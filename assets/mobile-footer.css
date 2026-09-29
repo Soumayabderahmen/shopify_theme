@@ -372,7 +372,12 @@
 }
 
 /* 4 Liens en accordéons */
-.nf-links {
+/* #root : les marges du thème écrasaient l'espace autour de la carte de note. */
+#root .nf .nf-rate {
+  margin-top: 12px;
+}
+
+#root .nf .nf-links {
   margin-top: 22px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
