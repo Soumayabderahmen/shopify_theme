@@ -1,0 +1,35 @@
+{%- comment -%}
+  Flux de cartes produit pour les filtres rapides mobiles de la section "Featured collection".
+  Appelé via la Section Rendering API sur une page collection :
+  /collections/<handle>?section_id=featured-collection-feed&sort_by=<tri>&page=<n>
+  Rend uniquement les cartes (snippets/product-item.liquid) et l'URL de la page suivante.
+{%- endcomment -%}
+{%- if collection != blank -%}
+  {%- paginate collection.products by 24 -%}
+    <ul data-feed-items>
+      {%- for product in collection.products -%}
+        {%- capture placeholder_int -%}{% cycle 1, 2, 3, 4, 5, 6 %}{%- endcapture -%}
+        {%- render 'product-item',
+          product: product,
+          placeholder_int: placeholder_int,
+          enable_quick_buy_desktop: false,
+          enable_quick_buy_mobile: false,
+          enable_quick_buy_qty_selector: false,
+          quick_buy_compact: false,
+          enable_quick_buy_drawer: false,
+          sizes: '(min-width: 760px) 320px, 170px',
+          enable_color_picker: false,
+          no_lazyload: false
+        -%}
+      {%- endfor -%}
+    </ul>
+    <div data-feed-next="{% if paginate.next %}{{ paginate.next.url }}{% endif %}"></div>
+  {%- endpaginate -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Featured collection feed",
+  "settings": []
+}
+{% endschema %}

@@ -695,7 +695,26 @@
     {%- if link and section.settings.text_alignment != 'center' -%}
       {{ link | replace: 'class-x', 'mobile-hide' }}
     {%- endif -%}
+    {%- if section.settings.show_mobile_filters and collection != blank -%}
+      <a class="featured-filters__all mobile-only" href="{{ collection.url }}">Vedi tutti</a>
+    {%- endif -%}
   </header>
+{%- endif -%}
+{%- if section.settings.show_mobile_filters and collection != blank -%}
+  <div
+    class="featured-filters mobile-only"
+    role="group"
+    aria-label="Filtra"
+    data-featured-filters
+    data-feed-url="{{ collection.url }}?section_id=featured-collection-feed"
+  >
+    <button type="button" aria-pressed="true" data-filter-sort="">Consigliati</button>
+    <button type="button" aria-pressed="false" data-filter-sort="price-ascending">Prezzo più basso</button>
+    <button type="button" aria-pressed="false" data-filter-sort="created-descending">Novità</button>
+    <button type="button" aria-pressed="false" data-filter-sort="" data-filter-match="sale">In offerta</button>
+    <button type="button" aria-pressed="false" data-filter-sort="" data-filter-match="free-shipping">Spedizione gratis</button>
+  </div>
+  <p class="featured-filters__empty mobile-only" data-featured-filters-empty hidden>Nessun prodotto per questo filtro.</p>
 {%- endif -%}
 {%- if aside %}<div>{%- endif -%}
 
@@ -916,21 +935,37 @@
 
 <script>
   (function() {
+    // Cartes conservées par les filtres rapides "In offerta" et "Spedizione gratis".
+    const CARD_MATCHERS = {
+      sale: (card) => Boolean(card.querySelector('.old-price')),
+      'free-shipping': (card) => Boolean(card.querySelector('.alibaba-trust-chip--shipping'))
+    };
+    const FEED_SECTION = 'featured-collection-feed';
+
     class LightningProductScroll {
       constructor(sectionId) {
+        this.sectionId = sectionId;
         this.section = document.querySelector(`#shopify-section-${sectionId}`);
         if (!this.section) return;
 
         this.grid = this.section.querySelector(`#product-grid-${sectionId}`);
+        if (!this.grid) return;
         this.trigger = this.section.querySelector('.infinite-scroll-trigger');
-        if (!this.trigger || !this.grid) return;
 
         this.isFetching = false;
         this.cachedFragment = null;
-        this.nextUrl = this.trigger.getAttribute('data-next-url');
+        this.observer = null;
+        // Mode "feed" : après un filtre rapide, les pages viennent de sections/featured-collection-feed.liquid.
+        this.feedMode = false;
+        this.feedSort = '';
+        this.matchCard = null;
+        this.requestId = 0;
+        this.section.lightningScroll = this;
 
+        if (!this.trigger) return;
+        this.nextUrl = this.trigger.getAttribute('data-next-url');
         this.initObserver();
-        
+
         if ('requestIdleCallback' in window) {
           requestIdleCallback(() => this.prefetchNextPage());
         } else {
@@ -938,30 +973,80 @@
         }
       }
 
+      feedPageUrl(url) {
+        const pageUrl = new URL(url, window.location.origin);
+        pageUrl.searchParams.set('section_id', FEED_SECTION);
+        if (this.feedSort) pageUrl.searchParams.set('sort_by', this.feedSort);
+        else pageUrl.searchParams.delete('sort_by');
+        return pageUrl.pathname + pageUrl.search;
+      }
+
+      parsePage(doc) {
+        if (!this.feedMode) {
+          const nextTrigger = doc.querySelector(`#shopify-section-${this.sectionId} .infinite-scroll-trigger`);
+          return {
+            items: Array.from(doc.querySelectorAll(`#${this.grid.id} > *`)),
+            nextUrl: nextTrigger ? nextTrigger.getAttribute('data-next-url') : null
+          };
+        }
+
+        const list = doc.querySelector('[data-feed-items]');
+        const next = doc.querySelector('[data-feed-next]');
+        const nextUrl = next && next.getAttribute('data-feed-next') ? this.feedPageUrl(next.getAttribute('data-feed-next')) : null;
+        let items = list ? Array.from(list.children) : [];
+        if (this.matchCard) {
+          // Retire les cartes qui ne correspondent pas, ainsi que leur popup "bestseller".
+          const removedIds = new Set();
+          items = items.filter((node) => {
+            if (node.matches('li.alibaba-product-card')) {
+              if (this.matchCard(node)) return true;
+              const button = node.querySelector('.alibaba-card__wishlist');
+              if (button) removedIds.add(button.dataset.productId);
+              return false;
+            }
+            const popup = node.id && node.id.match(/^bestseller-popup-(\d+)$/);
+            return !(popup && removedIds.has(popup[1]));
+          });
+        }
+        return { items, nextUrl };
+      }
+
       async prefetchNextPage() {
         if (!this.nextUrl || this.isFetching || this.cachedFragment) return;
 
         this.isFetching = true;
+        const requestId = this.requestId;
         try {
-          const response = await fetch(this.nextUrl, { priority: 'low' });
-          const htmlText = await response.text();
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(htmlText, 'text/html');
+          let url = this.nextUrl;
+          let page = { items: [], nextUrl: null };
+          let fetchedPages = 0;
+          // Avec un filtre, une page peut ne contenir aucune carte : on continue (5 pages max).
+          do {
+            const response = await fetch(url, { priority: 'low' });
+            if (!response.ok) throw new Error(`Request failed with status ${response.status} for ${url}`);
+            const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+            if (requestId !== this.requestId) return;
+            page = this.parsePage(doc);
+            url = page.nextUrl;
+            fetchedPages++;
+          } while (
+            this.feedMode
+            && url
+            && fetchedPages < 5
+            && !page.items.some((node) => node.matches('li.alibaba-product-card'))
+          );
 
-          const newItems = Array.from(doc.querySelectorAll(`#${this.grid.id} > *`));
-          const nextTrigger = doc.querySelector(`#shopify-section-${this.section.id.replace('shopify-section-', '')} .infinite-scroll-trigger`);
-
-          if (newItems.length > 0) {
+          if (page.items.length > 0) {
             const fragment = document.createDocumentFragment();
-            newItems.forEach((item) => fragment.appendChild(item));
+            page.items.forEach((item) => fragment.appendChild(item));
             this.cachedFragment = fragment;
           }
 
-          this.nextUrl = nextTrigger ? nextTrigger.getAttribute('data-next-url') : null;
+          this.nextUrl = page.nextUrl;
         } catch (err) {
           console.error('Prefetch error:', err);
         } finally {
-          this.isFetching = false;
+          if (requestId === this.requestId) this.isFetching = false;
         }
       }
 
@@ -998,6 +1083,7 @@
 
         if (this.cachedFragment) {
           requestAnimationFrame(() => {
+            if (!this.cachedFragment) return;
             this.grid.appendChild(this.cachedFragment);
             this.cachedFragment = null;
 
@@ -1016,24 +1102,89 @@
         }
       }
 
+      showTrigger() {
+        if (!this.trigger) {
+          this.trigger = document.createElement('div');
+          this.trigger.className = 'infinite-scroll-trigger text-center';
+          this.trigger.setAttribute('aria-hidden', 'true');
+          this.trigger.innerHTML = '<div class="infinite-scroll-loader"><span class="spinner-dot"></span><span class="spinner-dot"></span><span class="spinner-dot"></span></div>';
+          this.grid.after(this.trigger);
+        }
+        this.trigger.style.display = '';
+        this.trigger.setAttribute('data-next-url', this.nextUrl);
+        if (!this.observer) this.initObserver();
+        else this.observer.observe(this.trigger);
+      }
+
+      async applyFilter(feedUrl, sort, match) {
+        this.requestId++;
+        this.feedMode = true;
+        this.feedSort = sort;
+        this.matchCard = CARD_MATCHERS[match] || null;
+        this.cachedFragment = null;
+        this.isFetching = false;
+        this.nextUrl = this.feedPageUrl(feedUrl);
+        const requestId = this.requestId;
+        const empty = this.section.querySelector('[data-featured-filters-empty]');
+
+        this.grid.setAttribute('aria-busy', 'true');
+        this.grid.classList.add('is-filtering');
+        if (empty) empty.hidden = true;
+        await this.prefetchNextPage();
+        if (requestId !== this.requestId) return;
+
+        this.grid.replaceChildren();
+        if (this.cachedFragment) {
+          this.grid.appendChild(this.cachedFragment);
+          this.cachedFragment = null;
+        }
+        this.grid.setAttribute('aria-busy', 'false');
+        this.grid.classList.remove('is-filtering');
+        if (empty) empty.hidden = this.grid.querySelector('li.alibaba-product-card') !== null;
+
+        if (this.nextUrl) {
+          this.showTrigger();
+          this.prefetchNextPage();
+        } else {
+          this.destroy();
+        }
+        window.dispatchEvent(new Event('resize'));
+        document.dispatchEvent(new CustomEvent('theme:loading:end', { bubbles: true }));
+      }
+
       destroy() {
         if (this.observer) this.observer.disconnect();
-        if (this.trigger) this.trigger.remove();
+        this.observer = null;
+        if (this.trigger) this.trigger.style.display = 'none';
       }
     }
 
     const sectionId = '{{ section.id }}';
 
+    function initSection() {
+      const scroll = new LightningProductScroll(sectionId);
+      const filters = scroll.section && scroll.section.querySelector('[data-featured-filters]');
+      if (!filters || !scroll.grid) return;
+      filters.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-filter-sort]');
+        if (!button || button.getAttribute('aria-pressed') === 'true') return;
+        filters.querySelectorAll('button[data-filter-sort]').forEach((item) => {
+          item.setAttribute('aria-pressed', String(item === button));
+        });
+        scroll.applyFilter(filters.dataset.feedUrl, button.dataset.filterSort, button.dataset.filterMatch || '');
+      });
+    }
+
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => new LightningProductScroll(sectionId));
+      document.addEventListener('DOMContentLoaded', initSection);
     } else {
-      new LightningProductScroll(sectionId);
+      initSection();
     }
 
     if (Shopify.designMode) {
       document.addEventListener('shopify:section:load', (e) => {
         if (e.detail.sectionId === sectionId) {
-          new LightningProductScroll(sectionId);
+          initSection();
         }
       });
     }
@@ -1127,6 +1278,13 @@
       ],
       "default": "boxed",
       "visible_if": "{{ settings.width < 2000 }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_mobile_filters",
+      "label": "Filtri rapidi su mobile",
+      "info": "Mostra i filtri Consigliati, Prezzo più basso, Novità, In offerta e Spedizione gratis sotto il titolo, solo su mobile.",
+      "default": false
     },
     {
       "type": "header",

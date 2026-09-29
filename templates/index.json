@@ -215,6 +215,7 @@
         "number_of_items": 5,
         "text_alignment": "center",
         "width": "wide",
+        "show_mobile_filters": true,
         "title": "<h2>Featured collection</h2>",
         "title_underline_style": "none",
         "text": "",

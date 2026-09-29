@@ -4005,3 +4005,108 @@
     margin: 6px 0 0 !important;
   }
 }
+/* Filtres rapides sous le titre "Featured collection" (home, mobile uniquement) — cf. prototype. */
+@media only screen and (max-width: 760px) {
+  #root article[id*="section_featured_collection"] > header .featured-filters__all {
+    display: inline !important;
+    flex: none !important;
+    margin: 0 !important;
+    color: #3a34d2 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+  }
+
+  #root article[id*="section_featured_collection"] > .featured-filters {
+    display: flex !important;
+    gap: 8px !important;
+    margin: 0 12px 12px !important;
+    padding: 0 0 2px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] > .featured-filters::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] > .featured-filters button {
+    display: inline-flex !important;
+    flex: none !important;
+    align-items: center !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 7px 14px !important;
+    border: 1px solid #d7dae0 !important;
+    border-radius: 999px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #16123f !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+  }
+
+  #root article[id*="section_featured_collection"] > .featured-filters button::before,
+  #root article[id*="section_featured_collection"] > .featured-filters button::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] > .featured-filters button[aria-pressed="true"] {
+    border-color: #3a34d2 !important;
+    background: #3a34d2 !important;
+    color: #fff !important;
+  }
+
+  #root article[id*="section_featured_collection"] > .featured-filters__empty:not([hidden]) {
+    display: block !important;
+    margin: 0 12px 24px !important;
+    color: #4a4f6b !important;
+    font-size: 13.5px !important;
+    text-align: center !important;
+  }
+
+  #root article[id*="section_featured_collection"] > ul.l4cl.is-filtering {
+    opacity: 0.45 !important;
+    pointer-events: none !important;
+    transition: opacity 0.2s !important;
+  }
+}
+@media only screen and (max-width: 760px) {
+  #root article[id*="section_featured_collection"] > header:has(.featured-filters__all) {
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* .cols > * du thème ajoute une bordure gauche de 16px (gouttière) qui décalait le titre. */
+  #root article[id*="section_featured_collection"] > header:has(.featured-filters__all) > .truncate-single-line {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    border-left-width: 0 !important;
+    text-align: left !important;
+  }
+
+  #root article[id*="section_featured_collection"] > header .featured-filters__all {
+    width: auto !important;
+    border-left-width: 0 !important;
+  }
+}
+@media only screen and (max-width: 760px) {
+  #root article[id*="section_featured_collection"] > .featured-filters__empty[hidden] {
+    display: none !important;
+  }
+}
