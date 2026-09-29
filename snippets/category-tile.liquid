@@ -1,0 +1,20 @@
+{%- comment -%}
+  Tuile de la grille de catégories (sections/section-category-tiles.liquid).
+  Params : url, image, label, hidden (bool), attributes (attributs d'éditeur optionnels).
+{%- endcomment -%}
+<a class="category-tiles__item" href="{{ url }}"{% if hidden %} hidden{% endif %} {{ attributes }}>
+  <span class="category-tiles__media">
+    {%- if image != blank -%}
+      {{
+        image
+        | image_url: width: 240, height: 240, crop: 'center'
+        | image_tag:
+          loading: 'lazy',
+          widths: '120, 180, 240',
+          sizes: '(max-width: 760px) 22vw, 120px',
+          alt: ''
+      }}
+    {%- endif -%}
+  </span>
+  <span class="category-tiles__label">{{ label | escape }}</span>
+</a>

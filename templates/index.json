@@ -35,107 +35,13 @@
     },
     "section_category_tiles_home": {
       "type": "section-category-tiles",
-      "blocks": {
-        "category_donna": {
-          "type": "category",
-          "settings": {
-            "collection": "abbigliamento-donna-tutti",
-            "label": "Donna"
-          }
-        },
-        "category_uomo": {
-          "type": "category",
-          "settings": {
-            "collection": "abbigliamento-uomo-tutti",
-            "label": "Uomo"
-          }
-        },
-        "category_scarpe_donna": {
-          "type": "category",
-          "settings": {
-            "collection": "scarpe-donna-tutti",
-            "label": "Scarpe Donna"
-          }
-        },
-        "category_scarpe_uomo": {
-          "type": "category",
-          "settings": {
-            "collection": "scarpe-uomo",
-            "label": "Scarpe Uomo"
-          }
-        },
-        "category_borse": {
-          "type": "category",
-          "settings": {
-            "collection": "borse-tote",
-            "label": "Borse"
-          }
-        },
-        "category_accessori": {
-          "type": "category",
-          "settings": {
-            "collection": "accessori-donna",
-            "label": "Accessori"
-          }
-        },
-        "category_orologi": {
-          "type": "category",
-          "settings": {
-            "collection": "orologi-uomo-novita",
-            "label": "Orologi"
-          }
-        },
-        "category_mocassini": {
-          "type": "category",
-          "settings": {
-            "collection": "mocassini",
-            "label": "Mocassini"
-          }
-        },
-        "category_piumini": {
-          "type": "category",
-          "settings": {
-            "collection": "piumini",
-            "label": "Piumini"
-          }
-        },
-        "category_mare": {
-          "type": "category",
-          "settings": {
-            "collection": "mare-spiaggia",
-            "label": "Mare"
-          }
-        },
-        "category_casa": {
-          "type": "category",
-          "settings": {
-            "collection": "casa-giardino",
-            "label": "Casa"
-          }
-        },
-        "category_bici": {
-          "type": "category",
-          "settings": {
-            "collection": "bici-monopattini",
-            "label": "Bici"
-          }
-        }
-      },
-      "block_order": [
-        "category_donna",
-        "category_uomo",
-        "category_scarpe_donna",
-        "category_scarpe_uomo",
-        "category_borse",
-        "category_accessori",
-        "category_orologi",
-        "category_mocassini",
-        "category_piumini",
-        "category_mare",
-        "category_casa",
-        "category_bici"
-      ],
       "settings": {
+        "source": "auto",
+        "tiles_count": 8,
+        "exclude_menu": "main-menu",
+        "exclude_handles": "all\nbestsellers\nnew-arrivals\nproducts_recenti_reviews\nseo-pro-5-off\nglobofilter-best-selling-products-index",
+        "min_products": 6,
+        "labels": "abbigliamento-cinese: Stile Cinese\nbambini-ragazza: Bambina\ngiacche-ragazza-luxury: Giacche Lux\ngioielli-hip-hop: Hip Hop\nfelpe-novita: Hoodie\nnews-arrival: Sotto 100\nscarpe_all_collection: Scarpe\nscarpe_uomo: Scarpe Uomo\nsept-discount: Offerte\ntecnologie: Tecnologia",
         "label": "Categorie",
         "mobile_only": true
       }

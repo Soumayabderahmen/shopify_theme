@@ -1,10 +1,91 @@
 {%- comment -%}
   Grille de catégories (prototype mobile) : carrés arrondis 4 colonnes, image de la
-  collection plein cadre, libellé en gras dessous. Chaque tuile est un bloc relié à une
-  collection Shopify (image, titre et lien viennent de la collection).
+  collection plein cadre, libellé en gras dessous.
+
+  Mode "auto" : toutes les collections de la boutique, sauf celles liées dans le menu du
+  header (et la liste d'exclusions), avec au moins N produits et une image. Chaque jour,
+  une sélection différente est tirée au hasard (même tirage pour tous les visiteurs du jour).
+  Mode "manual" : une tuile par bloc.
 {%- endcomment -%}
-{%- if section.blocks.size > 0 -%}
-  <nav class="category-tiles" aria-label="{{ section.settings.label | default: 'Categorie' | escape }}">
+{%- liquid
+  assign tiles_count = section.settings.tiles_count
+  assign excluded = '|'
+
+  assign exclude_menu = linklists[section.settings.exclude_menu]
+  for level1 in exclude_menu.links
+    if level1.url contains '/collections/'
+      assign link_handle = level1.url | split: '/collections/' | last | split: '/' | first | split: '?' | first
+      assign excluded = excluded | append: link_handle | append: '|'
+    endif
+    for level2 in level1.links
+      if level2.url contains '/collections/'
+        assign link_handle = level2.url | split: '/collections/' | last | split: '/' | first | split: '?' | first
+        assign excluded = excluded | append: link_handle | append: '|'
+      endif
+      for level3 in level2.links
+        if level3.url contains '/collections/'
+          assign link_handle = level3.url | split: '/collections/' | last | split: '/' | first | split: '?' | first
+          assign excluded = excluded | append: link_handle | append: '|'
+        endif
+      endfor
+    endfor
+  endfor
+
+  # newline_to_br peut produire <br> ou <br /> : on normalise vers | avant de découper.
+  assign extra_exclusions = section.settings.exclude_handles | newline_to_br | replace: '<br />', '|' | replace: '<br>', '|' | strip_newlines | replace: ',', '|' | split: '|'
+  for extra in extra_exclusions
+    assign extra_handle = extra | strip
+    if extra_handle != blank
+      assign excluded = excluded | append: extra_handle | append: '|'
+    endif
+  endfor
+
+  assign label_lines = section.settings.labels | newline_to_br | replace: '<br />', '|' | replace: '<br>', '|' | strip_newlines | split: '|'
+-%}
+
+{%- capture tiles_markup -%}
+  {%- if section.settings.source == 'auto' -%}
+    {%- assign tile_index = 0 -%}
+    {%- paginate collections by 250 -%}
+      {%- for tile_collection in collections -%}
+        {%- liquid
+          if tile_collection.products_count < section.settings.min_products
+            continue
+          endif
+          assign handle_key = '|' | append: tile_collection.handle | append: '|'
+          if excluded contains handle_key
+            continue
+          endif
+          assign tile_image = tile_collection.image | default: tile_collection.products.first.featured_image
+          if tile_image == blank
+            continue
+          endif
+
+          assign tile_label = tile_collection.title
+          for label_line in label_lines
+            assign label_parts = label_line | split: ':'
+            if label_parts.size > 1
+              assign label_handle = label_parts.first | strip
+              if label_handle == tile_collection.handle
+                assign tile_label = label_parts.last | strip
+              endif
+            endif
+          endfor
+          assign tile_index = tile_index | plus: 1
+          assign tile_hidden = false
+          if tile_index > tiles_count
+            assign tile_hidden = true
+          endif
+        -%}
+        {%- render 'category-tile',
+          url: tile_collection.url,
+          image: tile_image,
+          label: tile_label,
+          hidden: tile_hidden
+        -%}
+      {%- endfor -%}
+    {%- endpaginate -%}
+  {%- else -%}
     {%- for block in section.blocks -%}
       {%- liquid
         assign tile_collection = collections[block.settings.collection]
@@ -12,23 +93,18 @@
         assign tile_label = block.settings.label | default: tile_collection.title
         assign tile_url = tile_collection.url | default: routes.collections_url
       -%}
-      <a class="category-tiles__item" href="{{ tile_url }}" {{ block.shopify_attributes }}>
-        <span class="category-tiles__media">
-          {%- if tile_image != blank -%}
-            {{
-              tile_image
-              | image_url: width: 240, height: 240, crop: 'center'
-              | image_tag:
-                loading: 'lazy',
-                widths: '120, 180, 240',
-                sizes: '(max-width: 760px) 22vw, 120px',
-                alt: ''
-            }}
-          {%- endif -%}
-        </span>
-        <span class="category-tiles__label">{{ tile_label | escape }}</span>
-      </a>
+      {%- render 'category-tile', url: tile_url, image: tile_image, label: tile_label, hidden: false, attributes: block.shopify_attributes -%}
     {%- endfor -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if tiles_markup != blank -%}
+  <nav
+    class="category-tiles"
+    aria-label="{{ section.settings.label | default: 'Categorie' | escape }}"
+    {% if section.settings.source == 'auto' %}data-daily-tiles="{{ tiles_count }}"{% endif %}
+  >
+    {{- tiles_markup -}}
   </nav>
 {%- endif -%}
 
@@ -62,6 +138,10 @@
     line-height: 1.2;
     text-align: center;
     text-decoration: none;
+  }
+
+  #root #shopify-section-{{ section.id }} .category-tiles__item[hidden] {
+    display: none;
   }
 
   #shopify-section-{{ section.id }} .category-tiles__media {
@@ -113,12 +193,108 @@
   }
 </style>
 
+<script>
+  (function () {
+    const sectionId = '{{ section.id }}';
+
+    // Générateur pseudo-aléatoire déterministe (mulberry32) : même graine = même tirage.
+    function seededRandom(seed) {
+      let state = seed >>> 0;
+      return function () {
+        state = (state + 0x6d2b79f5) >>> 0;
+        let value = state;
+        value = Math.imul(value ^ (value >>> 15), value | 1);
+        value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+        return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    // Tirage du jour : la date locale sert de graine, la sélection change donc à minuit.
+    function pickDailyTiles() {
+      const section = document.getElementById('shopify-section-' + sectionId);
+      const grid = section && section.querySelector('[data-daily-tiles]');
+      if (!grid) return;
+      const tiles = Array.from(grid.querySelectorAll('.category-tiles__item'));
+      const count = Math.min(Number(grid.dataset.dailyTiles) || tiles.length, tiles.length);
+      const today = new Date();
+      const random = seededRandom(today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate());
+      for (let index = tiles.length - 1; index > 0; index--) {
+        const swap = Math.floor(random() * (index + 1));
+        [tiles[index], tiles[swap]] = [tiles[swap], tiles[index]];
+      }
+      tiles.forEach((tile, index) => {
+        tile.hidden = index >= count;
+        grid.appendChild(tile);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', pickDailyTiles);
+    } else {
+      pickDailyTiles();
+    }
+
+    if (window.Shopify && window.Shopify.designMode) {
+      document.addEventListener('shopify:section:load', (event) => {
+        if (event.detail.sectionId === sectionId) pickDailyTiles();
+      });
+    }
+  })();
+</script>
+
 {% schema %}
 {
   "name": "Categorie",
   "tag": "section",
   "class": "shopify-section-category-tiles",
   "settings": [
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Collezioni mostrate",
+      "options": [
+        { "value": "auto", "label": "Automatico: fuori dal menu, cambia ogni giorno" },
+        { "value": "manual", "label": "Manuale: blocchi qui sotto" }
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "range",
+      "id": "tiles_count",
+      "label": "Numero di categorie",
+      "min": 4,
+      "max": 16,
+      "step": 4,
+      "default": 8
+    },
+    {
+      "type": "link_list",
+      "id": "exclude_menu",
+      "label": "Escludi le collezioni di questo menu",
+      "info": "Automatico: le collezioni già presenti in questo menu (header) non vengono mostrate.",
+      "default": "main-menu"
+    },
+    {
+      "type": "textarea",
+      "id": "exclude_handles",
+      "label": "Altre collezioni da escludere",
+      "info": "Un handle per riga (es. seo-pro-5-off)."
+    },
+    {
+      "type": "range",
+      "id": "min_products",
+      "label": "Prodotti minimi per collezione",
+      "min": 1,
+      "max": 30,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "textarea",
+      "id": "labels",
+      "label": "Nomi brevi",
+      "info": "Un nome per riga nel formato handle: Nome (es. felpe-novita: Hoodie). Vuoto: titolo della collezione."
+    },
     {
       "type": "text",
       "id": "label",
@@ -159,13 +335,7 @@
   ],
   "presets": [
     {
-      "name": "Categorie",
-      "blocks": [
-        { "type": "category" },
-        { "type": "category" },
-        { "type": "category" },
-        { "type": "category" }
-      ]
+      "name": "Categorie"
     }
   ]
 }
