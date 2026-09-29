@@ -1,0 +1,172 @@
+{%- comment -%}
+  Grille de catégories (prototype mobile) : carrés arrondis 4 colonnes, image de la
+  collection plein cadre, libellé en gras dessous. Chaque tuile est un bloc relié à une
+  collection Shopify (image, titre et lien viennent de la collection).
+{%- endcomment -%}
+{%- if section.blocks.size > 0 -%}
+  <nav class="category-tiles" aria-label="{{ section.settings.label | default: 'Categorie' | escape }}">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign tile_collection = collections[block.settings.collection]
+        assign tile_image = block.settings.image | default: tile_collection.image | default: tile_collection.products.first.featured_image
+        assign tile_label = block.settings.label | default: tile_collection.title
+        assign tile_url = tile_collection.url | default: routes.collections_url
+      -%}
+      <a class="category-tiles__item" href="{{ tile_url }}" {{ block.shopify_attributes }}>
+        <span class="category-tiles__media">
+          {%- if tile_image != blank -%}
+            {{
+              tile_image
+              | image_url: width: 240, height: 240, crop: 'center'
+              | image_tag:
+                loading: 'lazy',
+                widths: '120, 180, 240',
+                sizes: '(max-width: 760px) 22vw, 120px',
+                alt: ''
+            }}
+          {%- endif -%}
+        </span>
+        <span class="category-tiles__label">{{ tile_label | escape }}</span>
+      </a>
+    {%- endfor -%}
+  </nav>
+{%- endif -%}
+
+<style>
+  {%- if section.settings.mobile_only %}
+    @media only screen and (min-width: 761px) {
+      #shopify-section-{{ section.id }} { display: none !important; }
+    }
+  {%- endif %}
+
+  #shopify-section-{{ section.id }} .category-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px 10px;
+    margin: 12px 6px 0;
+    padding: 16px 12px;
+    border-radius: 18px;
+    background: #fff;
+  }
+
+  #root #shopify-section-{{ section.id }} .category-tiles__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    color: #16123f;
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  #shopify-section-{{ section.id }} .category-tiles__media {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #eef0f5;
+    box-shadow: inset 0 0 0 1px rgba(22, 18, 63, 0.06), 0 4px 12px -8px rgba(22, 18, 63, 0.45);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  #shopify-section-{{ section.id }} .category-tiles__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+    transition: transform 0.35s;
+  }
+
+  #shopify-section-{{ section.id }} .category-tiles__label {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  #shopify-section-{{ section.id }} .category-tiles__item:hover .category-tiles__media,
+  #shopify-section-{{ section.id }} .category-tiles__item:focus-visible .category-tiles__media {
+    box-shadow: inset 0 0 0 2px #3a34d2, 0 8px 18px -10px rgba(58, 52, 210, 0.6);
+  }
+
+  #shopify-section-{{ section.id }} .category-tiles__item:hover .category-tiles__media img {
+    transform: scale(1.06);
+  }
+
+  #shopify-section-{{ section.id }} .category-tiles__item:active .category-tiles__media {
+    transform: scale(0.96);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #shopify-section-{{ section.id }} .category-tiles__media,
+    #shopify-section-{{ section.id }} .category-tiles__media img {
+      transition: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Categorie",
+  "tag": "section",
+  "class": "shopify-section-category-tiles",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Etichetta accessibile",
+      "default": "Categorie"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_only",
+      "label": "Solo su mobile",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Categoria",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collezione"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Nome",
+          "info": "Vuoto: usa il titolo della collezione."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Immagine",
+          "info": "Vuoto: usa l'immagine della collezione."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Categorie",
+      "blocks": [
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" },
+        { "type": "category" }
+      ]
+    }
+  ]
+}
+{% endschema %}

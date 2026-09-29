@@ -9,6 +9,136 @@
  */
 {
   "sections": {
+    "section_coupons_home": {
+      "type": "section-coupons",
+      "blocks": {
+        "coupon_jceb1xq31x8x": {
+          "type": "coupon",
+          "settings": {
+            "amount": "-20%",
+            "condition": "su 40€ di spesa · max 12€",
+            "code": "JCEB1XQ31X8X"
+          }
+        }
+      },
+      "block_order": [
+        "coupon_jceb1xq31x8x"
+      ],
+      "settings": {
+        "title": "Offerta del giorno",
+        "text": "Riscatta il coupon prima che scada",
+        "show_timer": true,
+        "end_date": "",
+        "mobile_only": true
+      }
+    },
+    "section_category_tiles_home": {
+      "type": "section-category-tiles",
+      "blocks": {
+        "category_donna": {
+          "type": "category",
+          "settings": {
+            "collection": "abbigliamento-donna-tutti",
+            "label": "Donna"
+          }
+        },
+        "category_uomo": {
+          "type": "category",
+          "settings": {
+            "collection": "abbigliamento-uomo-tutti",
+            "label": "Uomo"
+          }
+        },
+        "category_scarpe_donna": {
+          "type": "category",
+          "settings": {
+            "collection": "scarpe-donna-tutti",
+            "label": "Scarpe Donna"
+          }
+        },
+        "category_scarpe_uomo": {
+          "type": "category",
+          "settings": {
+            "collection": "scarpe-uomo",
+            "label": "Scarpe Uomo"
+          }
+        },
+        "category_borse": {
+          "type": "category",
+          "settings": {
+            "collection": "borse-tote",
+            "label": "Borse"
+          }
+        },
+        "category_accessori": {
+          "type": "category",
+          "settings": {
+            "collection": "accessori-donna",
+            "label": "Accessori"
+          }
+        },
+        "category_orologi": {
+          "type": "category",
+          "settings": {
+            "collection": "orologi-uomo-novita",
+            "label": "Orologi"
+          }
+        },
+        "category_mocassini": {
+          "type": "category",
+          "settings": {
+            "collection": "mocassini",
+            "label": "Mocassini"
+          }
+        },
+        "category_piumini": {
+          "type": "category",
+          "settings": {
+            "collection": "piumini",
+            "label": "Piumini"
+          }
+        },
+        "category_mare": {
+          "type": "category",
+          "settings": {
+            "collection": "mare-spiaggia",
+            "label": "Mare"
+          }
+        },
+        "category_casa": {
+          "type": "category",
+          "settings": {
+            "collection": "casa-giardino",
+            "label": "Casa"
+          }
+        },
+        "category_bici": {
+          "type": "category",
+          "settings": {
+            "collection": "bici-monopattini",
+            "label": "Bici"
+          }
+        }
+      },
+      "block_order": [
+        "category_donna",
+        "category_uomo",
+        "category_scarpe_donna",
+        "category_scarpe_uomo",
+        "category_borse",
+        "category_accessori",
+        "category_orologi",
+        "category_mocassini",
+        "category_piumini",
+        "category_mare",
+        "category_casa",
+        "category_bici"
+      ],
+      "settings": {
+        "label": "Categorie",
+        "mobile_only": true
+      }
+    },
     "section_slideshow_XNiKWa": {
       "type": "section-slideshow",
       "blocks": {
@@ -181,7 +311,7 @@
         "enable_controls": false,
         "height_mobile": "1/1",
         "spacing_desktop": 50,
-        "spacing_mobile": 30,
+        "spacing_mobile": 10,
         "fix_zindex": 0
       }
     },
@@ -279,6 +409,8 @@
   },
   "order": [
     "section_slideshow_XNiKWa",
+    "section_coupons_home",
+    "section_category_tiles_home",
     "78836e0a-6131-4f01-afff-dbdd186d0914",
     "section_featured_collection_ekApHt",
     "165346832322a4db6f"

@@ -1,0 +1,382 @@
+{%- comment -%}
+  Bandeau coupons (prototype mobile) : titre, compte à rebours et tickets de réduction.
+  Les coupons sont des blocs éditables dans l'éditeur de thème ; un tap sur un ticket
+  copie le code et l'applique au panier via /discount/<code>.
+{%- endcomment -%}
+{%- liquid
+  assign coupon_blocks = section.blocks | where: 'type', 'coupon'
+-%}
+{%- if coupon_blocks.size > 0 -%}
+  <div
+    class="coupons-offer"
+    data-coupons-offer
+    data-end-date="{{ section.settings.end_date | escape }}"
+    aria-label="Coupon"
+  >
+    <div class="coupons-offer__head">
+      {%- if section.settings.title != blank -%}
+        <h2>{{ section.settings.title | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.text != blank -%}
+        <p>{{ section.settings.text | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.show_timer -%}
+        <div class="coupons-offer__timer" data-coupons-timer role="timer" aria-label="Tempo rimanente">
+          <span>00</span>:<span>00</span>:<span>00</span>
+        </div>
+      {%- endif -%}
+    </div>
+    <div class="coupons-offer__tickets">
+      {%- for block in coupon_blocks -%}
+        <button
+          type="button"
+          class="coupons-offer__ticket"
+          data-coupon-code="{{ block.settings.code | strip | escape }}"
+          aria-label="Riscatta il coupon {{ block.settings.code | strip | escape }}"
+          {{ block.shopify_attributes }}
+        >
+          <strong>{{ block.settings.amount | escape }}</strong>
+          {%- if block.settings.condition != blank -%}
+            <small>{{ block.settings.condition | escape }}</small>
+          {%- endif -%}
+          <span class="coupons-offer__code">{{ block.settings.code | strip | escape }}</span>
+        </button>
+      {%- endfor -%}
+    </div>
+    <p class="coupons-offer__toast" role="status" aria-live="polite" data-coupons-toast></p>
+  </div>
+{%- endif -%}
+
+<style>
+  {%- if section.settings.mobile_only %}
+    @media only screen and (min-width: 761px) {
+      #shopify-section-{{ section.id }} { display: none !important; }
+    }
+  {%- endif %}
+
+  /* 10px d'espacement du carrousel + 2px = 12px sous le carrousel, comme le prototype. */
+  #shopify-section-{{ section.id }} {
+    padding-top: 2px;
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin: 0 6px;
+    padding: 14px;
+    border-radius: 18px;
+    background: #e4323c;
+    color: #fff;
+    font-family: 'Figtree', system-ui, sans-serif;
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer__head h2 {
+    margin: 0;
+    color: #fff;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer__head p {
+    margin: 4px 0 0;
+    color: #fff;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer__timer {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 8px;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer__timer span {
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: #fff;
+    color: #e4323c;
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer__tickets {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+
+  #root #shopify-section-{{ section.id }} .coupons-offer__ticket {
+    position: relative;
+    display: block;
+    flex: 1 1 0;
+    min-width: 96px;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    padding: 9px 14px;
+    overflow: visible;
+    border: 0;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: none;
+    color: #e4323c;
+    font-family: 'Figtree', system-ui, sans-serif;
+    line-height: 1.2;
+    text-align: center;
+    text-transform: none;
+    cursor: pointer;
+  }
+
+  #root #shopify-section-{{ section.id }} .coupons-offer__ticket::before,
+  #root #shopify-section-{{ section.id }} .coupons-offer__ticket::after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    width: 12px;
+    height: 12px;
+    border: 0;
+    border-radius: 50%;
+    background: #e4323c;
+    box-shadow: none;
+    opacity: 1;
+    transform: translateY(-50%);
+  }
+
+  #root #shopify-section-{{ section.id }} .coupons-offer__ticket::before { left: -6px; }
+  #root #shopify-section-{{ section.id }} .coupons-offer__ticket::after { right: -6px; left: auto; }
+
+  #shopify-section-{{ section.id }} .coupons-offer__ticket strong {
+    display: block;
+    color: #e4323c;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer__ticket small {
+    display: block;
+    color: #9a4148;
+    font-size: 11px;
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer__code {
+    display: block;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px dashed #f0b7bb;
+    font-size: 11px;
+    font-weight: 700;
+    word-break: break-all;
+  }
+
+  #root #shopify-section-{{ section.id }} .coupons-offer__ticket.is-taken {
+    background: #ffe9ea;
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer__ticket.is-taken .coupons-offer__code::after {
+    content: " ✓";
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer__toast {
+    width: 100%;
+    margin: -4px 0 0;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  #shopify-section-{{ section.id }} .coupons-offer__toast:empty {
+    display: none;
+  }
+</style>
+
+<script>
+  (function () {
+    const sectionId = '{{ section.id }}';
+    const TAKEN_KEY = 'platinumshop:coupons-taken';
+
+    function readTaken() {
+      try {
+        const stored = JSON.parse(window.localStorage.getItem(TAKEN_KEY) || '[]');
+        return Array.isArray(stored) ? stored : [];
+      } catch (error) {
+        console.error('Unable to read redeemed coupons.', error);
+        return [];
+      }
+    }
+
+    function saveTaken(codes) {
+      try {
+        window.localStorage.setItem(TAKEN_KEY, JSON.stringify(codes));
+      } catch (error) {
+        console.error('Unable to save redeemed coupons.', error);
+      }
+    }
+
+    // Date de fin réglée dans l'éditeur (AAAA-MM-GG HH:MM), sinon minuit du jour.
+    function endTime(offer) {
+      const setting = (offer.dataset.endDate || '').trim();
+      if (setting) {
+        const parsed = new Date(setting.replace(' ', 'T'));
+        if (!Number.isNaN(parsed.getTime())) return parsed.getTime();
+        console.error('Invalid coupon end date, expected YYYY-MM-DD HH:MM:', setting);
+      }
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0);
+      return midnight.getTime();
+    }
+
+    function startTimer(offer) {
+      const timer = offer.querySelector('[data-coupons-timer]');
+      if (!timer) return;
+      const end = endTime(offer);
+      const parts = timer.querySelectorAll('span');
+      const tick = () => {
+        const seconds = Math.max(0, Math.floor((end - Date.now()) / 1000));
+        [Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), seconds % 60].forEach((value, index) => {
+          parts[index].textContent = String(value).padStart(2, '0');
+        });
+        if (seconds === 0) window.clearInterval(interval);
+      };
+      const interval = window.setInterval(tick, 1000);
+      tick();
+    }
+
+    async function redeem(offer, ticket) {
+      const code = ticket.dataset.couponCode;
+      const toast = offer.querySelector('[data-coupons-toast]');
+      if (!code) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).catch((error) => console.error('Unable to copy the coupon code.', error));
+      }
+      try {
+        const root = window.Shopify && window.Shopify.routes ? window.Shopify.routes.root : '/';
+        // Shopify mémorise le code : il est appliqué automatiquement au checkout.
+        const response = await fetch(root + 'discount/' + encodeURIComponent(code) + '?redirect=' + encodeURIComponent(root + 'cart.js'), {
+          credentials: 'same-origin'
+        });
+        if (!response.ok) throw new Error('Discount request failed with status ' + response.status);
+        ticket.classList.add('is-taken');
+        const taken = readTaken();
+        if (!taken.includes(code)) saveTaken(taken.concat(code));
+        toast.textContent = 'Coupon ' + code + ' riscattato: verrà applicato al checkout.';
+      } catch (error) {
+        console.error('Unable to apply the coupon.', error);
+        toast.textContent = 'Codice ' + code + ' copiato: inseriscilo al checkout.';
+      }
+    }
+
+    function init() {
+      const section = document.getElementById('shopify-section-' + sectionId);
+      const offer = section && section.querySelector('[data-coupons-offer]');
+      if (!offer) return;
+      const taken = readTaken();
+      offer.querySelectorAll('[data-coupon-code]').forEach((ticket) => {
+        if (taken.includes(ticket.dataset.couponCode)) ticket.classList.add('is-taken');
+        ticket.addEventListener('click', () => redeem(offer, ticket));
+      });
+      startTimer(offer);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    if (window.Shopify && window.Shopify.designMode) {
+      document.addEventListener('shopify:section:load', (event) => {
+        if (event.detail.sectionId === sectionId) init();
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Coupon",
+  "tag": "section",
+  "class": "shopify-section-coupons",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Titolo",
+      "default": "Offerta del giorno"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Testo",
+      "default": "Riscatta il coupon prima che scada"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_timer",
+      "label": "Mostra il conto alla rovescia",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "Fine dell'offerta",
+      "info": "Formato AAAA-MM-GG HH:MM (es. 2026-10-05 23:59). Vuoto: il conto alla rovescia termina a mezzanotte ogni giorno.",
+      "placeholder": "2026-10-05 23:59"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_only",
+      "label": "Solo su mobile",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "coupon",
+      "name": "Coupon",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "amount",
+          "label": "Sconto",
+          "info": "Es. -5€ o -20%",
+          "default": "-20%"
+        },
+        {
+          "type": "text",
+          "id": "condition",
+          "label": "Condizione",
+          "info": "Es. su 39€ di spesa",
+          "default": "su 40€ di spesa"
+        },
+        {
+          "type": "text",
+          "id": "code",
+          "label": "Codice sconto",
+          "info": "Deve esistere in Shopify > Sconti."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Coupon",
+      "blocks": [
+        { "type": "coupon" }
+      ]
+    }
+  ]
+}
+{% endschema %}
