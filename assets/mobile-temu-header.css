@@ -4110,3 +4110,11 @@
     display: none !important;
   }
 }
+/* Popup marque (snippets/prodducts--brand-popap.liquid) : chaque carte est enveloppée dans un
+   <li class="brand-product-card"> ; le navigateur ferme ce li avant celui de la carte, ce qui crée
+   une case vide. Sur mobile uniquement, on masque ces cases (le desktop reste inchangé). */
+@media only screen and (max-width: 760px) {
+  #root .brand-products-grid > li.brand-product-card {
+    display: none !important;
+  }
+}

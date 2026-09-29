@@ -450,8 +450,150 @@ function initMobileTemuHeader() {
     });
   }
 
+
+  // --- Page wishlist sur desktop : fonctionnement d'origine, inchangé (les évolutions ne concernent que le mobile). ---
+  function isMobileWishlistViewport() {
+    return window.matchMedia('(max-width: 760px)').matches;
+  }
+
+  function getFilteredWishlistItemsLegacy() {
+    var items = wishlistItems.slice();
+    if (wishlistFilter === 'sale' || wishlistFilter === 'down') {
+      items = items.filter(function (item) {
+        return Number(item.compareAtPriceCents) > Number(item.priceCents);
+      });
+    } else if (wishlistFilter === 'available') {
+      items = items.filter(function (item) {
+        return item.available !== false;
+      });
+    }
+    if (wishlistSortOrder === 'asc' || wishlistSortOrder === 'desc') {
+      items.sort(function (first, second) {
+        var difference = (Number(first.priceCents) || 0) - (Number(second.priceCents) || 0);
+        return wishlistSortOrder === 'asc' ? difference : -difference;
+      });
+    } else {
+      items.reverse();
+    }
+    return items;
+  }
+
+  function updateWishlistSummaryFromCards(cards) {
+    if (!wishlistPage) return;
+    var summary = wishlistPage.querySelector('[data-wishlist-summary]');
+    if (!summary) return;
+    var totalCents = 0;
+    var availableCount = 0;
+    cards.forEach(function (card) {
+      var productButton = card.querySelector('.alibaba-card__wishlist');
+      var priceElement = card.querySelector('.alibaba-card__price-main');
+      var priceCents = Number(card.dataset.wishlistPriceCents) || readWishlistCardPrice(priceElement);
+      var variantId = card.dataset.wishlistVariantId || (productButton && productButton.dataset.variantId) || '';
+      totalCents += priceCents;
+      if (variantId) availableCount += 1;
+    });
+    summary.hidden = cards.length === 0;
+    summary.querySelector('[data-wishlist-total]').textContent = formatWishlistMoney(totalCents);
+    var addAll = summary.querySelector('[data-wishlist-add-all]');
+    addAll.textContent = 'Aggiungi tutto al carrello (' + availableCount + ')';
+    addAll.disabled = availableCount === 0;
+  }
+
+  function renderWishlistPageFiltersLegacy() {
+    if (!wishlistPage) return;
+    var container = wishlistPage.querySelector('[data-wishlist-filters]');
+    if (!container) return;
+    var saleCount = wishlistItems.filter(function (item) {
+      return Number(item.compareAtPriceCents) > Number(item.priceCents);
+    }).length;
+    container.replaceChildren();
+    [
+      { id: 'all', label: 'Tutti', count: wishlistItems.length },
+      { id: 'down', label: 'Prezzo sceso', count: saleCount },
+      { id: 'sale', label: 'In offerta', count: saleCount },
+      { id: 'available', label: 'Disponibili', count: wishlistItems.filter(function (item) { return item.available !== false; }).length }
+    ].forEach(function (filter) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.wishlistFilter = filter.id;
+      button.setAttribute('aria-pressed', String(wishlistFilter === filter.id));
+      button.innerHTML = '<span>' + filter.label + '</span><small>' + filter.count + '</small>';
+      container.appendChild(button);
+    });
+  }
+
+  async function renderWishlistPageLegacy() {
+    if (!wishlistPage || !wishlistPageList) return;
+    var request = ++wishlistPageRequest;
+    var filteredItems = getFilteredWishlistItemsLegacy();
+    var empty = wishlistPage.querySelector('[data-wishlist-empty]');
+    var error = wishlistPage.querySelector('[data-wishlist-error]');
+    var count = wishlistPage.querySelector('[data-wishlist-count]');
+    var tools = wishlistPage.querySelector('[data-wishlist-tools]');
+    var filters = wishlistPage.querySelector('[data-wishlist-filters]');
+    var share = wishlistPage.querySelector('[data-wishlist-share]');
+    var priceDrop = wishlistPage.querySelector('[data-wishlist-price-drop]');
+    var summary = wishlistPage.querySelector('[data-wishlist-summary]');
+    var saleCount = wishlistItems.filter(function (item) {
+      return Number(item.compareAtPriceCents) > Number(item.priceCents);
+    }).length;
+    count.textContent = wishlistItems.length + (wishlistItems.length === 1 ? ' articolo salvato' : ' articoli salvati');
+    empty.hidden = wishlistItems.length > 0;
+    tools.hidden = wishlistItems.length === 0;
+    filters.hidden = wishlistItems.length === 0;
+    share.hidden = wishlistItems.length === 0;
+    if (priceDrop) {
+      priceDrop.hidden = saleCount === 0;
+      var priceDropText = priceDrop.querySelector('[data-wishlist-price-drop-text]');
+      if (priceDropText) priceDropText.innerHTML = '<strong>' + saleCount + (saleCount === 1 ? ' articolo è sceso' : ' articoli sono scesi') + ' di prezzo</strong> da quando li hai salvati';
+    }
+    if (summary) {
+      summary.hidden = wishlistItems.length === 0;
+      var total = wishlistItems.reduce(function (amount, item) { return amount + (Number(item.priceCents) || 0); }, 0);
+      summary.querySelector('[data-wishlist-total]').textContent = formatWishlistMoney(total);
+      summary.querySelector('[data-wishlist-add-all]').textContent = 'Aggiungi tutto al carrello (' + wishlistItems.length + ')';
+    }
+    error.hidden = true;
+    wishlistPageList.hidden = filteredItems.length === 0;
+    wishlistPageList.setAttribute('aria-busy', 'true');
+    wishlistPage.querySelector('[data-wishlist-sort]').value = wishlistSortOrder;
+    renderWishlistPageFiltersLegacy();
+    if (filteredItems.length) empty.hidden = true;
+
+    var cards = await Promise.all(filteredItems.map(async function (item) {
+      try {
+        return await loadWishlistCard(item);
+      } catch (loadError) {
+        console.error('Unable to render a saved wishlist product.', loadError);
+        return null;
+      }
+    }));
+    if (request !== wishlistPageRequest) return;
+
+    var validCards = cards.filter(Boolean);
+    wishlistPageList.replaceChildren.apply(wishlistPageList, validCards);
+    updateWishlistSummaryFromCards(validCards);
+    decorateWishlistCardsForEdit(validCards);
+    wishlistPageList.hidden = validCards.length === 0;
+    wishlistPageList.setAttribute('aria-busy', 'false');
+    error.hidden = validCards.length === filteredItems.length;
+    if (filteredItems.length && !validCards.length) {
+      empty.querySelector('h2').textContent = 'I prodotti salvati non sono disponibili';
+      empty.hidden = false;
+    } else if (wishlistItems.length && !filteredItems.length) {
+      empty.querySelector('h2').textContent = 'Nessun prodotto in offerta';
+      empty.hidden = false;
+    } else if (!wishlistItems.length) {
+      empty.querySelector('h2').textContent = 'La tua wishlist è vuota';
+      empty.querySelector('p').textContent = 'Tocca il cuore sui prodotti che ti piacciono per ritrovarli qui.';
+      empty.hidden = false;
+    }
+    syncWishlistButtons(wishlistPage);
+  }
+
   async function renderWishlistPage() {
     if (!wishlistPage || !wishlistPageList) return;
+    if (!isMobileWishlistViewport()) return renderWishlistPageLegacy();
     var request = ++wishlistPageRequest;
     var empty = wishlistPage.querySelector('[data-wishlist-empty]');
     var error = wishlistPage.querySelector('[data-wishlist-error]');
@@ -635,7 +777,8 @@ function initMobileTemuHeader() {
         if (label) label.textContent = 'Aggiunto';
       }
       document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
-      // Met à jour le panneau panier du thème (assets/custom-async.js) et les compteurs du header.
+      // Mobile uniquement : met à jour le panneau panier du thème (assets/custom-async.js) et les compteurs du header.
+      if (!isMobileWishlistViewport()) return true;
       if (typeof ajaxCart !== 'undefined' && typeof ajaxCart.refresh === 'function') ajaxCart.refresh();
       var cartResponse = await fetch(shopRoot + 'cart.js', { credentials: 'same-origin' });
       if (cartResponse.ok) {
@@ -1215,7 +1358,7 @@ function initMobileTemuHeader() {
       wishlistEditMode = !wishlistEditMode;
       selectedWishlistIds.clear();
       decorateWishlistCardsForEdit(Array.prototype.slice.call(wishlistPageList.children));
-      updateWishlistPageSummary();
+      if (isMobileWishlistViewport()) updateWishlistPageSummary();
       return;
     }
 
@@ -1281,6 +1424,14 @@ function initMobileTemuHeader() {
     }
 
     var addAllButton = target.closest('[data-wishlist-add-all]');
+    if (addAllButton && !isMobileWishlistViewport()) {
+      var loadedVariantIds = Array.prototype.map.call(
+        wishlistPage.querySelectorAll('[data-wishlist-list] .alibaba-card__wishlist'),
+        function (button) { return button.dataset.variantId || ''; }
+      );
+      addWishlistVariantsToCart(loadedVariantIds, addAllButton);
+      return;
+    }
     if (addAllButton) {
       addWishlistVariantsToCart(wishlistAvailableVariantIds(), addAllButton).then(function () {
         addAllButton.disabled = false;

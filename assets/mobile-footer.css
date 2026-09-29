@@ -1,0 +1,624 @@
+/* Footer mobile (prototype) — snippets/mobile-footer.liquid.
+   Chargé uniquement en mobile (media="(max-width: 760px)") ; le footer desktop n'est pas modifié. */
+
+/* L'ancien footer et le second formulaire newsletter sont remplacés par le footer mobile. */
+#root .shopify-section-footer > nav,
+#root .shopify-section-footer > .base-font,
+#root .shopify-section-group-footer-group[id*="__section_newsletter_"] {
+  display: none !important;
+}
+
+#root .shopify-section-footer {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+#root .shopify-section-footer::before,
+#root .shopify-section-footer::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* #root .shopify-section-footer > .nf : plus spécifique que ".shopify-section-footer > div" du thème. */
+#root .shopify-section-footer > .nf {
+  --nf-ink: #16123f;
+  --nf-blue: #3a34d2;
+  --nf-muted: #8f92b3;
+  --nf-soft: #c6c8e2;
+  position: relative;
+  display: block;
+  width: auto;
+  max-width: none;
+  overflow: hidden;
+  margin: 28px -6px 0;
+  padding: 26px 16px 28px;
+  border: 0;
+  border-radius: 24px 24px 0 0;
+  background: var(--nf-ink);
+  color: #fff;
+  font-family: 'Figtree', system-ui, sans-serif;
+  text-align: left;
+}
+
+#root .shopify-section-footer > .nf::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -90px;
+  right: -90px;
+  bottom: auto;
+  left: auto;
+  z-index: 0;
+  width: 260px;
+  height: 260px;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(58, 52, 210, 0.55), transparent 70%);
+  box-shadow: none;
+  pointer-events: none;
+}
+
+#root .shopify-section-footer > .nf::after {
+  content: none;
+  display: none;
+}
+
+.nf > * {
+  position: relative;
+}
+
+.nf *,
+.nf *::before,
+.nf *::after {
+  box-sizing: border-box;
+}
+
+.nf p,
+.nf ul,
+.nf li {
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+  list-style: none;
+}
+
+.nf li::before {
+  content: none;
+}
+
+.nf a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nf button {
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+  font: inherit;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.nf button::before,
+.nf button::after {
+  content: none;
+  display: none;
+}
+
+.nf svg:not(.nf-pay svg) {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nf .nf-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* 1 Newsletter */
+.nf .nf-news__title {
+  margin: 0;
+  color: #fff;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.nf-news p {
+  margin: 6px 0 14px;
+  color: var(--nf-soft);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+#root .nf .nf-news form {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.nf-news__field {
+  display: flex;
+  align-items: center;
+  padding: 5px 5px 5px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nf-news__field:focus-within {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.nf .nf-news__field input {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+}
+
+.nf .nf-news__field input::placeholder {
+  color: #a9accb;
+  opacity: 1;
+}
+
+/* #root : plus fort que "#root button" et ".shopify-section-footer button" du thème. */
+#root .nf .nf-news__field button {
+  display: grid;
+  float: none;
+  flex: none;
+  place-items: center;
+  width: 42px;
+  min-width: 0;
+  height: 42px;
+  min-height: 0;
+  padding: 0;
+  text-indent: 0;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--nf-ink);
+}
+
+.nf-news__field button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.4;
+}
+
+.nf-news small {
+  display: block;
+  margin-top: 8px;
+  color: var(--nf-muted);
+  font-size: 11.5px;
+}
+
+.nf-news .nf-news__status {
+  color: #7ee2a8;
+  font-weight: 700;
+}
+
+.nf-news .nf-news__status.is-error {
+  color: #ff9b9b;
+}
+
+.nf-news__terms {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px !important;
+  color: var(--nf-soft);
+  font-size: 12px;
+}
+
+/* 2 Assistance */
+#root .nf .nf-help {
+  margin-top: 26px;
+}
+
+.nf .nf-help__title {
+  margin-bottom: 10px;
+  color: var(--nf-muted);
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.nf-contact {
+  display: grid;
+  gap: 8px;
+}
+
+.nf-contact a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nf-contact a:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.nf-contact svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: #c9ccf7;
+  stroke-width: 1.9;
+}
+
+.nf-contact .nf-contact__wa svg {
+  color: #4ade80;
+}
+
+.nf-contact .nf-fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+.nf-contact b {
+  display: block;
+  color: #fff;
+  font-size: 14.5px;
+}
+
+.nf-contact small {
+  display: block;
+  color: #a9accb;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* 3 Avis */
+.nf-rate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+}
+
+/* Badge Ali Reviews (source de la note réelle) : présent mais invisible sous la carte. */
+.nf .nf-rate__source {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nf-rate > b {
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.nf-rate > span {
+  flex: 1;
+  text-align: left;
+}
+
+.nf-rate > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--nf-muted);
+  stroke-width: 2;
+}
+
+.nf-stars {
+  position: relative;
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 17px;
+  font-style: normal;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.nf-stars::before {
+  content: "★★★★★";
+}
+
+.nf-stars em {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  color: #00b67a;
+  white-space: nowrap;
+}
+
+.nf-stars em::before {
+  content: "★★★★★";
+}
+
+.nf-rate small {
+  display: block;
+  margin-top: 3px;
+  color: #a9accb;
+  font-size: 12px;
+}
+
+/* 4 Liens en accordéons */
+.nf-links {
+  margin-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nf-acc {
+  display: block;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nf-acc summary,
+.nf .nf-acc--link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 2px;
+  color: #fff;
+  font-size: 15.5px;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.nf-acc summary::-webkit-details-marker {
+  display: none;
+}
+
+.nf-acc summary svg {
+  width: 18px;
+  height: 18px;
+  color: var(--nf-muted);
+  stroke-width: 1.9;
+  transition: transform 0.25s;
+}
+
+.nf-acc[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.nf-acc ul {
+  padding: 0 2px 12px;
+}
+
+.nf .nf-acc li a {
+  display: block;
+  padding: 8px 0;
+  color: var(--nf-soft);
+  font-size: 14px;
+}
+
+/* 5 Bas */
+.nf-bottom {
+  margin-top: 24px;
+}
+
+.nf-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.nf-logo {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  background: linear-gradient(100deg, #fff, #c9ceea 40%, #fff 60%, #aeb4da);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+}
+
+.nf-logo span {
+  font-weight: 600;
+}
+
+.nf-follow {
+  margin-left: auto;
+  color: var(--nf-muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* #root : plus fort que "#root button" et ".shopify-section-footer button" (text-indent, largeur 100 %) du thème. */
+#root .nf .nf-shop {
+  display: inline-flex;
+  float: none;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #5a31f4;
+  text-align: center;
+  text-indent: 0;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.nf .nf-shop b {
+  font-weight: 800;
+}
+
+.nf .nf-shop svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.2;
+}
+
+/* Vrai bouton Shopify "Follow on Shop" : invisible, déclenché par la pilule ci-dessus. */
+.nf .nf-shop-real {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.nf-sel {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0 0;
+}
+
+.nf-sel__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  height: 38px;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+}
+
+.nf-sel__item--country {
+  flex: 1;
+}
+
+.nf .nf-flag {
+  flex: none;
+  width: 18px;
+  height: 12px;
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+.nf .nf-sel select {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  padding: 0 18px 0 0;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238F92B3' stroke-width='2.2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right center / 14px;
+  box-shadow: none;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.nf .nf-sel select option {
+  color: #111;
+}
+
+/* Moyens de paiement : même rendu que l'ancien footer (.l4pm) — logos Shopify 38x24, espacés de 10px. */
+.nf-pay {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px !important;
+}
+
+.nf .nf-pay li {
+  display: block;
+  width: 38px;
+  height: 24px;
+}
+
+.nf .nf-pay svg {
+  display: block;
+  width: 38px;
+  height: 24px;
+}
+
+.nf-end {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nf .nf-copy {
+  color: var(--nf-muted);
+  font-size: 12px;
+}
+
+#root .nf .nf-top {
+  display: flex;
+  float: none;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  text-indent: 0;
+  white-space: nowrap;
+  background: none;
+  color: var(--nf-soft);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.nf-top svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-acc summary svg {
+    transition: none;
+  }
+}

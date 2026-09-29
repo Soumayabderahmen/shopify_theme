@@ -459,6 +459,17 @@
   {%- endif -%}
 </div>
 
+{%- comment -%} Footer mobile (prototype) : mêmes données, affiché uniquement sur mobile. {%- endcomment -%}
+<link rel="stylesheet" href="{{ 'mobile-footer.css' | asset_url }}" media="(max-width: 760px)">
+{%- render 'mobile-footer',
+  menu: linklists[menu_block.settings.menu],
+  customer_block: customer_service_block,
+  newsletter_block: newsletter_block,
+  section_settings: section.settings,
+  rating: section.settings.mobile_rating,
+  trustpilot_url: section.settings.mobile_trustpilot_url
+-%}
+
 {% style %}
   #shopify-section-{{ section.id }} {
   {% comment %} main {% endcomment %}
@@ -512,6 +523,9 @@
   {% endif %}
   @media only screen and (min-width: 47.5em) {
     #shopify-section-{{ section.id }} { margin-bottom: {{ section.settings.spacing_desktop }}px; }
+  }
+  @media only screen and (min-width: 761px) {
+    #shopify-section-{{ section.id }} .nf { display: none !important; }
   }
   @media only screen and (max-width: 47.5em) {
     #shopify-section-{{ section.id }} { margin-bottom: {{ section.settings.spacing_mobile }}px; }
@@ -651,6 +665,30 @@
       "id": "show_payment_methods",
       "label": "t:static_sections.footer.settings.payment_methods.show_payment_methods.label",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Footer mobile"
+    },
+    {
+      "type": "text",
+      "id": "mobile_trustpilot_url",
+      "label": "Link recensioni (Trustpilot)",
+      "default": "https://www.trustpilot.com/review/platinumshop.it"
+    },
+    {
+      "type": "text",
+      "id": "mobile_rating",
+      "label": "Valutazione di riserva",
+      "info": "Usata solo se il badge Ali Reviews non è disponibile.",
+      "default": "4.8"
+    },
+    {
+      "type": "text",
+      "id": "mobile_whatsapp",
+      "label": "Numero WhatsApp",
+      "info": "Usato dal footer mobile se il numero WhatsApp del tema è vuoto.",
+      "default": "+39 331 451 1142"
     },
     {
       "type": "header",

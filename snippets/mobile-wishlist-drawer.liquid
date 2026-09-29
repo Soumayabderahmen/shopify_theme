@@ -4,6 +4,8 @@
 {%- endcomment -%}
 {%- assign wishlist_page_url = pages['wishlist'].url | default: '/pages/wishlist' -%}
 <link rel="stylesheet" href="{{ 'mobile-wishlist-drawer.css' | asset_url }}" media="(max-width: 760px)">
+{%- comment -%} Le thème force dialog { display: block } : on masque le panneau hors mobile. {%- endcomment -%}
+<style>@media (min-width: 761px) { #mobile-wishlist-drawer { display: none !important; } }</style>
 <dialog
   id="mobile-wishlist-drawer"
   class="mobile-wishlist-drawer"

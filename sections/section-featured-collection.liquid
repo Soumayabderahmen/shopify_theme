@@ -1023,7 +1023,7 @@
           // Avec un filtre, une page peut ne contenir aucune carte : on continue (5 pages max).
           do {
             const response = await fetch(url, { priority: 'low' });
-            if (!response.ok) throw new Error(`Request failed with status ${response.status} for ${url}`);
+            if (this.feedMode && !response.ok) throw new Error(`Request failed with status ${response.status} for ${url}`);
             const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
             if (requestId !== this.requestId) return;
             page = this.parsePage(doc);
@@ -1155,7 +1155,8 @@
       destroy() {
         if (this.observer) this.observer.disconnect();
         this.observer = null;
-        if (this.trigger) this.trigger.style.display = 'none';
+        if (this.trigger) this.trigger.remove();
+        this.trigger = null;
       }
     }
 

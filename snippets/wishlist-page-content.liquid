@@ -123,6 +123,25 @@
   [data-wishlist-page] .wishlist-page__error{color:#b3261e}
   [data-wishlist-page] [hidden]{display:none!important}
 
+  @media only screen and (min-width:761px){
+    [data-wishlist-page]{max-width:none;margin:0 0 40px;padding:0 26px 20px}
+    [data-wishlist-page] .wishlist-page__heading{display:block;margin:0}
+    [data-wishlist-page] .wishlist-page__heading h1{margin:0;font-size:32px;line-height:1.2}
+    [data-wishlist-page] .wishlist-page__heading p,
+    [data-wishlist-page] [data-wishlist-share],
+    [data-wishlist-page] .wishlist-page__guest,
+    [data-wishlist-page] .wishlist-page__price-drop,
+    [data-wishlist-page] .wishlist-page__filters,
+    [data-wishlist-page] .wishlist-page__tools,
+    [data-wishlist-page] .wishlist-page__edit,
+    [data-wishlist-page] .wishlist-page__editbar,
+    [data-wishlist-page] .wishlist-page__empty,
+    [data-wishlist-page] #section_featured_collection-wishlist,
+    [data-wishlist-page] .wishlist-page__error,
+    [data-wishlist-page] .wishlist-page__summary,
+    [data-wishlist-page] .wishlist-page__recommendations{display:none!important}
+  }
+
   @media only screen and (max-width:760px){
     html.wishlist-page-active #root #nav-top,
     html.wishlist-page-active #root .shopify-section-breadcrumbs{display:none!important}

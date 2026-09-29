@@ -1585,19 +1585,20 @@
           {% assign product_count = product_count | plus: 1 %}
           {% capture placeholder_int %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
 
-          {%- comment -%} product-item rend déjà un <li> : pas de <li> englobant (un li dans un li crée une case vide). {%- endcomment -%}
-          {% render 'product-item',
-            product: brand_product,
-            placeholder_int: placeholder_int,
-            enable_quick_buy_desktop: section.settings.enable_quick_buy_desktop,
-            enable_quick_buy_mobile: section.settings.enable_quick_buy_mobile,
-            enable_quick_buy_qty_selector: section.settings.enable_quick_buy_qty_selector,
-            quick_buy_compact: section.settings.enable_quick_buy_compact,
-            enable_quick_buy_drawer: section.settings.enable_quick_buy_drawer,
-            sizes: image_sizes,
-            enable_color_picker: section.settings.enable_color_picker,
-            no_lazyload: true
-          %}
+          <li class="brand-product-card">
+            {% render 'product-item', 
+              product: brand_product, 
+              placeholder_int: placeholder_int, 
+              enable_quick_buy_desktop: section.settings.enable_quick_buy_desktop, 
+              enable_quick_buy_mobile: section.settings.enable_quick_buy_mobile, 
+              enable_quick_buy_qty_selector: section.settings.enable_quick_buy_qty_selector, 
+              quick_buy_compact: section.settings.enable_quick_buy_compact, 
+              enable_quick_buy_drawer: section.settings.enable_quick_buy_drawer, 
+              sizes: image_sizes, 
+              enable_color_picker: section.settings.enable_color_picker, 
+              no_lazyload: true 
+            %}
+          </li>
 
           {% if product_count >= 8 %}{% break %}{% endif %}
         {% endunless %}
