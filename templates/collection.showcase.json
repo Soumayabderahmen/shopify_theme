@@ -1,0 +1,188 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "settings": {
+        "hide_mobile": false
+      }
+    },
+    "1655110164baffd4a4": {
+      "type": "section-slideshow",
+      "blocks": {
+        "16551101647c9a5032-0": {
+          "type": "slide",
+          "settings": {
+            "layout": "background",
+            "overlay_opacity": 10,
+            "color_palette": "scheme-4",
+            "text_position": "text-start",
+            "title": "<h1>From headphones to fridges.</h1>",
+            "title_underline_style": "none",
+            "text": "<p>Headphones, phone cases and accessories, we've got you covered. </p>",
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain"
+          }
+        }
+      },
+      "block_order": [
+        "16551101647c9a5032-0"
+      ],
+      "settings": {
+        "height": "32/9",
+        "width": "boxed",
+        "autoplay": false,
+        "autoplay_seconds": 3,
+        "enable_controls": false,
+        "height_mobile": "xs",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "165487019461e74783": {
+      "type": "section-image-with-products",
+      "settings": {
+        "overlay_opacity": 15,
+        "color_palette": "scheme-4",
+        "layout": "image-left",
+        "text_position": "center start",
+        "title": "<h1>Top 3 electronics equipment</h1>",
+        "title_underline_style": "none",
+        "text": "<p>High quality electronics from the best brands</p>",
+        "show_link": false,
+        "link_text": "",
+        "link_url": "/",
+        "button_style": "primary plain",
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "width_mobile": "boxed",
+        "mobile_height": "size-s",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "main-collection": {
+      "type": "main-collection",
+      "blocks": {
+        "46c7e820-523e-4f79-a02e-8289bc02fe41": {
+          "type": "title",
+          "settings": {
+            "title_size": "h1",
+            "text_alignment": "left",
+            "title": ""
+          }
+        },
+        "b4ca5ed6-593e-4fb2-b602-a25847c3b247": {
+          "type": "description",
+          "settings": {
+            "text_alignment": "left",
+            "enable_read_more": false,
+            "text": ""
+          }
+        },
+        "9676b31d-fbea-4f1a-909d-6a816ab7ee38": {
+          "type": "sorting",
+          "settings": {}
+        },
+        "3b8d4990-828e-4b6b-ac83-772f3c5d1285": {
+          "type": "product_grid",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "46c7e820-523e-4f79-a02e-8289bc02fe41",
+        "b4ca5ed6-593e-4fb2-b602-a25847c3b247",
+        "9676b31d-fbea-4f1a-909d-6a816ab7ee38",
+        "3b8d4990-828e-4b6b-ac83-772f3c5d1285"
+      ],
+      "settings": {
+        "pagination_qty": 48,
+        "pagination_type": "button",
+        "show_amount_of_products_in_collection": true,
+        "show_collection_image": false,
+        "productview_type": "grid",
+        "products_per_row": 4,
+        "enable_filters": true,
+        "enable_menu": true,
+        "enable_collections": true,
+        "filters_menu_alignment": "left",
+        "collections_menu": [],
+        "filter_sticky": false,
+        "filters_show_more_limit": 7,
+        "image_swatches_size": "xs",
+        "image_swatches_fill_images": true,
+        "image_swatches_show_in_circle": true,
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "products_per_row_mobile": "2",
+        "filter_mobile_sticky": false
+      }
+    },
+    "1654869260ba0f16e6": {
+      "type": "section-usp-bar",
+      "blocks": {
+        "1654869260f94c18d6-0": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>All your <strong>electronics</strong> in one place</p>"
+          }
+        },
+        "1654869260f94c18d6-1": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>The world's best brands together</p>"
+          }
+        },
+        "1654869260f94c18d6-2": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>Premium products</strong> for a normal price</p>"
+          }
+        }
+      },
+      "block_order": [
+        "1654869260f94c18d6-0",
+        "1654869260f94c18d6-1",
+        "1654869260f94c18d6-2"
+      ],
+      "settings": {
+        "color_palette": "scheme-6",
+        "layout": "rows",
+        "autoplay": false,
+        "autoplay_seconds": 3,
+        "show_arrows": false,
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "1655110164baffd4a4",
+    "165487019461e74783",
+    "main-collection",
+    "1654869260ba0f16e6"
+  ]
+}

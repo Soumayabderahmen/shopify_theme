@@ -1,0 +1,58 @@
+{% render 'divider', settings: section.settings %}
+
+{% schema %}
+{
+  "name": "t:sections.divider.name",
+  "disabled_on": {
+    "groups": ["custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:global.layout.width.label",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed"
+    },
+    {
+      "type": "header",
+      "content": "t:global.spacing.header"
+    },
+    {
+      "id": "spacing_desktop",
+      "type": "range",
+      "label": "t:global.spacing.spacing_desktop.label",
+      "min": -25,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "id": "spacing_mobile",
+      "type": "range",
+      "label": "t:global.spacing.spacing_mobile.label",
+      "min": -25,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.divider.presets.name",
+     "category": "t:categories.layout"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,331 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "header",
+  "name": "t:static_sections.header.name",
+  "sections": {
+    "announcement_bar_pro_y9Ly7Y": {
+      "type": "announcement-bar-pro",
+      "blocks": {
+        "slide_9CeFTC": {
+          "type": "slide",
+          "settings": {
+            "enabled": true,
+            "message": "🔥 September Sale — 20% OFF on all hoodies & puffer jackets!",
+            "btn_label": "Shop Now",
+            "btn_url": "https://platinumshop.it/discount/HPG42RK9T96C?redirect=/collections/sept-discount"
+          }
+        }
+      },
+      "block_order": [
+        "slide_9CeFTC"
+      ],
+      "disabled": true,
+      "name": "Announcement Bar Pro",
+      "settings": {
+        "bg_color": "#e14646",
+        "text_color": "#ffffff",
+        "font_size": 14,
+        "bar_padding": 10,
+        "text_align": "center",
+        "sticky": true,
+        "animation_type": "slide",
+        "animation_speed": "medium",
+        "btn_style": "outline",
+        "btn_shape": "pill",
+        "btn_bg_color": "#ffffff",
+        "btn_text_color": "#1a1a1a",
+        "btn_font_size": 12,
+        "btn_padding_v": 5,
+        "btn_padding_h": 16,
+        "show_arrows": false,
+        "show_dots": true,
+        "show_close": false
+      }
+    },
+    "announcement": {
+      "type": "announcement-bar",
+      "blocks": {
+        "announcement-block-1": {
+          "type": "announcement",
+          "settings": {
+            "text": "🚀 20<strong>% OFF</strong> ALL INTERIOR PRODUCTS  |  🛍️ Paga in 3 rate con <strong>Klarna</strong>  |  💰 Compra e ottieni <strong>10% CashBack</strong> sul tuo ordine",
+            "image_height": 55
+          }
+        }
+      },
+      "block_order": [
+        "announcement-block-1"
+      ],
+      "settings": {
+        "text_alignment": "center",
+        "color_palette": "scheme-8",
+        "padding": 14,
+        "display_type": "marquee",
+        "allow_close": true,
+        "text_speed": "neutral",
+        "show_cursor": true,
+        "default_no_nav": true,
+        "autoplay_enabled": true,
+        "autoplay_seconds": 6,
+        "gap": 30,
+        "show_separators": true,
+        "separator": "slash",
+        "marquee_reverse_direction": false
+      }
+    },
+    "header": {
+      "type": "header",
+      "blocks": {
+        "promo_collection_list_DBgdGL": {
+          "type": "promo_collection_list",
+          "settings": {
+            "menu_item": "",
+            "show_in_button_menu": true,
+            "collections": [],
+            "image_ratio": "square",
+            "show_in_circle": false,
+            "fill_images": true,
+            "layout": "slider",
+            "number_of_items": 5,
+            "text_alignment": "start",
+            "title": "<h3>Beauty</h3>",
+            "title_underline_style": "none",
+            "show_link": true,
+            "link_text": "View all",
+            "link_url": "/",
+            "button_style": "primary plain",
+            "show_collection_titles": true,
+            "collection_title_position": "center",
+            "collection_title_size": "h5",
+            "mobile_layout": "grid"
+          }
+        },
+        "promo_banners_tyLyU6": {
+          "type": "promo_banners",
+          "settings": {
+            "menu_item": "",
+            "show_in_button_menu": true,
+            "height": "1/1",
+            "image_zoom": false,
+            "show_content_below": false,
+            "layout": "columns",
+            "enable_banner_1": true,
+            "fill_images_1": true,
+            "overlay_opacity_1": 30,
+            "color_palette_1": "scheme-2",
+            "text_position_1": "center",
+            "title_1": "<h1>Hair care</h1>",
+            "title_1_underline_style": "none",
+            "text_1": "<p>Hair care born from our experience in skin care.</p>",
+            "show_link_1": true,
+            "link_text_1": "View all",
+            "link_url_1": "/",
+            "button_style_1": "primary plain",
+            "show_overlay_link_1": true,
+            "overlay_url_1": "",
+            "enable_banner_2": false,
+            "fill_images_2": true,
+            "overlay_opacity_2": 0,
+            "color_palette_2": "scheme-1",
+            "text_position_2": "center",
+            "title_2": "<h3>Image banner</h3>",
+            "title_2_underline_style": "none",
+            "text_2": "<p>Give customers details about the banner image(s)</p>",
+            "show_link_2": true,
+            "link_text_2": "Button",
+            "link_url_2": "/",
+            "button_style_2": "primary plain",
+            "show_overlay_link_2": true,
+            "overlay_url_2": "",
+            "layout_mobile": "rows",
+            "height_mobile": "16/9"
+          }
+        },
+        "promo_banners_3Eji6K": {
+          "type": "promo_banners",
+          "settings": {
+            "menu_item": "",
+            "show_in_button_menu": true,
+            "height": "1/1",
+            "image_zoom": false,
+            "show_content_below": false,
+            "layout": "columns",
+            "enable_banner_1": true,
+            "fill_images_1": true,
+            "overlay_opacity_1": 30,
+            "color_palette_1": "scheme-2",
+            "text_position_1": "center",
+            "title_1": "<h1>The best gift ideas</h1>",
+            "title_1_underline_style": "none",
+            "text_1": "<p>Gifts for your friends, family, for him and for her</p>",
+            "show_link_1": true,
+            "link_text_1": "View all",
+            "link_url_1": "/",
+            "button_style_1": "primary plain",
+            "show_overlay_link_1": true,
+            "overlay_url_1": "",
+            "enable_banner_2": false,
+            "fill_images_2": true,
+            "overlay_opacity_2": 0,
+            "color_palette_2": "scheme-1",
+            "text_position_2": "center",
+            "title_2": "<h3>Image banner</h3>",
+            "title_2_underline_style": "none",
+            "text_2": "<p>Give customers details about the banner image(s)</p>",
+            "show_link_2": true,
+            "link_text_2": "Button",
+            "link_url_2": "/",
+            "button_style_2": "primary plain",
+            "show_overlay_link_2": true,
+            "overlay_url_2": "",
+            "layout_mobile": "rows",
+            "height_mobile": "16/9"
+          }
+        },
+        "246bf498-f488-4eaf-9630-846e68dfe4c0": {
+          "type": "button",
+          "settings": {
+            "show_mobile": true,
+            "button_menu": "main-menu",
+            "button_style": "dynamic_buy_button plain"
+          }
+        },
+        "f8ee5b63-cdad-4140-9183-2aea32d44591": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><a href=\"/policies/refund-policy\" title=\"Refund Policy\"><strong>Free exchange</strong></a> of products within 30 days</p>",
+            "icon": "mobile_payment",
+            "image_width": 55
+          }
+        },
+        "655f761a-afea-4320-92ad-c4df9417265c": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>Pickup in <strong>16 stores</strong> international</p>",
+            "icon": "default",
+            "image_width": 55
+          }
+        },
+        "7db5eae6-23ed-4bae-85f9-3b91f023c974": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>Premium brand products</strong> for an affordable price</p>",
+            "icon": "default",
+            "image_width": 55
+          }
+        }
+      },
+      "block_order": [
+        "promo_collection_list_DBgdGL",
+        "promo_banners_tyLyU6",
+        "promo_banners_3Eji6K",
+        "246bf498-f488-4eaf-9630-846e68dfe4c0",
+        "f8ee5b63-cdad-4140-9183-2aea32d44591",
+        "655f761a-afea-4320-92ad-c4df9417265c",
+        "7db5eae6-23ed-4bae-85f9-3b91f023c974"
+      ],
+      "settings": {
+        "layout": "layout_2",
+        "width": 1280,
+        "header_height": "69px|55px",
+        "show_header_border": "bottom",
+        "header_border_opacity": 100,
+        "header_border_width": "wide",
+        "header_shadow": true,
+        "header_shadow_opacity": 7,
+        "enable_country_selector": true,
+        "enable_language_selector": true,
+        "top_bar_color": "scheme-1",
+        "header_color": "scheme-4",
+        "menubar_color": "scheme-1",
+        "show_top_bar": true,
+        "top_bar_height": "35px|25px",
+        "top_bar_font": "secondary",
+        "top_bar_font_size": "14px",
+        "navbar_menu_item_text": "Customer service",
+        "navbar_menu_item_icon": "none",
+        "navbar_menu_item_link": "/",
+        "usp_display_type": "none",
+        "enable_usp_slider_arrows": false,
+        "enable_usp_slider_autoplay": true,
+        "usp_slider_autoplay_seconds": 3,
+        "usp_marquee_speed": "normal",
+        "usp_items_gap": 24,
+        "usp_marquee_dots": false,
+        "usp_marquee_separator": "dot",
+        "usp_marquee_invert": false,
+        "usp_text_speed": "normal",
+        "usp_typewriter_show_cursor": true,
+        "searchbar_font_size": "14px",
+        "searchbar_height": 50,
+        "searchbar_width": 600,
+        "show_searchbar_border": true,
+        "enable_sticky_header": true,
+        "sticky": "sticky-menu",
+        "cart_icon": "cart|e903",
+        "cart_icon_color": "primary",
+        "show_cart_total": false,
+        "menubar_menu": "main-menu",
+        "menubar_height": "45px",
+        "menu_layout": "mega",
+        "menu_scroll": true,
+        "menu_compact": false,
+        "show_dropdown_images": true,
+        "show_dropdown_images_subs": true,
+        "show_dropdown_images_autofill": true,
+        "show_dropdown_images_rounded": false,
+        "menubar_alignment": "left",
+        "main_menu_items_clickable": true,
+        "main_menu_items_clickable_mobile": true,
+        "menu_show_chevrons": false,
+        "sale_highlight": true,
+        "sale_highlight_item": "Sale",
+        "menu_font": "secondary",
+        "menu_font_weight": "400",
+        "menu_font_size": 14,
+        "menu_letter_spacing": 0,
+        "menubar_caps": false,
+        "menu_subs_font": "secondary",
+        "menu_subs_font_weight": "400",
+        "enable_menu_subs_font_size": false,
+        "menu_subs_font_size": 16,
+        "custom_menu_items_per_columns": false,
+        "menu_items_limit": 5,
+        "submenu_items_limit": 5,
+        "main_menu_show_lines": true,
+        "enable_socials": true,
+        "extra_image_width": 100,
+        "extra_image_link": "",
+        "enable_button": false,
+        "button_text": "Dealer login",
+        "button_url": "",
+        "button_style": "primary plain",
+        "disable_online_store": false,
+        "disable_account_component": false,
+        "header_icons": false,
+        "layout_mobile": "logo_center",
+        "mobile_menu_color": "",
+        "menu_icon": "menu-left|e97f",
+        "search_compact_mobile": false,
+        "search_mobile_bd": "bd-b",
+        "searchbar_height_mobile": 35,
+        "menu_font_size_mobile": 16,
+        "spacing_desktop": 15,
+        "spacing_mobile": 15
+      }
+    }
+  },
+  "order": [
+    "announcement_bar_pro_y9Ly7Y",
+    "announcement",
+    "header"
+  ]
+}

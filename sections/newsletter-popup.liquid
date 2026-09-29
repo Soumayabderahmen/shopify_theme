@@ -1,0 +1,131 @@
+<article
+  class="popup-a {% if section.settings.newsletter_popup_image %}aside{% else %}w360{% endif %}"
+  data-title="newsletter-popup"
+  data-popup-delay="{{ section.settings.newsletter_popup_seconds | minus: 0.5 | times: 1000 | round }}"
+>
+  {%- if section.settings.newsletter_popup_image -%}
+    {%- assign default_alt = 'newsletter.title_html' | t %}
+    <figure>
+      <picture>
+        <img
+          src="{{ section.settings.newsletter_popup_image | image_url }}"
+          srcset="{% render 'image-srcset', image: section.settings.newsletter_popup_image %}"
+          sizes="
+            (min-width: 760px) 480px,
+            100vw
+          "
+          width="1260"
+          height="290"
+          alt="{{ section.settings.newsletter_popup_image.alt | default: default_alt | escape }}"
+          loading="lazy"
+        >
+      </picture>
+    </figure>
+  {%- endif -%}
+  <header>
+    <h2>{{ 'newsletter.title_html' | t }}</h2>
+  </header>
+  <p class="m15">{{ 'newsletter.subtitle_html' | t }}</p>
+  {%- form 'customer', id: 'newsletter-popup' -%}
+    {%- if form.errors -%}
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          var alertAttributes = {
+              message: "{{ 'newsletter.form.email_placeholder' | t }} {{ form.errors.messages['email'] }}",
+              type: 'error',
+              origin: 'newsletter',
+            },
+            showAlertEvent = new CustomEvent('showAlert', { detail: alertAttributes });
+          window.dispatchEvent(showAlertEvent);
+        });
+      </script>
+    {%- elsif form.posted_successfully? -%}
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          var alertAttributes = {
+              message: "{{ 'newsletter.form.success' | t }}",
+              type: 'success',
+              origin: 'newsletter',
+            },
+            showAlertEvent = new CustomEvent('showAlert', { detail: alertAttributes });
+          window.dispatchEvent(showAlertEvent);
+        });
+      </script>
+    {%- endif -%}
+    <p class="m20">
+      <label for="contact[email]">
+        {{- 'newsletter.form.email_placeholder' | t -}}
+        <span class="overlay-theme">*</span></label
+      >
+      <input type="hidden" name="contact[tags]" value="newsletter">
+      <input
+        type="email"
+        name="contact[email]"
+        id="newsletter-popup"
+        aria-label="{{ 'newsletter.form.email_placeholder' | t }}"
+        required
+      >
+    </p>
+    {% if section.settings.enable_newsletter_terms_checkbox and section.settings.newsletter_terms_text != empty %}
+      <div class="check">
+        <input
+          type="checkbox"
+          name="newsletter_check-{{ section.id }}"
+          id="newsletter_check-{{ section.id }}"
+          aria-label="Accept the terms"
+          required
+        >
+        <label for="newsletter_check-{{ section.id }}">{{ section.settings.newsletter_terms_text }}</label>
+      </div>
+    {% endif %}
+    <p class="submit">
+      <button
+        type="submit"
+        {% if settings.button_style == 'inv' %}
+          class="inv"
+        {% endif %}
+      >
+        {{ 'newsletter.form.submit_button' | t }}
+      </button>
+    </p>
+  {%- endform -%}
+</article>
+
+{% schema %}
+    {
+    "name": "t:settings_schema.newsletter.name",
+    "settings": [
+      {
+        "id": "newsletter_popup_seconds",
+        "type": "range",
+        "label": "t:settings_schema.newsletter.settings.newsletter_popup.newsletter_popup_seconds.label",
+        "min": 0,
+        "max": 30,
+        "step": 1,
+        "unit": "sec",
+        "default": 5
+      },
+      {
+        "id": "newsletter_popup_image",
+        "type": "image_picker",
+        "label": "t:settings_schema.newsletter.settings.newsletter_popup.newsletter_popup_image.label",
+        "info": "t:settings_schema.newsletter.settings.newsletter_popup.newsletter_popup_image.info"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.newsletter.settings.checkbox.header"
+      },
+      {
+        "id": "enable_newsletter_terms_checkbox",
+        "type": "checkbox",
+        "label": "t:settings_schema.newsletter.settings.checkbox.enable_newsletter_terms_checkbox.label"
+      },
+      {
+        "id": "newsletter_terms_text",
+        "type": "richtext",
+        "label": "t:settings_schema.newsletter.settings.checkbox.newsletter_terms_text.label",
+        "info": "t:settings_schema.newsletter.settings.checkbox.newsletter_terms_text.info"
+      }
+    ]
+  }
+{% endschema %}

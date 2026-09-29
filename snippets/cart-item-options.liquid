@@ -1,0 +1,118 @@
+{% doc %}
+  Renders detailed options and metadata for cart line items including variant options, pricing, properties, discounts, and delivery information. Adapts display based on context (cart page vs cart panel).
+
+  @param {object} line_item - The cart line item object containing product variant and options data
+  @param {string} [origin] - Display context: 'cartpage' for full cart page, 'cartpanel' for side cart drawer
+  @param {boolean} [bundle] - Whether the item is part of a product bundle
+  @param {boolean} [list] - Whether to display in list format (affects discount display)
+
+  @example
+  {% render 'cart-item-options', line_item: item, origin: 'cartpage' %}
+  @example
+  {% render 'cart-item-options', line_item: item, origin: 'cartpanel', list: true %}
+  @example
+  {% render 'cart-item-options', line_item: item, bundle: true %}
+{% enddoc %}
+
+{%- capture line_item_options -%}
+    {%- liquid
+        assign show_deliverytime = false
+        if origin == 'cartpage'
+            assign show_deliverytime = true
+        elsif origin == 'cartpage' and bundle
+            assign show_deliverytime = true
+        endif
+        if line_item.item_components.size > 0
+            assign show_deliverytime = false
+        endif
+
+        assign slash = false
+        assign show_line_item_options = false
+        assign properties_size = line_item.properties | size
+        assign line_item_discount_allocations_size = 0
+        for discount_allocation in line_item.line_level_discount_allocations
+          if discount_allocation.amount > 0
+            assign line_item_discount_allocations_size = line_item_discount_allocations_size | plus: 1
+            break
+          endif
+        endfor
+        if line_item.unit_price_measurement != blank or line_item.selling_plan_allocation != blank or properties_size > 0 or line_item_discount_allocations_size > 0
+            assign show_line_item_options = true
+        elsif line_item.options_with_values and line_item.product.has_only_default_variant == false
+            assign show_line_item_options = true
+        elsif show_deliverytime
+            assign show_line_item_options = true
+        endif
+
+        assign shown_options = false
+    -%}
+    {%- if origin == 'cartpage' or bundle -%}<span>{%- endif -%}
+    {%- if show_line_item_options -%}
+        {%- if origin == 'cartpage' or bundle -%}<span class="{% if origin == 'cartpanel' and bundle %}size-12{% endif %}">{%- else -%}<p class="{% if list == false %}size-12{% endif %}">{%- endif -%}
+        {% if line_item.unit_price_measurement %}
+            {%- assign slash = true -%}
+            {%- assign shown_options = true -%}
+            {{ line_item.unit_price | unit_price_with_measurement: line_item.unit_price_measurement }}
+            {{ 'product.unit_price_label' | t }}&nbsp;{{ line_item.unit_price | unit_price_with_measurement: line_item.unit_price_measurement }}
+        {% endif %}
+        {%- unless line_item.product.has_only_default_variant -%}
+            {%- assign shown_options = true -%}
+            {%- if slash -%}&nbsp;/&nbsp;{%- else -%}{%- assign slash = true -%}{%- endif -%}
+            {%- for option in line_item.options_with_values -%}
+                {{ option.value }}
+                {% unless forloop.last %}&nbsp;/&nbsp;{% endunless %}
+            {%- endfor -%}
+        {% endunless -%}
+        {%- if line_item.selling_plan_allocation -%}
+            {%- assign shown_options = true -%}
+            {%- if slash -%}&nbsp;/&nbsp;{%- else -%}{%- assign slash = true -%}{%- endif -%}
+            {{ line_item.selling_plan_allocation.selling_plan.name }}
+        {%- endif -%}
+        {% if properties_size > 0 and slash -%}&nbsp;/&nbsp;{%- endif -%}
+        {%- for property in line_item.properties -%}
+            {%- assign shown_options = true -%}
+            {%- if property.first.first == '_' or property.last == blank -%}{%- continue -%}{%- endif -%}
+            {{ property.first }}:&nbsp;{% if property.last contains '/uploads/' %}<a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>{% else %}{{ property.last }}{% endif %}
+            {% unless forloop.last %}&nbsp;/&nbsp;{% endunless %}
+        {%- endfor -%}
+        {% if origin == 'cartpanel' and list %}
+            {%- for discount_allocation in line_item.line_level_discount_allocations -%}
+                {% if discount_allocation.amount > 0 %}
+                    {%- assign shown_options = true -%}
+                    <br><span class="overlay-gray"><i aria-hidden="true" class="icon-label"></i> <span class="text-uppercase">{{ discount_allocation.discount_application.title }}&nbsp;(-{{ discount_allocation.amount | money }})</span></span>
+                {% endif %}
+            {%- endfor -%}
+        {% endif %}
+        {% if line_item.product.remote_details %}
+            {% if shown_options %}<br>{% endif %}
+            {% if line_item.product.remote_details?.shop?.name %}
+                {{ 'product.remote_product_shop' | t: shop_name: line_item.product.remote_details?.shop.name }}
+            {% else %}
+                {{ 'product.remote_product' | t}}
+            {% endif %}
+        {% endif %}
+        {%- if origin == 'cartpage' or bundle -%}</span>{%- else -%}</p>{%- endif -%}
+    {%- endif -%}
+    {%- if show_deliverytime %}
+        {%- liquid
+            if shown_options
+                assign deliverytime_extra_element = '<br>'
+            else
+                assign deliverytime_extra_element = ''
+            endif
+        -%}
+        {%- render 'product-deliverytime',
+                product: line_item.product,
+                current_variant: line_item.variant,
+                container: "span",
+                extra_element: deliverytime_extra_element
+        -%}
+    {%- endif -%}
+    {%- for discount_allocation in line_item.line_level_discount_allocations -%}
+        {% if discount_allocation.amount > 0 %}
+            {% if origin == 'cartpage' %}<br>{% endif %}<span class="overlay-gray{% if origin == 'cartpanel' %} size-12{% endif %}"><i aria-hidden="true" class="icon-label"></i> <span class="text-uppercase">{{ discount_allocation.discount_application.title }}&nbsp;(-{{ discount_allocation.amount | money }})</span></span>
+        {% endif %}
+    {%- endfor -%}
+    {%- if origin == 'cartpage' or bundle -%}</span>{%- endif -%}
+{%- endcapture -%}
+{{ line_item_options }}

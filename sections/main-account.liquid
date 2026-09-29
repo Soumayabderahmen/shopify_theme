@@ -1,0 +1,219 @@
+<div class="m6fr compact">
+  <article class="palette-{{ section.settings.color_palette }}
+    {{ section.settings.text_position }}
+    module-color-palette
+  ">
+    <figure>
+      <span class="img-overlay" style="opacity:{{ section.settings.overlay_opacity | divided_by: 100.0 }}"></span>
+      <picture>
+        {%- if section.settings.image -%}
+        {%- assign default_alt = 'customer.account.title' | t %}
+          <img
+            src="{{ section.settings.image | image_url: width: 1024 }}"
+            srcset="{% render 'image-srcset', image: section.settings.image %}"
+            sizes="
+              {% if settings.width < 2000 %}(min-width: 1300px) {{ settings.width }}px,{% endif %}
+              100vw
+            "
+            width="1260"
+            height="265"
+            alt="{{ section.settings.image.alt | default: default_alt | escape }}"
+            style="object-position: {{ section.settings.image.presentation.focal_point }}"
+            loading="lazy"
+          >
+        {% else %}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        {% endif %}
+      </picture>
+    </figure>
+    <div style="width: 100%;">
+      <{{ settings.global_title_size }} class="m5">{{ 'customer.account.title' | t }} <span class="small">{{ 'customer.account.welcome' | t: first_name: customer.first_name }}</span></{{ settings.global_title_size }}>
+      <p>{{ 'customer.account.subtitle_html' | t }}</p>
+    </div>
+  </article>
+</div>
+<div class="cols base-font">
+  <article class="w42">
+    <h2 class="size-18">{{ 'customer.account.details' | t }}</h2>
+    <div class="m6bx overlay m10">
+      <ul class="l4as caption">
+        <li><span>{{ 'customer.name' | t }}</span> {{ customer.name }}</li>
+        {%- if customer.phone != blank -%}<li><span>{{ 'customer.phone_number' | t }}</span> {{ customer.phone }}</li>{%- endif -%}
+        <li><span>{{ 'customer.email' | t }}</span> <a href="./" class="email">{{ customer.email }}</a></li>
+        {%- if customer.default_address -%}<li><span>{{ 'customer.account.address' | t }}</span> {% if customer.default_address.company != empty %}{{ customer.default_address.company }}<br>{% endif %}{{ customer.default_address.street }}<br> {{ customer.default_address.zip }} {{ customer.default_address.city }}<br> {{ customer.default_address.country }}</li>{%- endif -%}
+      </ul>
+    </div>
+    <p class="cols">
+      <a href="{{ routes.account_addresses_url }}" class="strong">{{ 'customer.account.manage_addresses' | t }}&nbsp;<i aria-hidden="true" class="icon-chevron-right"></i></a>
+      <a href="{{ routes.account_logout_url }}" class="strong">{{ 'header.account.logout' | t }}&nbsp;<i aria-hidden="true" class="icon-chevron-right"></i></a>
+    </p>
+    {% assign app_blocks = section.blocks | where: "type", "@app" %}
+    {% for app_block in app_blocks %}
+      {% render app_block %}
+    {% endfor %}
+  </article>
+  {%- if section.settings.text != empty or section.settings.show_phone_link or section.settings.show_mail_link or section.settings.show_whatsapp_link -%}
+    <article class="w58">
+      <h2 class="size-18">{{ 'customer.account.customer_service' | t }}</h2>
+      <div class="m6bx">
+        {{ section.settings.text }}
+        {%- if section.settings.show_phone_link or section.settings.show_mail_link or section.settings.show_whatsapp_link -%}
+          <ul class="l4cn box">
+            {% if shop.phone != empty and section.settings.show_phone_link %}
+              <li><a href="tel:{{ shop.phone }}"><i aria-hidden="true" class="icon-phone"></i> {{ shop.phone }}</a></li>
+            {% endif %}
+            {% if shop.email != empty and section.settings.show_mail_link %}
+              <li><a href="mailto:{{ shop.email }}" class="email"><i aria-hidden="true" class="icon-envelope"></i> {{ shop.email }}</a></li>
+            {% endif %}
+            {% if settings.whatsapp != empty and settings.whatsapp != 0 and section.settings.show_whatsapp_link %}
+              <li><a href="https://wa.me/{{ settings.whatsapp }}"><i aria-hidden="true" class="icon-whatsapp"></i> {{ 'footer.whatsapp_html' | t }}</a></li>
+            {% endif %}
+          </ul>
+        {%- endif -%}
+      </div>
+    </article>
+  {%- endif -%}
+</div>
+
+<h2 class="size-18">{{ 'customer.account.orders_title' | t }}</h2>
+{%- if customer.orders == blank -%}
+  <p class="base-font">{{ 'customer.account.no_orders_content' | t }}</p>
+{%- else -%}
+  {%- paginate customer.orders by 12 -%}
+    <div class="table-wrapper base-font">
+      <table class="table-drop">
+        <caption>{{ 'customer.account.orders_title' | t }}</caption>
+        <thead>
+          <tr>
+            <th>{{ 'customer.orders.order_number' | t }}</th>
+            <th>{{ 'customer.orders.date' | t }}</th>
+            <th>{{ 'customer.orders.payment_status' | t }}</th>
+            <th>{{ 'customer.orders.fulfillment_status' | t }}</th>
+            <th>{{ 'customer.orders.total' | t }}</th>
+            <th class="text-end"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {%- for order in customer.orders -%}
+            <tr>
+              <td>{{ order.name }}</td>
+              <td>{{ order.created_at | date: format: 'month_day_year_basic' }}</td>
+              <td class="strong">{% if order.financial_status == 'paid' %}<i aria-hidden="true" class="icon-check"></i> {% endif %}{{ order.financial_status_label }}</td>
+              <td>{{ order.fulfillment_status_label }}</td>
+              <td>{{ order.total_price | money }}</td>
+              <td class="text-end">
+                <a href="./" class="toggle"><i aria-hidden="true" class="icon-chevron-down"></i> <span class="hidden">{{ 'general.read_more.read_more' | t }}</span></a>
+                <a href="{{ order.customer_url }}">{{ 'customer.orders.view_order' | t }}</a>
+              </td>
+            </tr>
+            <tr class="sub hidden">
+              <th>{{ 'customer.orders.payment_status' | t }}</th>
+              <td colspan="5">{% if order.financial_status == 'paid' %}<i aria-hidden="true" class="icon-check"></i> {% endif %}{{ order.financial_status_label }}</td>
+            </tr>
+            <tr class="sub hidden">
+              <th>{{ 'customer.orders.fulfillment_status' | t }}</th>
+              <td colspan="5">{{ order.fulfillment_status_label }}</td>
+            </tr>
+            <tr class="sub hidden">
+              <th>{{ 'customer.orders.total' | t }}</th>
+              <td colspan="5">{{ order.total_price | money }}</td>
+            </tr>
+            <tr class="sub hidden">
+              <td colspan="6"><a href="{{ order.customer_url }}">{{ 'customer.orders.view_order' | t }}</a></td>
+            </tr>
+          {%- endfor -%}
+        </tbody>
+      </table>
+    </div>
+    {%- render 'pagination',
+      paginate: paginate,
+      show_amount: true
+    -%}
+  {%- endpaginate -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:main.account_dashboard.name",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:main.account_dashboard.settings.banner.header"
+    },
+    {
+      "id": "image",
+      "type": "image_picker",
+      "label": "t:main.account_dashboard.settings.banner.image.label"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:main.account_dashboard.settings.banner.overlay_opacity.label",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 25
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_palette",
+      "label": "t:global.color_palette.label",
+      "default": "scheme-4"
+    },
+    {
+      "id": "text_position",
+      "type": "select",
+      "label": "t:main.account_dashboard.settings.banner.text_position.label",
+      "options": [
+        {
+          "value": "text-start",
+          "label": "t:main.account_dashboard.settings.banner.text_position.options__1.label"
+        },
+        {
+          "value": "text-center",
+          "label": "t:main.account_dashboard.settings.banner.text_position.options__2.label"
+        },
+        {
+          "value": "text-end",
+          "label": "t:main.account_dashboard.settings.banner.text_position.options__3.label"
+        }
+      ],
+      "default": "text-start"
+    },
+    {
+      "type": "header",
+      "content": "t:main.account_dashboard.settings.customer_service.header"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "t:main.account_dashboard.settings.customer_service.text.label",
+      "default": "<p>Extra shop info</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_phone_link",
+      "label": "t:main.account_dashboard.settings.customer_service.show_phone_link.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_mail_link",
+      "label": "t:main.account_dashboard.settings.customer_service.show_mail_link.label",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_whatsapp_link",
+      "label": "t:main.account_dashboard.settings.customer_service.show_whatsapp_link.label",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ]
+}
+{% endschema %}

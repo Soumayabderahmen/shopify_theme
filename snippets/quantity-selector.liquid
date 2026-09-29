@@ -1,0 +1,29 @@
+{%- doc -%}
+  This snippet is used to render the quantity selector for a product.
+
+  @param {object} product - the product to render the quantity selector for
+  @param {object} [variant] - the specific variant to use (for cart items), if not provided uses selected_or_first_available_variant
+  @param {string} [form_id] - the id of the form
+  @param {object} [block_attributes] - the block attributes
+{%- enddoc -%}
+
+{% liquid
+  if variant
+    assign variant = variant
+  else
+    assign variant = product.selected_or_first_available_variant
+  endif
+%}
+
+<span class="input-amount" {{ block_attributes }}>
+  <label for="quantity-{{ form_id }}" class="hidden">{{ 'product.form.quantity' | t }}</label>
+  <input type="number" id="quantity-{{ form_id }}" name="quantity" value="{{ variant.quantity_rule.min }}"
+      min="{{ variant.quantity_rule.min }}"
+      {% if variant.inventory_management == 'shopify' and variant.inventory_policy == 'deny' -%}
+      max="{{ variant.inventory_quantity }}"
+      {% elsif variant.quantity_rule.max %}
+      max="{{ variant.quantity_rule.max }}"
+      {% endif %}
+  {% if variant.quantity_rule.increment %}step="{{ variant.quantity_rule.increment }}"{% endif %}
+  required>
+</span>

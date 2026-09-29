@@ -1,0 +1,81 @@
+{% render 'button', block_settings: block.settings %}
+
+{% schema %}
+{
+  "name": "t:blocks.button.name",
+  "tag": null,
+  "settings": [
+    {
+      "id": "link_text",
+      "type": "text",
+      "label": "t:global.button.link_text.label",
+      "default": "Button"
+    },
+    {
+      "id": "link_url",
+      "type": "url",
+      "label": "t:global.button.link_url.label",
+      "default": "/"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "t:global.button.button_style.label",
+      "options": [
+        {
+          "value": "primary plain",
+          "label": "t:global.button.button_style.primary.label",
+          "group": "t:global.button.button_style.group.plain"
+        },
+        {
+          "value": "secondary plain",
+          "label": "t:global.button.button_style.secondary.label",
+          "group": "t:global.button.button_style.group.plain"
+        },
+        {
+          "value": "tertiary plain",
+          "label": "t:global.button.button_style.tertiary.label",
+          "group": "t:global.button.button_style.group.plain"
+        },
+        {
+          "value": "primary inv",
+          "label": "t:global.button.button_style.primary.label",
+          "group": "t:global.button.button_style.group.inv"
+        },
+        {
+          "value": "secondary inv",
+          "label": "t:global.button.button_style.secondary.label",
+          "group": "t:global.button.button_style.group.inv"
+        },
+        {
+          "value": "tertiary inv",
+          "label": "t:global.button.button_style.tertiary.label",
+          "group": "t:global.button.button_style.group.inv"
+        },
+        {
+          "value": "primary link",
+          "label": "t:global.button.button_style.primary.label",
+          "group": "t:global.button.button_style.group.link"
+        },
+        {
+          "value": "secondary link",
+          "label": "t:global.button.button_style.secondary.label",
+          "group": "t:global.button.button_style.group.link"
+        },
+        {
+          "value": "tertiary link",
+          "label": "t:global.button.button_style.tertiary.label",
+          "group": "t:global.button.button_style.group.link"
+        }
+      ],
+      "default": "secondary plain"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.button.name",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}

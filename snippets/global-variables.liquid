@@ -1,0 +1,73 @@
+{%- liquid
+  assign datepicker_path = 'datepicker-lang.js' | asset_url
+-%}
+<script>
+  window.routes = {
+      predictive_search_url: '{{ routes.predictive_search_url }}',
+      cart_url: '{{ routes.cart_url }}',
+      cart_add_url: '{{ routes.cart_add_url }}',
+      cart_change_url: '{{ routes.cart_change_url }}',
+      cart_update_url: '{{ routes.cart_update_url }}',
+      product_recommendations_url: '{{ routes.product_recommendations_url }}'
+  };
+  window.general = {
+      {% if template.name == 'product' %}
+      viewed_product: '{{ product.url }}',
+      viewed_product_id: '{{ product.id }}',
+      {% endif %}
+      template: '{{ template.name }}',
+      show_accessibility: {{ settings.show_accessibility }},
+      language: '{{ localization.language.iso_code | downcase }}',
+      currency: '{{ shop.money_format }}'
+  };
+  window.datepicker_path_global = '{{ datepicker_path }}';
+  window.translations = {
+      readmore_text: {{ "general.read_more.read_more" | t | json }},
+      unavailable_text: {{ "product.form.unavailable" | t | json }},
+      view_options_text: {{ "product.form.view_options" | t | json }},
+      view_text: {{ "product.form.view" | t | json }},
+      select: {{ "product.form.select" | t | json }},
+      general_alerts_success_text: {{ "general.alerts.success" | t | json }},
+      general_alerts_info_text: {{ "general.alerts.info" | t | json }},
+      general_alerts_error_text: {{ "general.alerts.error" | t | json }},
+      added_to_cart: {{ "general.alerts.added_to_cart" | t | json }},
+      out_of_5_stars_text: {{ "product.reviews.out_of_5_stars" | t | json }},
+      seen_number_of_reviews_html_text: {{ "product.reviews.seen_number_of_reviews_html" | t | json }}
+  };
+  window.filepaths = {
+      theme_accessible_css: '{{ "theme-accessible.css" | asset_url }}',
+      async_menu_css: '{{ "async-menu.css" | asset_url }}',
+      async_css: '{{ "async.css" | asset_url }}',
+      async_hovers_css: '{{ "async-hovers.css" | asset_url }}',
+      async_hovers_hack_css: '{{ "async-hovers-hack.css" | asset_url }}',
+      async_validation_css: '{{ "async-validation.css" | asset_url }}',
+      async_product_scrolled_css: '{{ "async-product-scrolled.css" | asset_url }}',
+      async_product_css: '{{ "page-product.css" | asset_url }}',
+      async_select_css: '{{ "async-select.css" | asset_url }}',
+      async_filters_css: '{{ "async-filters.css" | asset_url }}',
+      async_panels_css: '{{ "async-panels.css" | asset_url }}',
+      async_compare_css: '{{ "async-compare.css" | asset_url }}',
+      async_datepicker_css: '{{ "async-datepicker.css" | asset_url }}',
+      async_search_css: '{{ "async-search.css" | asset_url }}',
+      async_ui_sliders_css: '{{ "async-ui-sliders.css" | asset_url }}',
+      async_announcement_css: '{{ "async-announcement.css" | asset_url }}',
+      async_fancybox_css: '{{ "async-fancybox.css" | asset_url }}',
+      async_hotspots_css: '{{ "async-hotspots.css" | asset_url }}',
+      async_marquee_css: '{{ "async-marquee.css" | asset_url }}',
+      async_popups_css: '{{ "async-popups.css" | asset_url }}',
+      async_product_variants_css: '{{ "async-product-variants.css" | asset_url }}',
+      custom_async_js: '{{ 'custom-async.js' | asset_url }}',
+      plugin_validator_js: '{{ "plugin-validator.js" | asset_url }}',
+      plugin_selects_js: '{{ "plugin-selects.js" | asset_url }}',
+      plugin_sliders_js: '{{ "plugin-sliders.js" | asset_url }}',
+      plugin_compare_js: '{{ "plugin-compare.js" | asset_url }}',
+      plugin_datepicker_js: '{{ "plugin-datepicker.js" | asset_url }}',
+      plugin_outline_js: '{{ "plugin-outline.js" | asset_url }}',
+      plugin_popups_js: '{{ "plugin-popups.js" | asset_url }}',
+      plugin_countdown_js: '{{ "plugin-countdown.js" | asset_url }}',
+      plugin_countup_js: '{{ "plugin-countup.js" | asset_url }}',
+      plugin_fancybox_js: '{{ "plugin-fancybox.js" | asset_url }}',
+      plugin_typewriter_js: "{{ 'plugin-typewritter.js' | asset_url }}",
+      plugin_upsell_popup_js: "{{ 'plugin-upsell-popup.js' | asset_url }}"
+  }
+</script>

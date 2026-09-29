@@ -1,0 +1,77 @@
+{% doc %}
+  Generates responsive image srcset values for optimal image loading across different screen sizes. Creates multiple image URLs at various widths with optional format constraints and cropping.
+
+  @param {object} image - Image object to generate srcset for (required)
+  @param {string} [format] - Aspect ratio format: 'square', 'portrait', 'landscape', or 'banner'
+  @param {string} [crop] - Crop parameter for image resizing (e.g., 'center', 'top', 'bottom')
+  @param {number} [max_width] - Maximum width for srcset generation. Defaults to 1400 or 2900 based on theme width settings.
+
+  @example
+  {% render 'image-srcset', image: product.featured_image %}
+  @example
+  {% render 'image-srcset', image: section.settings.banner_image, format: 'landscape', max_width: 1400 %}
+  @example
+  {% render 'image-srcset', image: collection.featured_image, format: 'square', crop: 'center' %}
+{% enddoc %}
+
+{%- liquid
+  assign first = true
+  assign format = format | default: false
+  assign crop = crop | default: false
+  if settings.width < 2000
+    assign max_width = max_width | default: settings.width
+  else
+    assign max_width = max_width | default: 2900
+  endif
+  assign widths = '165,240,350,533,720,940,1066,1280,1400,1700,2000,2300,2600,2900' | split: ','
+  assign pad_color = 'fff'
+  if image.media_type
+    assign src = image.preview_image.src
+  else
+    assign src = image.src
+  endif
+
+  for width_str in widths
+    assign width = width_str | plus: 0
+    assign img_height = false
+    if src.width >= width or forloop.first
+      assign img_width = width
+      if format
+        case format
+          when 'square'
+            assign img_height = img_width
+          when 'portrait'
+            assign portrait_height = img_width | times: 1.25 | round
+            assign img_height = portrait_height
+          when 'landscape'
+            assign landscape_height = img_width | times: 0.75 | round
+            assign img_height = landscape_height
+          when 'banner'
+            assign banner_height = img_width | times: 0.4 | round
+            assign img_height = banner_height
+        endcase
+      endif
+      if crop
+        if img_height
+          assign img_url = src | image_url: width: img_width, height: img_height, crop: crop
+        else
+          assign img_url = src | image_url: width: img_width, crop: crop
+        endif
+      else
+        if img_height
+          assign img_url = src | image_url: height: img_height
+        else
+          assign img_url = src | image_url: width: img_width, pad_color: pad_color
+        endif
+      endif
+      unless first 
+        echo ','
+      endunless
+      echo img_url | append: ' ' | append: width | append: 'w'
+      assign first = false
+      if width >= max_width
+        break
+      endif
+    endif
+  endfor
+-%}

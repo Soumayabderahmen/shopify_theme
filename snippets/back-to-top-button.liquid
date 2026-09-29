@@ -1,0 +1,10 @@
+{% doc %}
+  Renders a back-to-top button that allows users to quickly scroll to the top of the page. Hidden by default and shown via JavaScript when the user scrolls down.
+
+  @example
+  {% render 'back-to-top-button' %}
+{% enddoc %}
+
+<p id="totop" class="hidden">
+  <a href="#root">{{ 'general.accessibility.back_to_top' | t }}</a>
+</p>

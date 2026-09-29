@@ -1,0 +1,70 @@
+{% render 'title', block: block %}
+
+{% schema %}
+{
+  "name": "t:blocks.title.name",
+  "tag": null,
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "t:global.typography.title.label",
+      "info": "t:global.typography.title.info",
+      "default": "<h2>Title</h2>"
+    },
+    {
+      "type": "select",
+      "id": "underline_style",
+      "label": "t:global.typography.title_underline_style.label",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:global.typography.title_underline_style.none.label"
+        },
+        {
+          "value": "secondary_font",
+          "label": "t:global.typography.title_underline_style.secondary_font.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_accent",
+          "label": "t:global.typography.title_underline_style.secondary_font_accent.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_gradient",
+          "label": "t:global.typography.title_underline_style.secondary_font_gradient.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "accent",
+          "label": "t:global.typography.title_underline_style.accent.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        },
+        {
+          "value": "gradient",
+          "label": "t:global.typography.title_underline_style.gradient.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        }
+      ]
+    },
+    {
+        "type": "checkbox",
+        "id": "caps",
+        "label": "t:blocks.title.settings.caps.label"
+    },
+    {
+        "type": "checkbox",
+        "id": "link_to_product",
+        "label": "t:blocks.title.settings.link_to_product.label",
+        "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.title.name",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}

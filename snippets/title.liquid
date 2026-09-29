@@ -1,0 +1,53 @@
+{%- doc -%}
+  Intended for use in a block similar to the text block.
+
+  @param {string} [class] - custom class to define in addition to title-block classes
+  @param {string} [fallback_text] - fallback text if settings title does not exist
+  @param {object} [block] - The block object
+{%- enddoc -%}
+
+{% liquid
+  assign product = closest.product
+  assign stripped_text = block.settings.title | strip_html
+  if fallback_text != blank and stripped_text == blank 
+    assign title_text = fallback_text
+  else
+    assign title_text = block.settings.title
+  endif
+  if title_text == blank
+    continue 
+  endif
+  assign underline_style = block.settings.underline_style | default: settings.underline_style
+  assign caps = block.settings.caps
+%}
+<div
+  class="
+    {{ class }} title-block
+    {% if underline_style != 'none' %}
+      title-underline-none
+      {% if underline_style contains 'accent' %}
+        title-underline-accent
+      {% elsif underline_style contains 'gradient' %}
+        title-underline-gradient
+      {% endif %}
+      {% if underline_style contains 'secondary_font' %}
+        title-underline-secondary-font
+      {% endif %}
+    {% endif %}
+    {% if caps %}
+      text-uppercase
+    {% endif %}
+  "
+  {% if block %}
+    {{ block.shopify_attributes }}
+  {% endif %}
+>
+  {% if block.settings.link_to_product and product != blank %}
+    {% capture link_to_product %}
+      <a href="{{ product.url }}" aria-label="{{ product.title | escape }}">{{ product.title }}</a>
+    {% endcapture %}
+    {{ title_text | replace: product.title, link_to_product }}
+  {% else %}
+    {{ title_text }}
+  {% endif %}
+</div>

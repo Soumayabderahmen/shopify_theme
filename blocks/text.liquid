@@ -1,0 +1,190 @@
+{% render 'text', block: block %}
+
+{% schema %}
+{
+  "name": "t:blocks.text.name",
+  "tag": null,
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "t:blocks.text.settings.text.label",
+      "default": "<p>Highlight a new collection and share details about products related to this image.</p>"
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.text.settings.layout.header"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:blocks.text.settings.width.label",
+      "options": [
+        {
+          "value": "fit-content",
+          "label": "t:blocks.text.settings.width.options.fit"
+        },
+        {
+          "value": "100%",
+          "label": "t:blocks.text.settings.width.options.fill"
+        }
+      ],
+      "default": "100%"
+    },
+    {
+      "type": "select",
+      "id": "max_width",
+      "label": "t:blocks.text.settings.max_width.label",
+      "options": [
+        {
+          "value": "narrow",
+          "label": "t:blocks.text.settings.max_width.options.narrow"
+        },
+        {
+          "value": "normal",
+          "label": "t:blocks.text.settings.max_width.options.normal"
+        },
+        {
+          "value": "none",
+          "label": "t:blocks.text.settings.max_width.options.none"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:blocks.text.settings.alignment.label",
+      "default": "left",
+      "visible_if": "{{ block.settings.width == '100%' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_read_more",
+      "label": "t:blocks.text.settings.enable_read_more.label",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:blocks.text.settings.padding.header"
+    },
+    {
+      "type": "select",
+      "id": "padding",
+      "label": "t:blocks.text.settings.padding.label",
+      "options": [
+        {
+          "value": "0",
+          "label": "t:blocks.text.settings.padding.options.none"
+        },
+        {
+          "value": "1",
+          "label": "t:blocks.text.settings.padding.options.small"
+        },
+        {
+          "value": "1.5",
+          "label": "t:blocks.text.settings.padding.options.medium"
+        },
+        {
+          "value": "3",
+          "label": "t:blocks.text.settings.padding.options.large"
+        }
+      ],
+      "default": "0"
+    },
+    {
+      "type": "header",
+      "content": "t:global.typography.custom_text_styling.header"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_custom_text_styling",
+      "label": "t:global.typography.enable_custom_text_styling.label",
+      "info": "t:global.typography.enable_custom_text_styling.info"
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "t:global.typography.font_weight.label",
+      "options": [
+        {
+          "value": "100",
+          "label": "t:global.typography.font_weight.100.label"
+        },
+        {
+          "value": "200",
+          "label": "t:global.typography.font_weight.200.label"
+        },
+        {
+          "value": "300",
+          "label": "t:global.typography.font_weight.300.label"
+        },
+        {
+          "value": "400",
+          "label": "t:global.typography.font_weight.400.label"
+        },
+        {
+          "value": "500",
+          "label": "t:global.typography.font_weight.500.label"
+        },
+        {
+          "value": "600",
+          "label": "t:global.typography.font_weight.600.label"
+        },
+        {
+          "value": "700",
+          "label": "t:global.typography.font_weight.700.label"
+        },
+        {
+          "value": "800",
+          "label": "t:global.typography.font_weight.800.label"
+        },
+        {
+          "value": "900",
+          "label": "t:global.typography.font_weight.900.label"
+        }
+      ],
+      "default": "700",
+      "visible_if": "{{ block.settings.enable_custom_text_styling }}"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "t:global.typography.font_size.label",
+      "options": [
+        {
+          "value": "13px",
+          "label": "t:global.typography.font_size.13px.label"
+        },
+        {
+          "value": "14px",
+          "label": "t:global.typography.font_size.14px.label"
+        },
+        {
+          "value": "16px",
+          "label": "t:global.typography.font_size.16px.label"
+        },
+        {
+          "value": "18px",
+          "label": "t:global.typography.font_size.18px.label"
+        }
+      ],
+      "default": "16px",
+      "visible_if": "{{ block.settings.enable_custom_text_styling }}"
+    },
+    {
+      "type": "color",
+      "id": "font_color",
+      "label": "t:global.typography.font_color.label",
+      "default": "#000000",
+      "visible_if": "{{ block.settings.enable_custom_text_styling }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.text.name",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}

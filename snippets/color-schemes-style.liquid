@@ -1,0 +1,97 @@
+{% style %}
+  {% for scheme in settings.color_schemes -%}
+  	:root {
+  	--{{ scheme.id }}:                      {% if scheme.settings.primary_bg_gradient != empty %}{{ scheme.settings.primary_bg_gradient }}{% else %}{{ scheme.settings.primary_bg }}{% endif %};
+  	--{{ scheme.id }}_solid:                {{ scheme.settings.primary_bg }};
+  	--{{ scheme.id }}_bg:                   var(--{{ scheme.id }});
+  	--{{ scheme.id }}_bg_dark:              {% assign primary_bg_hex = scheme.settings.primary_bg | color_to_hex  %}{% if primary_bg_hex == '#ffffff' or primary_bg_hex == '#FFFFFF' %}var(--{{ scheme.id }}_bg);{% else %}{{ scheme.settings.primary_bg | color_darken: 2 }};{% endif %}
+  	--{{ scheme.id }}_bg_var:               var(--{{ scheme.id }}_bg_dark);
+  	--{{ scheme.id }}_bg_secondary:         {{ scheme.settings.secondary_bg }};
+  	--{{ scheme.id }}_fg:                   {{ scheme.settings.primary_fg }};
+  	--{{ scheme.id }}_fg_sat:               {{ scheme.settings.primary_fg | color_lighten: 75 }};
+  	--{{ scheme.id }}_title:                {% if scheme.settings.title_color_gradient != empty %}{{ scheme.settings.title_color_gradient }}{% else %}{{ scheme.settings.title_color }}{% endif %};
+  	--{{ scheme.id }}_title_solid:          {{ scheme.settings.title_color }};
+
+  	--{{ scheme.id }}_primary_btn_bg:       {{ scheme.settings.primary_button_bg }};
+  	--{{ scheme.id }}_primary_btn_bg_dark:  {{ scheme.settings.primary_button_bg | color_darken: 7 }};
+  	--{{ scheme.id }}_primary_btn_fg:       {{ scheme.settings.primary_button_fg }};
+  	--{{ scheme.id }}_secondary_btn_bg:     {{ scheme.settings.secondary_button_bg }};
+  	--{{ scheme.id }}_secondary_btn_bg_dark:{{ scheme.settings.secondary_button_bg | color_darken: 7 }};
+  	--{{ scheme.id }}_secondary_btn_fg:     {{ scheme.settings.secondary_button_fg }};
+  	--{{ scheme.id }}_tertiary_btn_bg:      {{ scheme.settings.tertiary_button_bg }};
+  	--{{ scheme.id }}_tertiary_btn_bg_dark: {{ scheme.settings.tertiary_button_bg | color_darken: 7 }};
+  	--{{ scheme.id }}_tertiary_btn_fg:      {{ scheme.settings.tertiary_button_fg }};
+  	--{{ scheme.id }}_btn_bg:       		var(--{{ scheme.id }}_primary_btn_bg);
+  	--{{ scheme.id }}_btn_bg_dark:  		var(--{{ scheme.id }}_primary_btn_bg_dark);
+  	--{{ scheme.id }}_btn_fg:       		var(--{{ scheme.id }}_primary_btn_fg);
+  	--{{ scheme.id }}_bd:                   {{ scheme.settings.primary_bd }};
+  	--{{ scheme.id }}_input_bg:             {{ scheme.settings.input_bg }};
+  	--{{ scheme.id }}_input_fg:             {{ scheme.settings.input_fg }};
+  	--{{ scheme.id }}_input_pl:             {{ scheme.settings.input_fg | color_lighten: 10 }};
+  	--{{ scheme.id }}_accent:               {{ scheme.settings.accent }};
+  	--{{ scheme.id }}_accent_gradient:      {% if scheme.settings.accent_gradient != empty %}{{ scheme.settings.accent_gradient }}{% else %}{{ scheme.settings.accent }}{% endif %};
+  	{% assign brightness = scheme.settings.primary_fg | color_brightness %}
+  	--{{ scheme.id }}_fg_brightness: {% if brightness >= 128 %}1{% else %}0{% endif %}; {% comment %}0 is dark, 1 is light{% endcomment %}
+  	{% if scheme.id == settings.default_color_scheme.id %}
+  		--primary_text_rgba:  				{{ scheme.settings.primary_fg | color_to_rgb }};
+  		--body_bg:            				var(--{{ scheme.id }}_bg);
+  	{% endif %}
+  	}
+  	{%- assign input_fg = scheme.settings.input_fg | remove: '#' -%}
+  	{% if scheme.id == settings.default_color_scheme.id %}select, .bv_atual, #root #content .f8sr select,{% endif %}
+  	[class*="palette-{{ scheme.id }}"] select,
+  	[class*="palette-{{ scheme.id }}"] .bv_atual,
+  	#root #content [class*="palette-{{ scheme.id }}"] .f8sr select {
+  	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' style='enable-background:new 0 0 12.7 7.7' viewBox='0 0 12.7 7.7' fill='%23{{ input_fg }}'%3E%3Cpath d='M.3.2c.4-.3.9-.3 1.2.1l4.7 5.3 5-5.3c.3-.3.9-.4 1.2 0 .3.3.4.9 0 1.2l-5.7 6c-.1.1-.3.2-.5.2s-.5-.1-.6-.3l-5.3-6C-.1 1.1-.1.5.3.2z'/%3E%3C/svg%3E");
+  	}
+  	{% if scheme.id == settings.default_color_scheme.id %}
+  		#root input[type="date"], #root .datepicker-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' style='enable-background:new 0 0 14 16' viewBox='0 0 14 16' fill='%23{{ input_fg }}'%3E%3Cpath d='M12.3 2H11V.8c0-.5-.3-.8-.7-.8s-.8.3-.8.8V2h-5V.8c0-.5-.3-.8-.7-.8S3 .3 3 .8V2H1.8C.8 2 0 2.8 0 3.8v10.5c0 1 .8 1.8 1.8 1.8h10.5c1 0 1.8-.8 1.8-1.8V3.8c-.1-1-.9-1.8-1.8-1.8zm.2 12.3c0 .1-.1.3-.3.3H1.8c-.1 0-.3-.1-.3-.3V7.5h11v6.8zm0-8.3h-11V3.8c0-.1.1-.3.3-.3h10.5c.1 0 .3.1.3.3V6z'/%3E%3C/svg%3E"); }
+  	{% endif %}
+  	{% if scheme.id == settings.default_color_scheme.id %}select:focus, #root #content .f8sr select:focus,{% endif %}
+  	[class*="palette-{{ scheme.id }}"] select:focus,
+  	#root #content [class*="palette-{{ scheme.id }}"] .f8sr select:focus {
+  	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' style='enable-background:new 0 0 12.7 7.7' viewBox='0 0 12.7 7.7' fill='%23{{ input_fg }}'%3E%3Cpath d='M12.4 7.5c-.4.3-.9.3-1.2-.1L6.5 2.1l-5 5.3c-.3.3-.9.4-1.2 0-.3-.3-.4-.9 0-1.2L6 .2c.1-.1.3-.2.5-.2.3 0 .5.1.6.3l5.3 6c.4.3.4.9 0 1.2z'/%3E%3C/svg%3E");
+  	}
+  	{% if scheme.id == settings.default_color_scheme.id %}:root, {% endif %}[class*="palette-{{ scheme.id }}"], [data-active-content*="{{ scheme.id }}"] {
+  	--primary_bg:             var(--{{ scheme.id }}_bg);
+  	--bg_secondary:           var(--{{ scheme.id }}_bg_secondary);
+  	--primary_text:           var(--{{ scheme.id }}_fg);
+  	--primary_text_h:         var(--{{ scheme.id }}_title);
+  	--headings_text:          var(--primary_text_h);
+  	--headings_text_solid:    var(--{{ scheme.id }}_title_solid);
+  	--primary_bg_btn:         var(--{{ scheme.id }}_primary_btn_bg);
+  	--primary_bg_btn_dark:    var(--{{ scheme.id }}_primary_btn_bg_dark);
+  	--primary_btn_text:       var(--{{ scheme.id }}_primary_btn_fg);
+  	--secondary_bg_btn:       var(--{{ scheme.id }}_secondary_btn_bg);
+  	--secondary_bg_btn_dark:  var(--{{ scheme.id }}_secondary_btn_bg_dark);
+  	--secondary_btn_text:     var(--{{ scheme.id }}_secondary_btn_fg);
+  	--tertiary_bg_btn:        var(--{{ scheme.id }}_tertiary_btn_bg);
+  	--tertiary_bg_btn_dark:   var(--{{ scheme.id }}_tertiary_btn_bg_dark);
+  	--tertiary_btn_text:      var(--{{ scheme.id }}_tertiary_btn_fg);
+  	--custom_input_bg:        var(--{{ scheme.id }}_input_bg);
+  	--custom_input_fg:        var(--{{ scheme.id }}_input_fg);
+  	--custom_input_pl:        var(--{{ scheme.id }}_input_pl);
+  	--custom_input_bd:        var(--{{ scheme.id }}_bd);
+  	--custom_bd:              var(--custom_input_bd);
+  	--secondary_bg: 		  var(--primary_bg_btn);
+  	--accent:                 var(--{{ scheme.id }}_accent);
+  	--accent_gradient:        var(--{{ scheme.id }}_accent_gradient);
+  	--primary_text_brightness:var(--{{ scheme.id }}_fg_brightness);
+  	}
+  	{% if scheme.settings.title_color_gradient != empty %}
+  		{% if scheme.id == settings.default_color_scheme.id %}h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6,{% endif %}
+  		[class*="palette-{{ scheme.id }}"] h1, [data-active-content*="{{ scheme.id }}"] h1,
+  		[class*="palette-{{ scheme.id }}"] h2, [data-active-content*="{{ scheme.id }}"] h2,
+  		[class*="palette-{{ scheme.id }}"] h3, [data-active-content*="{{ scheme.id }}"] h3,
+  		[class*="palette-{{ scheme.id }}"] h4, [data-active-content*="{{ scheme.id }}"] h4,
+  		[class*="palette-{{ scheme.id }}"] h5, [data-active-content*="{{ scheme.id }}"] h5,
+  		[class*="palette-{{ scheme.id }}"] h6, [data-active-content*="{{ scheme.id }}"] h6,
+  		[class*="palette-{{ scheme.id }}"] .ff-heading, [data-active-content*="{{ scheme.id }}"] .ff-heading {
+  		background: var(--headings_text);
+  		background-clip: text; -webkit-background-clip: text;
+  		text-fill-color: transparent; -webkit-text-fill-color: transparent;
+  		line-height: max(1.25, var(--main_lh_h));
+  		}
+  	{% endif %}
+  {% endfor %}
+{% endstyle %}

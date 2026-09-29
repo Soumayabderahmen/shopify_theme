@@ -1,0 +1,329 @@
+{% comment %} 
+
+{% assign lang = request.locale.iso_code %}
+
+{% case lang %}
+  {% when 'fr' %}
+    {% assign badge_text = 'Achetez en toute confiance avec notre garantie de prix' %}
+    {% assign modal_title = 'Garantie de Prix' %}
+    {% assign close_text = 'Fermer' %}
+  {% when 'es' %}
+    {% assign badge_text = 'Compra con confianza con nuestra garantía de precio' %}
+    {% assign modal_title = 'Garantía de Precio' %}
+    {% assign close_text = 'Cerrar' %}
+  {% when 'it' %}
+    {% assign badge_text = 'Acquista con fiducia con la nostra garanzia sul prezzo' %}
+    {% assign modal_title = 'Garanzia sul Prezzo' %}
+    {% assign close_text = 'Chiudi' %}
+  {% when 'id' %}
+    {% assign badge_text = 'Belanja dengan percaya diri dengan jaminan harga kami' %}
+    {% assign modal_title = 'Jaminan Harga' %}
+    {% assign close_text = 'Tutup' %}
+  {% when 'de' %}
+    {% assign badge_text = 'Kaufen Sie sicher mit unserer Preisgarantie' %}
+    {% assign modal_title = 'Preisgarantie' %}
+    {% assign close_text = 'Schließen' %}
+  {% else %}
+    {% assign badge_text = 'Shop confidently with our Price Match Guarantee' %}
+    {% assign modal_title = 'Price Match Guarantee' %}
+    {% assign close_text = 'Close' %}
+{% endcase %}
+
+{% assign guarantee_page = pages['garanzia-sul-prezzo'] %}
+
+<!-- BADGE TRIGGER -->
+<div class="price-match-badge" id="price-match-trigger" role="button" tabindex="0" aria-haspopup="dialog">
+  <span class="price-match-icon">✅</span>
+  <p class="price-match-text">{{ badge_text }}</p>
+  <span class="price-match-arrow">›</span>
+</div>
+
+<!-- OVERLAY + DRAWER -->
+<div id="price-match-modal" class="pm-overlay" role="dialog" aria-modal="true" aria-labelledby="pm-modal-title" hidden>
+  <div class="pm-drawer">
+    <div class="pm-drag-handle"></div>
+    <div class="pm-modal-header">
+      <h2 id="pm-modal-title">{{ modal_title }}</h2>
+      <button class="pm-close-btn" id="pm-close" aria-label="{{ close_text }}">✕</button>
+    </div>
+    <div class="pm-modal-body">
+      {% if guarantee_page != blank %}
+        {{ guarantee_page.content }}
+      {% else %}
+        <p>{{ badge_text }}</p>
+      {% endif %}
+    </div>
+    <div class="pm-modal-footer">
+      <button class="pm-close-footer-btn" id="pm-close-footer">{{ close_text }}</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Badge Styles */
+  .price-match-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #2e7d32;
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    margin: 12px 0;
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .price-match-badge:hover { background-color: #1b5e20; }
+  .price-match-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .price-match-text { margin: 0; padding: 0; flex: 1; }
+  .price-match-arrow { font-size: 1.4rem; font-weight: 300; opacity: 0.8; }
+
+  /* OVERLAY (FORÇAGE PLEIN ÉCRAN) */
+  .pm-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    backdrop-filter: blur(4px);
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+  
+  .pm-overlay[hidden] { 
+    display: none !important; 
+  }
+
+  /* DRAWER MOBILE (Glisse depuis le bas) */
+  .pm-drawer {
+    background: #ffffff !important;
+    border-radius: 20px 20px 0 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 85vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.3) !important;
+    animation: pm-slide-up 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    position: relative !important;
+  }
+
+  .pm-drag-handle {
+    width: 42px;
+    height: 5px;
+    background: #d1d5db;
+    border-radius: 3px;
+    margin: 10px auto 6px;
+    flex-shrink: 0;
+  }
+
+  .pm-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #2e7d32;
+    color: #fff;
+  }
+  .pm-modal-header h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #fff !important;
+  }
+  .pm-close-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    font-size: 1rem;
+    {% comment %} width: 30px;
+    height: 30px; {% endcomment %}
+    border-radius: 90%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pm-modal-body {
+    padding: 20px;
+    overflow-y: auto !important;
+    flex: 1;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: #374151;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pm-modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #e5e7eb;
+  }
+  .pm-close-footer-btn {
+    background: #2e7d32;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  /* Keyframes Animation */
+  @keyframes pm-slide-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  @keyframes pm-fade-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* DESKTOP (>= 768px): Modal Popup Centrée */
+  @media (min-width: 768px) {
+    .pm-overlay {
+      align-items: center !important;
+      padding: 20px !important;
+    }
+    .pm-drawer {
+      max-width: 550px !important;
+      border-radius: 16px !important;
+      animation: pm-fade-in 0.2s ease-out !important;
+    }
+    .pm-drag-handle {
+      display: none !important;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    function initPriceMatch() {
+      var trigger  = document.getElementById('price-match-trigger');
+      var modal    = document.getElementById('price-match-modal');
+      var closeBtn = document.getElementById('pm-close');
+      var closeFtr = document.getElementById('pm-close-footer');
+
+      if (!trigger || !modal) return;
+
+      // Déplace la modale à la racine du <body> pour supprimer toute restriction de bloc CSS
+      if (modal.parentNode !== document.body) {
+        document.body.appendChild(modal);
+      }
+
+      function openModal(e) {
+        if (e) e.preventDefault();
+        modal.hidden = false;
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        modal.hidden = true;
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      }
+
+      trigger.addEventListener('click', openModal);
+      closeBtn.addEventListener('click', closeModal);
+      closeFtr.addEventListener('click', closeModal);
+
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.hidden) closeModal();
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPriceMatch);
+    } else {
+      initPriceMatch();
+    }
+  })();
+</script> {% endcomment %}
+
+
+
+{% assign lang = request.locale.iso_code %}
+
+{% case lang %}
+  {% when 'fr' %}
+    {% assign badge_text = 'Achetez en toute confiance avec notre garantie de prix' %}
+    {% assign modal_title = 'Garantie de Prix' %}
+    {% assign close_text = 'Fermer' %}
+  {% when 'es' %}
+    {% assign badge_text = 'Compra con confianza con nuestra garantía de precio' %}
+    {% assign modal_title = 'Garantía de Precio' %}
+    {% assign close_text = 'Cerrar' %}
+  {% when 'it' %}
+    {% assign badge_text = 'Acquista con fiducia con la nostra garanzia sul prezzo' %}
+    {% assign modal_title = 'Garanzia sul Prezzo' %}
+    {% assign close_text = 'Chiudi' %}
+  {% when 'id' %}
+    {% assign badge_text = 'Belanja dengan percaya diri dengan jaminan harga kami' %}
+    {% assign modal_title = 'Jaminan Harga' %}
+    {% assign close_text = 'Tutup' %}
+  {% when 'de' %}
+    {% assign badge_text = 'Kaufen Sie sicher mit unserer Preisgarantie' %}
+    {% assign modal_title = 'Preisgarantie' %}
+    {% assign close_text = 'Schließen' %}
+  {% else %}
+    {% assign badge_text = 'Shop confidently with our Price Match Guarantee' %}
+    {% assign modal_title = 'Price Match Guarantee' %}
+    {% assign close_text = 'Close' %}
+{% endcase %}
+
+{% assign guarantee_page = pages['garanzia-sul-prezzo'] %}
+
+<!-- BADGE TRIGGER -->
+<div class="price-match-badge js-drawer-trigger" data-target="price-match-modal" role="button" tabindex="0" aria-haspopup="dialog">
+  <span class="price-match-icon">✅</span>
+  <p class="price-match-text">{{ badge_text }}</p>
+  <span class="price-match-arrow">›</span>
+</div>
+
+<!-- OVERLAY + DRAWER -->
+<div id="price-match-modal" class="pm-overlay js-drawer-modal" role="dialog" aria-modal="true" aria-labelledby="pm-modal-title" aria-hidden="true">
+  <div class="pm-drawer">
+    <div class="pm-drag-handle"></div>
+    <div class="pm-modal-header">
+      <h2 id="pm-modal-title">{{ modal_title }}</h2>
+      <button class="pm-close-btn js-drawer-close" aria-label="{{ close_text }}">✕</button>
+    </div>
+    <div class="pm-modal-body">
+      {% if guarantee_page != blank %}
+        {{ guarantee_page.content }}
+      {% else %}
+        <p>{{ badge_text }}</p>
+      {% endif %}
+    </div>
+    <div class="pm-modal-footer">
+      <button class="pm-close-footer-btn js-drawer-close">{{ close_text }}</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- SCRIPT CONDIVISO PER ENTRAMBI I DRAWER -->
+<script src="{{ 'drower-product.js' | asset_url }}" defer></script>

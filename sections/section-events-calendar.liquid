@@ -1,0 +1,604 @@
+{% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+{%- liquid
+  if section.settings.show_link and section.settings.link_text != empty and section.settings.link_url != blank
+    assign link = true
+  endif
+
+  if section.settings.title != empty
+    assign show_header = true
+  elsif link and section.settings.text_alignment == 'start'
+    assign show_header = true
+  endif
+
+  if section.settings.title != empty
+    assign container_div = true
+  endif
+
+  capture title_classes
+    echo 'w720 '
+    if section.settings.text_alignment == 'center'
+      echo ' text-center align-center'
+    endif
+  endcapture
+-%}
+
+{%- if link %}
+  {%- capture link -%}
+    {%- liquid
+      assign button_color = section.settings.button_style | split: ' ' | first
+      assign button_style = section.settings.button_style | split: ' ' | last
+      assign is_link = false
+      if button_style == 'link'
+        assign is_link = true
+      endif
+    -%}
+    <p class="class-x link-btn"><a href="{{ section.settings.link_url }}" class="overlay-{{ button_color }} {% if is_link %}inline strong{% elsif button_style == 'inv' %}inv{% endif %}">{% if is_link %}<span>{% endif %}{{ section.settings.link_text }}{% if is_link %}</span>&nbsp;<i aria-hidden="true" class="icon-chevron-right"></i>{% endif %}</a></p>
+  {%- endcapture %}
+{%- endif -%}
+
+{%- if show_header -%}
+  <header
+    class="
+      cols{% if link and section.settings.show_link == false %} align-middle{% endif %}{% if section.settings.title == empty %} text-end{% endif %} title-styling
+      {% if section.settings.title_underline_style != 'none' %}
+        title-underline-none
+        {% if section.settings.title_underline_style contains 'accent' %}
+          title-underline-accent
+        {% elsif section.settings.title_underline_style contains 'gradient' %}
+          title-underline-gradient
+        {% endif %}
+        {% if section.settings.title_underline_style contains 'secondary_font' %}
+          title-underline-secondary-font
+        {% endif %}
+      {% endif %}
+    "
+  >
+    {%- if container_div -%}<div class="{{ title_classes }}">{%- endif -%}
+    {%- if section.settings.title != blank -%}
+      {{ section.settings.title }}
+    {%- endif -%}
+    {%- if container_div -%}</div>{%- endif -%}
+    {%- if link and section.settings.text_alignment == 'start' -%}
+      {{ link | replace: 'class-x', 'mobile-hide' }}
+    {%- endif -%}
+  </header>
+{%- endif -%}
+{{ 'async-events.css' | asset_url | stylesheet_tag: media: 'screen' }}
+<ul class="l4ev section-width-{{ section.settings.width }}">
+  {%- for block in section.blocks -%}
+    <li {{ block.shopify_attributes }}>
+      {%- liquid
+        assign day = block.settings.date | date: '%d'
+        assign month = block.settings.date | date: '%b'
+        assign button_color = block.settings.button_style | split: ' ' | first
+        assign button_style = block.settings.button_style | split: ' ' | last
+        assign is_link = false
+        if button_style == 'link'
+          assign is_link = true
+        endif
+      -%}
+      {%- if block.settings.image != blank -%}
+        <figure>
+          <picture>
+            <img
+              src="{{ block.settings.image | image_url: 305 }}"
+              srcset="{% render 'image-srcset', image: block.settings.image, max_width: 720 %}"
+              sizes="
+                (min-width: 760px) 305px,
+                100vw
+              "
+              alt="{{ block.settings.image.alt | default: block.settings.title | escape }}"
+              style="object-position: {{ block.settings.image.presentation.focal_point }}"
+              width="305"
+              height="190"
+              loading="{% if section.index > 1 or forloop.first == false %}lazy{% else %}eager{% endif %}"
+            >
+          </picture>
+        </figure>
+      {%- endif -%}
+      {%- if block.settings.date != empty -%}
+        <p class="overlay-{{ block.settings.date_color_palette }} date">
+          {{ day }}
+          <span>{{ month }}</span>
+        </p>
+      {%- endif -%}
+      <div>
+        {%- if block.settings.title or block.settings.time -%}
+          <div class="cols">
+            <div
+              class="
+                title-styling
+                {% if block.settings.title_underline_style != 'none' %}
+                  title-underline-none
+                  {% if block.settings.title_underline_style contains 'accent' %}
+                    title-underline-accent
+                  {% elsif block.settings.title_underline_style contains 'gradient' %}
+                    title-underline-gradient
+                  {% endif %}
+                  {% if block.settings.title_underline_style contains 'secondary_font' %}
+                    title-underline-secondary-font
+                  {% endif %}
+                {% endif %}
+              "
+            >
+              {{ block.settings.title }}
+            </div>
+            {%- if block.settings.time != empty -%}
+              <span class="small overlay-content"
+                ><i aria-hidden="true" class="icon-time"></i>&nbsp;{{ block.settings.time -}}
+              </span>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+        {{ block.settings.text }}
+        <p class="link-btn" style="--btn_br: var(--b2r);">
+          {%- if block.settings.location != empty -%}
+            <a
+              {% if block.settings.location_url %}
+                href="{{ block.settings.location_url }}"
+              {% endif %}
+              class="overlay-secondary_bg size-s font-regular plain"
+              ><i aria-hidden="true" class="icon-pin"></i>&nbsp;{{ block.settings.location -}}
+            </a>
+          {%- endif -%}
+          {%- if is_link and block.settings.link_text != empty -%}
+            <a href="{{ block.settings.link_url }}" class="overlay-{{ button_color }} inline strong">
+              {%- if is_link %}<span>{% endif -%}
+              {{- block.settings.link_text -}}
+              {%- if is_link %}</span>&nbsp;<i aria-hidden="true" class="icon-chevron-right"></i>{% endif -%}
+            </a>
+          {%- endif -%}
+        </p>
+        {%- if is_link == false and block.settings.link_text != empty -%}
+          <p class="link-btn">
+            <a
+              class="overlay-{{ button_color }}{% if button_style == 'inv' %} inv{% endif %}"
+              href="{{ block.settings.link_url }}"
+              ><span>{{ block.settings.link_text }}</span></a
+            >
+          </p>
+        {%- endif -%}
+      </div>
+    </li>
+  {%- endfor -%}
+</ul>
+{%- if link and section.settings.text_alignment == 'center' -%}
+  {{ link | replace: 'class-x', 'm0 text-center' }}
+{%- elsif link and section.settings.text_alignment == 'start' -%}
+  {{ link | replace: 'class-x', 'm0 mobile-only' }}
+{%- endif -%}
+
+<style>
+  #shopify-section-{{ section.id }} { position: relative; z-index: {{ section.settings.fix_zindex }}!important; }
+  @media only screen and (min-width: 47.5em) {
+  {% if link and section.settings.text_alignment == 'center' %}
+    #shopify-section-{{ section.id }} { margin-bottom: {{ section.settings.spacing_desktop }}px; }
+  {% else %}
+    #shopify-section-{{ section.id }} .l4ev { margin-bottom: {{ section.settings.spacing_desktop | minus: 20 }}px; }
+  {% endif %}
+  }
+  @media only screen and (max-width: 47.5em) {
+  {% if link %}
+    #shopify-section-{{ section.id }} { margin-bottom: {{ section.settings.spacing_mobile }}px; }
+  {% else %}
+    #shopify-section-{{ section.id }} .l4ev { margin-bottom: {{ section.settings.spacing_mobile | minus: 20 }}px; }
+  {% endif %}
+  }
+</style>
+
+{% schema %}
+{
+  "name": "t:sections.events_calendar.name",
+  "tag": "article",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "t:sections.events_calendar.settings.text_alignment.label",
+      "options": [
+        {
+          "value": "start",
+          "label": "t:sections.events_calendar.settings.text_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.events_calendar.settings.text_alignment.options__2.label"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:global.layout.width.label",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed",
+      "visible_if": "{{ settings.width < 2000 }}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.typography.title.label"
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "t:global.typography.title.label",
+      "info": "t:global.typography.title.info",
+      "default": "<h2>Events</h2>"
+    },
+    {
+      "type": "select",
+      "id": "title_underline_style",
+      "label": "t:global.typography.title_underline_style.label",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:global.typography.title_underline_style.none.label"
+        },
+        {
+          "value": "secondary_font",
+          "label": "t:global.typography.title_underline_style.secondary_font.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_accent",
+          "label": "t:global.typography.title_underline_style.secondary_font_accent.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_gradient",
+          "label": "t:global.typography.title_underline_style.secondary_font_gradient.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "accent",
+          "label": "t:global.typography.title_underline_style.accent.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        },
+        {
+          "value": "gradient",
+          "label": "t:global.typography.title_underline_style.gradient.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:global.button.header"
+    },
+    {
+      "id": "show_link",
+      "type": "checkbox",
+      "label": "t:global.button.show_link.label",
+      "default": true
+    },
+    {
+      "id": "link_text",
+      "type": "text",
+      "label": "t:global.button.link_text.label",
+      "default": "Button",
+      "visible_if": "{{ section.settings.show_link }}"
+    },
+    {
+      "id": "link_url",
+      "type": "url",
+      "label": "t:global.button.link_url.label",
+      "visible_if": "{{ section.settings.show_link }}"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "t:global.button.button_style.label",
+      "options": [
+        {
+          "value": "primary plain",
+          "label": "t:global.button.button_style.primary.label",
+          "group": "t:global.button.button_style.group.plain"
+        },
+        {
+          "value": "secondary plain",
+          "label": "t:global.button.button_style.secondary.label",
+          "group": "t:global.button.button_style.group.plain"
+        },
+        {
+          "value": "tertiary plain",
+          "label": "t:global.button.button_style.tertiary.label",
+          "group": "t:global.button.button_style.group.plain"
+        },
+        {
+          "value": "primary inv",
+          "label": "t:global.button.button_style.primary.label",
+          "group": "t:global.button.button_style.group.inv"
+        },
+        {
+          "value": "secondary inv",
+          "label": "t:global.button.button_style.secondary.label",
+          "group": "t:global.button.button_style.group.inv"
+        },
+        {
+          "value": "tertiary inv",
+          "label": "t:global.button.button_style.tertiary.label",
+          "group": "t:global.button.button_style.group.inv"
+        },
+        {
+          "value": "primary link",
+          "label": "t:global.button.button_style.primary.label",
+          "group": "t:global.button.button_style.group.link"
+        },
+        {
+          "value": "secondary link",
+          "label": "t:global.button.button_style.secondary.label",
+          "group": "t:global.button.button_style.group.link"
+        },
+        {
+          "value": "tertiary link",
+          "label": "t:global.button.button_style.tertiary.label",
+          "group": "t:global.button.button_style.group.link"
+        }
+      ],
+      "default": "primary plain",
+      "visible_if": "{{ section.settings.show_link }}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.spacing.header"
+    },
+    {
+      "id": "spacing_desktop",
+      "type": "range",
+      "label": "t:global.spacing.spacing_desktop.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "id": "spacing_mobile",
+      "type": "range",
+      "label": "t:global.spacing.spacing_mobile.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "id": "fix_zindex",
+      "type": "range",
+      "label": "t:global.fix_zindex.label",
+      "info": "t:global.fix_zindex.info",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "event",
+      "name": "t:sections.events_calendar.blocks.event.name",
+      "settings": [
+        {
+          "id": "image",
+          "type": "image_picker",
+          "label": "t:sections.events_calendar.blocks.event.settings.image.label"
+        },
+        {
+          "type": "select",
+          "id": "date_color_palette",
+          "label": "t:sections.events_calendar.blocks.event.settings.date_color_palette.label",
+          "options": [
+            {
+              "value": "primary",
+              "label": "t:global.button.button_style.primary.label"
+            },
+            {
+              "value": "secondary",
+              "label": "t:global.button.button_style.secondary.label"
+            },
+            {
+              "value": "tertiary",
+              "label": "t:global.button.button_style.tertiary.label"
+            }
+          ],
+          "default": "primary"
+        },
+        {
+          "type": "header",
+          "content": "t:global.typography.title.label"
+        },
+        {
+          "type": "richtext",
+          "id": "title",
+          "label": "t:global.typography.title.label",
+          "info": "t:global.typography.title.info",
+          "default": "<h2>Event</h2>"
+        },
+        {
+          "type": "select",
+          "id": "title_underline_style",
+          "label": "t:global.typography.title_underline_style.label",
+          "options": [
+            {
+              "value": "none",
+              "label": "t:global.typography.title_underline_style.none.label"
+            },
+            {
+              "value": "secondary_font",
+              "label": "t:global.typography.title_underline_style.secondary_font.label",
+              "group": "t:global.typography.title_underline_style.group.fonts"
+            },
+            {
+              "value": "secondary_font_accent",
+              "label": "t:global.typography.title_underline_style.secondary_font_accent.label",
+              "group": "t:global.typography.title_underline_style.group.fonts"
+            },
+            {
+              "value": "secondary_font_gradient",
+              "label": "t:global.typography.title_underline_style.secondary_font_gradient.label",
+              "group": "t:global.typography.title_underline_style.group.fonts"
+            },
+            {
+              "value": "accent",
+              "label": "t:global.typography.title_underline_style.accent.label",
+              "group": "t:global.typography.title_underline_style.group.colors"
+            },
+            {
+              "value": "gradient",
+              "label": "t:global.typography.title_underline_style.gradient.label",
+              "group": "t:global.typography.title_underline_style.group.colors"
+            }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "t:global.typography.section_text.header"
+        },
+        {
+          "id": "text",
+          "type": "richtext",
+          "label": "t:global.typography.text.label",
+          "default": "<p>Share information and details about this event.</p>"
+        },
+        {
+          "id": "date",
+          "type": "text",
+          "label": "t:sections.events_calendar.blocks.event.settings.date.label",
+          "placeholder": "July 15th",
+          "default": "July 15th"
+        },
+        {
+          "id": "time",
+          "type": "text",
+          "label": "t:sections.events_calendar.blocks.event.settings.time.label",
+          "placeholder": "7PM - 11PM"
+        },
+        {
+          "id": "location",
+          "type": "text",
+          "label": "t:sections.events_calendar.blocks.event.settings.location.label",
+          "default": "Event location"
+        },
+        {
+          "id": "location_url",
+          "type": "url",
+          "label": "t:sections.events_calendar.blocks.event.settings.location_url.label"
+        },
+        {
+          "type": "header",
+          "content": "t:global.button.header"
+        },
+        {
+          "id": "link_text",
+          "type": "text",
+          "label": "t:global.button.link_text.label",
+          "default": "More info"
+        },
+        {
+          "id": "link_url",
+          "type": "url",
+          "label": "t:global.button.link_url.label"
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "t:global.button.button_style.label",
+          "options": [
+            {
+              "value": "primary plain",
+              "label": "t:global.button.button_style.primary.label",
+              "group": "t:global.button.button_style.group.plain"
+            },
+            {
+              "value": "secondary plain",
+              "label": "t:global.button.button_style.secondary.label",
+              "group": "t:global.button.button_style.group.plain"
+            },
+            {
+              "value": "tertiary plain",
+              "label": "t:global.button.button_style.tertiary.label",
+              "group": "t:global.button.button_style.group.plain"
+            },
+            {
+              "value": "primary inv",
+              "label": "t:global.button.button_style.primary.label",
+              "group": "t:global.button.button_style.group.inv"
+            },
+            {
+              "value": "secondary inv",
+              "label": "t:global.button.button_style.secondary.label",
+              "group": "t:global.button.button_style.group.inv"
+            },
+            {
+              "value": "tertiary inv",
+              "label": "t:global.button.button_style.tertiary.label",
+              "group": "t:global.button.button_style.group.inv"
+            },
+            {
+              "value": "primary link",
+              "label": "t:global.button.button_style.primary.label",
+              "group": "t:global.button.button_style.group.link"
+            },
+            {
+              "value": "secondary link",
+              "label": "t:global.button.button_style.secondary.label",
+              "group": "t:global.button.button_style.group.link"
+            },
+            {
+              "value": "tertiary link",
+              "label": "t:global.button.button_style.tertiary.label",
+              "group": "t:global.button.button_style.group.link"
+            }
+          ],
+          "default": "primary link"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.events_calendar.blocks.event.settings.mobile.header"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.events_calendar.presets.name",
+      "category": "t:categories.storytelling",
+      "blocks": [
+        {
+          "type": "event",
+          "settings": {
+            "date": "July 31th",
+            "time": "7PM - 11PM"
+          }
+        },
+        {
+          "type": "event",
+          "settings": {
+            "date": "August 1th",
+            "time": "8PM"
+          }
+        },
+        {
+          "type": "event",
+          "settings": {
+            "date": "August 2nd"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

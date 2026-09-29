@@ -1,0 +1,44 @@
+{% doc %}
+  Renders a trust badge with security icon, configurable text, and optional trust/security images. Helps build customer confidence by displaying security certifications, payment badges, or custom trust indicators.
+
+  @param {string} [shopify_attributes] - Additional HTML attributes to apply to the container element (e.g., data attributes, IDs, classes).
+
+  @example
+  {% render 'trustbadge' %}
+  @example
+  {% render 'trustbadge', shopify_attributes: 'block.shopify_attributes' %}
+{% enddoc %}
+
+<ul
+  class="l4al l4al-trustbadge"
+  {% if shopify_attributes %}
+    {{ shopify_attributes -}}
+  {% endif %}
+>
+  <li class="inner-plain size-m">
+    <i aria-hidden="true" class="icon-lock sticky"></i>
+    <span class="cols cols-mobile align-middle">
+      <span>{{ settings.trustbadge_text }}</span>
+      {%- if settings.trustbadge_custom_image -%}
+        <img
+          src="{{- settings.trustbadge_custom_image | image_url: width: 85 -}}"
+          srcset="{{ settings.trustbadge_custom_image | image_url: width: 85 }} 1x,{{ settings.trustbadge_custom_image | image_url: width: 170 }} 2x"
+          width="85"
+          height="28"
+          alt="{{ settings.trustbadge_custom_image.alt | default: settings.trustbadge_text | escape }}"
+          loading="lazy"
+          class="no-bd-radius"
+        >
+      {%- elsif settings.trustbadge_image != 'none' -%}
+        <img
+          src="{{ 'trustbadge-' | append: settings.trustbadge_image | handleize | append: '.svg' | asset_url }}"
+          alt="{{ settings.trustbadge_image }}"
+          width="85"
+          height="28"
+          loading="lazy"
+          class="no-bd-radius"
+        >
+      {%- endif -%}
+    </span>
+  </li>
+</ul>

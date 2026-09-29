@@ -1,0 +1,482 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "settings": {
+        "hide_mobile": false
+      }
+    },
+    "16534637855a1536b8": {
+      "type": "section-slideshow",
+      "blocks": {
+        "1653463785b75d0fb8-0": {
+          "type": "slide",
+          "settings": {
+            "layout": "background",
+            "overlay_opacity": 10,
+            "color_palette": "scheme-2",
+            "text_position": "text-start",
+            "title": "<h1>Read the Story about Xtra</h1>",
+            "title_underline_style": "none",
+            "show_first_link": true,
+            "first_link_text": "View collections",
+            "first_link_url": "/",
+            "first_button_style": "secondary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain"
+          }
+        }
+      },
+      "block_order": [
+        "1653463785b75d0fb8-0"
+      ],
+      "settings": {
+        "height": "32/9",
+        "width": "wide",
+        "autoplay": true,
+        "autoplay_seconds": 3,
+        "enable_controls": false,
+        "height_mobile": "4/5",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16552050441a8cdfa5": {
+      "type": "section-gallery",
+      "blocks": {
+        "16552050441176bcdf-0": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 25,
+            "color_palette": "scheme-4",
+            "text_position": "center",
+            "title": "<h3>Theme Xtra provide a good user experience for your online store</h3>",
+            "title_underline_style": "none",
+            "text": "",
+            "show_link": true,
+            "link_text": "Learn more",
+            "link_url": "/",
+            "button_style": "secondary link"
+          }
+        },
+        "16552050441176bcdf-1": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 25,
+            "color_palette": "scheme-8",
+            "text_position": "center",
+            "title": "<h3>Our services have the power to get the most out of your online store</h3>",
+            "title_underline_style": "none",
+            "text": "",
+            "show_link": false,
+            "link_text": "",
+            "link_url": "",
+            "button_style": "primary plain"
+          }
+        },
+        "16552050441176bcdf-2": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 0,
+            "color_palette": "scheme-8",
+            "text_position": "center start",
+            "title": "<h1>We are there to help you</h1>",
+            "title_underline_style": "none",
+            "text": "<p>Together we make your online store a success</p>",
+            "show_link": true,
+            "link_text": "Discover more",
+            "link_url": "/",
+            "button_style": "secondary link"
+          }
+        }
+      },
+      "block_order": [
+        "16552050441176bcdf-0",
+        "16552050441176bcdf-1",
+        "16552050441176bcdf-2"
+      ],
+      "settings": {
+        "items_layout": "playful-grid-inv",
+        "items_width": 2,
+        "height": "1/1",
+        "width": "boxed",
+        "space_between": 16,
+        "image_zoom": true,
+        "image_move": false,
+        "show_content_on_hover": false,
+        "content_on_hover_color_palette": "",
+        "layout_mobile": "rows",
+        "mobile_height": "size-s",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16534638377c7920c1": {
+      "type": "section-image-with-text",
+      "blocks": {
+        "1653463837107b96d3-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h2><i>‘‘Our themes does make sense. </br>  No nonsens, suitable for every </br>business’’.</i></h2>",
+            "title_underline_style": "none"
+          }
+        },
+        "1653463837107b96d3-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Raoul, our theme specialist</p>"
+          }
+        }
+      },
+      "block_order": [
+        "1653463837107b96d3-0",
+        "1653463837107b96d3-1"
+      ],
+      "settings": {
+        "overlay_opacity": 0,
+        "color_palette": "scheme-1",
+        "layout": "image-left",
+        "text_position": "text-start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16552065979381eb3e": {
+      "type": "section-counters",
+      "blocks": {
+        "165520659721506b68-0": {
+          "type": "counter",
+          "settings": {
+            "number": "24",
+            "text": "<p>Years of experience</p>"
+          }
+        },
+        "165520659721506b68-1": {
+          "type": "counter",
+          "settings": {
+            "number": "29.946",
+            "text": "<p>Happy customers</p>"
+          }
+        },
+        "6858738e-9d68-49d0-b163-f42911f6a319": {
+          "type": "counter",
+          "settings": {
+            "number": "9.2",
+            "text": "<p>From our customers</p>"
+          }
+        },
+        "8147e47a-3fd9-4bb5-80d3-2944c4474dc5": {
+          "type": "counter",
+          "settings": {
+            "number": "988.586+",
+            "text": "<p>Products in stock</p>"
+          }
+        }
+      },
+      "block_order": [
+        "165520659721506b68-0",
+        "165520659721506b68-1",
+        "6858738e-9d68-49d0-b163-f42911f6a319",
+        "8147e47a-3fd9-4bb5-80d3-2944c4474dc5"
+      ],
+      "settings": {
+        "overlay_opacity": 100,
+        "color_palette": "scheme-4",
+        "text_position": "center",
+        "title": "<h1>Our customers are happy with Xtra</h1>",
+        "title_underline_style": "none",
+        "text": "<p>Have a look at these impressive numbers</p>",
+        "numbers_boxed_overlay_opacity": 10,
+        "numbers_accent_color": false,
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "165346385457f0044f": {
+      "type": "section-image-with-text",
+      "blocks": {
+        "1653463854c4d6293d-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h2>The Xtra team</h2>",
+            "title_underline_style": "none"
+          }
+        },
+        "1653463854c4d6293d-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Our team consists of a group of young enthusiastic trend watchers and trendsetters. We travel all over the world looking for the best and most beautiful products for you. We carefully put together our offer and look for the best parties to be able to deliver the items to your home.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "1653463854c4d6293d-0",
+        "1653463854c4d6293d-1"
+      ],
+      "settings": {
+        "overlay_opacity": 0,
+        "color_palette": "scheme-1",
+        "layout": "image-right",
+        "text_position": "text-start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16552027695203de66": {
+      "type": "section-image-with-text",
+      "blocks": {
+        "1655202769b66966f1-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h2>Service is our top priority</h2>",
+            "title_underline_style": "none"
+          }
+        },
+        "1655202769b66966f1-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>We are available 24/7/365 for you! Do you want to surprise someone? Take advantage of our gift service. Do you need advice? One of our private shoppers will be happy to help you put together an ideal package.</p>"
+          }
+        },
+        "1655202769b66966f1-2": {
+          "type": "buttons",
+          "settings": {
+            "show_first_link": true,
+            "first_link_text": "Contact us",
+            "first_link_url": "/",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain"
+          }
+        }
+      },
+      "block_order": [
+        "1655202769b66966f1-0",
+        "1655202769b66966f1-1",
+        "1655202769b66966f1-2"
+      ],
+      "settings": {
+        "overlay_opacity": 0,
+        "color_palette": "scheme-1",
+        "layout": "image-left",
+        "text_position": "text-start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "165520504129a8d4ea": {
+      "type": "section-spacer",
+      "settings": {
+        "height": 0,
+        "height_mobile": 0
+      }
+    },
+    "16552049697d86bb94": {
+      "type": "section-rich-text",
+      "blocks": {
+        "165520496913c5dc92-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h1>Meet our wonderful team</h1>",
+            "title_underline_style": "none"
+          }
+        },
+        "165520496913c5dc92-2": {
+          "type": "content",
+          "settings": {
+            "page": ""
+          }
+        }
+      },
+      "block_order": [
+        "165520496913c5dc92-0",
+        "165520496913c5dc92-2"
+      ],
+      "settings": {
+        "color_palette": "scheme-1",
+        "text_alignment": "start",
+        "height": "size-s",
+        "width": "wide",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "1655207119c21c6327": {
+      "type": "section-spacer",
+      "settings": {
+        "height": 0,
+        "height_mobile": 0
+      }
+    },
+    "165520284857767467": {
+      "type": "section-promo-gallery",
+      "blocks": {
+        "16552028481d4c4222-0": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity_img": 0,
+            "color_palette": "scheme-5",
+            "overlay_opacity": 100,
+            "text_position": "text-center",
+            "title": "John Doe",
+            "title_underline_style": "none",
+            "text": "<p>Theme expert with a special focus on UX</p>",
+            "show_link": false,
+            "link_text": "",
+            "link_url": "",
+            "button_style": "primary plain"
+          }
+        },
+        "16552028481d4c4222-1": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity_img": 0,
+            "color_palette": "scheme-5",
+            "overlay_opacity": 100,
+            "text_position": "text-center",
+            "title": "Meave Spears",
+            "title_underline_style": "none",
+            "text": "<p>Technical wonder and app specialist</p>",
+            "show_link": false,
+            "link_text": "",
+            "link_url": "",
+            "button_style": "primary plain"
+          }
+        },
+        "16552028481d4c4222-2": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity_img": 0,
+            "color_palette": "scheme-5",
+            "overlay_opacity": 100,
+            "text_position": "text-center",
+            "title": "Lora Jones",
+            "title_underline_style": "none",
+            "text": "<p>Data driven personality focused on design </p>",
+            "show_link": false,
+            "link_text": "",
+            "link_url": "",
+            "button_style": "primary plain"
+          }
+        }
+      },
+      "block_order": [
+        "16552028481d4c4222-0",
+        "16552028481d4c4222-1",
+        "16552028481d4c4222-2"
+      ],
+      "settings": {
+        "items_width": 3,
+        "width": "boxed",
+        "height": "16/9",
+        "space_between": 16,
+        "image_zoom": true,
+        "shadow": false,
+        "title_size_blocks": "h2",
+        "layout_mobile": "compact",
+        "height_mobile": "16/9",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "main-page": {
+      "type": "main-page",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {
+            "title_size": "h2"
+          }
+        },
+        "content": {
+          "type": "content",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "title",
+        "content"
+      ],
+      "disabled": true,
+      "settings": {
+        "max_width": 980,
+        "content_alignment": "start",
+        "text_alignment": "start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16552049540feeb966": {
+      "type": "section-usp-bar",
+      "blocks": {
+        "1655204954cff9afb3-0": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>A <strong>brand new </strong>Shopify theme</p>"
+          }
+        },
+        "1655204954cff9afb3-1": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>100% focused</strong> on UX</p>"
+          }
+        },
+        "1655204954cff9afb3-2": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>Perfect </strong>for larger catalogs</p>"
+          }
+        },
+        "192063ba-cf38-489a-8eb7-f21942f527fc": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>Sell more & create <strong>happy customers</strong></p>"
+          }
+        }
+      },
+      "block_order": [
+        "1655204954cff9afb3-0",
+        "1655204954cff9afb3-1",
+        "1655204954cff9afb3-2",
+        "192063ba-cf38-489a-8eb7-f21942f527fc"
+      ],
+      "settings": {
+        "color_palette": "scheme-6",
+        "layout": "rows",
+        "autoplay": false,
+        "autoplay_seconds": 3,
+        "show_arrows": false,
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "16534637855a1536b8",
+    "16552050441a8cdfa5",
+    "16534638377c7920c1",
+    "16552065979381eb3e",
+    "165346385457f0044f",
+    "16552027695203de66",
+    "165520504129a8d4ea",
+    "16552049697d86bb94",
+    "1655207119c21c6327",
+    "165520284857767467",
+    "main-page",
+    "16552049540feeb966"
+  ]
+}

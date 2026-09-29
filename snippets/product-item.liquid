@@ -1,0 +1,5409 @@
+{% comment %}
+  {% doc %}
+    Renders a comprehensive product card component with support for various layouts, quick buy functionality, color swatches, and extensive customization options. Handles grid cards, list items, upsell selection, and special layouts like hotspots.
+
+    @param [product] - Product object to display, or blank to render placeholder content.
+    @param {string} [layout] - Card layout: 'grid' (default), 'list', 'list-compact', or 'hotspot' for different display modes
+    @param {string} [type] - Display type: 'grid' (default) or 'both' for dual grid/list support with additional features
+    @param {string} [origin] - Context origin for specialized behavior (e.g., 'image-with-banners' affects label display)
+    @param {string} [product_view_context] - Standard product view context. Defaults to 'recommendation'.
+    @param {string} [container] - HTML element to wrap the card. Defaults to 'li' (auto-changes to 'div' for hotspot layout)
+    @param {string} [width_class] - CSS classes for controlling card width in grid layouts
+    @param {string} [extra_class] - Additional CSS classes for custom styling
+    @param {string} [extra_style] - Inline CSS styles for advanced customization
+    @param {string} [shopify_attributes] - HTML attributes like data attributes, IDs, or classes
+    @param {number} [placeholder_int] - Placeholder image number (1-6) when product is blank. Defaults to 1.
+    @param {number} [index] - Card position index for bulk operations and progressive loading
+    @param {string} [block_id] - Unique identifier for form elements and upsell selection
+    @param {boolean} [show_image] - Whether to display product image. Defaults to true.
+    @param {boolean} [show_labels] - Whether to display product labels (sale, stock badges). Defaults to true.
+    @param {boolean} [show_title] - Whether to display product title. Defaults to true.
+    @param {string} [custom_title] - Custom label to display instead of product.title when provided.
+    @param {boolean} [show_stock] - Whether to display stock information. Defaults to true.
+    @param {boolean} [show_vendor] - Whether to display vendor name. Defaults to settings.show_vendor.
+    @param {boolean} [show_rating] - Whether to display product rating. Defaults to settings.show_product_rating.
+    @param {boolean} [show_price] - Whether to display product price. Defaults to true.
+    @param {string} [price_location] - Whether to display product price next to title or below title. Defaults to 'below_title'.
+    @param {boolean} [is_child_product] - Whether this is a child product in a upsell/upsell context. Defaults to false.
+    @param {string} [parent_product_id] - Parent product variant ID when this is a child product in upsell/upsell context.
+    @param {boolean} [quick_buy_compact] - Use compact quick buy buttons with icons only. Defaults to false.
+    @param {boolean} [enable_quick_buy_drawer] - Enable quick buy drawer/popup for complex products. Defaults to false.
+    @param {boolean} [enable_quick_buy_desktop] - Enable quick buy functionality on desktop. Defaults to false.
+    @param {boolean} [enable_quick_buy_mobile] - Enable quick buy functionality on mobile. Defaults to false.
+    @param {boolean} [enable_quick_buy_qty_selector] - Include quantity selector in quick buy forms. Defaults to false.
+    @param {boolean} [enable_variant_picker] - Enable variant selection in quick buy forms. Defaults to false.
+    @param {boolean} [enable_color_picker] - Display color swatches for color variants. Defaults to false.
+    @param {boolean} [show_unavailable_variants] - Whether to show unavailable variants in the variant selector. Defaults to settings.productcard_show_unavailable_variants.
+    @param {boolean} [upsell] - Enable upsell selection mode with checkboxes. Defaults to false.
+    @param {boolean} [variant_in_popup] - Show variant options in popup instead of inline select. Defaults to false.
+    @param {string} [variant_selector_color] - Color scheme for variant selection buttons (e.g., 'primary', 'secondary')
+    @param {number} [visible_products] - Number of initially visible products in upsell mode for progressive loading
+    @param {string} [sizes] - Responsive image sizes attribute for advanced srcset control
+    @param {boolean} [slider] - Whether card is used in a slider context (affects image loading)
+    @param {boolean} [no_lazyload] - Disable lazy loading for images (useful for above-fold content). Defaults to false.
+    @param {boolean} [cart_upsell_card] - Whether the card is rendered in the cart upsell slider. Defaults to false.
+    @param {boolean} [cart_upsell_quick_add_only] - Restrict cart upsell cards to quick-add behavior. Defaults to false.
+    @param {object} [section] - Current section context used for image loading decisions.
+
+    @example
+    {% render 'product-item', product: product %}
+    @example
+    {% render 'product-item', product: product, layout: 'list', show_vendor: true, enable_quick_buy_desktop: true %}
+    @example
+    {% render 'product-item', product: product, layout: 'list-compact', enable_variant_picker: true, quick_buy_compact: true %}
+    @example
+    {% render 'product-item', product: product, type: 'both', enable_color_picker: true, show_rating: true, layout: 'grid' %}
+  {% enddoc %}
+
+  {%- liquid
+    assign container = 'li'
+    assign placeholder_int = placeholder_int | default: 1
+    assign quick_buy_compact = quick_buy_compact | default: false
+    assign cart_upsell_card = cart_upsell_card | default: false
+    assign cart_upsell_quick_add_only = cart_upsell_quick_add_only | default: false
+    assign enable_quick_buy_drawer = enable_quick_buy_drawer | default: false
+    assign width_class = width_class | default: ''
+    assign sizes = sizes | default: false
+    assign slider = slider | default: false
+    assign type = type | default: 'grid'
+    assign no_lazyload = no_lazyload | default: false
+    assign enable_quick_buy_desktop = enable_quick_buy_desktop | default: false
+    assign enable_quick_buy_mobile = enable_quick_buy_mobile | default: false
+    assign enable_quick_buy_qty_selector = enable_quick_buy_qty_selector | default: false
+    assign enable_variant_picker = enable_variant_picker | default: false
+    assign enable_color_picker = enable_color_picker | default: false
+    assign upsell = upsell | default: false
+    assign variant_in_popup = variant_in_popup | default: false
+    assign is_child_product = is_child_product | default: false
+    assign parent_product_id = parent_product_id | default: false
+    assign custom_title = custom_title | default: false
+    assign price_location = price_location | default: 'below_title'
+    assign index = index
+    assign id = block_id | default: ''
+    assign visible_products = visible_products | default: false
+    assign extra_style = extra_style | default: ''
+    if show_image == null
+      assign show_image = true
+      assign show_labels = true
+      assign show_title = true
+      assign show_stock = true
+      assign show_vendor = settings.show_vendor
+      assign show_rating = settings.show_product_rating
+      assign show_price = true
+    endif
+    if layout == 'list-compact'
+      assign show_labels = false
+      assign show_stock = false
+      assign show_vendor = false
+      assign show_rating = false
+    endif
+    if layout == 'hotspot'
+      assign show_labels = false
+      assign show_image = false
+      assign container = 'div'
+      if product.variants.size > 1 or product.available == false
+        assign enable_quick_buy_drawer = true
+      endif
+    endif
+    if layout == 'list' and origin == 'image-with-banners'
+      assign show_labels = false
+    endif
+    assign current_variant = product.selected_or_first_available_variant
+    assign product_image_ratio = settings.product_image_ratio
+    case product_image_ratio
+      when '310x430'
+        assign image_ratio = 'portrait'
+        assign image_width = 310
+        assign image_height = 430
+      when '430x310'
+        assign image_ratio = 'landscape'
+        assign image_width = 430
+        assign image_height = 310
+      else
+        assign image_ratio = 'square'
+        assign image_width = 430
+        assign image_height = 430
+    endcase
+    assign image_width_2 = image_width | times: 1.5
+    assign image_height_2 = image_height | times: 1.5
+    assign image_width_small = image_width | divided_by: 3
+    assign image_height_small = image_height | divided_by: 3
+    if product == blank
+      assign vendor = 'Vendor name'
+      assign title = 'Product title'
+      assign price = 0 | money
+    else
+      assign vendor = product.vendor
+      if vendor == 'vendor-unknown' or vendor == shop.name
+        assign show_vendor = false
+      endif
+      if custom_title
+        assign title = custom_title
+      else
+        assign title = product.title
+      endif
+      if layout == 'list-compact'
+        assign price = current_variant.price | money
+      else
+        assign price = product.price | money
+      endif
+    endif
+
+    assign standard_view_context = product_view_context | default: 'recommendation'
+
+    assign show_unavailable_variants = show_unavailable_variants | default: settings.productcard_show_unavailable_variants
+    if show_unavailable_variants
+      assign available_variants = product.variants
+    else
+      assign available_variants = product.variants | where: 'available'
+    endif
+
+    assign preorder = false
+    if current_variant.inventory_management != null and current_variant.inventory_policy == 'continue' and current_variant.available and current_variant.inventory_quantity <= 0 and settings.show_preorder
+      assign preorder = true
+      unless settings.show_preorder_inventory
+        if layout == 'list-compact'
+          assign show_stock = false
+        elsif product.variants.size == 1 and current_variant.available and enable_quick_buy_drawer == false
+          assign show_stock = false
+        endif
+      endunless
+    endif
+  -%}
+
+  {%- capture price_element -%}
+    {% if price_location == 'next_to_title' %}
+      &nbsp;
+      <span class="price s1pr">
+        {%- if current_variant.compare_at_price > current_variant.price -%}
+          <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+        {% endif %}
+        {{ current_variant.price | money }}
+      </span>
+    {% else %}
+      <p class="price s1pr">
+        {%- if current_variant.compare_at_price > current_variant.price -%}
+          <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+        {% endif %}
+        {{ current_variant.price | money }}
+        {%- if current_variant.unit_price_measurement -%}
+          <span class="small">
+            {{- 'product.unit_price_label' | t -}}
+            {{- current_variant.unit_price | unit_price_with_measurement: current_variant.unit_price_measurement -}}
+          </span>
+        {%- endif -%}
+      </p>
+    {% endif %}
+  {%- endcapture -%}
+
+  {%- if enable_quick_buy_desktop or enable_quick_buy_mobile -%}
+    {%- liquid
+      assign product_form_class = 'f8pr form-card'
+      unless enable_quick_buy_mobile
+        assign product_form_class = product_form_class | append: ' mobile-hide'
+      endunless
+      unless enable_quick_buy_desktop
+        assign product_form_class = product_form_class | append: ' mobile-only'
+      endunless
+      assign product_form_id = 'quick-add-' | append: section.id | append: product.id | append: '-quick-add-form_x'
+    -%}
+    {%- capture quick_buy -%}
+      {%- if layout == 'list-compact' -%}
+        {%- form 'product', product, id: product_form_id, class: product_form_class, novalidate: 'novalidate' -%}
+          {%- assign available_variants = product.variants | where: "available" -%}
+          {%- if enable_variant_picker and available_variants.size > 1 and product.variants.size < 250 -%}
+            <p>
+              <select name="id">
+                {%- for variant in product.variants -%}
+                  {%- unless variant.available -%}{% continue %}{%- endunless -%}
+                  {%- liquid
+                    if variant.featured_image
+                      assign product_image = variant.featured_image
+                     else
+                      assign product_image = product.featured_image
+                    endif
+                  -%}
+                  <option
+                    value="{{ variant.id }}"
+                    data-standard-product-select-variant="{% render 'standard-product-select-data', type: 'variant', product: product, variant: variant %}"
+                    data-variantinfo='{ {% if product_image %}"image":"{%- if settings.fill_product_images -%}{{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}{%- else -%}{{ product_image | image_url: width: image_width_2 }}{%- endif -%}",{% endif %}"price_old":"{%- if variant.compare_at_price > variant.price -%}{{ variant.compare_at_price | money }}{%- endif -%}","price":"{{ variant.price | money }}"}'
+                    {% unless variant.available %}disabled data-class="disabled"{% endunless %}
+                    {% if variant == current_variant %}selected{% endif %}
+                  >{{ variant.title }}</option>
+                {%- endfor -%}
+              </select>
+            </p>
+          {%- else -%}
+            <input type="hidden" name="id" value="{{ current_variant.id }}">
+          {%- endif -%}
+          <p class="submit">
+            <button
+              type="submit"
+              class="{% if cart_upsell_quick_add_only %}circle {% endif %}{% if preorder %}overlay-preorder {% elsif current_variant.available %}overlay-buy_button{% else %}overlay-unavailable-buy-button{% endif %}{% if settings.button_style == 'inv' %} inv{% endif %}"
+              aria-label="{% if preorder and settings.preorder_button_text != '' %}{{ settings.preorder_button_text }}{% else %}{{ 'product.form.add_to_cart' | t }}{% endif %}"
+            >
+              <i aria-hidden="true" class="icon-cart"></i>
+              {% if preorder and settings.preorder_button_text != '' %}
+                {{ settings.preorder_button_text }}
+              {% else %}
+                {{ 'product.form.add_to_cart' | t }}
+              {% endif %}
+            </button>
+          </p>
+        {%- endform -%}
+      {%- elsif product.variants.size == 1 and current_variant.available and enable_quick_buy_drawer == false -%}
+        {%- form 'product', product, id: product_form_id, class: product_form_class, novalidate: 'novalidate' -%}
+          <fieldset>
+            <input type="hidden" name="id" value="{{ current_variant.id }}">
+            <p class="submit{% if layout == 'hotspot' %} wide{% endif %}">
+              {%- if enable_quick_buy_qty_selector -%}
+                <span class="input-amount">
+                <label for="quantity-{{ product_form_id }}" class="hidden">{{ 'product.form.quantity' | t }}</label>
+                <input type="number" id="quantity-{{ product_form_id }}" name="quantity" value="{{ current_variant.quantity_rule.min }}"
+                    min="{{ current_variant.quantity_rule.min }}"
+                   {% if current_variant.inventory_management == 'shopify' and current_variant.inventory_policy == 'deny' -%}
+                     max="{{ current_variant.inventory_quantity }}"
+                   {% elsif current_variant.quantity_rule.max %}
+                     max="{{ current_variant.quantity_rule.max }}"
+                   {% endif %}
+                  {% if current_variant.quantity_rule.increment %}step="{{ current_variant.quantity_rule.increment }}"{% endif %}
+                  required>
+              </span>
+              {%- endif -%}
+              <button type="submit" class="{% if preorder %}overlay-preorder{% elsif current_variant.available %}overlay-buy_button{% else %}overlay-unavailable-buy-button{% endif %}{% if settings.button_style == 'inv' %} inv{% endif %}{% if quick_buy_compact %} compact{% if layout == 'list' %} w160{% endif %}{% endif %}" aria-label="{% if preorder and settings.preorder_button_text != '' %}{{ settings.preorder_button_text }}{% else %}{{ 'product.form.add_to_cart' | t }}{% endif %}">
+                {%- unless quick_buy_compact -%}
+                  <span class="mobile-hide">
+                    {% if preorder and settings.preorder_button_text != '' %}
+                      {{ settings.preorder_button_text }}
+                    {% else %}
+                      {{ 'product.form.add_to_cart' | t }}
+                    {% endif %}
+                  </span>
+                {%- endunless -%}
+
+                <i aria-hidden="true" class="icon-cart{% unless quick_buy_compact %} mobile-only{% endunless %}"></i>
+              </button>
+            </p>
+          </fieldset>
+        {%- endform -%}
+      {%- else -%}
+        <p class="link-btn wide {% unless enable_quick_buy_mobile %}mobile-hide{% endunless %} {% unless enable_quick_buy_desktop %}mobile-only{% endunless %} {% if quick_buy_compact and layout == 'list' %} w160{% endif %}">
+          <a class="overlay-buy_button{% if settings.button_style == 'inv' %} inv{% endif %}" href="{{ product.url }}"{% if enable_quick_buy_drawer and product != blank %} data-quickshop{% endif %}>
+            {%- if quick_buy_compact -%}
+              {{ 'product.form.view' | t }}
+            {%- else -%}
+              {{ 'product.form.view_options' | t }}
+            {%- endif -%}
+          </a>
+        </p>
+      {%- endif -%}
+    {%- endcapture %}
+  {%- endif -%}
+
+  <{{ container }}
+    class="
+      {% if cart_upsell_card %}
+        has-form dont-move
+      {% else %}
+        legacy-product-card
+        {% if extra_class %}{% unless extra_style contains '--vertical' %}{{ extra_class }}{% endunless %}{% endif %} product-card {{ width_class }}{% if settings.enable_quick_buy != 'none' %} has-form{% endif %}
+        {% unless current_variant.available %}unavailable{% endunless %}
+        {% unless layout contains 'list' %}{% if settings.productcards_text_alignment == 'center' %}text-center{% elsif settings.productcards_text_alignment == 'right' %}text-end{% endif %}{% endunless %}
+        {% if settings.show_secondary_image %}second-img-hover{% endif %}
+        {% if product == blank %}placeholder-product{% endif %}
+        {% if upsell and index > visible_products %}hidden{% endif %}
+      {% endif %}
+    "
+    {% if product != blank %}
+      data-standard-view-event="product"
+      data-standard-view-event-payload="{{ product | standard_event_data: "view", context: standard_view_context | escape }}"
+      data-standard-product-select-product="{% render 'standard-product-select-data', type: 'product', product: product %}"
+      {% if standard_view_context == 'dialog' %}
+        data-standard-view-event-trigger="manual"
+      {% endif %}
+    {% endif %}
+    {% if layout == 'list-compact' %}
+      data-product-id="{{ product.id }}"
+    {% endif %}
+    {% if upsell and index > visible_products %}
+      data-element="unique-more-products-class"
+    {% endif %}
+    {% unless extra_style contains '--vertical' %}
+      {{- shopify_attributes -}}
+    {% endunless %}
+    style="{{ extra_style }}"
+  >
+    {% if extra_style contains '--vertical' %}
+      <div {{ shopify_attributes }} class="{% if extra_class %}{{ extra_class }}{% endif %}">
+    {% endif %}
+    {%- if upsell -%}
+      <span class="check">
+        <input
+          type="checkbox"
+          {% if current_variant.available == false %}
+            disabled="disable"
+          {% endif %}
+          data-id="{{ current_variant.id }}"
+          {% if is_child_product and parent_product_id %}
+            data-parent-product="{{ parent_product_id }}"
+          {% endif %}
+          id="{{ id }}-{{ product.id }}-id"
+          name="c4a"
+        >
+        <label class="hidden" for="{{ id }}-{{ product.id }}-id">{{ 'product.form.choose_product' | t }}</label>
+      </span>
+    {%- endif -%}
+    {%- if show_image -%}
+      <figure
+        class="
+          {% if settings.multiply_product_images == 'multiply' %} img-multiply{% elsif settings.multiply_product_images == 'multiply-bg' %} img-multiply-bg{% endif %}
+          {% if settings.fade_unavailable_products and current_variant.available == false %} unavailable-faded{% endif %}
+        "
+      >
+        {% if show_labels %}{%- render 'product-labels', product: product, origin: 'productitem' -%}{% endif %}
+        {% unless layout == 'list-compact' %}<a href="{{ product.url }}" aria-label="{{ title | escape }}">{% endunless %}
+        {%- liquid
+          if layout == 'list-compact' and current_variant.featured_image
+            assign product_image = current_variant.featured_image
+          elsif product.selected_or_first_available_variant.featured_image
+            assign product_image = product.selected_or_first_available_variant.featured_image
+          else
+            assign product_image = product.media.first
+          endif
+        -%}
+        {%- if product != blank and product_image -%}
+          {%- liquid
+            if settings.fill_product_images
+              assign product_image_src = product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center'
+            else
+              assign product_image_src = product_image | image_url: width: image_width_2
+            endif
+          -%}
+          <picture>
+            <img
+              src="{{ product_image_src }}"
+              {%- if sizes -%}
+                srcset="
+                  {%- if settings.fill_product_images -%}
+                    {%- render 'image-srcset', image: product_image, format: image_ratio, max_width: 640, crop: 'center' -%}
+                  {%- else -%}
+                    {%- render 'image-srcset', image: product_image, format: image_ratio, max_width: 640 -%}
+                  {%- endif -%}
+                "
+                sizes="{{ sizes }}"
+              {%- else -%}
+                srcset="
+                  {%- if settings.fill_product_images -%}
+                    {{ product_image | image_url: width: image_width, height: image_height, crop: 'center' }} 1x, {{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }} 2x
+                  {%- else -%}
+                    {{ product_image | image_url: width: image_width }} 1x, {{ product_image | image_url: width: image_width_2 }} 2x
+                  {%- endif -%}
+                "
+              {%- endif -%}
+              width="{{ image_width }}"
+              height="{{ image_height }}"
+              alt="{{ product_image.alt | default: product.title | escape }}"
+              {% if settings.fill_product_images %}
+                class="filled"
+              {% endif %}
+              loading="{% if section.index > 2 or no_lazyload == false or section.location == 'footer' %}lazy{% else %}eager{% endif %}"
+            >
+          </picture>
+          {%- if product.media[1] != null and settings.show_secondary_image and layout != 'list-compact' -%}
+            {%- liquid
+              if settings.fill_product_images
+                assign secondary_product_image_src = product.media[1] | image_url: width: image_width_2, height: image_height_2, crop: 'center'
+              else
+                assign secondary_product_image_src = product.media[1] | image_url: width: image_width_2
+              endif
+            -%}
+            <picture>
+              <img
+                src="{{ secondary_product_image_src }}"
+                {%- if sizes -%}
+                  srcset="
+                    {%- if settings.fill_product_images -%}
+                      {%- render 'image-srcset', image: product.media[1], format: image_ratio, max_width: 640, crop: 'center' -%}
+                    {%- else -%}
+                      {%- render 'image-srcset', image: product.media[1], format: image_ratio, max_width: 640 -%}
+                     {%- endif -%}
+                  "
+                  sizes="{{ sizes }}"
+                {%- else -%}
+                  srcset="
+                    {%- if settings.fill_product_images -%}
+                      {{ product.media[1] | image_url: width: image_width, height: image_height, crop: 'center' }} 1x, {{ product.media[1] | image_url: width: image_width_2, height: image_height_2, crop: 'center' }} 2x
+                    {%- else -%}
+                      {{ product.media[1] | image_url: width: image_width }} 1x, {{ product.media[1] | image_url: width: image_width_2 }} 2x
+                    {%- endif -%}
+                  "
+                {%- endif -%}
+                width="{{ image_width }}"
+                height="{{ image_height }}"
+                alt="{{ product.media[1].alt | default: product.title | escape }}"
+                loading="lazy"
+                {% if settings.fill_product_images %}
+                  class="filled"
+                {% endif %}
+              >
+            </picture>
+          {%- endif -%}
+        {%- else -%}
+          <picture>{{ 'product-' | append: placeholder_int | placeholder_svg_tag: 'placeholder-svg' }}</picture>
+        {%- endif -%}
+        {% unless layout == 'list-compact' %}</a>{% endunless %}
+        <button
+          type="button"
+          class="wishlist-productcard hidden"
+          title="Wishlist"
+          data-product-id="{{ product.id }}"
+          data-variant-id="{{ current_variant.id }}"
+          data-variant-title="{{ current_variant.title | escape }}"
+          data-price-cents="{{ current_variant.price }}"
+          data-compare-at-price-cents="{{ current_variant.compare_at_price }}"
+        >
+          <svg class="alibaba-card__wishlist-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path>
+          </svg>
+          <i class="icon-heart-outline"></i>
+        </button>
+        {%- if quick_buy and enable_quick_buy_desktop and layout != 'list-compact' -%}
+          {{ quick_buy | replace: '-quick-add-form_x', '1' }}
+        {%- endif -%}
+      </figure>
+    {%- endif -%}
+    {% if layout == 'list-compact' %}<section>{% else %}<div>{% endif %}
+    {%- if show_title or show_vendor -%}
+      {%- if custom_title and upsell -%}
+        <label for="{{ id }}-{{ product.id }}-id">
+          {{- title -}}
+
+          {%- if upsell and show_price and price_location == 'next_to_title' -%}
+            {{- price_element -}}
+          {%- endif -%}
+        </label>
+      {%- else -%}
+        <h3
+          {% unless show_vendor %}
+            class="p0"
+          {% endunless %}
+        >
+          {%- if show_vendor -%}
+            <span class="small">
+              {{ vendor }}
+            </span>
+          {%- endif -%}
+          {%- if show_title -%}
+            <a
+              href="{{ product.url }}"
+              {% if settings.product_titles_caps %}
+                class="text-uppercase"
+              {% endif %}
+            >
+              {{- title -}}
+
+              {%- if upsell and show_price and price_location == 'next_to_title' -%}
+                {{- price_element -}}
+              {%- endif -%}
+            </a>
+          {%- endif -%}
+          {%- if layout == 'list-compact' and product.has_only_default_variant == false -%}
+            {% if enable_variant_picker == false or enable_variant_picker and available_variants.size == 1 %}
+              <span class="small">
+                {{ current_variant.title }}
+              </span>
+            {%- endif -%}
+          {%- endif -%}
+        </h3>
+      {%- endif -%}
+    {%- endif -%}
+    {%- if upsell %}
+      {%- if show_price and price_location == 'below_title' -%}
+        {{- price_element -}}
+      {%- endif -%}
+
+      {%- if variant_in_popup and available_variants.size > 1 -%}
+        <p>
+          <span>{{ current_variant.title }}</span>
+          <a
+            href="./"
+            data-options="{{ product.options | json | escape }}"
+            data-title="{{ title }}"
+            class="overlay-{{ variant_selector_color }} strong"
+            data-variant="{{ current_variant.id }}"
+            data-upsell
+          >
+            {{- 'product.form.choose_variant' | t }}
+            <i aria-hidden="true" class="icon-chevron-right"></i
+          ></a>
+        </p>
+      {% endif %}
+      <p class="{% if variant_in_popup or product == blank or available_variants.size <= 1 %}hidden{% endif %}">
+        <select name="upsell-id" id="upsell-{{ id }}">
+          {%- for variant in product.variants -%}
+            {%- unless variant.available -%}{% continue %}{%- endunless -%}
+            {%- liquid
+              if variant.featured_image
+                assign product_image = variant.featured_image
+              else
+                assign product_image = product.featured_image
+              endif
+            -%}
+            <option
+              value="{{ variant.id }}"
+              data-standard-product-select-variant="{% render 'standard-product-select-data', type: 'variant', product: product, variant: variant %}"
+              data-variantinfo='{"id":{{ variant.id }}, "variant":"{{ variant.title }}", "options":{{ variant.options | json | escape }},{% if product_image %}"image":"{%- if settings.fill_product_images -%}{{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}{%- else -%}{{ product_image | image_url: width: image_width_2 }}{%- endif -%}",{% endif %}"price_old":"{%- if variant.compare_at_price > variant.price -%}{{ variant.compare_at_price | money }}{%- endif -%}","price":"{{ variant.price | money }}"}'
+              {% unless variant.available %}
+                disabled data-class="disabled"
+              {% endunless %}
+              {% if variant == current_variant %}
+                selected
+              {% endif %}
+            >
+              {{ variant.title }}
+            </option>
+          {%- endfor -%}
+        </select>
+      </p>
+    {%- else -%}
+      <input type="hidden" name="id" value="{{ current_variant.id }}">
+    {%- endif -%}
+    {% comment %} {%- if show_rating -%}
+      {%- liquid
+        assign rating_value = false
+        assign rating_count = false
+        if product.metafields.syncer.reviews
+          assign locale_ratings = product.metafields.syncer.reviews.value.reviews[localization.language.iso_code]
+          if locale_ratings
+            assign rating_value = locale_ratings.rating
+            assign rating_count = locale_ratings.count
+          else
+            assign rating_value = product.metafields.syncer.reviews.value.cumulative_rating
+            assign rating_count = product.metafields.syncer.reviews.value.total_reviews
+          endif
+        elsif product.metafields.reviews.rating
+          assign rating_value = product.metafields.reviews.rating.value
+          assign rating_count = product.metafields.reviews.rating_count
+        endif
+      -%}
+      {%- if rating_value -%}
+        {% capture rating_label %}
+            {%- if rating_count -%}
+                <a href="{{ product.url }}">{{ rating_count }} <span>{{ 'product.reviews.count' | t: count: rating_count }}</span></a>
+            {%- endif -%}
+        {% endcapture %}
+        {% render 'rating-stars', value: rating_value, label: rating_label %}
+      {%- endif -%}
+    {%- endif -%}
+    {%- if show_stock -%}
+      {%- render 'product-deliverytime',
+        product: product,
+        current_variant: current_variant,
+        container: 'p',
+        extra_class: 'list-hide',
+        origin: 'productitem'
+      -%}
+    {%- endif -%} {% endcomment %}
+
+
+    {%- if settings.product_short_description != 'none' and type == 'both' %}
+      {%- liquid
+        if settings.product_short_description == 'custom'
+          assign product_short_description_namespace = settings.product_short_description_text | split: '.' | first
+          assign product_short_description_key = settings.product_short_description_text | split: '.' | last
+          assign short_description = product.metafields[product_short_description_namespace][product_short_description_key]
+        else
+          assign short_description = product.description | strip_html
+        endif
+      -%}
+      {% if short_description != empty and short_description != blank -%}
+        <div class="info">
+          <p>{{ short_description }}</p>
+          <p class="link-more">
+            <a href="./" class="strong link-more">
+              {{- 'general.read_more.read' | t }}
+              <span>{{ 'general.read_more.more' | t }}</span>
+              <span class="hidden">{{ 'general.read_more.less' | t }}</span>
+              <i aria-hidden="true" class="icon-chevron-down"></i
+            ></a>
+          </p>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+    {% if layout == 'list-compact' %}
+      <section>
+    {% elsif upsell == false %}
+      </div>
+      <div class="static">
+    {% endif %}
+    {%- if type == 'both' and show_stock %}
+      {%- render 'product-deliverytime',
+        product: product,
+        current_variant: current_variant,
+        container: 'p',
+        extra_class: 'list-only',
+        origin: 'productitem'
+      -%}
+    {%- endif -%}
+
+
+     {% render 'product-badges',
+      product: product,
+      settings:settings,
+      upsell:upsell,
+      show_price:show_price,
+      show_rating:show_rating,
+      show_stock:show_stock,
+      price:price
+    %}
+
+
+
+
+
+
+
+
+    {%- if enable_color_picker -%}
+      {%- liquid
+        assign triggers = settings.color_swatch_name | newline_to_br | strip_newlines | replace: '<br />', '|' | split: '|'
+        if settings.enable_color_swatches
+          for option in product.options_with_values
+            if triggers contains option.name
+              assign color_option = option
+              break
+            endif
+          endfor
+        endif
+      -%}
+      {% if color_option %}
+        <ul class="check color" data-limit="6">
+          {% for color in color_option.values %}
+            {%- liquid
+              for variant in product.variants
+                assign options = variant.options | map: 'name'
+                if options contains color
+                  assign color_variant = variant
+                  break
+                endif
+              endfor
+            -%}
+            {% capture swatch %}
+                {% if color_variant and color_variant.featured_media and settings.color_swatches_variant_image %}
+                  <img src="{{ color_variant.featured_media | image_url: width: image_width_small, height: image_height_small, crop: 'center' }}" alt="{{ color }}" width="30" height="23" loading="lazy" class="color-variant-img filled">
+                {% elsif color.swatch.image %}
+                  <i aria-hidden="true" class="icon-circle" style="background-image: url('{{ color.swatch.image | image_url }}');"></i>
+                {% elsif color.swatch.color %}
+                  <i aria-hidden="true" class="icon-circle" style="background-color: {{ color.swatch.color }};"></i>
+                {% else %}
+                  <i aria-hidden="true"
+                     class="icon-circle swatch-custom-color-{{ color | handleize }}"
+                     style="background-color:{{ color | split: ' ' | last }}"
+                  ></i>
+                {% endif %}
+              {% endcapture %}
+            <li
+              {% if color_variant and color_variant.featured_media %}
+                data-img="
+                  {%- if settings.fill_product_images -%}
+                    {{ color_variant.featured_media | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}
+                  {%- else -%}
+                    {{ color_variant.featured_media | image_url: width: image_width_2 }}
+                  {%- endif -%}
+                "
+              {% endif %}
+            >
+              <input
+                type="radio"
+                id="color-{{ product.id }}-{{ color_variant.id }}-{{ forloop.index }}"
+                name="color-{{ product.id }}-{{ color_variant.id }}-{{ forloop.index }}"
+              >
+              <label for="color-{{ product.id }}-{{ color_variant.id }}-{{ forloop.index }}">
+                <a
+                  href="{% if color_variant %}{{ color_variant.url }}{% else %}{{ product.url }}{% endif %}"
+                  aria-label="{{ color }}"
+                >
+                  {{ swatch }}
+                </a>
+              </label>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endif %}
+    {%- if quick_buy -%}
+      {% if layout == 'list-compact' %}<footer>{% endif %}
+      {{ quick_buy | replace: '-quick-add-form_x', '2' }}
+      {% if layout == 'list-compact' %}</footer>{% endif %}
+    {%- endif -%}
+    {% if layout == 'list-compact' %}
+      </section>
+      </section>
+    {% else %}
+      </div>
+    {% endif %}
+    {% if extra_style contains '--vertical' %}</div>{% endif %}
+  </{{ container }}>
+{% endcomment %}
+
+
+
+
+{% comment %} 
+
+
+
+{%- liquid
+  assign container = 'li'
+  assign placeholder_int = placeholder_int | default: 1
+  assign quick_buy_compact = quick_buy_compact | default: false
+  assign cart_upsell_card = cart_upsell_card | default: false
+  assign cart_upsell_quick_add_only = cart_upsell_quick_add_only | default: false
+  assign enable_quick_buy_drawer = enable_quick_buy_drawer | default: false
+  assign width_class = width_class | default: ''
+  assign sizes = sizes | default: false
+  assign slider = slider | default: false
+  assign type = type | default: 'grid'
+  assign no_lazyload = no_lazyload | default: false
+  assign enable_quick_buy_desktop = enable_quick_buy_desktop | default: false
+  assign enable_quick_buy_mobile = enable_quick_buy_mobile | default: false
+  assign enable_quick_buy_qty_selector = enable_quick_buy_qty_selector | default: false
+  assign enable_variant_picker = enable_variant_picker | default: false
+  assign enable_color_picker = enable_color_picker | default: false
+  assign upsell = upsell | default: false
+  assign variant_in_popup = variant_in_popup | default: false
+  assign is_child_product = is_child_product | default: false
+  assign parent_product_id = parent_product_id | default: false
+  assign custom_title = custom_title | default: false
+  assign price_location = price_location | default: 'below_title'
+  assign index = index | default: 1
+  assign id = block_id | default: ''
+  assign visible_products = visible_products | default: false
+  assign extra_style = extra_style | default: ''
+
+  if show_image == null
+    assign show_image = true
+    assign show_labels = true
+    assign show_title = true
+    assign show_stock = true
+    assign show_vendor = settings.show_vendor
+    assign show_rating = settings.show_product_rating
+    assign show_price = true
+  endif
+
+  if layout == 'list-compact'
+    assign show_labels = false
+    assign show_stock = false
+    assign show_vendor = false
+    assign show_rating = false
+  endif
+
+  if layout == 'hotspot'
+    assign show_labels = false
+    assign show_image = false
+    assign container = 'div'
+    if product.variants.size > 1 or product.available == false
+      assign enable_quick_buy_drawer = true
+    endif
+  endif
+
+  if layout == 'list' and origin == 'image-with-banners'
+    assign show_labels = false
+  endif
+
+  assign current_variant = product.selected_or_first_available_variant
+  assign product_image_ratio = settings.product_image_ratio
+
+  case product_image_ratio
+    when '310x430'
+      assign image_ratio = 'portrait'
+      assign image_width = 310
+      assign image_height = 430
+    when '430x310'
+      assign image_ratio = 'landscape'
+      assign image_width = 430
+      assign image_height = 310
+    else
+      assign image_ratio = 'square'
+      assign image_width = 430
+      assign image_height = 430
+  endcase
+
+  assign image_width_2 = image_width | times: 1.5
+  assign image_height_2 = image_height | times: 1.5
+  assign image_width_small = image_width | divided_by: 3
+  assign image_height_small = image_height | divided_by: 3
+
+  if product == blank
+    assign vendor = 'Vendor name'
+    assign title = 'Product title'
+    assign price = 0 | money
+  else
+    assign vendor = product.vendor
+    if vendor == 'vendor-unknown' or vendor == shop.name
+      assign show_vendor = false
+    endif
+    if custom_title
+      assign title = custom_title
+    else
+      assign title = product.title
+    endif
+    if layout == 'list-compact'
+      assign price = current_variant.price | money
+    else
+      assign price = product.price | money
+    endif
+  endif
+
+  assign show_unavailable_variants = show_unavailable_variants | default: settings.productcard_show_unavailable_variants
+  if show_unavailable_variants
+    assign available_variants = product.variants
+  else
+    assign available_variants = product.variants | where: 'available'
+  endif
+
+  assign preorder = false
+  if current_variant.inventory_management != null and current_variant.inventory_policy == 'continue' and current_variant.available and current_variant.inventory_quantity <= 0 and settings.show_preorder
+    assign preorder = true
+    unless settings.show_preorder_inventory
+      if layout == 'list-compact'
+        assign show_stock = false
+      elsif product.variants.size == 1 and current_variant.available and enable_quick_buy_drawer == false
+        assign show_stock = false
+      endif
+    endunless
+  endif
+
+  assign anim_index = index | default: 1 | modulo: 5
+  case anim_index
+    when 0
+      assign anim_class = 'anim-slide-right'
+    when 1
+      assign anim_class = 'anim-slide-left'
+    when 2
+      assign anim_class = 'anim-scale-in'
+    when 3
+      assign anim_class = 'anim-flip-x'
+    when 4
+      assign anim_class = 'anim-bounce-in'
+  endcase
+  assign anim_delay = index | default: 1 | times: 0.08 | append: 's'
+
+  assign country_code = localization.country.iso_code | upcase
+  assign flag_emoji = '🇺🇸'
+  case country_code
+    when 'IT'
+      assign flag_emoji = '🇮🇹'
+    when 'US'
+      assign flag_emoji = '🇺🇸'
+    when 'GB'
+      assign flag_emoji = '🇬🇧'
+    when 'FR'
+      assign flag_emoji = '🇫🇷'
+    when 'DE'
+      assign flag_emoji = '🇩🇪'
+    when 'ES'
+      assign flag_emoji = '🇪🇸'
+    when 'CA'
+      assign flag_emoji = '🇨🇦'
+    when 'AU'
+      assign flag_emoji = '🇦🇺'
+    when 'JP'
+      assign flag_emoji = '🇯🇵'
+    when 'BR'
+      assign flag_emoji = '🇧🇷'
+    when 'IN'
+      assign flag_emoji = '🇮🇳'
+    when 'CN'
+      assign flag_emoji = '🇨🇳'
+    when 'RU'
+      assign flag_emoji = '🇷🇺'
+    when 'MX'
+      assign flag_emoji = '🇲🇽'
+    when 'KR'
+      assign flag_emoji = '🇰🇷'
+    when 'NL'
+      assign flag_emoji = '🇳🇱'
+    when 'SE'
+      assign flag_emoji = '🇸🇪'
+    when 'NO'
+      assign flag_emoji = '🇳🇴'
+    when 'CH'
+      assign flag_emoji = '🇨🇭'
+    when 'AT'
+      assign flag_emoji = '🇦🇹'
+    when 'BE'
+      assign flag_emoji = '🇧🇪'
+    when 'PT'
+      assign flag_emoji = '🇵🇹'
+    when 'PL'
+      assign flag_emoji = '🇵🇱'
+    when 'TR'
+      assign flag_emoji = '🇹🇷'
+    when 'SA'
+      assign flag_emoji = '🇸🇦'
+    when 'ZA'
+      assign flag_emoji = '🇿🇦'
+    when 'AE'
+      assign flag_emoji = '🇦🇪'
+    when 'SG'
+      assign flag_emoji = '🇸🇬'
+    when 'MY'
+      assign flag_emoji = '🇲🇾'
+    when 'TH'
+      assign flag_emoji = '🇹🇭'
+    when 'ID'
+      assign flag_emoji = '🇮🇩'
+    when 'PH'
+      assign flag_emoji = '🇵🇭'
+    when 'VN'
+      assign flag_emoji = '🇻🇳'
+    when 'IL'
+      assign flag_emoji = '🇮🇱'
+    when 'GR'
+      assign flag_emoji = '🇬🇷'
+    when 'DK'
+      assign flag_emoji = '🇩🇰'
+    when 'FI'
+      assign flag_emoji = '🇫🇮'
+    when 'IE'
+      assign flag_emoji = '🇮🇪'
+    when 'NZ'
+      assign flag_emoji = '🇳🇿'
+    when 'AR'
+      assign flag_emoji = '🇦🇷'
+    when 'CL'
+      assign flag_emoji = '🇨🇱'
+    when 'CO'
+      assign flag_emoji = '🇨🇴'
+    when 'PE'
+      assign flag_emoji = '🇵🇪'
+    when 'EG'
+      assign flag_emoji = '🇪🇬'
+    when 'NG'
+      assign flag_emoji = '🇳🇬'
+    when 'KE'
+      assign flag_emoji = '🇰🇪'
+    when 'MA'
+      assign flag_emoji = '🇲🇦'
+    when 'DZ'
+      assign flag_emoji = '🇩🇿'
+    when 'UA'
+      assign flag_emoji = '🇺🇦'
+    when 'RO'
+      assign flag_emoji = '🇷🇴'
+    when 'CZ'
+      assign flag_emoji = '🇨🇿'
+    when 'HU'
+      assign flag_emoji = '🇭🇺'
+    when 'SK'
+      assign flag_emoji = '🇸🇰'
+    when 'HR'
+      assign flag_emoji = '🇭🇷'
+    when 'BG'
+      assign flag_emoji = '🇧🇬'
+    when 'LT'
+      assign flag_emoji = '🇱🇹'
+    when 'LV'
+      assign flag_emoji = '🇱🇻'
+    when 'EE'
+      assign flag_emoji = '🇪🇪'
+    when 'SI'
+      assign flag_emoji = '🇸🇮'
+  endcase
+
+  assign bestseller_count = product.metafields.custom.bestseller_count.value | default: 0 | plus: 0
+  assign current_month = 'now' | date: '%B %Y'
+  assign current_month_sales = product.metafields.custom.bestseller_current_month.value | default: bestseller_count | plus: 0
+  assign month_1_sales = product.metafields.custom.bestseller_month_1.value | default: 0 | plus: 0
+  assign month_2_sales = product.metafields.custom.bestseller_month_2.value | default: 0 | plus: 0
+  assign month_3_sales = product.metafields.custom.bestseller_month_3.value | default: 0 | plus: 0
+
+  assign free_shipping_threshold = 5000
+  assign qualifies_for_free_shipping = false
+  if current_variant.price > free_shipping_threshold
+    assign qualifies_for_free_shipping = true
+  endif
+
+  assign shipping_text = 't.shipping_free' | t
+  assign bestseller_label = 't.bestseller' | t
+  assign sold_in_period_text = 't.sold_in_period' | t: count: bestseller_count
+  assign top_selling_text = 't.top_selling' | t
+  assign view_more_text = 't.view_more' | t
+  assign analytics_title = 't.bestseller_analytics' | t
+  assign this_month_text = 't.this_month' | t
+  assign items_sold_text = 't.items_sold' | t
+  assign current_month_text = 't.current_month' | t
+  assign month_1_text = 't.month_ago_1' | t
+  assign month_2_text = 't.month_ago_2' | t
+  assign month_3_text = 't.month_ago_3' | t
+  assign data_note_text = 't.data_note' | t
+  assign Reso_facile = 't.Reso_facile' | t
+
+  assign moq = product.metafields.custom.moq | default: 0 | plus: 0
+  assign reorder_rate = product.metafields.custom.reorder_rate | default: 0 | plus: 0
+  assign show_reorder_badge = false
+  if bestseller_count > 20 and reorder_rate > 0
+    assign show_reorder_badge = true
+  endif
+-%}
+
+{%- capture price_element -%}
+  {% if price_location == 'next_to_title' %}
+    &nbsp;
+    <span class="price s1pr alibaba-card__price-inline">
+      {%- if current_variant.compare_at_price > current_variant.price -%}
+        <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+      {% endif %}
+      {{ current_variant.price | money }}
+    </span>
+  {% else %}
+    <p class="price s1pr alibaba-card__price-main">
+      {%- if current_variant.compare_at_price > current_variant.price -%}
+        <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+      {% endif %}
+      {{ current_variant.price | money }}
+      {%- if current_variant.unit_price_measurement -%}
+        <span class="small">
+          {{- 'product.unit_price_label' | t -}}
+          {{- current_variant.unit_price | unit_price_with_measurement: current_variant.unit_price_measurement -}}
+        </span>
+      {%- endif -%}
+    </p>
+  {% endif %}
+{%- endcapture -%}
+
+{%- if enable_quick_buy_desktop or enable_quick_buy_mobile -%}
+  {%- liquid
+    assign product_form_class = 'f8pr form-card alibaba-card__form'
+    unless enable_quick_buy_mobile
+      assign product_form_class = product_form_class | append: ' mobile-hide'
+    endunless
+    unless enable_quick_buy_desktop
+      assign product_form_class = product_form_class | append: ' mobile-only'
+    endunless
+    assign product_form_id = 'quick-add-' | append: section.id | append: product.id | append: '-quick-add-form_x'
+  -%}
+  {%- capture quick_buy -%}
+    {%- if layout == 'list-compact' -%}
+      {%- form 'product', product, id: product_form_id, class: product_form_class, novalidate: 'novalidate' -%}
+        {%- assign available_variants = product.variants | where: "available" -%}
+        {%- if enable_variant_picker and available_variants.size > 1 and product.variants.size < 250 -%}
+          <p>
+            <select name="id">
+              {%- for variant in product.variants -%}
+                {%- unless variant.available -%}{% continue %}{%- endunless -%}
+                {%- liquid
+                  if variant.featured_image
+                    assign product_image = variant.featured_image
+                   else
+                    assign product_image = product.featured_image
+                  endif
+                -%}
+                <option
+                  value="{{ variant.id }}"
+                  data-variantinfo='{ {% if product_image %}"image":"{%- if settings.fill_product_images -%}{{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}{%- else -%}{{ product_image | image_url: width: image_width_2 }}{%- endif -%}",{% endif %}"price_old":"{%- if variant.compare_at_price > variant.price -%}{{ variant.compare_at_price | money }}{%- endif -%}","price":"{{ variant.price | money }}"}'
+                  {% unless variant.available %}disabled data-class="disabled"{% endunless %}
+                  {% if variant == current_variant %}selected{% endif %}
+                >{{ variant.title }}</option>
+              {%- endfor -%}
+            </select>
+          </p>
+        {%- else -%}
+          <input type="hidden" name="id" value="{{ current_variant.id }}">
+        {%- endif -%}
+        <p class="submit">
+          <button
+            type="submit"
+            class="alibaba-btn alibaba-btn--primary {% if cart_upsell_quick_add_only %}circle {% endif %}{% if preorder %}overlay-preorder {% elsif current_variant.available %}overlay-buy_button{% else %}overlay-unavailable-buy-button{% endif %}{% if settings.button_style == 'inv' %} inv{% endif %}"
+            aria-label="{% if preorder and settings.preorder_button_text != '' %}{{ settings.preorder_button_text }}{% else %}{{ 'product.form.add_to_cart' | t }}{% endif %}"
+          >
+            <i aria-hidden="true" class="icon-cart"></i>
+            {% if preorder and settings.preorder_button_text != '' %}
+              {{ settings.preorder_button_text }}
+            {% else %}
+              {{ 'product.form.add_to_cart' | t }}
+            {% endif %}
+          </button>
+        </p>
+      {%- endform -%}
+    {%- elsif product.variants.size == 1 and current_variant.available and enable_quick_buy_drawer == false -%}
+      {%- form 'product', product, id: product_form_id, class: product_form_class, novalidate: 'novalidate' -%}
+        <fieldset>
+          <input type="hidden" name="id" value="{{ current_variant.id }}">
+          <p class="submit{% if layout == 'hotspot' %} wide{% endif %}">
+            {%- if enable_quick_buy_qty_selector -%}
+              <span class="input-amount">
+              <label for="quantity-{{ product_form_id }}" class="hidden">{{ 'product.form.quantity' | t }}</label>
+              <input type="number" id="quantity-{{ product_form_id }}" name="quantity" value="{{ current_variant.quantity_rule.min }}"
+                  min="{{ current_variant.quantity_rule.min }}"
+                 {% if current_variant.inventory_management == 'shopify' and current_variant.inventory_policy == 'deny' -%}
+                   max="{{ current_variant.inventory_quantity }}"
+                 {% elsif current_variant.quantity_rule.max %}
+                   max="{{ current_variant.quantity_rule.max }}"
+                 {% endif %}
+                {% if current_variant.quantity_rule.increment %}step="{{ current_variant.quantity_rule.increment }}"{% endif %}
+                required>
+            </span>
+            {%- endif -%}
+            <button type="submit" class="alibaba-btn alibaba-btn--primary {% if preorder %}overlay-preorder{% elsif current_variant.available %}overlay-buy_button{% else %}overlay-unavailable-buy-button{% endif %}{% if settings.button_style == 'inv' %} inv{% endif %}{% if quick_buy_compact %} compact{% if layout == 'list' %} w160{% endif %}{% endif %}" aria-label="{% if preorder and settings.preorder_button_text != '' %}{{ settings.preorder_button_text }}{% else %}{{ 'product.form.add_to_cart' | t }}{% endif %}">
+              {%- unless quick_buy_compact -%}
+                <span class="mobile-hide">
+                  {% if preorder and settings.preorder_button_text != '' %}
+                    {{ settings.preorder_button_text }}
+                  {% else %}
+                    {{ 'product.form.add_to_cart' | t }}
+                  {% endif %}
+                </span>
+              {%- endunless -%}
+              <i aria-hidden="true" class="icon-cart{% unless quick_buy_compact %} mobile-only{% endunless %}"></i>
+            </button>
+          </p>
+        </fieldset>
+      {%- endform -%}
+    {%- else -%}
+      <p class="link-btn wide alibaba-card__action-link {% unless enable_quick_buy_mobile %}mobile-hide{% endunless %} {% unless enable_quick_buy_desktop %}mobile-only{% endunless %} {% if quick_buy_compact and layout == 'list' %} w160{% endif %}">
+        <a class="alibaba-btn alibaba-btn--secondary overlay-buy_button{% if settings.button_style == 'inv' %} inv{% endif %}" href="{{ product.url }}"{% if enable_quick_buy_drawer and product != blank %} data-quickshop{% endif %}>
+          {%- if quick_buy_compact -%}
+            {{ 'product.form.view' | t }}
+          {%- else -%}
+            {{ 'product.form.view_options' | t }}
+          {%- endif -%}
+        </a>
+      </p>
+    {%- endif -%}
+  {%- endcapture %}
+{%- endif -%}
+
+<{{ container }}
+  class="
+    alibaba-product-card
+    {% if cart_upsell_card %}
+      has-form dont-move
+    {% else %}
+      legacy-product-card
+      {% if extra_class %}{% unless extra_style contains '--vertical' %}{{ extra_class }}{% endunless %}{% endif %} product-card {{ width_class }}{% if settings.enable_quick_buy != 'none' %} has-form{% endif %}
+      {% unless current_variant.available %}unavailable{% endunless %}
+      {% unless layout contains 'list' %}{% if settings.productcards_text_alignment == 'center' %}text-center{% elsif settings.productcards_text_alignment == 'right' %}text-end{% endif %}{% endunless %}
+      {% if settings.show_secondary_image %}second-img-hover{% endif %}
+      {% if product == blank %}placeholder-product{% endif %}
+      {% if upsell and index > visible_products %}hidden{% endif %}
+    {% endif %}
+  "
+  {% if layout == 'list-compact' %}
+    data-product-id="{{ product.id }}"
+  {% endif %}
+  {% if upsell and index > visible_products %}
+    data-element="unique-more-products-class"
+  {% endif %}
+  {% unless extra_style contains '--vertical' %}
+    {{- shopify_attributes -}}
+  {% endunless %}
+  style="{{ extra_style }} --anim-delay: {{ anim_delay }};"
+>
+  {% if extra_style contains '--vertical' %}
+    <div {{ shopify_attributes }} class="{% if extra_class %}{{ extra_class }}{% endif %}">
+  {% endif %}
+
+  {%- if upsell -%}
+    <span class="check alibaba-card__upsell-check">
+      <input
+        type="checkbox"
+        {% if current_variant.available == false %}
+          disabled="disable"
+        {% endif %}
+        data-id="{{ current_variant.id }}"
+        {% if is_child_product and parent_product_id %}
+          data-parent-product="{{ parent_product_id }}"
+        {% endif %}
+        id="{{ id }}-{{ product.id }}-id"
+        name="c4a"
+      >
+      <label class="hidden" for="{{ id }}-{{ product.id }}-id">{{ 'product.form.choose_product' | t }}</label>
+    </span>
+  {%- endif -%}
+
+  {%- if show_image -%}
+    <figure
+      class="
+        alibaba-card__media
+        {% if settings.multiply_product_images == 'multiply' %} img-multiply{% elsif settings.multiply_product_images == 'multiply-bg' %} img-multiply-bg{% endif %}
+        {% if settings.fade_unavailable_products and current_variant.available == false %} unavailable-faded{% endif %}
+      "
+    >
+      {% if show_labels %}{%- render 'product-labels', product: product, origin: 'productitem' -%}{% endif %}
+
+      <div class="alibaba-card__media-link">
+        {%- liquid
+          if layout == 'list-compact' and current_variant.featured_image
+            assign product_image = current_variant.featured_image
+          elsif product.selected_or_first_available_variant.featured_image
+            assign product_image = product.selected_or_first_available_variant.featured_image
+          else
+            assign product_image = product.media.first
+          endif
+        -%}
+        {%- if product != blank and product_image -%}
+          <picture class="alibaba-card__picture">
+            <img
+              src="{%- if settings.fill_product_images -%}{{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}{%- else -%}{{ product_image | image_url: width: image_width_2 }}{%- endif -%}"
+              {%- if sizes -%}
+                srcset="
+                  {%- if settings.fill_product_images -%}
+                    {%- render 'image-srcset', image: product_image, format: image_ratio, max_width: 640, crop: 'center' -%}
+                  {%- else -%}
+                    {%- render 'image-srcset', image: product_image, format: image_ratio, max_width: 640 -%}
+                  {%- endif -%}
+                "
+                sizes="{{ sizes }}"
+              {%- else -%}
+                srcset="
+                  {%- if settings.fill_product_images -%}
+                    {{ product_image | image_url: width: image_width, height: image_height, crop: 'center' }} 1x, {{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }} 2x
+                  {%- else -%}
+                    {{ product_image | image_url: width: image_width }} 1x, {{ product_image | image_url: width: image_width_2 }} 2x
+                  {%- endif -%}
+                "
+              {%- endif -%}
+              width="{{ image_width }}"
+              height="{{ image_height }}"
+              alt="{{ product_image.alt | default: product.title | escape }}"
+              {% if settings.fill_product_images %}
+                class="filled"
+              {% endif %}
+              loading="{% if section.index > 2 or no_lazyload == false or section.location == 'footer' %}lazy{% else %}eager{% endif %}"
+            >
+          </picture>
+          {%- if product.media[1] != null and settings.show_secondary_image and layout != 'list-compact' -%}
+            <picture class="alibaba-card__picture alibaba-card__picture--secondary">
+              <img
+                src="{%- if settings.fill_product_images -%}{{ product.media[1] | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}{%- else -%}{{ product.media[1] | image_url: width: image_width_2 }}{%- endif -%}"
+                {%- if sizes -%}
+                  srcset="
+                    {%- if settings.fill_product_images -%}
+                      {%- render 'image-srcset', image: product.media[1], format: image_ratio, max_width: 640, crop: 'center' -%}
+                    {%- else -%}
+                      {%- render 'image-srcset', image: product.media[1], format: image_ratio, max_width: 640 -%}
+                     {%- endif -%}
+                  "
+                  sizes="{{ sizes }}"
+                {%- else -%}
+                  srcset="
+                    {%- if settings.fill_product_images -%}
+                      {{ product.media[1] | image_url: width: image_width, height: image_height, crop: 'center' }} 1x, {{ product.media[1] | image_url: width: image_width_2, height: image_height_2, crop: 'center' }} 2x
+                    {%- else -%}
+                      {{ product.media[1] | image_url: width: image_width }} 1x, {{ product.media[1] | image_url: width: image_width_2 }} 2x
+                    {%- endif -%}
+                  "
+                {%- endif -%}
+                width="{{ image_width }}"
+                height="{{ image_height }}"
+                alt="{{ product.media[1].alt | default: product.title | escape }}"
+                loading="lazy"
+                {% if settings.fill_product_images %}
+                  class="filled"
+                {% endif %}
+              >
+            </picture>
+          {%- endif -%}
+        {%- else -%}
+          <picture class="alibaba-card__picture">
+            {{- 'product-' | append: placeholder_int | placeholder_svg_tag: 'placeholder-svg' -}}
+          </picture>
+        {%- endif -%}
+      </div>
+
+      {%- if bestseller_count > 50 -%}
+        <div class="alibaba-top-selling-ribbon" role="status" aria-label="{{ top_selling_text }}">
+          <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
+          <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
+        </div>
+      {%- endif -%}
+
+      <button
+        type="button"
+        class="wishlist-productcard hidden alibaba-card__wishlist"
+        title="Wishlist"
+        data-product-id="{{ product.id }}"
+        data-variant-id="{{ current_variant.id }}"
+        data-variant-title="{{ current_variant.title | escape }}"
+        data-price-cents="{{ current_variant.price }}"
+        data-compare-at-price-cents="{{ current_variant.compare_at_price }}"
+      >
+        <svg class="alibaba-card__wishlist-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+          <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path>
+        </svg>
+        <i class="icon-heart-outline"></i>
+      </button>
+
+      {%- if quick_buy and enable_quick_buy_desktop and layout != 'list-compact' -%}
+        {{ quick_buy | replace: '-quick-add-form_x', '1' }}
+      {%- endif -%}
+    </figure>
+  {%- endif -%}
+
+  <div class="alibaba-card__body">
+    {%- if show_title or show_vendor -%}
+      {%- if custom_title and upsell -%}
+        <label for="{{ id }}-{{ product.id }}-id" class="alibaba-card__title-label">
+          {{- title -}}
+          {%- if upsell and show_price and price_location == 'next_to_title' -%}
+            {{- price_element -}}
+          {%- endif -%}
+        </label>
+      {%- else -%}
+        <div class="alibaba-card__header">
+          <h3 class="alibaba-card__title {% unless show_vendor %}p0{% endunless %}">
+            {%- if show_vendor -%}
+              <span class="alibaba-card__vendor small">
+                {{ vendor }}
+              </span>
+            {%- endif -%}
+            {%- if show_title -%}
+              <a
+                href="{{ product.url }}"
+                {% if settings.product_titles_caps %}
+                  class="text-uppercase"
+                {% endif %}
+              >
+                {{- title -}}
+                {%- if upsell and show_price and price_location == 'next_to_title' -%}
+                  {{- price_element -}}
+                {%- endif -%}
+              </a>
+            {%- endif -%}
+            {%- if layout == 'list-compact' and product.has_only_default_variant == false -%}
+              {% if enable_variant_picker == false or enable_variant_picker and available_variants.size == 1 %}
+                <span class="alibaba-card__variant small">
+                  {{ current_variant.title }}
+                </span>
+              {%- endif -%}
+            {%- endif -%}
+          </h3>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- comment -%} ROTATOR BADGES — REORDER & RETURNS {%- endcomment -%}
+    {%- if product != blank -%}
+      <div class="alibaba-card__rotator" aria-label="Promozioni prodotto">
+        <div class="alibaba-card__rotator-track">
+          {%- if show_reorder_badge -%}
+            <span class="alibaba-rotator-item alibaba-rotator-item--reorder">
+              <i aria-hidden="true">🔄</i> {{ reorder_rate }}% di riordini
+            </span>
+          {%- endif -%}
+          <span class="alibaba-rotator-item alibaba-rotator-item--returns">
+            <i aria-hidden="true">↩️</i> {{ Reso_facile }}
+          </span>
+          {%- if show_reorder_badge -%}
+            <span class="alibaba-rotator-item alibaba-rotator-item--reorder" aria-hidden="true">
+              <i aria-hidden="true">🔄</i> {{ reorder_rate }}% di riordini
+            </span>
+          {%- endif -%}
+          <span class="alibaba-rotator-item alibaba-rotator-item--returns" aria-hidden="true">
+            <i aria-hidden="true">↩️</i> {{ Reso_facile }}
+          </span>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} BADGES BLOCK {%- endcomment -%}
+    {%- if product != blank -%}
+      <div class="alibaba-card__badges-row {{ anim_class }}" style="--anim-delay: {{ anim_delay }};">
+        {%- if qualifies_for_free_shipping -%}
+          <div
+            class="alibaba-badge alibaba-badge--shipping"
+            title="{{ shipping_text }} — {{ localization.country.name }}"
+          >
+            <span class="alibaba-badge__flag" aria-hidden="true">{{ flag_emoji }}</span>
+            <span class="alibaba-badge__text">{{ shipping_text }}</span>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if upsell %}
+      {%- if show_price and price_location == 'below_title' -%}
+        <div class="alibaba-card__price-wrapper">
+          {{- price_element -}}
+          {%- if moq > 0 -%}
+            <p class="alibaba-card__moq">
+              MOQ: {{ moq }}
+              {{ 't.moq.unit' | t | default: 'articoli' }}
+            </p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+      {%- if variant_in_popup and available_variants.size > 1 -%}
+        <p class="alibaba-card__variant-popup">
+          <span>{{ current_variant.title }}</span>
+          <a
+            href="./"
+            data-options="{{ product.options | json | escape }}"
+            data-title="{{ title }}"
+            class="overlay-{{ variant_selector_color }} strong"
+            data-variant="{{ current_variant.id }}"
+            data-upsell
+          >
+            {{- 'product.form.choose_variant' | t }}
+            <i aria-hidden="true" class="icon-chevron-right"></i>
+          </a>
+        </p>
+      {% endif %}
+      <p class="{% if variant_in_popup or product == blank or available_variants.size <= 1 %}hidden{% endif %} alibaba-card__variant-select">
+        <select name="upsell-id" id="upsell-{{ id }}">
+          {%- for variant in product.variants -%}
+            {%- unless variant.available -%}{% continue %}{%- endunless -%}
+            {%- liquid
+              if variant.featured_image
+                assign product_image = variant.featured_image
+              else
+                assign product_image = product.featured_image
+              endif
+            -%}
+            <option
+              value="{{ variant.id }}"
+              data-variantinfo='{"id":{{ variant.id }}, "variant":"{{ variant.title }}", "options":{{ variant.options | json | escape }},{% if product_image %}"image":"{%- if settings.fill_product_images -%}{{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}{%- else -%}{{ product_image | image_url: width: image_width_2 }}{%- endif -%}",{% endif %}"price_old":"{%- if variant.compare_at_price > variant.price -%}{{ variant.compare_at_price | money }}{%- endif -%}","price":"{{ variant.price | money }}"}'
+              {% unless variant.available %}
+                disabled data-class="disabled"
+              {% endunless %}
+              {% if variant == current_variant %}
+                selected
+              {% endif %}
+            >
+              {{ variant.title }}
+            </option>
+          {%- endfor -%}
+        </select>
+      </p>
+    {%- else -%}
+      <input type="hidden" name="id" value="{{ current_variant.id }}">
+    {%- endif -%}
+
+    {%- if show_rating -%}
+      {%- liquid
+        assign rating_value = false
+        assign rating_count = false
+        if product.metafields.syncer.reviews
+          assign locale_ratings = product.metafields.syncer.reviews.value.reviews[localization.language.iso_code]
+          if locale_ratings
+            assign rating_value = locale_ratings.rating
+            assign rating_count = locale_ratings.count
+          else
+            assign rating_value = product.metafields.syncer.reviews.value.cumulative_rating
+            assign rating_count = product.metafields.syncer.reviews.value.total_reviews
+          endif
+        elsif product.metafields.reviews.rating
+          assign rating_value = product.metafields.reviews.rating.value
+          assign rating_count = product.metafields.reviews.rating_count
+        endif
+      -%}
+      {% render 'badge--brand-products', product: product %}
+
+      {%- if rating_value -%}
+        <div class="alibaba-card__rating">
+          {% render 'rating-stars', value: rating_value %}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if show_stock -%}
+      <div class="alibaba-card__stock">
+        {%- render 'product-deliverytime',
+          product: product,
+          current_variant: current_variant,
+          container: 'p',
+          extra_class: 'list-hide',
+          origin: 'productitem'
+        -%}
+      </div>
+    {%- endif -%}
+    {%- if settings.product_short_description != 'none' and type == 'both' %}
+      {%- liquid
+        if settings.product_short_description == 'custom'
+          assign product_short_description_namespace = settings.product_short_description_text | split: '.' | first
+          assign product_short_description_key = settings.product_short_description_text | split: '.' | last
+          assign short_description = product.metafields[product_short_description_namespace][product_short_description_key]
+        else
+          assign short_description = product.description | strip_html
+        endif
+      -%}
+      {% if short_description != empty and short_description != blank -%}
+        <div class="alibaba-card__description info">
+          <p>{{ short_description }}</p>
+          <p class="link-more">
+            <a href="./" class="strong link-more">
+              {{- 'general.read_more.read' | t }}
+              <span>{{ 'general.read_more.more' | t }}</span>
+              <span class="hidden">{{ 'general.read_more.less' | t }}</span>
+              <i aria-hidden="true" class="icon-chevron-down"></i>
+            </a>
+          </p>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if type == 'both' and show_stock %}
+      <div class="alibaba-card__stock-list">
+        {%- render 'product-deliverytime',
+          product: product,
+          current_variant: current_variant,
+          container: 'p',
+          extra_class: 'list-only',
+          origin: 'productitem'
+        -%}
+      </div>
+    {%- endif -%}
+
+    {% render 'badge--discount-products', product: product %}
+    {%- if upsell == false and show_price -%}
+      <div class="alibaba-card__price-wrapper">
+        <p class="price s1pr alibaba-card__price-main">
+          {%- if product.price_varies and settings.show_price_varies and layout != 'list-compact' -%}
+            {%- liquid
+              assign price_min = product.price_min | money
+              assign price_max = product.price_max | money
+            -%}
+            {{ price_min -}}
+            <span class="price-varies">&nbsp;- {{ price_max }}</span>
+          {%- else -%}
+            {%- if current_variant.compare_at_price > current_variant.price -%}
+              <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+            {%- endif -%}
+            {{ price }}
+          {%- endif -%}
+          {%- if current_variant.unit_price_measurement -%}
+            <span class="small">
+              {{- 'product.unit_price_label' | t -}}
+              {{- current_variant.unit_price | unit_price_with_measurement: current_variant.unit_price_measurement -}}
+            </span>
+          {%- endif -%}
+        </p>
+        {%- if moq > 0 -%}
+          <p class="alibaba-card__moq">
+            <span class="alibaba-card__moq-desktop">
+              MOQ: {{ moq }}
+              {{ 't.moq.unit' | t | default: 'articoli' }}
+            </span>
+            <span class="alibaba-card__moq-mobile" hidden>+{{ moq }} venduti</span>
+          </p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if enable_color_picker -%}
+      {%- liquid
+        assign triggers = settings.color_swatch_name | newline_to_br | strip_newlines | replace: '<br />', '|' | split: '|'
+        if settings.enable_color_swatches
+          for option in product.options_with_values
+            if triggers contains option.name
+              assign color_option = option
+              break
+            endif
+          endfor
+        endif
+      -%}
+      {% if color_option %}
+        <ul class="check color alibaba-card__colors" data-limit="6">
+          {% for color in color_option.values %}
+            {%- liquid
+              for variant in product.variants
+                assign options = variant.options | map: 'name'
+                if options contains color
+                  assign color_variant = variant
+                  break
+                endif
+              endfor
+            -%}
+            {% capture swatch %}
+                {% if color_variant and color_variant.featured_media and settings.color_swatches_variant_image %}
+                  <img src="{{ color_variant.featured_media | image_url: width: image_width_small, height: image_height_small, crop: 'center' }}" alt="{{ color }}" width="30" height="23" loading="lazy" class="color-variant-img filled">
+                {% elsif color.swatch.image %}
+                  <i aria-hidden="true" class="icon-circle" style="background-image: url('{{ color.swatch.image | image_url }}');"></i>
+                {% elsif color.swatch.color %}
+                  <i aria-hidden="true" class="icon-circle" style="background-color: {{ color.swatch.color }};"></i>
+                {% else %}
+                  <i aria-hidden="true"
+                     class="icon-circle swatch-custom-color-{{ color | handleize }}"
+                     style="background-color:{{ color | split: ' ' | last }}"
+                  ></i>
+                {% endif %}
+              {% endcapture %}
+            <li
+              {% if color_variant and color_variant.featured_media %}
+                data-img="
+                  {%- if settings.fill_product_images -%}
+                    {{ color_variant.featured_media | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}
+                  {%- else -%}
+                    {{ color_variant.featured_media | image_url: width: image_width_2 }}
+                  {%- endif -%}
+                "
+              {% endif %}
+            >
+              <input
+                type="radio"
+                id="color-{{ product.id }}-{{ color_variant.id }}-{{ forloop.index }}"
+                name="color-{{ product.id }}-{{ color_variant.id }}-{{ forloop.index }}"
+              >
+              <label for="color-{{ product.id }}-{{ color_variant.id }}-{{ forloop.index }}">
+                <a
+                  href="{% if color_variant %}{{ color_variant.url }}{% else %}{{ product.url }}{% endif %}"
+                  aria-label="{{ color }}"
+                >
+                  {{ swatch }}
+                </a>
+              </label>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  {%- if quick_buy -%}
+    <div class="alibaba-card__footer">
+      {% if layout == 'list-compact' %}<footer>{% endif %}
+      {{ quick_buy | replace: '-quick-add-form_x', '2' }}
+      {% if layout == 'list-compact' %}</footer>{% endif %}
+    </div>
+  {%- endif -%}
+
+  {% if extra_style contains '--vertical' %}</div>{% endif %}
+</{{ container }}>
+
+{%- comment -%} BESTSELLER POPUP MODAL {%- endcomment -%}
+{%- if product != blank and bestseller_count > 0 -%}
+  <div class="alibaba-bestseller-popup" id="bestseller-popup-{{ product.id }}" aria-hidden="true">
+    <div class="alibaba-bestseller-popup__overlay" data-popup-close></div>
+    <div class="alibaba-bestseller-popup__content">
+      <button class="alibaba-bestseller-popup__close" data-popup-close aria-label="{{ view_more_text }}">
+        <i class="icon-close"></i>
+      </button>
+
+      <div class="alibaba-bestseller-popup__header">
+        <div class="alibaba-bestseller-popup__icon">🏆</div>
+        <h4 class="alibaba-bestseller-popup__title">{{ analytics_title }}</h4>
+        <p class="alibaba-bestseller-popup__subtitle">{{ title | truncate: 40 }}</p>
+      </div>
+
+      <div class="alibaba-bestseller-popup__body">
+        <div class="alibaba-bestseller-popup__current">
+          <span class="alibaba-bestseller-popup__label">{{ this_month_text }}</span>
+          <span class="alibaba-bestseller-popup__value alibaba-bestseller-popup__value--current">
+            {{- current_month_sales -}}
+          </span>
+          <span class="alibaba-bestseller-popup__unit">{{ items_sold_text }}</span>
+        </div>
+
+        <div class="alibaba-bestseller-popup__history">
+          <div class="alibaba-bestseller-popup__bar">
+            <div class="alibaba-bestseller-popup__bar-fill" style="--bar-height: 100%;"></div>
+            <span class="alibaba-bestseller-popup__bar-label">{{ current_month_text }}</span>
+            <span class="alibaba-bestseller-popup__bar-value">{{ current_month_sales }}</span>
+          </div>
+          <div class="alibaba-bestseller-popup__bar">
+            <div
+              class="alibaba-bestseller-popup__bar-fill"
+              style="--bar-height: {% if current_month_sales > 0 %}{{ month_1_sales | times: 100 | divided_by: current_month_sales }}%{% else %}0%{% endif %};"
+            ></div>
+            <span class="alibaba-bestseller-popup__bar-label">{{ month_1_text }}</span>
+            <span class="alibaba-bestseller-popup__bar-value">{{ month_1_sales }}</span>
+          </div>
+          <div class="alibaba-bestseller-popup__bar">
+            <div
+              class="alibaba-bestseller-popup__bar-fill"
+              style="--bar-height: {% if current_month_sales > 0 %}{{ month_2_sales | times: 100 | divided_by: current_month_sales }}%{% else %}0%{% endif %};"
+            ></div>
+            <span class="alibaba-bestseller-popup__bar-label">{{ month_2_text }}</span>
+            <span class="alibaba-bestseller-popup__bar-value">{{ month_2_sales }}</span>
+          </div>
+          <div class="alibaba-bestseller-popup__bar">
+            <div
+              class="alibaba-bestseller-popup__bar-fill"
+              style="--bar-height: {% if current_month_sales > 0 %}{{ month_3_sales | times: 100 | divided_by: current_month_sales }}%{% else %}0%{% endif %};"
+            ></div>
+            <span class="alibaba-bestseller-popup__bar-label">{{ month_3_text }}</span>
+            <span class="alibaba-bestseller-popup__bar-value">{{ month_3_sales }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="alibaba-bestseller-popup__footer">
+        <p class="alibaba-bestseller-popup__note">{{ data_note_text }}</p>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+<style>
+    /* =========================================================
+     ALIBABA PRODUCT CARD — Professional & Lightweight
+     ========================================================= */
+
+  :root {
+    --apc-accent: #ff6a00;
+    --apc-accent-hover: #e55f00;
+    --apc-bg: #ffffff;
+    --apc-border: #e8e8e8;
+    --apc-text: #1a1a1a;
+    --apc-text-secondary: #666666;
+    --apc-success: #52c41a;
+    --apc-radius: 8px;
+    --apc-transition: 0.2s ease;
+  }
+
+  /* Card base */
+  .alibaba-product-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--apc-bg);
+    border: 1px solid var(--apc-border);
+    border-radius: var(--apc-radius);
+    overflow: hidden;
+    transition: box-shadow var(--apc-transition), transform var(--apc-transition);
+    height: 100%;
+  }
+
+  .alibaba-product-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+    transform: translateY(-2px);
+  }
+
+  /* Media */
+  .alibaba-card__media {
+    position: relative;
+    margin: 0;
+    background: #f8f8f8;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .alibaba-card__media-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .alibaba-card__picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .alibaba-card__picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+  }
+
+  .alibaba-product-card:hover .alibaba-card__picture img {
+    transform: scale(1.04);
+  }
+
+  .alibaba-card__picture--secondary {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .alibaba-product-card:hover .alibaba-card__picture--secondary {
+    opacity: 1;
+  }
+
+  /* Wishlist */
+  .alibaba-card__wishlist {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid var(--apc-border);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--apc-transition);
+  }
+
+  .alibaba-card__wishlist:hover {
+    background: var(--apc-accent);
+    border-color: var(--apc-accent);
+    color: #fff;
+  }
+
+  /* ---- Wishlist button — globally consistent across ALL product card contexts ---- */
+  /* Makes wishlist button visible and consistently styled on every product card */
+  .alibaba-product-card .wishlist-productcard,
+  .alibaba-product-card .alibaba-card__wishlist,
+  .l4cl .wishlist-productcard,
+  .l4ca .wishlist-productcard,
+  .l4pr .wishlist-productcard,
+  .l4hs .wishlist-productcard,
+  .l4ts .wishlist-productcard,
+  .l4ne .wishlist-productcard,
+  .l4cu .wishlist-productcard,
+  .m6cu .wishlist-productcard,
+  .m6ne .wishlist-productcard,
+  .m6ts .wishlist-productcard,
+  .product-card .wishlist-productcard {
+    display: flex !important;
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 2px 8px rgba(22, 18, 63, 0.12) !important;
+    cursor: pointer !important;
+    z-index: 3 !important;
+    border: 1px solid var(--apc-border) !important;
+    margin: 0 !important;
+  }
+
+  /* Wishlist icon — always visible */
+  .alibaba-card__wishlist i,
+  .wishlist-productcard i {
+    font-size: 18px !important;
+    color: #16123f !important;
+    margin: 0 !important;
+  }
+
+  /* Wishlist hover state — consistent across all contexts */
+  .alibaba-product-card .wishlist-productcard:hover,
+  .alibaba-product-card .alibaba-card__wishlist:hover,
+  .wishlist-productcard:hover {
+    background: var(--apc-accent) !important;
+    border-color: var(--apc-accent) !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(255, 106, 0, 0.25) !important;
+  }
+
+  /* Top Selling Ribbon */
+  .alibaba-top-selling-ribbon {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    background: linear-gradient(135deg, #6d28d9, #5b21b6);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .alibaba-top-selling-ribbon__star {
+    font-size: 14px;
+  }
+
+  /* Body */
+  .alibaba-card__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: 14px;
+    gap: 6px;
+  }
+
+  .alibaba-card__header {
+    min-width: 0;
+  }
+
+  .alibaba-card__vendor {
+    display: block;
+    color: var(--apc-text-secondary);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+
+  .alibaba-card__title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.45;
+    margin: 0;
+    color: var(--apc-text);
+  }
+
+  .alibaba-card__title a {
+    color: inherit;
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    cursor: pointer;
+    transition: color var(--apc-transition);
+  }
+
+  .alibaba-card__title a:hover {
+    color: var(--apc-accent);
+  }
+
+  .alibaba-card__variant {
+    display: block;
+    color: var(--apc-text-secondary);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  /* Rotator — MODIFICA 2: animazione verticale */
+  .alibaba-card__rotator {
+    overflow: hidden;
+    height: 24px;
+    {% comment %} background: #f5f5f5; {% endcomment %}
+    border-radius: 4px;
+    {% comment %} border: 1px solid #ededed; {% endcomment %}
+    display: flex;
+    align-items: center;
+  }
+
+  .alibaba-card__rotator-track {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    white-space: nowrap;
+    width: 100%;
+    padding-left: 14px;
+    animation: alibabaRotatorVertical 8s linear infinite;
+  }
+
+  .alibaba-card__rotator:hover .alibaba-card__rotator-track {
+    animation-play-state: paused;
+  }
+
+  .alibaba-rotator-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    flex-shrink: 0;
+    height: 24px;
+    line-height: 24px;
+  }
+
+  .alibaba-rotator-item i { font-style: normal; font-size: 12px; }
+  .alibaba-rotator-item--reorder { color: var(--apc-accent); }
+  .alibaba-rotator-item--returns { color: var(--apc-success); }
+
+  @keyframes alibabaRotatorVertical {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+  }
+  /* FINE MODIFICA 2 */
+
+  /* Badges */
+  .alibaba-card__badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0;
+  }
+
+  .alibaba-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    cursor: default;
+    opacity: 0;
+    animation: badgeFadeIn 0.5s ease forwards;
+    animation-delay: var(--anim-delay, 0s);
+  }
+
+  @keyframes badgeFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .alibaba-badge--shipping {
+    background: rgba(82, 196, 26, 0.08);
+    color: #237804;
+    border: 1px solid rgba(82, 196, 26, 0.2);
+  }
+
+  .alibaba-badge__flag { font-size: 13px; line-height: 1; }
+
+  .alibaba-badge--bestseller {
+    background: var(--apc-text);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: transform var(--apc-transition);
+  }
+
+  .alibaba-badge--bestseller:hover {
+    transform: translateY(-1px);
+  }
+
+  .alibaba-badge__count {
+    background: var(--apc-accent);
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 9px;
+    font-weight: 800;
+  }
+
+  .alibaba-badge__action {
+    font-size: 9px;
+    opacity: 0.7;
+    font-weight: 500;
+    text-transform: lowercase;
+  }
+
+  /* Price */
+  .alibaba-card__price-wrapper {
+    margin-top: auto;
+    padding-top: 6px;
+  }
+
+  .alibaba-card__price-main,
+  .alibaba-card__price-inline {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--apc-text);
+    margin: 0;
+  }
+
+  .alibaba-card__price-main .old-price,
+  .alibaba-card__price-inline .old-price {
+    font-size: 13px;
+    color: #999;
+    text-decoration: line-through;
+    font-weight: 400;
+    margin-right: 6px;
+  }
+
+  .alibaba-card__price-main .small {
+    display: block;
+    font-size: 11px;
+    color: var(--apc-text-secondary);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .price-varies {
+    font-size: 13px;
+    color: var(--apc-text-secondary);
+    font-weight: 400;
+  }
+
+  .alibaba-card__moq {
+    font-size: 11px;
+    color: var(--apc-text-secondary);
+    margin: 3px 0 0;
+    font-weight: 500;
+  }
+
+  /* Rating */
+  .alibaba-card__rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--apc-text-secondary);
+  }
+
+  /* Stock */
+  .alibaba-card__stock,
+  .alibaba-card__stock-list {
+    font-size: 11px;
+    color: var(--apc-success);
+    font-weight: 600;
+  }
+
+  .alibaba-card__stock p,
+  .alibaba-card__stock-list p { margin: 0; }
+
+  /* Description */
+  .alibaba-card__description {
+    font-size: 12px;
+    color: var(--apc-text-secondary);
+    line-height: 1.5;
+  }
+
+  .alibaba-card__description p {
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Colors */
+  .alibaba-card__colors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+  }
+
+  .alibaba-card__colors li {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: border-color var(--apc-transition);
+    cursor: pointer;
+  }
+
+  .alibaba-card__colors li:hover { border-color: var(--apc-accent); }
+
+  .alibaba-card__colors img,
+  .alibaba-card__colors .icon-circle {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Footer / Actions */
+  .  /* Footer / Actions */
+  .alibaba-card__footer {
+    padding: 0 14px 14px;
+    margin-top: auto;
+  }
+
+  .alibaba-card__footer footer {
+    width: 100%;
+  }
+
+  .alibaba-card__footer .form-card,
+  .alibaba-card__form {
+    width: 100%;
+    margin: 0;
+  }
+
+  .alibaba-card__form fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  .alibaba-card__form .submit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+  }
+
+  .alibaba-card__form .input-amount {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+
+  .alibaba-card__form .input-amount input {
+    width: 64px;
+    height: 42px;
+    padding: 0 8px;
+    text-align: center;
+    border: 1px solid var(--apc-border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--apc-text);
+    font-size: 13px;
+  }
+
+  .alibaba-card__form .input-amount input:focus {
+    outline: none;
+    border-color: var(--apc-accent);
+    box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.12);
+  }
+
+  .alibaba-card__form button,
+  .alibaba-card__action-link a {
+    min-height: 42px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background var(--apc-transition),
+      border-color var(--apc-transition),
+      color var(--apc-transition),
+      transform var(--apc-transition),
+      box-shadow var(--apc-transition);
+  }
+
+  .alibaba-card__form button {
+    border: 1px solid var(--apc-accent);
+    background: var(--apc-accent);
+    color: #fff;
+  }
+
+  .alibaba-card__form button:hover {
+    background: var(--apc-accent-hover);
+    border-color: var(--apc-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(255, 106, 0, 0.18);
+  }
+
+  .alibaba-card__form button:active {
+    transform: translateY(0);
+  }
+
+  .alibaba-card__form button:disabled,
+  .alibaba-card__form button.unavailable {
+    background: #f1f1f1;
+    border-color: #ddd;
+    color: #999;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .alibaba-card__form button .icon-cart {
+    font-size: 15px;
+  }
+
+  .alibaba-card__form button.compact {
+    width: 42px;
+    min-width: 42px;
+    padding: 0;
+  }
+
+  .alibaba-card__form button.inv {
+    background: transparent;
+    color: var(--apc-accent);
+    border-color: var(--apc-accent);
+  }
+
+  .alibaba-card__form button.inv:hover {
+    background: var(--apc-accent);
+    color: #fff;
+  }
+
+  .alibaba-card__action-link {
+    width: 100%;
+    margin: 0;
+  }
+
+  .alibaba-card__action-link a {
+    background: transparent;
+    color: var(--apc-text);
+    border: 1px solid var(--apc-border);
+  }
+
+  .alibaba-card__action-link a:hover {
+    background: var(--apc-text);
+    border-color: var(--apc-text);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .alibaba-card__action-link a.inv {
+    color: var(--apc-text);
+    background: transparent;
+    border-color: var(--apc-text);
+  }
+
+  .alibaba-card__action-link a.inv:hover {
+    background: var(--apc-text);
+    color: #fff;
+  }
+
+  .alibaba-card__action-link.w160,
+  .alibaba-card__form .w160 {
+    max-width: 160px;
+  }
+
+  /* Variant selector */
+  .alibaba-card__variant-select {
+    margin: 2px 0 4px;
+  }
+
+  .alibaba-card__variant-select select,
+  .alibaba-card__form select {
+    width: 100%;
+    min-height: 38px;
+    padding: 0 34px 0 10px;
+    border: 1px solid var(--apc-border);
+    border-radius: 6px;
+    background-color: #fff;
+    color: var(--apc-text);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .alibaba-card__variant-select select:focus,
+  .alibaba-card__form select:focus {
+    outline: none;
+    border-color: var(--apc-accent);
+    box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.1);
+  }
+
+  .alibaba-card__variant-popup {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 3px 0;
+    padding: 7px 9px;
+    border: 1px solid var(--apc-border);
+    border-radius: 5px;
+    background: #fafafa;
+    font-size: 11px;
+  }
+
+  .alibaba-card__variant-popup > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--apc-text-secondary);
+  }
+
+  .alibaba-card__variant-popup a {
+    flex: 0 0 auto;
+    color: var(--apc-accent);
+    text-decoration: none;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .alibaba-card__variant-popup a:hover {
+    text-decoration: underline;
+  }
+
+  /* Preorder */
+  .alibaba-card__form .overlay-preorder {
+    background: #1677ff;
+    border-color: #1677ff;
+  }
+
+  .alibaba-card__form .overlay-preorder:hover {
+    background: #0958d9;
+    border-color: #0958d9;
+  }
+
+  /* Unavailable card */
+  .alibaba-product-card.unavailable {
+    opacity: 0.82;
+  }
+
+  .alibaba-product-card.unavailable:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .alibaba-product-card.unavailable .alibaba-card__picture img {
+    filter: grayscale(12%);
+  }
+
+  .alibaba-product-card.unavailable .alibaba-card__price-main {
+    color: #888;
+  }
+
+  /* Product image unavailable overlay */
+  .alibaba-card__media .unavailable-faded {
+    opacity: 0.62;
+  }
+
+  /* Bestseller / analytics popup */
+  .alibaba-bestseller-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s ease;
+  }
+
+  .alibaba-bestseller-popup[aria-hidden="false"] {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .alibaba-bestseller-popup__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(3px);
+  }
+
+  .alibaba-bestseller-popup__content {
+    position: relative;
+    z-index: 1;
+    width: min(430px, 100%);
+    max-height: min(680px, calc(100vh - 40px));
+    overflow: auto;
+    background: #fff;
+    border: 1px solid var(--apc-border);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.25s ease;
+  }
+
+  .alibaba-bestseller-popup[aria-hidden="false"]
+    .alibaba-bestseller-popup__content {
+    transform: translateY(0) scale(1);
+  }
+
+  .alibaba-bestseller-popup__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--apc-border);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--apc-text);
+    cursor: pointer;
+    transition: all var(--apc-transition);
+  }
+
+  .alibaba-bestseller-popup__close:hover {
+    background: var(--apc-text);
+    border-color: var(--apc-text);
+    color: #fff;
+  }
+
+  .alibaba-bestseller-popup__header {
+    padding: 28px 50px 20px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .alibaba-bestseller-popup__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    background: #fff7e6;
+    font-size: 25px;
+  }
+
+  .alibaba-bestseller-popup__title {
+    margin: 0;
+    color: var(--apc-text);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .alibaba-bestseller-popup__subtitle {
+    margin: 6px 0 0;
+    color: var(--apc-text-secondary);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .alibaba-bestseller-popup__body {
+    padding: 20px;
+  }
+
+  .alibaba-bestseller-popup__current {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 7px;
+    margin-bottom: 26px;
+    padding: 16px;
+    border-radius: 10px;
+    background: #fafafa;
+  }
+
+  .alibaba-bestseller-popup__label {
+    color: var(--apc-text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .alibaba-bestseller-popup__value {
+    color: var(--apc-text);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .alibaba-bestseller-popup__value--current {
+    color: var(--apc-accent);
+  }
+
+  .alibaba-bestseller-popup__unit {
+    color: var(--apc-text-secondary);
+    font-size: 11px;
+  }
+
+  /* Bestseller bars */
+  .alibaba-bestseller-popup__history {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    height: 210px;
+    padding: 15px 5px 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .alibaba-bestseller-popup__bar {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    flex: 1 1 0;
+    height: 100%;
+    min-width: 0;
+  }
+
+  .alibaba-bestseller-popup__bar-fill {
+    width: min(42px, 70%);
+    height: var(--bar-height, 0%);
+    min-height: 3px;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(
+      to top,
+      var(--apc-accent),
+      #ff9d52
+    );
+    transition: height 0.5s ease;
+  }
+
+  .alibaba-bestseller-popup__bar-label {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    width: 100%;
+    transform: translateX(-50%);
+    color: var(--apc-text-secondary);
+    font-size: 9px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .alibaba-bestseller-popup__bar-value {
+    position: absolute;
+    bottom: calc(var(--bar-height, 0%) + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--apc-text);
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .alibaba-bestseller-popup__footer {
+    padding: 25px 20px 20px;
+  }
+
+  .alibaba-bestseller-popup__note {
+    margin: 0;
+    color: #999;
+    font-size: 10px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  /* Scrollbar popup */
+  .alibaba-bestseller-popup__content::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .alibaba-bestseller-popup__content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .alibaba-bestseller-popup__content::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+  }
+
+  /* =========================================================
+     CARD ANIMATIONS
+     ========================================================= */
+
+  .alibaba-product-card.anim-slide-left,
+  .alibaba-product-card.anim-slide-right,
+  .alibaba-product-card.anim-scale-in,
+  .alibaba-product-card.anim-flip-x,
+  .alibaba-product-card.anim-bounce-in {
+    animation-duration: 0.55s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: both;
+    animation-delay: var(--anim-delay, 0s);
+  }
+
+  .anim-slide-left {
+    animation-name: alibabaSlideLeft;
+  }
+
+  .anim-slide-right {
+    animation-name: alibabaSlideRight;
+  }
+
+  .anim-scale-in {
+    animation-name: alibabaScaleIn;
+  }
+
+  .anim-flip-x {
+    animation-name: alibabaFlipX;
+  }
+
+  .anim-bounce-in {
+    animation-name: alibabaBounceIn;
+  }
+
+  @keyframes alibabaSlideLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes alibabaSlideRight {
+    from {
+      opacity: 0;
+      transform: translateX(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes alibabaScaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes alibabaFlipX {
+    from {
+      opacity: 0;
+      transform: perspective(500px) rotateX(-8deg);
+    }
+    to {
+      opacity: 1;
+      transform: perspective(500px) rotateX(0);
+    }
+  }
+
+  @keyframes alibabaBounceIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+
+    60% {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* =========================================================
+     LIST LAYOUT
+     ========================================================= */
+
+  .alibaba-product-card.list,
+  .alibaba-product-card.list-compact {
+    border-radius: 6px;
+  }
+
+  .alibaba-product-card.list .alibaba-card__media,
+  .alibaba-product-card.list-compact .alibaba-card__media {
+    aspect-ratio: 1 / 1;
+  }
+
+  .alibaba-product-card.list .alibaba-card__body,
+  .alibaba-product-card.list-compact .alibaba-card__body {
+    padding: 10px 12px;
+  }
+
+  .alibaba-product-card.list .alibaba-card__footer,
+  .alibaba-product-card.list-compact .alibaba-card__footer {
+    padding: 0 12px 12px;
+  }
+
+  /* =========================================================
+     HOTSPOT
+     ========================================================= */
+
+  .alibaba-product-card.hotspot {
+    border-radius: 6px;
+  }
+
+  .alibaba-product-card.hotspot .alibaba-card__body {
+    padding: 10px;
+  }
+
+  .alibaba-product-card.hotspot .alibaba-card__title {
+    font-size: 13px;
+  }
+
+  /* =========================================================
+     ACCESSIBILITY
+     ========================================================= */
+
+  .alibaba-product-card a:focus-visible,
+  .alibaba-product-card button:focus-visible,
+  .alibaba-product-card input:focus-visible,
+  .alibaba-product-card select:focus-visible {
+    outline: 2px solid var(--apc-accent);
+    outline-offset: 2px;
+  }
+
+  .alibaba-bestseller-popup button:focus-visible {
+    outline: 2px solid var(--apc-accent);
+    outline-offset: 2px;
+  }
+
+  /* Prevent body scroll when popup is open if theme JS adds this class */
+  body.alibaba-popup-open {
+    overflow: hidden;
+  }
+
+  /* =========================================================
+     REDUCED MOTION
+     ========================================================= */
+
+  @media (prefers-reduced-motion: reduce) {
+    .alibaba-product-card,
+    .alibaba-card__picture img,
+    .alibaba-card__picture--secondary,
+    .alibaba-badge,
+    .alibaba-card__rotator-track,
+    .alibaba-bestseller-popup,
+    .alibaba-bestseller-popup__content,
+    .alibaba-bestseller-popup__bar-fill {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .alibaba-product-card:hover {
+      transform: none;
+    }
+  }
+
+  /* =========================================================
+     MOBILE
+     ========================================================= */
+
+  @media screen and (max-width: 749px) {
+    .alibaba-product-card {
+      border-radius: 6px;
+    }
+
+    .alibaba-product-card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .alibaba-card__body {
+      padding: 10px;
+      gap: 5px;
+    }
+
+    .alibaba-card__footer {
+      padding: 0 10px 10px;
+    }
+
+    .alibaba-card__title {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .alibaba-card__vendor {
+      font-size: 10px;
+    }
+
+    .alibaba-card__price-main,
+    .alibaba-card__price-inline {
+      font-size: 15px;
+    }
+
+    .alibaba-card__rotator {
+      height: 22px;
+    }
+
+    .alibaba-card__rotator-track {
+      padding-left: 10px;
+    }
+
+    .alibaba-rotator-item {
+      height: 22px;
+      line-height: 22px;
+      font-size: 9px;
+    }
+
+    .alibaba-rotator-item i {
+      font-size: 11px;
+    }
+
+    .alibaba-badge {
+      padding: 3px 8px;
+      font-size: 9px;
+    }
+
+    .alibaba-card__wishlist {
+      top: 7px;
+      right: 7px;
+      width: 30px;
+      height: 30px;
+    }
+
+    .alibaba-top-selling-ribbon {
+      padding: 6px;
+      font-size: 9px;
+    }
+
+    .alibaba-top-selling-ribbon__star {
+      font-size: 12px;
+    }
+
+    .alibaba-bestseller-popup {
+      padding: 12px;
+    }
+
+    .alibaba-bestseller-popup__content {
+      max-height: calc(100vh - 24px);
+      border-radius: 12px;
+    }
+
+    .alibaba-bestseller-popup__header {
+      padding: 24px 45px 16px;
+    }
+
+    .alibaba-bestseller-popup__body {
+      padding: 15px;
+    }
+
+    .alibaba-bestseller-popup__history {
+      height: 185px;
+    }
+
+    .alibaba-bestseller-popup__value {
+      font-size: 24px;
+    }
+  }
+
+  /* =========================================================
+     VERY SMALL MOBILE
+     ========================================================= */
+
+  @media screen and (max-width: 389px) {
+    .alibaba-card__body {
+      padding: 8px;
+    }
+
+    .alibaba-card__footer {
+      padding: 0 8px 8px;
+    }
+
+    .alibaba-card__title {
+      font-size: 12px;
+    }
+
+    .alibaba-card__price-main,
+    .alibaba-card__price-inline {
+      font-size: 14px;
+    }
+
+    .alibaba-card__rotator-track {
+      padding-left: 8px;
+    }
+
+    .alibaba-rotator-item {
+      font-size: 8px;
+      letter-spacing: 0.25px;
+    }
+  }
+</style> {% endcomment %}
+
+
+
+
+
+
+
+
+
+
+
+{%- liquid
+  assign container = 'li'
+  assign placeholder_int = placeholder_int | default: 1
+  assign quick_buy_compact = quick_buy_compact | default: false
+  assign cart_upsell_card = cart_upsell_card | default: false
+  assign cart_upsell_quick_add_only = cart_upsell_quick_add_only | default: false
+  assign enable_quick_buy_drawer = enable_quick_buy_drawer | default: false
+  assign width_class = width_class | default: ''
+  assign sizes = sizes | default: false
+  assign slider = slider | default: false
+  assign type = type | default: 'grid'
+  assign no_lazyload = no_lazyload | default: false
+  assign enable_quick_buy_desktop = enable_quick_buy_desktop | default: false
+  assign enable_quick_buy_mobile = enable_quick_buy_mobile | default: false
+  assign enable_quick_buy_qty_selector = enable_quick_buy_qty_selector | default: false
+  assign enable_variant_picker = enable_variant_picker | default: false
+  assign enable_color_picker = enable_color_picker | default: false
+  assign upsell = upsell | default: false
+  assign variant_in_popup = variant_in_popup | default: false
+  assign is_child_product = is_child_product | default: false
+  assign parent_product_id = parent_product_id | default: false
+  assign custom_title = custom_title | default: false
+  assign price_location = price_location | default: 'below_title'
+  assign index = index | default: 1
+  assign id = block_id | default: ''
+  assign visible_products = visible_products | default: false
+  assign extra_style = extra_style | default: ''
+
+  if show_image == null
+    assign show_image = true
+    assign show_labels = true
+    assign show_title = true
+    assign show_stock = true
+    assign show_vendor = settings.show_vendor
+    assign show_rating = settings.show_product_rating
+    assign show_price = true
+  endif
+
+  if layout == 'list-compact'
+    assign show_labels = false
+    assign show_stock = false
+    assign show_vendor = false
+    assign show_rating = false
+  endif
+
+  if layout == 'hotspot'
+    assign show_labels = false
+    assign show_image = false
+    assign container = 'div'
+    if product.variants.size > 1 or product.available == false
+      assign enable_quick_buy_drawer = true
+    endif
+  endif
+
+  if layout == 'list' and origin == 'image-with-banners'
+    assign show_labels = false
+  endif
+
+  assign current_variant = product.selected_or_first_available_variant
+  assign product_image_ratio = settings.product_image_ratio
+
+  case product_image_ratio
+    when '310x430'
+      assign image_ratio = 'portrait'
+      assign image_width = 310
+      assign image_height = 430
+    when '430x310'
+      assign image_ratio = 'landscape'
+      assign image_width = 430
+      assign image_height = 310
+    else
+      assign image_ratio = 'square'
+      assign image_width = 430
+      assign image_height = 430
+  endcase
+
+  assign image_width_2 = image_width | times: 1.5
+  assign image_height_2 = image_height | times: 1.5
+  assign image_width_small = image_width | divided_by: 3
+  assign image_height_small = image_height | divided_by: 3
+
+  if product == blank
+    assign vendor = 'Vendor name'
+    assign title = 'Product title'
+    assign price = 0 | money
+  else
+    assign vendor = product.vendor
+    if vendor == 'vendor-unknown' or vendor == shop.name
+      assign show_vendor = false
+    endif
+    if custom_title
+      assign title = custom_title
+    else
+      assign title = product.title
+    endif
+    if layout == 'list-compact'
+      assign price = current_variant.price | money
+    else
+      assign price = product.price | money
+    endif
+  endif
+
+  assign show_unavailable_variants = show_unavailable_variants | default: settings.productcard_show_unavailable_variants
+  if show_unavailable_variants
+    assign available_variants = product.variants
+  else
+    assign available_variants = product.variants | where: 'available'
+  endif
+
+  assign preorder = false
+  if current_variant.inventory_management != null and current_variant.inventory_policy == 'continue' and current_variant.available and current_variant.inventory_quantity <= 0 and settings.show_preorder
+    assign preorder = true
+    unless settings.show_preorder_inventory
+      if layout == 'list-compact'
+        assign show_stock = false
+      elsif product.variants.size == 1 and current_variant.available and enable_quick_buy_drawer == false
+        assign show_stock = false
+      endif
+    endunless
+  endif
+
+  assign anim_index = index | default: 1 | modulo: 5
+  case anim_index
+    when 0
+      assign anim_class = 'anim-slide-right'
+    when 1
+      assign anim_class = 'anim-slide-left'
+    when 2
+      assign anim_class = 'anim-scale-in'
+    when 3
+      assign anim_class = 'anim-flip-x'
+    when 4
+      assign anim_class = 'anim-bounce-in'
+  endcase
+  assign anim_delay = index | default: 1 | times: 0.08 | append: 's'
+
+  assign country_code = localization.country.iso_code | upcase
+  assign flag_emoji = '🇺🇸'
+  case country_code
+    when 'IT'
+      assign flag_emoji = '🇮🇹'
+    when 'US'
+      assign flag_emoji = '🇺🇸'
+    when 'GB'
+      assign flag_emoji = '🇬🇧'
+    when 'FR'
+      assign flag_emoji = '🇫🇷'
+    when 'DE'
+      assign flag_emoji = '🇩🇪'
+    when 'ES'
+      assign flag_emoji = '🇪🇸'
+    when 'CA'
+      assign flag_emoji = '🇨🇦'
+    when 'AU'
+      assign flag_emoji = '🇦🇺'
+    when 'JP'
+      assign flag_emoji = '🇯🇵'
+    when 'BR'
+      assign flag_emoji = '🇧🇷'
+    when 'IN'
+      assign flag_emoji = '🇮🇳'
+    when 'CN'
+      assign flag_emoji = '🇨🇳'
+    when 'RU'
+      assign flag_emoji = '🇷🇺'
+    when 'MX'
+      assign flag_emoji = '🇲🇽'
+    when 'KR'
+      assign flag_emoji = '🇰🇷'
+    when 'NL'
+      assign flag_emoji = '🇳🇱'
+    when 'SE'
+      assign flag_emoji = '🇸🇪'
+    when 'NO'
+      assign flag_emoji = '🇳🇴'
+    when 'CH'
+      assign flag_emoji = '🇨🇭'
+    when 'AT'
+      assign flag_emoji = '🇦🇹'
+    when 'BE'
+      assign flag_emoji = '🇧🇪'
+    when 'PT'
+      assign flag_emoji = '🇵🇹'
+    when 'PL'
+      assign flag_emoji = '🇵🇱'
+    when 'TR'
+      assign flag_emoji = '🇹🇷'
+    when 'SA'
+      assign flag_emoji = '🇸🇦'
+    when 'ZA'
+      assign flag_emoji = '🇿🇦'
+    when 'AE'
+      assign flag_emoji = '🇦🇪'
+    when 'SG'
+      assign flag_emoji = '🇸🇬'
+    when 'MY'
+      assign flag_emoji = '🇲🇾'
+    when 'TH'
+      assign flag_emoji = '🇹🇭'
+    when 'ID'
+      assign flag_emoji = '🇮🇩'
+    when 'PH'
+      assign flag_emoji = '🇵🇭'
+    when 'VN'
+      assign flag_emoji = '🇻🇳'
+    when 'IL'
+      assign flag_emoji = '🇮🇱'
+    when 'GR'
+      assign flag_emoji = '🇬🇷'
+    when 'DK'
+      assign flag_emoji = '🇩🇰'
+    when 'FI'
+      assign flag_emoji = '🇫🇮'
+    when 'IE'
+      assign flag_emoji = '🇮🇪'
+    when 'NZ'
+      assign flag_emoji = '🇳🇿'
+    when 'AR'
+      assign flag_emoji = '🇦🇷'
+    when 'CL'
+      assign flag_emoji = '🇨🇱'
+    when 'CO'
+      assign flag_emoji = '🇨🇴'
+    when 'PE'
+      assign flag_emoji = '🇵🇪'
+    when 'EG'
+      assign flag_emoji = '🇪🇬'
+    when 'NG'
+      assign flag_emoji = '🇳🇬'
+    when 'KE'
+      assign flag_emoji = '🇰🇪'
+    when 'MA'
+      assign flag_emoji = '🇲🇦'
+    when 'DZ'
+      assign flag_emoji = '🇩🇿'
+    when 'UA'
+      assign flag_emoji = '🇺🇦'
+    when 'RO'
+      assign flag_emoji = '🇷🇴'
+    when 'CZ'
+      assign flag_emoji = '🇨🇿'
+    when 'HU'
+      assign flag_emoji = '🇭🇺'
+    when 'SK'
+      assign flag_emoji = '🇸🇰'
+    when 'HR'
+      assign flag_emoji = '🇭🇷'
+    when 'BG'
+      assign flag_emoji = '🇧🇬'
+    when 'LT'
+      assign flag_emoji = '🇱🇹'
+    when 'LV'
+      assign flag_emoji = '🇱🇻'
+    when 'EE'
+      assign flag_emoji = '🇪🇪'
+    when 'SI'
+      assign flag_emoji = '🇸🇮'
+  endcase
+
+  assign bestseller_count = product.metafields.custom.bestseller_count.value | default: 0 | plus: 0
+  assign current_month = 'now' | date: '%B %Y'
+  assign current_month_sales = product.metafields.custom.bestseller_current_month.value | default: bestseller_count | plus: 0
+  assign month_1_sales = product.metafields.custom.bestseller_month_1.value | default: 0 | plus: 0
+  assign month_2_sales = product.metafields.custom.bestseller_month_2.value | default: 0 | plus: 0
+  assign month_3_sales = product.metafields.custom.bestseller_month_3.value | default: 0 | plus: 0
+
+  assign free_shipping_threshold = 5000
+  assign qualifies_for_free_shipping = false
+  if current_variant.price > free_shipping_threshold
+    assign qualifies_for_free_shipping = true
+  endif
+
+  assign discount_percent = 0
+  if product != blank and current_variant.compare_at_price > current_variant.price
+    assign discount_percent = current_variant.compare_at_price | minus: current_variant.price | times: 100 | divided_by: current_variant.compare_at_price
+  endif
+
+  assign shipping_text = 't.shipping_free' | t
+  assign bestseller_label = 't.bestseller' | t
+  assign sold_in_period_text = 't.sold_in_period' | t: count: bestseller_count
+  assign top_selling_text = 't.top_selling' | t
+  assign view_more_text = 't.view_more' | t
+  assign analytics_title = 't.bestseller_analytics' | t
+  assign this_month_text = 't.this_month' | t
+  assign items_sold_text = 't.items_sold' | t
+  assign current_month_text = 't.current_month' | t
+  assign month_1_text = 't.month_ago_1' | t
+  assign month_2_text = 't.month_ago_2' | t
+  assign month_3_text = 't.month_ago_3' | t
+  assign data_note_text = 't.data_note' | t
+  assign Reso_facile = 't.Reso_facile' | t
+
+  assign moq = product.metafields.custom.moq | default: 0 | plus: 0
+  assign reorder_rate = product.metafields.custom.reorder_rate | default: 0 | plus: 0
+  assign show_reorder_badge = false
+  if bestseller_count > 20 and reorder_rate > 0
+    assign show_reorder_badge = true
+  endif
+-%}
+
+{%- capture price_element -%}
+  {% if price_location == 'next_to_title' %}
+    &nbsp;
+    <span class="price s1pr alibaba-card__price-inline">
+      {%- if current_variant.compare_at_price > current_variant.price -%}
+        <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+      {% endif %}
+      {{ current_variant.price | money }}
+    </span>
+  {% else %}
+    <p class="price s1pr alibaba-card__price-main">
+      {%- if current_variant.compare_at_price > current_variant.price -%}
+        <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+      {% endif %}
+      {{ current_variant.price | money }}
+      {%- if current_variant.unit_price_measurement -%}
+        <span class="small">
+          {{- 'product.unit_price_label' | t -}}
+          {{- current_variant.unit_price | unit_price_with_measurement: current_variant.unit_price_measurement -}}
+        </span>
+      {%- endif -%}
+    </p>
+  {% endif %}
+{%- endcapture -%}
+
+{%- if enable_quick_buy_desktop or enable_quick_buy_mobile -%}
+  {%- liquid
+    assign product_form_class = 'f8pr form-card alibaba-card__form'
+    unless enable_quick_buy_mobile
+      assign product_form_class = product_form_class | append: ' mobile-hide'
+    endunless
+    unless enable_quick_buy_desktop
+      assign product_form_class = product_form_class | append: ' mobile-only'
+    endunless
+    assign product_form_id = 'quick-add-' | append: section.id | append: product.id | append: '-quick-add-form_x'
+  -%}
+  {%- capture quick_buy -%}
+    {%- if layout == 'list-compact' -%}
+      {%- form 'product', product, id: product_form_id, class: product_form_class, novalidate: 'novalidate' -%}
+        {%- assign available_variants = product.variants | where: "available" -%}
+        {%- if enable_variant_picker and available_variants.size > 1 and product.variants.size < 250 -%}
+          <p>
+            <select name="id">
+              {%- for variant in product.variants -%}
+                {%- unless variant.available -%}{% continue %}{%- endunless -%}
+                {%- liquid
+                  if variant.featured_image
+                    assign product_image = variant.featured_image
+                   else
+                    assign product_image = product.featured_image
+                  endif
+                -%}
+                <option
+                  value="{{ variant.id }}"
+                  data-variantinfo='{ {% if product_image %}"image":"{%- if settings.fill_product_images -%}{{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}{%- else -%}{{ product_image | image_url: width: image_width_2 }}{%- endif -%}",{% endif %}"price_old":"{%- if variant.compare_at_price > variant.price -%}{{ variant.compare_at_price | money }}{%- endif -%}","price":"{{ variant.price | money }}"}'
+                  {% unless variant.available %}disabled data-class="disabled"{% endunless %}
+                  {% if variant == current_variant %}selected{% endif %}
+                >{{ variant.title }}</option>
+              {%- endfor -%}
+            </select>
+          </p>
+        {%- else -%}
+          <input type="hidden" name="id" value="{{ current_variant.id }}">
+        {%- endif -%}
+        <p class="submit">
+          <button
+            type="submit"
+            class="alibaba-btn alibaba-btn--primary {% if cart_upsell_quick_add_only %}circle {% endif %}{% if preorder %}overlay-preorder {% elsif current_variant.available %}overlay-buy_button{% else %}overlay-unavailable-buy-button{% endif %}{% if settings.button_style == 'inv' %} inv{% endif %}"
+            aria-label="{% if preorder and settings.preorder_button_text != '' %}{{ settings.preorder_button_text }}{% else %}{{ 'product.form.add_to_cart' | t }}{% endif %}"
+          >
+            <i aria-hidden="true" class="icon-cart"></i>
+            {% if preorder and settings.preorder_button_text != '' %}
+              {{ settings.preorder_button_text }}
+            {% else %}
+              {{ 'product.form.add_to_cart' | t }}
+            {% endif %}
+          </button>
+        </p>
+      {%- endform -%}
+    {%- elsif product.variants.size == 1 and current_variant.available and enable_quick_buy_drawer == false -%}
+      {%- form 'product', product, id: product_form_id, class: product_form_class, novalidate: 'novalidate' -%}
+        <fieldset>
+          <input type="hidden" name="id" value="{{ current_variant.id }}">
+          <p class="submit{% if layout == 'hotspot' %} wide{% endif %}">
+            {%- if enable_quick_buy_qty_selector -%}
+              <span class="input-amount">
+              <label for="quantity-{{ product_form_id }}" class="hidden">{{ 'product.form.quantity' | t }}</label>
+              <input type="number" id="quantity-{{ product_form_id }}" name="quantity" value="{{ current_variant.quantity_rule.min }}"
+                  min="{{ current_variant.quantity_rule.min }}"
+                 {% if current_variant.inventory_management == 'shopify' and current_variant.inventory_policy == 'deny' -%}
+                   max="{{ current_variant.inventory_quantity }}"
+                 {% elsif current_variant.quantity_rule.max %}
+                   max="{{ current_variant.quantity_rule.max }}"
+                 {% endif %}
+                {% if current_variant.quantity_rule.increment %}step="{{ current_variant.quantity_rule.increment }}"{% endif %}
+                required>
+            </span>
+            {%- endif -%}
+            <button type="submit" class="alibaba-btn alibaba-btn--primary {% if preorder %}overlay-preorder{% elsif current_variant.available %}overlay-buy_button{% else %}overlay-unavailable-buy-button{% endif %}{% if settings.button_style == 'inv' %} inv{% endif %}{% if quick_buy_compact %} compact{% if layout == 'list' %} w160{% endif %}{% endif %}" aria-label="{% if preorder and settings.preorder_button_text != '' %}{{ settings.preorder_button_text }}{% else %}{{ 'product.form.add_to_cart' | t }}{% endif %}">
+              {%- unless quick_buy_compact -%}
+                <span class="mobile-hide">
+                  {% if preorder and settings.preorder_button_text != '' %}
+                    {{ settings.preorder_button_text }}
+                  {% else %}
+                    {{ 'product.form.add_to_cart' | t }}
+                  {% endif %}
+                </span>
+              {%- endunless -%}
+              <i aria-hidden="true" class="icon-cart{% unless quick_buy_compact %} mobile-only{% endunless %}"></i>
+            </button>
+          </p>
+        </fieldset>
+      {%- endform -%}
+    {%- else -%}
+      <p class="link-btn wide alibaba-card__action-link {% unless enable_quick_buy_mobile %}mobile-hide{% endunless %} {% unless enable_quick_buy_desktop %}mobile-only{% endunless %} {% if quick_buy_compact and layout == 'list' %} w160{% endif %}">
+        <a class="alibaba-btn alibaba-btn--secondary overlay-buy_button{% if settings.button_style == 'inv' %} inv{% endif %}" href="{{ product.url }}"{% if enable_quick_buy_drawer and product != blank %} data-quickshop{% endif %}>
+          {%- if quick_buy_compact -%}
+            {{ 'product.form.view' | t }}
+          {%- else -%}
+            {{ 'product.form.view_options' | t }}
+          {%- endif -%}
+        </a>
+      </p>
+    {%- endif -%}
+  {%- endcapture %}
+{%- endif -%}
+
+<{{ container }}
+  class="
+    alibaba-product-card
+    {% if cart_upsell_card %}
+      has-form dont-move
+    {% else %}
+      legacy-product-card
+      {% if extra_class %}{% unless extra_style contains '--vertical' %}{{ extra_class }}{% endunless %}{% endif %} product-card {{ width_class }}{% if settings.enable_quick_buy != 'none' %} has-form{% endif %}
+      {% unless current_variant.available %}unavailable{% endunless %}
+      {% unless layout contains 'list' %}{% if settings.productcards_text_alignment == 'center' %}text-center{% elsif settings.productcards_text_alignment == 'right' %}text-end{% endif %}{% endunless %}
+      {% if settings.show_secondary_image %}second-img-hover{% endif %}
+      {% if product == blank %}placeholder-product{% endif %}
+      {% if upsell and index > visible_products %}hidden{% endif %}
+    {% endif %}
+  "
+  {% if layout == 'list-compact' %}
+    data-product-id="{{ product.id }}"
+  {% endif %}
+  {% if upsell and index > visible_products %}
+    data-element="unique-more-products-class"
+  {% endif %}
+  {% unless extra_style contains '--vertical' %}
+    {{- shopify_attributes -}}
+  {% endunless %}
+  style="{{ extra_style }} --anim-delay: {{ anim_delay }};"
+>
+  {% if extra_style contains '--vertical' %}
+    <div {{ shopify_attributes }} class="{% if extra_class %}{{ extra_class }}{% endif %}">
+  {% endif %}
+
+  {%- if upsell -%}
+    <span class="check alibaba-card__upsell-check">
+      <input
+        type="checkbox"
+        {% if current_variant.available == false %}
+          disabled="disable"
+        {% endif %}
+        data-id="{{ current_variant.id }}"
+        {% if is_child_product and parent_product_id %}
+          data-parent-product="{{ parent_product_id }}"
+        {% endif %}
+        id="{{ id }}-{{ product.id }}-id"
+        name="c4a"
+      >
+      <label class="hidden" for="{{ id }}-{{ product.id }}-id">{{ 'product.form.choose_product' | t }}</label>
+    </span>
+  {%- endif -%}
+
+  {%- if show_image -%}
+    <figure
+      class="
+        alibaba-card__media
+        {% if settings.multiply_product_images == 'multiply' %} img-multiply{% elsif settings.multiply_product_images == 'multiply-bg' %} img-multiply-bg{% endif %}
+        {% if settings.fade_unavailable_products and current_variant.available == false %} unavailable-faded{% endif %}
+      "
+    >
+      {% if show_labels %}{%- render 'product-labels', product: product, origin: 'productitem' -%}{% endif %}
+
+      <div class="alibaba-card__media-link">
+        {%- liquid
+          if layout == 'list-compact' and current_variant.featured_image
+            assign product_image = current_variant.featured_image
+          elsif product.selected_or_first_available_variant.featured_image
+            assign product_image = product.selected_or_first_available_variant.featured_image
+          else
+            assign product_image = product.media.first
+          endif
+        -%}
+        {%- if product != blank and product_image -%}
+          <picture class="alibaba-card__picture">
+            <img
+              src="{%- if settings.fill_product_images -%}{{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}{%- else -%}{{ product_image | image_url: width: image_width_2 }}{%- endif -%}"
+              {%- if sizes -%}
+                srcset="
+                  {%- if settings.fill_product_images -%}
+                    {%- render 'image-srcset', image: product_image, format: image_ratio, max_width: 640, crop: 'center' -%}
+                  {%- else -%}
+                    {%- render 'image-srcset', image: product_image, format: image_ratio, max_width: 640 -%}
+                  {%- endif -%}
+                "
+                sizes="{{ sizes }}"
+              {%- else -%}
+                srcset="
+                  {%- if settings.fill_product_images -%}
+                    {{ product_image | image_url: width: image_width, height: image_height, crop: 'center' }} 1x, {{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }} 2x
+                  {%- else -%}
+                    {{ product_image | image_url: width: image_width }} 1x, {{ product_image | image_url: width: image_width_2 }} 2x
+                  {%- endif -%}
+                "
+              {%- endif -%}
+              width="{{ image_width }}"
+              height="{{ image_height }}"
+              alt="{{ product_image.alt | default: product.title | escape }}"
+              {% if settings.fill_product_images %}
+                class="filled"
+              {% endif %}
+              loading="{% if section.index > 2 or no_lazyload == false or section.location == 'footer' %}lazy{% else %}eager{% endif %}"
+            >
+          </picture>
+          {%- if product.media[1] != null and settings.show_secondary_image and layout != 'list-compact' -%}
+            <picture class="alibaba-card__picture alibaba-card__picture--secondary">
+              <img
+                src="{%- if settings.fill_product_images -%}{{ product.media[1] | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}{%- else -%}{{ product.media[1] | image_url: width: image_width_2 }}{%- endif -%}"
+                {%- if sizes -%}
+                  srcset="
+                    {%- if settings.fill_product_images -%}
+                      {%- render 'image-srcset', image: product.media[1], format: image_ratio, max_width: 640, crop: 'center' -%}
+                    {%- else -%}
+                      {%- render 'image-srcset', image: product.media[1], format: image_ratio, max_width: 640 -%}
+                     {%- endif -%}
+                  "
+                  sizes="{{ sizes }}"
+                {%- else -%}
+                  srcset="
+                    {%- if settings.fill_product_images -%}
+                      {{ product.media[1] | image_url: width: image_width, height: image_height, crop: 'center' }} 1x, {{ product.media[1] | image_url: width: image_width_2, height: image_height_2, crop: 'center' }} 2x
+                    {%- else -%}
+                      {{ product.media[1] | image_url: width: image_width }} 1x, {{ product.media[1] | image_url: width: image_width_2 }} 2x
+                    {%- endif -%}
+                  "
+                {%- endif -%}
+                width="{{ image_width }}"
+                height="{{ image_height }}"
+                alt="{{ product.media[1].alt | default: product.title | escape }}"
+                loading="lazy"
+                {% if settings.fill_product_images %}
+                  class="filled"
+                {% endif %}
+              >
+            </picture>
+          {%- endif -%}
+        {%- else -%}
+          <picture class="alibaba-card__picture">
+            {{- 'product-' | append: placeholder_int | placeholder_svg_tag: 'placeholder-svg' -}}
+          </picture>
+        {%- endif -%}
+      </div>
+
+      {% comment %} {%- if bestseller_count > 50 -%}
+        <div class="alibaba-top-selling-ribbon" role="status" aria-label="{{ top_selling_text }}">
+          <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
+          <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
+        </div>
+      {%- endif -%} {% endcomment %}
+{%- comment -%}
+  1. Estrazione Brand dal Titolo e dal Vendor
+{%- endcomment -%}
+{%- assign target_brands = "nike, adidas, puma, reebok, new balance, onemix, jordan, asics" | split: ", " -%}
+{%- assign product_title_lower = product.title | downcase -%}
+{%- assign product_vendor_lower = product.vendor | downcase -%}
+{%- assign matched_brand = "" -%}
+
+{%- for brand in target_brands -%}
+  {%- assign brand_lower = brand | downcase -%}
+  {%- if product_title_lower contains brand_lower or product_vendor_lower contains brand_lower -%}
+    {%- assign matched_brand = brand | capitalize -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- comment -%}
+  2. Logica di Rendering
+{%- endcomment -%}
+{%- if bestseller_count > 50 -%}
+
+  {%- if matched_brand != "" -%}
+    <!-- bestseller_count > 50 + BRAND: Cubo 3D Animato -->
+    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--animated" role="status" aria-label="{{ top_selling_text }}">
+      <div class="alibaba-cube-scene">
+        <div class="alibaba-cube">
+          <!-- Faccia Frontale: Bestseller -->
+          <div class="alibaba-cube__face alibaba-cube__face--front">
+            <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
+            <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
+          </div>
+          <!-- Faccia Posteriore: Verified Brand -->
+          <div class="alibaba-cube__face alibaba-cube__face--top">
+            <span class="alibaba-verified-badge__icon">✓</span>
+            <span class="alibaba-verified-badge__text">Verified {{ matched_brand }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  {%- else -%}
+    <!-- bestseller_count > 50 senza Brand: Solo Ribbon Bestseller -->
+    <div class="alibaba-top-selling-ribbon" role="status" aria-label="{{ top_selling_text }}">
+      <div class="alibaba-top-selling-ribbon__main">
+        <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
+        <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
+      </div>
+    </div>
+  {%- endif -%}
+
+{%- elsif matched_brand != "" -%}
+
+  <!-- bestseller_count <= 50 + BRAND: Solo Badge Verified {{ matched_brand }} -->
+  <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--verified-only" role="status" aria-label="Verified {{ matched_brand }}">
+    <div class="alibaba-verified-standalone">
+      <span class="alibaba-verified-badge__icon">✓</span>
+      <span class="alibaba-verified-badge__text">Verified {{ matched_brand }}</span>
+    </div>
+  </div>
+
+{%- endif -%}
+      <button
+        type="button"
+        class="wishlist-productcard hidden alibaba-card__wishlist"
+        title="Wishlist"
+        data-product-id="{{ product.id }}"
+        data-variant-id="{{ current_variant.id }}"
+      >
+        <svg class="alibaba-card__wishlist-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+          <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path>
+        </svg>
+        <i class="icon-heart-outline"></i>
+      </button>
+
+      {%- if quick_buy and layout != 'list-compact' -%}
+        {{ quick_buy | replace: 'alibaba-card__form', 'alibaba-card__form alibaba-card__quickbuy' | replace: '-quick-add-form_x', '1' }}
+      {%- endif -%}
+    </figure>
+  {%- endif -%}
+
+  <div class="alibaba-card__body">
+    {%- if show_title or show_vendor -%}
+      {%- if custom_title and upsell -%}
+        <label for="{{ id }}-{{ product.id }}-id" class="alibaba-card__title-label">
+          {{- title -}}
+          {%- if upsell and show_price and price_location == 'next_to_title' -%}
+            {{- price_element -}}
+          {%- endif -%}
+        </label>
+      {%- else -%}
+        <div class="alibaba-card__header">
+          <h3 class="alibaba-card__title {% unless show_vendor %}p0{% endunless %}">
+            {%- if show_vendor -%}
+              <span class="alibaba-card__vendor">{{ vendor }}&nbsp;·&nbsp;</span>
+            {%- endif -%}
+            {%- if show_title -%}
+              <a
+                href="{{ product.url }}"
+                {% if settings.product_titles_caps %}
+                  class="text-uppercase"
+                {% endif %}
+              >
+                {{- title -}}
+                {%- if upsell and show_price and price_location == 'next_to_title' -%}
+                  {{- price_element -}}
+                {%- endif -%}
+              </a>
+            {%- endif -%}
+            {%- if layout == 'list-compact' and product.has_only_default_variant == false -%}
+              {% if enable_variant_picker == false or enable_variant_picker and available_variants.size == 1 %}
+                <span class="alibaba-card__variant small">
+                  {{ current_variant.title }}
+                </span>
+              {%- endif -%}
+            {%- endif -%}
+          </h3>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- comment -%} TRUST ROW — spedizione, resi, riordini (una riga sola) {%- endcomment -%}
+    {%- if product != blank -%}
+      <div class="alibaba-card__trust">
+        {%- if qualifies_for_free_shipping -%}
+          <span class="alibaba-trust-chip alibaba-trust-chip--shipping" title="{{ shipping_text }} — {{ localization.country.name }}">
+            <span aria-hidden="true">{{ flag_emoji }}</span>{{ shipping_text }}
+          </span>
+        {%- endif -%}
+        <span class="alibaba-trust-chip alibaba-trust-chip--returns">
+          <i aria-hidden="true">↩️</i>{{ Reso_facile }}
+        </span>
+        {%- if show_reorder_badge -%}
+          <span class="alibaba-trust-chip alibaba-trust-chip--reorder">
+            <i aria-hidden="true">🔄</i>{{ reorder_rate }}%
+          </span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if upsell %}
+      {%- if show_price and price_location == 'below_title' -%}
+        <div class="alibaba-card__price-wrapper">
+          {{- price_element -}}
+          {%- if moq > 0 -%}
+            <p class="alibaba-card__moq">
+              MOQ: {{ moq }}
+              {{ 't.moq.unit' | t | default: 'articoli' }}
+            </p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+      {%- if variant_in_popup and available_variants.size > 1 -%}
+        <p class="alibaba-card__variant-popup">
+          <span>{{ current_variant.title }}</span>
+          <a
+            href="./"
+            data-options="{{ product.options | json | escape }}"
+            data-title="{{ title }}"
+            class="overlay-{{ variant_selector_color }} strong"
+            data-variant="{{ current_variant.id }}"
+            data-upsell
+          >
+            {{- 'product.form.choose_variant' | t }}
+            <i aria-hidden="true" class="icon-chevron-right"></i>
+          </a>
+        </p>
+      {% endif %}
+      <p class="{% if variant_in_popup or product == blank or available_variants.size <= 1 %}hidden{% endif %} alibaba-card__variant-select">
+        <select name="upsell-id" id="upsell-{{ id }}">
+          {%- for variant in product.variants -%}
+            {%- unless variant.available -%}{% continue %}{%- endunless -%}
+            {%- liquid
+              if variant.featured_image
+                assign product_image = variant.featured_image
+              else
+                assign product_image = product.featured_image
+              endif
+            -%}
+            <option
+              value="{{ variant.id }}"
+              data-variantinfo='{"id":{{ variant.id }}, "variant":"{{ variant.title }}", "options":{{ variant.options | json | escape }},{% if product_image %}"image":"{%- if settings.fill_product_images -%}{{ product_image | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}{%- else -%}{{ product_image | image_url: width: image_width_2 }}{%- endif -%}",{% endif %}"price_old":"{%- if variant.compare_at_price > variant.price -%}{{ variant.compare_at_price | money }}{%- endif -%}","price":"{{ variant.price | money }}"}'
+              {% unless variant.available %}
+                disabled data-class="disabled"
+              {% endunless %}
+              {% if variant == current_variant %}
+                selected
+              {% endif %}
+            >
+              {{ variant.title }}
+            </option>
+          {%- endfor -%}
+        </select>
+      </p>
+    {%- else -%}
+      <input type="hidden" name="id" value="{{ current_variant.id }}">
+    {%- endif -%}
+
+    {%- if show_rating -%}
+      {%- liquid
+        assign rating_value = false
+        assign rating_count = false
+        if product.metafields.syncer.reviews
+          assign locale_ratings = product.metafields.syncer.reviews.value.reviews[localization.language.iso_code]
+          if locale_ratings
+            assign rating_value = locale_ratings.rating
+            assign rating_count = locale_ratings.count
+          else
+            assign rating_value = product.metafields.syncer.reviews.value.cumulative_rating
+            assign rating_count = product.metafields.syncer.reviews.value.total_reviews
+          endif
+        elsif product.metafields.reviews.rating
+          assign rating_value = product.metafields.reviews.rating.value
+          assign rating_count = product.metafields.reviews.rating_count
+        endif
+      -%}
+      {% render 'badge--brand-products', product: product %}
+
+      {%- if rating_value or bestseller_count > 0 -%}
+        <div class="alibaba-card__meta">
+          {%- if rating_value -%}
+            <span class="alibaba-card__rating-inline">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+             {% render 'rating-stars', value: rating_value %}
+            </span>
+            {%- if rating_count -%}
+              {% comment %} <span class="alibaba-card__rating-count">({{ rating_count }})</span> {% endcomment %}
+            {%- endif -%}
+          {%- endif -%}
+          {%- if bestseller_count > 0 -%}
+            {% comment %} <span class="alibaba-card__sold">+{{ bestseller_count }} {{ 't.sold_suffix' | t | default: 'venduti' }}</span> {% endcomment %}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if show_stock -%}
+      <div class="alibaba-card__stock">
+        {%- render 'product-deliverytime',
+          product: product,
+          current_variant: current_variant,
+          container: 'p',
+          extra_class: 'list-hide',
+          origin: 'productitem'
+        -%}
+      </div>
+    {%- endif -%}
+    {%- if settings.product_short_description != 'none' and type == 'both' %}
+      {%- liquid
+        if settings.product_short_description == 'custom'
+          assign product_short_description_namespace = settings.product_short_description_text | split: '.' | first
+          assign product_short_description_key = settings.product_short_description_text | split: '.' | last
+          assign short_description = product.metafields[product_short_description_namespace][product_short_description_key]
+        else
+          assign short_description = product.description | strip_html
+        endif
+      -%}
+      {% if short_description != empty and short_description != blank -%}
+        <div class="alibaba-card__description info">
+          <p>{{ short_description }}</p>
+          <p class="link-more">
+            <a href="./" class="strong link-more">
+              {{- 'general.read_more.read' | t }}
+              <span>{{ 'general.read_more.more' | t }}</span>
+              <span class="hidden">{{ 'general.read_more.less' | t }}</span>
+              <i aria-hidden="true" class="icon-chevron-down"></i>
+            </a>
+          </p>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if type == 'both' and show_stock %}
+      <div class="alibaba-card__stock-list">
+        {%- render 'product-deliverytime',
+          product: product,
+          current_variant: current_variant,
+          container: 'p',
+          extra_class: 'list-only',
+          origin: 'productitem'
+        -%}
+      </div>
+    {%- endif -%}
+
+    {% render 'badge--discount-products', product: product %}
+    {%- if upsell == false and show_price -%}
+      <div class="alibaba-card__price-wrapper">
+        <p class="price s1pr alibaba-card__price-main">
+          {%- if product.price_varies and settings.show_price_varies and layout != 'list-compact' -%}
+            {%- liquid
+              assign price_min = product.price_min | money
+              assign price_max = product.price_max | money
+            -%}
+            {{ price_min -}}
+            <span class="price-varies">&nbsp;- {{ price_max }}</span>
+          {%- else -%}
+            {%- if current_variant.compare_at_price > current_variant.price -%}
+              <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+            {%- endif -%}
+            {{ price }}
+            {%- if discount_percent > 0 -%}
+              <span class="alibaba-card__discount-badge">-{{ discount_percent }}%</span>
+            {%- endif -%}
+          {%- endif -%}
+          {%- if current_variant.unit_price_measurement -%}
+            <span class="small">
+              {{- 'product.unit_price_label' | t -}}
+              {{- current_variant.unit_price | unit_price_with_measurement: current_variant.unit_price_measurement -}}
+            </span>
+          {%- endif -%}
+        </p>
+        {%- if moq > 0 -%}
+          <p class="alibaba-card__moq">
+            <span class="alibaba-card__moq-desktop">
+              MOQ: +{{ moq }}
+              {{ 't.moq.unit' | t | default: 'articoli' }}
+            </span>
+            <span class="alibaba-card__moq-mobile" hidden>+{{ moq }} venduti</span>
+          </p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if enable_color_picker -%}
+      {%- liquid
+        assign triggers = settings.color_swatch_name | newline_to_br | strip_newlines | replace: '<br />', '|' | split: '|'
+        if settings.enable_color_swatches
+          for option in product.options_with_values
+            if triggers contains option.name
+              assign color_option = option
+              break
+            endif
+          endfor
+        endif
+      -%}
+      {% if color_option %}
+        <ul class="check color alibaba-card__colors" data-limit="6">
+          {% for color in color_option.values %}
+            {%- liquid
+              for variant in product.variants
+                assign options = variant.options | map: 'name'
+                if options contains color
+                  assign color_variant = variant
+                  break
+                endif
+              endfor
+            -%}
+            {% capture swatch %}
+                {% if color_variant and color_variant.featured_media and settings.color_swatches_variant_image %}
+                  <img src="{{ color_variant.featured_media | image_url: width: image_width_small, height: image_height_small, crop: 'center' }}" alt="{{ color }}" width="30" height="23" loading="lazy" class="color-variant-img filled">
+                {% elsif color.swatch.image %}
+                  <i aria-hidden="true" class="icon-circle" style="background-image: url('{{ color.swatch.image | image_url }}');"></i>
+                {% elsif color.swatch.color %}
+                  <i aria-hidden="true" class="icon-circle" style="background-color: {{ color.swatch.color }};"></i>
+                {% else %}
+                  <i aria-hidden="true"
+                     class="icon-circle swatch-custom-color-{{ color | handleize }}"
+                     style="background-color:{{ color | split: ' ' | last }}"
+                  ></i>
+                {% endif %}
+              {% endcapture %}
+            <li
+              {% if color_variant and color_variant.featured_media %}
+                data-img="
+                  {%- if settings.fill_product_images -%}
+                    {{ color_variant.featured_media | image_url: width: image_width_2, height: image_height_2, crop: 'center' }}
+                  {%- else -%}
+                    {{ color_variant.featured_media | image_url: width: image_width_2 }}
+                  {%- endif -%}
+                "
+              {% endif %}
+            >
+              <input
+                type="radio"
+                id="color-{{ product.id }}-{{ color_variant.id }}-{{ forloop.index }}"
+                name="color-{{ product.id }}-{{ color_variant.id }}-{{ forloop.index }}"
+              >
+              <label for="color-{{ product.id }}-{{ color_variant.id }}-{{ forloop.index }}">
+                <a
+                  href="{% if color_variant %}{{ color_variant.url }}{% else %}{{ product.url }}{% endif %}"
+                  aria-label="{{ color }}"
+                >
+                  {{ swatch }}
+                </a>
+              </label>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  {%- if quick_buy -%}
+    <div class="alibaba-card__footer{% if layout != 'list-compact' and enable_quick_buy_mobile %} mobile-hide{% endif %}">
+      {% if layout == 'list-compact' %}<footer>{% endif %}
+      {{ quick_buy | replace: '-quick-add-form_x', '2' }}
+      {% if layout == 'list-compact' %}</footer>{% endif %}
+    </div>
+  {%- endif -%}
+
+  {% if extra_style contains '--vertical' %}</div>{% endif %}
+</{{ container }}>
+
+{%- comment -%} BESTSELLER POPUP MODAL {%- endcomment -%}
+{%- if product != blank and bestseller_count > 0 -%}
+  <div class="alibaba-bestseller-popup" id="bestseller-popup-{{ product.id }}" aria-hidden="true">
+    <div class="alibaba-bestseller-popup__overlay" data-popup-close></div>
+    <div class="alibaba-bestseller-popup__content">
+      <button class="alibaba-bestseller-popup__close" data-popup-close aria-label="{{ view_more_text }}">
+        <i class="icon-close"></i>
+      </button>
+
+      <div class="alibaba-bestseller-popup__header">
+        <div class="alibaba-bestseller-popup__icon">🏆</div>
+        <h4 class="alibaba-bestseller-popup__title">{{ analytics_title }}</h4>
+        <p class="alibaba-bestseller-popup__subtitle">{{ title | truncate: 40 }}</p>
+      </div>
+
+      <div class="alibaba-bestseller-popup__body">
+        <div class="alibaba-bestseller-popup__current">
+          <span class="alibaba-bestseller-popup__label">{{ this_month_text }}</span>
+          <span class="alibaba-bestseller-popup__value alibaba-bestseller-popup__value--current">
+            {{- current_month_sales -}}
+          </span>
+          <span class="alibaba-bestseller-popup__unit">{{ items_sold_text }}</span>
+        </div>
+
+        <div class="alibaba-bestseller-popup__history">
+          <div class="alibaba-bestseller-popup__bar">
+            <div class="alibaba-bestseller-popup__bar-fill" style="--bar-height: 100%;"></div>
+            <span class="alibaba-bestseller-popup__bar-label">{{ current_month_text }}</span>
+            <span class="alibaba-bestseller-popup__bar-value">{{ current_month_sales }}</span>
+          </div>
+          <div class="alibaba-bestseller-popup__bar">
+            <div
+              class="alibaba-bestseller-popup__bar-fill"
+              style="--bar-height: {% if current_month_sales > 0 %}{{ month_1_sales | times: 100 | divided_by: current_month_sales }}%{% else %}0%{% endif %};"
+            ></div>
+            <span class="alibaba-bestseller-popup__bar-label">{{ month_1_text }}</span>
+            <span class="alibaba-bestseller-popup__bar-value">{{ month_1_sales }}</span>
+          </div>
+          <div class="alibaba-bestseller-popup__bar">
+            <div
+              class="alibaba-bestseller-popup__bar-fill"
+              style="--bar-height: {% if current_month_sales > 0 %}{{ month_2_sales | times: 100 | divided_by: current_month_sales }}%{% else %}0%{% endif %};"
+            ></div>
+            <span class="alibaba-bestseller-popup__bar-label">{{ month_2_text }}</span>
+            <span class="alibaba-bestseller-popup__bar-value">{{ month_2_sales }}</span>
+          </div>
+          <div class="alibaba-bestseller-popup__bar">
+            <div
+              class="alibaba-bestseller-popup__bar-fill"
+              style="--bar-height: {% if current_month_sales > 0 %}{{ month_3_sales | times: 100 | divided_by: current_month_sales }}%{% else %}0%{% endif %};"
+            ></div>
+            <span class="alibaba-bestseller-popup__bar-label">{{ month_3_text }}</span>
+            <span class="alibaba-bestseller-popup__bar-value">{{ month_3_sales }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="alibaba-bestseller-popup__footer">
+        <p class="alibaba-bestseller-popup__note">{{ data_note_text }}</p>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+<style>
+    /* =========================================================
+     PRODUCT CARD — Ottimizzato mobile-first
+     Stile marketplace (Temu/AliExpress): info compatte,
+     prezzo protagonista, badge sconto, CTA flottante.
+     ========================================================= */
+
+  :root {
+    --apc-accent: #ff6a00;
+    --apc-accent-hover: #e55f00;
+    --apc-price: #1a1a1a;
+    --apc-bg: #ffffff;
+    --apc-border: #eeeeee;
+    --apc-text: #212121;
+    --apc-text-secondary: #757575;
+    --apc-success: #52c41a;
+    --apc-star: #ff9500;
+    --apc-chip-bg: #f5f5f5;
+    --apc-radius: 8px;
+    --apc-transition: 0.2s ease;
+  }
+
+  /* Card base */
+  .alibaba-product-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--apc-bg);
+    border: 1px solid var(--apc-border);
+    border-radius: var(--apc-radius);
+    overflow: hidden;
+    transition: box-shadow var(--apc-transition), transform var(--apc-transition);
+    height: 100%;
+  }
+
+  .alibaba-product-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+    transform: translateY(-2px);
+  }
+
+  /* Media */
+  .alibaba-card__media {
+    position: relative;
+    margin: 0;
+    background: #f8f8f8;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .alibaba-card__media-link { display: block; width: 100%; height: 100%; }
+  .alibaba-card__picture { display: block; width: 100%; height: 100%; }
+
+  .alibaba-card__picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+  }
+
+  .alibaba-product-card:hover .alibaba-card__picture img { transform: scale(1.04); }
+
+  .alibaba-card__picture--secondary {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .alibaba-product-card:hover .alibaba-card__picture--secondary { opacity: 1; }
+
+  /* Wishlist */
+  .alibaba-card__wishlist {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 3;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--apc-border);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--apc-transition);
+  }
+
+  .alibaba-card__wishlist:hover {
+    background: var(--apc-accent);
+    border-color: var(--apc-accent);
+    color: #fff;
+  }
+
+  /* Top Selling Ribbon */
+  {% comment %} .alibaba-top-selling-ribbon {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 6px;
+    background: linear-gradient(135deg, #6d28d9, #5b21b6);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .alibaba-top-selling-ribbon__star { font-size: 12px; } {% endcomment %}
+.alibaba-top-selling-ribbon {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 28px;
+  background: linear-gradient(135deg, #6d28d9, #5b21b6);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  overflow: hidden;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.alibaba-top-selling-ribbon--animated {
+  background: linear-gradient(135deg, #4c1d95, #6d28d9, #2563eb);
+}
+
+/* Stile per badge solo Verified (quando bestseller_count <= 50) */
+.alibaba-top-selling-ribbon--verified-only {
+  background: linear-gradient(135deg, #332decff, #332decff);
+}
+
+.alibaba-verified-standalone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 6px;
+  padding: 0 8px;
+}
+
+.alibaba-top-selling-ribbon__main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 5px;
+}
+
+.alibaba-top-selling-ribbon__star {
+  font-size: 12px;
+  color: #fbbf24;
+  text-shadow: 0 0 4px rgba(251, 191, 36, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   STRUTTURA & ANIMAZIONE CUBO 3D (X-AXIS ROTATION)
+   -------------------------------------------------------------------------- */
+.alibaba-cube-scene {
+  width: 100%;
+  height: 100%;
+  perspective: 400px;
+}
+
+.alibaba-cube {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: rotateCubeX 6s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+.alibaba-cube__face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  backface-visibility: hidden;
+  box-sizing: border-box;
+}
+
+.alibaba-cube__face--front {
+  transform: translateZ(14px);
+  background: linear-gradient(135deg, #4567f0ff, #5b21b6);
+}
+
+.alibaba-cube__face--top {
+  transform: rotateX(90deg) translateZ(14px);
+  background: linear-gradient(135deg, #96052eff, #de2e69ff);
+}
+
+.alibaba-verified-badge__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  background: #ffffff;
+  color: #960505ff;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+@keyframes rotateCubeX {
+  0%, 40% {
+    transform: rotateX(0deg);
+  }
+  50%, 90% {
+    transform: rotateX(-90deg);
+  }
+  100% {
+    transform: rotateX(-360deg);
+  }
+}
+  /* Body — COMPATTO */
+  .alibaba-card__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: 10px 10px 12px;
+    gap: 4px;
+  }
+
+  .alibaba-card__header { min-width: 0; }
+
+  .alibaba-card__vendor {
+    color: var(--apc-text-secondary);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .alibaba-card__title {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 0;
+    color: var(--apc-text);
+  }
+
+  .alibaba-card__title a {
+    color: inherit;
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    /* Altezza fissa a 2 righe: le card restano perfettamente allineate in griglia */
+    min-height: calc(13px * 1.4 * 2);
+    cursor: pointer;
+    transition: color var(--apc-transition);
+  }
+
+  .alibaba-card__title a:hover { color: var(--apc-accent); }
+
+  .alibaba-card__variant {
+    display: block;
+    color: var(--apc-text-secondary);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* META — rating + venduti su UNA riga sola (stile Temu) */
+  .alibaba-card__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 11px;
+    line-height: 1.2;
+    margin-top: 1px;
+  }
+
+  .alibaba-card__rating-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--apc-star);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .alibaba-card__rating-inline svg { flex: 0 0 auto; }
+
+  .alibaba-card__rating-count {
+    color: var(--apc-text-secondary);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .alibaba-card__sold {
+    color: var(--apc-text-secondary);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* TRUST ROW — chip compatti su una riga sola */
+  .alibaba-card__trust {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 4px;
+    overflow: hidden;
+    margin-top: 2px;
+  }
+
+  .alibaba-trust-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: var(--apc-chip-bg);
+    color: var(--apc-text-secondary);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .alibaba-trust-chip i { font-style: normal; font-size: 10px; }
+
+  .alibaba-trust-chip--shipping {
+    color: #237804;
+    background: rgba(82, 196, 26, 0.1);
+  }
+
+  .alibaba-trust-chip--reorder {
+    color: var(--apc-accent);
+    background: rgba(255, 106, 0, 0.08);
+  }
+
+  /* Price */
+  .alibaba-card__price-wrapper {
+    margin-top: auto;
+    padding-top: 4px;
+  }
+
+  .alibaba-card__price-main,
+  .alibaba-card__price-inline {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--apc-price);
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+
+  .alibaba-card__price-main .old-price,
+  .alibaba-card__price-inline .old-price {
+    font-size: 11px;
+    color: #9e9e9e;
+    text-decoration: line-through;
+    font-weight: 400;
+    margin-right: 4px;
+  }
+
+  /* Badge sconto % — segnale fiducia stile marketplace */
+  .alibaba-card__discount-badge {
+    display: inline-block;
+    vertical-align: 2px;
+    margin-left: 4px;
+    padding: 1px 4px;
+    background: var(--apc-accent);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+
+  .alibaba-card__price-main .small,
+  .alibaba-card__price-inline .small {
+    display: block;
+    font-size: 11px;
+    color: var(--apc-text-secondary);
+    font-weight: 400;
+    margin-top: 2px;
+    letter-spacing: 0;
+  }
+
+  .price-varies {
+    font-size: 12px;
+    color: var(--apc-text-secondary);
+    font-weight: 400;
+  }
+
+  .alibaba-card__moq {
+    font-size: 10px;
+    color: var(--apc-text-secondary);
+    margin: 2px 0 0;
+    font-weight: 500;
+  }
+
+  /* Stock / consegna — compatto, segnale di fiducia */
+  .alibaba-card__stock,
+  .alibaba-card__stock-list {
+    font-size: 10.5px;
+    color: var(--apc-success);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .alibaba-card__stock p,
+  .alibaba-card__stock-list p { margin: 0; }
+
+  /* Description — desktop: 2 righe; mobile: nascosta (risparmio maggiore) */
+  .alibaba-card__description {
+    font-size: 12px;
+    color: var(--apc-text-secondary);
+    line-height: 1.5;
+  }
+
+  .alibaba-card__description p {
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .alibaba-card__description .link-more { margin: 2px 0 0; }
+
+  /* Colors */
+  .alibaba-card__colors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+  }
+
+  .alibaba-card__colors li {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: border-color var(--apc-transition);
+    cursor: pointer;
+  }
+
+  .alibaba-card__colors li:hover { border-color: var(--apc-accent); }
+
+  .alibaba-card__colors img,
+  .alibaba-card__colors .icon-circle {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Footer / Actions */
+  .alibaba-card__footer {
+    padding: 0 10px 10px;
+    margin-top: auto;
+  }
+
+  .alibaba-card__footer.mobile-hide { display: none; }
+
+  .alibaba-card__footer footer { width: 100%; }
+
+  .alibaba-card__footer .form-card,
+  .alibaba-card__form {
+    width: 100%;
+    margin: 0;
+  }
+
+  .alibaba-card__form fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  .alibaba-card__form .submit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+  }
+
+  .alibaba-card__form .input-amount {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+
+  .alibaba-card__form .input-amount input {
+    width: 60px;
+    height: 40px;
+    padding: 0 8px;
+    text-align: center;
+    border: 1px solid var(--apc-border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--apc-text);
+    font-size: 13px;
+  }
+
+  .alibaba-card__form .input-amount input:focus {
+    outline: none;
+    border-color: var(--apc-accent);
+    box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.12);
+  }
+
+  .alibaba-card__form button,
+  .alibaba-card__action-link a {
+    min-height: 40px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background var(--apc-transition),
+      border-color var(--apc-transition),
+      color var(--apc-transition),
+      transform var(--apc-transition),
+      box-shadow var(--apc-transition);
+  }
+
+  .alibaba-card__form button {
+    border: 1px solid var(--apc-accent);
+    background: var(--apc-accent);
+    color: #fff;
+  }
+
+  .alibaba-card__form button:hover {
+    background: var(--apc-accent-hover);
+    border-color: var(--apc-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(255, 106, 0, 0.18);
+  }
+
+  .alibaba-card__form button:active { transform: translateY(0); }
+
+  .alibaba-card__form button:disabled,
+  .alibaba-card__form button.unavailable {
+    background: #f1f1f1;
+    border-color: #ddd;
+    color: #999;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .alibaba-card__form button .icon-cart { font-size: 15px; }
+
+  .alibaba-card__form button.compact {
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+  }
+
+  .alibaba-card__form button.inv {
+    background: transparent;
+    color: var(--apc-accent);
+    border-color: var(--apc-accent);
+  }
+
+  .alibaba-card__form button.inv:hover {
+    background: var(--apc-accent);
+    color: #fff;
+  }
+
+  .alibaba-card__action-link {
+    width: 100%;
+    margin: 0;
+  }
+
+  .alibaba-card__action-link a {
+    background: transparent;
+    color: var(--apc-text);
+    border: 1px solid var(--apc-border);
+  }
+
+  .alibaba-card__action-link a:hover {
+    background: var(--apc-text);
+    border-color: var(--apc-text);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .alibaba-card__action-link a.inv {
+    color: var(--apc-text);
+    background: transparent;
+    border-color: var(--apc-text);
+  }
+
+  .alibaba-card__action-link a.inv:hover {
+    background: var(--apc-text);
+    color: #fff;
+  }
+
+  .alibaba-card__action-link.w160,
+  .alibaba-card__form .w160 { max-width: 160px; }
+
+  /* Variant selector */
+  .alibaba-card__variant-select { margin: 2px 0 4px; }
+
+  .alibaba-card__variant-select select,
+  .alibaba-card__form select {
+    width: 100%;
+    min-height: 36px;
+    padding: 0 32px 0 10px;
+    border: 1px solid var(--apc-border);
+    border-radius: 6px;
+    background-color: #fff;
+    color: var(--apc-text);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .alibaba-card__variant-select select:focus,
+  .alibaba-card__form select:focus {
+    outline: none;
+    border-color: var(--apc-accent);
+    box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.1);
+  }
+
+  .alibaba-card__variant-popup {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 3px 0;
+    padding: 6px 8px;
+    border: 1px solid var(--apc-border);
+    border-radius: 5px;
+    background: #fafafa;
+    font-size: 11px;
+  }
+
+  .alibaba-card__variant-popup > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--apc-text-secondary);
+  }
+
+  .alibaba-card__variant-popup a {
+    flex: 0 0 auto;
+    color: var(--apc-accent);
+    text-decoration: none;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .alibaba-card__variant-popup a:hover { text-decoration: underline; }
+
+  /* Preorder */
+  .alibaba-card__form .overlay-preorder {
+    background: #1677ff;
+    border-color: #1677ff;
+  }
+
+  .alibaba-card__form .overlay-preorder:hover {
+    background: #0958d9;
+    border-color: #0958d9;
+  }
+
+  /* Unavailable card */
+  .alibaba-product-card.unavailable { opacity: 0.82; }
+
+  .alibaba-product-card.unavailable:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .alibaba-product-card.unavailable .alibaba-card__picture img {
+    filter: grayscale(12%);
+  }
+
+  .alibaba-product-card.unavailable .alibaba-card__price-main {
+    color: #888;
+  }
+
+  .alibaba-card__media .unavailable-faded { opacity: 0.62; }
+
+  /* Bestseller / analytics popup */
+  .alibaba-bestseller-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s ease;
+  }
+
+  .alibaba-bestseller-popup[aria-hidden="false"] {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .alibaba-bestseller-popup__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(3px);
+  }
+
+  .alibaba-bestseller-popup__content {
+    position: relative;
+    z-index: 1;
+    width: min(430px, 100%);
+    max-height: min(680px, calc(100vh - 40px));
+    overflow: auto;
+    background: #fff;
+    border: 1px solid var(--apc-border);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.25s ease;
+  }
+
+  .alibaba-bestseller-popup[aria-hidden="false"]
+    .alibaba-bestseller-popup__content {
+    transform: translateY(0) scale(1);
+  }
+
+  .alibaba-bestseller-popup__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--apc-border);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--apc-text);
+    cursor: pointer;
+    transition: all var(--apc-transition);
+  }
+
+  .alibaba-bestseller-popup__close:hover {
+    background: var(--apc-text);
+    border-color: var(--apc-text);
+    color: #fff;
+  }
+
+  .alibaba-bestseller-popup__header {
+    padding: 28px 50px 20px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .alibaba-bestseller-popup__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    background: #fff7e6;
+    font-size: 25px;
+  }
+
+  .alibaba-bestseller-popup__title {
+    margin: 0;
+    color: var(--apc-text);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .alibaba-bestseller-popup__subtitle {
+    margin: 6px 0 0;
+    color: var(--apc-text-secondary);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .alibaba-bestseller-popup__body { padding: 20px; }
+
+  .alibaba-bestseller-popup__current {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 7px;
+    margin-bottom: 26px;
+    padding: 16px;
+    border-radius: 10px;
+    background: #fafafa;
+  }
+
+  .alibaba-bestseller-popup__label {
+    color: var(--apc-text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .alibaba-bestseller-popup__value {
+    color: var(--apc-text);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .alibaba-bestseller-popup__value--current { color: var(--apc-accent); }
+
+  .alibaba-bestseller-popup__unit {
+    color: var(--apc-text-secondary);
+    font-size: 11px;
+  }
+
+  .alibaba-bestseller-popup__history {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    height: 210px;
+    padding: 15px 5px 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .alibaba-bestseller-popup__bar {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    flex: 1 1 0;
+    height: 100%;
+    min-width: 0;
+  }
+
+  .alibaba-bestseller-popup__bar-fill {
+    width: min(42px, 70%);
+    height: var(--bar-height, 0%);
+    min-height: 3px;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(to top, var(--apc-accent), #ff9d52);
+    transition: height 0.5s ease;
+  }
+
+  .alibaba-bestseller-popup__bar-label {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    width: 100%;
+    transform: translateX(-50%);
+    color: var(--apc-text-secondary);
+    font-size: 9px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .alibaba-bestseller-popup__bar-value {
+    position: absolute;
+    bottom: calc(var(--bar-height, 0%) + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--apc-text);
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .alibaba-bestseller-popup__footer { padding: 25px 20px 20px; }
+
+  .alibaba-bestseller-popup__note {
+    margin: 0;
+    color: #999;
+    font-size: 10px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .alibaba-bestseller-popup__content::-webkit-scrollbar { width: 5px; }
+  .alibaba-bestseller-popup__content::-webkit-scrollbar-track { background: transparent; }
+  .alibaba-bestseller-popup__content::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+  /* Card animations */
+  .alibaba-product-card.anim-slide-left,
+  .alibaba-product-card.anim-slide-right,
+  .alibaba-product-card.anim-scale-in,
+  .alibaba-product-card.anim-flip-x,
+  .alibaba-product-card.anim-bounce-in {
+    animation-duration: 0.55s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: both;
+    animation-delay: var(--anim-delay, 0s);
+  }
+
+  .anim-slide-left { animation-name: alibabaSlideLeft; }
+  .anim-slide-right { animation-name: alibabaSlideRight; }
+  .anim-scale-in { animation-name: alibabaScaleIn; }
+  .anim-flip-x { animation-name: alibabaFlipX; }
+  .anim-bounce-in { animation-name: alibabaBounceIn; }
+
+  @keyframes alibabaSlideLeft {
+    from { opacity: 0; transform: translateX(-18px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes alibabaSlideRight {
+    from { opacity: 0; transform: translateX(18px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes alibabaScaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes alibabaFlipX {
+    from { opacity: 0; transform: perspective(500px) rotateX(-8deg); }
+    to { opacity: 1; transform: perspective(500px) rotateX(0); }
+  }
+
+  @keyframes alibabaBounceIn {
+    0% { opacity: 0; transform: scale(0.94); }
+    60% { opacity: 1; transform: scale(1.02); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* List layout */
+  .alibaba-product-card.list,
+  .alibaba-product-card.list-compact { border-radius: 6px; }
+
+  .alibaba-product-card.list .alibaba-card__media,
+  .alibaba-product-card.list-compact .alibaba-card__media { aspect-ratio: 1 / 1; }
+
+  .alibaba-product-card.list .alibaba-card__body,
+  .alibaba-product-card.list-compact .alibaba-card__body { padding: 10px 12px; }
+
+  .alibaba-product-card.list .alibaba-card__footer,
+  .alibaba-product-card.list-compact .alibaba-card__footer { padding: 0 12px 12px; }
+
+  /* Hotspot */
+  .alibaba-product-card.hotspot { border-radius: 6px; }
+  .alibaba-product-card.hotspot .alibaba-card__body { padding: 10px; }
+  .alibaba-product-card.hotspot .alibaba-card__title { font-size: 13px; }
+
+  /* Accessibility */
+  .alibaba-product-card a:focus-visible,
+  .alibaba-product-card button:focus-visible,
+  .alibaba-product-card input:focus-visible,
+  .alibaba-product-card select:focus-visible,
+  .alibaba-bestseller-popup button:focus-visible {
+    outline: 2px solid var(--apc-accent);
+    outline-offset: 2px;
+  }
+
+  body.alibaba-popup-open { overflow: hidden; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .alibaba-product-card,
+    .alibaba-card__picture img,
+    .alibaba-card__picture--secondary,
+    .alibaba-bestseller-popup,
+    .alibaba-bestseller-popup__content,
+    .alibaba-bestseller-popup__bar-fill {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .alibaba-product-card:hover { transform: none; }
+  }
+
+  /* =========================================================
+     MOBILE — stile marketplace professionale
+     ========================================================= */
+  {% comment %} @media screen and (max-width: 749px) {
+    .alibaba-product-card { border-radius: 8px; }
+
+    .alibaba-product-card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .alibaba-card__body {
+      padding: 8px 8px 10px;
+      gap: 3px;
+    }
+
+    .alibaba-card__title { font-size: 12px; }
+    .alibaba-card__title a { min-height: calc(12px * 1.4 * 2); }
+    .alibaba-card__vendor { font-size: 9px; }
+
+    .alibaba-card__price-main,
+    .alibaba-card__price-inline { font-size: 15px; }
+
+    .alibaba-card__price-main .old-price,
+    .alibaba-card__price-inline .old-price { font-size: 10px; }
+
+    .alibaba-card__discount-badge { font-size: 9px; }
+
+    .alibaba-card__meta { font-size: 10px; }
+
+    .alibaba-trust-chip {
+      height: 16px;
+      font-size: 8.5px;
+      padding: 0 5px;
+    }
+
+    .alibaba-card__stock,
+    .alibaba-card__stock-list { font-size: 10px; }
+
+    /* Descrizione nascosta su mobile: massimo risparmio di spazio */
+    .alibaba-card__description { display: none; }
+
+    .alibaba-card__wishlist {
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .alibaba-top-selling-ribbon { padding: 5px; font-size: 9px; }
+    .alibaba-top-selling-ribbon__star { font-size: 11px; }
+
+    .alibaba-card__footer { padding: 0 8px 8px; }
+
+    /* Quick buy mobile: bottone tondo flottante sull'immagine
+       (stile AliExpress — zero spazio nel body della card) */
+    .alibaba-card__footer.mobile-hide { display: none !important; }
+
+    .alibaba-card__media .alibaba-card__quickbuy {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      z-index: 4;
+      width: auto !important;
+      margin: 0;
+    }
+
+    .alibaba-card__media .alibaba-card__quickbuy .submit {
+      width: auto;
+      margin: 0;
+      display: block;
+    }
+
+    .alibaba-card__media .alibaba-card__quickbuy .input-amount { display: none; }
+
+    .alibaba-card__media .alibaba-card__quickbuy button {
+      width: 34px !important;
+      min-width: 34px;
+      height: 34px;
+      min-height: 34px;
+      padding: 0 !important;
+      border-radius: 50% !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .alibaba-card__media .alibaba-card__quickbuy button > span { display: none !important; }
+
+    .alibaba-card__media .alibaba-card__quickbuy button .icon-cart {
+      display: inline !important;
+      font-size: 15px;
+      margin: 0;
+    }
+
+    /* "Vedi opzioni" sulle varianti: su mobile si apre il prodotto
+       toccando la card (comportamento Temu) */
+    .alibaba-card__media .alibaba-card__action-link { display: none; }
+
+    .alibaba-bestseller-popup { padding: 12px; }
+
+    .alibaba-bestseller-popup__content {
+      max-height: calc(100vh - 24px);
+      border-radius: 12px;
+    }
+
+    .alibaba-bestseller-popup__header { padding: 24px 45px 16px; }
+    .alibaba-bestseller-popup__body { padding: 15px; }
+    .alibaba-bestseller-popup__history { height: 185px; }
+    .alibaba-bestseller-popup__value { font-size: 24px; }
+  } {% endcomment %}
+{% comment %} @media screen and (max-width: 749px) {
+  .alibaba-product-card { 
+    border-radius: 8px; 
+  }
+
+  .alibaba-product-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .alibaba-card__body {
+    padding: 8px 8px 10px;
+    gap: 3px;
+  }
+
+  .alibaba-card__title { font-size: 12px; }
+  .alibaba-card__title a { min-height: calc(12px * 1.4 * 2); }
+  .alibaba-card__vendor { font-size: 9px; }
+
+  .alibaba-card__price-main,
+  .alibaba-card__price-inline { font-size: 15px; }
+
+  .alibaba-card__price-main .old-price,
+  .alibaba-card__price-inline .old-price { font-size: 10px; }
+
+  .alibaba-card__discount-badge { font-size: 9px; }
+
+  .alibaba-card__meta { font-size: 10px; }
+
+  .alibaba-trust-chip {
+    height: 16px;
+    font-size: 8.5px;
+    padding: 0 5px;
+  }
+
+  .alibaba-card__stock,
+  .alibaba-card__stock-list { font-size: 10px; }
+
+  .alibaba-card__description { display: none; }
+
+  .alibaba-card__wishlist {
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Adattamento ribbon e cubo su mobile */
+  .alibaba-top-selling-ribbon { 
+    height: 24px;
+    font-size: 8.5px; 
+  }
+  .alibaba-top-selling-ribbon__star { 
+    font-size: 10px; 
+  }
+
+  .alibaba-cube__face--front {
+    transform: translateZ(12px);
+  }
+
+  .alibaba-cube__face--top {
+    transform: rotateX(90deg) translateZ(12px);
+  }
+
+  .alibaba-verified-badge__icon {
+    width: 11px;
+    height: 11px;
+    font-size: 8px;
+  }
+
+  .alibaba-card__footer { padding: 0 8px 8px; }
+
+  .alibaba-card__footer.mobile-hide { display: none !important; }
+
+  .alibaba-card__media .alibaba-card__quickbuy {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    z-index: 4;
+    width: auto !important;
+    margin: 0;
+  }
+
+  .alibaba-card__media .alibaba-card__quickbuy .submit {
+    width: auto;
+    margin: 0;
+    display: block;
+  }
+
+  .alibaba-card__media .alibaba-card__quickbuy .input-amount { display: none; }
+
+  .alibaba-card__media .alibaba-card__quickbuy button {
+    width: 34px !important;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .alibaba-card__media .alibaba-card__quickbuy button > span { display: none !important; }
+
+  .alibaba-card__media .alibaba-card__quickbuy button .icon-cart {
+    display: inline !important;
+    font-size: 15px;
+    margin: 0;
+  }
+
+  .alibaba-card__media .alibaba-card__action-link { display: none; }
+
+  .alibaba-bestseller-popup { padding: 12px; }
+
+  .alibaba-bestseller-popup__content {
+    max-height: calc(100vh - 24px);
+    border-radius: 12px;
+  }
+
+  .alibaba-bestseller-popup__header { padding: 24px 45px 16px; }
+  .alibaba-bestseller-popup__body { padding: 15px; }
+  .alibaba-bestseller-popup__history { height: 185px; }
+  .alibaba-bestseller-popup__value { font-size: 24px; }
+} {% endcomment %}
+@media screen and (max-width: 749px) {
+  .alibaba-product-card { 
+    border-radius: 8px; 
+  }
+
+  .alibaba-product-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .alibaba-card__body {
+    padding: 8px 8px 10px;
+    gap: 3px;
+  }
+
+  .alibaba-card__title { font-size: 12px; }
+  .alibaba-card__title a { min-height: calc(12px * 1.4 * 2); }
+  .alibaba-card__vendor { font-size: 9px; }
+
+  .alibaba-card__price-main,
+  .alibaba-card__price-inline { font-size: 15px; }
+
+  .alibaba-card__price-main .old-price,
+  .alibaba-card__price-inline .old-price { font-size: 10px; }
+
+  .alibaba-card__discount-badge { font-size: 9px; }
+
+  .alibaba-card__meta { font-size: 10px; }
+
+  .alibaba-trust-chip {
+    height: 16px;
+    font-size: 8.5px;
+    padding: 0 5px;
+  }
+
+  .alibaba-card__stock,
+  .alibaba-card__stock-list { font-size: 10px; }
+
+  .alibaba-card__description { display: none; }
+
+  .alibaba-card__wishlist {
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .alibaba-top-selling-ribbon { 
+    height: 24px;
+    font-size: 8.5px; 
+  }
+  .alibaba-top-selling-ribbon__star { 
+    font-size: 10px; 
+  }
+
+  .alibaba-cube__face--front {
+    transform: translateZ(12px);
+  }
+
+  .alibaba-cube__face--top {
+    transform: rotateX(90deg) translateZ(12px);
+  }
+
+  .alibaba-verified-badge__icon {
+    width: 11px;
+    height: 11px;
+    font-size: 8px;
+  }
+
+  .alibaba-card__footer { padding: 0 8px 8px; }
+
+  .alibaba-card__footer.mobile-hide { display: none !important; }
+
+  .alibaba-card__media .alibaba-card__quickbuy {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    z-index: 4;
+    width: auto !important;
+    margin: 0;
+  }
+
+  .alibaba-card__media .alibaba-card__quickbuy .submit {
+    width: auto;
+    margin: 0;
+    display: block;
+  }
+
+  .alibaba-card__media .alibaba-card__quickbuy .input-amount { display: none; }
+
+  .alibaba-card__media .alibaba-card__quickbuy button {
+    width: 34px !important;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .alibaba-card__media .alibaba-card__quickbuy button > span { display: none !important; }
+
+  .alibaba-card__media .alibaba-card__quickbuy button .icon-cart {
+    display: inline !important;
+    font-size: 15px;
+    margin: 0;
+  }
+
+  .alibaba-card__media .alibaba-card__action-link { display: none; }
+
+  .alibaba-bestseller-popup { padding: 12px; }
+
+  .alibaba-bestseller-popup__content {
+    max-height: calc(100vh - 24px);
+    border-radius: 12px;
+  }
+
+  .alibaba-bestseller-popup__header { padding: 24px 45px 16px; }
+  .alibaba-bestseller-popup__body { padding: 15px; }
+  .alibaba-bestseller-popup__history { height: 185px; }
+  .alibaba-bestseller-popup__value { font-size: 24px; }
+}
+  /* Very small mobile */
+  @media screen and (max-width: 389px) {
+    .alibaba-card__body { padding: 7px 7px 9px; }
+    .alibaba-card__footer { padding: 0 7px 7px; }
+    .alibaba-card__title { font-size: 11.5px; }
+    .alibaba-card__title a { min-height: calc(11.5px * 1.4 * 2); }
+    .alibaba-card__price-main,
+    .alibaba-card__price-inline { font-size: 14px; }
+    .alibaba-trust-chip { font-size: 8px; height: 15px; }
+    .alibaba-card__meta { font-size: 9.5px; }
+  }
+</style>

@@ -1,0 +1,247 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "settings": {
+        "hide_mobile": false
+      }
+    },
+    "165510985160ffa4b3": {
+      "type": "section-slideshow",
+      "blocks": {
+        "16551098501ceffa7e-0": {
+          "type": "slide",
+          "settings": {
+            "layout": "right",
+            "overlay_opacity": 15,
+            "color_palette": "scheme-4",
+            "text_position": "text-start",
+            "title": "<h1>{{ collection.title }}</h1>",
+            "title_underline_style": "none",
+            "text": "{{ collection.description }}",
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain"
+          }
+        }
+      },
+      "block_order": [
+        "16551098501ceffa7e-0"
+      ],
+      "settings": {
+        "height": "32/9",
+        "width": "boxed",
+        "autoplay": false,
+        "autoplay_seconds": 3,
+        "enable_controls": false,
+        "height_mobile": "xs",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "1660555835f130cd00": {
+      "type": "section-featured-products",
+      "settings": {
+        "layout": "slider",
+        "number_of_items": 6,
+        "text_alignment": "start",
+        "title": "<h2>New products</h2>",
+        "title_underline_style": "none",
+        "text": "",
+        "show_link": false,
+        "link_text": "",
+        "link_url": "",
+        "button_style": "primary plain",
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": true,
+        "mobile_layout": "slider",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16548690024b0be279": {
+      "type": "section-gallery",
+      "blocks": {
+        "1654869002e8d139cb-0": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 5,
+            "color_palette": "scheme-4",
+            "text_position": "end center",
+            "title": "<h2>Plant terrariums</h2>",
+            "title_underline_style": "none",
+            "text": "",
+            "show_link": true,
+            "link_text": "Discover now",
+            "link_url": "/",
+            "button_style": "secondary link"
+          }
+        },
+        "1654869002e8d139cb-1": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 10,
+            "color_palette": "scheme-4",
+            "text_position": "end center",
+            "title": "<h2>Dried flowers</h2>",
+            "title_underline_style": "none",
+            "text": "",
+            "show_link": true,
+            "link_text": "Discover now",
+            "link_url": "/",
+            "button_style": "secondary link"
+          }
+        },
+        "61903fe0-38ee-4205-9b32-e1b13cdda520": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 10,
+            "color_palette": "scheme-4",
+            "text_position": "end center",
+            "title": "<h2>House plants</h2>",
+            "title_underline_style": "none",
+            "text": "",
+            "show_link": true,
+            "link_text": "Discover now",
+            "link_url": "/",
+            "button_style": "secondary link"
+          }
+        }
+      },
+      "block_order": [
+        "1654869002e8d139cb-0",
+        "1654869002e8d139cb-1",
+        "61903fe0-38ee-4205-9b32-e1b13cdda520"
+      ],
+      "settings": {
+        "items_layout": "playful-grid-inv",
+        "items_width": 3,
+        "height": "1/1",
+        "width": "boxed",
+        "space_between": 16,
+        "image_zoom": true,
+        "image_move": false,
+        "show_content_on_hover": false,
+        "content_on_hover_color_palette": "dark",
+        "layout_mobile": "compact",
+        "mobile_height": "size-xs",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "main-collection": {
+      "type": "main-collection",
+      "blocks": {
+        "46c7e820-523e-4f79-a02e-8289bc02fe41": {
+          "type": "title",
+          "settings": {
+            "title_size": "h1",
+            "text_alignment": "left",
+            "title": ""
+          }
+        },
+        "b4ca5ed6-593e-4fb2-b602-a25847c3b247": {
+          "type": "description",
+          "settings": {
+            "text_alignment": "left",
+            "enable_read_more": false,
+            "text": ""
+          }
+        },
+        "3b8d4990-828e-4b6b-ac83-772f3c5d1285": {
+          "type": "product_grid",
+          "settings": {}
+        },
+        "9676b31d-fbea-4f1a-909d-6a816ab7ee38": {
+          "type": "sorting",
+          "settings": {}
+        },
+        "05592803-c02a-46b6-bd00-a83f561b4c7c": {
+          "type": "spacer",
+          "settings": {
+            "height": 20
+          }
+        }
+      },
+      "block_order": [
+        "46c7e820-523e-4f79-a02e-8289bc02fe41",
+        "b4ca5ed6-593e-4fb2-b602-a25847c3b247",
+        "3b8d4990-828e-4b6b-ac83-772f3c5d1285",
+        "9676b31d-fbea-4f1a-909d-6a816ab7ee38",
+        "05592803-c02a-46b6-bd00-a83f561b4c7c"
+      ],
+      "settings": {
+        "pagination_qty": 48,
+        "pagination_type": "pages",
+        "show_amount_of_products_in_collection": true,
+        "show_collection_image": false,
+        "productview_type": "grid",
+        "products_per_row": 3,
+        "enable_filters": true,
+        "enable_menu": true,
+        "enable_collections": true,
+        "filters_menu_alignment": "left",
+        "collections_menu": [],
+        "filter_sticky": true,
+        "filters_show_more_limit": 7,
+        "image_swatches_size": "xs",
+        "image_swatches_fill_images": true,
+        "image_swatches_show_in_circle": true,
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "products_per_row_mobile": "2",
+        "filter_mobile_sticky": false
+      }
+    },
+    "1662462585c97697c0": {
+      "type": "section-collection-list",
+      "settings": {
+        "image_ratio": "square",
+        "fill_images": true,
+        "layout": "slider",
+        "number_of_items": 5,
+        "text_alignment": "start",
+        "title": "<h2>You might like these too:</h2>",
+        "title_underline_style": "none",
+        "show_link": true,
+        "link_text": "All collections",
+        "link_url": "/",
+        "button_style": "primary link",
+        "collection_title_size": "p",
+        "mobile_layout": "slider",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "165510985160ffa4b3",
+    "1660555835f130cd00",
+    "16548690024b0be279",
+    "main-collection",
+    "1662462585c97697c0"
+  ]
+}

@@ -1,0 +1,1557 @@
+{% comment %} {%- liquid
+  assign ve_title = 'vantaggi.title' | t: default: "Vantaggi esclusivi per l'articolo"
+  assign ve_coupon_title = 'vantaggi.coupon_title' | t: default: 'Coupon: 20% di sconto'
+  assign ve_coupon_desc = 'vantaggi.coupon_desc' | t: default: 'Con una spesa min. di 40 €, avrai uno sconto max. di 12 €.'
+  assign ve_coupon_validity = 'vantaggi.coupon_validity' | t: default: 'Offerta a tempo limitato'
+  assign ve_terms_link = 'vantaggi.terms' | t: default: 'Termini e Condizioni'
+  assign ve_ship_title = 'vantaggi.shipping_title' | t: default: 'Spedizione gratuita'
+  assign ve_ship_desc = 'vantaggi.shipping_desc' | t: default: 'Spedizione gratuita su questo ordine'
+  assign ve_claim_btn = 'vantaggi.claim' | t: default: 'Riscuoti'
+  assign ve_close_btn = 'vantaggi.close' | t: default: 'Chiudi'
+  assign ve_coupon_code = 'JCEB1XQ31X8X'
+
+  # Calcolo dinamico dello sconto (20% max 12€)
+  assign original_price = product.selected_or_first_available_variant.price
+  assign discount_rate = 0.20
+  assign max_discount = 1200
+  assign calculated_discount = original_price | times: discount_rate
+
+  if calculated_discount > max_discount
+    assign actual_discount = max_discount
+  else
+    assign actual_discount = calculated_discount
+  endif
+
+  assign final_price = original_price | minus: actual_discount
+-%}
+
+<div class="ve-container" id="ve-main-wrap">
+  {%- comment %} ── TRIGGER BADGE (DIV) ── {%- endcomment %}
+  <div
+    class="ve-pill"
+    id="ve-open-trigger"
+    role="button"
+    tabindex="0"
+    aria-expanded="false"
+    aria-controls="ve-popup-card"
+  >
+    <span class="ve-pill-title">{{ ve_title }}</span>
+    <span class="ve-pill-arrow" aria-hidden="true">›</span>
+  </div>
+
+  {%- comment %} ── CONTENUTO POPUP ── {%- endcomment %}
+  <div class="ve-accordion-wrap" id="ve-popup-card" aria-hidden="true">
+    <div class="ve-accordion-content">
+      <div class="ve-card-header">
+        <h3 class="ve-card-title">{{ ve_title }}</h3>
+        <span class="ve-card-gift-icon">🎁</span>
+      </div>
+
+      <!-- Card Prezzo Scontato Calcolato -->
+      <div class="ve-ocard ve-price-card">
+        <div class="ve-card-row">
+          <div class="ve-icon-circle ve-bg-green">🏷️</div>
+          <div class="ve-card-text">
+            <div class="ve-otag">{{ 'vantaggi.price_preview_title' | t: default: 'Prezzo Riservato con Coupon' }}</div>
+            <div class="ve-price-box">
+              <span class="ve-price-discounted">{{ final_price | money }}</span>
+              <span class="ve-price-original">{{ original_price | money }}</span>
+              <span class="ve-price-badge">-{{ actual_discount | money }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Coupon con Timer -->
+      <div class="ve-ocard">
+        <div class="ve-card-row">
+          <div class="ve-icon-circle ve-bg-pink">🎟️</div>
+          <div class="ve-card-text">
+            <div class="ve-otag">{{ ve_coupon_title }}</div>
+            <p class="ve-odesc">{{ ve_coupon_desc }}</p>
+
+            <!-- Timer a conteggio rovesciato (2 giorni) -->
+            <div class="ve-timer-wrap">
+              <span class="ve-timer-label">⏱️ {{ 'vantaggi.expires_in' | t: default: 'Scade tra' }}:</span>
+              <span class="ve-timer-clock" id="ve-countdown-timer">02d 00h 00m 00s</span>
+            </div>
+
+            <span class="ve-terms-link" id="ve-open-terms" role="button" tabindex="0">{{ ve_terms_link }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Spedizione -->
+      <div class="ve-ocard">
+        <div class="ve-card-row">
+          <div class="ve-icon-circle ve-bg-cyan">🚚</div>
+          <div class="ve-card-text">
+            <div class="ve-otag ve-otag-dark">{{ ve_ship_title }}</div>
+            <p class="ve-odesc ve-odesc-last">{{ ve_ship_desc }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Azioni -->
+      <div class="ve-actions">
+        <button type="button" class="ve-cbtn ve-btn-claim" id="ve-claim-code" data-code="{{ ve_coupon_code }}">
+          {{ ve_claim_btn }}
+        </button>
+        <button type="button" class="ve-btn-close-action" id="ve-close-card">
+          {{ ve_close_btn }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {%- comment %} ── DRAWER TERMINI E CONDIZIONI ── {%- endcomment %}
+  <div class="ve-overlay" id="ve-terms-overlay"></div>
+  <div class="ve-drawer" id="ve-terms-drawer" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="ve-dhead">
+      <span class="ve-dhead-title">
+        {{- 'vantaggi.terms_modal_title' | t: default: 'Termini e Condizioni Promozionali' -}}
+      </span>
+      <button class="ve-dclose" id="ve-close-terms-x" type="button" aria-label="Chiudi">x</button>
+    </div>
+    <div class="ve-dbody">
+      <!-- Dettagli del Coupon -->
+      <div class="ve-ocard ve-ocard-drawer">
+        <div class="ve-otag">📌 {{ 'vantaggi.promo_details_title' | t: default: 'Dettagli della Promozione' }}</div>
+        <p class="ve-odesc ve-odesc-last">
+          • <strong>{{ 'vantaggi.term_discount_value' | t: default: 'Valore sconto' }}:</strong> 20% sul totale dei
+          prodotti idonei.<br>
+          • <strong>{{ 'vantaggi.term_min_spend' | t: default: 'Spesa minima' }}:</strong> Applicabile su acquisti da
+          40,00 €.<br>
+          • <strong>{{ 'vantaggi.term_max_discount' | t: default: 'Sconto massimo' }}:</strong> 12,00 €.<br>
+          • <strong>{{ 'vantaggi.term_validity' | t: default: 'Durata offerta' }}:</strong> Valida per cicli da 48 ore
+          dalla prima visita del cliente e automaticamente rinnovabile.<br>
+          • <strong>{{ 'vantaggi.term_limits' | t: default: 'Limitazioni' }}:</strong> Non cumulabile con altri codici
+          promozionali.
+        </p>
+      </div>
+
+      <!-- Sezione Clienti UE -->
+      <div class="ve-ocard ve-ocard-drawer">
+        <div class="ve-otag">
+          🇪🇺 {{ 'vantaggi.eu_clients_title' | t: default: "Per i Clienti dell'Unione Europea (UE)" }}
+        </div>
+        <p class="ve-odesc ve-odesc-last">
+          • <strong>Trasparenza Prezzi (Direttiva UE 2019/2161 - Omnibus):</strong> La percentuale di sconto viene
+          applicata al prezzo di vendita. Ogni prezzo precedente fa riferimento al prezzo più basso degli ultimi 30
+          giorni.<br>
+          • <strong>Diritto di Recesso (Direttiva UE 2011/83/UE):</strong> Diritto di recesso garantito entro 14 giorni.
+          Il rimborso in caso di reso corrisponderà al valore netto effettivamente pagato.
+        </p>
+      </div>
+
+      <!-- Sezione Clienti Extra-UE -->
+      <div class="ve-ocard ve-ocard-drawer">
+        <div class="ve-otag ve-otag-dark">
+          🌐 {{ 'vantaggi.extra_eu_clients_title' | t: default: 'Per i Clienti Internazionali (Extra-UE)' }}
+        </div>
+        <p class="ve-odesc ve-odesc-last">
+          • <strong>Calcolo Sconto:</strong> Sconto applicato unicamente sul valore netto dei prodotti, escluse spese di
+          spedizione estere e sdoganamento.<br>
+          • <strong>Dazi e Tasse:</strong> Imposte e dazi doganali locali rimangono a carico del cliente.
+        </p>
+      </div>
+
+      <!-- Supporto e Assistenza -->
+      <div class="ve-ocard ve-ocard-drawer">
+        <div class="ve-otag">✉️ {{ 'vantaggi.support_title' | t: default: 'Assistenza e Supporto Clienti' }}</div>
+        <p class="ve-odesc ve-odesc-last">
+          In caso di domande o difficoltà con il codice sconto, il nostro team è a disposizione:<br>
+          Email:
+          <a href="mailto:contact@platinumshop.it" class="ve-terms-link" style="font-weight:700;"
+            >contact@platinumshop.it</a
+          >
+        </p>
+      </div>
+    </div>
+    <div class="ve-dfooter">
+      <button class="ve-dfooter-btn" id="ve-close-terms-btn" type="button">{{ ve_close_btn }}</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── ISOLAMENTO E RESET CONTENITORE ── */
+  .ve-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 12px 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    clear: both !important;
+    position: relative !important;
+    z-index: 10 !important;
+  }
+
+  .ve-container * {
+    box-sizing: border-box !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* ── BADGE PRINCIPALE ── */
+  div.ve-pill {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    background: linear-gradient(90deg, #e8f7fa 0%, #f3e8fa 50%, #fce8f3 100%) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+  }
+
+  .ve-pill-title {
+    font-weight: 700 !important;
+    color: #111111 !important;
+    font-size: 14px !important;
+  }
+
+  .ve-pill-arrow {
+    color: #555555 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+  }
+
+  div.ve-pill[aria-expanded="true"] .ve-pill-arrow {
+    transform: rotate(90deg) !important;
+  }
+
+  /* ── CONTENITORE SCHEDA APERTA ── */
+  .ve-accordion-wrap {
+    display: none !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+  }
+
+  .ve-accordion-wrap.is-open {
+    display: block !important;
+  }
+
+  .ve-accordion-content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    background: linear-gradient(135deg, #e0f2fe 0%, #f3e8ff 50%, #fce7f3 100%) !important;
+    padding: 18px 14px !important;
+    border-radius: 16px !important;
+    border: none !important;
+  }
+
+  .ve-card-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 2px !important;
+  }
+
+  .ve-card-title {
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .ve-card-gift-icon {
+    font-size: 24px !important;
+  }
+
+  /* ── SCHEDE BIANCHE INTERNE ── */
+  .ve-ocard {
+    border-radius: 14px !important;
+    padding: 14px !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+    width: 100% !important;
+  }
+
+  .ve-card-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .ve-icon-circle {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .ve-bg-pink { background: #ffe4e6 !important; }
+  .ve-bg-cyan { background: #ccfbf1 !important; }
+  .ve-bg-green { background: #dcfce7 !important; }
+
+  .ve-card-text {
+    flex: 1 !important;
+  }
+
+  .ve-otag {
+    display: block !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    margin-bottom: 4px !important;
+  }
+
+  .ve-odesc {
+    font-size: 12px !important;
+    color: #4b5563 !important;
+    margin: 0 0 6px 0 !important;
+    line-height: 1.45 !important;
+  }
+
+  .ve-odesc-last {
+    margin-bottom: 0 !important;
+  }
+
+  /* ── BLOCCO PREZZO DINAMICO ── */
+  .ve-price-box {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 4px !important;
+  }
+
+  .ve-price-discounted {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #16a34a !important;
+  }
+
+  .ve-price-original {
+    font-size: 14px !important;
+    color: #9ca3af !important;
+    text-decoration: line-through !important;
+  }
+
+  .ve-price-badge {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+  }
+
+  /* ── BLOCCO TIMER ── */
+  .ve-timer-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: #fef2f2 !important;
+    border: 1px solid #fee2e2 !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+    margin: 6px 0 !important;
+  }
+
+  .ve-timer-label {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #991b1b !important;
+  }
+
+  .ve-timer-clock {
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    color: #dc2626 !important;
+    font-family: monospace !important;
+  }
+
+  /* ── LINK TERMINI ── */
+  .ve-terms-link {
+    display: inline-block !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin-top: 2px !important;
+    color: #2563eb !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-decoration: underline !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+  }
+
+  /* ── PULSANTI DI AZIONE ── */
+  .ve-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-top: 4px !important;
+  }
+
+  button.ve-cbtn {
+    width: 100% !important;
+    background: #ff2b56 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 50px !important;
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  button.ve-cbtn.ok {
+    background: #16a34a !important;
+  }
+
+  button.ve-btn-close-action {
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 50px !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  /* ── OVERLAY & DRAWER ── */
+  .ve-overlay {
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    z-index: 2147483646 !important;
+    transform: translateZ(9998px) !important;
+  }
+
+  .ve-overlay.on {
+    display: block !important;
+  }
+
+  .ve-drawer {
+    display: none !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    border-radius: 18px 18px 0 0 !important;
+    z-index: 2147483647 !important;
+    transform: translateZ(9999px) !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    padding-bottom: 20px !important;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2) !important;
+  }
+
+  .ve-drawer.on {
+    display: block !important;
+  }
+
+  .ve-ocard-drawer {
+    background: #f9fafb !important;
+    border: 1px solid #f3f4f6 !important;
+  }
+
+  .ve-dhead {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 14px 16px !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    background: #ffffff !important;
+    z-index: 2 !important;
+  }
+
+  .ve-dhead-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+  }
+
+  .ve-dclose {
+    background: #f3f4f6 !important;
+    border: none ;
+    border-radius: 80px;
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    color: #444444 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .ve-dbody {
+    padding: 14px 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .ve-dfooter {
+    padding: 4px 16px 0 !important;
+  }
+
+  .ve-dfooter-btn {
+    width: 100% !important;
+    padding: 12px !important;
+    background: #f3f4f6 !important;
+    border: none !important;
+    border-radius: 50px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    color: #333333 !important;
+  }
+</style>
+
+<script>
+  (function () {
+    'use strict';
+
+    var trigger = document.getElementById('ve-open-trigger');
+    var popupCard = document.getElementById('ve-popup-card');
+    var closeCard = document.getElementById('ve-close-card');
+
+    var openTerms = document.getElementById('ve-open-terms');
+    var termsDrawer = document.getElementById('ve-terms-drawer');
+    var termsOverlay = document.getElementById('ve-terms-overlay');
+    var closeTermsBtn = document.getElementById('ve-close-terms-btn');
+    var closeTermsX = document.getElementById('ve-close-terms-x');
+    var claimBtn = document.getElementById('ve-claim-code');
+    var timerClock = document.getElementById('ve-countdown-timer');
+
+    /* ── TELEPORT IN BODY ── */
+    function teleportToBody() {
+      if (termsOverlay && termsOverlay.parentElement !== document.body) {
+        document.body.appendChild(termsOverlay);
+      }
+      if (termsDrawer && termsDrawer.parentElement !== document.body) {
+        document.body.appendChild(termsDrawer);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', teleportToBody);
+    } else {
+      teleportToBody();
+    }
+
+    /* ── ACCORDION ── */
+    function toggleCard() {
+      var isOpen = popupCard.classList.contains('is-open');
+      if (isOpen) {
+        popupCard.classList.remove('is-open');
+        popupCard.setAttribute('aria-hidden', 'true');
+        trigger.setAttribute('aria-expanded', 'false');
+      } else {
+        popupCard.classList.add('is-open');
+        popupCard.setAttribute('aria-hidden', 'false');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    if (trigger) {
+      trigger.addEventListener('click', toggleCard);
+      trigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleCard();
+        }
+      });
+    }
+
+    if (closeCard) closeCard.addEventListener('click', toggleCard);
+
+    /* ── DRAWER TERMINI ── */
+    function openDrawer() {
+      teleportToBody();
+      termsOverlay.classList.add('on');
+      termsOverlay.setAttribute('aria-hidden', 'false');
+      termsDrawer.classList.add('on');
+      termsDrawer.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      termsOverlay.classList.remove('on');
+      termsOverlay.setAttribute('aria-hidden', 'true');
+      termsDrawer.classList.remove('on');
+      termsDrawer.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    if (openTerms) {
+      openTerms.addEventListener('click', openDrawer);
+      openTerms.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openDrawer();
+        }
+      });
+    }
+
+    if (closeTermsBtn) closeTermsBtn.addEventListener('click', closeDrawer);
+    if (closeTermsX) closeTermsX.addEventListener('click', closeDrawer);
+    if (termsOverlay) termsOverlay.addEventListener('click', closeDrawer);
+
+    /* ── GESTIONE TIMER RIATTIVABILE (2 GIORNI) ── */
+    var TIMER_KEY = 've_coupon_expiry';
+    var TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+
+    function getExpiryTime() {
+      var savedExpiry = localStorage.getItem(TIMER_KEY);
+      var now = new Date().getTime();
+
+      if (!savedExpiry || now >= parseInt(savedExpiry, 10)) {
+        var newExpiry = now + TWO_DAYS_MS;
+        localStorage.setItem(TIMER_KEY, newExpiry.toString());
+        return newExpiry;
+      }
+      return parseInt(savedExpiry, 10);
+    }
+
+    function updateTimer() {
+      var expiry = getExpiryTime();
+      var now = new Date().getTime();
+      var diff = expiry - now;
+
+      if (diff <= 0) {
+        expiry = getExpiryTime();
+        diff = expiry - now;
+      }
+
+      var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      var pad = function (num) {
+        return num < 10 ? '0' + num : num;
+      };
+
+      if (timerClock) {
+        timerClock.textContent = pad(days) + 'd ' + pad(hours) + 'h ' + pad(minutes) + 'm ' + pad(seconds) + 's';
+      }
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    /* ── COPIA CODICE ── */
+    function copyText(textToCopy, callback) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(callback)
+          .catch(function () {
+            fallbackCopy(textToCopy, callback);
+          });
+      } else {
+        fallbackCopy(textToCopy, callback);
+      }
+    }
+
+    function fallbackCopy(text, cb) {
+      var textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        cb();
+      } catch (err) {}
+      document.body.removeChild(textArea);
+    }
+
+    if (claimBtn) {
+      claimBtn.addEventListener('click', function () {
+        var code = claimBtn.dataset.code;
+        copyText(code, function () {
+          var originalText = claimBtn.textContent;
+          claimBtn.textContent = 'Copiato!';
+          claimBtn.classList.add('ok');
+          setTimeout(function () {
+            claimBtn.textContent = originalText;
+            claimBtn.classList.remove('ok');
+          }, 2000);
+        });
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+  })();
+</script> {% endcomment %}
+
+
+
+
+{%- liquid
+  assign ve_title = 'vantaggi.title' | t: default: "Vantaggi esclusivi per l'articolo"
+  assign ve_coupon_title = 'vantaggi.coupon_title' | t: default: 'Coupon: 20% di sconto'
+  assign ve_coupon_desc = 'vantaggi.coupon_desc' | t: default: 'Con una spesa min. di 40 €, avrai uno sconto max. di 12 €.'
+  assign ve_coupon_validity = 'vantaggi.coupon_validity' | t: default: 'Offerta a tempo limitato'
+  assign ve_terms_link = 'vantaggi.terms' | t: default: 'Termini e Condizioni'
+  assign ve_ship_title = 'vantaggi.shipping_title' | t: default: 'Spedizione gratuita'
+  assign ve_ship_desc = 'vantaggi.shipping_desc' | t: default: 'Spedizione gratuita su questo ordine'
+  assign ve_claim_btn = 'vantaggi.claim' | t: default: 'Riscuoti'
+  assign ve_close_btn = 'vantaggi.close' | t: default: 'Chiudi'
+  assign ve_coupon_code = 'JCEB1XQ31X8X'
+
+  # Calcolo dinamico dello sconto (20% max 12€)
+  assign original_price = product.selected_or_first_available_variant.price
+  assign discount_rate = 0.20
+  assign max_discount = 1200
+  assign calculated_discount = original_price | times: discount_rate
+
+  if calculated_discount > max_discount
+    assign actual_discount = max_discount
+  else
+    assign actual_discount = calculated_discount
+  endif
+
+  assign final_price = original_price | minus: actual_discount
+-%}
+
+<div class="ve-container" id="ve-main-wrap">
+  {%- comment %} ── TRIGGER BADGE (DIV) ── {%- endcomment %}
+  <div
+    class="ve-pill ve-attention-pulse"
+    id="ve-open-trigger"
+    role="button"
+    tabindex="0"
+    aria-expanded="false"
+    aria-controls="ve-popup-card"
+  >
+    <div class="ve-pill-left">
+      <span class="ve-pill-badge-icon">🎁</span>
+      <span class="ve-pill-title">{{ ve_title }}</span>
+    </div>
+    <span class="ve-pill-arrow" aria-hidden="true">›</span>
+  </div>
+
+  {%- comment %} ── CONTENUTO POPUP (Apertura parziale elegante / Peek) ── {%- endcomment %}
+  <div class="ve-accordion-wrap is-initial-peek" id="ve-popup-card" aria-hidden="false">
+    <div class="ve-accordion-content">
+      <div class="ve-card-header">
+        <h3 class="ve-card-title">{{ ve_title }}</h3>
+        <span class="ve-card-gift-icon">🎁</span>
+      </div>
+
+      <!-- Card Prezzo Scontato Calcolato -->
+      <div class="ve-ocard ve-price-card">
+        <div class="ve-card-row">
+          <div class="ve-icon-circle ve-bg-green">🏷️</div>
+          <div class="ve-card-text">
+            <div class="ve-otag">{{ 'vantaggi.price_preview_title' | t: default: 'Prezzo Riservato con Coupon' }}</div>
+            <div class="ve-price-box">
+              <span class="ve-price-discounted">{{ final_price | money }}</span>
+              <span class="ve-price-original">{{ original_price | money }}</span>
+              <span class="ve-price-badge">-{{ actual_discount | money }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Coupon con Timer -->
+      <div class="ve-ocard">
+        <div class="ve-card-row">
+          <div class="ve-icon-circle ve-bg-pink">🎟️</div>
+          <div class="ve-card-text">
+            <div class="ve-otag">{{ ve_coupon_title }}</div>
+            <p class="ve-odesc">{{ ve_coupon_desc }}</p>
+
+            <!-- Timer a conteggio rovesciato (2 giorni) -->
+            <div class="ve-timer-wrap">
+              <span class="ve-timer-label">⏱️ {{ 'vantaggi.expires_in' | t: default: 'Scade tra' }}:</span>
+              <span class="ve-timer-clock" id="ve-countdown-timer">02d 00h 00m 00s</span>
+            </div>
+
+            <span class="ve-terms-link" id="ve-open-terms" role="button" tabindex="0">{{ ve_terms_link }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Spedizione -->
+      <div class="ve-ocard">
+        <div class="ve-card-row">
+          <div class="ve-icon-circle ve-bg-cyan">🚚</div>
+          <div class="ve-card-text">
+            <div class="ve-otag ve-otag-dark">{{ ve_ship_title }}</div>
+            <p class="ve-odesc ve-odesc-last">{{ ve_ship_desc }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Azioni -->
+      <div class="ve-actions">
+        <button type="button" class="ve-cbtn ve-btn-claim" id="ve-claim-code" data-code="{{ ve_coupon_code }}">
+          {{ ve_claim_btn }}
+        </button>
+        <button type="button" class="ve-btn-close-action" id="ve-close-card">
+          {{ ve_close_btn }}
+        </button>
+      </div>
+    </div>
+    <div class="ve-peek-fade"></div>
+  </div>
+
+  {%- comment %} ── DRAWER TERMINI E CONDIZIONI ── {%- endcomment %}
+  <div class="ve-overlay" id="ve-terms-overlay"></div>
+  <div class="ve-drawer" id="ve-terms-drawer" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="ve-dhead">
+      <span class="ve-dhead-title">
+        {{- 'vantaggi.terms_modal_title' | t: default: 'Termini e Condizioni Promozionali' -}}
+      </span>
+      <button class="ve-dclose" id="ve-close-terms-x" type="button" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="ve-dbody">
+      <!-- Dettagli del Coupon -->
+      <div class="ve-ocard ve-ocard-drawer">
+        <div class="ve-otag">📌 {{ 'vantaggi.promo_details_title' | t: default: 'Dettagli della Promozione' }}</div>
+        <p class="ve-odesc ve-odesc-last">
+          • <strong>{{ 'vantaggi.term_discount_value' | t: default: 'Valore sconto' }}:</strong> 20% sul totale dei
+          prodotti idonei.<br>
+          • <strong>{{ 'vantaggi.term_min_spend' | t: default: 'Spesa minima' }}:</strong> Applicabile su acquisti da
+          40,00 €.<br>
+          • <strong>{{ 'vantaggi.term_max_discount' | t: default: 'Sconto massimo' }}:</strong> 12,00 €.<br>
+          • <strong>{{ 'vantaggi.term_validity' | t: default: 'Durata offerta' }}:</strong> Valida per cicli da 48 ore
+          dalla prima visita del cliente e automaticamente rinnovabile.<br>
+          • <strong>{{ 'vantaggi.term_limits' | t: default: 'Limitazioni' }}:</strong> Non cumulabile con altri codici
+          promozionali.
+        </p>
+      </div>
+
+      <!-- Sezione Clienti UE -->
+      <div class="ve-ocard ve-ocard-drawer">
+        <div class="ve-otag">
+          🇪🇺 {{ 'vantaggi.eu_clients_title' | t: default: "Per i Clienti dell'Unione Europea (UE)" }}
+        </div>
+        <p class="ve-odesc ve-odesc-last">
+          • <strong>Trasparenza Prezzi (Direttiva UE 2019/2161 - Omnibus):</strong> La percentuale di sconto viene
+          applicata al prezzo di vendita. Ogni prezzo precedente fa riferimento al prezzo più basso degli ultimi 30
+          giorni.<br>
+          • <strong>Diritto di Recesso (Direttiva UE 2011/83/UE):</strong> Diritto di recesso garantito entro 14 giorni.
+          Il rimborso in caso di reso corrisponderà al valore netto effettivamente pagato.
+        </p>
+      </div>
+
+      <!-- Sezione Clienti Extra-UE -->
+      <div class="ve-ocard ve-ocard-drawer">
+        <div class="ve-otag ve-otag-dark">
+          🌐 {{ 'vantaggi.extra_eu_clients_title' | t: default: 'Per i Clienti Internazionali (Extra-UE)' }}
+        </div>
+        <p class="ve-odesc ve-odesc-last">
+          • <strong>Calcolo Sconto:</strong> Sconto applicato unicamente sul valore netto dei prodotti, escluse spese di
+          spedizione estere e sdoganamento.<br>
+          • <strong>Dazi e Tasse:</strong> Imposte e dazi doganali locali rimangono a carico del cliente.
+        </p>
+      </div>
+
+      <!-- Supporto e Assistenza -->
+      <div class="ve-ocard ve-ocard-drawer">
+        <div class="ve-otag">✉️ {{ 'vantaggi.support_title' | t: default: 'Assistenza e Supporto Clienti' }}</div>
+        <p class="ve-odesc ve-odesc-last">
+          In caso di domande o difficoltà con il codice sconto, il nostro team è a disposizione:<br>
+          Email:
+          <a href="mailto:contact@platinumshop.it" class="ve-terms-link" style="font-weight:700;"
+            >contact@platinumshop.it</a
+          >
+        </p>
+      </div>
+    </div>
+    <div class="ve-dfooter">
+      <button class="ve-dfooter-btn" id="ve-close-terms-btn" type="button">{{ ve_close_btn }}</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── ISOLAMENTO E TIPOGRAFIA PROFESSIONALE ── */
+  .ve-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 14px 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    clear: both !important;
+    position: relative !important;
+    z-index: 10 !important;
+    font-family: inherit !important;
+  }
+
+  .ve-container * {
+    box-sizing: border-box !important;
+    -webkit-font-smoothing: antialiased !important;
+  }
+
+  /* ── MICRO-ANIMAZIONI DI CONVERSIONE (ELEGANT PULSE) ── */
+  @keyframes veSubtleGlow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 43, 86, 0.25);
+      border-color: rgba(255, 43, 86, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgba(255, 43, 86, 0);
+      border-color: rgba(255, 43, 86, 0.6);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 43, 86, 0);
+      border-color: rgba(255, 43, 86, 0.3);
+    }
+  }
+
+  @keyframes veBounceSubtle {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(3px); }
+  }
+
+  .ve-attention-pulse {
+    animation: veSubtleGlow 3s infinite ease-in-out !important;
+  }
+
+  .ve-pill-arrow {
+    animation: veBounceSubtle 2s infinite ease-in-out !important;
+  }
+
+  /* ── BADGE PRINCIPALE ── */
+  div.ve-pill {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 50%, #fdf2f8 100%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    border-radius: 14px !important;
+    padding: 13px 18px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  div.ve-pill:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .ve-pill-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .ve-pill-badge-icon {
+    font-size: 16px !important;
+  }
+
+  .ve-pill-title {
+    font-weight: 700 !important;
+    color: #111111 !important;
+    font-size: 14px !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  .ve-pill-arrow {
+    color: #4b5563 !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    display: inline-block !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  div.ve-pill[aria-expanded="true"] .ve-pill-arrow {
+    transform: rotate(90deg) !important;
+    animation: none !important;
+  }
+
+  /* ── CONTENITORE SCHEDA (PEEK STATE & ACCORDION) ── */
+  .ve-accordion-wrap {
+    display: block !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+    max-height: 135px !important; /* Taglio parziale raffinato per la prima card */
+    overflow: hidden !important;
+    position: relative !important;
+    transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease !important;
+    opacity: 0.98 !important;
+    border-radius: 16px !important;
+  }
+
+  .ve-peek-fade {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 55px !important;
+    background: linear-gradient(to bottom, rgba(252, 231, 243, 0) 0%, rgba(243, 232, 255, 0.9) 100%) !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease !important;
+  }
+
+  .ve-accordion-wrap.is-open {
+    max-height: 1400px !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+  }
+
+  .ve-accordion-wrap.is-open .ve-peek-fade {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  .ve-accordion-content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    background: linear-gradient(135deg, #e0f2fe 0%, #f3e8ff 50%, #fce7f3 100%) !important;
+    padding: 18px 16px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .ve-card-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 2px !important;
+  }
+
+  .ve-card-title {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    letter-spacing: -0.3px !important;
+  }
+
+  .ve-card-gift-icon {
+    font-size: 22px !important;
+  }
+
+  /* ── SCHEDE INTERNE BIANCHE ── */
+  .ve-ocard {
+    border-radius: 12px !important;
+    padding: 14px !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.04) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02) !important;
+    width: 100% !important;
+  }
+
+  .ve-card-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .ve-icon-circle {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .ve-bg-pink { background: #fff1f2 !important; }
+  .ve-bg-cyan { background: #f0fdfa !important; }
+  .ve-bg-green { background: #f0fdf4 !important; }
+
+  .ve-card-text {
+    flex: 1 !important;
+  }
+
+  .ve-otag {
+    display: block !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin-bottom: 3px !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  .ve-odesc {
+    font-size: 12px !important;
+    color: #4b5563 !important;
+    margin: 0 0 6px 0 !important;
+    line-height: 1.5 !important;
+  }
+
+  .ve-odesc-last {
+    margin-bottom: 0 !important;
+  }
+
+  /* ── BLOCCO PREZZO DINAMICO ── */
+  .ve-price-box {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 4px !important;
+  }
+
+  .ve-price-discounted {
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    color: #16a34a !important;
+    letter-spacing: -0.3px !important;
+  }
+
+  .ve-price-original {
+    font-size: 13px !important;
+    color: #9ca3af !important;
+    text-decoration: line-through !important;
+  }
+
+  .ve-price-badge {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+  }
+
+  /* ── BLOCCO TIMER ── */
+  .ve-timer-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: #fff5f5 !important;
+    border: 1px solid #fed7d7 !important;
+    padding: 6px 10px !important;
+    border-radius: 8px !important;
+    margin: 6px 0 !important;
+  }
+
+  .ve-timer-label {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #9b2c2c !important;
+  }
+
+  .ve-timer-clock {
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    color: #e53e3e !important;
+    font-family: monospace !important;
+  }
+
+  /* ── LINK TERMINI ── */
+  .ve-terms-link {
+    display: inline-block !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin-top: 3px !important;
+    color: #2563eb !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-decoration: underline !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+  }
+
+  .ve-terms-link:hover {
+    color: #1d4ed8 !important;
+  }
+
+  /* ── PULSANTI DI AZIONE ── */
+  .ve-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-top: 4px !important;
+  }
+
+  button.ve-cbtn {
+    width: 100% !important;
+    background: #ff2b56 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 50px !important;
+    padding: 13px 16px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    outline: none !important;
+    box-shadow: 0 4px 12px rgba(255, 43, 86, 0.3) !important;
+    transition: background 0.2s ease, transform 0.1s ease !important;
+  }
+
+  button.ve-cbtn:hover {
+    background: #e02048 !important;
+  }
+
+  button.ve-cbtn:active {
+    transform: scale(0.99) !important;
+  }
+
+  button.ve-cbtn.ok {
+    background: #16a34a !important;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3) !important;
+  }
+
+  button.ve-btn-close-action {
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 50px !important;
+    padding: 12px 16px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: background 0.2s ease !important;
+  }
+
+  button.ve-btn-close-action:hover {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  /* ── OVERLAY & DRAWER ── */
+  .ve-overlay {
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    z-index: 2147483646 !important;
+    transform: translateZ(9998px) !important;
+    transition: opacity 0.3s ease !important;
+  }
+
+  .ve-overlay.on {
+    display: block !important;
+  }
+
+  .ve-drawer {
+    display: none !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    border-radius: 20px 20px 0 0 !important;
+    z-index: 2147483647 !important;
+    transform: translateZ(9999px) !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    padding-bottom: 24px !important;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.15) !important;
+  }
+
+  .ve-drawer.on {
+    display: block !important;
+  }
+
+  .ve-ocard-drawer {
+    background: #f8fafc !important;
+    border: 1px solid #f1f5f9 !important;
+  }
+
+  .ve-dhead {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 16px 20px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    position: sticky !important;
+    top: 0 !important;
+    background: #ffffff !important;
+    z-index: 2 !important;
+  }
+
+  .ve-dhead-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  .ve-dclose {
+    background: #f1f5f9 !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    color: #475569 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background 0.2s ease !important;
+  }
+
+  .ve-dclose:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+  }
+
+  .ve-dbody {
+    padding: 16px 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .ve-dfooter {
+    padding: 6px 20px 0 !important;
+  }
+
+  .ve-dfooter-btn {
+    width: 100% !important;
+    padding: 13px !important;
+    background: #f1f5f9 !important;
+    border: none !important;
+    border-radius: 50px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    color: #334155 !important;
+    transition: background 0.2s ease !important;
+  }
+
+  .ve-dfooter-btn:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+  }
+</style>
+
+<script>
+  (function () {
+    'use strict';
+
+    var trigger = document.getElementById('ve-open-trigger');
+    var popupCard = document.getElementById('ve-popup-card');
+    var closeCard = document.getElementById('ve-close-card');
+
+    var openTerms = document.getElementById('ve-open-terms');
+    var termsDrawer = document.getElementById('ve-terms-drawer');
+    var termsOverlay = document.getElementById('ve-terms-overlay');
+    var closeTermsBtn = document.getElementById('ve-close-terms-btn');
+    var closeTermsX = document.getElementById('ve-close-terms-x');
+    var claimBtn = document.getElementById('ve-claim-code');
+    var timerClock = document.getElementById('ve-countdown-timer');
+
+    /* ── TELEPORT IN BODY ── */
+    function teleportToBody() {
+      if (termsOverlay && termsOverlay.parentElement !== document.body) {
+        document.body.appendChild(termsOverlay);
+      }
+      if (termsDrawer && termsDrawer.parentElement !== document.body) {
+        document.body.appendChild(termsDrawer);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', teleportToBody);
+    } else {
+      teleportToBody();
+    }
+
+    /* ── ACCORDION (Toggle Aperto/Chiuso & Peek handling) ── */
+    function toggleCard() {
+      var isOpen = popupCard.classList.contains('is-open');
+      if (isOpen) {
+        popupCard.classList.remove('is-open');
+        popupCard.setAttribute('aria-hidden', 'true');
+        trigger.setAttribute('aria-expanded', 'false');
+      } else {
+        popupCard.classList.add('is-open');
+        popupCard.setAttribute('aria-hidden', 'false');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    if (trigger) {
+      trigger.addEventListener('click', function() {
+        toggleCard();
+      });
+      trigger.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleCard();
+        }
+      });
+    }
+
+    if (closeCard) {
+      closeCard.addEventListener('click', function() {
+        popupCard.classList.remove('is-open');
+        popupCard.setAttribute('aria-hidden', 'true');
+        trigger.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    /* ── DRAWER TERMINI ── */
+    function openDrawer() {
+      teleportToBody();
+      termsOverlay.classList.add('on');
+      termsOverlay.setAttribute('aria-hidden', 'false');
+      termsDrawer.classList.add('on');
+      termsDrawer.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      termsOverlay.classList.remove('on');
+      termsOverlay.setAttribute('aria-hidden', 'true');
+      termsDrawer.classList.remove('on');
+      termsDrawer.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    if (openTerms) {
+      openTerms.addEventListener('click', openDrawer);
+      openTerms.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openDrawer();
+        }
+      });
+    }
+
+    if (closeTermsBtn) closeTermsBtn.addEventListener('click', closeDrawer);
+    if (closeTermsX) closeTermsX.addEventListener('click', closeDrawer);
+    if (termsOverlay) termsOverlay.addEventListener('click', closeDrawer);
+
+    /* ── GESTIONE TIMER RIATTIVABILE (2 GIORNI) ── */
+    var TIMER_KEY = 've_coupon_expiry';
+    var TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+
+    function getExpiryTime() {
+      var savedExpiry = localStorage.getItem(TIMER_KEY);
+      var now = new Date().getTime();
+
+      if (!savedExpiry || now >= parseInt(savedExpiry, 10)) {
+        var newExpiry = now + TWO_DAYS_MS;
+        localStorage.setItem(TIMER_KEY, newExpiry.toString());
+        return newExpiry;
+      }
+      return parseInt(savedExpiry, 10);
+    }
+
+    function updateTimer() {
+      var expiry = getExpiryTime();
+      var now = new Date().getTime();
+      var diff = expiry - now;
+
+      if (diff <= 0) {
+        expiry = getExpiryTime();
+        diff = expiry - now;
+      }
+
+      var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      var pad = function (num) {
+        return num < 10 ? '0' + num : num;
+      };
+
+      if (timerClock) {
+        timerClock.textContent = pad(days) + 'd ' + pad(hours) + 'h ' + pad(minutes) + 'm ' + pad(seconds) + 's';
+      }
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    /* ── COPIA CODICE ── */
+    function copyText(textToCopy, callback) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(callback)
+          .catch(function () {
+            fallbackCopy(textToCopy, callback);
+          });
+      } else {
+        fallbackCopy(textToCopy, callback);
+      }
+    }
+
+    function fallbackCopy(text, cb) {
+      var textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        cb();
+      } catch (err) {}
+      document.body.removeChild(textArea);
+    }
+
+    if (claimBtn) {
+      claimBtn.addEventListener('click', function () {
+        var code = claimBtn.dataset.code;
+        copyText(code, function () {
+          var originalText = claimBtn.textContent;
+          claimBtn.textContent = 'Copiato!';
+          claimBtn.classList.add('ok');
+          setTimeout(function () {
+            claimBtn.textContent = originalText;
+            claimBtn.classList.remove('ok');
+          }, 2000);
+        });
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+  })();
+</script>

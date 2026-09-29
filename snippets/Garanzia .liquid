@@ -1,0 +1,165 @@
+{% assign lang = request.locale.iso_code | slice: 0, 2 %}
+
+{% case lang %}
+  {% when 'it' %}
+    {% assign badge_title = 'Garanzia Ordine' %}
+    {% assign badge_1 = 'Resi Gratuiti' %}
+    {% assign badge_2 = 'Garanzia sul Prezzo' %}
+    {% assign badge_3 = '5,00€ Credito per Ritardi' %}
+    {% assign badge_4 = 'Reso se Danneggiato' %}
+    {% assign badge_5 = '15 giorni senza aggiornamenti' %}
+    {% assign badge_6 = '30 giorni senza consegna' %}
+  {% when 'fr' %}
+    {% assign badge_title = 'Garantie Commande' %}
+    {% assign badge_1 = 'Retours Gratuits' %}
+    {% assign badge_2 = 'Garantie de Prix' %}
+    {% assign badge_3 = '5,00€ Crédit pour Retard' %}
+    {% assign badge_4 = 'Retour si Endommagé' %}
+    {% assign badge_5 = '15 jours sans mise à jour' %}
+    {% assign badge_6 = '30 jours sans livraison' %}
+  {% when 'de' %}
+    {% assign badge_title = 'Bestellgarantie' %}
+    {% assign badge_1 = 'Kostenlose Rücksendung' %}
+    {% assign badge_2 = 'Preisgarantie' %}
+    {% assign badge_3 = '5,00€ Gutschrift bei Verzögerung' %}
+    {% assign badge_4 = 'Rückgabe bei Beschädigung' %}
+    {% assign badge_5 = '15 Tage ohne Update' %}
+    {% assign badge_6 = '30 Tage ohne Lieferung' %}
+  {% when 'es' %}
+    {% assign badge_title = 'Garantía de Pedido' %}
+    {% assign badge_1 = 'Devoluciones Gratuitas' %}
+    {% assign badge_2 = 'Garantía de Precio' %}
+    {% assign badge_3 = '5,00€ Crédito por Retraso' %}
+    {% assign badge_4 = 'Devolución si Dañado' %}
+    {% assign badge_5 = '15 días sin actualización' %}
+    {% assign badge_6 = '30 días sin entrega' %}
+  {% else %}
+    {% assign badge_title = 'Order Guarantee' %}
+    {% assign badge_1 = 'Free Returns' %}
+    {% assign badge_2 = 'Price Guarantee' %}
+    {% assign badge_3 = '5,00€ Credit for Delay' %}
+    {% assign badge_4 = 'Return if Item Damaged' %}
+    {% assign badge_5 = '15-day no update refund' %}
+    {% assign badge_6 = '30-day no delivery refund' %}
+{% endcase %}
+
+<style>
+  .og-bar {
+    padding: 10px 16px;
+    background: #fff;
+    border-top: 1px solid #e8e8e8;
+    border-bottom: 1px solid #e8e8e8;
+    font-family: inherit;
+    overflow: hidden;
+  }
+
+  .og-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #222;
+  }
+  .og-header svg {
+    width: 16px;
+    height: 16px;
+    fill: #1a5c38;
+    flex-shrink: 0;
+  }
+
+  /* Ticker wrapper */
+  .og-ticker {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+  }
+
+  /* Fade edges */
+  .og-ticker::before,
+  .og-ticker::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .og-ticker::before {
+    left: 0;
+    background: linear-gradient(to right, #fff, transparent);
+  }
+  .og-ticker::after {
+    right: 0;
+    background: linear-gradient(to left, #fff, transparent);
+  }
+
+  /* Scrolling track */
+  .og-track {
+    display: flex;
+    gap: 10px;
+    width: max-content;
+    animation: og-scroll 22s linear infinite;
+  }
+  .og-track:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes og-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .og-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #1b8a4dff;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    {% comment %} border-radius: 20px; {% endcomment %}
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.2s ease;
+    cursor: default;
+  }
+  .og-pill:hover {
+    background: #145230;
+    transform: scale(1.05);
+  }
+  .og-pill-icon {
+    font-size: 13px;
+  }
+</style>
+
+<div class="og-bar">
+  <div class="og-header">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+    </svg>
+    {{ badge_title }}
+  </div>
+
+  <div class="og-ticker">
+    <div class="og-track" id="og-track">
+      <!-- Original set -->
+      <span class="og-pill"><span class="og-pill-icon">🔄</span>{{ badge_1 }}</span>
+      <span class="og-pill"><span class="og-pill-icon">💰</span>{{ badge_2 }}</span>
+      <span class="og-pill"><span class="og-pill-icon">⏱️</span>{{ badge_3 }}</span>
+      <span class="og-pill"><span class="og-pill-icon">🛡️</span>{{ badge_4 }}</span>
+      <span class="og-pill"><span class="og-pill-icon">📦</span>{{ badge_5 }}</span>
+      <span class="og-pill"><span class="og-pill-icon">🚚</span>{{ badge_6 }}</span>
+      <!-- Duplicate set for seamless loop -->
+      <span class="og-pill"><span class="og-pill-icon">🔄</span>{{ badge_1 }}</span>
+      <span class="og-pill"><span class="og-pill-icon">💰</span>{{ badge_2 }}</span>
+      <span class="og-pill"><span class="og-pill-icon">⏱️</span>{{ badge_3 }}</span>
+      <span class="og-pill"><span class="og-pill-icon">🛡️</span>{{ badge_4 }}</span>
+      <span class="og-pill"><span class="og-pill-icon">📦</span>{{ badge_5 }}</span>
+      <span class="og-pill"><span class="og-pill-icon">🚚</span>{{ badge_6 }}</span>
+    </div>
+  </div>
+</div>

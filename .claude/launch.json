@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "shopify-theme-dev",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "shopify", "theme", "dev", "--store", "0g5p1w-50.myshopify.com"],
+      "port": 9292,
+      "url": "http://127.0.0.1:9292"
+    }
+  ]
+}

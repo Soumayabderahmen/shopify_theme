@@ -1,0 +1,230 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "settings": {
+        "hide_mobile": false
+      }
+    },
+    "16534836035233544d": {
+      "type": "section-spacer",
+      "settings": {
+        "height": 50,
+        "height_mobile": 20
+      }
+    },
+    "main-page": {
+      "type": "main-page",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {
+            "title_size": "h2"
+          }
+        },
+        "content": {
+          "type": "content",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "title",
+        "content"
+      ],
+      "disabled": true,
+      "settings": {
+        "max_width": 980,
+        "content_alignment": "start",
+        "text_alignment": "start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "1653482236cd744a0f": {
+      "type": "section-icon-text-blocks",
+      "blocks": {
+        "165348223644882a56-0": {
+          "type": "text",
+          "settings": {
+            "icon": "email",
+            "image_height": 55,
+            "title": "You can email us anytime",
+            "text": "<p>Give your We try to respond within 24 hours more details</p>",
+            "show_link": false,
+            "link_text": "",
+            "link_url": "",
+            "button_style": "primary plain"
+          }
+        },
+        "165348223644882a56-1": {
+          "type": "text",
+          "settings": {
+            "icon": "24_7_call",
+            "image_height": 55,
+            "title": "Do you need help?",
+            "text": "<p>You can call us at: 123 456 789</p>",
+            "show_link": false,
+            "link_text": "",
+            "link_url": "",
+            "button_style": "primary plain"
+          }
+        },
+        "165348223644882a56-2": {
+          "type": "text",
+          "settings": {
+            "icon": "truck",
+            "image_height": 55,
+            "title": "Free shipping on all orders",
+            "text": "<p>Worldwide shipping</p>",
+            "show_link": false,
+            "link_text": "",
+            "link_url": "",
+            "button_style": "primary plain"
+          }
+        },
+        "165348223644882a56-3": {
+          "type": "text",
+          "settings": {
+            "icon": "delivery_box_2",
+            "image_height": 55,
+            "title": "Next day delivery",
+            "text": "<p><a href=\"/policies/shipping-policy\" title=\"Shipping Policy\">Read more</a> about shipping</p>",
+            "show_link": false,
+            "link_text": "",
+            "link_url": "",
+            "button_style": "primary plain"
+          }
+        }
+      },
+      "block_order": [
+        "165348223644882a56-0",
+        "165348223644882a56-1",
+        "165348223644882a56-2",
+        "165348223644882a56-3"
+      ],
+      "settings": {
+        "items_width": 4,
+        "text_alignment": "center",
+        "title": "",
+        "title_underline_style": "none",
+        "text": "",
+        "font_size": "16px",
+        "show_link": false,
+        "link_text": "",
+        "link_url": "",
+        "button_style": "primary plain",
+        "blocks_text_alignment": "center",
+        "blocks_title_font": "primary",
+        "blocks_title_size": "h3",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16534818921d9da639": {
+      "type": "section-faq",
+      "blocks": {
+        "1653481892aca601d3-0": {
+          "type": "text",
+          "settings": {
+            "faq_question": "When will my order be delivered?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>We ship worldwide. Your order will be packaged really carefully and delivered wherever you want. Delivery takes between 2-4 business days. You will receive an e-mail after ordering with more information about the delivery.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "1653481892aca601d3-1": {
+          "type": "text",
+          "settings": {
+            "faq_question": "Can I Return my product?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "1653481892aca601d3-2": {
+          "type": "text",
+          "settings": {
+            "faq_question": "I would like to speak with the customer service. How can I get in touch?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>You can email and call us. We are there for you 24/7, every day. You can visit us in the Netherlands:123 example Eindhoven, NL</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "19bffed1-f52f-4d9c-877f-5374d9a41f2b": {
+          "type": "text",
+          "settings": {
+            "faq_question": "What can I do if my item (or part of it) is damaged?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>We work hard to deliver your items without damage. Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "432c0efd-c93e-48f4-b507-204ff1d1ee9f": {
+          "type": "text",
+          "settings": {
+            "faq_question": "What if I paid too much?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>We work hard to deliver your items without damage. Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        }
+      },
+      "block_order": [
+        "1653481892aca601d3-0",
+        "1653481892aca601d3-1",
+        "1653481892aca601d3-2",
+        "19bffed1-f52f-4d9c-877f-5374d9a41f2b",
+        "432c0efd-c93e-48f4-b507-204ff1d1ee9f"
+      ],
+      "settings": {
+        "alignment": "left",
+        "compact": false,
+        "title": "",
+        "title_underline_style": "none",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "16534836035233544d",
+    "main-page",
+    "1653482236cd744a0f",
+    "16534818921d9da639"
+  ]
+}

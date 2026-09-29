@@ -1,0 +1,351 @@
+{%- liquid
+  assign primary_font = settings.heading_font
+  assign secondary_font = settings.body_font
+  assign primary_font_100 = primary_font | font_modify: 'weight', '100'
+  assign primary_font_200 = primary_font | font_modify: 'weight', '200'
+  assign primary_font_300 = primary_font | font_modify: 'weight', '300'
+  assign primary_font_400 = primary_font | font_modify: 'weight', '400'
+  assign primary_font_500 = primary_font | font_modify: 'weight', '500'
+  assign primary_font_600 = primary_font | font_modify: 'weight', '600'
+  assign primary_font_700 = primary_font | font_modify: 'weight', '700'
+  assign primary_font_800 = primary_font | font_modify: 'weight', '800'
+  assign primary_font_900 = primary_font | font_modify: 'weight', '900'
+  assign secondary_font_100 = secondary_font | font_modify: 'weight', '100'
+  assign secondary_font_200 = secondary_font | font_modify: 'weight', '200'
+  assign secondary_font_300 = secondary_font | font_modify: 'weight', '300'
+  assign secondary_font_400 = secondary_font | font_modify: 'weight', '400'
+  assign secondary_font_500 = secondary_font | font_modify: 'weight', '500'
+  assign secondary_font_600 = secondary_font | font_modify: 'weight', '600'
+  assign secondary_font_700 = secondary_font | font_modify: 'weight', '700'
+  assign secondary_font_800 = secondary_font | font_modify: 'weight', '800'
+  assign secondary_font_900 = secondary_font | font_modify: 'weight', '900'
+  assign secondary_font_italic = secondary_font | font_modify: 'style', 'italic'
+  assign secondary_font_bold_italic = secondary_font_700 | font_modify: 'style', 'italic'
+-%}
+{% style %}
+{% if settings.enable_custom_primary_font %}
+  {% if settings.custom_primary_font_file != blank and settings.custom_primary_font_name %}
+    {%- liquid
+      assign custom_primary_font = settings.custom_primary_font_file
+      if custom_primary_font contains 'woff2'
+          assign custom_primary_font_type = 'woff2'
+      elsif custom_primary_font contains 'woff'
+          assign custom_primary_font_type = 'woff'
+      elsif custom_primary_font contains "ttf"
+          assign custom_primary_font_type = 'truetype'
+      elsif custom_primary_font contains "otf"
+          assign custom_primary_font_type = 'opentype'
+      else
+          assign custom_primary_font = false
+      endif
+    -%}
+    {%- if custom_primary_font -%}
+      @font-face { font-family: '{{ settings.custom_primary_font_name | downcase }}'; src: url({{ custom_primary_font }}) format({{ custom_primary_font_type }}); font-display: swap; }
+    {% endif %}
+  {% elsif settings.custom_primary_font_snippet != empty and settings.custom_primary_font_name %}
+    {%- assign custom_primary_font = true -%}
+  {% endif %}
+{% endif %}
+{% if settings.enable_custom_secondary_font %}
+  {% if settings.custom_secondary_font_file != blank and settings.custom_secondary_font_name %}
+    {%- liquid
+      assign custom_secondary_font = settings.custom_secondary_font_file
+      if custom_secondary_font contains 'woff2'
+          assign custom_secondary_font_type = 'woff2'
+      elsif custom_secondary_font contains 'woff'
+          assign custom_secondary_font_type = 'woff'
+      elsif custom_secondary_font contains "ttf"
+          assign custom_secondary_font_type = 'truetype'
+      elsif custom_secondary_font contains "otf"
+          assign custom_secondary_font_type = 'opentype'
+      else
+          assign custom_secondary_font = false
+      endif
+    -%}
+    {%- if custom_secondary_font -%}
+      @font-face { font-family: '{{ settings.custom_secondary_font_name }}'; src: url({{ custom_secondary_font }}) format({{ custom_secondary_font_type }}); font-display: swap; }
+    {% endif %}
+  {% elsif settings.custom_secondary_font_snippet != empty and settings.custom_secondary_font_name %}
+    {%- assign custom_secondary_font = true -%}
+  {% endif %}
+{% endif %}
+
+{{ primary_font | font_face: font_display: 'swap' }}
+{{ secondary_font | font_face: font_display: 'swap' }}
+{{ primary_font_100 | font_face: font_display: 'swap' }}
+{{ primary_font_200 | font_face: font_display: 'swap' }}
+{{ primary_font_300 | font_face: font_display: 'swap' }}
+{{ primary_font_400 | font_face: font_display: 'swap' }}
+{{ primary_font_500 | font_face: font_display: 'swap' }}
+{{ primary_font_600 | font_face: font_display: 'swap' }}
+{{ primary_font_700 | font_face: font_display: 'swap' }}
+{{ primary_font_800 | font_face: font_display: 'swap' }}
+{{ primary_font_900 | font_face: font_display: 'swap' }}
+{{ secondary_font_100 | font_face: font_display: 'swap' }}
+{{ secondary_font_200 | font_face: font_display: 'swap' }}
+{{ secondary_font_300 | font_face: font_display: 'swap' }}
+{{ secondary_font_400 | font_face: font_display: 'swap' }}
+{{ secondary_font_500 | font_face: font_display: 'swap' }}
+{{ secondary_font_600 | font_face: font_display: 'swap' }}
+{{ secondary_font_700 | font_face: font_display: 'swap' }}
+{{ secondary_font_800 | font_face: font_display: 'swap' }}
+{{ secondary_font_900 | font_face: font_display: 'swap' }}
+{{ secondary_font_italic | font_face: font_display: 'swap' }}
+{{ secondary_font_bold_italic | font_face: font_display: 'swap' }}
+@font-face { font-family: 'i'; src: url({{ 'xtra.woff2' | asset_url }}) format('woff2'), url({{ 'xtra.woff' | asset_url }}) format('woff'); font-display: block; }
+
+:root {
+  --buy_button_bg:		var(--buy_btn_bg);
+  --buy_button_fg: 		var(--buy_btn_text);
+  --buy_button_bg_dark: var(--buy_btn_bg_dark);
+
+  --dynamic_buy_button_bg: var(--dynamic_buy_btn_bg);
+  --dynamic_buy_button_fg: var(--dynamic_buy_btn_text);
+  --dynamic_buy_button_bg_dark:  var(--dynamic_buy_btn_bg_dark);
+
+  --buy_btn_text:      {{ settings.buy_button_text_color }};
+  --buy_btn_bg:        {{ settings.buy_button_color }};
+  --buy_btn_bg_dark:   {{ settings.buy_button_color | color_darken: 5 }};
+
+  --dynamic_buy_btn_text:    {{ settings.dynamic_buy_button_text_color }};
+  --dynamic_buy_btn_bg:      {{ settings.dynamic_buy_button_color }};
+  --dynamic_buy_btn_bg_dark: {{ settings.dynamic_buy_button_color | color_darken: 5 }};
+
+  --unavailable_buy_btn_text:    {{ settings.unavailable_button_text_color }};
+  --unavailable_buy_btn_bg:      {{ settings.unavailable_button_color }};
+  --unavailable_buy_btn_bg_dark: {{ settings.unavailable_button_color | color_darken: 5 }};
+
+  --custom_top_search_bg: var(--body_bg);
+
+  --alert_error:        {{ settings.negative_vibes }};
+  --alert_valid:        {{ settings.positive_vibes }};
+  --lime:               {{ settings.positive_vibes }};
+  --gallery:            {{ settings.palette_light }};
+  --sand:               {{ settings.palette_light }};
+
+  --light: 				var(--bg_secondary);
+
+  --product_label_bg:   {{ settings.product_label_color }};
+  --product_label_bg_dark:{{ settings.product_label_color | color_darken: 5 }};
+  --product_label_text: {{ settings.product_label_text_color }};
+  --sale_label_bg:      {{ settings.sale_label_color }};
+  --sale_label_bg_dark: {{ settings.sale_label_color | color_darken: 5 }};
+  --sale_label_text:    {{ settings.sale_label_text_color }};
+  --product_label_bg_custom: {{ settings.preorder_label_color }};
+  --product_label_text_custom: {{ settings.preorder_label_text_color }};
+
+  --positive_bg:        {{ settings.positive_vibes }};
+  --positive_bg_dark:   {{ settings.positive_vibes | color_darken: 5 }};
+  --positive_fg:	      var(--white);
+
+  --custom_drop_nav_bg:         var(--{{ settings.dropdown_color }}_bg);
+  --custom_drop_nav_fg:         var(--{{ settings.dropdown_color }}_fg);
+  --custom_drop_nav_fg_text:    var(--{{ settings.dropdown_color }}_fg);
+  --custom_drop_nav_fg_hover:   var(--{{ settings.dropdown_color }}_btn_bg);
+  --custom_drop_nav_head_bg:    var(--{{ settings.dropdown_color }}_bg_var);
+  --custom_drop_nav_head_fg:    var(--{{ settings.dropdown_color }}_fg);
+  --custom_drop_nav_bd:         var(--{{ settings.dropdown_color }}_bd);
+  --custom_drop_nav_input_bg:   var(--{{ settings.dropdown_color }}_input_bg);
+  --custom_drop_nav_input_fg:   var(--{{ settings.dropdown_color }}_input_fg);
+  --custom_drop_nav_input_bd:   var(--custom_drop_nav_bd);
+  --custom_drop_nav_input_pl:   var(--custom_drop_nav_input_fg);
+  --custom_top_search_bg_cont:  var(--{{ settings.dropdown_color }}_bg_secondary);
+
+  --price_color:        {{ settings.price_color }};
+  --price_color_old:    {{ settings.compare_at_price_color }};
+
+  --multiply_bg_product:  var(--{{ settings.multiply_product_images_color_palette }});
+  --multiply_bg_collection: var(--{{ settings.multiply_collection_images_color_palette }});
+
+  --main_ff:            {{ secondary_font.family | remove: '"' | json }}, {{ secondary_font.fallback_families }};
+  --main_ff_h:          {% if custom_primary_font %}{{ settings.custom_primary_font_name | json }}, {% endif %}{{ primary_font.family | remove: '"' | json }}, {{ primary_font.fallback_families }};
+
+  --main_fw:            {{ secondary_font.weight }};
+  --main_fw_strong:     {{ secondary_font.weight | plus: 300 | at_most: 800 }};
+  --breadcrumbs_fz:     {{ settings.breadcrumbs_font_size }};
+  --main_fw_h:          {{ primary_font.weight }};
+  --main_fw_h_strong:   {{ primary_font.weight | plus: 300 | at_most: 800 }};
+  --main_fw_secondary_h:{{ secondary_font.weight }};
+  --main_fw_secondary_h_strong: {{ secondary_font.weight | plus: 300 | at_most: 800 }};
+  --main_fs_h:          {{ primary_font.style }};
+  --main_ls_h:          {% if settings.primary_letter_spacing == '0' %}normal{% else %}{{ settings.primary_letter_spacing | divided_by: 100.0 }}em{% endif %};
+  --main_tt_h:          {{ settings.primary_case }};
+  --main_lh_h:          {{ settings.heading_line_height | divided_by: 100.0 }};
+
+{% if settings.body_font_family == 'primary' %}
+  --main_ff:            var(--main_ff_h);
+  --main_fs:            var(--main_fs_h);
+{% else %}
+  --main_ff:            {% if custom_secondary_font %}{{ settings.custom_secondary_font_name | json }}, {% endif %} {{ secondary_font.family | remove: '"' | json }}, {{ secondary_font.fallback_families }};
+  --main_fs:            {{ secondary_font.style }};
+{% endif %}
+  --main_tt:            {{ settings.body_case }};
+{% if settings.body_font_family == 'primary' %}
+  --main_fw:            {{ primary_font.weight }};
+  --main_fw_strong:     {{ primary_font.weight | plus: 300 | at_most: 800 }};
+{% else %}
+  --main_fw:            {{ secondary_font.weight }};
+  --main_fw_strong:     {{ secondary_font.weight | plus: 300 | at_most: 800 }};
+{% endif %}
+
+  --main_ls:            {% if settings.body_letter_spacing == '0' %}normal{% else %}{{ settings.body_letter_spacing | divided_by: 100.0 }}em{% endif %};
+  --main_lh:            {{ settings.body_line_height | divided_by: 100.0 }};
+  --main_fz_scale:      {{ settings.body_font_size | divided_by: 100.0 }};
+  --main_fz:            calc(var(--main_fz_scale) * 1.4rem);
+  --base_fz_scale:      {{ settings.base_font_size | divided_by: 100.0 }};
+  --base_fz:            calc(var(--base_fz_scale) * 1.4rem);
+  --base_fz_small:      calc(var(--base_fz_scale) * 1.4rem - 0.2rem);
+
+  --main_h1:            {{ 32 | times: settings.h1_size | divided_by: 100 }}px;
+  --main_h2:            {{ 24 | times: settings.h2_size | divided_by: 100 }}px;
+  --main_h3:            {{ 21 | times: settings.h3_size | divided_by: 100 }}px;
+  --main_h4:            {{ 18 | times: settings.h4_size | divided_by: 100 }}px;
+  --main_h5:            {{ 14 | times: settings.h5_size | divided_by: 100 }}px;
+  --main_h6:            {{ 14 | times: settings.h6_size | divided_by: 100 }}px;
+
+  --mob_h1:             {{ 28 | times: settings.h1_size_mobile | divided_by: 100 }}px;
+  --mob_h2:             {{ 24 | times: settings.h2_size_mobile | divided_by: 100 }}px;
+  --mob_h3:             {{ 20 | times: settings.h3_size_mobile | divided_by: 100 }}px;
+  --mob_h4:             {{ 16 | times: settings.h4_size_mobile | divided_by: 100 }}px;
+  --mob_h5:             {{ 14 | times: settings.h5_size_mobile | divided_by: 100 }}px;
+  --mob_h6:             {{ 14 | times: settings.h6_size_mobile | divided_by: 100 }}px;
+  --mob_fz:             {{ settings.body_font_size_mobile }};
+
+  {% if settings.button_height == 'size-m' %}
+    --btn_ph: calc(18px * 1.25);
+    --btn_pv: calc(14px * 1.2);
+  {% elsif settings.button_height == 'size-l' %}
+    --btn_ph: calc(18px * 1.5);
+    --btn_pv: calc(14px * 1.35);
+  {% endif %}
+
+  {% if settings.button_rounded == 'square' %}
+    --btn_br: 0;
+    --b2i: var(--btn_br);
+  {% elsif settings.button_rounded == 'slightly-rounded' %}
+    --btn_br: 4px;
+    --b2i: var(--btn_br);
+  {% elsif settings.button_rounded == 'rounded' %}
+    {% if settings.button_height == 'size-s' %}
+      --btn_br: 22px;
+    {% elsif settings.button_height == 'size-m' %}
+      --btn_br: 25px;
+    {% elsif settings.button_height == 'size-l' %}
+      --btn_br: 28px;
+    {% endif %}
+  {% endif %}
+    --btn_fw:            {{ settings.button_font_weight }};
+    --btn_tt:          {{ settings.button_case }};
+
+{% if settings.prices_font == 'primary' %}
+  --price_ff:            var(--main_ff_h);
+  --price_fs:            var(--main_fs_h);
+{% else %}
+  --price_ff:            {{ secondary_font.family | remove: '"' | json }}, {{ secondary_font.fallback_families }};
+  --price_fs:            {{ secondary_font.style }};
+{% endif %}
+  --price_fw:            {{ settings.prices_font_weight }};
+
+  {% unless settings.everything_rounded %}
+    --b2r: 0;
+  {% endunless %}
+
+  --ratio: {% if settings.product_image_ratio == '430x310' %}0.75{% elsif settings.product_image_ratio == '310x310' %}1{% else %}1.25{% endif %};
+
+  --glw: 10000px;
+  --glw_boxed: {% if settings.width == 2000 %}10000{% else %}{{ settings.width }}{% endif %}px;
+}
+
+html.t1ac {
+	--secondary_bg_btn:      {{ settings.regular_button_color | color_darken: 20 }};
+	--secondary_bg_btn_dark: {{ settings.regular_button_color | color_darken: 30 }};
+	--secondary_bg_btn_fade: {{ settings.regular_button_color }};
+
+	--tertiary_bg:        {{ settings.buy_button_color | color_darken: 20 }};
+	--tertiary_bg_dark:   {{ settings.buy_button_color | color_darken: 30 }};
+	--tertiary_bg_fade:   {{ settings.buy_button_color }};
+
+	--quaternary_bg:      {{ settings.dynamic_buy_button_color | color_darken: 20 }};
+	--quaternary_bg_dark: {{ settings.dynamic_buy_button_color | color_darken: 30 }};
+	--quaternary_bg_fade: {{ settings.dynamic_buy_button_color }};
+
+	--main_fz_scale:      {{ settings.body_font_size | times: 120 | divided_by: 10000.0 }};
+	--main_fz:            calc(var(--main_fz_scale) * 1.4rem);
+	--base_fz_scale:      {{ settings.base_font_size | times: 120 | divided_by: 10000.0 }};
+	--base_fz:            calc(var(--base_fz_scale) * 1.4rem);
+	--base_fz_small:      calc(var(--base_fz_scale) * 1.4rem - 0.2rem);
+	--mob_fz:             {{ settings.body_font_size_mobile | remove: 'px' | times: 120 | divided_by: 100.0 | at_least: 16 }}px;
+
+	--main_h1:            {{ 34 | times: settings.h1_size | divided_by: 100 }}px;
+	--main_h2:            {{ 26 | times: settings.h2_size | divided_by: 100 }}px;
+	--main_h3:            {{ 24 | times: settings.h3_size | divided_by: 100 }}px;
+	--main_h4:            {{ 20 | times: settings.h4_size | divided_by: 100 }}px;
+	--main_h5:            {{ 18 | times: settings.h5_size | divided_by: 100 }}px;
+	--main_h6:            {{ 18 | times: settings.h6_size | divided_by: 100 }}px;
+
+	--mob_h1:             {{ 28 | times: settings.h1_size_mobile | divided_by: 100 }}px;
+	--mob_h2:             {{ 24 | times: settings.h2_size_mobile | divided_by: 100 }}px;
+	--mob_h3:             {{ 20 | times: settings.h3_size_mobile | divided_by: 100 }}px;
+	--mob_h4:             {{ 16 | times: settings.h4_size_mobile | divided_by: 100 }}px;
+	--mob_h5:             {{ 14 | times: settings.h5_size_mobile | divided_by: 100 }}px;
+	--mob_h6:             {{ 14 | times: settings.h6_size_mobile | divided_by: 100 }}px;
+	--mob_h_small:        var(--mob_h6);
+}
+
+.ff-primary, .ff-primary-digit .simply-amount, .l4ft li > .content .ff-primary {
+  font-family: {% if custom_primary_font %}{{ settings.custom_primary_font_name | json }}, {% endif %}{{ primary_font.family | remove: '"' | json }}, {{ primary_font.fallback_families }};
+
+  text-transform: {{ settings.primary_case }};
+  font-weight: var(--main_fw_h);
+  font-style: {{ primary_font.style }};
+  --main_fw_strong: var(--main_fw_h_strong);
+  letter-spacing: {% if settings.primary_letter_spacing == '0' %}normal{% else %}{{ settings.primary_letter_spacing | divided_by: 100.0 }}em{% endif %};
+}
+.ff-secondary, .ff-secondary-digit .simply-amount, .l4ft li > .content .ff-secondary  {
+  font-family: {% if custom_secondary_font %}{{ settings.custom_secondary_font_name | json }}, {% endif %} {{ secondary_font.family | remove: '"' | json }}, {{ secondary_font.fallback_families }};
+  text-transform: {{ settings.secondary_case }};
+  font-style: {{ secondary_font.style }};
+  --main_fw_strong: var(--main_fw_h_strong);
+  letter-spacing: {% if settings.secondary_letter_spacing == '0' %}normal{% else %}{{ settings.secondary_letter_spacing | divided_by: 100.0 }}em{% endif %};
+}
+.ff-primary p, .l4ft li > .content .ff-primary p, .ff-secondary p, .l4ft li > .content p .ff-secondary p {
+  text-transform: {{ settings.body_case }};
+}
+#nav-top.ff-primary, #nav-top.ff-secondary {
+  letter-spacing: var(--main_ls);
+  text-transform: {{ settings.body_case }};
+}
+
+.overlay-preorder {
+  --secondary_btn_text:     {{ settings.preorder_button_text_color }};
+  --secondary_bg_btn:       {{ settings.preorder_button_color }};
+  --secondary_bg_btn_dark:  {{ settings.preorder_button_color | color_darken: 10 }};
+  --secondary_bg_btn_fade:  {{ settings.preorder_button_color | color_lighten: 10 }};
+}
+
+/* Typography */
+.title-underline-secondary-font {
+  --ff: {% if custom_secondary_font %}'{{ settings.custom_secondary_font_name }}', {% endif %}{{ settings.secondary_font.family | remove: '"' }}, {{ settings.secondary_font.fallback_families }};
+  --fs: {{ settings.secondary_font.style }};
+  --fw: {{ settings.secondary_font.weight }};
+  --fw_700: {{ settings.secondary_font.weight | plus: 300 | at_most: 900 }};
+  --ls: {% if settings.secondary_letter_spacing == '0' %}normal{% else %}{{ settings.secondary_letter_spacing | divided_by: 100.0 }}em{% endif %};
+  --tt: {{ settings.secondary_case }};
+}
+
+/* Other */
+{%- assign text_color_handle = 'palette_' | append: settings.text_color -%}
+{%- assign text_color = settings[text_color_handle] | remove: '#' -%}
+select, .bv_atual, select:focus, #root .f8sr select, #root .f8sr select:focus { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 5.7' style='enable-background:new 0 0 9 5.7' xml:space='preserve'%3E%3Cpath d='M8.4.2C8.2.1 8 0 7.8 0s-.3.1-.5.2L4.5 3 1.7.2C1.5.1 1.4 0 1.2 0S.8.1.6.2L.2.6C.1.8 0 1 0 1.2s.1.4.2.5L4 5.5c.1.1.3.2.5.2s.4-.1.5-.2l3.8-3.8c.1-.1.2-.3.2-.5S8.9.8 8.8.6L8.4.2z' style='fill:%23{{ text_color }}'/%3E%3C/svg%3E"); }
+
+/* Buttons */
+{% if settings.button_font == 'title' %}
+.link-btn a, button, .l4cn.box li, .spr-button { font-family: var(--main_ff_h); }
+{% endif %}
+{% if settings.button_style == 'plain' %}
+.link-btn a, button, .link-btn a:before, button:before { box-shadow: none; }
+{% elsif settings.button_style == 'inv' %}
+{% endif %}
+
+#root .l4hs .price .old-price { --price_color_old: {{ settings.compare_at_price_color }}!important; }
+{% endstyle %}

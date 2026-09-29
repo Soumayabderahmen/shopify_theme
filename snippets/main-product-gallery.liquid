@@ -1,0 +1,228 @@
+{% liquid
+  assign product = product
+  assign current_variant = product.selected_or_first_available_variant
+
+  unless featured_media_position
+    assign featured_media_position = current_variant.featured_media.position
+  endunless
+
+  unless featured_media_position
+    assign featured_media_position = 0
+  endunless
+
+  assign media_images = media_images | default: product.media
+  assign has_selected_variant_images = has_selected_variant_images | default: false
+  assign show_selected_variant_images = show_selected_variant_images | default: false
+  assign has_pros_and_cons = has_pros_and_cons | default: false
+  assign has_specs = has_specs | default: false
+
+  assign main_width = 700 | minus: 38 | minus: 38
+  if section.settings.images_layout == 'aside'
+    assign main_width = main_width | minus: 54
+  endif
+  assign sizes = '(min-width: 1000px) ' | append: main_width | append: 'px, 100vw'
+%}
+
+<ul
+  class="
+    l4pr
+    {% if section.settings.show_thumbs_desktop == false %}no-thumbs-desktop{% endif %}{% if section.settings.show_thumbs_mobile == false %} no-thumbs-mobile strong{% endif %}
+    {% if section.settings.images_layout == 'aside' and section.settings.show_thumbs_desktop %}aside-pager{% endif %}
+    no-scrollbar
+  "
+  data-media-size="{{ media_images.size }}"
+  {% if show_selected_variant_images %}
+    data-variant-image="true"
+  {% endif %}
+  data-featured_media_position="{{ featured_media_position }}"
+>
+  {%- if media_images.size == 0 or product == blank -%}
+    <li>
+      {%- render 'product-labels' -%}
+      <picture class="{% if settings.multiply_product_images == 'multiply' %}img-multiply{% elsif settings.multiply_product_images == 'multiply-bg' %}img-multiply-bg{% endif %}">
+        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      </picture>
+    </li>
+  {%- endif -%}
+  {%- for media_image in media_images -%}
+    {%- liquid
+      if media_image.media_type
+        assign media = media_image
+      else
+        assign media_id_number = media_image | plus: 0
+        assign matched_media = product.media | where: 'id', media_id_number | first
+        assign media = matched_media
+      endif
+    -%}
+    {%- if media == blank -%}{%- continue -%}{%- endif -%}
+    <li class="{% if settings.fill_product_images %} cover{% endif %}">
+      <a
+        data-fancybox="product-gallery-{{ product.id }}"
+        {% if media.media_type == 'image' %}
+          href="{{ media | image_url }}"
+        {% elsif media.media_type == 'external_video' %}
+          href="{{ media | external_video_url }}"
+        {% elsif media.media_type == 'video' %}
+          {%- liquid
+            assign source = media.sources | where: 'height', 1080 | where: 'format', 'mp4' | first
+            if source == null
+              assign source = media.sources | where: 'format', 'mp4' | first
+            endif
+            if source == null
+              assign source = media.sources | where: 'format', 'mov' | first
+            endif
+            if source == null
+              assign source = media.sources.first
+            endif
+          -%}
+          href="{{ source.url }}"
+        {% elsif media.media_type == 'model' %}
+          href="#model-3d-{{ forloop.index }}"
+        {% endif %}
+        data-gallery-thumb="
+          {% if settings.fill_product_images %}
+            {{ media.preview_image | image_url: width: image_width_small, height: image_height_small, crop: 'center' }}
+          {% else %}
+            {{ media.preview_image | image_url: width: image_width_small }}
+          {% endif %}
+        "
+      >
+        {%- if forloop.first -%}
+          {%- render 'product-labels' -%}
+        {%- endif -%}
+        <picture class="{% if settings.multiply_product_images == 'multiply' %}img-multiply{% elsif settings.multiply_product_images == 'multiply-bg' %}img-multiply-bg{% endif %}">
+          {%- liquid
+            assign lazyload = true
+            if forloop.index == featured_media_position
+              assign lazyload = false
+            elsif forloop.first and featured_media_position == 0
+              assign lazyload = false
+            endif
+          -%}
+          {% if media.image %}
+            {% capture srcset %}
+                {%- liquid
+                    if settings.fill_product_images
+                        render 'image-srcset', image: media, format: image_ratio, crop: 'center'
+                    else
+                        render 'image-srcset', image: media, format: image_ratio
+                    endif
+                -%}
+            {% endcapture %}
+            {%- if lazyload -%}
+              {{
+                media
+                | image_url: width: image_width, height: image_height, crop: 'center'
+                | image_tag: srcset: srcset, sizes: sizes, loading: 'lazy'
+              }}
+            {%- else -%}
+              {%- if prioritize_initial_media -%}
+                {{
+                  media
+                  | image_url: width: image_width, height: image_height, crop: 'center'
+                  | image_tag: srcset: srcset, sizes: sizes, loading: 'eager', fetchpriority: 'high', preload: true
+                }}
+              {%- else -%}
+                {{
+                  media
+                  | image_url: width: image_width, height: image_height, crop: 'center'
+                  | image_tag: srcset: srcset, sizes: sizes, preload: true
+                }}
+              {%- endif -%}
+            {%- endif -%}
+          {%- else -%}
+            {%- if lazyload -%}
+              {{
+                media.preview_image
+                | image_url: width: image_width, height: image_height, crop: 'center'
+                | image_tag: sizes: sizes, loading: 'lazy'
+              }}
+            {%- else -%}
+              {%- if prioritize_initial_media -%}
+                {{
+                  media.preview_image
+                  | image_url: width: image_width, height: image_height, crop: 'center'
+                  | image_tag: sizes: sizes, loading: 'eager', fetchpriority: 'high', preload: true
+                }}
+              {%- else -%}
+                {{
+                  media.preview_image
+                  | image_url: width: image_width, height: image_height, crop: 'center'
+                  | image_tag: sizes: sizes, preload: true
+                }}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endif -%}
+          {%- if media.media_type == 'external_video' or media.media_type == 'video' -%}
+            <i aria-hidden="true" class="icon-play"></i>
+          {%- elsif media.media_type == 'model' -%}
+            <span id="model-3d-{{ forloop.index }}" class="model-3d">
+              {{ media | model_viewer_tag: shadow-intensity: '1' }}
+              <button
+                data-shopify-xr
+                data-shopify-model3d-id="{{ media.id }}"
+                data-shopify-title="{{ product_title | escape }}"
+                data-shopify-xr-hidden
+              >
+                <i aria-hidden="true" class="icon-cube"></i> {{ 'product.view_in_your_space' | t }}
+              </button>
+            </span>
+            <i aria-hidden="true" class="icon-cube"></i>
+          {%- endif -%}
+        </picture>
+      </a>
+      {%- if media.media_type == 'model' -%}
+        <button
+          data-shopify-xr
+          data-shopify-model3d-id="{{ media.id }}"
+          data-shopify-title="{{ product_title | escape }}"
+          data-shopify-xr-hidden
+        >
+          <i aria-hidden="true" class="icon-cube"></i> {{ 'product.view_in_your_space' | t }}
+        </button>
+      {%- endif -%}
+    </li>
+  {%- endfor -%}
+</ul>
+
+
+{%- if has_pros_and_cons == false and has_specs == false -%}
+  {%- if section.settings.show_product_description and product.description != empty -%}
+    {% assign heading_tag = section.settings.description_title_size %}
+    <footer class="m6tb static desktop-only base-font">
+      <nav class="hidden">
+        <ul>
+          <li class="active">
+            <a href="#section-info">{{ 'product.description' | t }}</a>
+          </li>
+        </ul>
+      </nav>
+      <div>
+        <div id="section-info">
+          <{{ heading_tag }} class="mobile-hide">{{ 'product.description' | t }}</{{ heading_tag }}>
+          {%- if section.settings.product_description_enable_read_more -%}
+            <div class="m6lm">
+              {{ product.description }}
+            </div>
+            <p class="has-link-more">
+              <a href="./" class="strong link-more">
+                {{ 'general.read_more.read' | t }}
+                <span>{{ 'general.read_more.more' | t }}</span>
+                <span class="hidden">{{ 'general.read_more.less' | t }}</span>
+                <i aria-hidden="true" class="icon-chevron-down"></i>
+              </a>
+            </p>
+          {%- else -%}
+            {{ product.description }}
+          {%- endif -%}
+        </div>
+      </div>
+    </footer>
+  {%- endif %}
+{%- endif %}
+{%- assign has_model = product.media | where: 'media_type', 'model' | first -%}
+{%- if has_model -%}
+  <script type="application/json" id="ProductJSON-{{ product.id }}">
+    {{ product.media | where: 'media_type', 'model' | json }}
+  </script>
+{%- endif -%}

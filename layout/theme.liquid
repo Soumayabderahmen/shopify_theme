@@ -1,0 +1,342 @@
+<!doctype html>
+{%- assign rtl_languages = 'ae,ar,arc,bcc,bqi,ckb,dv,fa,glk,ha,he,kwh,ks,ku,mzn,nqo,pnb,ps,sd,ug,ur,yi' | split: ',' %}
+<html
+  lang="{{ request.locale.iso_code }}"
+  data-theme="xtra"
+  dir="{% if rtl_languages contains localization.language.iso_code %}rtl{% else %}ltr{% endif %}"
+  class="no-js{% if request.design_mode %} theme-editor{% endif %}{% unless settings.enable_hyphens %} no-hyph{% endunless %}"
+>
+  <head>
+    <!-- Added by AVADA SEO Suite -->
+    {% include 'avada-seo' %}
+    <!-- /Added by AVADA SEO Suite -->
+    {%- if content_for_header contains 'tapita-seo-script-tags' -%}{%- include 'tapita-seo-schema' -%}{%- endif -%}
+    <link rel="stylesheet" href="{{ 'drawer1product-style.css' | asset_url }}" media="print" onload="this.media='all'">
+    <noscript>{{ 'drawer1product-style.css' | asset_url | stylesheet_tag }}</noscript>
+    <link rel="stylesheet" href="{{ 'producttext-style.css' | asset_url }}" media="print" onload="this.media='all'">
+    <noscript>{{ 'producttext-style.css' | asset_url | stylesheet_tag }}</noscript>
+    <link rel="preconnect" href="https://cdn.alireviews.io" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.alireviews.io">
+
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>
+      {{ page_title }}
+      {% unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}
+    </title>
+    {%- if page_description -%}<meta name="description" content="{{ page_description | escape }}">{%- endif -%}
+    <meta name="theme-color" content="{{ settings.default_color_scheme.settings.accent }}">
+    <meta name="MobileOptimized" content="320">
+    <meta name="HandheldFriendly" content="true">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, viewport-fit=cover, shrink-to-fit=no"
+    >
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-config" content="{{ 'browserconfig.xml' | asset_url }}">
+    {%- comment -%}dl-bc-v3{%- endcomment -%}
+    {%- if template contains 'product' and product.metafields.deeplumen.ap_deployed.value == true -%}
+      <link rel="canonical" href="https://{{ request.host }}/a/shop/products/{{ product.handle }}">
+    {%- elsif template contains 'collection' and collection.metafields.deeplumen.ap_deployed.value == true -%}
+      <link rel="canonical" href="https://{{ request.host }}/a/shop/collections/{{ collection.handle }}">
+    {%- elsif template contains 'article' and article.metafields.deeplumen.ap_deployed.value == true -%}
+      <link rel="canonical" href="https://{{ request.host }}/a/shop/blogs/{{ article.handle }}">
+    {%- else -%}
+      <link rel="canonical" href="{{ canonical_url }}">
+    {%- endif -%}
+    {%- comment -%}/dl-bc{%- endcomment -%}
+    {% unless settings.heading_font.system? -%}
+      {%- assign heading_font_url = settings.heading_font | font_url -%}
+      {{ heading_font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
+    {%- endunless %}
+    {% unless settings.body_font.system? -%}
+      {%- assign body_font_url = settings.body_font | font_url -%}
+      {%- unless body_font_url == heading_font_url -%}
+        {{ body_font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
+      {%- endunless -%}
+    {%- endunless %}
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap"
+      media="(max-width: 760px)"
+    >
+    {%- if settings.custom_primary_font_snippet -%}{{ settings.custom_primary_font_snippet }}{%- endif -%}
+    {%- if settings.custom_secondary_font_snippet -%}{{ settings.custom_secondary_font_snippet }}{%- endif -%}
+    {{ 'screen.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
+    {{ 'theme-xtra.css' | asset_url | stylesheet_tag: media: 'screen' }}
+    {{ 'mobile-temu-header.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
+    <style id="mobile-critical-layout">
+      @media only screen and (max-width: 760px) {
+        #root #nav-top,
+        #root #nav-top::before,
+        #root #nav-top > ul,
+        #root #nav-top .swiper-outer,
+        #root #nav-top .swiper-wrapper,
+        #root #nav-top .swiper-slide {
+          background: #f5f6f8 !important;
+          border: 0 !important;
+          box-shadow: none !important;
+        }
+
+        .shopify-section-announcement-bar-container {
+          color: #e6e8f2 !important;
+          background: linear-gradient(90deg, #16123f, #3a34d2) !important;
+        }
+
+        [id$="section_slideshow_XNiKWa"] .m6fr.slider-fraction {
+          margin-left: 6px !important;
+          margin-right: 6px !important;
+          margin-top: -5px !important;
+          height: auto !important;
+          aspect-ratio: 1 / 1;
+          border-radius: 18px !important;
+          overflow: hidden !important;
+        }
+
+        [id$="section_slideshow_XNiKWa"] .m6fr.slider-fraction .swiper-outer {
+          border-radius: 18px !important;
+          overflow: hidden !important;
+        }
+      }
+    </style>
+    {{ 'async-print.css' | asset_url | stylesheet_tag: media: 'print' }}
+    <noscript><link rel="stylesheet" href="{{ 'async-menu.css' | asset_url }}"></noscript>
+    {%- if template.name == 'blog' or template.name == 'article' -%}
+      <link media="screen" rel="stylesheet" href="{{ 'page-blog.css' | asset_url }}" id="blog-css">
+    {%- endif -%}
+    {%- if template.name == 'cart' -%}
+      <link media="screen" rel="stylesheet" href="{{ 'page-cart.css' | asset_url }}" id="cart-css">
+    {%- endif -%}
+    {%- if template.name == 'collection' or template.name == 'search' -%}
+      {{ 'page-collection.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
+    {%- endif -%}
+    {%- if template.name == '404' -%}
+      <link media="screen" rel="stylesheet" href="{{ 'page-misc.css' | asset_url }}" id="misc-css">
+    {%- endif -%}
+    {%- if template.name == 'product' -%}
+      {{ 'page-product.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
+    {%- endif -%}
+    {%- if settings.favicon -%}
+      {%- assign favicon_url = settings.favicon | image_url: width: 32, height: 32 -%}
+      {%- assign favicon_no_query = favicon_url | split: '?' | first -%}
+      {%- assign favicon_ext = favicon_no_query | split: '.' | last | downcase -%}
+      {%- assign apple_touch_icon_url = settings.favicon | image_url: width: 180, height: 180 -%}
+
+      {%- if favicon_ext == 'svg' -%}
+        <link rel="icon" href="{{ favicon_url }}" type="image/svg+xml">
+      {%- elsif favicon_ext == 'png' -%}
+        <link rel="icon" href="{{ favicon_url }}" type="image/png">
+      {%- else -%}
+        <link rel="icon" href="{{ favicon_url }}">
+      {%- endif -%}
+
+      {%- if favicon_ext == 'svg' -%}
+        <link rel="mask-icon" href="{{ favicon_url }}" color="#333333">
+      {%- endif -%}
+      <link rel="apple-touch-icon" href="{{ apple_touch_icon_url }}">
+    {%- endif -%}
+    <script>
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+    </script>
+    <script>
+      try {
+        if (localStorage.getItem('announcement-bar-closed') === '1') {
+          document.documentElement.classList.add('announcement-bar-closed');
+        }
+        if (localStorage.getItem('accessible') === '1') {
+          document.documentElement.classList.add('t1ac');
+        }
+      } catch (e) {}
+    </script>
+    {% render 'social-meta-tags' %}
+    {% render 'standard-storefront-actions' %}
+    {% render 'standard-storefront-events' %}
+    {{ content_for_header }}
+    {{ settings.custom_script_for_head }}
+    {% render 'color-schemes-style' %}
+    {% render 'theme-settings-style' %}
+ 
+   <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Verifica il supporto nativo del browser per le Speculation Rules
+    if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('speculationrules')) {
+      return;
+    }
+
+    const rules = document.createElement('script');
+    rules.type = 'speculationrules';
+    rules.textContent = JSON.stringify({
+      prerender: [
+        {
+          source: 'document',
+          where: {
+            and: [
+              { href_matches: '/*' },
+              {
+                selector_matches:
+                  '.mobile-temu-categories a[href], .mobile-bottom-navigation a[href], .mobile-category-browser a[href*="/products/"], header a[href], .footer__links a[href]',
+              },
+              {
+                not: {
+                  selector_matches: 'a[data-mobile-categories-trigger], a[href*="/account"], a[href*="/cart"], a[href*="/checkout"], a[href*="/search"]',
+                },
+              },
+            ],
+          },
+          // "eager" fa partire il prerendering all'istante non appena il link appare nel viewport o viene sfiorato
+          eagerness: 'moderate', 
+        },
+      ],
+    });
+
+    document.head.appendChild(rules);
+  });
+</script>
+
+<!-- Speculation Rules e Gestione Attivazione Smart per App & Widget -->
+  
+
+  <script>
+    function handlePageActivation() {
+      // 1. Forza il reflow grafico per allineare gli stili istantaneamente
+      document.documentElement.style.opacity = '0.99';
+      setTimeout(() => {
+        document.documentElement.style.opacity = '1';
+      }, 10);
+
+      // 2. Sincronizza i componenti dinamici del tema
+      if (typeof updateCartCount === 'function') {
+        updateCartCount();
+      }
+      if (typeof window.initThemeComponents === 'function') {
+        window.initThemeComponents();
+      }
+
+      // 3. SBLOCCO E RE-INIZIALIZZAZIONE APP TERZE (AliReviews, Trustpilot, ecc.)
+      // Forza il browser a rileggere gli script iniettati dalle app
+      setTimeout(function() {
+        // Dispara un evento di resize fittizio per svegliare caroselli e griglie pigre (lazy load)
+        window.dispatchEvent(new Event('resize'));
+        window.dispatchEvent(new Event('scroll'));
+
+        // Se l'app usa funzioni globali di ricaricamento (es. AliReviews o simili), le richiamiamo in sicurezza:
+        if (typeof AliReviews !== 'undefined' && typeof AliReviews.init === 'function') {
+          AliReviews.init();
+        }
+        
+        // Esegue un trigger generico per script in ascolto sul DOM
+        document.dispatchEvent(new CustomEvent('shopify:section:load', { detail: { sectionId: 'dynamic-widgets' } }));
+      }, 50);
+    }
+
+    if (document.prerendering) {
+      document.addEventListener('prerenderingchange', handlePageActivation, { once: true });
+    }
+
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted || performance.getEntriesByType('navigation')[0]?.activationStart > 0) {
+        handlePageActivation();
+      }
+    });
+  </script>
+</head>
+  <body class="template-{{ template.name | handle }}">
+    <div id="root">
+      {%- render 'accessible-nav' -%}
+      {%- sections 'header-group' -%}
+      {%- sections 'overlay-group' -%}
+      <main id="content">
+        {{ content_for_layout }}
+        {%- sections 'footer-group' -%}
+      </main>
+      {%- liquid
+        if template.name == 'product'
+          section 'sticky-add-to-cart'
+        endif
+        render 'quickshop-container'
+        render 'pickup-availability-container'
+        if settings.back_to_top_button
+          render 'back-to-top-button'
+        endif
+        render 'upsell-popup'
+      -%}
+      <button type="button" class="overlay-close" aria-label="Close">Close</button>
+      <button type="button" class="overlay-close-clipping" aria-label="Close">Close</button>
+      <div class="panel-1"></div>
+      <div class="panel-2"></div>
+    </div>
+    {% render 'global-variables' %}
+    {%- if rtl_languages contains localization.language.iso_code -%}
+      {{ 'rtl.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
+    {%- endif -%}
+    {% render 'color-swatches' %}
+    <script defer src="{{ 'scripts.js' | asset_url }}"></script>
+    <script defer src="{{ 'custom.js' | asset_url }}"></script>
+    {%- if template.name == 'collection' or template.name == 'search' -%}
+      <script defer src="{{ 'page-collection.js' | asset_url }}"></script>
+    {%- endif -%}
+    {%- if request.design_mode -%}<script defer src="{{ 'backend-listeners.js' | asset_url }}"></script>{%- endif -%}
+    {{ settings.custom_script_for_body }}
+    {% render 'beacon' %}
+    {% render 'indexeddb-cache' %}
+    <script>
+      (function () {
+        // Prevent redirect loops
+        if (sessionStorage.getItem('geo_redirected')) return;
+
+        const currentPath = window.location.pathname;
+
+        // Use Shopify's built-in localization object via a fetch
+        fetch('/localization.json')
+          .then((res) => res.json())
+          .then((data) => {
+            const country = data.country && data.country.iso_code ? data.country.iso_code.toUpperCase() : null;
+
+            if (!country) return;
+
+            // Map country codes → your language URL prefix
+            const countryLangMap = {
+              // English-speaking countries → /en
+              US: '/en',
+              GB: '/en',
+              AU: '/en',
+              CA: '/en',
+              IE: '/en',
+              NZ: '/en',
+              JM: '/en',
+              BZ: '/en',
+              // French-speaking countries → /fr
+              FR: '/fr',
+              BE: '/fr',
+              CH: '/fr',
+              LU: '/fr',
+              HT: '/fr',
+              MC: '/fr',
+              // Spanish-speaking countries → /en (no Spanish yet, fallback English)
+              MX: '/en',
+              GT: '/en',
+              CR: '/en',
+              PA: '/en',
+              DO: '/en',
+              NI: '/en',
+              HN: '/en',
+              SV: '/en',
+              // Italian stays default (no prefix)
+              IT: null,
+            };
+
+            const targetPrefix = countryLangMap.hasOwnProperty(country) ? countryLangMap[country] : '/en'; // Default to English for unknown countries
+
+            if (targetPrefix && !currentPath.startsWith(targetPrefix)) {
+              sessionStorage.setItem('geo_redirected', 'true');
+              window.location.replace(targetPrefix + currentPath);
+            }
+          })
+          .catch(() => {}); // Fail silently if fetch fails
+      })();
+    </script>
+    <!-- Script di Prefetching Istantaneo per Shopify -->
+  </body>
+</html>

@@ -1,0 +1,269 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "settings": {
+        "hide_mobile": true
+      }
+    },
+    "main-product": {
+      "type": "main-product",
+      "blocks": {
+        "custom_liquid_BwcUth": {
+          "type": "custom_liquid",
+          "disabled": true,
+          "settings": {
+            "custom_liquid": "{% assign target_brands = \"nike, adidas, puma, reebok, new balance, onemix, jordan, asics\" | split: \", \" %}\n{% assign product_title_lower = product.title | downcase %}\n{% assign matched_brand = \"\" %}\n\n{% for brand in target_brands %}\n  {% if product_title_lower contains brand %}\n    {% assign matched_brand = brand | capitalize %}\n    {% break %}\n  {% endif %}\n{% endfor %}\n\n{% case request.locale.iso_code %}\n  {% when 'it' %}\n    {% capture badge_text %}Negozio Ufficiale del Marchio: {{ matched_brand }} · Garanzia di qualità{% endcapture %}\n    {% assign title_text = \"Negozio Ufficiale del Marchio\" %}\n    {% assign review_text = \"Revisione qualifiche\" %}\n    {% assign auth_text = \"Certificazione autorizzata\" %}\n    {% assign quality_text = \"Dichiarazione di qualità\" %}\n    {% assign delivery_title = \"Marchio con spedizione veloce\" %}\n    {% assign delivery_sub = \"Spedizione più veloce della media.\" %}\n    {% assign more_from_text = \"Altri prodotti da\" %}\n  {% when 'es' %}\n    {% capture badge_text %}Tienda Oficial de la Marca: {{ matched_brand }} · Garantía de calidad{% endcapture %}\n    {% assign title_text = \"Tienda Oficial de la Marca\" %}\n    {% assign review_text = \"Revisión de cualificación\" %}\n    {% assign auth_text = \"Certificación de autorización\" %}\n    {% assign quality_text = \"Declaración de calidad\" %}\n    {% assign delivery_title = \"Marca con envío rápido\" %}\n    {% assign delivery_sub = \"Envío más rápido que la media.\" %}\n    {% assign more_from_text = \"Más de\" %}\n  {% when 'fr' %}\n    {% capture badge_text %}Boutique Officielle de la Marque : {{ matched_brand }} · Assurance qualité{% endcapture %}\n    {% assign title_text = \"Boutique Officielle de la Marque\" %}\n    {% assign review_text = \"Examen des qualifications\" %}\n    {% assign auth_text = \"Certification d'autorisation\" %}\n    {% assign quality_text = \"Déclaration de qualité\" %}\n    {% assign delivery_title = \"Marque à livraison rapide\" %}\n    {% assign delivery_sub = \"Livraison plus rapide que la moyenne.\" %}\n    {% assign more_from_text = \"Plus de\" %}\n  {% when 'de' %}\n    {% capture badge_text %}Offizieller Marken-Store: {{ matched_brand }} · Qualitätssicherung{% endcapture %}\n    {% assign title_text = \"Offizieller Marken-Store\" %}\n    {% assign review_text = \"Qualifikationsprüfung\" %}\n    {% assign auth_text = \"Autorisierungszertifikat\" %}\n    {% assign quality_text = \"Qualitätserklärung\" %}\n    {% assign delivery_title = \"Schnelle Lieferung Marke\" %}\n    {% assign delivery_sub = \"Schnellere Lieferung als der Durchschnitt.\" %}\n    {% assign more_from_text = \"Mehr von\" %}\n  {% else %}\n    {% capture badge_text %}Brand Official Store: {{ matched_brand }} · Quality assurance{% endcapture %}\n    {% assign title_text = \"Brand Official Store\" %}\n    {% assign review_text = \"Qualification Review\" %}\n    {% assign auth_text = \"Authorization Certification\" %}\n    {% assign quality_text = \"Quality Statement\" %}\n    {% assign delivery_title = \"Fast Delivery Brand\" %}\n    {% assign delivery_sub = \"Faster delivery than average.\" %}\n    {% assign more_from_text = \"More from\" %}\n{% endcase %}\n\n{% if matched_brand != \"\" %}\n  <!-- Banner Button -->\n  <div class=\"brand-badges-container\">\n    <div class=\"badge badge-store\" id=\"brandPopupTrigger\" role=\"button\" tabindex=\"0\">\n      <div class=\"badge-content\">\n        <svg class=\"badge-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\">\n          <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\" />\n        </svg>\n        <span class=\"badge-text\">{{ badge_text }}</span>\n      </div>\n      <svg class=\"arrow-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\">\n        <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 5l7 7-7 7\" />\n      </svg>\n    </div>\n  </div>\n\n  <!-- Fullscreen Drawer Structure -->\n  <div class=\"brand-drawer-overlay\" id=\"brandDrawerOverlay\" aria-hidden=\"true\">\n    <div class=\"brand-drawer-container\">\n      \n      <!-- Drag Handle per Mobile -->\n      <div class=\"drawer-drag-handle\"></div>\n\n      <!-- Drawer Header -->\n      <div class=\"brand-drawer-header\">\n        <h3>{{ title_text }}: {{ matched_brand }}</h3>\n        <div class=\"brand-drawer-close\" id=\"brandDrawerClose\" role=\"button\" tabindex=\"0\">&times;</div>\n      </div>\n\n      <div class=\"brand-drawer-body\">\n        <!-- Feature Cards -->\n        <div class=\"brand-features-grid\">\n          <div class=\"feature-item\">\n            <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\" /></svg>\n            <span>{{ review_text }}</span>\n          </div>\n          <div class=\"feature-item\">\n            <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z\" /></svg>\n            <span>{{ auth_text }}</span>\n          </div>\n          <div class=\"feature-item\">\n            <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z\" /></svg>\n            <span>{{ quality_text }}</span>\n          </div>\n        </div>\n\n        <!-- Fast Delivery Banner -->\n        <div class=\"brand-delivery-card\">\n          <div class=\"delivery-title\">\n            <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13 10V3L4 14h7v7l9-11h-7z\"/></svg>\n            <strong>{{ delivery_title }}</strong>\n          </div>\n          <p>{{ delivery_sub }}</p>\n        </div>\n\n        <!-- Products List -->\n        <div class=\"brand-products-section\">\n          <h4>{{ more_from_text }} {{ matched_brand }}</h4>\n          <div class=\"brand-products-grid\">\n            {% assign brand_lower = matched_brand | downcase %}\n            {% for product in collection.products %}\n              {% assign p_title = product.title | downcase %}\n              {% if p_title contains brand_lower %}\n                {% capture placeholder_int %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}\n                {% assign no_lazyload = false %}\n                {% if section.index == 1 and forloop.index <= 4 %}\n                  {% assign no_lazyload = true %}\n                {% endif %}\n\n                <div class=\"brand-product-item-wrap\">\n                  {% render 'product-item', product: product, placeholder_int: placeholder_int, enable_quick_buy_desktop: section.settings.enable_quick_buy_desktop, enable_quick_buy_mobile: section.settings.enable_quick_buy_mobile, enable_quick_buy_qty_selector: section.settings.enable_quick_buy_qty_selector, quick_buy_compact: section.settings.enable_quick_buy_compact, enable_quick_buy_drawer: section.settings.enable_quick_buy_drawer, sizes: image_sizes, enable_color_picker: section.settings.enable_color_picker, no_lazyload: no_lazyload %}\n                </div>\n              {% endif %}\n            {% endfor %}\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n{% endif %}\n\n<style>\n  .brand-badges-container {\n    margin: 12px 0;\n    width: 100%;\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  }\n\n  .badge-store {\n    display: flex;\n    align-items: center;\n    justify-content: space-between;\n    width: 100%;\n    padding: 10px 14px;\n    border-radius: 6px;\n    background-color: #382418;\n    color: #e5c3a6;\n    cursor: pointer;\n    user-select: none;\n    box-sizing: border-box;\n    transition: background-color 0.2s ease;\n  }\n\n  .badge-store:hover {\n    background-color: #2e1d13;\n  }\n\n  .badge-content {\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    min-width: 0;\n  }\n\n  .badge-text {\n    font-size: 13px;\n    font-weight: 500;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n  }\n\n  .badge-icon, .arrow-icon {\n    width: 16px;\n    height: 16px;\n    flex-shrink: 0;\n    color: #e5c3a6;\n  }\n\n  /* Overlay globale che copre TUTTA la pagina */\n  .brand-drawer-overlay {\n    position: fixed !important;\n    top: 0 !important;\n    left: 0 !important;\n    right: 0 !important;\n    bottom: 0 !important;\n    width: 100vw !important;\n    height: 100vh !important;\n    background: rgba(0, 0, 0, 0.65) !important;\n    backdrop-filter: blur(4px);\n    -webkit-backdrop-filter: blur(4px);\n    z-index: 2147483647 !important; /* Forza l'uscita sopra qualsiasi elemento Shopify */\n    display: flex !important;\n    justify-content: center;\n    align-items: flex-end; /* Mobile Bottom Drawer */\n    opacity: 0;\n    visibility: hidden;\n    pointer-events: none;\n    transition: opacity 0.35s ease, visibility 0.35s ease;\n  }\n\n  .brand-drawer-overlay.is-active {\n    opacity: 1 !important;\n    visibility: visible !important;\n    pointer-events: auto !important;\n  }\n\n  .drawer-drag-handle {\n    width: 40px;\n    height: 4px;\n    background: #5a3c28;\n    border-radius: 2px;\n    margin: 8px auto 4px auto;\n    flex-shrink: 0;\n  }\n\n  /* Contenitore Drawer */\n  .brand-drawer-container {\n    background: #2b1a10;\n    color: #f2e3d5;\n    width: 100%;\n    max-height: 85vh;\n    border-radius: 18px 18px 0 0;\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);\n    transform: translateY(100%); /* Parte da fuori schermo in basso */\n    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);\n    box-sizing: border-box;\n  }\n\n  .brand-drawer-overlay.is-active .brand-drawer-container {\n    transform: translateY(0) !important; /* Scorre verso l'alto */\n  }\n\n  /* Header */\n  .brand-drawer-header {\n    padding: 12px 20px 16px 20px;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    border-bottom: 1px solid #4a3222;\n  }\n\n  .brand-drawer-header h3 {\n    margin: 0;\n    font-size: 15px;\n    color: #ffffff;\n    font-weight: 600;\n  }\n\n  .brand-drawer-close {\n    color: #e5c3a6;\n    font-size: 26px;\n    cursor: pointer;\n    line-height: 1;\n    user-select: none;\n  }\n\n  /* Content Body */\n  .brand-drawer-body {\n    padding: 16px;\n    overflow-y: auto;\n    -webkit-overflow-scrolling: touch;\n  }\n\n  .brand-features-grid {\n    display: grid;\n    grid-template-columns: 1fr;\n    gap: 8px;\n    margin-bottom: 14px;\n  }\n\n  .feature-item {\n    background: #3d2719;\n    padding: 10px 12px;\n    border-radius: 6px;\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    font-size: 12px;\n    border: 1px solid #4a3222;\n  }\n\n  .feature-item svg {\n    width: 16px;\n    height: 16px;\n    flex-shrink: 0;\n    color: #e5c3a6;\n  }\n\n  .brand-delivery-card {\n    background: #3d2719;\n    padding: 10px 12px;\n    border-radius: 6px;\n    margin-bottom: 20px;\n    border: 1px solid #4a3222;\n  }\n\n  .delivery-title {\n    display: flex;\n    align-items: center;\n    gap: 6px;\n    font-size: 12px;\n    margin-bottom: 2px;\n  }\n\n  .delivery-title svg {\n    width: 15px;\n    height: 15px;\n    color: #e5c3a6;\n  }\n\n  .brand-delivery-card p {\n    margin: 0;\n    font-size: 11px;\n    color: #bfa895;\n  }\n\n  .brand-products-section h4 {\n    margin: 0 0 10px 0;\n    font-size: 14px;\n    color: #ffffff;\n  }\n\n  .brand-products-grid {\n    display: grid;\n    grid-template-columns: repeat(2, 1fr);\n    gap: 10px;\n  }\n\n  .brand-product-item-wrap {\n    background: #ffffff;\n    border-radius: 6px;\n    overflow: hidden;\n    color: #000000;\n  }\n</style>\n\n<script>\n  (function() {\n    function initBrandDrawer() {\n      const trigger = document.getElementById('brandPopupTrigger');\n      const overlay = document.getElementById('brandDrawerOverlay');\n      const closeBtn = document.getElementById('brandDrawerClose');\n\n      if (!trigger || !overlay) return;\n\n      // Sposta l'overlay direttamente nel body per bypassare contenitori con overflow/z-index limitati\n      if (overlay.parentNode !== document.body) {\n        document.body.appendChild(overlay);\n      }\n\n      function openDrawer() {\n        overlay.classList.add('is-active');\n        document.body.style.overflow = 'hidden';\n      }\n\n      function closeDrawer() {\n        overlay.classList.remove('is-active');\n        document.body.style.overflow = '';\n      }\n\n      trigger.addEventListener('click', openDrawer);\n\n      if (closeBtn) {\n        closeBtn.addEventListener('click', closeDrawer);\n      }\n\n      overlay.addEventListener('click', function(e) {\n        if (e.target === overlay) {\n          closeDrawer();\n        }\n      });\n    }\n\n    if (document.readyState === 'loading') {\n      document.addEventListener('DOMContentLoaded', initBrandDrawer);\n    } else {\n      initBrandDrawer();\n    }\n  })();\n</script>"
+          }
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_tax": true
+          }
+        },
+        "c7259cb9-7235-4028-b6df-3a68077fed80": {
+          "type": "title",
+          "settings": {
+            "layout": "title-right",
+            "title_size": "h5",
+            "title": "",
+            "show_vendor_brand": false,
+            "show_vendor_name": false,
+            "show_product_rating": true,
+            "share_whatsapp": true,
+            "share_facebook": true,
+            "share_twitter": true,
+            "share_pinterest": true,
+            "share_messenger": true,
+            "share_email": true,
+            "layout_mobile": "title-bottom"
+          }
+        },
+        "short_description": {
+          "type": "short_description",
+          "settings": {
+            "show_read_more": true
+          }
+        },
+        "custom_liquid_4ekLfn": {
+          "type": "custom_liquid",
+          "disabled": true,
+          "settings": {
+            "custom_liquid": "{% assign size_chart = product.metafields.custom.size_chart.value %}\n{% assign size_chart_stripped = size_chart | strip_html | strip %}\n{% if size_chart != blank and size_chart_stripped != blank %}\n{% assign locale = request.locale.iso_code | downcase %}\n{% case locale %}{% when 'fr' %}{% assign sc_label = 'Guide des tailles' %}{% assign sc_close_label = 'Fermer' %}{% assign sc_drawer_title = 'Guide des tailles' %}{% when 'de' %}{% assign sc_label = 'Größentabelle' %}{% assign sc_close_label = 'Schließen' %}{% assign sc_drawer_title = 'Größentabelle' %}{% when 'es' %}{% assign sc_label = 'Guía de tallas' %}{% assign sc_close_label = 'Cerrar' %}{% assign sc_drawer_title = 'Guía de tallas' %}{% when 'nl' %}{% assign sc_label = 'Maattabel' %}{% assign sc_close_label = 'Sluiten' %}{% assign sc_drawer_title = 'Maattabel' %}{% when 'et' %}{% assign sc_label = 'Suuruste juhend' %}{% assign sc_close_label = 'Sulge' %}{% assign sc_drawer_title = 'Suuruste juhend' %}{% when 'it' %}{% assign sc_label = 'Guida alle taglie' %}{% assign sc_close_label = 'Chiudi' %}{% assign sc_drawer_title = 'Guida alle taglie' %}{% else %}{% assign sc_label = 'Size Guide' %}{% assign sc_close_label = 'Close' %}{% assign sc_drawer_title = 'Size Guide' %}{% endcase %}\n<div class=\"sc-wrapper\" id=\"scWrapper\"><button class=\"sc-trigger\" id=\"scTrigger\" aria-expanded=\"false\" aria-controls=\"scPanel scDrawer\" type=\"button\"><span class=\"sc-trigger__ruler\" aria-hidden=\"true\"><svg width=\"44\" height=\"36\" viewBox=\"0 0 44 36\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><line x1=\"4\" y1=\"6\" x2=\"40\" y2=\"6\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><polyline points=\"9,2 4,6 9,10\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><polyline points=\"35,2 40,6 35,10\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><rect x=\"2\" y=\"14\" width=\"40\" height=\"18\" rx=\"2\" fill=\"currentColor\"/><line x1=\"8\" y1=\"14\" x2=\"8\" y2=\"22\" stroke=\"white\" stroke-width=\"1.5\" stroke-linecap=\"round\"/><line x1=\"11\" y1=\"14\" x2=\"11\" y2=\"19\" stroke=\"white\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><line x1=\"14\" y1=\"14\" x2=\"14\" y2=\"22\" stroke=\"white\" stroke-width=\"1.5\" stroke-linecap=\"round\"/><line x1=\"17\" y1=\"14\" x2=\"17\" y2=\"19\" stroke=\"white\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><line x1=\"20\" y1=\"14\" x2=\"20\" y2=\"22\" stroke=\"white\" stroke-width=\"1.5\" stroke-linecap=\"round\"/><line x1=\"23\" y1=\"14\" x2=\"23\" y2=\"19\" stroke=\"white\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><line x1=\"26\" y1=\"14\" x2=\"26\" y2=\"22\" stroke=\"white\" stroke-width=\"1.5\" stroke-linecap=\"round\"/><line x1=\"29\" y1=\"14\" x2=\"29\" y2=\"19\" stroke=\"white\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><line x1=\"32\" y1=\"14\" x2=\"32\" y2=\"22\" stroke=\"white\" stroke-width=\"1.5\" stroke-linecap=\"round\"/><line x1=\"35\" y1=\"14\" x2=\"35\" y2=\"19\" stroke=\"white\" stroke-width=\"1.2\" stroke-linecap=\"round\"/><line x1=\"38\" y1=\"14\" x2=\"38\" y2=\"22\" stroke=\"white\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></svg></span><span class=\"sc-trigger__text\">{{ sc_label }}</span><svg class=\"sc-trigger__chevron\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polyline points=\"6 9 12 15 18 9\"/></svg></button><div class=\"sc-dropdown\" id=\"scPanel\" role=\"dialog\" aria-label=\"{{ sc_drawer_title }}\" aria-hidden=\"true\"><div class=\"sc-dropdown__inner\"><div class=\"sc-dropdown__topbar\"><span class=\"sc-dropdown__title\">{{ sc_drawer_title }}</span><button class=\"sc-close\" id=\"scClose\" aria-label=\"{{ sc_close_label }}\" type=\"button\">×</button></div><div class=\"sc-content\">{{ size_chart }}</div></div></div><div class=\"sc-overlay\" id=\"scOverlay\" aria-hidden=\"true\"></div><div class=\"sc-drawer\" id=\"scDrawer\" role=\"dialog\" aria-label=\"{{ sc_drawer_title }}\" aria-modal=\"true\" aria-hidden=\"true\"><div class=\"sc-drawer__handle\" aria-hidden=\"true\"></div><div class=\"sc-drawer__header\"><span class=\"sc-drawer__title\">{{ sc_drawer_title }}</span><button class=\"sc-close sc-drawer__close\" id=\"scDrawerClose\" aria-label=\"{{ sc_close_label }}\" type=\"button\">×</button></div><div class=\"sc-drawer__body\"><div class=\"sc-content\">{{ size_chart }}</div></div></div></div>\n<style>\n.sc-wrapper *, .sc-wrapper *::before, .sc-wrapper *::after{box-sizing:border-box}.sc-wrapper{--sc-accent:#111;--sc-bg:#fff;--sc-border:#e2e2e2;--sc-radius:8px;--sc-radius-lg:16px;--sc-shadow:0 8px 40px rgba(0,0,0,.14);--sc-transition:.22s ease;position:relative;display:inline-block;margin:14px 0}.sc-trigger{display:inline-flex;align-items:center;gap:10px;padding:6px 4px;background:transparent!important;border:none!important;border-radius:0;box-shadow:none!important;font-size:13px;font-weight:600;letter-spacing:.03em;color:var(--sc-accent);cursor:pointer;transition:opacity var(--sc-transition);white-space:nowrap;-webkit-tap-highlight-color:transparent}.sc-trigger:hover,.sc-trigger:focus-visible{background:transparent!important;border:none!important;color:var(--sc-accent);opacity:.7;outline:none}.sc-trigger__ruler{display:inline-flex;align-items:center;flex-shrink:0;color:currentColor}.sc-trigger:hover .sc-trigger__ruler,.sc-trigger:focus-visible .sc-trigger__ruler{color:currentColor}.sc-trigger__chevron{transition:transform .25s ease}.sc-trigger[aria-expanded=true] .sc-trigger__chevron{transform:rotate(180deg)}.sc-dropdown{display:none;position:absolute;top:calc(100% + 8px);left:0;z-index:9200;width:480px;max-width:92vw;background:var(--sc-bg);border:1px solid var(--sc-border);border-radius:var(--sc-radius-lg);box-shadow:var(--sc-shadow);overflow:hidden}.sc-dropdown.is-open{display:block}.sc-dropdown__inner{display:flex;flex-direction:column;max-height:440px}.sc-dropdown__topbar,.sc-drawer__header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--sc-border)}.sc-dropdown__title,.sc-drawer__title{font-size:14px;font-weight:700;color:var(--sc-accent)}.sc-content{font-size:13px;color:#222;line-height:1.55}.sc-dropdown__inner .sc-content{overflow-y:auto;padding:16px}.sc-content table{width:100%;border-collapse:collapse;font-size:12.5px}.sc-content th,.sc-content td{border:1px solid #e4e4e4;padding:8px 12px;text-align:center;white-space:nowrap}.sc-content th{background:#f7f7f7;font-weight:700;text-transform:uppercase;color:#444}.sc-content tr:nth-child(even) td{background:#fafafa}.sc-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998}.sc-overlay.is-open{display:block}.sc-drawer{display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--sc-bg);border-radius:20px 20px 0 0;box-shadow:0 -6px 40px rgba(0,0,0,.18);transform:translateY(100%);transition:transform .36s cubic-bezier(.32,.72,0,1);max-height:88vh;overflow:hidden;flex-direction:column}.sc-drawer.is-visible{display:flex}.sc-drawer.is-open{transform:translateY(0)}.sc-drawer__handle{width:36px;height:4px;background:#d1d1d1;border-radius:2px;margin:10px auto 2px}.sc-drawer__body{overflow-y:auto;padding:16px 20px 36px}.sc-close{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:#f4f4f4;border:0;border-radius:50%;cursor:pointer;color:#555;font-size:20px}.sc-close:hover,.sc-close:focus-visible{background:var(--sc-accent);color:#fff;outline:none}@media(max-width:749px){.sc-dropdown{display:none!important}}@media(min-width:750px){.sc-drawer,.sc-overlay{display:none!important}}\n</style>\n<script>\n(function(){'use strict';var MOBILE_BP=750,trigger=document.getElementById('scTrigger'),panel=document.getElementById('scPanel'),closeBtn=document.getElementById('scClose'),overlay=document.getElementById('scOverlay'),drawer=document.getElementById('scDrawer'),drawerClose=document.getElementById('scDrawerClose');if(!trigger)return;function isMobile(){return window.innerWidth<MOBILE_BP}var savedScrollY=0;function lockBody(){savedScrollY=window.scrollY||window.pageYOffset;document.body.style.position='fixed';document.body.style.top='-'+savedScrollY+'px';document.body.style.left='0';document.body.style.right='0';document.body.style.overflow='hidden'}function unlockBody(){document.body.style.position='';document.body.style.top='';document.body.style.left='';document.body.style.right='';document.body.style.overflow='';window.scrollTo(0,savedScrollY)}function isOpen(){return isMobile()?drawer.classList.contains('is-open'):panel.classList.contains('is-open')}function openPanel(){if(isMobile()){overlay.classList.add('is-open');overlay.setAttribute('aria-hidden','false');drawer.classList.add('is-visible');drawer.setAttribute('aria-hidden','false');lockBody();requestAnimationFrame(function(){requestAnimationFrame(function(){drawer.classList.add('is-open')})})}else{panel.classList.add('is-open');panel.setAttribute('aria-hidden','false');trigger.setAttribute('aria-expanded','true')}}function closePanel(){if(isMobile()){drawer.classList.remove('is-open');overlay.classList.remove('is-open');overlay.setAttribute('aria-hidden','true');drawer.setAttribute('aria-hidden','true');unlockBody();setTimeout(function(){drawer.classList.remove('is-visible')},360)}else{panel.classList.remove('is-open');panel.setAttribute('aria-hidden','true');trigger.setAttribute('aria-expanded','false')}}trigger.addEventListener('click',function(e){e.stopPropagation();isOpen()?closePanel():openPanel()});if(closeBtn)closeBtn.addEventListener('click',closePanel);if(drawerClose)drawerClose.addEventListener('click',closePanel);if(overlay)overlay.addEventListener('click',closePanel);document.addEventListener('click',function(e){if(!isMobile()&&panel.classList.contains('is-open')&&!panel.contains(e.target)&&e.target!==trigger&&!trigger.contains(e.target))closePanel()});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&isOpen())closePanel()})}());\n</script>\n{% endif %}"
+          }
+        },
+        "variant_selection": {
+          "type": "variant_selection",
+          "settings": {
+            "selection_type": "buttons",
+            "options": true,
+            "show_variant_images": true,
+            "show_unavailable_variants": true,
+            "show_single_options": true,
+            "enable_selling_plans": true,
+            "show_selected_variant_images": false,
+            "selected_variant_images_source": "default",
+            "variant_images_metafield": "custom.images"
+          }
+        },
+        "buy_button": {
+          "type": "buy_button",
+          "settings": {
+            "button_style": "plain",
+            "show_amount_selection": true,
+            "show_dynamic_buybutton": false,
+            "button_style_dynamic_buybutton": "plain",
+            "preorder": false,
+            "preorder_button_text": "Pre-order",
+            "preorder_label": "<p>The estimated delivery time is 2-4 weeks</p>",
+            "preorder_label_color_palette": "light_2",
+            "preorder_show_dynamic_buybutton": true,
+            "show_gift_card_recipient": true
+          }
+        },
+        "beafbaf1-a0af-4326-b4de-6e78c472249c": {
+          "type": "spacer",
+          "settings": {
+            "height": 20
+          }
+        },
+        "klarna_on_site_messaging_app_block_VeB3tE": {
+          "type": "shopify://apps/klarna-on-site-messaging/blocks/app-block/b95936a9-74b6-4a95-8103-6a1b6459c25e",
+          "settings": {
+            "data_key": "credit-promotion-badge",
+            "theme": "dark",
+            "topPadding": "0",
+            "bottomPadding": "0",
+            "messagePrefix": ""
+          }
+        },
+        "shipping_timer": {
+          "type": "shipping_timer",
+          "settings": {}
+        },
+        "f2290434-741b-4731-a534-ad679331e164": {
+          "type": "complementary_products",
+          "disabled": true,
+          "settings": {
+            "enable_tab": true,
+            "collapse": false,
+            "title": "Pairs well with",
+            "icon": "none",
+            "header_image_svg": "",
+            "header_image_width": 25,
+            "layout": "grid",
+            "number_of_items": 3,
+            "enable_quick_buy_desktop": true,
+            "enable_quick_buy_mobile": true,
+            "enable_quick_buy_drawer": true,
+            "enable_quick_buy_qty_selector": false,
+            "enable_color_picker": false,
+            "enable_quick_buy_compact": false,
+            "products_show_image": true,
+            "products_show_labels": false,
+            "products_show_vendor": false,
+            "products_show_title": true,
+            "products_show_rating": false,
+            "products_show_price": true,
+            "products_show_stock": false
+          }
+        }
+      },
+      "block_order": [
+        "custom_liquid_BwcUth",
+        "price",
+        "c7259cb9-7235-4028-b6df-3a68077fed80",
+        "short_description",
+        "custom_liquid_4ekLfn",
+        "variant_selection",
+        "buy_button",
+        "beafbaf1-a0af-4326-b4de-6e78c472249c",
+        "klarna_on_site_messaging_app_block_VeB3tE",
+        "shipping_timer",
+        "f2290434-741b-4731-a534-ad679331e164"
+      ],
+      "settings": {
+        "width": "boxed",
+        "show_thumbs_desktop": true,
+        "show_thumbs_mobile": false,
+        "images_layout": "aside",
+        "show_product_description": true,
+        "description_title_size": "h2",
+        "product_description_enable_read_more": true,
+        "pros_cons_title_size": "h2",
+        "pros": "<p>Sustainably produced, Ideal for everyday use</p>",
+        "cons": "<p>May discolor in direct sunlight</p>",
+        "specs_title_size": "h2",
+        "specifications": "",
+        "product_description_mobile_collapse": true,
+        "mobile_tabs_title_size": "h4"
+      }
+    },
+    "recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "recommended_products_qty": 6,
+        "number_of_items": 5,
+        "text_alignment": "center",
+        "width": "wide",
+        "title": "<h2>You may also like</h2>",
+        "title_underline_style": "none",
+        "enable_quick_buy_desktop": false,
+        "enable_quick_buy_mobile": false,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "spacing_desktop": 50,
+        "spacing_mobile": 0,
+        "fix_zindex": 0,
+        "mobile_collapse": false
+      }
+    },
+    "section_featured_collection_F3njwN": {
+      "type": "section-featured-collection",
+      "disabled": true,
+      "name": "t:sections.featured_collection.presets.name",
+      "settings": {
+        "collection": "abbigliamento-donna-tutti",
+        "layout": "grid",
+        "limit": 23,
+        "number_of_items": 5,
+        "text_alignment": "start",
+        "width": "boxed",
+        "title": "<h2>Featured collection</h2>",
+        "title_underline_style": "none",
+        "text": "<p>Share information and details about this collection</p>",
+        "show_link": false,
+        "link_text": "Button",
+        "button_style": "primary plain",
+        "enable_quick_buy_desktop": false,
+        "enable_quick_buy_mobile": false,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "mobile_layout": "grid",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30,
+        "fix_zindex": 0
+      }
+    },
+    "1788353364ecee6717": {
+      "type": "_blocks",
+      "blocks": {
+        "ali_reviews_widget_box_9TQEBe": {
+          "type": "shopify://apps/ali-reviews/blocks/widget-box/bf2eea72-0400-4db1-8908-44b7418f9a88",
+          "settings": {
+            "product": "",
+            "collection": ""
+          }
+        },
+        "ali_reviews_widget_box_in_cart_BdwQgj": {
+          "type": "shopify://apps/ali-reviews/blocks/widget-box-in-cart/bf2eea72-0400-4db1-8908-44b7418f9a88",
+          "disabled": true,
+          "settings": {
+            "product": ""
+          }
+        }
+      },
+      "block_order": [
+        "ali_reviews_widget_box_9TQEBe",
+        "ali_reviews_widget_box_in_cart_BdwQgj"
+      ],
+      "settings": {
+        "color_palette": "",
+        "overlay_opacity": 100,
+        "width": "wide",
+        "padding_top": 20,
+        "padding_bottom": 20,
+        "padding_left": 0,
+        "padding_right": 0,
+        "padding_top_mobile": 20,
+        "padding_bottom_mobile": 20,
+        "padding_left_mobile": 0,
+        "padding_right_mobile": 0,
+        "spacing_desktop": 50,
+        "spacing_mobile": 30,
+        "fix_zindex": 0
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "main-product",
+    "recommendations",
+    "section_featured_collection_F3njwN",
+    "1788353364ecee6717"
+  ]
+}

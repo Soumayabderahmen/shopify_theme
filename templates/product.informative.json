@@ -1,0 +1,449 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "settings": {
+        "hide_mobile": true
+      }
+    },
+    "main-product": {
+      "type": "main-product",
+      "blocks": {
+        "inventory": {
+          "type": "inventory",
+          "settings": {}
+        },
+        "short_description": {
+          "type": "short_description",
+          "settings": {
+            "show_read_more": true
+          }
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_tax": false
+          }
+        },
+        "buy_button": {
+          "type": "buy_button",
+          "settings": {
+            "button_style": "plain",
+            "show_amount_selection": true,
+            "show_dynamic_buybutton": true,
+            "button_style_dynamic_buybutton": "plain",
+            "preorder": false,
+            "preorder_button_text": "Pre-order",
+            "preorder_label": "<p>The estimated delivery time is 2-4 weeks</p>",
+            "preorder_label_color_palette": "light_2",
+            "preorder_show_dynamic_buybutton": false,
+            "show_gift_card_recipient": false
+          }
+        },
+        "c7259cb9-7235-4028-b6df-3a68077fed80": {
+          "type": "title",
+          "settings": {
+            "layout": "title-top",
+            "title_size": "h2",
+            "title": "",
+            "show_vendor_brand": true,
+            "show_vendor_name": true,
+            "show_product_rating": true,
+            "share_whatsapp": true,
+            "share_facebook": true,
+            "share_twitter": true,
+            "share_pinterest": true,
+            "share_messenger": true,
+            "share_email": true,
+            "layout_mobile": "title-top"
+          }
+        },
+        "variant_selection": {
+          "type": "variant_selection",
+          "settings": {
+            "selection_type": "dropdown",
+            "options": false,
+            "show_variant_images": true,
+            "show_unavailable_variants": true,
+            "show_single_options": false,
+            "enable_selling_plans": true
+          }
+        },
+        "shipping_timer": {
+          "type": "shipping_timer",
+          "settings": {}
+        },
+        "1a84f50b-3827-4efa-a4d1-95168bd6bbcb": {
+          "type": "spacer",
+          "settings": {
+            "height": 20
+          }
+        },
+        "7426f725-7f17-4cb9-a8fd-70b4c538492f": {
+          "type": "trustbadge",
+          "settings": {}
+        },
+        "e9431daf-3b99-40f6-89ff-dab164cda2ff": {
+          "type": "spacer",
+          "settings": {
+            "height": 15
+          }
+        },
+        "usp_1": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>Free shipping </strong>on all orders above 50,00</p>"
+          }
+        },
+        "usp_2": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>No <strong>hassle returns, </strong>30 days return</p>"
+          }
+        },
+        "usp_3": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>Next day </strong>delivery within your country</p>"
+          }
+        },
+        "a3bd83df-7c11-4d5c-a7bd-b4cd0b8da931": {
+          "type": "content",
+          "settings": {
+            "enable_tab": true,
+            "collapse": true,
+            "title": "Buy now, pay later",
+            "icon": "none",
+            "header_image_width": 25,
+            "text": "<p>Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition. We ship worldwide. Your order will be packaged really carefully and delivered wherever you want. Delivery takes between 2-4 business days. </p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "e314f776-428b-4d1d-9cb7-94ea58b90442": {
+          "type": "content",
+          "settings": {
+            "enable_tab": true,
+            "collapse": true,
+            "title": "Shipping & Delivery",
+            "icon": "truck",
+            "header_image_width": 25,
+            "text": "",
+            "page": "shipping-info",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        }
+      },
+      "block_order": [
+        "inventory",
+        "short_description",
+        "price",
+        "buy_button",
+        "c7259cb9-7235-4028-b6df-3a68077fed80",
+        "variant_selection",
+        "shipping_timer",
+        "1a84f50b-3827-4efa-a4d1-95168bd6bbcb",
+        "7426f725-7f17-4cb9-a8fd-70b4c538492f",
+        "e9431daf-3b99-40f6-89ff-dab164cda2ff",
+        "usp_1",
+        "usp_2",
+        "usp_3",
+        "a3bd83df-7c11-4d5c-a7bd-b4cd0b8da931",
+        "e314f776-428b-4d1d-9cb7-94ea58b90442"
+      ],
+      "settings": {
+        "show_thumbs_desktop": true,
+        "show_thumbs_mobile": false,
+        "images_layout": "aside",
+        "show_product_description": true,
+        "product_description_enable_read_more": false,
+        "pros": "<p>Sustainably produced, Ideal for everyday use</p>",
+        "cons": "<p>May discolor in direct sunlight</p>",
+        "specifications": "<p>Weight: 200gr, Usage: Indoor & outdoor</p>",
+        "product_description_mobile_collapse": false
+      }
+    },
+    "1655736197e3f3d938": {
+      "type": "section-faq",
+      "blocks": {
+        "4f6755d8-4e8c-4ff4-be69-c6ce04a4d7fc": {
+          "type": "text",
+          "settings": {
+            "faq_question": "Good to know",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>• We work with MPS-certified plants and recycled glassware.<br/>• Dimensions and colours of live plants may vary.It is also possible that, due to the season, a pictured plant is not in stock.<br/>• In that case you will receive a beautiful alternative.<br/>• It is recommended to open your ecosystem once a month for a few hours.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "1655736197d4a3dd1a-0": {
+          "type": "text",
+          "settings": {
+            "faq_question": "When will my order be delivered?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>We ship worldwide. Your order will be packaged really carefully and delivered wherever you want. Delivery takes between 2-4 business days. You will receive an e-mail after ordering with more information about the delivery.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "1655736197d4a3dd1a-1": {
+          "type": "text",
+          "settings": {
+            "faq_question": "Can I return my product?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "1655736197d4a3dd1a-2": {
+          "type": "text",
+          "settings": {
+            "faq_question": "What can I do if my item (or part of it) is damaged?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>We work hard to deliver your items without damage. Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        }
+      },
+      "block_order": [
+        "4f6755d8-4e8c-4ff4-be69-c6ce04a4d7fc",
+        "1655736197d4a3dd1a-0",
+        "1655736197d4a3dd1a-1",
+        "1655736197d4a3dd1a-2"
+      ],
+      "settings": {
+        "alignment": "left",
+        "compact": false,
+        "title": "",
+        "title_underline_style": "none",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "1656406276a66059df": {
+      "type": "section-image-with-text",
+      "blocks": {
+        "16564062765c88b1d4-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h2>Personal, sustainable, and educational</h2>",
+            "title_underline_style": "none"
+          }
+        },
+        "16564062765c88b1d4-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Our plants and mosses are hand selected at local growers with the utmost care and love. Here, they are grown in the most sustainable way possible. This way, the plants in your glass bottle are guaranteed to thrive together and you will enjoy your personal ecosystem with plants for many years to come. </p><p>We learn by doing. By creating your own terrarium with plants in a bottle yourself or with your children you learn about the various facets of the earth and thus the basis of our living existence in a creative way. Stone, potting soil, roots, plants, water and recycling all come together in this creative eye-catcher for your home.</p>"
+          }
+        },
+        "16564062765c88b1d4-2": {
+          "type": "buttons",
+          "settings": {
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "secondary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain"
+          }
+        }
+      },
+      "block_order": [
+        "16564062765c88b1d4-0",
+        "16564062765c88b1d4-1",
+        "16564062765c88b1d4-2"
+      ],
+      "settings": {
+        "overlay_opacity": 0,
+        "color_palette": "scheme-3",
+        "layout": "image-left",
+        "text_position": "text-start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16551999062a9697ac": {
+      "type": "section-image-with-text",
+      "blocks": {
+        "1655199906a88142bc-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h2>Gift tip for your lover, family, friend, or colleague </h2>",
+            "title_underline_style": "none"
+          }
+        },
+        "1655199906a88142bc-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>A great gift for your green friend, but definitely also for your less green friend. Does he or she not have a green thumb? Then follow the five steps yourself and make it for him or her yourself. Great story, right?</p><p>You can let your ‘I do have a green thumb’ friend figure it all out him- or herself!</p><p>Give it as a birthday gift, a housewarming gift, or whatever occasion you can think of. It makes for a different and unique gift. This time, gift the bottle but hold the liquor. That is, if you manage to give it away... We bet that this special eye-catcher will have a place in your interior in no time.</p>"
+          }
+        },
+        "1655199906a88142bc-2": {
+          "type": "buttons",
+          "settings": {
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "secondary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain"
+          }
+        }
+      },
+      "block_order": [
+        "1655199906a88142bc-0",
+        "1655199906a88142bc-1",
+        "1655199906a88142bc-2"
+      ],
+      "settings": {
+        "overlay_opacity": 0,
+        "color_palette": "scheme-3",
+        "layout": "image-right",
+        "text_position": "text-start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "recommended_products_qty": 6,
+        "number_of_items": 5,
+        "text_alignment": "start",
+        "title": "<h2>You may also like</h2>",
+        "title_underline_style": "none",
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "spacing_desktop": 50,
+        "spacing_mobile": 0,
+        "mobile_collapse": false
+      }
+    },
+    "1655199380bd7f8fd3": {
+      "type": "section-collection-list",
+      "settings": {
+        "image_ratio": "square",
+        "fill_images": true,
+        "layout": "slider",
+        "number_of_items": 6,
+        "text_alignment": "start",
+        "title": "<h2>Collections with similar products</h2>",
+        "title_underline_style": "none",
+        "show_link": false,
+        "link_text": "",
+        "link_url": "",
+        "button_style": "primary plain",
+        "collection_title_size": "p",
+        "mobile_layout": "slider",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "recently-viewed": {
+      "type": "section-recently-viewed-products",
+      "settings": {
+        "number_of_items": 5,
+        "text_alignment": "left",
+        "title": "<h2>Recently viewed products</h2>",
+        "title_underline_style": "none",
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": true,
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16564012959dccfd54": {
+      "type": "section-usp-bar",
+      "blocks": {
+        "165640129578ae788f-0": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>Most <strong>Wicked theme </strong>in the themestore</p>"
+          }
+        },
+        "165640129578ae788f-1": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>Create<strong> landingspages </strong>in minutes</p>"
+          }
+        },
+        "165640129578ae788f-2": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>Premium design</strong> for an affordable price</p>"
+          }
+        }
+      },
+      "block_order": [
+        "165640129578ae788f-0",
+        "165640129578ae788f-1",
+        "165640129578ae788f-2"
+      ],
+      "settings": {
+        "color_palette": "scheme-3",
+        "layout": "rows",
+        "autoplay": false,
+        "autoplay_seconds": 3,
+        "show_arrows": false,
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "main-product",
+    "1655736197e3f3d938",
+    "1656406276a66059df",
+    "16551999062a9697ac",
+    "recommendations",
+    "1655199380bd7f8fd3",
+    "recently-viewed",
+    "16564012959dccfd54"
+  ]
+}

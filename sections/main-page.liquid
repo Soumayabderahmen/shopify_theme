@@ -1,0 +1,194 @@
+{% liquid
+  assign title_block = section.blocks | where: 'type', 'title' | first
+  assign max_width = section.settings.max_width | plus: 0
+
+  if title_block.settings.title_size == 'size-50'
+    assign title_classes = title_block.settings.title_size
+    assign title_size = 'h1'
+  else
+    assign title_classes = false
+    assign title_size = title_block.settings.title_size
+  endif
+-%}
+{%- if page.handle == 'wishlist' -%}
+  {%- render 'wishlist-page-content' -%}
+{%- else -%}
+<div
+  class="{% if section.settings.text_alignment == 'center' %}text-center{% endif %}{% if section.settings.content_alignment == 'center' %} align-center{% endif %}{% if title_block.settings.title_size == 'size-50' %} size-16 mobile-size-14{% endif %}"
+  {%- if max_width != 2000 -%}
+    style="max-width: {{ max_width }}px;"
+  {%- endif -%}
+>
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+      {%- when 'title' -%}
+        <header>
+          <{{ title_size }} class="m20 {{ title_classes }}" {{ block.shopify_attributes }}>
+            {{- page.title -}}
+          </{{ title_size }}>
+        </header>
+      {%- when 'content' -%}
+        <div {{ block.shopify_attributes }}>
+          {{ page.content }}
+        </div>
+      {%- when 'spacer' -%}
+        <div
+          class="module-spacer"
+          style="margin-bottom:{{ block.settings.height }}px;"
+          {{ block.shopify_attributes }}
+        ></div>
+    {%- endcase -%}
+  {%- endfor -%}
+</div>
+{%- endif -%}
+
+<style>
+  #shopify-section-{{ section.id }} > div { margin-bottom: {{ section.settings.spacing_desktop }}px; }
+  @media only screen and (max-width: 47.5em) {
+    #shopify-section-{{ section.id }} > div { margin-bottom: {{ section.settings.spacing_mobile }}px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "t:main.page.name",
+  "tag": "section",
+  "settings": [
+    {
+      "id": "max_width",
+      "type": "range",
+      "label": "t:main.page.settings.max_width.label",
+      "info": "t:main.page.settings.max_width.info",
+      "min": 400,
+      "max": 2000,
+      "step": 20,
+      "unit": "px",
+      "default": 980
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "t:main.page.settings.content_alignment.label",
+      "options": [
+        {
+          "value": "start",
+          "label": "t:main.page.settings.content_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:main.page.settings.content_alignment.options__2.label"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "t:main.page.settings.text_alignment.label",
+      "options": [
+        {
+          "value": "start",
+          "label": "t:main.page.settings.text_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:main.page.settings.text_alignment.options__2.label"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "header",
+      "content": "t:global.spacing.header"
+    },
+    {
+      "id": "spacing_desktop",
+      "type": "range",
+      "label": "t:global.spacing.spacing_desktop.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "id": "spacing_mobile",
+      "type": "range",
+      "label": "t:global.spacing.spacing_mobile.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "id": "fix_zindex",
+      "type": "range",
+      "label": "t:global.fix_zindex.label",
+      "info": "t:global.fix_zindex.info",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "title",
+      "name": "t:main.page.blocks.title.name",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "title_size",
+          "label": "t:main.page.blocks.title.settings.title_size.label",
+          "options": [
+            {
+              "value": "h1",
+              "label": "t:global.typography.title_size.h1.label"
+            },
+            {
+              "value": "h2",
+              "label": "t:global.typography.title_size.h2.label"
+            },
+            {
+              "value": "h3",
+              "label": "t:global.typography.title_size.h3.label"
+            },
+            {
+              "value": "h4",
+              "label": "t:global.typography.title_size.h4.label"
+            },
+            {
+              "value": "h5",
+              "label": "t:global.typography.title_size.h5.label"
+            }
+          ],
+          "default": "h1"
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "name": "t:main.page.blocks.content.name",
+      "limit": 1
+    },
+    {
+      "type": "spacer",
+      "name": "t:main.page.blocks.spacer.name",
+      "settings": [
+        {
+          "id": "height",
+          "type": "range",
+          "label": "t:main.page.blocks.spacer.settings.height.label",
+          "min": -100,
+          "max": 200,
+          "step": 5,
+          "unit": "px",
+          "default": 35
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

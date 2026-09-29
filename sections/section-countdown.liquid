@@ -1,0 +1,526 @@
+{% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+{%- liquid
+  assign show_banner = true
+  assign start_time = section.settings.countdown_start | default: 'now' | date: '%s'
+  assign end_time = section.settings.countdown_end | date: '%s'
+  assign now = 'now' | date: '%s'
+
+  if now > end_time and section.settings.hide_banner_after_countdown == true
+    assign show_banner = false
+  elsif start_time > now
+    assign show_banner = false
+  endif
+-%}
+{%- if show_banner -%}
+  {{ 'async-m6cu.css' | asset_url | stylesheet_tag: media: 'screen' }}
+  <article
+    class="
+      palette-{{ section.settings.color_palette }}
+      module-color-palette
+      m6cu
+      text-{{ section.settings.text_position }}
+      size-{{ section.settings.height }}
+      {{ section.settings.width }}
+      section-width-{{ section.settings.width_banner }}
+    "
+  >
+    <figure class="background plain">
+      <span class="img-overlay" style="opacity:{{ section.settings.overlay_opacity | divided_by: 100.0 }}"></span>
+      {%- if section.settings.video -%}
+        {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+      {%- elsif section.settings.image %}
+        <picture>
+          <img
+            src="{{ section.settings.image | image_url: height: 310, width: 1260 }}"
+            srcset="{% render 'image-srcset', image: section.settings.image, max_width: 2900 %}"
+            sizes="              100vw"
+            width="1260"
+            height="310"
+            alt="{{ section.settings.image.alt | default: section.settings.title | escape }}"
+            style="object-position: {{ section.settings.image.presentation.focal_point }}"
+            loading="{% if section.index > 1 %}lazy{% else %}eager{% endif %}"
+          >
+        </picture>
+      {%- endif -%}
+    </figure>
+    <header
+      class="
+        countdown-ended-hide {% if now > end_time %} hidden{% endif %} title-styling
+        {% if section.settings.title_underline_style != 'none' %}
+          title-underline-none
+          {% if section.settings.title_underline_style contains 'accent' %}
+            title-underline-accent
+          {% elsif section.settings.title_underline_style contains 'gradient' %}
+            title-underline-gradient
+          {% endif %}
+          {% if section.settings.title_underline_style contains 'secondary_font' %}
+            title-underline-secondary-font
+          {% endif %}
+        {% endif %}
+      "
+    >
+      {%- if section.settings.title != blank -%}
+        {{ section.settings.title }}
+      {%- endif -%}
+      {%- if section.settings.text != empty -%}{{ section.settings.text }}{%- endif -%}
+    </header>
+    {%- unless section.settings.hide_banner_after_countdown %}
+      <header class="countdown-ended-show {% unless now > end_time %}hidden {% endunless %}">
+        {%- if section.settings.ended_title != blank -%}
+          <div
+            class="
+              {% if section.settings.ended_title_underline_style != 'none' %}
+                title-underline-none
+                {% if section.settings.ended_title_underline_style contains 'accent' %}
+                  title-underline-accent
+                {% elsif section.settings.ended_title_underline_style contains 'gradient' %}
+                  title-underline-gradient
+                {% endif %}
+                {% if section.settings.ended_title_underline_style contains 'secondary_font' %}
+                  title-underline-secondary-font
+                {% endif %}
+              {% endif %}
+            "
+          >
+            {{ section.settings.ended_title }}
+          </div>
+        {%- endif -%}
+        {%- if section.settings.ended_text != empty -%}
+          {{ section.settings.ended_text }}
+        {%- endif -%}
+      </header>
+    {%- endunless -%}
+    <p
+      class="countdown-container countdown"
+      data-show-from="{{ start_time | date: '%Y/%m/%d %H:%M %z' }}"
+      data-show-until="{{ end_time | date: '%Y/%m/%d %H:%M %z' }}"
+      data-show-days="1234560"
+      data-days="{{ 'general.countdown.days' | t }}"
+      data-day="{{ 'general.countdown.day' | t }}"
+      data-hours="{{ 'general.countdown.hours' | t }}"
+      data-hour="{{ 'general.countdown.hour' | t }}"
+      data-minutes="{{ 'general.countdown.minutes' | t }}"
+      data-minute="{{ 'general.countdown.minute' | t }}"
+      data-seconds="{{ 'general.countdown.seconds' | t }}"
+      data-second="{{ 'general.countdown.second' | t }}"
+    >
+      {{ section.settings.countdown_end | date: '%b %d, %Y %H:%M:%S' }}
+    </p>
+    {%- if section.settings.show_link and section.settings.link_text != empty and section.settings.link_url != blank -%}
+      {%- liquid
+        assign button_color = section.settings.button_style | split: ' ' | first
+        assign button_style = section.settings.button_style | split: ' ' | last
+        assign is_link = false
+        if button_style == 'link'
+          assign is_link = true
+        endif
+      -%}
+      <p class="link-btn">
+        <a
+          href="{{ section.settings.link_url }}"
+          class="overlay-{{ button_color }} {% if is_link %}strong inline{% elsif button_style == 'inv' %}inv{% endif %}"
+        >
+          {% if is_link %}<span>{% endif -%}
+          {{- section.settings.link_text -}}
+          {%- if is_link %}</span>&nbsp;<i aria-hidden="true" class="icon-chevron-right"></i>{% endif %}
+        </a>
+      </p>
+    {%- endif -%}
+    {%- if section.settings.show_overlay_link and section.settings.overlay_url != blank -%}
+      <a
+        class="link-overlay"
+        href="{{ section.settings.overlay_url }}"
+        aria-label="{{ section.settings.title | escape }}"
+      ></a>
+    {%- endif -%}
+  </article>
+
+  <style>
+    #shopify-section-{{ section.id }} { z-index: {{ section.settings.fix_zindex }} !important; }
+    #shopify-section-{{ section.id }} .m6cu { --mr_sect: {{ section.settings.spacing_desktop }}px; --mr_sect_m: {{ section.settings.spacing_mobile }}px; --m6cu_bg: {{ section.settings.countdown_bg_color }}; --m6cu_fg: {{ section.settings.countdown_text_color }}; }
+  </style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:sections.countdown.name",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "id": "image",
+      "type": "image_picker",
+      "label": "t:sections.countdown.settings.image.label"
+    },
+    {
+      "id": "video",
+      "type": "video",
+      "label": "t:sections.countdown.settings.video.label"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:sections.countdown.settings.overlay_opacity.label",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "t:sections.countdown.settings.height.label",
+      "options": [
+        {
+          "value": "xs",
+          "label": "t:sections.countdown.settings.height.options__1.label"
+        },
+        {
+          "value": "s",
+          "label": "t:sections.countdown.settings.height.options__2.label"
+        },
+        {
+          "value": "m",
+          "label": "t:sections.countdown.settings.height.options__3.label"
+        },
+        {
+          "value": "l",
+          "label": "t:sections.countdown.settings.height.options__4.label"
+        }
+      ],
+      "default": "xs"
+    },
+    {
+      "type": "select",
+      "id": "width_banner",
+      "label": "t:global.layout.width.label_banner",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed",
+      "visible_if": "{{ settings.width < 2000 }}"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:global.layout.width.label_background",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.countdown.settings.colors.header"
+    },
+    {
+      "id": "countdown_bg_color",
+      "type": "color",
+      "label": "t:sections.countdown.settings.colors.countdown_bg_color.label",
+      "default": "#EFB34C"
+    },
+    {
+      "id": "countdown_text_color",
+      "type": "color",
+      "label": "t:sections.countdown.settings.colors.countdown_text_color.label",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_palette",
+      "label": "t:global.color_palette.label",
+      "default": "scheme-4"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.countdown.settings.content.header"
+    },
+    {
+      "id": "text_position",
+      "type": "select",
+      "label": "t:sections.countdown.settings.content.text_position.label",
+      "options": [
+        {
+          "value": "start",
+          "label": "t:sections.countdown.settings.content.text_position.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.countdown.settings.content.text_position.options__2.label"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "header",
+      "content": "t:global.typography.title.label"
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "t:global.typography.title.label",
+      "info": "t:global.typography.title.info",
+      "default": "<h2>Countdown banner</h2>"
+    },
+    {
+      "type": "select",
+      "id": "title_underline_style",
+      "label": "t:global.typography.title_underline_style.label",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:global.typography.title_underline_style.none.label"
+        },
+        {
+          "value": "secondary_font",
+          "label": "t:global.typography.title_underline_style.secondary_font.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_accent",
+          "label": "t:global.typography.title_underline_style.secondary_font_accent.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_gradient",
+          "label": "t:global.typography.title_underline_style.secondary_font_gradient.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "accent",
+          "label": "t:global.typography.title_underline_style.accent.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        },
+        {
+          "value": "gradient",
+          "label": "t:global.typography.title_underline_style.gradient.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:global.button.header"
+    },
+    {
+      "id": "show_link",
+      "type": "checkbox",
+      "label": "t:global.button.show_link.label",
+      "default": true
+    },
+    {
+      "id": "link_text",
+      "type": "text",
+      "label": "t:global.button.link_text.label",
+      "default": "Button",
+      "visible_if": "{{ section.settings.show_link }}"
+    },
+    {
+      "id": "link_url",
+      "type": "url",
+      "label": "t:global.button.link_url.label",
+      "default": "/",
+      "visible_if": "{{ section.settings.show_link }}"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "t:global.button.button_style.label",
+      "options": [
+        {
+          "value": "primary plain",
+          "label": "t:global.button.button_style.primary.label",
+          "group": "t:global.button.button_style.group.plain"
+        },
+        {
+          "value": "secondary plain",
+          "label": "t:global.button.button_style.secondary.label",
+          "group": "t:global.button.button_style.group.plain"
+        },
+        {
+          "value": "tertiary plain",
+          "label": "t:global.button.button_style.tertiary.label",
+          "group": "t:global.button.button_style.group.plain"
+        },
+        {
+          "value": "primary inv",
+          "label": "t:global.button.button_style.primary.label",
+          "group": "t:global.button.button_style.group.inv"
+        },
+        {
+          "value": "secondary inv",
+          "label": "t:global.button.button_style.secondary.label",
+          "group": "t:global.button.button_style.group.inv"
+        },
+        {
+          "value": "tertiary inv",
+          "label": "t:global.button.button_style.tertiary.label",
+          "group": "t:global.button.button_style.group.inv"
+        },
+        {
+          "value": "primary link",
+          "label": "t:global.button.button_style.primary.label",
+          "group": "t:global.button.button_style.group.link"
+        },
+        {
+          "value": "secondary link",
+          "label": "t:global.button.button_style.secondary.label",
+          "group": "t:global.button.button_style.group.link"
+        },
+        {
+          "value": "tertiary link",
+          "label": "t:global.button.button_style.tertiary.label",
+          "group": "t:global.button.button_style.group.link"
+        }
+      ],
+      "default": "primary plain",
+      "visible_if": "{{ section.settings.show_link }}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.overlay.header"
+    },
+    {
+      "id": "show_overlay_link",
+      "type": "checkbox",
+      "label": "t:global.overlay.show_overlay_link.label",
+      "default": true
+    },
+    {
+      "id": "overlay_url",
+      "type": "url",
+      "label": "t:global.overlay.overlay_url.label",
+      "visible_if": "{{ section.settings.show_overlay_link }}"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.countdown.settings.countdown.header"
+    },
+    {
+      "id": "countdown_start",
+      "type": "text",
+      "label": "t:sections.countdown.settings.countdown.countdown_start.label",
+      "info": "t:sections.countdown.settings.countdown.countdown_start.info"
+    },
+    {
+      "id": "countdown_end",
+      "type": "text",
+      "label": "t:sections.countdown.settings.countdown.countdown_end.label",
+      "default": "December 31th, 11:59:59"
+    },
+    {
+      "id": "hide_banner_after_countdown",
+      "type": "checkbox",
+      "label": "t:sections.countdown.settings.countdown.hide_banner_after_countdown.label"
+    },
+    {
+      "id": "ended_title",
+      "type": "richtext",
+      "label": "t:sections.countdown.settings.countdown.ended_title.label",
+      "info": "t:global.typography.title.info",
+      "default": "<h2>Countdown banner</h2>",
+      "visible_if": "{{ section.settings.hide_banner_after_countdown == false }}"
+    },
+    {
+      "type": "select",
+      "id": "ended_title_underline_style",
+      "label": "t:global.typography.title_underline_style.label",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:global.typography.title_underline_style.none.label"
+        },
+        {
+          "value": "secondary_font",
+          "label": "t:global.typography.title_underline_style.secondary_font.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_accent",
+          "label": "t:global.typography.title_underline_style.secondary_font_accent.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_gradient",
+          "label": "t:global.typography.title_underline_style.secondary_font_gradient.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "accent",
+          "label": "t:global.typography.title_underline_style.accent.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        },
+        {
+          "value": "gradient",
+          "label": "t:global.typography.title_underline_style.gradient.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        }
+      ],
+      "visible_if": "{{ section.settings.hide_banner_after_countdown == false }}"
+    },
+    {
+      "id": "ended_text",
+      "type": "richtext",
+      "label": "t:sections.countdown.settings.countdown.ended_text.label",
+      "default": "<p>Tell something about your offers, sale or discounts when the timer has ended.</p>",
+      "visible_if": "{{ section.settings.hide_banner_after_countdown == false }}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.spacing.header"
+    },
+    {
+      "id": "spacing_desktop",
+      "type": "range",
+      "label": "t:global.spacing.spacing_desktop.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "id": "spacing_mobile",
+      "type": "range",
+      "label": "t:global.spacing.spacing_mobile.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "id": "fix_zindex",
+      "type": "range",
+      "label": "t:global.fix_zindex.label",
+      "info": "t:global.fix_zindex.info",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.countdown.presets.name",
+      "category": "t:categories.storytelling"
+    }
+  ]
+}
+{% endschema %}

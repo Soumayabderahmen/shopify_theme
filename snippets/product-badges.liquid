@@ -1,0 +1,1320 @@
+{% comment %}
+  {%- liquid
+    assign current_variant = product.selected_or_first_available_variant
+    assign current_price = current_variant.price
+    assign compare_price = current_variant.compare_at_price
+
+    if compare_price > current_price and compare_price > 0
+      assign discount_amount = compare_price | minus: current_price
+      assign discount_percentage = discount_amount | times: 100.0 | divided_by: compare_price | round
+      assign discount_money = discount_amount | money
+    else
+      assign discount_percentage = 0
+      assign discount_money = 0 | money
+    endif
+
+    # Soglia spedizione gratuita: 50,00 € (in centesimi = 5000)
+    assign threshold = 5000
+
+    # Controllo Tag Prodotto
+    assign has_promo_tag = false
+    assign has_bestseller_tag = false
+
+    for tag in product.tags
+      assign tag_lower = tag | downcase
+      if tag_lower == 'promo' or tag_lower == 'promozione'
+        assign has_promo_tag = true
+      endif
+      if tag_lower == 'bestseller' or tag_lower == 'best-seller' or tag_lower == 'top-seller'
+        assign has_bestseller_tag = true
+      endif
+    endfor
+
+    # Alternanza gradienti basata sull'ID prodotto (0, 1, 2, 3)
+    assign gradient_index = product.id | modulo: 4
+  -%}
+
+  <div
+    class="product-badges-master-wrap"
+    id="ProductBadges-{{ section.id }}"
+    data-threshold="{{ threshold }}"
+  >
+    {%- comment -%} 1. BLOCCO SPEDIZIONE GRATUITA {%- endcomment -%}
+    <a
+      href="#shipping-details"
+      class="standalone-shipping-ticker js-smooth-ship-scroll shipping-gradient-{{ gradient_index }}"
+    >
+      <div class="ticker-track track-shipping">
+        {% for i in (1..2) %}
+          <div class="ticker-group">
+            <div class="ticker-item item-shipping-single">
+              <svg
+                class="truck-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9 1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+              </svg>
+              <span class="js-shipping-status">
+                {%- if current_price >= threshold -%}
+                  <strong>{{ 'badge_ticker.free_shipping_unlocked' | t }}</strong>
+                {%- else -%}
+                  {%- liquid
+                    assign remaining_amount = threshold | minus: current_price | money
+                    assign amount_html = '<strong>' | append: remaining_amount | append: '</strong>'
+                    assign remaining_text = 'badge_ticker.free_shipping_remaining' | t | replace: '{amount}', amount_html
+                  -%}
+                  {{ remaining_text }}
+                {%- endif -%}
+              </span>
+            </div>
+            <span class="ticker-dots">|</span>
+          </div>
+        {% endfor %}
+      </div>
+    </a>
+
+    {%- if show_rating -%}
+      {%- liquid
+        assign rating_value = false
+        assign rating_count = false
+        if product.metafields.syncer.reviews
+          assign locale_ratings = product.metafields.syncer.reviews.value.reviews[localization.language.iso_code]
+          if locale_ratings
+            assign rating_value = locale_ratings.rating
+            assign rating_count = locale_ratings.count
+          else
+            assign rating_value = product.metafields.syncer.reviews.value.cumulative_rating
+            assign rating_count = product.metafields.syncer.reviews.value.total_reviews
+          endif
+        elsif product.metafields.reviews.rating
+          assign rating_value = product.metafields.reviews.rating.value
+          assign rating_count = product.metafields.reviews.rating_count
+        endif
+      -%}
+      {%- if rating_value -%}
+        {% capture rating_label %}
+            {%- if rating_count -%}
+                <a href="{{ product.url }}">{{ rating_count }} <span>{{ 'product.reviews.count' | t: count: rating_count }}</span></a>
+            {%- endif -%}
+        {% endcapture %}
+        {% render 'rating-stars', value: rating_value, label: rating_label %}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if show_stock -%}
+      {%- render 'product-deliverytime',
+        product: product,
+        current_variant: current_variant,
+        container: 'p',
+        extra_class: 'list-hide',
+        origin: 'productitem'
+      -%}
+    {%- endif -%}
+
+    {%- comment -%} 2. BANDA BADGES (SCONTO + PROMO) {%- endcomment -%}
+    <div class="dynamic-tags-row">
+      {%- if upsell == false and show_price -%}
+        <p class="price s1pr">
+          {%- if product.price_varies and settings.show_price_varies and layout != 'list-compact' -%}
+            {%- liquid
+              assign price_min = product.price_min | money
+              assign price_max = product.price_max | money
+            -%}
+            {{ price_min -}}
+            <span class="price-varies">&nbsp;- {{ price_max }}</span>
+          {%- else -%}
+            {%- if current_variant.compare_at_price > current_variant.price -%}
+              <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+            {%- endif -%}
+            {{ price }}
+          {%- endif -%}
+          {%- if current_variant.unit_price_measurement -%}
+            <span class="small">
+              {{- 'product.unit_price_label' | t -}}
+              {{- current_variant.unit_price | unit_price_with_measurement: current_variant.unit_price_measurement -}}
+            </span>
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+
+
+
+      {% if has_promo_tag %}
+        <div class="badge-promo-gold">
+          <span>{{ 'badge_ticker.special_promo' | t }}</span>
+        </div>
+      {% endif %}
+    </div>
+
+    {%- comment -%} 3. TICKER SCORREVOLE SECONDARIO {%- endcomment -%}
+    <a href="#shipping-details" class="bottom-ticker-wrap js-smooth-ship-scroll">
+      <div class="ticker-track">
+        {% for i in (1..2) %}
+          <div class="ticker-group">
+            {%- liquid
+              assign installment_price = current_price | divided_by: 3.0 | money
+            -%}
+            <div class="ticker-item item-klarna">
+              <span class="klarna-pill">Klarna.</span>
+              <span
+                >3 rate da <strong class="js-klarna-installment">{{ installment_price }}</strong> senza interessi</span
+              >
+            </div>
+
+            <span class="ticker-dots">•</span>
+
+            {% if has_bestseller_tag %}
+              {%- liquid
+                if product.metafields.custom.bestseller_count != blank
+                  assign sales_count = product.metafields.custom.bestseller_count
+                else
+                  assign sales_count = product.id | modulo: 250 | plus: 100
+                endif
+
+                assign count_html = '<strong>' | append: sales_count | append: '</strong>'
+                assign bestseller_text = 'badge_ticker.bestseller' | t | replace: '{count}', count_html
+              -%}
+              <div class="badge-bestseller-black">
+                <span class="fire-icon">🔥</span>
+                <span>{{ bestseller_text }}</span>
+              </div>
+            {% endif %}
+
+            <div class="ticker-item item-returns">
+              <span class="icon-circle">✓</span>
+              <span>{{ 'badge_ticker.easy_returns' | t }}</span>
+            </div>
+
+            <span class="ticker-dots">•</span>
+
+            <div class="ticker-item item-support">
+              <span class="icon-circle">🛡️</span>
+              <span>{{ 'badge_ticker.warranty_support' | t }}</span>
+            </div>
+
+            <span class="ticker-dots">•</span>
+          </div>
+        {% endfor %}
+      </div>
+    </a>
+  </div>
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .product-badges-master-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 14px 0;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .standalone-shipping-ticker {
+      display: flex;
+      width: 100%;
+      overflow: hidden;
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 10px 0;
+      text-decoration: none;
+      white-space: nowrap;
+      user-select: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .standalone-shipping-ticker:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+    }
+
+    .shipping-gradient-0 { background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%); }
+    .shipping-gradient-1 { background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #60a5fa 100%); }
+    .shipping-gradient-2 { background: linear-gradient(135deg, #3730a3 0%, #4f46e5 50%, #818cf8 100%); }
+    .shipping-gradient-3 { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%); }
+
+    .standalone-shipping-ticker:hover .track-shipping { animation-play-state: paused; }
+
+    .track-shipping {
+      display: flex;
+      width: max-content;
+      animation: marqueeScroll 12s linear infinite;
+    }
+
+    .item-shipping-single {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      font-size: 1.02rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+
+    .item-shipping-single .truck-icon { flex-shrink: 0; }
+
+    .dynamic-tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badge-discount-red {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      animation: pulseSoft 2s infinite ease-in-out;
+    }
+
+    .discount-arrow {
+      background: #dc2626;
+      color: #ffffff;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 900;
+    }
+
+    @keyframes pulseSoft {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .badge-bestseller-black {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      letter-spacing: 0.03em;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .badge-bestseller-black::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      animation: shineBlack 3.5s infinite;
+    }
+
+    @keyframes shineBlack {
+      0% { left: -100%; }
+      20% { left: 200%; }
+      100% { left: 200%; }
+    }
+
+    .badge-promo-gold {
+      display: inline-flex;
+      align-items: center;
+      background: #fffbe2;
+      color: #b45309;
+      border: 1px solid #fde68a;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    .bottom-ticker-wrap {
+      display: flex;
+      width: 100%;
+      overflow: hidden;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 7px 0;
+      text-decoration: none;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .ticker-track {
+      display: flex;
+      width: max-content;
+      animation: marqueeScroll 18s linear infinite;
+    }
+
+    .bottom-ticker-wrap:hover .ticker-track { animation-play-state: paused; }
+
+    .ticker-group { display: flex; align-items: center; }
+
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      font-size: 0.8rem;
+      color: #334155;
+    }
+
+    .klarna-pill {
+      background: #ffb3c7;
+      color: #000;
+      font-weight: 800;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .icon-circle { color: #2563eb; font-weight: bold; }
+    .ticker-dots { color: #cbd5e1; font-size: 0.75rem; margin: 0 6px; }
+
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+  </style>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var container = document.getElementById('ProductBadges-{{ section.id }}');
+      if (!container) return;
+
+      var threshold = parseInt(container.getAttribute('data-threshold'), 10) || 5000;
+
+      var tUnlocked = {{ 'badge_ticker.free_shipping_unlocked' | t | json }};
+      var tRemainingTemplate = {{ 'badge_ticker.free_shipping_remaining' | t | json }};
+
+      function formatMoney(cents) {
+        return (cents / 100).toLocaleString('{{ request.locale.iso_code }}', {
+          style: 'currency',
+          currency: '{{ cart.currency.iso_code }}'
+        });
+      }
+
+      function updateUI(price, compareAtPrice) {
+        var shippingStatusElements = container.querySelectorAll('.js-shipping-status');
+        var badgeDiscount = container.querySelector('.js-badge-discount');
+        var discountVal = container.querySelector('.js-discount-val');
+        var discountMoney = container.querySelector('.js-discount-money');
+        var klarnaInstallmentElements = container.querySelectorAll('.js-klarna-installment');
+
+        // 1. Aggiornamento Rata Klarna (Prezzo / 3)
+        var installmentCents = Math.round(price / 3);
+        var formattedInstallment = formatMoney(installmentCents);
+        klarnaInstallmentElements.forEach(function (el) {
+          el.textContent = formattedInstallment;
+        });
+
+        // 2. Aggiornamento Badge Sconto
+        if (compareAtPrice && compareAtPrice > price) {
+          var discountAmount = compareAtPrice - price;
+          var discountPercent = Math.round((discountAmount * 100) / compareAtPrice);
+
+          if (badgeDiscount) {
+            if (discountVal) discountVal.textContent = '-' + discountPercent + '%';
+            if (discountMoney) discountMoney.textContent = formatMoney(discountAmount);
+            badgeDiscount.style.display = 'inline-flex';
+          }
+        } else if (badgeDiscount) {
+          badgeDiscount.style.display = 'none';
+        }
+
+        // 3. Aggiornamento Status Spedizione Gratuita
+        shippingStatusElements.forEach(function (el) {
+          if (price >= threshold) {
+            el.innerHTML = '<strong>' + tUnlocked + '</strong>';
+          } else {
+            var remaining = threshold - price;
+            var formattedAmount = '<strong class="js-remaining-amount">' + formatMoney(remaining) + '</strong>';
+
+            if (tRemainingTemplate.indexOf('{amount}') !== -1) {
+              el.innerHTML = tRemainingTemplate.replace('{amount}', formattedAmount);
+            } else {
+              el.innerHTML = tRemainingTemplate + ' ' + formattedAmount;
+            }
+          }
+        });
+      }
+
+      function getProductJSON() {
+        var form = container.closest('.product-form, .product-single, section') || document;
+        var scriptJson = form.querySelector(
+          'script[type="application/json"][data-product-json], script[id^="ProductJson-"], script[data-variant-json]'
+        );
+        if (scriptJson) {
+          try {
+            return JSON.parse(scriptJson.textContent);
+          } catch (e) {
+            return null;
+          }
+        }
+        return null;
+      }
+
+      var productData = getProductJSON();
+
+      // Event Listener: Cambio variante tramite custom events (Shopify OS 2.0 / Dawn)
+      document.addEventListener('variant:change', function (e) {
+        if (e.detail && e.detail.variant) {
+          updateUI(e.detail.variant.price, e.detail.variant.compare_at_price);
+        }
+      });
+
+      // Supporto Web Components (variant-selects / variant-radios)
+      document.addEventListener('change', function (e) {
+        if (e.target.matches('variant-selects, variant-radios') || e.target.closest('variant-selects, variant-radios')) {
+          setTimeout(function() {
+            var idInput = document.querySelector('input[name="id"], select[name="id"]');
+            if (idInput && productData && productData.variants) {
+              var selectedVariant = productData.variants.find(function (v) {
+                return v.id == idInput.value;
+              });
+              if (selectedVariant) {
+                updateUI(selectedVariant.price, selectedVariant.compare_at_price);
+              }
+            }
+          }, 50);
+        }
+      });
+
+      // Event Listener: Selettori Input/Select Standard
+      document.addEventListener('change', function (e) {
+        var target = e.target;
+        if (!target.closest('.product-form, form[action*="/cart/add"]')) return;
+
+        var form = target.closest('form');
+        var idInput = form ? form.querySelector('[name="id"]') : null;
+        if (!idInput) return;
+
+        if (productData && productData.variants) {
+          var selectedVariant = productData.variants.find(function (v) {
+            return v.id == idInput.value;
+          });
+          if (selectedVariant) {
+            updateUI(selectedVariant.price, selectedVariant.compare_at_price);
+          }
+        }
+      });
+
+      // Smooth Scroll
+      document.addEventListener('click', function (e) {
+        var anchor = e.target.closest('.js-smooth-ship-scroll');
+        if (!anchor) return;
+
+        var href = anchor.getAttribute('href');
+        if (!href || href === '#') return;
+
+        var targetElem = document.querySelector(href);
+        if (targetElem) {
+          e.preventDefault();
+          var headerOffset = 90;
+          var elementPosition = targetElem.getBoundingClientRect().top;
+          var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          });
+        }
+      });
+    });
+  </script>
+{% endcomment %}
+
+{% comment %}
+  ============================================================
+  TEMU-STYLE PRODUCT BADGES — Shopify Liquid
+  ============================================================
+  Badge compatti, pill-shaped, colori vividi come Temu.
+  Animazioni random per prodotto (8 famiglie).
+  Responsive, non invasive, professionali.
+  ============================================================
+{% endcomment %}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign current_price = current_variant.price
+  assign compare_price = current_variant.compare_at_price
+
+  if compare_price > current_price and compare_price > 0
+    assign discount_amount = compare_price | minus: current_price
+    assign discount_percentage = discount_amount | times: 100.0 | divided_by: compare_price | round
+    assign discount_money = discount_amount | money
+  else
+    assign discount_percentage = 0
+    assign discount_money = 0 | money
+  endif
+
+  # Soglia spedizione gratuita: 50,00 € (centesimi)
+  assign threshold = 5000
+
+  # Flag Paese
+  assign country_code = localization.country.iso_code | default: 'IT'
+  case country_code
+    when 'IT'
+      assign flag_emoji = '🇮🇹'
+    when 'CA'
+      assign flag_emoji = '🇨🇦'
+    when 'US'
+      assign flag_emoji = '🇺🇸'
+    when 'GB', 'UK'
+      assign flag_emoji = '🇬🇧'
+    when 'FR'
+      assign flag_emoji = '🇫🇷'
+    when 'DE'
+      assign flag_emoji = '🇩🇪'
+    when 'ES'
+      assign flag_emoji = '🇪🇸'
+    when 'AU'
+      assign flag_emoji = '🇦🇺'
+    when 'BR'
+      assign flag_emoji = '🇧🇷'
+    when 'JP'
+      assign flag_emoji = '🇯🇵'
+    when 'NL'
+      assign flag_emoji = '🇳🇱'
+    when 'CH'
+      assign flag_emoji = '🇨🇭'
+    when 'PL'
+      assign flag_emoji = '🇵🇱'
+
+    when 'SE'
+      assign flag_emoji = '🇸🇪'
+    when 'RO'
+      assign flag_emoji = '🇷🇴'
+    else
+      assign flag_emoji = '🌍'
+  endcase
+
+  # Visibilità Spedizione Gratuita
+  assign show_free_shipping = false
+  if current_price >= threshold
+    assign show_free_shipping = true
+  endif
+
+  # Shared product badge rules
+  assign has_promo_tag = false
+  assign has_local_tag = false
+
+  for tag in product.tags
+    assign tag_lower = tag | downcase
+    if tag_lower == 'promo' or tag_lower == 'promozione'
+      assign has_promo_tag = true
+    endif
+    if tag_lower == 'local' or tag_lower == 'locale'
+      assign has_local_tag = true
+    endif
+  endfor
+
+  capture hot_rule_result
+    render 'product-badge-rule', product: product, rule: 'hot', hot_min_sold: settings.badge_hot_min_sold
+  endcapture
+  assign has_hot_badge = false
+  if hot_rule_result == 'true'
+    assign has_hot_badge = true
+  endif
+
+  capture new_rule_result
+    render 'product-badge-rule', product: product, rule: 'new'
+  endcapture
+  assign has_new_arrival = false
+  if new_rule_result == 'true'
+    assign has_new_arrival = true
+  endif
+
+  # Bestseller text
+  if has_hot_badge
+    if product.metafields.custom.bestseller_count != blank
+      assign sales_count = product.metafields.custom.bestseller_count
+    else
+      assign sales_count = product.id | modulo: 250 | plus: 100
+    endif
+    assign count_html = '<strong>' | append: sales_count | append: '</strong>'
+    assign bestseller_text = 'badge_ticker.bestseller' | t | replace: '{count}', count_html
+  endif
+
+  # Seed animazione unica per prodotto (0-7)
+  assign anim_seed = product.id | modulo: 8
+-%}
+
+<div
+  class="temu-badges-wrap"
+  id="ProductBadges-{{ section.id }}"
+  data-threshold="{{ threshold }}"
+  data-has-bestseller="{{ has_hot_badge }}"
+  data-anim-seed="{{ anim_seed }}"
+>
+  {%- comment -%} ═══════════════════════════════════════════ {%- endcomment -%}
+  {%- comment -%} ROW 1: BADGES PRINCIPALI (TEMU STYLE)     {%- endcomment -%}
+  {%- comment -%} Spedizione + Bestseller + New + Local     {%- endcomment -%}
+  {%- comment -%} ═══════════════════════════════════════════ {%- endcomment -%}
+  <div class="temu-row temu-row-primary">
+    {% if show_free_shipping %}
+      <span class="temu-pill temu-pill-green temu-anim-{{ anim_seed }}">
+        <span class="temu-shimmer"></span>
+        <span class="temu-pill-inner">
+          <svg class="temu-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+          <span class="temu-pill-text">{{ 'badge_ticker.free_shipping_unlocked' | t }}</span>
+        </span>
+      </span>
+    {% endif %}
+
+    {% if has_local_tag %}
+      <span class="temu-pill temu-pill-green temu-anim-{{ anim_seed | plus: 1 | modulo: 8 }}">
+        <span class="temu-shimmer"></span>
+        <span class="temu-pill-inner">
+          <span class="temu-flag">{{ flag_emoji }}</span>
+          <span class="temu-pill-text">
+            {{- 'badge_ticker.shipped_from' | t | default: 'Spedito da' }}
+            {{ localization.country.name | default: 'Italia' -}}
+          </span>
+        </span>
+      </span>
+    {% endif %}
+
+    {% if has_hot_badge %}
+      <span class="temu-pill temu-pill-purple temu-anim-{{ anim_seed | plus: 2 | modulo: 8 }}">
+        <span class="temu-shimmer"></span>
+        <span class="temu-pill-inner">
+          <svg class="temu-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <span class="temu-pill-text">{{ bestseller_text }}</span>
+        </span>
+      </span>
+    {% endif %}
+
+    {% if has_new_arrival %}
+      <span class="temu-pill temu-pill-blue temu-anim-{{ anim_seed | plus: 3 | modulo: 8 }}">
+        <span class="temu-shimmer"></span>
+        <span class="temu-pill-inner">
+          <span class="temu-pill-text">{{ 'badge_ticker.new_arrival' | t | default: 'Nuovo Arrivo' }}</span>
+        </span>
+      </span>
+    {% endif %}
+  </div>
+
+  {%- comment -%} ═══════════════════════════════════════════ {%- endcomment -%}
+  {%- comment -%} ROW 2: BADGES SECONDARI                  {%- endcomment -%}
+  {%- comment -%} Sconto + Promo + Altri                   {%- endcomment -%}
+  {%- comment -%} ═══════════════════════════════════════════ {%- endcomment -%}
+  <div class="temu-row temu-row-secondary">
+    {%- if discount_percentage > 0 -%}
+      <span class="temu-pill temu-pill-red temu-anim-{{ anim_seed | plus: 4 | modulo: 8 }}">
+        <span class="temu-shimmer"></span>
+        <span class="temu-pill-inner">
+          <span class="temu-pill-text">-{{ discount_percentage }}%</span>
+        </span>
+      </span>
+    {%- endif -%}
+
+    {% if has_promo_tag %}
+      <span class="temu-pill temu-pill-orange temu-anim-{{ anim_seed | plus: 5 | modulo: 8 }}">
+        <span class="temu-shimmer"></span>
+        <span class="temu-pill-inner">
+          <span class="temu-pill-text">{{ 'badge_ticker.special_promo' | t }}</span>
+        </span>
+      </span>
+    {% endif %}
+
+    {%- if compare_price > current_price and compare_price > 0 -%}
+      <span class="temu-pill temu-pill-yellow temu-anim-{{ anim_seed | plus: 6 | modulo: 8 }}">
+        <span class="temu-shimmer"></span>
+        <span class="temu-pill-inner">
+          <span class="temu-pill-text">
+            {{- 'badge_ticker.save' | t | default: 'Risparmi' }}
+            {{ discount_money -}}
+          </span>
+        </span>
+      </span>
+    {%- endif -%}
+  </div>
+
+  {%- comment -%} ═══════════════════════════════════════════ {%- endcomment -%}
+  {%- comment -%} RATING + STOCK                             {%- endcomment -%}
+  {%- comment -%} ═══════════════════════════════════════════ {%- endcomment -%}
+  {%- if show_rating -%}
+    {%- liquid
+      assign rating_value = false
+      assign rating_count = false
+      if product.metafields.syncer.reviews
+        assign locale_ratings = product.metafields.syncer.reviews.value.reviews[localization.language.iso_code]
+        if locale_ratings
+          assign rating_value = locale_ratings.rating
+          assign rating_count = locale_ratings.count
+        else
+          assign rating_value = product.metafields.syncer.reviews.value.cumulative_rating
+          assign rating_count = product.metafields.syncer.reviews.value.total_reviews
+        endif
+      elsif product.metafields.reviews.rating
+        assign rating_value = product.metafields.reviews.rating.value
+        assign rating_count = product.metafields.reviews.rating_count
+      endif
+    -%}
+    {%- if rating_value -%}
+      {% capture rating_label %}
+        {%- if rating_count -%}
+          <a href="{{ product.url }}">{{ rating_count }} <span>{{ 'product.reviews.count' | t: count: rating_count }}</span></a>
+        {%- endif -%}
+      {% endcapture %}
+      {% render 'rating-stars', value: rating_value, label: rating_label %}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if show_stock -%}
+    {%- render 'product-deliverytime',
+      product: product,
+      current_variant: current_variant,
+      container: 'p',
+      extra_class: 'list-hide',
+      origin: 'productitem'
+    -%}
+  {%- endif -%}
+
+  {%- comment -%} ═══════════════════════════════════════════ {%- endcomment -%}
+  {%- comment -%} PREZZO                                     {%- endcomment -%}
+  {%- comment -%} ═══════════════════════════════════════════ {%- endcomment -%}
+  {%- if upsell == false and show_price -%}
+    <div class="temu-price-row">
+      <p class="price s1pr">
+        {%- if product.price_varies and settings.show_price_varies and layout != 'list-compact' -%}
+          {%- liquid
+            assign price_min = product.price_min | money
+            assign price_max = product.price_max | money
+          -%}
+          {{ price_min -}}
+          <span class="price-varies">&nbsp;- {{ price_max }}</span>
+        {%- else -%}
+          {%- if current_variant.compare_at_price > current_variant.price -%}
+            <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+          {%- endif -%}
+          {{ price }}
+        {%- endif -%}
+        {%- if current_variant.unit_price_measurement -%}
+          <span class="small">
+            {{- 'product.unit_price_label' | t -}}
+            {{- current_variant.unit_price | unit_price_with_measurement: current_variant.unit_price_measurement -}}
+          </span>
+        {%- endif -%}
+      </p>
+    </div>
+  {%- endif -%}
+
+  {%- comment -%} ═══════════════════════════════════════════ {%- endcomment -%}
+  {%- comment -%} TICKER SCORREVOLE SECONDARIO TEMU        {%- endcomment -%}
+  {%- comment -%} ═══════════════════════════════════════════ {%- endcomment -%}
+  <a href="#shipping-details" class="temu-ticker js-smooth-ship-scroll">
+    <div class="temu-ticker-track ticker-anim-{{ anim_seed }}">
+      {% for i in (1..2) %}
+        <div class="temu-ticker-group">
+          {%- liquid
+            assign installment_price = current_price | divided_by: 3.0 | money
+          -%}
+          <span class="temu-ticker-item">
+            <span class="temu-ticker-klarna">Klarna</span>
+            <span
+              >3× <strong class="js-klarna-installment">{{ installment_price }}</strong></span
+            >
+          </span>
+          <span class="temu-ticker-dot">·</span>
+          <span class="temu-ticker-item">
+            <svg class="temu-ticker-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            {{ 'badge_ticker.easy_returns' | t }}
+          </span>
+          <span class="temu-ticker-dot">·</span>
+          <span class="temu-ticker-item">
+            <svg class="temu-ticker-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+            </svg>
+            {{ 'badge_ticker.warranty_support' | t }}
+          </span>
+          <span class="temu-ticker-dot">·</span>
+          <span class="temu-ticker-item">
+            <svg class="temu-ticker-icon temu-icon-green" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 22c4.97 0 9-4.03 9-9-4.5 0-9-9-9-9s-4.5 9-9 9c0 4.97 4.03 9 9 9z"/>
+            </svg>
+            {{ 'badge_ticker.eco_friendly' | t | default: 'Eco packaging' }}
+          </span>
+          <span class="temu-ticker-dot">·</span>
+        </div>
+      {% endfor %}
+    </div>
+  </a>
+</div>
+
+<style>
+  /* ═══════════════════════════════════════════
+     TEMU BADGES — BASE STYLES
+     ═══════════════════════════════════════════ */
+  .temu-badges-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 8px 0;
+    width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  /* Rows */
+  .temu-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .temu-price-row {
+    margin: 4px 0;
+  }
+
+  /* ═══════════════════════════════════════════
+     TEMU PILL — BADGE BASE
+     ═══════════════════════════════════════════ */
+  .temu-pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: default;
+    border: none;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+  }
+
+  .temu-pill:hover {
+    transform: translateY(-1px);
+  }
+
+  .temu-pill-inner {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    z-index: 2;
+  }
+
+  .temu-pill-text {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Shimmer effect */
+  .temu-shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255,255,255,0.45) 50%,
+      transparent 60%
+    );
+    transform: translateX(-100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* SVG icons inside pills */
+  .temu-svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    opacity: 0.9;
+  }
+
+  .temu-flag {
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  /* ═══════════════════════════════════════════
+     COLORI PILL (TEMU EXACT)
+     ═══════════════════════════════════════════ */
+
+  /* Verde — Spedizione Gratuita, Locale */
+  .temu-pill-green {
+    color: #065f46;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border: 1px solid #6ee7b7;
+  }
+  .temu-pill-green .temu-svg { color: #059669; }
+
+  /* Viola — Bestseller, Top Venditore */
+  .temu-pill-purple {
+    color: #581c87;
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    border: 1px solid #c084fc;
+  }
+  .temu-pill-purple .temu-svg { color: #9333ea; }
+
+  /* Blu — Nuovo Arrivo */
+  .temu-pill-blue {
+    color: #1e40af;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border: 1px solid #60a5fa;
+  }
+
+  /* Rosso — Sconto */
+  .temu-pill-red {
+    color: #991b1b;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 1px solid #f87171;
+  }
+
+  /* Arancione — Promo */
+  .temu-pill-orange {
+    color: #7c2d12;
+    background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+    border: 1px solid #fb923c;
+  }
+
+  /* Giallo — Risparmio */
+  .temu-pill-yellow {
+    color: #713f12;
+    background: linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+    border: 1px solid #facc15;
+  }
+
+  /* Nero — Negozio Ufficiale */
+  .temu-pill-black {
+    color: #f3f4f6;
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    border: 1px solid #4b5563;
+  }
+
+  /* ═══════════════════════════════════════════
+     8 ANIMAZIONI RANDOM PER PRODOTTO
+     Ogni prodotto ha la SUA combinazione unica
+     ═══════════════════════════════════════════ */
+
+  /* Anim 0: SHIMMER */
+  .temu-anim-0 .temu-shimmer {
+    animation: temuShimmerSweep 2.5s ease-in-out infinite;
+  }
+
+  /* Anim 1: SOFT BOUNCE */
+  .temu-anim-1 {
+    animation: temuSoftBounce 2.2s ease-in-out infinite;
+  }
+  .temu-anim-1 .temu-shimmer {
+    animation: temuShimmerSweep 3s ease-in-out infinite 0.5s;
+  }
+
+  /* Anim 2: PULSE SCALE */
+  .temu-anim-2 {
+    animation: temuPulseScale 2.5s ease-in-out infinite;
+  }
+
+  /* Anim 3: GENTLE FLOAT */
+  .temu-anim-3 {
+    animation: temuFloat 3s ease-in-out infinite;
+  }
+  .temu-anim-3 .temu-shimmer {
+    animation: temuShimmerSweep 2s ease-in-out infinite 0.3s;
+  }
+
+  /* Anim 4: FAST SHIMMER */
+  .temu-anim-4 .temu-shimmer {
+    animation: temuShimmerSweep 1.5s ease-in-out infinite;
+  }
+
+  /* Anim 5: BORDER GLOW */
+  .temu-anim-5 {
+    animation: temuBorderGlow 2.8s ease-in-out infinite;
+  }
+
+  /* Anim 6: RUBBER BAND */
+  .temu-anim-6 {
+    animation: temuRubber 3.5s ease-in-out infinite;
+  }
+
+  /* Anim 7: MICRO SHAKE */
+  .temu-anim-7 {
+    animation: temuMicroShake 4s ease-in-out infinite;
+  }
+  .temu-anim-7 .temu-shimmer {
+    animation: temuShimmerSweep 2.2s ease-in-out infinite 0.8s;
+  }
+
+  /* KEYFRAMES BADGES */
+  @keyframes temuShimmerSweep {
+    0% { transform: translateX(-100%); }
+    50%, 100% { transform: translateX(200%); }
+  }
+  @keyframes temuSoftBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+  @keyframes temuPulseScale {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+  @keyframes temuFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2.5px); }
+  }
+  @keyframes temuBorderGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+    50% { box-shadow: 0 0 8px 2px rgba(0,0,0,0.08); }
+  }
+  @keyframes temuRubber {
+    0%, 100% { transform: scale(1); }
+    30% { transform: scale(1.02); }
+    50% { transform: scale(0.98); }
+    70% { transform: scale(1.01); }
+  }
+  @keyframes temuMicroShake {
+    0%, 92%, 100% { transform: rotate(0deg); }
+    94% { transform: rotate(-0.8deg); }
+    96% { transform: rotate(0.8deg); }
+    98% { transform: rotate(-0.4deg); }
+  }
+
+  /* ═══════════════════════════════════════════
+     TICKER SCORREVOLE — TEMU STYLE
+     ═══════════════════════════════════════════ */
+  .temu-ticker {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 5px 0;
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+    margin-top: 4px;
+  }
+
+  .temu-ticker:hover {
+    background: #f1f5f9;
+  }
+
+  .temu-ticker:hover .temu-ticker-track {
+    animation-play-state: paused;
+  }
+
+  .temu-ticker-track {
+    display: flex;
+    width: max-content;
+  }
+
+  .temu-ticker-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .temu-ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 8px;
+    font-size: 11px;
+    color: #475569;
+    font-weight: 500;
+  }
+
+  .temu-ticker-klarna {
+    background: #ffb3c7;
+    color: #000;
+    font-weight: 800;
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+  }
+
+  .temu-ticker-icon {
+    width: 12px;
+    height: 12px;
+    color: #2563eb;
+    flex-shrink: 0;
+  }
+
+  .temu-ticker-icon.temu-icon-green {
+    color: #16a34a;
+  }
+
+  .temu-ticker-dot {
+    color: #cbd5e1;
+    font-size: 10px;
+    margin: 0 3px;
+    user-select: none;
+  }
+
+  /* 4 ANIMAZIONI TICKER */
+  .ticker-anim-0 { animation: temuTickerScroll 20s linear infinite; }
+  .ticker-anim-1 { animation: temuTickerBounce 22s ease-in-out infinite; }
+  .ticker-anim-2 { animation: temuTickerFade 24s linear infinite; }
+  .ticker-anim-3 { animation: temuTickerElastic 18s ease-in-out infinite; }
+  .ticker-anim-4 { animation: temuTickerScroll 16s linear infinite; }
+  .ticker-anim-5 { animation: temuTickerBounce 20s ease-in-out infinite; }
+  .ticker-anim-6 { animation: temuTickerFade 22s linear infinite; }
+  .ticker-anim-7 { animation: temuTickerElastic 20s ease-in-out infinite; }
+
+  @keyframes temuTickerScroll {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes temuTickerBounce {
+    0%, 100% { transform: translateX(0%); }
+    25% { transform: translateX(-12%); }
+    50% { transform: translateX(-50%); }
+    75% { transform: translateX(-38%); }
+  }
+  @keyframes temuTickerFade {
+    0% { transform: translateX(0%); opacity: 1; }
+    45% { opacity: 0.5; }
+    50% { transform: translateX(-50%); opacity: 1; }
+    95% { opacity: 0.5; }
+    100% { transform: translateX(-50%); opacity: 1; }
+  }
+  @keyframes temuTickerElastic {
+    0% { transform: translateX(0%) scale(1); }
+    30% { transform: translateX(-15%) scale(1.01); }
+    50% { transform: translateX(-50%) scale(1); }
+    80% { transform: translateX(-35%) scale(1.01); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var wrap = document.getElementById('ProductBadges-{{ section.id }}');
+    if (!wrap) return;
+
+    var threshold = parseInt(wrap.getAttribute('data-threshold'), 10) || 5000;
+    var hasBestseller = wrap.getAttribute('data-has-bestseller') === 'true';
+
+    var tUnlocked = {{ 'badge_ticker.free_shipping_unlocked' | t | json }};
+    var tRemaining = {{ 'badge_ticker.free_shipping_remaining' | t | json }};
+
+    function fmtMoney(cents) {
+      return (cents / 100).toLocaleString('{{ request.locale.iso_code }}', {
+        style: 'currency',
+        currency: '{{ cart.currency.iso_code }}'
+      });
+    }
+
+    function updateLayout(showFS) {
+      var greenPills = wrap.querySelectorAll('.temu-pill-green');
+      greenPills.forEach(function(p) {
+        var txt = p.querySelector('.temu-pill-text');
+        if (txt && txt.textContent.indexOf(tUnlocked) !== -1) {
+          p.style.display = showFS ? '' : 'none';
+        }
+      });
+    }
+
+    function updateUI(price, compareAtPrice) {
+      var klarnaEls = wrap.querySelectorAll('.js-klarna-installment');
+      var discBadge = wrap.querySelector('.temu-pill-red');
+      var saveBadge = wrap.querySelector('.temu-pill-yellow');
+
+      // Klarna
+      klarnaEls.forEach(function (el) {
+        el.textContent = fmtMoney(Math.round(price / 3));
+      });
+
+      // Sconto badge
+      if (compareAtPrice && compareAtPrice > price) {
+        var discAmt = compareAtPrice - price;
+        var discPct = Math.round((discAmt * 100) / compareAtPrice);
+        if (discBadge) {
+          discBadge.querySelector('.temu-pill-text').textContent = '-' + discPct + '%';
+          discBadge.style.display = 'inline-flex';
+        }
+        if (saveBadge) {
+          saveBadge.querySelector('.temu-pill-text').textContent = 'Risparmi ' + fmtMoney(discAmt);
+          saveBadge.style.display = 'inline-flex';
+        }
+      } else {
+        if (discBadge) discBadge.style.display = 'none';
+        if (saveBadge) saveBadge.style.display = 'none';
+      }
+
+      // Spedizione
+      updateLayout(price >= threshold);
+    }
+
+    function getJSON() {
+      var scope = wrap.closest('.product-form, .product-single, section') || document;
+      var s = scope.querySelector('script[type="application/json"][data-product-json], script[id^="ProductJson-"], script[data-variant-json]');
+      if (s) { try { return JSON.parse(s.textContent); } catch (e) { return null; } }
+      return null;
+    }
+
+    var data = getJSON();
+
+    document.addEventListener('variant:change', function (e) {
+      if (e.detail && e.detail.variant) updateUI(e.detail.variant.price, e.detail.variant.compare_at_price);
+    });
+
+    document.addEventListener('change', function (e) {
+      if (e.target.matches('variant-selects, variant-radios') || e.target.closest('variant-selects, variant-radios')) {
+        setTimeout(function() {
+          var inp = document.querySelector('input[name="id"], select[name="id"]');
+          if (inp && data && data.variants) {
+            var v = data.variants.find(function(x){ return x.id == inp.value; });
+            if (v) updateUI(v.price, v.compare_at_price);
+          }
+        }, 50);
+      }
+    });
+
+    document.addEventListener('change', function (e) {
+      var t = e.target;
+      if (!t.closest('.product-form, form[action*="/cart/add"]')) return;
+      var f = t.closest('form');
+      var inp = f ? f.querySelector('[name="id"]') : null;
+      if (!inp || !data || !data.variants) return;
+      var v = data.variants.find(function(x){ return x.id == inp.value; });
+      if (v) updateUI(v.price, v.compare_at_price);
+    });
+
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('.js-smooth-ship-scroll');
+      if (!a) return;
+      var href = a.getAttribute('href');
+      if (!href || href === '#') return;
+      var el = document.querySelector(href);
+      if (el) {
+        e.preventDefault();
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 90, behavior: 'smooth' });
+      }
+    });
+  });
+</script>

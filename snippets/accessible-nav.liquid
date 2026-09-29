@@ -1,0 +1,20 @@
+{% doc %}
+  Renders an accessible skip navigation menu with keyboard shortcuts. Provides screen reader users and keyboard navigators with quick access to main page sections and functionality.
+
+  @example
+  {% render 'accessible-nav' %}
+  @example
+  {% comment %} Typically included in theme layout {% endcomment %}
+  {% render 'accessible-nav' %}
+{% enddoc %}
+
+<nav id="skip">
+    <ul>
+        <li><a href="{{ routes.root_url }}" accesskey="a" class="link-accessible">{{ 'general.accessibility.toggle_accessibility_mode' | t }} (a)</a></li>
+        <li><a href="{{ routes.root_url }}" accesskey="h">{{ 'general.accessibility.go_to_homepage' | t }} (h)</a></li>
+        <li><a href="#nav" accesskey="n">{{ 'general.accessibility.go_to_navigation' | t }} (n)</a></li>
+        <li><a href="{{ routes.search_url }}" aria-controls="search" accesskey="s">{{ 'general.accessibility.go_to_search' | t }} (s)</a></li>
+        <li><a href="#content" accesskey="c">{{ 'general.accessibility.go_to_content' | t }} (c)</a></li>
+        <li><a href="#shopify-section-footer" accesskey="f">{{ 'general.accessibility.go_to_footer' | t }} (f)</a></li>
+    </ul>
+</nav>

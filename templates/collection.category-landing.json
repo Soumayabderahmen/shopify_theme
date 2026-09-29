@@ -1,0 +1,320 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "disabled": true,
+      "settings": {
+        "hide_mobile": false
+      }
+    },
+    "165510917624f313ce": {
+      "type": "section-slideshow",
+      "blocks": {
+        "16551091769a378ed3-0": {
+          "type": "slide",
+          "settings": {
+            "layout": "background",
+            "overlay_opacity": 0,
+            "color_palette": "scheme-3",
+            "text_position": "align-start text-start",
+            "title": "<h1>Fashion, homewear & Pajamas</h1>",
+            "title_underline_style": "none",
+            "text": "<p>You are looking good and relaxed in your own home</p>",
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain"
+          }
+        }
+      },
+      "block_order": [
+        "16551091769a378ed3-0"
+      ],
+      "settings": {
+        "height": "32/9",
+        "width": "wide",
+        "autoplay": false,
+        "autoplay_seconds": 3,
+        "enable_controls": false,
+        "height_mobile": "1/1",
+        "spacing_desktop": 0,
+        "spacing_mobile": 30
+      }
+    },
+    "1654873054ee36ccb6": {
+      "type": "section-spacer",
+      "settings": {
+        "height": -20,
+        "height_mobile": 20
+      }
+    },
+    "16548690024b0be279": {
+      "type": "section-gallery",
+      "blocks": {
+        "1654869002e8d139cb-0": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 10,
+            "color_palette": "scheme-8",
+            "text_position": "end center",
+            "title": "<h1>Socks</h1>",
+            "title_underline_style": "none",
+            "text": "<p>In many different colors</p>",
+            "show_link": false,
+            "link_text": "",
+            "link_url": "/",
+            "button_style": "primary plain"
+          }
+        },
+        "1654869002e8d139cb-1": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 40,
+            "color_palette": "scheme-4",
+            "text_position": "end center",
+            "title": "<h1>Gift boxes</h1>",
+            "title_underline_style": "none",
+            "text": "<p>For him, her and for kids</p>",
+            "show_link": false,
+            "link_text": "",
+            "link_url": "/",
+            "button_style": "primary plain"
+          }
+        },
+        "1654869002e8d139cb-2": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 0,
+            "color_palette": "scheme-3",
+            "text_position": "end center",
+            "title": "<h1>Super cool homewear</h1>",
+            "title_underline_style": "none",
+            "text": "<p>Horizontal homewear for all day chilling</p>",
+            "show_link": true,
+            "link_text": "",
+            "link_url": "/",
+            "button_style": "primary plain"
+          }
+        }
+      },
+      "block_order": [
+        "1654869002e8d139cb-0",
+        "1654869002e8d139cb-1",
+        "1654869002e8d139cb-2"
+      ],
+      "settings": {
+        "items_layout": "static-grid",
+        "items_width": 3,
+        "height": "16/9",
+        "width": "wide",
+        "space_between": 0,
+        "image_zoom": true,
+        "image_move": false,
+        "show_content_on_hover": true,
+        "content_on_hover_color_palette": "dark",
+        "layout_mobile": "compact",
+        "mobile_height": "1/1",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "1654869628be3ef842": {
+      "type": "section-featured-collection",
+      "settings": {
+        "layout": "slider",
+        "limit": 6,
+        "number_of_items": 5,
+        "text_alignment": "start",
+        "title": "<h1>Homewear</h1>",
+        "title_underline_style": "none",
+        "text": "",
+        "show_link": true,
+        "link_text": "See all",
+        "button_style": "primary link",
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "mobile_layout": "slider",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "main-collection": {
+      "type": "main-collection",
+      "blocks": {
+        "46c7e820-523e-4f79-a02e-8289bc02fe41": {
+          "type": "title",
+          "settings": {
+            "title_size": "h2",
+            "text_alignment": "left",
+            "title": ""
+          }
+        },
+        "b4ca5ed6-593e-4fb2-b602-a25847c3b247": {
+          "type": "description",
+          "settings": {
+            "text_alignment": "left",
+            "enable_read_more": false,
+            "text": ""
+          }
+        },
+        "3b8d4990-828e-4b6b-ac83-772f3c5d1285": {
+          "type": "product_grid",
+          "settings": {}
+        },
+        "9676b31d-fbea-4f1a-909d-6a816ab7ee38": {
+          "type": "sorting",
+          "settings": {}
+        },
+        "05592803-c02a-46b6-bd00-a83f561b4c7c": {
+          "type": "spacer",
+          "settings": {
+            "height": 20
+          }
+        }
+      },
+      "block_order": [
+        "46c7e820-523e-4f79-a02e-8289bc02fe41",
+        "b4ca5ed6-593e-4fb2-b602-a25847c3b247",
+        "3b8d4990-828e-4b6b-ac83-772f3c5d1285",
+        "9676b31d-fbea-4f1a-909d-6a816ab7ee38",
+        "05592803-c02a-46b6-bd00-a83f561b4c7c"
+      ],
+      "disabled": true,
+      "settings": {
+        "pagination_qty": 48,
+        "pagination_type": "pages",
+        "show_amount_of_products_in_collection": true,
+        "show_collection_image": false,
+        "productview_type": "grid",
+        "products_per_row": 3,
+        "enable_filters": true,
+        "enable_menu": true,
+        "enable_collections": true,
+        "filters_menu_alignment": "left",
+        "collections_menu": [],
+        "filter_sticky": true,
+        "filters_show_more_limit": 7,
+        "image_swatches_size": "xs",
+        "image_swatches_fill_images": true,
+        "image_swatches_show_in_circle": true,
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": true,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": true,
+        "products_per_row_mobile": "1",
+        "filter_mobile_sticky": true
+      }
+    },
+    "1654872926ee0828ac": {
+      "type": "section-collection-list",
+      "settings": {
+        "image_ratio": "square",
+        "fill_images": true,
+        "layout": "slider",
+        "number_of_items": 5,
+        "text_alignment": "start",
+        "title": "<h1>Some collections you'd might like</h1>",
+        "title_underline_style": "none",
+        "show_link": false,
+        "link_text": "",
+        "link_url": "",
+        "button_style": "primary plain",
+        "collection_title_size": "p",
+        "mobile_layout": "slider",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "1654869260ba0f16e6": {
+      "type": "section-usp-bar",
+      "blocks": {
+        "1654869260f94c18d6-0": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>Great fashion</strong> for great people</p>"
+          }
+        },
+        "1654869260f94c18d6-1": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>A-brands for the best pricings</p>"
+          }
+        },
+        "1654869260f94c18d6-2": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>We care about the planet, sustainable fashion</p>"
+          }
+        }
+      },
+      "block_order": [
+        "1654869260f94c18d6-0",
+        "1654869260f94c18d6-1",
+        "1654869260f94c18d6-2"
+      ],
+      "settings": {
+        "color_palette": "scheme-6",
+        "layout": "rows",
+        "autoplay": false,
+        "autoplay_seconds": 3,
+        "show_arrows": false,
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "b9edc659-4fc1-4e06-a08a-fa2deda09fe0": {
+      "type": "section-featured-collection",
+      "settings": {
+        "layout": "slider",
+        "limit": 5,
+        "number_of_items": 5,
+        "text_alignment": "start",
+        "title": "<h1>For the little ones</h1>",
+        "title_underline_style": "none",
+        "text": "<p>Beautiful and funny patterns to sleep in</p>",
+        "show_link": true,
+        "link_text": "View all",
+        "button_style": "primary link",
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "mobile_layout": "slider",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "165510917624f313ce",
+    "1654873054ee36ccb6",
+    "16548690024b0be279",
+    "1654869628be3ef842",
+    "main-collection",
+    "1654872926ee0828ac",
+    "1654869260ba0f16e6",
+    "b9edc659-4fc1-4e06-a08a-fa2deda09fe0"
+  ]
+}

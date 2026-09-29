@@ -1,0 +1,285 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "section_slideshow_XNiKWa": {
+      "type": "section-slideshow",
+      "blocks": {
+        "slide_BwE6mN": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/generated-per-me-articole-orologi-pagin-designe.png",
+            "layout": "background",
+            "overlay_opacity": 0,
+            "color_palette": "scheme-7",
+            "text_position": "align-center text-center",
+            "content_width": 2000,
+            "title": "",
+            "title_underline_style": "none",
+            "text": "",
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain",
+            "show_overlay_link": true,
+            "overlay_url": "shopify://collections/orologi-uomo-novita",
+            "image_mobile": "shopify://shop_images/generated-per-me-articole-orologi-pagin-designe.png"
+          }
+        },
+        "slide_CYNMjV": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/S00407a7b47564064a46a27a88d81fdf2S.webp",
+            "layout": "background",
+            "overlay_opacity": 0,
+            "color_palette": "scheme-7",
+            "text_position": "align-center text-center",
+            "content_width": 2000,
+            "title": "",
+            "title_underline_style": "none",
+            "text": "",
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain",
+            "show_overlay_link": true,
+            "overlay_url": "shopify://collections/adidas",
+            "image_mobile": "shopify://shop_images/ok-ma-image-has-more-articol-for-adidas.png"
+          }
+        },
+        "slide_8Ch4pR": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/image-collection-scarpe-nike-need.png",
+            "layout": "background",
+            "overlay_opacity": 0,
+            "color_palette": "scheme-7",
+            "text_position": "align-center text-center",
+            "content_width": 2000,
+            "title": "",
+            "title_underline_style": "none",
+            "text": "",
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain",
+            "show_overlay_link": true,
+            "overlay_url": "shopify://collections/nike",
+            "image_mobile": "shopify://shop_images/image-collection-scarpe-nike-need.png"
+          }
+        },
+        "slide_8LpwFn": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/S7695e17502ef4b5487ed2ce11f2f25e86.webp",
+            "layout": "background",
+            "overlay_opacity": 0,
+            "color_palette": "scheme-7",
+            "video": "shopify://files/videos/breezefanfansummericefanairconditioneracaircoolerfanIceportablefanhumidifier.mp4",
+            "text_position": "align-center text-center",
+            "content_width": 2000,
+            "title": "",
+            "title_underline_style": "none",
+            "text": "",
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain",
+            "show_overlay_link": true,
+            "overlay_url": "shopify://collections/ventilatori"
+          }
+        },
+        "slide_E98UEf": {
+          "type": "slide",
+          "settings": {
+            "layout": "background",
+            "overlay_opacity": 0,
+            "color_palette": "scheme-7",
+            "video": "shopify://files/videos/ChooseyourSoKatepreferedcolorqualiltuocolorepreferito_bplakaLouboutinstilettoheelstacchialtihighheelstacchiaspillotacchihighheelsloverhighheelshoes.mp4",
+            "text_position": "align-center text-center",
+            "content_width": 2000,
+            "title": "",
+            "title_underline_style": "none",
+            "text": "",
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "shopify://collections/tacco-alto",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain",
+            "show_overlay_link": true,
+            "overlay_url": "shopify://collections/tacco-alto",
+            "image_mobile": "shopify://shop_images/genrated-for-images-profetionell-hasing-collection-for-tacci-donna-elegante.png"
+          }
+        },
+        "slide_kN74WB": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/im-need-images-hasing-more-articoli-di-mocassini.png",
+            "layout": "background",
+            "overlay_opacity": 0,
+            "color_palette": "",
+            "text_position": "align-center text-center",
+            "content_width": 2000,
+            "title": "",
+            "title_underline_style": "none",
+            "text": "",
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain",
+            "show_overlay_link": true,
+            "overlay_url": "shopify://collections/mocassini",
+            "image_mobile": "shopify://shop_images/mocassini-collection.png"
+          }
+        }
+      },
+      "block_order": [
+        "slide_BwE6mN",
+        "slide_CYNMjV",
+        "slide_8Ch4pR",
+        "slide_8LpwFn",
+        "slide_E98UEf",
+        "slide_kN74WB"
+      ],
+      "name": "t:sections.slideshow.presets.name",
+      "settings": {
+        "height": "32/9",
+        "width_banner": "wide",
+        "width": "wide",
+        "autoplay": true,
+        "autoplay_seconds": 6,
+        "enable_controls": false,
+        "height_mobile": "1/1",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30,
+        "fix_zindex": 0
+      }
+    },
+    "78836e0a-6131-4f01-afff-dbdd186d0914": {
+      "type": "section-recently-viewed-products",
+      "disabled": true,
+      "settings": {
+        "number_of_items": 5,
+        "text_alignment": "start",
+        "width": "wide",
+        "title": "<h2>Watched by you:</h2>",
+        "title_underline_style": "none",
+        "enable_quick_buy_desktop": false,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "spacing_desktop": 50,
+        "spacing_mobile": 30,
+        "fix_zindex": 0
+      }
+    },
+    "section_featured_collection_ekApHt": {
+      "type": "section-featured-collection",
+      "name": "t:sections.featured_collection.presets.name",
+      "settings": {
+        "collection": "globofilter-best-selling-products-index",
+        "layout": "grid",
+        "limit": 24,
+        "number_of_items": 5,
+        "text_alignment": "center",
+        "width": "wide",
+        "title": "<h2>Featured collection</h2>",
+        "title_underline_style": "none",
+        "text": "",
+        "show_link": false,
+        "link_text": "Button",
+        "button_style": "primary plain",
+        "enable_quick_buy_desktop": false,
+        "enable_quick_buy_mobile": false,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "mobile_layout": "grid",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30,
+        "fix_zindex": 0
+      }
+    },
+    "165346832322a4db6f": {
+      "type": "section-usp-bar",
+      "blocks": {
+        "16534683231021e629-0": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>Everything in stock and quick delivery</p>"
+          }
+        },
+        "16534683231021e629-1": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>Also <strong>pickup locations</strong> through the whole country</p>"
+          }
+        },
+        "16534683231021e629-2": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>We deliver <strong>CO2 neutral </strong>🍃</p>"
+          }
+        }
+      },
+      "block_order": [
+        "16534683231021e629-0",
+        "16534683231021e629-1",
+        "16534683231021e629-2"
+      ],
+      "disabled": true,
+      "settings": {
+        "color_palette": "scheme-1",
+        "layout": "rows",
+        "autoplay": true,
+        "autoplay_seconds": 3,
+        "show_arrows": true,
+        "width_banner": "boxed",
+        "width": "wide",
+        "mobile_layout": "slider",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30,
+        "fix_zindex": 0
+      }
+    }
+  },
+  "order": [
+    "section_slideshow_XNiKWa",
+    "78836e0a-6131-4f01-afff-dbdd186d0914",
+    "section_featured_collection_ekApHt",
+    "165346832322a4db6f"
+  ]
+}

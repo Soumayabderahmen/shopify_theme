@@ -1,0 +1,388 @@
+{% comment %}
+  List of target brands (lowercase)
+  {% assign target_brands = "nike, adidas, puma, reebok, new balance, onemix, jordan, asics" | split: ", " %}
+  {% assign product_title_lower = product.title | downcase %}
+  {% assign matched_brand = "" %}
+
+  {% comment %} Loop through brands to see if any exist in the product title {% endcomment %}
+  {% for brand in target_brands %}
+    {% if product_title_lower contains brand %}
+      {% assign matched_brand = brand | capitalize %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+
+  {% comment %} Show badges only if a brand was found in the title {% endcomment %}
+  {% if matched_brand != "" %}
+    <div class="brand-badges-container">
+
+      <!-- 1. Official Store Badge -->
+      <span class="badge badge-store">
+        Official Store: {{ matched_brand }}
+      </span>
+
+      <!-- 2. Star Seller Badge -->
+      <span class="badge badge-star">
+        <svg class="badge-icon star-icon" viewBox="0 0 24 24" width="13" height="13">
+          <path fill="#FFD700" d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6-6.3 4.6 2.3-7.1-6-4.5h7.6z"/>
+        </svg>
+        Star seller
+      </span>
+
+      <!-- 3. Brand Official Badge -->
+      <span class="badge badge-brand-check">
+        <svg class="badge-icon check-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Brand Official
+      </span>
+
+    </div>
+  {% endif %}
+
+  <style>
+      .brand-badges-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* Badge 1: Store Name (Dark Brown) */
+  .badge-store {
+    background-color: #3b2314;
+    color: #f2e3d5;
+  }
+
+  /* Badge 2: Star Seller (Purple) */
+  .badge-star {
+    background-color: #581c87;
+    color: #ffffff;
+  }
+
+  /* Badge 3: Brand Official (Bronze Checkmark) */
+  .badge-brand-check {
+    background-color: #4a2c11;
+    color: #fce7f3;
+  }
+
+  .badge-icon {
+    flex-shrink: 0;
+  }
+  </style>
+{% endcomment %}
+
+{% comment %} List of target brands (lowercase) {% endcomment %}
+{% assign target_brands = 'nike, adidas, puma, reebok, new balance, onemix, jordan, asics' | split: ', ' %}
+{% assign product_title_lower = product.title | downcase %}
+{% assign matched_brand = '' %}
+
+{% comment %} Loop through brands to check if any exist in the product title {% endcomment %}
+{% for brand in target_brands %}
+  {% if product_title_lower contains brand %}
+    {% assign matched_brand = brand | capitalize %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% if matched_brand != '' %}
+  <div class="badge-scroll-wrapper">
+    <div class="badge-scroll-track">
+      {% comment %} Block 1 {% endcomment %}
+      <div class="badge-scroll-group">
+        <span class="badge badge-store">Official Store: {{ matched_brand }}</span>
+        <span class="badge badge-star">
+          <svg class="badge-icon star-icon" viewBox="0 0 24 24" width="13" height="13">
+            <path fill="#FFD700" d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6-6.3 4.6 2.3-7.1-6-4.5h7.6z"/>
+          </svg>
+          Star seller
+        </span>
+        <span class="badge badge-brand-check">
+          <svg
+            class="badge-icon check-icon"
+            viewBox="0 0 24 24"
+            width="13"
+            height="13"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Brand Official
+        </span>
+      </div>
+
+      {% comment %} Block 2 (Duplicated for infinite looping) {% endcomment %}
+      <div class="badge-scroll-group" aria-hidden="true">
+        <span class="badge badge-store">Official Store: {{ matched_brand }}</span>
+        <span class="badge badge-star">
+          <svg class="badge-icon star-icon" viewBox="0 0 24 24" width="13" height="13">
+            <path fill="#FFD700" d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6-6.3 4.6 2.3-7.1-6-4.5h7.6z"/>
+          </svg>
+          Star seller
+        </span>
+        <span class="badge badge-brand-check">
+          <svg
+            class="badge-icon check-icon"
+            viewBox="0 0 24 24"
+            width="13"
+            height="13"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Brand Official
+        </span>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<style>
+      /* Container clipping and edge fading */
+  .badge-scroll-wrapper {
+    overflow: hidden;
+    width: 100%;
+    max-width: 420px;
+    margin: 12px 0;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  /* Animation Track with stepped pause keyframes */
+  .badge-scroll-track {
+    display: flex;
+    width: max-content;
+    gap: 12px;
+    animation: badgeStepScroll 18s ease-in-out infinite;
+  }
+
+  /* Pause scroll on mouse hover */
+  .badge-scroll-wrapper:hover .badge-scroll-track {
+    animation-play-state: paused;
+  }
+
+  .badge-scroll-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Base Badge Style */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 9px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* Color Styles */
+  .badge-store {
+    background-color: #3b2314;
+    color: #f2e3d5;
+  }
+
+  .badge-star {
+    background-color: #581c87;
+    color: #ffffff;
+  }
+
+  .badge-brand-check {
+    background-color: #4a2c11;
+    color: #fce7f3;
+  }
+
+  .badge-icon {
+    flex-shrink: 0;
+  }
+
+  /*
+    Keyframe sequence:
+    0% - 20%: Pause on Official Store badge (~2s pause out of 10s total)
+    50% - 70%: Pause when loop reaches second Official Store badge (~2s pause)
+    100%: Smoothly loop back to start
+  */
+  @keyframes badgeStepScroll {
+    0%, 20% {
+      transform: translateX(0);
+    }
+    50%, 70% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+</style>
+
+
+
+
+
+
+
+
+
+
+{% comment %}
+  Lista brand internazionali (in minuscolo)
+  {% assign target_brands = "nike, adidas, puma, reebok, new balance, onemix, jordan, asics" | split: ", " %}
+  {% assign product_title_lower = product.title | downcase %}
+  {% assign matched_brand = "" %}
+
+  {% for brand in target_brands %}
+    {% if product_title_lower contains brand %}
+      {% assign matched_brand = brand | capitalize %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+
+  {% if matched_brand != "" %}
+    <div class="badge-scroll-wrapper">
+      <div class="badge-scroll-track">
+
+        <!-- Blocco 1 -->
+        <div class="badge-scroll-group">
+          <span class="badge badge-store">Official Store: {{ matched_brand }}</span>
+          <span class="badge badge-star">
+            <svg class="badge-icon star-icon" viewBox="0 0 24 24" width="13" height="13">
+              <path fill="#FFD700" d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6-6.3 4.6 2.3-7.1-6-4.5h7.6z"/>
+            </svg>
+            Star seller
+          </span>
+          <span class="badge badge-brand-check">
+            <svg class="badge-icon check-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Brand Official
+          </span>
+        </div>
+
+        <!-- Blocco 2 (Duplicato per seamless loop) -->
+        <div class="badge-scroll-group" aria-hidden="true">
+          <span class="badge badge-store">Official Store: {{ matched_brand }}</span>
+          <span class="badge badge-star">
+            <svg class="badge-icon star-icon" viewBox="0 0 24 24" width="13" height="13">
+              <path fill="#FFD700" d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6-6.3 4.6 2.3-7.1-6-4.5h7.6z"/>
+            </svg>
+            Star seller
+          </span>
+          <span class="badge badge-brand-check">
+            <svg class="badge-icon check-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Brand Official
+          </span>
+        </div>
+
+      </div>
+    </div>
+  {% endif %}
+
+
+  <style>
+      /* Container principale */
+  .badge-scroll-wrapper {
+    overflow: hidden;
+    width: 100%;
+    max-width: 420px;
+    margin: 12px 0;
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+
+  /* Container tracce */
+  .badge-scroll-track {
+    display: flex;
+    width: max-content;
+    gap: 12px;
+    /* Animazione a 12 secondi per movimento fluido e naturale */
+    animation: badgeContinuousLoop 15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  /* Pausa al passaggio del mouse */
+  .badge-scroll-wrapper:hover .badge-scroll-track {
+    animation-play-state: paused;
+  }
+
+  .badge-scroll-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Stili Badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 9px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .badge-store {
+    background-color: #3b2314;
+    color: #f2e3d5;
+  }
+
+  .badge-star {
+    background-color: #581c87;
+    color: #ffffff;
+  }
+
+  .badge-brand-check {
+    background-color: #4a2c11;
+    color: #fce7f3;
+  }
+
+  .badge-icon {
+    flex-shrink: 0;
+  }
+
+  /*
+    Fix dei Keyframes per Seamless Loop:
+    0% - 25%: Fermo 2 secondi sul primo blocco (Official Store)
+    50% - 75%: Scorre in modo smooth e si ferma 2 secondi sul secondo blocco
+    100%: Torna esattamente a -50% per un ciclo infinito continuo senza mai scomparire
+  */
+  @keyframes badgeContinuousLoop {
+    0%, 25% {
+      transform: translateX(0%);
+    }
+    50%, 75% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  </style>
+{% endcomment %}

@@ -1,0 +1,214 @@
+<div
+  class="
+    m6fr
+    {% unless section.settings.enable_custom_height %}size-{{ section.settings.height }}{% endunless %}
+    {% unless section.settings.enable_custom_height_mobile %}size-{{ section.settings.height_mobile }}-mobile{% endunless %}
+    {% if section.settings.width == 'wide' %}wide{% endif %}
+    section-width-{{ section.settings.width_banner }}
+  "
+  >
+  <article
+    class="palette-{{ section.settings.color_palette }} module-color-palette p0"
+  ></article>
+</div>
+
+<style>
+  #shopify-section-{{ section.id }} { position: relative; z-index: {{ section.settings.fix_zindex }}!important; }
+  #shopify-section-{{ section.id }} .module-color-palette:before { opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }}; }
+  @media only screen and (min-width: 47.5em) {
+      #shopify-section-{{ section.id }} .m6fr { margin-bottom: {{ section.settings.spacing_desktop }}px; }
+  {% if section.settings.enable_custom_height %}
+      #shopify-section-{{ section.id }} article { --mih: {{ section.settings.custom_height }}px; }
+  {% endif %}
+  {% if section.settings.spacing_desktop < 0 %}
+      #shopify-section-{{ section.id }} + *.has-kinetic-text { pointer-events: none; }
+  {% endif %}
+  }
+  @media only screen and (max-width: 47.5em) {
+      #shopify-section-{{ section.id }} .m6fr { margin-bottom: {{ section.settings.spacing_mobile }}px; }
+  {% if section.settings.enable_custom_height_mobile %}
+      #shopify-section-{{ section.id }} article { --mih: {{ section.settings.custom_height_mobile }}px; }
+  {% endif %}
+  {% if section.settings.spacing_mobile < 0 %}
+      #shopify-section-{{ section.id }} + *.has-kinetic-text { pointer-events: none; }
+  {% endif %}
+  }
+</style>
+
+{% schema %}
+{
+  "name": "t:sections.background.name",
+  "disabled_on": {
+    "groups": ["header", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_palette",
+      "label": "t:global.color_palette.label",
+      "default": "scheme-5"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:sections.background.settings.overlay_opacity.label",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "height",
+      "label": "t:sections.background.settings.height.label",
+      "options": [
+        {
+          "value": "xs",
+          "label": "t:sections.background.settings.height.options__1.label"
+        },
+        {
+          "value": "s",
+          "label": "t:sections.background.settings.height.options__2.label"
+        },
+        {
+          "value": "m",
+          "label": "t:sections.background.settings.height.options__3.label"
+        },
+        {
+          "value": "l",
+          "label": "t:sections.background.settings.height.options__4.label"
+        }
+      ],
+      "default": "xs"
+    },
+    {
+      "id": "enable_custom_height",
+      "type": "checkbox",
+      "label": "t:sections.background.settings.enable_custom_height.label"
+    },
+    {
+      "type": "range",
+      "id": "custom_height",
+      "label": "t:sections.background.settings.custom_height.label",
+      "info": "t:sections.background.settings.custom_height.info",
+      "min": 20,
+      "max": 2000,
+      "step": 20,
+      "unit": "px",
+      "default": 300,
+      "visible_if": "{{ section.settings.enable_custom_height }}"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:global.layout.width.label_background",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "wide"
+    },
+    {
+      "type": "select",
+      "id": "width_banner",
+      "label": "t:global.layout.width.label_banner",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed",
+      "visible_if": "{{ settings.width < 2000 and section.settings.width == 'boxed'}}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.mobile.header"
+    },
+    {
+      "type": "select",
+      "id": "height_mobile",
+      "label": "t:sections.background.settings.mobile.height_mobile.label",
+      "options": [
+        {
+          "value": "xs",
+          "label": "t:sections.background.settings.mobile.height_mobile.options__1.label"
+        },
+        {
+          "value": "s",
+          "label": "t:sections.background.settings.mobile.height_mobile.options__2.label"
+        },
+        {
+          "value": "m",
+          "label": "t:sections.background.settings.mobile.height_mobile.options__3.label"
+        },
+        {
+          "value": "l",
+          "label": "t:sections.background.settings.mobile.height_mobile.options__4.label"
+        }
+      ],
+      "default": "xs"
+    },
+    {
+      "id": "enable_custom_height_mobile",
+      "type": "checkbox",
+      "label": "t:sections.background.settings.mobile.enable_custom_height_mobile.label"
+    },
+    {
+      "type": "range",
+      "id": "custom_height_mobile",
+      "label": "t:sections.background.settings.mobile.custom_height_mobile.label",
+      "info": "t:sections.background.settings.mobile.custom_height_mobile.info",
+      "min": 20,
+      "max": 2000,
+      "step": 20,
+      "unit": "px",
+      "default": 300,
+      "visible_if": "{{ section.settings.enable_custom_height_mobile }}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.spacing.header"
+    },
+    {
+      "id": "spacing_desktop",
+      "type": "number",
+      "label": "t:global.spacing.spacing_desktop.label",
+      "default": 50
+    },
+    {
+      "id": "spacing_mobile",
+      "type": "number",
+      "label": "t:global.spacing.spacing_mobile.label",
+      "default": 50
+    },
+    {
+      "id": "fix_zindex",
+      "type": "range",
+      "label": "t:global.fix_zindex.label",
+      "info": "t:global.fix_zindex.info",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.background.presets.name",
+     "category": "t:categories.layout"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,36 @@
+{% render 'spacer', block: block %}
+
+{% schema %}
+{
+  "name": "t:blocks.spacer.name",
+  "tag": null,
+  "settings": [
+    {
+      "id": "height",
+      "type": "range",
+      "label": "t:blocks.spacer.settings.height.label",
+      "min": -50,
+      "max": 400,
+      "step": 5,
+      "unit": "px",
+      "default": 35
+    },
+    {
+      "id": "height_mobile",
+      "type": "range",
+      "label": "t:blocks.spacer.settings.height_mobile.label",
+      "min": -50,
+      "max": 400,
+      "step": 5,
+      "unit": "px",
+      "default": 35
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:blocks.spacer.name",
+      "category": "t:categories.layout"
+    }
+  ]
+}
+{% endschema %}

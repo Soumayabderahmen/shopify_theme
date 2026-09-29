@@ -1,0 +1,8 @@
+{%- doc -%}
+  Intended for use in a block similar to the spacer block.
+
+  @param {string} [class] - custom class to define in addition to spacer block classes
+  @param {object} [block] - The block object
+{%- enddoc -%}
+
+<div class="module-spacer {{ class }}" style="--spacer-height: {{ block.settings.height }}px; --spacer-height-mobile: {{ block.settings.height_mobile }}px;" {{ block.shopify_attributes }}></div>

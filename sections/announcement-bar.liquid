@@ -1,0 +1,343 @@
+{%- if section.blocks.size > 0 -%}
+  {{ 'async-announcement.css' | asset_url | stylesheet_tag }}
+  {%- style -%}
+    #shopify-section-{{ section.id }}.shopify-section-announcement-bar-container {
+      --custom_alert_bg: var(--{{ section.settings.color_palette }}_bg);
+      --custom_alert_fg: var(--{{ section.settings.color_palette }}_fg);
+    }
+  {%- endstyle -%}
+
+  {%- liquid
+    assign use_m6kn = false
+    if section.settings.display_type == 'marquee' or section.settings.display_type == 'typewriter'
+      assign use_m6kn = true
+    endif
+
+    assign is_default = false
+    if section.settings.display_type == 'none'
+      assign is_default = true
+    endif
+
+    assign enable_slider = false
+    if is_default and section.blocks.size > 1
+      assign enable_slider = true
+    endif
+
+    assign autoplay_ms = 0
+    if enable_slider and section.settings.autoplay_enabled
+      assign autoplay_seconds = section.settings.autoplay_seconds | plus: 0
+      if autoplay_seconds > 0
+        assign autoplay_ms = autoplay_seconds | times: 1000 | plus: 0
+      endif
+    endif
+
+    assign default_no_nav = true
+    if is_default and section.settings.default_no_nav
+      assign default_no_nav = false
+    endif
+
+    assign sep_code = ''
+    case section.settings.separator
+      when 'show_separators'
+        assign sep_code = '\2022'
+      when 'slash'
+        assign sep_code = '\002F'
+      when 'pipe'
+        assign sep_code = '\007C'
+      when 'dash'
+        assign sep_code = '\002D'
+      when 'star'
+        assign sep_code = '\2736'
+    endcase
+
+    assign ann_padding = section.settings.padding | default: 14 | plus: 0
+  -%}
+
+  {%- if use_m6kn -%}
+    {{ 'async-marquee.css' | asset_url | stylesheet_tag }}
+
+    {%- liquid
+      assign marquee_dist = section.settings.gap | default: 30 | plus: 0
+
+      assign text_speed = section.settings.text_speed | default: 'neutral'
+      if text_speed != 'slow' and text_speed != 'fast' and text_speed != 'neutral'
+        assign text_speed = 'neutral'
+      endif
+    -%}
+
+    <div
+      class="
+        m6kn {{ text_speed }}
+        {% if section.settings.show_separators %} dot{% endif %}
+        {% if section.settings.display_type == 'typewriter' %} type{% endif %}
+        {% if section.settings.display_type == 'typewriter' and section.settings.show_cursor == false %} no-cursor{% endif %}
+        {% if section.settings.display_type == 'typewriter' and section.settings.text_alignment == 'center' %} text-center{% endif %}
+        {% if section.settings.display_type == 'marquee' and section.settings.marquee_reverse_direction %} inv{% endif %}
+      "
+      role="marquee"
+      style="--dist: {{ marquee_dist }}px;{% if section.settings.display_type == 'marquee' and sep_code != '' %} --sep: '{{ sep_code }}';{% endif %}"
+    >
+  {%- endif -%}
+
+  <ul
+    class="
+      l4us
+      {% if section.settings.section_width == 'full' %} fullwidth{% endif %}
+      {% if enable_slider %} slider{% endif %}
+      {% if default_no_nav %} no-nav{% endif %}
+      no-checks
+      shopify-section-announcement-bar
+    "
+    {% if autoplay_ms > 0 %}
+      data-autoplay="{{ autoplay_ms }}"
+    {% endif %}
+    {% if ann_padding != 14 %}
+      style="--ann_p: {{ ann_padding }}px;"
+    {% endif %}
+  >
+    {%- for block in section.blocks -%}
+      {%- assign txt = block.settings.text | default: '' -%}
+
+      {%- assign has_image = false -%}
+      {%- if block.settings.image -%}
+        {%- assign has_image = true -%}
+      {%- endif -%}
+
+      {%- if txt != blank or has_image -%}
+        <li
+          {% if section.settings.text_alignment == 'center' %}
+            class="text-center"
+          {% endif %}
+          {{ block.shopify_attributes }}
+        >
+          {%- liquid
+            assign img_h = block.settings.image_height | plus: 0
+            assign src_w = block.settings.image.width | default: 0 | plus: 0
+            assign src_h = block.settings.image.height | default: 0 | plus: 0
+
+            assign rendered_w = img_h
+            if img_h > 0 and src_w > 0 and src_h > 0
+              assign rendered_w = src_w | times: img_h | divided_by: src_h | round
+            endif
+          -%}
+          <span>
+            {% if has_image %}
+              <span class="cols cols-mobile">
+                <span>
+                  <img
+                    src="{{ block.settings.image | image_url: height: img_h }}"
+                    alt="{{ txt | strip_html | escape }}"
+                    loading="lazy"
+                    width="{{ rendered_w }}"
+                    height="{{ img_h }}"
+                    {% if img_h > 0 %}
+                      style="--height: {{ img_h }}px;"
+                    {% endif %}
+                  >
+                </span>
+                <span>
+                  {{ txt }}
+                </span>
+              </span>
+            {% else %}
+              {{ txt }}
+            {% endif %}
+          </span>
+
+          {%- unless default_no_nav -%}
+            <button class="swiper-button-nav swiper-button-next" aria-label="Next">
+              <i aria-hidden="true" class="icon-chevron-right"></i>
+            </button>
+          {%- endunless -%}
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+
+  {%- if use_m6kn -%}
+    </div>
+  {%- endif -%}
+
+  {%- if section.settings.allow_close -%}
+    <button type="button" class="close" aria-label="Close">Close</button>
+  {%- endif -%}
+
+  <button type="button" class="overlay-close" aria-label="Close">Close</button>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:static_sections.announcement_bar.name",
+  "class": "shopify-section-announcement-bar-container",
+  "settings": [
+    {
+      "id": "text_alignment",
+      "type": "select",
+      "label": "t:global.typography.text_position.label",
+      "default": "center",
+      "options": [
+        { "value": "left", "label": "t:global.alignment.left.label" },
+        { "value": "center", "label": "t:global.alignment.center.label" }
+      ],
+      "visible_if": "{{ section.settings.display_type != 'marquee' }}"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_palette",
+      "label": "t:global.color_palette.label",
+      "default": "scheme-8"
+    },
+    {
+      "id": "padding",
+      "type": "range",
+      "label": "t:global.padding.header",
+      "min": 10,
+      "max": 32,
+      "step": 2,
+      "default": 14,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "t:static_sections.announcement_bar.settings.behavior_and_interactions"
+    },
+    {
+      "id": "display_type",
+      "type": "select",
+      "label": "t:static_sections.announcement_bar.settings.display_type.label",
+      "default": "none",
+      "options": [
+        { "value": "none", "label": "t:static_sections.announcement_bar.settings.display_none.label" },
+        { "value": "marquee", "label": "t:static_sections.announcement_bar.settings.display_marquee.label" },
+        { "value": "typewriter", "label": "t:static_sections.announcement_bar.settings.display_typewriter.label" }
+      ]
+    },
+    {
+      "id": "allow_close",
+      "type": "checkbox",
+      "label": "t:static_sections.announcement_bar.settings.allow_close.label",
+      "info": "t:static_sections.announcement_bar.settings.paragraph",
+      "default": true,
+      "visible_if": "{{ section.settings.display_type == 'none' or section.settings.display_type == 'typewriter' }}"
+    },
+    {
+      "id": "text_speed",
+      "type": "select",
+      "label": "t:static_sections.announcement_bar.settings.text_speed.label",
+      "default": "neutral",
+      "options": [
+        { "value": "slow", "label": "t:static_sections.announcement_bar.settings.text_speed.slow" },
+        { "value": "neutral", "label": "t:static_sections.announcement_bar.settings.text_speed.neutral" },
+        { "value": "fast", "label": "t:static_sections.announcement_bar.settings.text_speed.fast" }
+      ],
+      "visible_if": "{{ section.settings.display_type == 'marquee' or section.settings.display_type == 'typewriter' }}"
+    },
+    {
+      "id": "show_cursor",
+      "type": "checkbox",
+      "label": "t:static_sections.announcement_bar.settings.show_cursor.label",
+      "default": true,
+      "visible_if": "{{ section.settings.display_type == 'typewriter' }}"
+    },
+    {
+      "id": "default_no_nav",
+      "type": "checkbox",
+      "label": "t:static_sections.announcement_bar.settings.default_no_nav.label",
+      "visible_if": "{{ section.settings.display_type == 'none' }}"
+    },
+    {
+      "id": "autoplay_enabled",
+      "type": "checkbox",
+      "label": "t:static_sections.announcement_bar.settings.autoplay_enabled.label",
+      "default": true,
+      "visible_if": "{{ section.settings.display_type == 'none' }}"
+    },
+    {
+      "id": "autoplay_seconds",
+      "type": "range",
+      "label": "t:static_sections.announcement_bar.settings.autoplay_seconds.label",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 6,
+      "unit": "t:static_sections.announcement_bar.settings.autoplay_seconds.unit",
+      "visible_if": "{{ section.settings.display_type == 'none' and section.settings.autoplay_enabled }}"
+    },
+    {
+      "id": "gap",
+      "type": "range",
+      "label": "t:global.spacing.item_spacing.label",
+      "min": 16,
+      "max": 150,
+      "step": 2,
+      "default": 30,
+      "unit": "px",
+      "visible_if": "{{ section.settings.display_type == 'marquee' }}"
+    },
+    {
+      "id": "show_separators",
+      "type": "checkbox",
+      "label": "t:static_sections.announcement_bar.settings.show_separators.label",
+      "default": false,
+      "visible_if": "{{ section.settings.display_type == 'marquee' }}"
+    },
+    {
+      "id": "separator",
+      "type": "select",
+      "label": "t:static_sections.announcement_bar.settings.separator.label",
+      "default": "dot",
+      "options": [
+        { "value": "dot", "label": "t:static_sections.announcement_bar.settings.separator.dot" },
+        { "value": "slash", "label": "t:static_sections.announcement_bar.settings.separator.slash" },
+        { "value": "pipe", "label": "t:static_sections.announcement_bar.settings.separator.pipe" },
+        { "value": "dash", "label": "t:static_sections.announcement_bar.settings.separator.dash" },
+        { "value": "star", "label": "t:static_sections.announcement_bar.settings.separator.star" }
+      ],
+      "visible_if": "{{ section.settings.display_type == 'marquee' and section.settings.show_separators }}"
+    },
+    {
+      "id": "marquee_reverse_direction",
+      "type": "checkbox",
+      "label": "t:static_sections.announcement_bar.settings.marquee_reverse_direction.label",
+      "default": false,
+      "visible_if": "{{ section.settings.display_type == 'marquee' }}"
+    }
+  ],
+
+  "blocks": [
+    {
+      "type": "announcement",
+      "name": "t:static_sections.announcement_bar.settings.blocks.header",
+      "settings": [
+        {
+          "id": "text",
+          "type": "inline_richtext",
+          "label": "t:static_sections.announcement_bar.settings.blocks.text",
+          "default": "t:static_sections.announcement_bar.settings.blocks.text_default"
+        },
+        {
+          "type": "header",
+          "content": "t:static_sections.announcement_bar.settings.image.header"
+        },
+        {
+          "id": "image",
+          "type": "image_picker",
+          "label": "t:static_sections.announcement_bar.settings.image.label"
+        },
+        {
+          "id": "image_height",
+          "type": "range",
+          "label": "t:static_sections.announcement_bar.settings.image.height",
+          "min": 10,
+          "max": 100,
+          "step": 5,
+          "default": 55,
+          "unit": "px",
+          "visible_if": "{{ block.settings.image }}"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12
+}
+{% endschema %}

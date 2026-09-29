@@ -1,0 +1,186 @@
+{% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+{%- liquid
+  assign image_ratio = section.settings.image_ratio
+  case image_ratio
+    when 'portrait'
+      assign image_width =  "240"
+      assign image_height = "300"
+    when 'square'
+      assign image_width =  "240"
+      assign image_height = "240"
+    else
+      assign image_width =  "300"
+      assign image_height = "240"
+  endcase
+
+  assign limit = section.settings.number_of_items
+  case limit
+    when 0
+      assign width_class = 'w20'
+    when 2
+      assign width_class = 'w50'
+    when 3
+      assign width_class = 'w33'
+    when 4
+      assign width_class = 'w25'
+    when 5
+      assign width_class = 'w20'
+    when 6
+      assign width_class = 'w16'
+    when 7
+      assign width_class = 'w14'
+    else
+      assign width_class = 'w12'
+  endcase
+  assign img_width_limit = limit
+  assign img_width = 100 | divided_by: img_width_limit
+-%}
+{%- paginate collections by section.settings.pagination_qty -%}
+  <header class="cols">
+    <{{ section.settings.title_size }}>{{ 'collection.all_collections' | t }}</{{ section.settings.title_size }}>
+  </header>
+  <ul class="l4cl {% if settings.enable_quick_buy %}with-quick-buy{% endif %} mobile-wide category {{ image_ratio }} {{ width_class }} section-width-{{ section.settings.width }}">
+    {%- for collection in collections -%}
+      {%- liquid
+        capture current
+          cycle 1, 2, 3, 4, 5, 6
+        endcapture
+      -%}
+      <li>
+        <figure class="{% if settings.multiply_collection_images == 'multiply' %}img-multiply{% elsif settings.multiply_collection_images == 'multiply-bg' %}img-multiply-bg{% endif %}">
+          <picture>
+            {% if collection.featured_image %}
+              <img
+                src="{{ collection.featured_image | image_url: width: image_width, height: image_height }}"
+                srcset="
+                  {% if section.settings.fill_images %}
+                    {% render 'image-srcset', image: collection.featured_image, format: image_ratio, crop: 'center' %}
+                  {% else %}
+                    {% render 'image-srcset', image: collection.featured_image %}
+                  {% endif %}
+                "
+                sizes="
+                  {% if settings.width < 2000 %}
+                    (min-width: 1300px) {% if img_width == 100 %}calc({{ settings.width }}px * 0.2){% else %}calc({{ settings.width }}px * 0.{{ img_width }}){% endif %},
+                  {% endif %}
+                  (min-width: 760px) {% if img_width == 100 %}calc(100vw * 0.2){% else %}calc(100vw * 0.{{ img_width }}){% endif %},
+                  141px
+                "
+                width="{{ image_width }}"
+                height="{{ image_height }}"
+                alt="{% if collection.featured_image.alt == blank or collection.featured_image.alt == collection.title %}Collection image for: {% endif %}{{ collection.featured_image.alt | default: collection.title | escape }}"
+                {% if section.settings.fill_images %}class="filled"{% endif %}
+                loading="{% if section.index > 2 or forloop.first == false %}lazy{% else %}eager{% endif %}"
+              >
+            {% else %}
+              {{ 'collection-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
+            {% endif %}
+          </picture>
+        </figure>
+        <p><a href="{{ collection.url }}" class="strong">{{ collection.title }}&nbsp;<i aria-hidden="true" class="icon-chevron-right mobile-hide"></i></a></p>
+      </li>
+    {%- endfor -%}
+  </ul>
+  {% render 'pagination',
+    paginate: paginate,
+    mobile_center: true
+  %}
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "t:main.list_collection.name",
+  "tag": "article",
+  "settings": [
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:global.layout.width.label",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed",
+      "visible_if": "{{ settings.width < 2000 }}"
+    },
+    {
+      "type": "select",
+      "id": "title_size",
+      "label": "t:global.typography.title_size.label",
+      "options": [
+        {
+          "value": "h1",
+          "label": "t:global.typography.title_size.h1.label"
+        },
+        {
+          "value": "h2",
+          "label": "t:global.typography.title_size.h2.label"
+        },
+        {
+          "value": "h3",
+          "label": "t:global.typography.title_size.h3.label"
+        },
+        {
+          "value": "h4",
+          "label": "t:global.typography.title_size.h4.label"
+        },
+        {
+          "value": "h5",
+          "label": "t:global.typography.title_size.h5.label"
+        }
+      ],
+      "default": "h1"
+    },
+    {
+      "id": "image_ratio",
+      "type": "select",
+      "label": "t:main.list_collection.settings.image_ratio.label",
+      "options": [
+        {
+          "value": "portrait",
+          "label": "t:main.list_collection.settings.image_ratio.options__1.label"
+        },
+        {
+          "value": "square",
+          "label": "t:main.list_collection.settings.image_ratio.options__2.label"
+        },
+        {
+          "value": "landscape",
+          "label": "t:main.list_collection.settings.image_ratio.options__3.label"
+        }
+      ],
+      "default": "square"
+    },
+    {
+      "id": "fill_images",
+      "type": "checkbox",
+      "label": "t:main.list_collection.settings.fill_images.label",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "pagination_qty",
+      "label": "t:main.list_collection.settings.pagination_qty.label",
+      "min": 12,
+      "max": 48,
+      "step": 12,
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "number_of_items",
+      "label": "t:main.list_collection.settings.number_of_items.label",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 5
+    }
+  ]
+}
+{% endschema %}

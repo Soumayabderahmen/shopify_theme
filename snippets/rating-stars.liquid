@@ -1,0 +1,66 @@
+{% doc %}
+  Renders a star rating component with customizable maximum value, labels, and styles.
+
+  @param {number} value - The current rating value.
+  @param {number} [max_value] - The maximum rating value. Defaults to 5.
+  @param {string} [extra_class] - Optional additional CSS classes for styling.
+  @param {string} [extra_style] - Optional inline CSS styles.
+  @param {string} [link] - Optional URL to wrap the rating component in a link.
+  @param {boolean} [list] - Whether to render the component as a list item. Defaults to false.
+  @param {string} [label] - Optional custom rating label.
+  @param {string} [overlay] - Optional overlay color suffix for filled stars.
+  @param {string} [shopify_attributes] - HTML attributes like data attributes, IDs, or classes.
+
+  @example
+  {% render 'rating-stars', value: '4.5', max_value: 5, extra_class: 'custom-class', link: '#reviews' %}
+{% enddoc %}
+
+{%- liquid
+    assign value = value | append: '' | plus: 0.0
+    assign max_value = max_value | default: 5
+    assign extra_class = extra_class | default: ''
+    assign extra_style = extra_style | default: ''
+    assign link = link | default: false
+    assign list = list | default: false
+    assign default_label = value | append: '/' | append: max_value
+    assign label = label | default: default_label
+    assign wrapper_tag = 'p'
+    if link
+        assign wrapper_tag = 'a'
+    elsif list
+        assign wrapper_tag = 'li'
+    endif
+    
+    assign full_stars = value | floor
+    assign partial_star = value | modulo: 1
+    assign remaining_stars = max_value | minus: full_stars
+
+    if partial_star > 0
+        assign remaining_stars = remaining_stars | minus: 1
+    endif
+-%}
+
+<{{ wrapper_tag }}{% if link %} href="{{ link }}"{% endif %} class="r6rt {{ extra_class }}" style="{{ extra_style }}" {{ shopify_attributes }}>
+    <span class="rating">
+        {%- for i in (1..full_stars) -%}
+            <span class="star">
+                <span class="fill{% if overlay %} overlay-{{ overlay }}{% endif %}" style="width: 100%;"></span>
+            </span>
+        {%- endfor -%}
+
+        {%- if partial_star > 0 -%}
+            <span class="star">
+                <span class="fill{% if overlay %} overlay-{{ overlay }}{% endif %}" style="width: {{ partial_star | times: 100 }}%;"></span>
+            </span>
+        {%- endif -%}
+
+        {%- for i in (1..remaining_stars) -%}
+            <span class="star">
+                <span class="fill{% if overlay %} overlay-{{ overlay }}{% endif %}" style="width: 0;"></span>
+            </span>
+        {%- endfor -%}
+    </span>
+    <span class="rating-label">
+        {{ label }}
+    </span>
+</{{ wrapper_tag }}>

@@ -1,0 +1,92 @@
+{%- liquid
+  case section.settings.shop_the_look_items
+    when 4
+      assign width_class = 'w25'
+    when 5
+      assign width_class = 'w20'
+    else
+      assign width_class = 'w16'
+  endcase
+-%}
+
+<aside class="m6pn wide" id="add-products-to-banner" aria-hidden="true" data-products="[]">
+  <div>
+    <header>
+      {%- unless section.settings.shop_the_look_title == empty -%}{{ section.settings.shop_the_look_title }}{%- endunless -%}
+      {%- unless section.settings.shop_the_look_subtitle == empty -%}
+        <p>{{ section.settings.shop_the_look_subtitle }}</p>
+      {%- endunless -%}
+    </header>
+    <ul
+      class="l4cl {{ width_class }}"
+      data-items="{{ section.settings.shop_the_look_items }}"
+      {% if settings.enable_quick_buy_desktop %}
+        data-enable_quick_buy_desktop
+      {% endif %}
+      {% if settings.enable_quick_buy_mobile %}
+        data-enable_quick_buy_mobile
+      {% endif %}
+      {% if settings.enable_quick_buy_qty_selector %}
+        data-enable_quick_buy_qty_selector
+      {% endif %}
+      {% if settings.enable_quick_buy_compact %}
+        data-enable_quick_buy_compact
+      {% endif %}
+      {% if settings.enable_quick_buy_drawer %}
+        data-enable_quick_buy_drawer
+      {% endif %}
+      {% if settings.enable_color_picker %}
+        data-enable_color_picker
+      {% endif %}
+    >
+      {% if request.design_mode %}
+        {%- for i in (1..section.settings.shop_the_look_items) -%}
+          {%- render 'product-item',
+            product: blank,
+            placeholder_int: i,
+            enable_quick_buy_desktop: settings.enable_quick_buy_desktop,
+            enable_quick_buy_mobile: settings.enable_quick_buy_mobile,
+            enable_quick_buy_qty_selector: settings.enable_quick_buy_qty_selector,
+            quick_buy_compact: settings.enable_quick_buy_compact,
+            enable_quick_buy_drawer: settings.enable_quick_buy_drawer,
+            enable_color_picker: settings.enable_color_picker,
+            product_view_context: 'dialog'
+          -%}
+        {%- endfor -%}
+      {% endif %}
+    </ul>
+  </div>
+</aside>
+
+{% schema %}
+{
+  "name": "t:settings_schema.shop_the_look.name",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:settings_schema.shop_the_look.settings.paragraph"
+    },
+    {
+      "id": "shop_the_look_title",
+      "type": "richtext",
+      "label": "t:settings_schema.shop_the_look.settings.shop_the_look_title.label",
+      "default": "<h2>Shop the look</h2>"
+    },
+    {
+      "id": "shop_the_look_subtitle",
+      "type": "inline_richtext",
+      "label": "t:settings_schema.shop_the_look.settings.shop_the_look_subtitle.label"
+    },
+    {
+      "id": "shop_the_look_items",
+      "type": "range",
+      "label": "t:settings_schema.shop_the_look.settings.shop_the_look_items.label",
+      "info": "t:settings_schema.shop_the_look.settings.shop_the_look_items.info",
+      "min": 4,
+      "max": 6,
+      "step": 1,
+      "default": 5
+    }
+  ]
+}
+{% endschema %}

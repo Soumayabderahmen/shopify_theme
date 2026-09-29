@@ -1,0 +1,37 @@
+{%- layout none -%}
+{%- liquid assign allo_namespace = 'alpha_loyalty' -%}
+{%- liquid assign allo_shop_mf_namespace = 'app--148986789889' -%}
+{%- liquid assign allo_mf_namespace = 'alpha_loyalty' -%}
+{
+  {%- if customer -%}
+    "customer": {
+  "id": {{ customer.id }},
+  "name": {{ customer.name | json }},
+  "tags": {{ customer.tags | json }},
+  "orders_count": {{ customer.orders_count | default: 0 }},
+  "total_spent": {{ customer.total_spent | default: 0 | divided_by: 100.0 }},
+  "orders_count_correction": {{ customer.metafields[allo_mf_namespace].orders_count_correction | default: 0 }},
+  "total_spent_correction": {{ customer.metafields[allo_mf_namespace].total_spent_correction | default: 0.0 }},
+  "loyalty_enabled": {%- if customer.metafields[allo_mf_namespace].loyalty_enabled == null -%}true{%- else -%}{{ customer.metafields[allo_mf_namespace].loyalty_enabled }}{%- endif -%},
+  "balance": {{ customer.metafields[allo_mf_namespace].balance | default: 0 }},
+  "earned": {{ customer.metafields[allo_mf_namespace].earned | default: 0 }},
+  "vip_used_rewards": {{ customer.metafields[allo_mf_namespace].vip_used_rewards | default: '[]' }},
+  "points_used_earn_ways": {{ customer.metafields[allo_mf_namespace].points_used_earn_ways | default: '[]' }},
+
+      {%- assign allo_hmac_key = shop.metafields[allo_shop_mf_namespace].customers_hmac_key | default: '' -%}
+    {%- assign allo_ts = "now" | date: "%s" -%}
+    "email": {{ customer.email | json }},
+    "subscribed": {{ customer.accepts_marketing | default: false }},
+    "signup_rewarded": {%- if customer.metafields[allo_mf_namespace].signup_rewarded == null -%}false{%- else -%}{{ customer.metafields[allo_mf_namespace].signup_rewarded }}{%- endif -%},
+    "subscription_rewarded": {%- if customer.metafields[allo_mf_namespace].subscription_rewarded == null -%}false{%- else -%}{{ customer.metafields[allo_mf_namespace].subscription_rewarded }}{%- endif -%},
+    "reward_usages": {{ customer.metafields[allo_mf_namespace].reward_usages | default: '[]' }},
+    "reward_usages_count": {{ customer.metafields[allo_mf_namespace].reward_usages_count | default: 0 }},
+    "loyalty_events": {{ customer.metafields[allo_mf_namespace].loyalty_events | default: '[]' }},
+    "last_points_event_at": {% if customer.metafields[allo_mf_namespace].last_points_event_at %}"{{ customer.metafields[allo_mf_namespace].last_points_event_at }}"{% else %}null{% endif %},
+    "loyalty_events_count": {{ customer.metafields[allo_mf_namespace].loyalty_events_count | default: 0 }},
+    "birthday": "{{ customer.metafields.facts.birth_date | default: '' }}",
+    "updated_at": {{ customer.metafields[allo_mf_namespace].updated_at | default: "now" | date: "%s" }},
+    "t": {{ allo_ts }},
+    "hmac": {{ shop.permanent_domain | append: ':' | append: customer.id | append: ':' | append: allo_ts | hmac_sha256: allo_hmac_key | json }}
+  }  {%- endif -%}
+}

@@ -1,0 +1,275 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "settings": {
+        "hide_mobile": false
+      }
+    },
+    "16552050441a8cdfa5": {
+      "type": "section-gallery",
+      "blocks": {
+        "16552050441176bcdf-0": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 100,
+            "color_palette": "scheme-5",
+            "text_position": "center",
+            "title": "<h3>Whoohoo! A package! Every day millions of people are made happy because the delivery person is at the door.</h3>",
+            "title_underline_style": "none",
+            "text": "",
+            "show_link": true,
+            "link_text": "Read more",
+            "link_url": "/",
+            "button_style": "primary link"
+          }
+        },
+        "16552050441176bcdf-1": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 0,
+            "color_palette": "scheme-8",
+            "text_position": "center",
+            "title": "<h3>Online stores are booming, and so are we!</h3>",
+            "title_underline_style": "none",
+            "text": "",
+            "show_link": true,
+            "link_text": "Read more",
+            "link_url": "/",
+            "button_style": "secondary link"
+          }
+        },
+        "16552050441176bcdf-2": {
+          "type": "image",
+          "settings": {
+            "overlay_opacity": 45,
+            "color_palette": "scheme-4",
+            "text_position": "center start",
+            "title": "<h1>We are there to help you</h1>",
+            "title_underline_style": "none",
+            "text": "<p>Are you interested in working in a young team and are you ready to invest in your future?</p>",
+            "show_link": true,
+            "link_text": "Discover more",
+            "link_url": "/",
+            "button_style": "secondary link"
+          }
+        }
+      },
+      "block_order": [
+        "16552050441176bcdf-0",
+        "16552050441176bcdf-1",
+        "16552050441176bcdf-2"
+      ],
+      "settings": {
+        "items_layout": "playful-grid-inv",
+        "items_width": 2,
+        "height": "size-s",
+        "width": "boxed",
+        "space_between": 16,
+        "image_zoom": true,
+        "image_move": false,
+        "show_content_on_hover": false,
+        "content_on_hover_color_palette": "",
+        "layout_mobile": "compact",
+        "mobile_height": "size-s",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16552067574f1c3332": {
+      "type": "section-rich-text",
+      "blocks": {
+        "1655206757120f969e-1": {
+          "type": "spacer",
+          "settings": {
+            "height": 0
+          }
+        },
+        "1655206757120f969e-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h1>Junior professional service & design</h1>",
+            "title_underline_style": "none"
+          }
+        },
+        "1655206757120f969e-2": {
+          "type": "content",
+          "settings": {
+            "page": "",
+            "text": "<p>Whoohoo! A package! Every day millions of people are made happy because the delivery person is at the door.<br/><br/>You have searched, found and ordered! But why exactly at that webshop? Why convince that button to click,<br/>and do you drop out at another shop if shipping costs are only added at the last step?<br/><br/>That's why we're looking for you! To ensure that even more beautiful webshops go online.<br/><br/></p>"
+          }
+        }
+      },
+      "block_order": [
+        "1655206757120f969e-1",
+        "1655206757120f969e-0",
+        "1655206757120f969e-2"
+      ],
+      "settings": {
+        "color_palette": "scheme-1",
+        "text_alignment": "center",
+        "height": "size-s",
+        "width": "wide",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "main-page": {
+      "type": "main-page",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {
+            "title_size": "h2"
+          }
+        },
+        "content": {
+          "type": "content",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "title",
+        "content"
+      ],
+      "disabled": true,
+      "settings": {
+        "max_width": 980,
+        "content_alignment": "start",
+        "text_alignment": "start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "165520504129a8d4ea": {
+      "type": "section-spacer",
+      "settings": {
+        "height": 0,
+        "height_mobile": 55
+      }
+    },
+    "16534638377c7920c1": {
+      "type": "section-image-with-text",
+      "blocks": {
+        "1653463837107b96d3-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h1>What we expect from you</h1>",
+            "title_underline_style": "none"
+          }
+        },
+        "1653463837107b96d3-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>You are fun, have a little humor and are looking for a job where you enjoy going every day. You are customer-friendly and are willing to help people. You have affinity with the internet, webshops and you have a good view of (web) design. You know what responsive design is, at least you can work with Figma. Experience with web design is a plus. You are flexible, stress resistant and can handle deadlines well.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "1653463837107b96d3-0",
+        "1653463837107b96d3-1"
+      ],
+      "settings": {
+        "overlay_opacity": 0,
+        "color_palette": "scheme-3",
+        "layout": "image-left",
+        "text_position": "text-start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "165346385457f0044f": {
+      "type": "section-image-with-text",
+      "blocks": {
+        "1653463854c4d6293d-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h1>One day at the office</h1>",
+            "title_underline_style": "none"
+          }
+        },
+        "1653463854c4d6293d-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Help customers; answer questions and adjust designs if necessary.<br/>Collecting (online) trends and processing them in blogs and news items. Keeping track of our websites. Setting up social media channels.<br/><br/>And last but not least.  Ultimately creating designs and managing customers.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "1653463854c4d6293d-0",
+        "1653463854c4d6293d-1"
+      ],
+      "settings": {
+        "overlay_opacity": 0,
+        "color_palette": "scheme-3",
+        "layout": "image-right",
+        "text_position": "text-start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "16552027695203de66": {
+      "type": "section-image-with-text",
+      "blocks": {
+        "1655202769b66966f1-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h1>What do we offer?</h1>",
+            "title_underline_style": "none"
+          }
+        },
+        "1655202769b66966f1-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>A nice job with growth opportunities, responsibilities and (personal) guidance if desired. Varied tasks and days, because no customer is the same. A team that makes you laugh and a nice salary.</p>"
+          }
+        },
+        "1655202769b66966f1-2": {
+          "type": "buttons",
+          "settings": {
+            "show_first_link": true,
+            "first_link_text": "Contact us",
+            "first_link_url": "/",
+            "first_button_style": "secondary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain"
+          }
+        }
+      },
+      "block_order": [
+        "1655202769b66966f1-0",
+        "1655202769b66966f1-1",
+        "1655202769b66966f1-2"
+      ],
+      "settings": {
+        "overlay_opacity": 0,
+        "color_palette": "scheme-3",
+        "layout": "image-left",
+        "text_position": "text-start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "16552050441a8cdfa5",
+    "16552067574f1c3332",
+    "main-page",
+    "165520504129a8d4ea",
+    "16534638377c7920c1",
+    "165346385457f0044f",
+    "16552027695203de66"
+  ]
+}

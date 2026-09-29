@@ -1,0 +1,1457 @@
+{% comment %} 
+{%- assign s = section.settings -%}
+
+{%- comment -%} Check product metafield fallback {%- endcomment -%}
+{%- if s.use_product_metafield and product.metafields.custom.badge_text != blank -%}
+  {%- assign metafield_text = product.metafields.custom.badge_text -%}
+{%- endif -%}
+
+{%- comment -%} Determine if any block matches product tags {%- endcomment -%}
+{%- assign has_tag_match = false -%}
+{%- for block in section.blocks -%}
+  {%- assign rule_tag = block.settings.tag | downcase | strip -%}
+  {%- if rule_tag != '' -%}
+    {%- for ptag in product.tags -%}
+      {%- assign clean_ptag = ptag | downcase | strip -%}
+      {%- if clean_ptag == rule_tag -%}
+        {%- assign has_tag_match = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- style -%}
+  #badge-marquee-{{ section.id }} {
+    --bm-bg: {{ s.bg_color }};
+    --bm-bg-2: {{ s.bg_color_2 }};
+    --bm-text: {{ s.text_color }};
+    --bm-speed: {{ s.speed }}s;
+    --bm-radius: {{ s.border_radius }}px;
+    --bm-font-size: {{ s.font_size }}px;
+    --bm-font-weight: {{ s.font_weight }};
+    --bm-padding-y: {{ s.padding_y }}px;
+    --bm-padding-x: {{ s.padding_x }}px;
+    --bm-gap: {{ s.gap }}px;
+    --bm-shadow: {{ s.shadow }};
+    --bm-border-color: {{ s.border_color }};
+    --bm-glow: {{ s.glow_color | color_modify: 'alpha', 0.55 }};
+    --bm-z: {{ s.z_index }};
+    --bm-offset: {{ s.fixed_offset }}px;
+    background: {{ s.section_bg }};
+    padding-top: {{ s.section_padding_top }}px;
+    padding-bottom: {{ s.section_padding_bottom }}px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+
+  #badge-marquee-{{ section.id }}.bm-fixed {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: var(--bm-z);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  #badge-marquee-{{ section.id }}.bm-fixed.bm-fixed-top { top: var(--bm-offset); }
+  #badge-marquee-{{ section.id }}.bm-fixed.bm-fixed-bottom { bottom: var(--bm-offset); }
+  #badge-marquee-{{ section.id }}.bm-spacer { visibility: hidden; }
+
+  /* BASE PILL STYLING */
+  #badge-marquee-{{ section.id }} .bm-pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bm-gap);
+    color: var(--bm-text);
+    font-size: var(--bm-font-size);
+    font-weight: var(--bm-font-weight);
+    border-radius: var(--bm-radius);
+    padding: var(--bm-padding-y) var(--bm-padding-x);
+    box-shadow: var(--bm-shadow);
+    white-space: nowrap;
+    text-decoration: none;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+
+  #badge-marquee-{{ section.id }} .bm-icon svg {
+    width: calc(var(--bm-font-size) * 1.15);
+    height: calc(var(--bm-font-size) * 1.15);
+    display: block;
+  }
+
+  /* CONTINUOUS MARQUEE ENGINE */
+  #badge-marquee-{{ section.id }} .bm-marquee-viewport {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    user-select: none;
+  }
+  
+  #badge-marquee-{{ section.id }} .bm-track {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-around;
+    min-width: 100%;
+    gap: {{ s.gap }}px;
+    animation-duration: var(--bm-speed);
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  #badge-marquee-{{ section.id }} .bm-track.anim-marquee-left {
+    animation-name: bm-marquee-left;
+  }
+  #badge-marquee-{{ section.id }} .bm-track.anim-marquee-right {
+    animation-name: bm-marquee-right;
+  }
+
+  @keyframes bm-marquee-left {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+  }
+
+  @keyframes bm-marquee-right {
+    0% { transform: translate3d(-100%, 0, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+
+  #badge-marquee-{{ section.id }}.bm-pause-hover:hover .bm-track {
+    animation-play-state: paused;
+  }
+
+  #badge-marquee-{{ section.id }} .bm-center-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* INDIVIDUAL BADGE ANIMATION PRESETS */
+  #badge-marquee-{{ section.id }} .bm-pill.anim-fade { animation: bm-fade 2.5s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-bounce { animation: bm-bounce 2s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-zoom { animation: bm-zoom 2.5s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-slide { animation: bm-slide 3s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-shake { animation: bm-shake 2.5s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-glow { animation: bm-glow 2s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-flip { animation: bm-flip 4s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-wiggle { animation: bm-wiggle 2s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-spin { animation: bm-spin 6s linear infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-heartbeat { animation: bm-heartbeat 1.8s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-swing { animation: bm-swing 3s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-elastic { animation: bm-elastic 2.5s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-blurin { animation: bm-blurin 3s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-neon { animation: bm-neon 1.5s steps(2) infinite; }
+
+  @keyframes bm-fade { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  @keyframes bm-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes bm-zoom { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes bm-slide { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(8px); } 75% { transform: translateX(-8px); } }
+  @keyframes bm-shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+  @keyframes bm-glow { 0%, 100% { box-shadow: 0 0 0 0 var(--bm-glow); } 50% { box-shadow: 0 0 16px 4px var(--bm-glow); } }
+  @keyframes bm-flip { 0%, 100% { transform: rotateX(0); } 50% { transform: rotateX(360deg); } }
+  @keyframes bm-wiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+  @keyframes bm-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes bm-heartbeat { 0%, 100% { transform: scale(1); } 14%, 42% { transform: scale(1.12); } 28%, 56% { transform: scale(1); } }
+  @keyframes bm-swing { 0%, 100% { transform: rotate(0deg); transform-origin: top center; } 25% { transform: rotate(5deg); } 75% { transform: rotate(-5deg); } }
+  @keyframes bm-elastic { 0%, 100% { transform: scale(1,1); } 30% { transform: scale(1.2,0.8); } 50% { transform: scale(0.9,1.1); } 70% { transform: scale(1.03,0.97); } }
+  @keyframes bm-blurin { 0%, 100% { filter: blur(0); opacity: 1; } 50% { filter: blur(2px); opacity: 0.6; } }
+  @keyframes bm-neon { 0%, 100% { text-shadow: 0 0 4px var(--bm-glow), 0 0 10px var(--bm-glow); opacity: 1; } 50% { text-shadow: none; opacity: 0.8; } }
+
+  /* ADVANCED EFFECT STYLES */
+  #badge-marquee-{{ section.id }} .bm-pill.anim-pulsering::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: calc(var(--bm-radius) + 4px);
+    border: 2px solid var(--bm-glow);
+    animation: bm-ring 2s ease-out infinite;
+  }
+  @keyframes bm-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.3); opacity: 0; } }
+
+  #badge-marquee-{{ section.id }} .bm-pill.anim-gradient {
+    background: linear-gradient(270deg, var(--bm-bg), var(--bm-bg-2), var(--bm-bg));
+    background-size: 200% 100%;
+    animation: bm-gradient 4s linear infinite;
+  }
+  @keyframes bm-gradient { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
+  #badge-marquee-{{ section.id }} .bm-pill.anim-border-run {
+    overflow: hidden;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-border-run::after {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: conic-gradient(var(--bm-border-color), transparent 40%, var(--bm-border-color));
+    animation: bm-spin 3s linear infinite;
+    z-index: -1;
+  }
+
+  /* TYPEWRITER CURSOR */
+  #badge-marquee-{{ section.id }} .bm-typing::after {
+    content: '|';
+    margin-left: 2px;
+    animation: bm-caret 0.8s step-end infinite;
+  }
+  @keyframes bm-caret { 50% { opacity: 0; } }
+
+  /* CLOSE BUTTON */
+  #badge-marquee-{{ section.id }} .bm-close {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.2);
+    color: var(--bm-text);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: calc(var(--bm-z) + 1);
+    transition: background 0.2s ease;
+  }
+  #badge-marquee-{{ section.id }} .bm-close:hover { background: rgba(0,0,0,0.4); }
+
+  @media (prefers-reduced-motion: reduce) {
+    #badge-marquee-{{ section.id }} * {
+      animation: none !important;
+    }
+  }
+{%- endstyle -%}
+
+<div
+  id="badge-marquee-{{ section.id }}"
+  class="{% if s.position != 'none' %}bm-fixed bm-fixed-{{ s.position }}{% endif %} bm-pause-{% if s.pause_on_hover %}hover{% else %}none{% endif %}{% if s.position != 'none' and s.add_spacer %} bm-spacer{% endif %}"
+  data-section-id="{{ section.id }}"
+  data-closeable="{% if s.close_button %}true{% else %}false{% endif %}"
+>
+  {%- if s.animation == 'marquee-left' or s.animation == 'marquee-right' -%}
+    {%- comment -%} MARQUEE LAYOUT ENGINE {%- endcomment -%}
+    <div class="bm-marquee-viewport">
+      <div class="bm-track anim-{{ s.animation }}">
+        {%- for i in (1..2) -%}
+          {%- for block in section.blocks -%}
+            {%- assign rule_tag = block.settings.tag | downcase | strip -%}
+            {%- assign show_block = false -%}
+
+            {%- if rule_tag == '' and has_tag_match == false -%}
+              {%- assign show_block = true -%}
+            {%- elsif rule_tag != '' -%}
+              {%- for ptag in product.tags -%}
+                {%- assign clean_ptag = ptag | downcase | strip -%}
+                {%- if clean_ptag == rule_tag -%}
+                  {%- assign show_block = true -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+
+            {%- if show_block -%}
+              {%- assign final_text = block.settings.text -%}
+              {%- if s.use_product_metafield and metafield_text -%}{%- assign final_text = metafield_text -%}{%- endif -%}
+              {%- assign pill_anim = block.settings.animation -%}
+              {%- if pill_anim == 'use-section' -%}{%- assign pill_anim = '' -%}{%- endif -%}
+
+              <div
+                class="bm-pill {% if pill_anim != blank %}anim-{{ pill_anim }}{% endif %}"
+                {{ block.shopify_attributes }}
+                style="background: {{ block.settings.bg_color }}; color: {{ block.settings.text_color }};"
+              >
+                {%- if block.settings.show_check -%}
+                  <span class="bm-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                {%- endif -%}
+                <span class="bm-text">{{ final_text }}</span>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+  {%- elsif s.animation == 'typing' -%}
+    {%- comment -%} TYPEWRITER DISPLAY ENGINE {%- endcomment -%}
+    {%- assign first_block = null -%}
+    {%- for block in section.blocks -%}
+      {%- assign rule_tag = block.settings.tag | downcase | strip -%}
+      {%- assign show_block = false -%}
+
+      {%- if rule_tag == '' and has_tag_match == false -%}
+        {%- assign show_block = true -%}
+      {%- elsif rule_tag != '' -%}
+        {%- for ptag in product.tags -%}
+          {%- assign clean_ptag = ptag | downcase | strip -%}
+          {%- if clean_ptag == rule_tag -%}
+            {%- assign show_block = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if show_block and first_block == null -%}
+        {%- assign first_block = block -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if first_block -%}
+      <div class="bm-center-wrap">
+        <div
+          class="bm-pill bm-typing"
+          id="bm-typing-{{ section.id }}"
+          style="background: {{ first_block.settings.bg_color }}; color: {{ first_block.settings.text_color }};"
+        >
+          {%- if first_block.settings.show_check -%}
+            <span class="bm-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+          {%- endif -%}
+          <span class="bm-text"></span>
+        </div>
+      </div>
+
+      <script>
+        (function(){
+          {%- if s.use_product_metafield and metafield_text -%}
+            var messages = [{{ metafield_text | json }}];
+          {%- else -%}
+            var messages = [{{ first_block.settings.text | json }}];
+          {%- endif -%}
+
+          var el = document.querySelector('#bm-typing-{{ section.id }} .bm-text');
+          if(!el) return;
+          var charTime = Math.max(30, ({{ s.speed }} * 1000) / 40);
+          var mi = 0, ci = 0, deleting = false;
+
+          function tick(){
+            var msg = messages[mi] || '';
+            if (!deleting) {
+              ci++; 
+              el.textContent = msg.slice(0, ci);
+              if (ci === msg.length) { 
+                deleting = true; 
+                return setTimeout(tick, 1800); 
+              }
+            } else {
+              ci--; 
+              el.textContent = msg.slice(0, ci);
+              if (ci === 0) { 
+                deleting = false; 
+                mi = (mi + 1) % messages.length; 
+              }
+            }
+            setTimeout(tick, deleting ? charTime / 2 : charTime);
+          }
+          tick();
+        })();
+      </script>
+    {%- endif -%}
+
+  {%- else -%}
+    {%- comment -%} SINGLE BADGE DISPLAY ENGINE {%- endcomment -%}
+    {%- assign first_block = null -%}
+    {%- for block in section.blocks -%}
+      {%- assign rule_tag = block.settings.tag | downcase | strip -%}
+      {%- assign show_block = false -%}
+
+      {%- if rule_tag == '' and has_tag_match == false -%}
+        {%- assign show_block = true -%}
+      {%- elsif rule_tag != '' -%}
+        {%- for ptag in product.tags -%}
+          {%- assign clean_ptag = ptag | downcase | strip -%}
+          {%- if clean_ptag == rule_tag -%}
+            {%- assign show_block = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if show_block and first_block == null -%}
+        {%- assign first_block = block -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if first_block -%}
+      {%- assign final_text = first_block.settings.text -%}
+      {%- if s.use_product_metafield and metafield_text -%}{%- assign final_text = metafield_text -%}{%- endif -%}
+      {%- assign pill_anim = first_block.settings.animation -%}
+      {%- if pill_anim == 'use-section' -%}{%- assign pill_anim = s.animation -%}{%- endif -%}
+
+      <div class="bm-center-wrap">
+        {%- if s.link != blank -%}<a href="{{ s.link }}" style="text-decoration:none;">{%- endif -%}
+        <div
+          class="bm-pill anim-{{ pill_anim }}"
+          style="background: {{ first_block.settings.bg_color }}; color: {{ first_block.settings.text_color }};"
+        >
+          {%- if first_block.settings.show_check -%}
+            <span class="bm-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+          {%- endif -%}
+          <span class="bm-text">{{ final_text }}</span>
+        </div>
+        {%- if s.link != blank -%}</a>{%- endif -%}
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if s.close_button -%}
+    <button class="bm-close" aria-label="Close banner">✕</button>
+  {%- endif -%}
+</div>
+
+<script>
+  (function() {
+    var sectionId = '{{ section.id }}';
+    var rootEl = document.getElementById('badge-marquee-' + sectionId);
+    if (!rootEl) return;
+
+    var closeBtn = rootEl.querySelector('.bm-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        if (rootEl.classList.contains('bm-spacer')) {
+          rootEl.style.display = 'none';
+        } else {
+          rootEl.remove();
+        }
+        try {
+          sessionStorage.setItem('bm-closed-' + sectionId, '1');
+        } catch (e) {}
+      });
+    }
+
+    try {
+      if (sessionStorage.getItem('bm-closed-' + sectionId)) {
+        if (rootEl.classList.contains('bm-spacer')) {
+          rootEl.style.display = 'none';
+        } else {
+          rootEl.remove();
+        }
+      }
+    } catch (e) {}
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Badge Animato Pro",
+  "tag": "section",
+  "class": "dynamic-badge-marquee",
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "select",
+      "id": "animation",
+      "label": "Animazione (Default Sezione)",
+      "default": "marquee-left",
+      "options": [
+        { "group": "Scorrimento continuo", "value": "marquee-left", "label": "⬅️ Marquee a sinistra" },
+        { "group": "Scorrimento continuo", "value": "marquee-right", "label": "➡️ Marquee a destra" },
+        { "group": "Testo", "value": "typing", "label": "⌨️ Macchina da scrivere" },
+        { "group": "Testo", "value": "neon", "label": "💡 Neon lampeggiante" },
+        { "group": "Movimento", "value": "bounce", "label": "🏀 Rimbalzo" },
+        { "group": "Movimento", "value": "slide", "label": "↔️ Oscillazione" },
+        { "group": "Movimento", "value": "shake", "label": "🫨 Scuotimento" },
+        { "group": "Movimento", "value": "wiggle", "label": "〰️ Ondulazione" },
+        { "group": "Movimento", "value": "swing", "label": "🕰️ Dondolo (pendolo)" },
+        { "group": "Movimento", "value": "elastic", "label": "🎯 Effetto elastico" },
+        { "group": "Scala", "value": "zoom", "label": "🔍 Zoom pulsante" },
+        { "group": "Scala", "value": "heartbeat", "label": "❤️ Battito cardiaco" },
+        { "group": "Rotazione", "value": "spin", "label": "🌀 Rotazione 360°" },
+        { "group": "Rotazione", "value": "flip", "label": "🔄 Capovolgimento 3D" },
+        { "group": "Opacità", "value": "fade", "label": "🌫️ Dissolvenza" },
+        { "group": "Opacità", "value": "blurin", "label": "🌁 Sfocatura" },
+        { "group": "Luce", "value": "glow", "label": "✨ Bagliore luminoso" },
+        { "group": "Luce", "value": "pulsering", "label": "💫 Anello pulsante" },
+        { "group": "Sfondo", "value": "gradient", "label": "🌈 Gradiente animato" },
+        { "group": "Bordo", "value": "border-run", "label": "🎞️ Bordo rotante" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Velocità Marquee / Durata",
+      "min": 2,
+      "max": 40,
+      "step": 1,
+      "unit": "s",
+      "default": 12
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Posizione blocco",
+      "default": "none",
+      "options": [
+        { "value": "none", "label": "Normale (nel flusso della pagina)" },
+        { "value": "top", "label": "📌 FIXED in alto" },
+        { "value": "bottom", "label": "📌 FIXED in basso" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "fixed_offset",
+      "label": "Distanza dal bordo (fixed)",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "z_index",
+      "label": "Z-index",
+      "min": 0,
+      "max": 1000,
+      "step": 10,
+      "default": 100
+    },
+    { "type": "checkbox", "id": "add_spacer", "label": "Mantieni spazio occupato (fixed)", "default": true },
+    { "type": "checkbox", "id": "close_button", "label": "Mostra bottone Chiudi (✕)", "default": false },
+    { "type": "checkbox", "id": "pause_on_hover", "label": "Pausa al passaggio del mouse", "default": true },
+
+    { "type": "header", "content": "🎨 Stili di Default" },
+    { "type": "color", "id": "bg_color", "label": "Sfondo badge default", "default": "#16a34a" },
+    { "type": "color", "id": "bg_color_2", "label": "Sfondo secondario (gradiente)", "default": "#22c55e" },
+    { "type": "color", "id": "text_color", "label": "Colore testo default", "default": "#ffffff" },
+    { "type": "color", "id": "glow_color", "label": "Colore bagliore", "default": "#22c55e" },
+    { "type": "color", "id": "border_color", "label": "Colore bordo rotante", "default": "#ffffff" },
+    { "type": "color", "id": "section_bg", "label": "Sfondo sezione", "default": "transparent" },
+
+    { "type": "header", "content": "🔤 Tipografia e forma" },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Dimensione testo",
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Spessore testo",
+      "default": "700",
+      "options": [
+        { "value": "400", "label": "Normale" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra-bold" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Arrotondamento (pill)",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Padding verticale",
+      "min": 2,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_x",
+      "label": "Padding orizzontale",
+      "min": 8,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Spaziatura elementi (gap)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    { "type": "text", "id": "shadow", "label": "Ombra CSS", "default": "0 2px 6px rgba(0,0,0,0.12)" },
+
+    { "type": "header", "content": "🔗 Integrazione Dinamica" },
+    { "type": "url", "id": "link", "label": "Link (per badge singolo)" },
+    {
+      "type": "checkbox",
+      "id": "use_product_metafield",
+      "label": "Usa metafield prodotto",
+      "default": false,
+      "info": "Se attivo, usa custom.badge_text sovrascrivendo il testo dei blocchi."
+    },
+
+    { "type": "header", "content": "📐 Spaziatura Sezione" },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Padding alto",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Padding basso",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    }
+  ],
+  "blocks": [
+    {
+      "type": "rule",
+      "name": "Badge Regola",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Tag prodotto (Vuoto = Default)",
+          "info": "Esempio: sconto, novita"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Testo badge",
+          "default": "✓ Platinumshop covers 30% of import charges"
+        },
+        { "type": "color", "id": "bg_color", "label": "Colore sfondo", "default": "#16a34a" },
+        { "type": "color", "id": "text_color", "label": "Colore testo", "default": "#ffffff" },
+        { "type": "checkbox", "id": "show_check", "label": "Mostra icona spunta", "default": true },
+        {
+          "type": "select",
+          "id": "animation",
+          "label": "Animazione specifica del badge",
+          "default": "use-section",
+          "options": [
+            { "value": "use-section", "label": "Nessuna / Usa sezione" },
+            { "value": "fade", "label": "🌫️ Dissolvenza" },
+            { "value": "bounce", "label": "🏀 Rimbalzo" },
+            { "value": "zoom", "label": "🔍 Zoom" },
+            { "value": "slide", "label": "↔️ Oscillazione" },
+            { "value": "shake", "label": "🫨 Scuotimento" },
+            { "value": "wiggle", "label": "〰️ Ondulazione" },
+            { "value": "swing", "label": "🕰️ Dondolo" },
+            { "value": "elastic", "label": "🎯 Elastico" },
+            { "value": "heartbeat", "label": "❤️ Battito" },
+            { "value": "spin", "label": "🌀 Rotazione" },
+            { "value": "flip", "label": "🔄 Flip 3D" },
+            { "value": "blurin", "label": "🌁 Sfocatura" },
+            { "value": "neon", "label": "💡 Neon" },
+            { "value": "glow", "label": "✨ Bagliore" },
+            { "value": "pulsering", "label": "💫 Anello pulsante" },
+            { "value": "gradient", "label": "🌈 Gradiente" },
+            { "value": "border-run", "label": "🎞️ Bordo rotante" }
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Badge Animato Pro",
+      "blocks": [
+        {
+          "type": "rule",
+          "settings": {
+            "tag": "sconto",
+            "text": "🔥 Sconto speciale attivo!",
+            "bg_color": "#dc2626",
+            "text_color": "#ffffff",
+            "animation": "heartbeat",
+            "show_check": false
+          }
+        },
+        {
+          "type": "rule",
+          "settings": {
+            "tag": "",
+            "text": "✓ Platinumshop covers 30% of import charges",
+            "bg_color": "#16a34a",
+            "text_color": "#ffffff",
+            "animation": "use-section"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %} {% endcomment %}
+
+{%- assign s = section.settings -%}
+
+{%- comment -%} Check product metafield fallback {%- endcomment -%}
+{%- if s.use_product_metafield and product.metafields.custom.badge_text != blank -%}
+  {%- assign metafield_text = product.metafields.custom.badge_text -%}
+{%- endif -%}
+
+{%- comment -%} Determine if any block matches product tags {%- endcomment -%}
+{%- assign has_tag_match = false -%}
+{%- for block in section.blocks -%}
+  {%- assign rule_tag = block.settings.tag | downcase | strip -%}
+  {%- if rule_tag != '' -%}
+    {%- for ptag in product.tags -%}
+      {%- assign clean_ptag = ptag | downcase | strip -%}
+      {%- if clean_ptag == rule_tag -%}
+        {%- assign has_tag_match = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- style -%}
+  #badge-marquee-{{ section.id }} {
+    --bm-bg: {{ s.bg_color }};
+    --bm-bg-2: {{ s.bg_color_2 }};
+    --bm-text: {{ s.text_color }};
+    --bm-speed: {{ s.speed }}s;
+    --bm-radius: {{ s.border_radius }}px;
+    --bm-font-size: {{ s.font_size }}px;
+    --bm-font-weight: {{ s.font_weight }};
+    --bm-padding-y: {{ s.padding_y }}px;
+    --bm-padding-x: {{ s.padding_x }}px;
+    --bm-gap: {{ s.gap }}px;
+    --bm-shadow: {{ s.shadow }};
+    --bm-border-color: {{ s.border_color }};
+    --bm-glow: {{ s.glow_color | color_modify: 'alpha', 0.55 }};
+    --bm-z: {{ s.z_index }};
+    --bm-offset: {{ s.fixed_offset }}px;
+    background: {{ s.section_bg }};
+    padding-top: {{ s.section_padding_top }}px;
+    padding-bottom: {{ s.section_padding_bottom }}px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+
+  #badge-marquee-{{ section.id }}.bm-fixed {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: var(--bm-z);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  #badge-marquee-{{ section.id }}.bm-fixed.bm-fixed-top { top: var(--bm-offset); }
+  #badge-marquee-{{ section.id }}.bm-fixed.bm-fixed-bottom { bottom: var(--bm-offset); }
+  #badge-marquee-{{ section.id }}.bm-spacer { visibility: hidden; }
+
+  /* BASE PILL STYLING */
+  #badge-marquee-{{ section.id }} .bm-pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bm-gap);
+    color: var(--bm-text);
+    font-size: var(--bm-font-size);
+    font-weight: var(--bm-font-weight);
+    border-radius: var(--bm-radius);
+    padding: var(--bm-padding-y) var(--bm-padding-x);
+    box-shadow: var(--bm-shadow);
+    white-space: nowrap;
+    text-decoration: none;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+
+  #badge-marquee-{{ section.id }} .bm-icon svg {
+    width: calc(var(--bm-font-size) * 1.15);
+    height: calc(var(--bm-font-size) * 1.15);
+    display: block;
+  }
+
+  /* CONTINUOUS & PAUSE-SCROLL ENGINE */
+  #badge-marquee-{{ section.id }} .bm-marquee-viewport {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+    user-select: none;
+  }
+  
+  #badge-marquee-{{ section.id }} .bm-track {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-around;
+    min-width: 100%;
+    gap: {{ s.gap }}px;
+    animation-duration: var(--bm-speed);
+    animation-iteration-count: infinite;
+  }
+
+  /* CONTINUOUS LINEAR MARQUEE */
+  #badge-marquee-{{ section.id }} .bm-track.anim-marquee-left {
+    animation-name: bm-marquee-left;
+    animation-timing-function: linear;
+  }
+  #badge-marquee-{{ section.id }} .bm-track.anim-marquee-right {
+    animation-name: bm-marquee-right;
+    animation-timing-function: linear;
+  }
+
+  /* SMOOTH SCROLL WITH 2-SECOND PAUSE STOPS */
+  #badge-marquee-{{ section.id }} .bm-track.anim-marquee-pause-left {
+    animation-name: bm-marquee-pause-left;
+    animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  #badge-marquee-{{ section.id }} .bm-track.anim-marquee-pause-right {
+    animation-name: bm-marquee-pause-right;
+    animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  @keyframes bm-marquee-left {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+  }
+
+  @keyframes bm-marquee-right {
+    0% { transform: translate3d(-100%, 0, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+
+  /* Keyframes for Smooth Scroll + Pause Cycle */
+  @keyframes bm-marquee-pause-left {
+    0%, 20% { transform: translate3d(0, 0, 0); }
+    40%, 60% { transform: translate3d(-50%, 0, 0); }
+    80%, 100% { transform: translate3d(-100%, 0, 0); }
+  }
+
+  @keyframes bm-marquee-pause-right {
+    0%, 20% { transform: translate3d(-100%, 0, 0); }
+    40%, 60% { transform: translate3d(-50%, 0, 0); }
+    80%, 100% { transform: translate3d(0, 0, 0); }
+  }
+
+  #badge-marquee-{{ section.id }}.bm-pause-hover:hover .bm-track {
+    animation-play-state: paused;
+  }
+
+  #badge-marquee-{{ section.id }} .bm-center-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  /* INDIVIDUAL BADGE ANIMATION PRESETS */
+  #badge-marquee-{{ section.id }} .bm-pill.anim-fade { animation: bm-fade 2.5s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-bounce { animation: bm-bounce 2s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-zoom { animation: bm-zoom 2.5s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-slide { animation: bm-slide 3s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-shake { animation: bm-shake 2.5s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-glow { animation: bm-glow 2s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-flip { animation: bm-flip 4s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-wiggle { animation: bm-wiggle 2s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-spin { animation: bm-spin 6s linear infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-heartbeat { animation: bm-heartbeat 1.8s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-swing { animation: bm-swing 3s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-elastic { animation: bm-elastic 2.5s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-blurin { animation: bm-blurin 3s ease-in-out infinite; }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-neon { animation: bm-neon 1.5s steps(2) infinite; }
+
+  @keyframes bm-fade { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  @keyframes bm-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes bm-zoom { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes bm-slide { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(8px); } 75% { transform: translateX(-8px); } }
+  @keyframes bm-shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+  @keyframes bm-glow { 0%, 100% { box-shadow: 0 0 0 0 var(--bm-glow); } 50% { box-shadow: 0 0 16px 4px var(--bm-glow); } }
+  @keyframes bm-flip { 0%, 100% { transform: rotateX(0); } 50% { transform: rotateX(360deg); } }
+  @keyframes bm-wiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+  @keyframes bm-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes bm-heartbeat { 0%, 100% { transform: scale(1); } 14%, 42% { transform: scale(1.12); } 28%, 56% { transform: scale(1); } }
+  @keyframes bm-swing { 0%, 100% { transform: rotate(0deg); transform-origin: top center; } 25% { transform: rotate(5deg); } 75% { transform: rotate(-5deg); } }
+  @keyframes bm-elastic { 0%, 100% { transform: scale(1,1); } 30% { transform: scale(1.2,0.8); } 50% { transform: scale(0.9,1.1); } 70% { transform: scale(1.03,0.97); } }
+  @keyframes bm-blurin { 0%, 100% { filter: blur(0); opacity: 1; } 50% { filter: blur(2px); opacity: 0.6; } }
+  @keyframes bm-neon { 0%, 100% { text-shadow: 0 0 4px var(--bm-glow), 0 0 10px var(--bm-glow); opacity: 1; } 50% { text-shadow: none; opacity: 0.8; } }
+
+  /* ADVANCED EFFECT STYLES */
+  #badge-marquee-{{ section.id }} .bm-pill.anim-pulsering::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: calc(var(--bm-radius) + 4px);
+    border: 2px solid var(--bm-glow);
+    animation: bm-ring 2s ease-out infinite;
+  }
+  @keyframes bm-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.3); opacity: 0; } }
+
+  #badge-marquee-{{ section.id }} .bm-pill.anim-gradient {
+    background: linear-gradient(270deg, var(--bm-bg), var(--bm-bg-2), var(--bm-bg));
+    background-size: 200% 100%;
+    animation: bm-gradient 4s linear infinite;
+  }
+  @keyframes bm-gradient { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
+  #badge-marquee-{{ section.id }} .bm-pill.anim-border-run {
+    overflow: hidden;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  #badge-marquee-{{ section.id }} .bm-pill.anim-border-run::after {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: conic-gradient(var(--bm-border-color), transparent 40%, var(--bm-border-color));
+    animation: bm-spin 3s linear infinite;
+    z-index: -1;
+  }
+
+  /* TYPEWRITER CURSOR */
+  #badge-marquee-{{ section.id }} .bm-typing::after {
+    content: '|';
+    margin-left: 2px;
+    animation: bm-caret 0.8s step-end infinite;
+  }
+  @keyframes bm-caret { 50% { opacity: 0; } }
+
+  /* CLOSE BUTTON */
+  #badge-marquee-{{ section.id }} .bm-close {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.2);
+    color: var(--bm-text);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: calc(var(--bm-z) + 1);
+    transition: background 0.2s ease;
+  }
+  #badge-marquee-{{ section.id }} .bm-close:hover { background: rgba(0,0,0,0.4); }
+
+  @media (prefers-reduced-motion: reduce) {
+    #badge-marquee-{{ section.id }} * {
+      animation: none !important;
+    }
+  }
+{%- endstyle -%}
+
+<div
+  id="badge-marquee-{{ section.id }}"
+  class="{% if s.position != 'none' %}bm-fixed bm-fixed-{{ s.position }}{% endif %} bm-pause-{% if s.pause_on_hover %}hover{% else %}none{% endif %}{% if s.position != 'none' and s.add_spacer %} bm-spacer{% endif %}"
+  data-section-id="{{ section.id }}"
+  data-closeable="{% if s.close_button %}true{% else %}false{% endif %}"
+>
+  {%- if s.animation contains 'marquee' -%}
+    {%- comment -%} MARQUEE LAYOUT ENGINE {%- endcomment -%}
+    <div class="bm-marquee-viewport">
+      <div class="bm-track anim-{{ s.animation }}">
+        {%- for i in (1..2) -%}
+          {%- for block in section.blocks -%}
+            {%- assign rule_tag = block.settings.tag | downcase | strip -%}
+            {%- assign show_block = false -%}
+
+            {%- if rule_tag == '' and has_tag_match == false -%}
+              {%- assign show_block = true -%}
+            {%- elsif rule_tag != '' -%}
+              {%- for ptag in product.tags -%}
+                {%- assign clean_ptag = ptag | downcase | strip -%}
+                {%- if clean_ptag == rule_tag -%}
+                  {%- assign show_block = true -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+
+            {%- if show_block -%}
+              {%- assign final_text = block.settings.text -%}
+              {%- if s.use_product_metafield and metafield_text -%}{%- assign final_text = metafield_text -%}{%- endif -%}
+              {%- assign pill_anim = block.settings.animation -%}
+              {%- if pill_anim == 'use-section' -%}{%- assign pill_anim = '' -%}{%- endif -%}
+
+              <div
+                class="bm-pill {% if pill_anim != blank %}anim-{{ pill_anim }}{% endif %}"
+                {{ block.shopify_attributes }}
+                style="background: {{ block.settings.bg_color }}; color: {{ block.settings.text_color }};"
+              >
+                {%- if block.settings.show_check -%}
+                  <span class="bm-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                {%- endif -%}
+                <span class="bm-text">{{ final_text }}</span>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+  {%- elsif s.animation == 'typing' -%}
+    {%- comment -%} TYPEWRITER DISPLAY ENGINE {%- endcomment -%}
+    {%- assign first_block = null -%}
+    {%- for block in section.blocks -%}
+      {%- assign rule_tag = block.settings.tag | downcase | strip -%}
+      {%- assign show_block = false -%}
+
+      {%- if rule_tag == '' and has_tag_match == false -%}
+        {%- assign show_block = true -%}
+      {%- elsif rule_tag != '' -%}
+        {%- for ptag in product.tags -%}
+          {%- assign clean_ptag = ptag | downcase | strip -%}
+          {%- if clean_ptag == rule_tag -%}
+            {%- assign show_block = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if show_block and first_block == null -%}
+        {%- assign first_block = block -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if first_block -%}
+      <div class="bm-center-wrap">
+        <div
+          class="bm-pill bm-typing"
+          id="bm-typing-{{ section.id }}"
+          style="background: {{ first_block.settings.bg_color }}; color: {{ first_block.settings.text_color }};"
+        >
+          {%- if first_block.settings.show_check -%}
+            <span class="bm-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+          {%- endif -%}
+          <span class="bm-text"></span>
+        </div>
+      </div>
+
+      <script>
+        (function(){
+          {%- if s.use_product_metafield and metafield_text -%}
+            var messages = [{{ metafield_text | json }}];
+          {%- else -%}
+            var messages = [{{ first_block.settings.text | json }}];
+          {%- endif -%}
+
+          var el = document.querySelector('#bm-typing-{{ section.id }} .bm-text');
+          if(!el) return;
+          var charTime = Math.max(30, ({{ s.speed }} * 1000) / 40);
+          var mi = 0, ci = 0, deleting = false;
+
+          function tick(){
+            var msg = messages[mi] || '';
+            if (!deleting) {
+              ci++; 
+              el.textContent = msg.slice(0, ci);
+              if (ci === msg.length) { 
+                deleting = true; 
+                return setTimeout(tick, 1800); 
+              }
+            } else {
+              ci--; 
+              el.textContent = msg.slice(0, ci);
+              if (ci === 0) { 
+                deleting = false; 
+                mi = (mi + 1) % messages.length; 
+              }
+            }
+            setTimeout(tick, deleting ? charTime / 2 : charTime);
+          }
+          tick();
+        })();
+      </script>
+    {%- endif -%}
+
+  {%- else -%}
+    {%- comment -%} SINGLE BADGE DISPLAY ENGINE {%- endcomment -%}
+    {%- assign first_block = null -%}
+    {%- for block in section.blocks -%}
+      {%- assign rule_tag = block.settings.tag | downcase | strip -%}
+      {%- assign show_block = false -%}
+
+      {%- if rule_tag == '' and has_tag_match == false -%}
+        {%- assign show_block = true -%}
+      {%- elsif rule_tag != '' -%}
+        {%- for ptag in product.tags -%}
+          {%- assign clean_ptag = ptag | downcase | strip -%}
+          {%- if clean_ptag == rule_tag -%}
+            {%- assign show_block = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if show_block and first_block == null -%}
+        {%- assign first_block = block -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if first_block -%}
+      {%- assign final_text = first_block.settings.text -%}
+      {%- if s.use_product_metafield and metafield_text -%}{%- assign final_text = metafield_text -%}{%- endif -%}
+      {%- assign pill_anim = first_block.settings.animation -%}
+      {%- if pill_anim == 'use-section' -%}{%- assign pill_anim = s.animation -%}{%- endif -%}
+
+      <div class="bm-center-wrap">
+        {%- if s.link != blank -%}<a href="{{ s.link }}" style="text-decoration:none;">{%- endif -%}
+        <div
+          class="bm-pill anim-{{ pill_anim }}"
+          style="background: {{ first_block.settings.bg_color }}; color: {{ first_block.settings.text_color }};"
+        >
+          {%- if first_block.settings.show_check -%}
+            <span class="bm-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </span>
+          {%- endif -%}
+          <span class="bm-text">{{ final_text }}</span>
+        </div>
+        {%- if s.link != blank -%}</a>{%- endif -%}
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if s.close_button -%}
+    <button class="bm-close" aria-label="Close banner">✕</button>
+  {%- endif -%}
+</div>
+
+<script>
+  (function() {
+    var sectionId = '{{ section.id }}';
+    var rootEl = document.getElementById('badge-marquee-' + sectionId);
+    if (!rootEl) return;
+
+    var closeBtn = rootEl.querySelector('.bm-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        if (rootEl.classList.contains('bm-spacer')) {
+          rootEl.style.display = 'none';
+        } else {
+          rootEl.remove();
+        }
+        try {
+          sessionStorage.setItem('bm-closed-' + sectionId, '1');
+        } catch (e) {}
+      });
+    }
+
+    try {
+      if (sessionStorage.getItem('bm-closed-' + sectionId)) {
+        if (rootEl.classList.contains('bm-spacer')) {
+          rootEl.style.display = 'none';
+        } else {
+          rootEl.remove();
+        }
+      }
+    } catch (e) {}
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Badge Animato Pro",
+  "tag": "section",
+  "class": "dynamic-badge-marquee",
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "select",
+      "id": "animation",
+      "label": "Animazione (Default Sezione)",
+      "default": "marquee-pause-left",
+      "options": [
+        { "group": "Scorrimento con pausa", "value": "marquee-pause-left", "label": "⏸️ Smooth Scroll con Pausa (Sinistra)" },
+        { "group": "Scorrimento con pausa", "value": "marquee-pause-right", "label": "⏸️ Smooth Scroll con Pausa (Destra)" },
+        { "group": "Scorrimento continuo", "value": "marquee-left", "label": "⬅️ Marquee continuo a sinistra" },
+        { "group": "Scorrimento continuo", "value": "marquee-right", "label": "➡️ Marquee continuo a destra" },
+        { "group": "Testo", "value": "typing", "label": "⌨️ Macchina da scrivere" },
+        { "group": "Testo", "value": "neon", "label": "💡 Neon lampeggiante" },
+        { "group": "Movimento", "value": "bounce", "label": "🏀 Rimbalzo" },
+        { "group": "Movimento", "value": "slide", "label": "↔️ Oscillazione" },
+        { "group": "Movimento", "value": "shake", "label": "🫨 Scuotimento" },
+        { "group": "Movimento", "value": "wiggle", "label": "〰️ Ondulazione" },
+        { "group": "Movimento", "value": "swing", "label": "🕰️ Dondolo (pendolo)" },
+        { "group": "Movimento", "value": "elastic", "label": "🎯 Effetto elastico" },
+        { "group": "Scala", "value": "zoom", "label": "🔍 Zoom pulsante" },
+        { "group": "Scala", "value": "heartbeat", "label": "❤️ Battito cardiaco" },
+        { "group": "Rotazione", "value": "spin", "label": "🌀 Rotazione 360°" },
+        { "group": "Rotazione", "value": "flip", "label": "🔄 Capovolgimento 3D" },
+        { "group": "Opacità", "value": "fade", "label": "🌫️ Dissolvenza" },
+        { "group": "Opacità", "value": "blurin", "label": "🌁 Sfocatura" },
+        { "group": "Luce", "value": "glow", "label": "✨ Bagliore luminoso" },
+        { "group": "Luce", "value": "pulsering", "label": "💫 Anello pulsante" },
+        { "group": "Sfondo", "value": "gradient", "label": "🌈 Gradiente animato" },
+        { "group": "Bordo", "value": "border-run", "label": "🎞️ Bordo rotante" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Velocità Marquee / Durata ciclo",
+      "min": 2,
+      "max": 40,
+      "step": 1,
+      "unit": "s",
+      "default": 10
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Posizione blocco",
+      "default": "none",
+      "options": [
+        { "value": "none", "label": "Normale (nel flusso della pagina)" },
+        { "value": "top", "label": "📌 FIXED in alto" },
+        { "value": "bottom", "label": "📌 FIXED in basso" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "fixed_offset",
+      "label": "Distanza dal bordo (fixed)",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "z_index",
+      "label": "Z-index",
+      "min": 0,
+      "max": 1000,
+      "step": 10,
+      "default": 100
+    },
+    { "type": "checkbox", "id": "add_spacer", "label": "Mantieni spazio occupato (fixed)", "default": true },
+    { "type": "checkbox", "id": "close_button", "label": "Mostra bottone Chiudi (✕)", "default": false },
+    { "type": "checkbox", "id": "pause_on_hover", "label": "Pausa al passaggio del mouse", "default": true },
+
+    { "type": "header", "content": "🎨 Stili di Default" },
+    { "type": "color", "id": "bg_color", "label": "Sfondo badge default", "default": "#16a34a" },
+    { "type": "color", "id": "bg_color_2", "label": "Sfondo secondario (gradiente)", "default": "#22c55e" },
+    { "type": "color", "id": "text_color", "label": "Colore testo default", "default": "#ffffff" },
+    { "type": "color", "id": "glow_color", "label": "Colore bagliore", "default": "#22c55e" },
+    { "type": "color", "id": "border_color", "label": "Colore bordo rotante", "default": "#ffffff" },
+    { "type": "color", "id": "section_bg", "label": "Sfondo sezione", "default": "transparent" },
+
+    { "type": "header", "content": "🔤 Tipografia e forma" },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Dimensione testo",
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Spessore testo",
+      "default": "700",
+      "options": [
+        { "value": "400", "label": "Normale" },
+        { "value": "600", "label": "Semi-bold" },
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra-bold" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Arrotondamento (pill)",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "label": "Padding verticale",
+      "min": 2,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_x",
+      "label": "Padding orizzontale",
+      "min": 8,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Spaziatura elementi (gap)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    { "type": "text", "id": "shadow", "label": "Ombra CSS", "default": "0 2px 6px rgba(0,0,0,0.12)" },
+
+    { "type": "header", "content": "🔗 Integrazione Dinamica" },
+    { "type": "url", "id": "link", "label": "Link (per badge singolo)" },
+    {
+      "type": "checkbox",
+      "id": "use_product_metafield",
+      "label": "Usa metafield prodotto",
+      "default": false,
+      "info": "Se attivo, usa custom.badge_text sovrascrivendo il testo dei blocchi."
+    },
+
+    { "type": "header", "content": "📐 Spaziatura Sezione" },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Padding alto",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Padding basso",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    }
+  ],
+  "blocks": [
+    {
+      "type": "rule",
+      "name": "Badge Regola",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Tag prodotto (Vuoto = Default)",
+          "info": "Esempio: sconto, novita"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Testo badge",
+          "default": "✓ Platinumshop covers 30% of import charges"
+        },
+        { "type": "color", "id": "bg_color", "label": "Colore sfondo", "default": "#16a34a" },
+        { "type": "color", "id": "text_color", "label": "Colore testo", "default": "#ffffff" },
+        { "type": "checkbox", "id": "show_check", "label": "Mostra icona spunta", "default": true },
+        {
+          "type": "select",
+          "id": "animation",
+          "label": "Animazione specifica del badge",
+          "default": "use-section",
+          "options": [
+            { "value": "use-section", "label": "Nessuna / Usa sezione" },
+            { "value": "fade", "label": "🌫️ Dissolvenza" },
+            { "value": "bounce", "label": "🏀 Rimbalzo" },
+            { "value": "zoom", "label": "🔍 Zoom" },
+            { "value": "slide", "label": "↔️ Oscillazione" },
+            { "value": "shake", "label": "🫨 Scuotimento" },
+            { "value": "wiggle", "label": "〰️ Ondulazione" },
+            { "value": "swing", "label": "🕰️ Dondolo" },
+            { "value": "elastic", "label": "🎯 Elastico" },
+            { "value": "heartbeat", "label": "❤️ Battito" },
+            { "value": "spin", "label": "🌀 Rotazione" },
+            { "value": "flip", "label": "🔄 Flip 3D" },
+            { "value": "blurin", "label": "🌁 Sfocatura" },
+            { "value": "neon", "label": "💡 Neon" },
+            { "value": "glow", "label": "✨ Bagliore" },
+            { "value": "pulsering", "label": "💫 Anello pulsante" },
+            { "value": "gradient", "label": "🌈 Gradiente" },
+            { "value": "border-run", "label": "🎞️ Bordo rotante" }
+          ]
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Badge Animato Pro",
+      "blocks": [
+        {
+          "type": "rule",
+          "settings": {
+            "tag": "sconto",
+            "text": "🔥 Sconto speciale attivo!",
+            "bg_color": "#dc2626",
+            "text_color": "#ffffff",
+            "animation": "heartbeat",
+            "show_check": false
+          }
+        },
+        {
+          "type": "rule",
+          "settings": {
+            "tag": "",
+            "text": "✓ Platinumshop covers 30% of import charges",
+            "bg_color": "#16a34a",
+            "text_color": "#ffffff",
+            "animation": "use-section"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

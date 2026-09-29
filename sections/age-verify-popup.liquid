@@ -1,0 +1,108 @@
+<article class="popup-a w360 popup-blocker" data-title="age-verifier-popup" data-popup-delay="0">
+  {%- if section.settings.age_verify_popup_image -%}
+    {%- assign default_alt = section.settings.age_verify_popup_title %}
+    <figure class="text-center no-border m30">
+      <img
+        src="{{ section.settings.age_verify_popup_image | image_url }}"
+        srcset="{% render 'image-srcset', image: section.settings.age_verify_popup_image %}"
+        sizes="
+          (min-width: 760px) 235,
+          100vw
+        "
+        width="235"
+        height="55"
+        alt="{{ section.settings.age_verify_popup_image.alt | default: default_alt | escape }}"
+        loading="lazy"
+      >
+    </figure>
+  {%- endif -%}
+  <section data-element="blocker-info">
+    {%- if section.settings.age_verify_popup_title != empty -%}
+      <header>
+        <h2>{{ section.settings.age_verify_popup_title }}</h2>
+      </header>
+    {%- endif -%}
+    {{ section.settings.age_verify_popup_text }}
+    <p class="link-btn">
+      <a
+        href="./"
+        class="close{% if settings.button_style == 'inv' %} inv{% endif %}"
+      >
+        {{- section.settings.age_verify_popup_accept_text -}}
+      </a>
+      <a href="./" class="inline overlay-gray" data-enable="blocker-too-young" data-disable="blocker-info">
+        {{- section.settings.age_verify_popup_deny_text -}}
+      </a>
+    </p>
+  </section>
+  <section class="hidden" data-element="blocker-too-young">
+    {%- if section.settings.age_verify_popup_denied_title != empty -%}
+      <header>
+        <h2>{{ section.settings.age_verify_popup_denied_title }}</h2>
+      </header>
+    {%- endif -%}
+    {{ section.settings.age_verify_popup_denied_text }}
+  </section>
+</article>
+
+{% schema %}
+    {
+    "name": "t:settings_schema.age_verify_popup.name",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "age_verify_popup_image",
+        "label": "t:settings_schema.age_verify_popup.settings.age_verify_popup_image.label",
+        "info": "t:settings_schema.age_verify_popup.settings.age_verify_popup_image.info"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.age_verify_popup.settings.verify.header"
+      },
+      {
+        "id": "age_verify_popup_title",
+        "type": "text",
+        "label": "t:settings_schema.age_verify_popup.settings.verify.age_verify_popup_title.label",
+        "default": "Age verification"
+      },
+      {
+        "id": "age_verify_popup_text",
+        "type": "richtext",
+        "label": "t:settings_schema.age_verify_popup.settings.verify.age_verify_popup_text.label",
+        "default": "<p>Please confirm that you are 18 years or older to enter the shop.</p>"
+      },
+      {
+        "id": "age_verify_popup_accept_text",
+        "type": "text",
+        "label": "t:settings_schema.age_verify_popup.settings.verify.age_verify_popup_accept_text.label",
+        "default": "Yes, I'm 18 years or older"
+      },
+      {
+        "id": "age_verify_popup_deny_text",
+        "type": "text",
+        "label": "t:settings_schema.age_verify_popup.settings.verify.age_verify_popup_deny_text.label",
+        "default": "No"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.age_verify_popup.settings.denied.header"
+      },
+      {
+        "type": "paragraph",
+        "content": "t:settings_schema.age_verify_popup.settings.denied.paragraph"
+      },
+      {
+        "id": "age_verify_popup_denied_title",
+        "type": "text",
+        "label": "t:settings_schema.age_verify_popup.settings.denied.age_verify_popup_denied_title.label",
+        "default": "Have patience..."
+      },
+      {
+        "id": "age_verify_popup_denied_text",
+        "type": "richtext",
+        "label": "t:settings_schema.age_verify_popup.settings.denied.age_verify_popup_denied_text.label",
+        "default": "<p>You are not old enough to visit the shop yet.</p>"
+      }
+    ]
+  }
+{% endschema %}

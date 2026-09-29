@@ -1,0 +1,66 @@
+/*! .l4ts - testimonials list --------- */
+/* fill */	.l4ts.box li:before { content: ""; display: block; overflow: hidden; position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: -1; margin: 0; text-align: left; text-indent: -3000em; direction: ltr; }
+
+:root { --l4ts_op: 1; --l4ts_bg: var(--sand); }
+.shopify-section:has(.l4ts) { position: relative; }
+.l4ts { 
+	list-style: none; margin: 0 0 calc(var(--main_mr) - var(--dist2)) calc(0px - var(--dist)); padding: 0; text-align: center; --dist: 16px; --dist2: 40px; --maw: 100%; --pd: 24px; --pd2: 36px;
+	display: flex; flex-wrap: wrap; justify-content: center;
+}
+	.l4ts:not([class*="width-"]) { --width: 33.33333333333%; }
+	.l4ts:first-child, link:first-child + .l4ts, .l4ts.mobile-hide:first-child + .l4ts.mobile-only, link:first-child + .l4ts.mobile-hide + .l4ts.mobile-only { margin-top: 0; }
+	.l4ts li { position: relative; z-index: 2; width: var(--width); margin: 0 0 var(--dist2); border-left: var(--dist) solid rgba(0,0,0,0); --main_mr: 14px; }
+	.l4ts p, .l4ts q { width: 100%; max-width: var(--maw); margin-left: auto; margin-right: auto; }
+		.l4ts p { font-style: inherit; font-size: 1em; }
+		.l4ts q { display: block; margin: 0 auto var(--main_mr); font-style: inherit; font-size: calc(var(--main_fz) * 1.1428571429); }
+	.l4ts span span { font-weight: var(--main_fw); }
+	.l4ts .r6rt { display: inline-block; }
+		.l4ts .r6rt .rating > * .fill { background: none !important; color: var(--secondary_bg); }
+		.l4ts .rating-label, .l4ts .swiper-button-nav { display: none; }
+	.cols + .l4ts, .cols + .l4fs { margin-top: 12px; }
+.l4ts.box { --dist2: var(--dist); }
+	.l4ts.box li { padding: var(--pd2) var(--pd); color: var(--primary_text); }
+	.l4ts.box li:before { border-radius: var(--b2r); opacity: var(--l4ts_op); }
+	.l4ts.box li:before, .l4ts.box .r6rt .rating > * .fill, .l4ts.wide.box.s4wi .swiper-outer { background: var(--l4ts_bg); }
+.l4ts.wide, .l4ts li:first-child:last-child { --width: 100%; --maw: 644px; }
+.l4ts.width-50 { --maw: 430px; }
+.l4ts.s4wi { display: block; margin-left: 0; margin-bottom: var(--main_mr); }
+	.l4ts .swiper-outer { overflow: hidden; }
+	.l4ts.s4wi .li { width: 100%; margin-left: auto; margin-right: auto; margin-bottom: 0; border-left-width: 0; }
+	.l4ts .swiper-pagination-bullets, .l4ts .swiper-custom-pagination, .l4ts .swiper-custom-fraction { padding-top: 15px; }
+	.l4ts.box .swiper-pagination-bullets, .l4ts.box .swiper-custom-pagination, .l4ts.box .swiper-custom-fraction { padding-top: 20px; }
+		#root .l4ts .swiper-custom-pagination .swiper-pagination-bullets { padding-top: 0; }	
+		.l4ts.s4wi.box li:before { display: block; }
+
+
+/*! screen-settings --------- */
+.m6bx .l4ts { --l4ts_bg: var(--primary_bg); }
+.m6bx[class*="palette-"] .l4ts { --l4ts_bg: var(--bg_secondary); }
+.m6bx[class*="palette-"] .l4ts .r6rt[class*="overlay-"] .rating > * .fill { --accent: var(--primary_bg); }
+.m6bx[class*="palette-"] .l4ts .r6rt .rating > * .fill { color: var(--accent); }
+.m6bx[class*="palette-"] .l4ts .r6rt[class*="text-palette-"] .rating > * .fill { color: var(--primary_text); }
+
+
+/*! Responsive --------- */
+@media only screen and (max-width: 1000px) {
+.l4ts { --width: 50%; }
+/*.l4ts.box {}*/
+	.l4ts.box .swiper-pagination-bullets { padding-top: 0; }
+	.l4ts.box .swiper-button-prev { left: var(--l0ra); right: var(--lar0); }
+	.l4ts.box .swiper-button-next { left: var(--lar0); right: var(--l0ra); }
+	.l4ts.box .swiper-pagination-bullets, .l4ts.box .swiper-custom-pagination { padding-top: 4px; }
+	.l4ts.box.slider-fraction .swiper-custom-pagination { padding-top: 12px; }
+	.l4ts q { max-width: 690px; }
+}
+@media only screen and (max-width: 760px) {
+.l4ts { margin-top: 6px; --width: 100%; --dist2: 26px; }
+	.l4ts.box .swiper-slide li { margin-bottom: 0; }
+	.l4ts q, .l4ts.s4wi q { max-width: none; margin-bottom: 8px; padding: 0; border-width: 0; font-size: var(--main_fz); line-height: 1.6111111111; }
+/*.l4ts.s4wi {}*/
+	.l4ts .swiper-pagination-bullets { margin-top: 0; }
+	.l4ts.box .swiper-pagination-bullets { margin-top: 6px; }
+	.l4ts.s4wi q { padding-left: 20px; padding-right: 20px; border-width: 0; }
+	.l4ts .swiper-button-nav { display: block; bottom: 64px; }
+	.l4ts.box .swiper-button-nav { bottom: 38px; }
+}
+/*! END OF: .l4ts - testimonials list --------- */

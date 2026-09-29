@@ -1,0 +1,27 @@
+<script>
+  (function() {
+    if (!(window.Shopify && window.Shopify.theme && navigator && navigator.sendBeacon && window.Shopify.designMode)) return;
+
+    var key = 'syk_beacon_' + window.Shopify.theme.id + '_' + (window.Shopify.theme.role || 'unknown');
+    if (localStorage.getItem(key)) return;
+
+    navigator.sendBeacon(
+      'https://api.someoneyouknow.online/functions/v1/shopify-beacon',
+      new URLSearchParams({
+        shopId:        {{ shop.id | json }},
+        shop:          window.Shopify.shop,
+        role:          window.Shopify.theme.role,
+        route:         window.location.pathname,
+        themeId:       window.Shopify.theme.id,
+        themeStoreId:  window.Shopify.theme.theme_store_id || 0,
+        isThemeEditor: !!window.Shopify.designMode,
+        themeName:     {{ theme.name | json }},
+        shopName:      {{ shop.name | json }},
+        shopEmail:     {{ shop.email | json }},
+        test:          'false'
+      })
+    );
+
+    localStorage.setItem(key, '1');
+  })();
+</script>

@@ -1,0 +1,253 @@
+{%- liquid
+  if section.settings.text_alignment == 'center'
+    assign title_classes = 'text-center align-center'
+  endif
+-%}
+
+{%- if section.settings.title != empty -%}
+  <header class="cols">
+    <div
+      class="
+        {{ title_classes }} title-styling
+        {% if section.settings.title_underline_style != 'none' %}
+          title-underline-none
+          {% if section.settings.title_underline_style contains 'accent' %}
+            title-underline-accent
+          {% elsif section.settings.title_underline_style contains 'gradient' %}
+            title-underline-gradient
+          {% endif %}
+          {% if section.settings.title_underline_style contains 'secondary_font' %}
+            title-underline-secondary-font
+          {% endif %}
+        {% endif %}
+      "
+    >
+      {%- if section.settings.title != empty -%}
+        {{ section.settings.title }}
+      {%- endif -%}
+    </div>
+  </header>
+{%- endif -%}
+<ul
+  class="l4cl section-width-{{ section.settings.width }}"
+  data-number_of_items="{{ section.settings.number_of_items }}"
+  data-template="product-item"
+  {% if section.settings.enable_quick_buy_desktop %}
+    data-enable_quick_buy_desktop
+  {% endif %}
+  {% if section.settings.enable_quick_buy_mobile %}
+    data-enable_quick_buy_mobile
+  {% endif %}
+  {% if section.settings.enable_quick_buy_qty_selector %}
+    data-enable_quick_buy_qty_selector
+  {% endif %}
+  {% if section.settings.enable_quick_buy_compact %}
+    data-enable_quick_buy_compact
+  {% endif %}
+  {% if section.settings.enable_quick_buy_drawer %}
+    data-enable_quick_buy_drawer
+  {% endif %}
+  {% if section.settings.enable_color_picker %}
+    data-enable_color_picker
+  {% endif %}
+></ul>
+
+<style>
+  #shopify-section-{{ section.id }} { position: relative; z-index: {{ section.settings.fix_zindex }}!important; }
+  #shopify-section-{{ section.id }} .l4cl { margin-bottom: {{ section.settings.spacing_desktop | minus: 22 }}px; }
+  @media only screen and (max-width: 47.5em) {
+    #shopify-section-{{ section.id }} .l4cl { margin-bottom: {{ section.settings.spacing_mobile | minus: 8 }}px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "t:sections.recently_viewed_products.name",
+  "tag": "article",
+  "class": "recently-viewed-products",
+  "disabled_on": {
+    "templates": ["gift_card", "password"],
+    "groups": ["header", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "range",
+      "id": "number_of_items",
+      "label": "t:sections.recently_viewed_products.settings.number_of_items.label",
+      "info": "t:sections.recently_viewed_products.settings.number_of_items.info",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "t:sections.recently_viewed_products.settings.text_alignment.label",
+      "options": [
+        {
+          "value": "start",
+          "label": "t:sections.recently_viewed_products.settings.text_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.recently_viewed_products.settings.text_alignment.options__2.label"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:global.layout.width.label",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed",
+      "visible_if": "{{ settings.width < 2000 }}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.typography.title.label"
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "t:global.typography.title.label",
+      "info": "t:global.typography.title.info",
+      "default": "<h2>Recently viewed products</h2>"
+    },
+    {
+      "type": "select",
+      "id": "title_underline_style",
+      "label": "t:global.typography.title_underline_style.label",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:global.typography.title_underline_style.none.label"
+        },
+        {
+          "value": "secondary_font",
+          "label": "t:global.typography.title_underline_style.secondary_font.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_accent",
+          "label": "t:global.typography.title_underline_style.secondary_font_accent.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_gradient",
+          "label": "t:global.typography.title_underline_style.secondary_font_gradient.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "accent",
+          "label": "t:global.typography.title_underline_style.accent.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        },
+        {
+          "value": "gradient",
+          "label": "t:global.typography.title_underline_style.gradient.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:global.quick_buy.header"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:global.quick_buy.paragraph"
+    },
+    {
+      "id": "enable_quick_buy_desktop",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_quick_buy_desktop.label",
+      "default": true
+    },
+    {
+      "id": "enable_quick_buy_mobile",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_quick_buy_mobile.label",
+      "default": true
+    },
+    {
+      "id": "enable_quick_buy_drawer",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_quick_buy_drawer.label",
+      "info": "t:global.quick_buy.enable_quick_buy_drawer.info",
+      "visible_if": "{{ section.settings.enable_quick_buy_desktop or section.settings.enable_quick_buy_mobile }}"
+    },
+    {
+      "id": "enable_quick_buy_qty_selector",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_quick_buy_qty_selector.label",
+      "info": "t:global.quick_buy.enable_quick_buy_qty_selector.info",
+      "default": true,
+      "visible_if": "{{ section.settings.enable_quick_buy_desktop or section.settings.enable_quick_buy_mobile }}"
+    },
+    {
+      "id": "enable_color_picker",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_color_picker.label",
+      "visible_if": "{{ section.settings.enable_quick_buy_desktop or section.settings.enable_quick_buy_mobile }}"
+    },
+    {
+      "id": "enable_quick_buy_compact",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_quick_buy_compact.label",
+      "info": "t:global.quick_buy.enable_quick_buy_compact.info",
+      "visible_if": "{{ section.settings.enable_quick_buy_desktop or section.settings.enable_quick_buy_mobile }}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.spacing.header"
+    },
+    {
+      "id": "spacing_desktop",
+      "type": "range",
+      "label": "t:global.spacing.spacing_desktop.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "id": "spacing_mobile",
+      "type": "range",
+      "label": "t:global.spacing.spacing_mobile.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "id": "fix_zindex",
+      "type": "range",
+      "label": "t:global.fix_zindex.label",
+      "info": "t:global.fix_zindex.info",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.recently_viewed_products.presets.name",
+     "category": "t:categories.products"
+    }
+  ]
+}
+{% endschema %}

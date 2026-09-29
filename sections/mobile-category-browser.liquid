@@ -1,0 +1,31 @@
+{%- if collection != blank -%}
+  <div class="mobile-category-products" data-mobile-category-products>
+    {%- paginate collection.products by 12 -%}
+      {%- for product in collection.products -%}
+        <a href="{{ product.url }}" class="mobile-category-card">
+          <span class="mobile-category-card__image">
+            {%- if product.featured_image != blank -%}
+              <img data-src="{{ product.featured_image | image_url: width: 184, height: 184, crop: 'center' }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" width="120" height="120">
+            {%- else -%}
+              <span aria-hidden="true">{{ product.title | slice: 0, 1 | upcase }}</span>
+            {%- endif -%}
+            {%- if collection.handle == 'hot' or collection.handle == 'bestseller' or collection.handle == 'bestsellers' -%}
+              <em>HOT</em>
+            {%- endif -%}
+          </span>
+          <span class="mobile-category-card__title">{{ product.title | escape }}</span>
+        </a>
+      {%- endfor -%}
+      {%- if paginate.next -%}
+        <a href="{{ paginate.next.url }}&view=mobile-category" class="mobile-category-products__more" data-category-products-more>Vedi più</a>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Mobile category products",
+  "settings": []
+}
+{% endschema %}

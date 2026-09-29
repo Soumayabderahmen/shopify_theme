@@ -1,0 +1,591 @@
+{% doc %}
+  Renders filtering and sorting interface for collections and search results. Supports multiple display modes including full filters, sorting controls, and mobile filter buttons with advanced features like color swatches and price ranges.
+
+  @param {object} [section] - Section object. Defaults to section.
+  @param {string} [display] - Display mode: 'filters' shows filter options, 'sorting' shows sort controls, 'mobile-filter-button' shows mobile filter button. Defaults to 'filters'.
+  @param {string} [origin] - Context origin: 'collection' for collection pages, 'search' for search results. Defaults to 'collection'.
+  @param {object} [object] - Collection or search object to filter/sort. Defaults to collection.
+  @param {boolean} [show_amount_of_products] - Whether to display product/result count. Defaults to false.
+  @param {boolean} [show_collection_image] - Whether to display collection featured image. Defaults to false.
+  @param {boolean} [show_filters] - Whether to show filter options. Defaults to false.
+  @param {string} [collection_view] - Display mode: 'grid' or 'list'. Defaults to 'grid'.
+  @param {object} [filters] - Custom filters array. Defaults to object.filters.
+  @param {object} [quick_links] - Menu links for collection navigation.
+  @param {object} [collections_menu] - Additional collections to display in navigation.
+  @param {number} [filters_show_more_limit] - Number of filter values to show before 'show more' link.
+  @param {boolean} [sticky] - Whether sorting controls should be sticky on mobile.
+  @param {boolean} [enable_collection_grid_choice] - Enable desktop grid size selection.
+  @param {boolean} [enable_collection_grid_choice_mobile] - Enable mobile grid size selection.
+  @param {boolean} [enable_collection_view_choice] - Enable grid/list view toggle.
+  @param {string} [width_class] - Width class for the filters-sorting section.
+  @param {string} [width_class_mobile] - Width class for the filters-sorting section on mobile.
+  @param {string} [grid_1] - First grid option in 'width|label' format.
+  @param {string} [grid_2] - Second grid option in 'width|label' format.
+  @param {string} [grid_1_mobile] - First mobile grid option in 'width|label' format.
+  @param {string} [grid_2_mobile] - Second mobile grid option in 'width|label' format.
+  @param {string} [collection_grid_view] - Current desktop grid width setting.
+  @param {string} [collection_grid_view_mobile] - Current mobile grid width setting.
+
+  @example
+  {% render 'filters-sorting', display: 'filters', show_filters: true, show_collection_image: true %}
+  @example
+  {% render 'filters-sorting', display: 'sorting', show_amount_of_products: true, collection_view: 'grid' %}
+  @example
+  {% render 'filters-sorting', display: 'mobile-filter-button', show_filters: true, sticky: true %}
+{% enddoc %}
+
+{{ 'async-validation.css' | asset_url | stylesheet_tag: media: 'screen' }}
+
+{%- liquid
+  assign display = display | default: 'filters'
+  assign origin = origin | default: 'collection'
+  assign object = object | default: collection
+  assign show_amount_of_products = show_amount_of_products | default: false
+  assign show_collection_image = show_collection_image | default: false
+  assign show_filters = show_filters | default: false
+  assign collection_view = collection_view | default: 'grid'
+
+  if origin == 'collection'
+    assign amount_of_products = collection.products_count | default: 0
+    assign amount_of_products_translation = 'collection.amount_of_products'
+  elsif origin == 'search'
+    assign amount_of_products = search.results_count | default: 0
+    assign amount_of_products_translation = 'search.amount_of_results'
+  endif
+
+  assign quick_links = quick_links | default: empty
+  assign collections_menu = collections_menu | default: empty
+  if quick_links != empty
+    assign has_quick_links = true
+  endif
+  if collections_menu != empty
+    assign has_quick_links = true
+  endif
+-%}
+
+{%- if display == 'filters' -%}
+  {%- liquid
+    assign filters = filters | default: object.filters
+    for filter in filters
+      if filter.active_values != null and filter.active_values != empty
+        assign has_active_filters = true
+        break
+      endif
+      if filter.type == 'price_range'
+        if filter.min_value.value != null or filter.max_value.value != null
+          if filter.min_value.value != filter.range_min and filter.max_value.value != filter.range_max
+            assign has_active_filters = true
+            break
+          endif
+        endif
+      endif
+    endfor
+  -%}
+  {%- if has_quick_links != empty or object.image -%}
+    <nav class="n6as">
+      {%- if object.image and show_collection_image -%}
+        <figure class="{% if settings.multiply_collection_images == 'multiply' %}img-multiply{% elsif settings.multiply_collection_images == 'multiply-bg' %}img-multiply-bg{% endif %}">
+          <img
+            src="{{ object.image | image_url: width: 350 }}"
+            srcset="{% render 'image-srcset', image: object.image, max_width: 350 %}"
+            sizes="
+              (min-width: 1000px) 245
+              0
+            "
+            alt="{{ object.image.alt | default: object.title | escape }}"
+            width="245"
+            height="245"
+            loading="lazy"
+          >
+        </figure>
+      {%- endif -%}
+      {%- if has_quick_links -%}
+        <ul>
+          <li>
+            <a href="{{ routes.collections_url }}">{{ 'collection.view_all_collections' | t }}</a>
+          </li>
+          {%- liquid
+            assign handles = empty
+            assign collection_links = quick_links.links | where: 'type', 'collection_link'
+            assign collection_links_handles = collection_links | map: 'handle'
+            assign handles = handles | concat: collection_links_handles
+          -%}
+          {%- for link in quick_links.links -%}
+            <li class="{% if link.active or link.child_active %}strong toggle{% endif %}">
+              <a href="{{ link.url }}">{{ link.title }}</a>
+              {%- if link.links != blank -%}
+                {%- liquid
+                  assign collection_links = link.links | where: 'type', 'collection_link'
+                  assign collection_links_handles = collection_links | map: 'handle'
+                  assign handles = handles | concat: collection_links_handles
+                -%}
+                <a href="./" class="toggle">{{ 'general.accessibility.toggle' | t: item: link.title }}</a>
+                <ul>
+                  {%- for sublink in link.links -%}
+                    {%- liquid
+                      assign collection_links = sublink.links | where: 'type', 'collection_link'
+                      assign collection_links_handles = collection_links | map: 'handle'
+                      assign handles = handles | concat: collection_links_handles
+                    -%}
+                    <li class="{% if sublink.active or sublink.child_active %}strong toggle{% endif %}">
+                      <a href="{{ sublink.url }}">{{ sublink.title }}</a>
+                      {%- if sublink.links != blank -%}
+                        <a href="./" class="toggle">{{ 'general.accessibility.toggle' | t: item: sublink.title }}</a>
+                        <ul>
+                          {%- for subsublink in sublink.links -%}
+                            {%- liquid
+                              assign collection_links = subsublink.links | where: 'type', 'collection_link'
+                              assign collection_links_handles = collection_links | map: 'handle'
+                              assign handles = handles | concat: collection_links_handles
+                            -%}
+                            <li class="{% if subsublink.active %}strong{% endif %}">
+                              <a href="{{ subsublink.url }}">{{ subsublink.title }}</a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+          {%- for collection in collections_menu -%}
+            {% unless handles contains collection.handle %}
+              <li class="{% if collection.handle == object.handle %}active toggle{% endif %}">
+                <a href="{{ collection.url }}">{{ collection.title }}</a>
+              </li>
+            {% endunless %}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </nav>
+  {%- endif %}
+  <form action="" method="get" class="f8fl" id="filter" data-template="{{ section.id }}">
+    <input
+      class="sort_by_clone"
+      name="sort_by"
+      type="hidden"
+      value="{{ object.sort_by | default: object.default_sort_by }}"
+    >
+    {%- if search.performed -%}
+      <input type="hidden" name="q" value="{{ search.terms | escape }}">
+    {%- elsif object.current_vendor or object.current_type -%}
+      <input type="hidden" name="q" value="{{ object.current_vendor }}{{ object.current_type }}">
+    {%- endif -%}
+    {%- if show_filters -%}
+      <fieldset>
+        <legend>{{ 'collection.filters.filter' | t }}</legend>
+        <header>
+          <h3>
+            {%- if has_active_filters -%}
+              <span class="desktop-only">{{ 'collection.filters.current_filters' | t }}</span>
+            {%- endif -%}
+            <span
+              {% if has_active_filters %}
+                class="desktop-hide"
+              {% endif %}
+            >
+              {{- 'collection.filters.filter' | t -}}
+            </span>
+            {%- if has_active_filters -%}
+              <a href="{{ collection.url }}" class="desktop-hide remove-all">
+                {{- 'collection.filters.remove_all_filters' | t -}}
+              </a>
+            {%- endif -%}
+          </h3>
+          {%- if has_active_filters -%}
+            <ul class="desktop-only">
+              {%- for filter in filters -%}
+                {%- for value in filter.active_values -%}
+                  <li>
+                    <label for="Filter-{{ value.param_name }}-{{ value.value }}">
+                      <a href="{{ value.url_to_remove }}">
+                        <span>{{ filter.label | escape }}</span> {{ value.label | escape }}
+                      </a>
+                    </label>
+                  </li>
+                {%- endfor -%}
+                {% if filter.type == 'price_range' %}
+                  {%- if filter.min_value.value != null or filter.max_value.value != null -%}
+                    {%- if filter.min_value.value != filter.range_min and filter.max_value.value != filter.range_max -%}
+                      <li>
+                        <a href="{{ filter.url_to_remove }}" class="clear-range">
+                          <span>{{ filter.label | escape }}</span>
+                          {% if filter.min_value.value -%}
+                            {{- filter.min_value.value | money -}}
+                          {%- else -%}
+                            {{- filter.range_min | money -}}
+                          {%- endif %}
+                          -
+                          {% if filter.max_value.value -%}
+                            {{- filter.max_value.value | money -}}
+                          {%- else -%}
+                            {{- filter.range_max | money -}}
+                          {%- endif %}
+                        </a>
+                      </li>
+                    {%- endif -%}
+                  {%- endif -%}
+                {% endif %}
+              {%- endfor -%}
+              <li class="strong">
+                <a href="{{ collection.url }}" class="remove-all">{{ 'collection.filters.remove_all_filters' | t }}</a>
+              </li>
+            </ul>
+          {%- endif -%}
+        </header>
+        {%- for filter in filters -%}
+          {%- case filter.type -%}
+            {%- when 'list' -%}
+              {%- if filter.param_name == 'filter.v.availability' -%}
+                {%- assign in_stock_filter = filter.values | where: 'value', '1' | first -%}
+                <h4 data-filter-toggle="{{ filter.label | handleize }}">{{ filter.label }}</h4>
+                <ul class="check">
+                  <li>
+                    <input
+                      type="checkbox"
+                      name="{{ in_stock_filter.param_name }}"
+                      value="{{ in_stock_filter.value }}"
+                      id="Filter-{{ in_stock_filter.param_name }}-{{ in_stock_filter.value }}"
+                      {% if in_stock_filter.active %}
+                        checked
+                      {% endif %}
+                    >
+                    <label for="Filter-{{ in_stock_filter.param_name }}-{{ in_stock_filter.value }}" class="strong">
+                      <a href="{%- if in_stock_filter.active -%}{{ in_stock_filter.url_to_remove }}{%- else -%}{{ in_stock_filter.url_to_add }}{%- endif -%}">
+                        {{ in_stock_filter.label }}
+                      </a>
+                    </label>
+                  </li>
+                </ul>
+              {%- else -%}
+                {%- liquid
+                  assign triggers = settings.color_swatch_name | newline_to_br | strip_newlines | replace: '<br />', ',' | split: ','
+                  if settings.enable_color_swatches and triggers contains filter.label
+                    assign is_color = true
+                    render 'color-swatches'
+                  else
+                    assign is_color = false
+                  endif
+                -%}
+                <h4 data-filter-toggle="{{ filter.label | handleize }}">{{ filter.label }}</h4>
+                <ul class="check" data-filter-toggle="{{ filter.label | handleize }}">
+                  {%- for filter_value in filter.values -%}
+                    <li>
+                      <input
+                        type="checkbox"
+                        name="{{ filter_value.param_name }}"
+                        value="{{ filter_value.value }}"
+                        id="Filter-{{ filter_value.param_name }}-{{ filter_value.value }}"
+                        {% if filter_value.active %}
+                          checked
+                        {% endif %}
+                      >
+                      <label for="Filter-{{ filter_value.param_name }}-{{ filter_value.value }}" class="align-middle">
+                        {% if filter_value.swatch.image %}
+                          {%- liquid
+                            case section.settings.image_swatches_size
+                              when 'xs'
+                                assign width = 15
+                              when 's'
+                                assign width = 30
+                              when 'm'
+                                assign width = 45
+                              when 'l'
+                                assign width = 60
+                            endcase
+                            assign width_2 = width | times: 2
+                          -%}
+                          <figure class="size-{{ section.settings.image_swatches_size }}{% if section.settings.image_swatches_fill_images %} cover{% if section.settings.image_swatches_show_in_circle %} rounded{% endif %}{% endif %}">
+                            <picture>
+                              <img
+                                src="{{ filter_value.swatch.image | image_url: width: width }}"
+                                srcset="{{ filter_value.swatch.image | image_url: width: width }} 1x,{{ filter_value.swatch.image | image_url: width: width_2 }} 2x"
+                                alt="{{ filter.label | escape }}"
+                                width="{{ width }}"
+                                height="{{ width }}"
+                                style="object-fit:{% if section.settings.image_swatches_fill_images %}cover{% else %}contain{% endif %};"
+                                loading="lazy"
+                              >
+                            </picture>
+                          </figure>
+                        {% elsif filter_value.swatch.color %}
+                          <i
+                            aria-hidden="true"
+                            class="icon-circle"
+                            style="background-color: {{ filter_value.swatch.color }};"
+                          ></i>
+                        {% elsif is_color %}
+                          <i
+                            aria-hidden="true"
+                            class="icon-circle swatch-custom-color-{{ filter_value.label | handleize }}"
+                            style="background-color: {{ filter_value.label | split: ' ' | last }};"
+                          ></i>
+                        {% endif %}
+                        <span>
+                          {{ filter_value.label }}
+                          <span>({{ filter_value.count }})</span>
+                        </span>
+                      </label>
+                    </li>
+                  {%- endfor -%}
+                  {%- if filter.values.size > filters_show_more_limit -%}
+                    <li class="link-more">
+                      <a href="./" class="link-more" data-limit="{{ filters_show_more_limit }}">
+                        {{- 'general.read_more.show' | t }}
+                        <span>{{ 'general.read_more.more' | t }}</span>
+                        <span class="hidden">{{ 'general.read_more.less' | t }}</span>
+                        <i aria-hidden="true" class="icon-chevron-down"></i
+                      ></a>
+                    </li>
+                  {%- endif -%}
+                </ul>
+              {%- endif -%}
+            {%- when 'boolean' -%}
+              <h4 data-filter-toggle="{{ filter.label | handleize }}">{{ filter.label }}</h4>
+              <ul class="check" data-filter-toggle="{{ filter.label | handleize }}">
+                {%- for filter_value in filter.values -%}
+                  <li>
+                    <input
+                      type="checkbox"
+                      name="{{ filter_value.param_name }}"
+                      value="{{ filter_value.value }}"
+                      id="Filter-{{ filter_value.param_name }}-{{ filter_value.value }}"
+                      {% if filter_value.active %}
+                        checked
+                      {% endif %}
+                    >
+                    <label for="Filter-{{ filter_value.param_name }}-{{ filter_value.value }}"
+                      ><a href="{%- if filter_value.active -%}{{ filter_value.url_to_remove }}{%- else -%}{{ filter_value.url_to_add }}{%- endif -%}">
+                        {{- filter_value.label }}
+                        <span>({{ filter_value.count }})</span></a
+                      ></label
+                    >
+                  </li>
+                {%- endfor -%}
+                {%- if filter.values.size > filters_show_more_limit -%}
+                  <li class="link-more">
+                    <a href="./" class="link-more" data-limit="{{ filters_show_more_limit }}">
+                      {{- 'general.read_more.show' | t }}
+                      <span>{{ 'general.read_more.more' | t }}</span>
+                      <span class="hidden">{{ 'general.read_more.less' | t }}</span>
+                      <i aria-hidden="true" class="icon-chevron-down"></i
+                    ></a>
+                  </li>
+                {%- endif -%}
+              </ul>
+            {%- when 'price_range' -%}
+              <h4 data-filter-toggle="{{ filter.label | handleize }}">
+                <span class="desktop-only">{{ 'collection.filters.price.title' | t }}</span
+                ><span class="desktop-hide">{{ filter.label }}</span>
+              </h4>
+              <p class="input-range">
+                <span>
+                  <label for="min">{{ 'collection.filters.price.range_from' | t }}</label>
+                  <span class="input-prefix">
+                    <span>{{ cart.currency.symbol }}</span>
+                    <input
+                      type="number"
+                      id="min"
+                      name="{{ filter.min_value.param_name }}"
+                      value="{% if filter.min_value.value -%}{{ filter.min_value.value | ceil | divided_by: 100 }}{% else %}0{% endif %}"
+                      min="{{ filter.range_min | ceil | divided_by: 100 }}"
+                    >
+                  </span>
+                </span>
+                <span>
+                  <label for="max">{{ 'collection.filters.price.range_to' | t }}</label>
+                  <span class="input-prefix">
+                    <span>{{ cart.currency.symbol }}</span>
+                    <input
+                      type="number"
+                      id="max"
+                      name="{{ filter.max_value.param_name }}"
+                      value="{% if filter.max_value.value -%}{{ filter.max_value.value | ceil | divided_by: 100 }}{% else %}{{ filter.range_max | ceil | divided_by: 100 }}{% endif %}"
+                      max="{{ filter.range_max | ceil | divided_by: 100 }}"
+                    >
+                  </span>
+                </span>
+              </p>
+          {%- endcase -%}
+        {%- endfor -%}
+        <p class="link-btn submit desktop-hide">
+          <a
+            href="./"
+            aria-controls="filter"
+            {% if settings.button_style == 'inv' %}
+              class="inv"
+            {% endif %}
+          >
+            {{- 'collection.filters.show_products' | t: count: amount_of_products }}
+            <span>({{ amount_of_products }})</span></a
+          >
+        </p>
+      </fieldset>
+    {%- endif -%}
+  </form>
+
+{%- elsif display == 'sorting' -%}
+  <form
+    action="./"
+    method="post"
+    class="f8sr {{ width_class }} {{ width_class_mobile }} {% if sticky %} mobile-sticky mobile-compact{% endif %}{% if collection_view == 'list' %} list{% endif %}"
+  >
+    <fieldset>
+      {%- if show_amount_of_products -%}
+        <span class="hx">
+          {{- amount_of_products_translation | t: count: amount_of_products, amount: amount_of_products -}}
+        </span>
+      {%- endif -%}
+      <hr>
+      {%- if show_filters -%}
+        <p class="link-btn desktop-hide">
+          <a
+            href="#filter"
+            {% if settings.button_style == 'inv' %}
+              class="inv"
+            {% endif %}
+            ><i aria-hidden="true" class="icon-filter"></i> {{ 'collection.filters.filter' | t -}}
+          </a>
+        </p>
+      {%- endif -%}
+
+      {% if enable_collection_grid_choice %}
+        <ul class="l4in strong list-hide mobile-hide" aria-controls="collection">
+          {%- liquid
+            assign grid_1_width = grid_1 | split: '|' | first
+            assign grid_1_label = grid_1 | split: '|' | last
+            assign grid_2_width = grid_2 | split: '|' | first
+            assign grid_2_label = grid_2 | split: '|' | last
+            assign collection_grid_view = collection_grid_view
+          -%}
+          <li>
+            <input
+              type="radio"
+              id="fsc"
+              name="fsa"
+              data-width="{{ grid_1_width }}"
+              {% if collection_grid_view == grid_1_width %}
+                checked
+              {% endif %}
+
+            ><label for="fsc"
+              ><span>{{ grid_1_label }}</span></label
+            >
+          </li>
+          <li>
+            <input
+              type="radio"
+              id="fsd"
+              name="fsa"
+              data-width="{{ grid_2_width }}"
+              {% if collection_grid_view == grid_2_width %}
+                checked
+              {% endif %}
+
+            ><label for="fsd"
+              ><span>{{ grid_2_label }}</span></label
+            >
+          </li>
+        </ul>
+      {% endif %}
+      {% if enable_collection_grid_choice_mobile %}
+        <ul class="l4in strong list-hide mobile-only" aria-controls="collection">
+          {%- liquid
+            assign grid_1_width = grid_1_mobile | split: '|' | first
+            assign grid_1_label = grid_1_mobile | split: '|' | last
+            assign grid_2_width = grid_2_mobile | split: '|' | first
+            assign grid_2_label = grid_2_mobile | split: '|' | last
+            assign collection_grid_view = collection_grid_view_mobile
+          -%}
+          <li>
+            <input
+              type="radio"
+              id="fsc_mobile"
+              name="fsa-mobile"
+              data-width-mobile="{{ grid_1_width }}"
+              {% if collection_grid_view == grid_1_width %}
+                checked
+              {% endif %}
+
+            ><label for="fsc_mobile"
+              ><span>{{ grid_1_label }}</span></label
+            >
+          </li>
+          <li>
+            <input
+              type="radio"
+              id="fsd_mobile"
+              name="fsa-mobile"
+              data-width-mobile="{{ grid_2_width }}"
+              {% if collection_grid_view == grid_2_width %}
+                checked
+              {% endif %}
+
+            ><label for="fsd_mobile"
+              ><span>{{ grid_2_label }}</span></label
+            >
+          </li>
+        </ul>
+      {% endif %}
+
+      {% if enable_collection_view_choice %}
+        <ul class="l4vw" aria-controls="collection">
+          <li
+            {% if collection_view == 'grid' %}
+              class="active"
+            {% endif %}
+          >
+            <a href="./" aria-label="Grid display"
+              ><i aria-hidden="true" class="icon-view-grid"></i>
+              <span class="hidden">{{ 'collection.sort_by.grid_view' | t }}</span></a
+            >
+          </li>
+          <li
+            {% if collection_view == 'list' %}
+              class="active"
+            {% endif %}
+          >
+            <a href="./" aria-label="List display"
+              ><i aria-hidden="true" class="icon-view-list"></i>
+              <span class="hidden">{{ 'collection.sort_by.list_view' | t }}</span></a
+            >
+          </li>
+        </ul>
+      {% endif %}
+
+      <p>
+        <label for="sort_by">{{ 'collection.sort_by.sort_by' | t }}</label>
+        <select id="sort_by" name="sort_by">
+          {%- assign sort_by = object.sort_by | default: object.default_sort_by -%}
+          {%- for option in object.sort_options -%}
+            <option
+              value="{{ option.value }}"
+              {% if option.value == sort_by %}
+                selected
+              {% endif %}
+            >
+              {{ option.name }}
+            </option>
+          {%- endfor -%}
+        </select>
+      </p>
+    </fieldset>
+  </form>
+
+{%- elsif display == 'mobile-filter-button' and show_filters -%}
+  <form action="./" method="post" class="f8sr desktop-hide{% if sticky %} mobile-sticky mobile-compact{% endif %}">
+    <fieldset>
+      <p class="link-btn desktop-hide">
+        <a
+          href="#filter"
+          {% if settings.button_style == 'inv' %}
+            class="inv"
+          {% endif %}
+          ><i aria-hidden="true" class="icon-filter"></i> {{ 'collection.filters.filter' | t -}}
+        </a>
+      </p>
+    </fieldset>
+  </form>
+{%- endif -%}

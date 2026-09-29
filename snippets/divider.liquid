@@ -1,0 +1,31 @@
+{% doc %}
+  Renders a divider with customizable spacing and width.
+  @param {object} [settings] - Settings object.
+  @param {string} [shopify_attributes] - Shopify attributes.
+
+  @example
+  {% render 'divider', settings: section.settings, shopify_attributes: section.shopify_attributes %}
+{% enddoc %}
+
+<div class="module-divider-wrapper section-width-{{ settings.width }}"
+    {% if shopify_attributes != blank %}{{ shopify_attributes }}{% endif %}
+    style="
+    {% if settings.width == 'wide' %}
+        left: min(var(--rpn), calc(-50vw + var(--glw) * 0.5 + var(--scrollbar_width) * 0.5));
+        position: relative;
+        width: 100vw;
+    {% endif %}
+    "
+>
+  <div class="module-divider desktop-only">
+    <hr style="margin: 0 0 {{ settings.spacing_desktop }}px; 
+      {% if settings.color != blank %}
+        background-color: {{ settings.color }};
+      {% endif %}">
+  </div>
+  <div class="module-divider desktop-hide">
+    <hr style="margin: 0 0 {{ settings.spacing_mobile }}px; {% if settings.color != blank %}
+      background-color: {{ settings.color }};
+    {% endif %}">
+  </div>
+</div>

@@ -1,0 +1,21 @@
+{% liquid
+  assign button_color = block_settings.button_style | split: ' ' | first
+  assign button_style = block_settings.button_style | split: ' ' | last
+  assign is_link = false
+  if button_style == 'link'
+    assign is_link = true
+  endif
+%}
+<div>
+  <p class="link-btn m0">
+    <a
+      style="margin: 0;"
+      href="{{ block_settings.link_url }}"
+      class="overlay-{{ button_color }} {% if is_link %}strong inline{% elsif button_style == 'inv' %}inv{% endif %}"
+    >
+      {% if is_link %}<span>{% endif -%}
+      {{- block_settings.link_text -}}
+      {%- if is_link %}</span>&nbsp;<i aria-hidden="true" class="icon-chevron-right"></i>{% endif %}
+    </a>
+  </p>
+</div>

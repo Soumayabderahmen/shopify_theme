@@ -1,0 +1,210 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "disabled": true,
+      "settings": {
+        "hide_mobile": false
+      }
+    },
+    "page-service-menu": {
+      "type": "page-service-menu",
+      "settings": {}
+    },
+    "section-faq": {
+      "type": "section-faq",
+      "blocks": {
+        "faq_1": {
+          "type": "text",
+          "settings": {
+            "faq_question": "When will my order be delivered?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>We ship worldwide. Your order will be packaged really carefully and delivered wherever you want. Delivery takes between 2-4 business days. You will receive an e-mail after ordering with more information about the delivery.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "faq_2": {
+          "type": "text",
+          "settings": {
+            "faq_question": "Can I Return my product?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "faq_3": {
+          "type": "text",
+          "settings": {
+            "faq_question": "What can I do if my item (or part of it) is damaged?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>We work hard to deliver your items without damage. Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        }
+      },
+      "block_order": [
+        "faq_1",
+        "faq_2",
+        "faq_3"
+      ],
+      "settings": {
+        "alignment": "left",
+        "compact": false,
+        "title": "<h2>Frequently asked questions</h2>",
+        "title_underline_style": "none",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "section-contact-form": {
+      "type": "section-contact-form",
+      "blocks": {
+        "b0e11565-1382-4fd0-8663-e1bcbddca57a": {
+          "type": "email",
+          "settings": {
+            "title": "Email",
+            "placeholder": "Email"
+          }
+        },
+        "b5e4bbb1-c18d-4871-8369-8084a11a9ba8": {
+          "type": "text",
+          "settings": {
+            "title": "Name",
+            "placeholder": "Name",
+            "required": false
+          }
+        },
+        "42924c9f-d314-4b70-98a2-8c9c70530399": {
+          "type": "textarea",
+          "settings": {
+            "title": "Message",
+            "placeholder": "Message",
+            "required": false
+          }
+        },
+        "99db52c7-524d-42d1-b323-6fa663d9bcd3": {
+          "type": "checkbox",
+          "settings": {
+            "title": "I want to receive marketing",
+            "option_1": "Yes",
+            "option_2": "No",
+            "option_3": "",
+            "option_4": "",
+            "option_5": "",
+            "option_6": "",
+            "required": false
+          }
+        }
+      },
+      "block_order": [
+        "b0e11565-1382-4fd0-8663-e1bcbddca57a",
+        "b5e4bbb1-c18d-4871-8369-8084a11a9ba8",
+        "42924c9f-d314-4b70-98a2-8c9c70530399",
+        "99db52c7-524d-42d1-b323-6fa663d9bcd3"
+      ],
+      "settings": {
+        "alignment": "left",
+        "title": "<h2>Contact form</h2>",
+        "title_underline_style": "none",
+        "button_style": "primary plain",
+        "show_placeholder": true,
+        "compact": true,
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "page-service-info-blocks": {
+      "type": "page-service-info-blocks",
+      "blocks": {
+        "18ebb386-ad40-4c3f-8386-2c45cb1a6cb2": {
+          "type": "information",
+          "settings": {
+            "color_palette": "scheme-7",
+            "title": "Account details",
+            "text": "<p><a href=\"/account\" title=\"/account\">Track your last order</a>, <a href=\"/account\" title=\"/account\">view all orders</a> or <a href=\"/account/addresses\" title=\"/account/addresses\">manage your addresses</a>.</p>",
+            "show_login_links": true,
+            "show_shop_address": false,
+            "show_maps_url": false,
+            "show_phone_link": false,
+            "show_mail_link": false,
+            "show_whatsapp_link": false
+          }
+        },
+        "1aac02b6-6669-4da9-8318-348245b71f6a": {
+          "type": "information",
+          "settings": {
+            "color_palette": "scheme-3",
+            "title": "Customer service",
+            "text": "<p>Give us a call or send us an email whenever you feel like. </p>",
+            "show_login_links": false,
+            "show_shop_address": false,
+            "show_maps_url": false,
+            "show_phone_link": true,
+            "show_mail_link": true,
+            "show_whatsapp_link": true
+          }
+        },
+        "e40e00a1-f1c1-46de-84f4-9f8ac1ca29af": {
+          "type": "information",
+          "settings": {
+            "color_palette": "scheme-8",
+            "title": "Store hours",
+            "text": "<p>Visit our store: </p><p>Mon - Fri: 9AM - 5PM<br/>Sat: 10AM - 6PM<br/>Sun: closed</p><p></p>",
+            "show_login_links": false,
+            "show_shop_address": false,
+            "show_maps_url": true,
+            "show_phone_link": false,
+            "show_mail_link": true,
+            "show_whatsapp_link": false
+          }
+        }
+      },
+      "block_order": [
+        "18ebb386-ad40-4c3f-8386-2c45cb1a6cb2",
+        "1aac02b6-6669-4da9-8318-348245b71f6a",
+        "e40e00a1-f1c1-46de-84f4-9f8ac1ca29af"
+      ],
+      "settings": {}
+    },
+    "section-google-maps": {
+      "type": "section-google-maps",
+      "settings": {
+        "google_maps_iframe": "<iframe src=\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2800.4613648351315!2d-75.69569834823506!3d45.420200278997804!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cce0502f07d210b%3A0xa1502f7f1d25c118!2sShopify!5e0!3m2!1snl!2snl!4v1653470436404!5m2!1snl!2snl\" width=\"600\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\"></iframe>",
+        "spacing_desktop": 20,
+        "spacing_mobile": 20
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "page-service-menu",
+    "section-faq",
+    "section-contact-form",
+    "page-service-info-blocks",
+    "section-google-maps"
+  ]
+}

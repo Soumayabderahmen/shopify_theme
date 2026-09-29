@@ -1,0 +1,156 @@
+{% doc %}
+  Renders product labels including sale badges, new product labels, stock alerts, and custom labels. Displays contextual information to help customers understand product status and promotions.
+
+  @param {object} [product] - The product object to generate labels for
+  @param {string} [origin] - Context origin, use 'productitem' for product grid items to enable advanced stock calculations
+  @param {object} [block] - The block object
+
+  @example
+  {% render 'product-labels', product: product %}
+  @example
+  {% render 'product-labels', product: product, origin: 'productitem' %}
+{% enddoc %}
+
+{%- liquid
+  if product == blank
+    continue
+  endif
+
+  assign current_variant = product.selected_or_first_available_variant
+
+  if block
+    assign custom_label_text = block.settings.custom_label
+    assign custom_labels = blank
+    assign show_sale_label = block.settings.show_sale_label
+    assign sale_label_price = block.settings.sale_label_price
+    assign show_stock_label = block.settings.show_stock_label
+    assign stock_label_qty = block.settings.stock_label_qty
+    assign show_new_label = block.settings.show_new_label
+    assign new_label_max_days = block.settings.new_label_max_days
+  else
+    assign custom_label_text = blank
+    assign custom_labels = blank
+
+    if settings.product_custom_label
+      assign custom_label_namespace = settings.product_custom_label | split: '.' | first
+      assign custom_label_key = settings.product_custom_label | split: '.' | last
+      assign custom_label_metafield = product.metafields[custom_label_namespace][custom_label_key]
+
+      if custom_label_metafield != blank
+        if custom_label_metafield.list?
+          assign custom_labels = custom_label_metafield.value
+        elsif custom_label_metafield.type != blank
+          assign custom_label_text = custom_label_metafield.value
+        else
+          assign custom_label_text = custom_label_metafield
+        endif
+      endif
+    endif
+
+    assign show_sale_label = settings.show_sale_label
+    assign sale_label_price = settings.sale_label_price
+    assign show_stock_label = settings.show_stock_label
+    assign stock_label_qty = settings.stock_label_qty
+    assign show_new_label = settings.show_new_label
+    assign new_label_max_days = settings.new_label_max_days
+  endif
+
+  assign total_stock = 0
+
+  if origin == 'productitem'
+    for variant in product.variants
+      if variant.matched and variant.inventory_management == 'shopify'
+        assign total_stock = total_stock | plus: variant.inventory_quantity
+      endif
+    endfor
+  endif
+
+  if total_stock == 0 and current_variant.inventory_management == 'shopify'
+    assign total_stock = current_variant.inventory_quantity
+  endif
+
+  if current_variant.compare_at_price > current_variant.price and show_sale_label
+    assign sale_label = true
+
+    if sale_label_price == 'percentage'
+      assign discount = current_variant.compare_at_price | minus: current_variant.price | times: 100.0 | divided_by: current_variant.compare_at_price
+
+      if discount > 1
+        assign discount = discount | round
+      else
+        assign discount = discount | round: 1
+      endif
+
+      if discount == 100 and product.price != 0
+        assign discount = discount | minus: 0.1
+      endif
+    elsif sale_label_price == 'amount'
+      assign discount = current_variant.compare_at_price | minus: current_variant.price | money
+    endif
+  endif
+
+  if show_new_label
+    assign new_label_seconds = new_label_max_days | times: 86400
+    assign now_seconds = 'now' | date: '%s' | plus: 0
+    assign published_seconds = product.published_at | date: '%s' | plus: 0
+    assign product_age_seconds = now_seconds | minus: published_seconds
+
+    if product_age_seconds <= new_label_seconds
+      assign new_label = true
+    endif
+  endif
+-%}
+
+<span
+  class="
+    s1lb
+    label
+    {% if settings.button_style != 'solid' %} plain{% endif %}
+  "
+  {% if block %}
+    {{- block.shopify_attributes -}}
+  {% endif %}
+>
+  {%- if sale_label -%}
+    <span class="overlay-sale">
+      {{- 'product.sale_tag' | t -}}
+      {%- if sale_label_price == 'percentage' -%}
+        &nbsp;-{{ discount }}%
+      {%- elsif sale_label_price == 'amount' -%}
+        &nbsp;-{{ discount -}}
+      {%- endif -%}
+    </span>
+  {%- endif -%}
+
+  {%- if new_label -%}
+    <span>{{ 'product.new_tag' | t }}</span>
+  {%- endif -%}
+
+  {%- if show_stock_label and total_stock > 0 and total_stock <= stock_label_qty -%}
+    <span>{{ 'product.stock_tag' | t }}</span>
+  {%- endif -%}
+
+  {%- if custom_labels != blank -%}
+    {%- for label in custom_labels limit: 3 -%}
+      {%- if label != blank -%}
+        <span
+          class="
+            custom-label
+            custom-label--{{ label | handle }}
+          "
+        >
+          {{ label | escape }}
+        </span>
+      {%- endif -%}
+    {%- endfor -%}
+  {%- elsif custom_label_text != blank -%}
+    <span
+      class="
+        custom-label
+        custom-label--{{ custom_label_text | handle }}
+      "
+    >
+      {{ custom_label_text | escape }}
+    </span>
+  {%- endif -%}
+</span>

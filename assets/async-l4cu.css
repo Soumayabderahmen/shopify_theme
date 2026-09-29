@@ -1,0 +1,59 @@
+/*! .l4cu - count up list --------- */
+:root { --l4cu_op: .1; --l4cu_fg: inherit; }
+
+.shopify-section:has(.l4cu) { position: relative; }
+.l4cu { list-style: none; margin: var(--main_mr) 0 calc(var(--main_mr) - var(--dist2)) calc(0px - var(--dist)); padding: 0; color: inherit; text-align: center; --bg: var(--coal); --dist: 80px; --dist2: var(--main_mr); --mr_count: 16px; --fz: var(--main_h1); }
+	.l4cu:first-child, link:first-child + .l4cu { margin-top: 0; }
+	.l4cu li { position: relative; z-index: 2; margin: 0 0 var(--dist2); border-left: var(--dist) solid rgba(0,0,0,0); }
+	.l4cu li > span { display: block; position: relative; z-index: 2; margin: 0 0 var(--mr_count); color: var(--l4cu_fg); font-weight: var(--main_fw_strong); font-size: var(--fz); line-height: var(--main_lh_h); }
+		.l4cu li > span span { margin: 0; }
+		.l4cu li > span span.main { visibility: hidden; opacity: 0; }
+		.l4cu li > span span.clone { display: block; position: absolute; left: 0; right: 0; top: 0; z-index: 9; }
+		.l4cu span.has-plus:after { content: "\002B"; }
+		.l4cu span.has-exc:after { content: "\0021"; }
+		.l4cu span.has-usd:not(.after):before, .l4cu span.has-usd.after:after { content: "\0024"; }
+		.l4cu span.has-eur:not(.after):before, .l4cu span.has-eur.after:after { content: "\20AC"; }
+		.l4cu span.has-gbp:before { content: "\00A3"; }
+		.l4cu span.has-jpy:before { content: "\00A5"; }
+		.l4cu span.has-inr:before { content: "\20B9"; }
+		.l4cu span.has-per:after { content: "\0025"; }
+		.l4cu span.has-str:after { content: "\0020\2605"; }
+	.l4cu p:last-child { margin-bottom: 0; }
+.l4cu.box { --dist: 16px; --mr_count: 8px; }
+	.l4cu.box li { flex-basis: 0; flex-grow: 3; }
+	.l4cu.box li > span { padding: 0 24px; border: 0 solid rgba(0,0,0,0); border-top-width: 35px; border-bottom-width: 35px; }
+	.l4cu.box li > span:before { content: ""; display: block; overflow: hidden; position: absolute; left: 0; right: 0; top: -35px; bottom: -35px; z-index: -1; margin: 0; border-radius: var(--b2r); background: var(--bg); opacity: var(--l4cu_op); }
+	
+	
+/*! Colors --------- */
+.overlay-theme { --l4cu_fg: var(--secondary_bg); }
+.overlay-content { --l4cu_fg: var(--primary_text); }
+.overlay-gray { --l4cu_fg: var(--gray_text); }
+.overlay-lime { --l4cu_fg: var(--tertiary_bg); }
+.overlay-sky { --l4cu_fg: var(--sky); }
+.overlay-pine { --l4cu_fg: var(--pine); }
+.overlay-rose { --l4cu_fg: var(--rose);  }
+.overlay-tan { --l4cu_fg: var(--tan); }
+.overlay-quaternary { --l4cu_fg: var(--quaternary_bg); }
+.overlay-quinary { --l4cu_fg: var(--quinary_bg); }
+
+
+/*! Flexbox --------- */
+/* flex */ 	.l4cu { display: flex; flex-wrap: wrap; }
+/* f:jc */	.text-center.l4cu, .text-center .l4cu { justify-content: center; }
+/* f:je */	.text-end.l4cu, .text-end .l4cu { justify-content: flex-end; }
+
+
+/*! Responsive --------- */
+@media only screen and (max-width: 760px) {
+.l4cu { --dist: var(--rpp); --mr_count: 6px; --fz: var(--size_24_f); }
+.l4cu.box { --dist2: var(--dist); }
+	.l4cu.box li { width: 50%; max-width: none; flex-basis: auto; }
+	
+.l4cu, .l4cu.text-center, .text-center .l4cu { justify-content: space-between; }
+}
+@media only screen and (max-width: 600px) {
+/*.l4cu {}*/
+	.l4cu li { width: 50%; }
+}
+/*! END OF: .l4cu - count up list --------- */

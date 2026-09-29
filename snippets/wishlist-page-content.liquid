@@ -1,0 +1,234 @@
+<section class="wishlist-page" data-wishlist-page>
+  <header class="wishlist-page__heading">
+    <div>
+      <h1>{{ page.title | default: 'La mia Wishlist' | escape }}</h1>
+      <p data-wishlist-count>0 articoli salvati</p>
+    </div>
+    <button type="button" data-wishlist-share hidden>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"></path></svg>
+      <span>Condividi</span>
+    </button>
+  </header>
+
+  {%- unless customer -%}
+    <aside class="wishlist-page__guest">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>
+      <p><b>Salva la tua wishlist</b>Accedi per ritrovarla su tutti i dispositivi</p>
+      <a href="{{ routes.account_login_url }}">Accedi</a>
+    </aside>
+  {%- endunless -%}
+
+  <button class="wishlist-page__price-drop" type="button" data-wishlist-price-drop hidden>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"></path><path d="M15 17h6v-6"></path></svg>
+    <span data-wishlist-price-drop-text></span><b aria-hidden="true">›</b>
+  </button>
+
+  <div class="wishlist-page__filters" role="group" aria-label="Filtra la wishlist" data-wishlist-filters hidden></div>
+  <div class="wishlist-page__tools" data-wishlist-tools hidden>
+    <label>Ordina:
+      <select data-wishlist-sort>
+        <option value="recent">Aggiunti di recente</option>
+        <option value="asc">Prezzo crescente</option>
+        <option value="desc">Prezzo decrescente</option>
+      </select>
+    </label>
+    <button type="button" class="wishlist-page__edit" data-wishlist-edit>Modifica</button>
+  </div>
+
+  <div class="wishlist-page__editbar" data-wishlist-editbar hidden>
+    <label><input type="checkbox" data-wishlist-select-all> <span>Seleziona tutto</span></label>
+    <button type="button" data-wishlist-remove-selected disabled>Rimuovi (0)</button>
+  </div>
+
+  <section class="wishlist-page__empty" data-wishlist-empty hidden>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+    <h2>La tua wishlist è vuota</h2>
+    <p>Tocca il cuore sui prodotti che ti piacciono per ritrovarli qui.</p>
+    <a href="{{ routes.all_products_collection_url }}">Scopri i più venduti</a>
+  </section>
+
+  <div id="section_featured_collection-wishlist">
+    <ul class="wishlist-page__list" data-wishlist-list></ul>
+  </div>
+  <p class="wishlist-page__error" data-wishlist-error role="status" hidden>Non è stato possibile caricare tutti i prodotti salvati. Riprova tra poco.</p>
+
+  {%- assign wishlist_recommendations = collections.all.products -%}
+  {%- if wishlist_recommendations != blank -%}
+    <section class="wishlist-page__recommendations" data-wishlist-recommendations>
+      <h2>Potrebbe piacerti anche</h2>
+      <ul>
+        {%- for recommendation in wishlist_recommendations limit: 16 -%}
+          {%- assign recommendation_variant = recommendation.selected_or_first_available_variant -%}
+          <li class="alibaba-product-card wishlist-recommendation-card">
+            <figure class="alibaba-card__media">
+              <a class="alibaba-card__media-link" href="{{ recommendation.url }}">
+                <picture class="alibaba-card__picture">
+                  {%- if recommendation.featured_image -%}
+                    {{ recommendation.featured_image | image_url: width: 360 | image_tag: loading: 'lazy', widths: '180,270,360', sizes: '40vw', alt: recommendation.featured_image.alt | default: recommendation.title }}
+                  {%- endif -%}
+                </picture>
+              </a>
+              <button
+                type="button"
+                class="wishlist-productcard alibaba-card__wishlist"
+                data-product-id="{{ recommendation.id }}"
+                data-variant-id="{{ recommendation_variant.id }}"
+                data-variant-title="{{ recommendation_variant.title | escape }}"
+                data-price-cents="{{ recommendation_variant.price }}"
+                data-compare-at-price-cents="{{ recommendation_variant.compare_at_price }}"
+                aria-label="Wishlist"
+              >
+                <svg class="alibaba-card__wishlist-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+              </button>
+            </figure>
+            <div class="alibaba-card__body">
+              <h3 class="alibaba-card__title"><a href="{{ recommendation.url }}">{{ recommendation.title | escape }}</a></h3>
+              <p class="alibaba-card__price-main">{{ recommendation_variant.price | money }}</p>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </section>
+  {%- endif -%}
+
+  <div class="wishlist-page__summary" data-wishlist-summary hidden>
+    <p>Totale <b data-wishlist-total>€0,00</b></p>
+    <button type="button" data-wishlist-add-all>Aggiungi tutto al carrello</button>
+  </div>
+</section>
+
+<style>
+  [data-wishlist-page]{max-width:1200px;margin:0 auto 40px;padding:24px 16px}
+  [data-wishlist-page] .wishlist-page__heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  [data-wishlist-page] .wishlist-page__heading h1,[data-wishlist-page] .wishlist-page__heading p{margin:0}
+  [data-wishlist-page] .wishlist-page__heading p{margin-top:5px;color:#71758c;font-size:13px}
+  [data-wishlist-page] [data-wishlist-share]{display:flex;align-items:center;gap:6px;padding:9px 12px;border:1px solid #d9dbea;border-radius:9px;background:#fff;color:#3a34d2;font-weight:700}
+  [data-wishlist-page] [data-wishlist-share] svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  [data-wishlist-page] .wishlist-page__guest{display:flex;align-items:center;gap:11px;margin-bottom:16px;padding:12px;border:1px solid #e2e1fa;border-radius:12px;background:#f0efff}
+  [data-wishlist-page] .wishlist-page__guest>svg{width:26px;height:26px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8}
+  [data-wishlist-page] .wishlist-page__guest p{display:grid;flex:1;gap:2px;margin:0;color:#656780;font-size:12px}
+  [data-wishlist-page] .wishlist-page__guest b{color:#16123f}
+  [data-wishlist-page] .wishlist-page__filters{display:flex;gap:8px;margin-bottom:10px;overflow-x:auto}
+  [data-wishlist-page] .wishlist-page__filters button{flex:none;padding:8px 12px;border:1px solid #e4e6ee;border-radius:999px;background:#fff;color:#4e526b;font-weight:700}
+  [data-wishlist-page] .wishlist-page__filters button[aria-pressed=true]{border-color:#3a34d2;background:#3a34d2;color:#fff}
+  [data-wishlist-page] .wishlist-page__tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  [data-wishlist-page] .wishlist-page__tools label{display:flex;align-items:center;gap:6px}
+  [data-wishlist-page] .wishlist-page__tools select{border:0;background:transparent}
+  [data-wishlist-page] .wishlist-page__list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding:0;list-style:none}
+  [data-wishlist-page] .wishlist-page__empty{margin:24px 0;padding:28px 18px;border:1px solid #e4e6ee;border-radius:14px;background:#fff;text-align:center}
+  [data-wishlist-page] .wishlist-page__empty>svg{width:56px;height:56px;margin:0 auto 12px;color:#3a34d2;fill:none;stroke:currentColor;stroke-width:1.5}
+  [data-wishlist-page] .wishlist-page__empty h2{margin:12px 0 5px}
+  [data-wishlist-page] .wishlist-page__empty p{color:#71758c}
+  [data-wishlist-page] .wishlist-page__empty a{display:inline-block;padding:10px 15px;border-radius:8px;background:#3a34d2;color:#fff;text-decoration:none}
+  [data-wishlist-page] .wishlist-page__error{color:#b3261e}
+  [data-wishlist-page] [hidden]{display:none!important}
+
+  @media only screen and (max-width:760px){
+    html.wishlist-page-active #root #nav-top,
+    html.wishlist-page-active #root .shopify-section-breadcrumbs{display:none!important}
+    html.wishlist-page-active #content{padding-top:0!important;margin-top:0!important}
+    html.wishlist-page-active #content>.shopify-section:first-child{margin-top:0!important;padding-top:0!important}
+    [data-wishlist-page]{--wl-ink:#16123f;--wl-muted:#4a4f6b;--wl-blue:#3a34d2;box-sizing:border-box;width:100%;max-width:none;margin:0 0 88px;padding:18px 12px 28px;background:#f5f6f8;color:var(--wl-ink);font-family:'Figtree',system-ui,sans-serif}
+    [data-wishlist-page] .wishlist-page__heading{align-items:flex-end;gap:10px;margin:0;padding:0 2px 12px}
+    [data-wishlist-page] .wishlist-page__heading h1{font-family:'Sora','Figtree',system-ui,sans-serif;font-size:24px;line-height:1.1;letter-spacing:-.6px}
+    [data-wishlist-page] .wishlist-page__heading p{margin-top:3px;color:var(--wl-muted)}
+    [data-wishlist-page] [data-wishlist-share]{display:flex!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:none!important;height:36px!important;padding:0 14px!important;border:1.5px solid var(--wl-ink)!important;border-radius:999px!important;background:transparent!important;color:var(--wl-ink)!important;font-size:13px!important;line-height:1!important}
+    [data-wishlist-page] .wishlist-page__guest{gap:12px;margin:0 0 14px;padding:12px 14px;border:0;border-radius:14px;background:linear-gradient(120deg,#16123f,#2a2390 60%,#3a34d2);color:#fff}
+    [data-wishlist-page] .wishlist-page__guest p{gap:0;color:#fff;font-size:12.5px;line-height:1.35}
+    [data-wishlist-page] .wishlist-page__guest b{color:#fff;font-size:14px}
+    [data-wishlist-page] .wishlist-page__guest>a{flex:none;padding:8px 14px;border-radius:999px;background:#fff;color:var(--wl-blue);font-size:13px;font-weight:800;text-decoration:none}
+    [data-wishlist-page] .wishlist-page__price-drop{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:10px 12px;border:1px solid #cbe9d6;border-radius:12px;background:#eaf7ef;color:#15603a;font-size:13px;text-align:left}
+    [data-wishlist-page] .wishlist-page__price-drop svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+    [data-wishlist-page] .wishlist-page__price-drop span{flex:1}
+    [data-wishlist-page] .wishlist-page__price-drop b{font-size:18px}
+    [data-wishlist-page] .wishlist-page__filters{gap:6px;margin:14px 0 0;padding-bottom:2px;scrollbar-width:none}
+    [data-wishlist-page] .wishlist-page__filters::-webkit-scrollbar{display:none}
+    [data-wishlist-page] .wishlist-page__filters button{display:block!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:none!important;height:34px!important;min-height:34px!important;padding:0 13px!important;border:1px solid #e4e6ee!important;border-radius:999px!important;background:#fff!important;color:var(--wl-ink)!important;font-size:13px!important;line-height:32px!important;white-space:nowrap}
+    [data-wishlist-page] .wishlist-page__filters button small{margin-left:3px;opacity:.7;font-size:inherit;font-weight:600}
+    [data-wishlist-page] .wishlist-page__filters button[aria-pressed=true]{border-color:var(--wl-blue)!important;background:var(--wl-blue)!important;color:#fff!important}
+    [data-wishlist-page] .wishlist-page__tools{margin:12px 2px 10px;color:var(--wl-ink);font-size:13px}
+    [data-wishlist-page] .wishlist-page__tools select{max-width:190px;padding:0 4px 0 0;color:var(--wl-ink);font:inherit;font-weight:700}
+    [data-wishlist-page] .wishlist-page__edit{width:auto!important;min-width:0!important;height:auto!important;padding:0!important;border:0!important;background:none!important;color:var(--wl-blue)!important;font-weight:800!important}
+    [data-wishlist-page] .wishlist-page__list{margin:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px}
+    [data-wishlist-page] .wishlist-page__list>.alibaba-product-card{min-width:0!important;margin:0!important;border:0!important;border-radius:12px!important;background:#fff!important;box-shadow:0 1px 3px rgba(20,20,40,.06),0 6px 18px -10px rgba(20,20,40,.18)!important;overflow:hidden!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-card__media{width:100%!important;margin:0!important;aspect-ratio:1/1!important;border-radius:0!important;background:#f4f4f4!important;overflow:hidden!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-card__picture,[data-wishlist-page] .wishlist-page__list .alibaba-card__picture img{width:100%!important;height:100%!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-card__picture img{object-fit:cover!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-card__wishlist{display:grid!important;place-items:center!important;top:8px!important;right:8px!important;width:32px!important;min-width:32px!important;height:32px!important;min-height:32px!important;margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;background:rgba(255,255,255,.95)!important;color:#e53935!important;box-shadow:0 2px 6px rgba(0,0,0,.12)!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-card__wishlist:before,[data-wishlist-page] .wishlist-page__list .alibaba-card__wishlist i{display:none!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-card__wishlist-icon{display:block!important;position:static!important;width:17px!important;height:17px!important;fill:currentColor!important;stroke:currentColor!important;stroke-width:2!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-card__body{min-width:0!important;padding:9px 9px 10px!important;gap:5px!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-card__title,[data-wishlist-page] .wishlist-page__list .alibaba-card__title a{margin:0!important;color:var(--wl-ink)!important;font-size:13.5px!important;font-weight:700!important;line-height:1.3!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-card__price-main{margin:0!important;color:var(--wl-ink)!important;font-size:17px!important;font-weight:800!important}
+    [data-wishlist-page] .wishlist-page__list .old-price{color:#8a8a8a!important;font-size:11.5px!important}
+    [data-wishlist-page] .wishlist-page__list :is(.alibaba-card__rotator,.alibaba-card__badges-row,.alibaba-card__rating,.alibaba-card__stock,.alibaba-card__stock-list,.alibaba-card__description,.alibaba-card__colors,.alibaba-card__moq){display:none!important}
+    [data-wishlist-page] .wishlist-page__empty{margin:12px 0 0;padding:36px 20px;border:0;border-radius:16px}
+    [data-wishlist-page] .wishlist-page__empty h2{margin:0;color:var(--wl-ink);font-family:'Sora','Figtree',system-ui,sans-serif;font-size:19px}
+    [data-wishlist-page] .wishlist-page__empty p{max-width:30ch;margin:6px auto 16px;color:var(--wl-muted);font-size:13.5px}
+    [data-wishlist-page] .wishlist-page__empty a{display:inline-flex;align-items:center;min-height:44px;padding:0 22px;border-radius:999px;background:var(--wl-blue);font-weight:800}
+    [data-wishlist-page] .wishlist-page__error{margin:12px 0 0;font-size:13px}
+    [data-wishlist-page] .wishlist-page__summary{position:fixed;z-index:45;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));left:0;display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-top:1px solid #e4e6ee;background:#fff;box-shadow:0 -8px 20px -14px rgba(22,18,63,.4)}
+    [data-wishlist-page] .wishlist-page__summary p{margin:0;color:var(--wl-muted);font-size:12px;line-height:1.2}
+    [data-wishlist-page] .wishlist-page__summary p b{display:block;color:var(--wl-ink);font-size:17px}
+    [data-wishlist-page] .wishlist-page__summary>button{flex:1!important;width:auto!important;min-width:0!important;height:46px!important;padding:0 10px!important;border:0!important;border-radius:12px!important;background:var(--wl-blue)!important;color:#fff!important;font-size:14.5px!important;font-weight:800!important}
+
+    #root [data-wishlist-page] [data-wishlist-share]::before,
+    #root [data-wishlist-page] [data-wishlist-share]::after,
+    #root [data-wishlist-page] .wishlist-page__price-drop::before,
+    #root [data-wishlist-page] .wishlist-page__price-drop::after,
+    #root [data-wishlist-page] .wishlist-page__filters button::before,
+    #root [data-wishlist-page] .wishlist-page__filters button::after,
+    #root [data-wishlist-page] .wishlist-page__edit::before,
+    #root [data-wishlist-page] .wishlist-page__edit::after,
+    #root [data-wishlist-page] [data-wishlist-add-all]::before,
+    #root [data-wishlist-page] [data-wishlist-add-all]::after,
+    #root [data-wishlist-page] [data-wishlist-remove-selected]::before,
+    #root [data-wishlist-page] [data-wishlist-remove-selected]::after,
+    #root [data-wishlist-page] .wishlist-page__select::before,
+    #root [data-wishlist-page] .wishlist-page__select::after{display:none!important;content:none!important}
+    #root [data-wishlist-page] [data-wishlist-share]{display:flex!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:none!important;height:36px!important;padding:0 14px!important;border:1.5px solid #16123f!important;border-radius:999px!important;background-color:transparent!important;color:#16123f!important;box-shadow:none!important}
+    #root [data-wishlist-page] [data-wishlist-share] span{display:inline!important;color:inherit!important;font-size:13px!important;font-weight:700!important;line-height:1!important}
+    #root [data-wishlist-page] .wishlist-page__filters{display:flex!important;align-items:center!important;justify-content:flex-start!important;flex-wrap:nowrap!important;width:100%!important;gap:6px!important;overflow-x:auto!important}
+    #root [data-wishlist-page] .wishlist-page__filters button{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:none!important;height:34px!important;min-height:34px!important;margin:0!important;padding:0 13px!important;border:1px solid #e4e6ee!important;border-radius:999px!important;background-color:#fff!important;color:#16123f!important;box-shadow:none!important;font-size:13px!important;font-weight:700!important;line-height:1!important}
+    #root [data-wishlist-page] .wishlist-page__filters button[aria-pressed=true]{border-color:#3a34d2!important;background-color:#3a34d2!important;color:#fff!important}
+    #root [data-wishlist-page] .wishlist-page__tools{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important}
+    #root [data-wishlist-page] .wishlist-page__tools label{display:flex!important;align-items:center!important;gap:5px!important;min-width:0!important;white-space:nowrap!important}
+    #root [data-wishlist-page] [data-wishlist-sort]{width:auto!important;max-width:205px!important;height:30px!important;margin:0!important;padding:0 24px 0 0!important;border:0!important;border-radius:0!important;background-color:transparent!important;color:#16123f!important;box-shadow:none!important;font-size:13px!important;font-weight:700!important;line-height:30px!important}
+    #root [data-wishlist-page] .wishlist-page__edit{display:inline!important;flex:0 0 auto!important;width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background-color:transparent!important;color:#3a34d2!important;font-size:13px!important;font-weight:800!important;line-height:1!important}
+    #root [data-wishlist-page] .wishlist-page__editbar{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;margin:0 0 10px!important;padding:8px 10px!important;border:1px solid #e4e6ee!important;border-radius:12px!important;background:#fff!important;font-size:13px!important}
+    #root [data-wishlist-page] .wishlist-page__editbar[hidden]{display:none!important}
+    #root [data-wishlist-page] .wishlist-page__editbar label{display:flex!important;align-items:center!important;gap:8px!important;margin:0!important;font-weight:700!important}
+    #root [data-wishlist-page] .wishlist-page__editbar input{width:15px!important;height:15px!important;margin:0!important;accent-color:#3a34d2}
+    #root [data-wishlist-page] [data-wishlist-remove-selected]{width:auto!important;min-width:0!important;height:32px!important;margin:0!important;padding:0 14px!important;border:0!important;border-radius:999px!important;background:#e53935!important;color:#fff!important;font-size:13px!important;font-weight:800!important}
+    #root [data-wishlist-page] [data-wishlist-remove-selected]:disabled{background:#f4adad!important;opacity:1!important}
+    #root [data-wishlist-page] .wishlist-page__list>.alibaba-product-card{position:relative!important}
+    #root [data-wishlist-page] .wishlist-page__select{position:absolute!important;z-index:8!important;top:8px!important;left:8px!important;display:grid!important;width:24px!important;min-width:24px!important;height:24px!important;min-height:24px!important;margin:0!important;padding:0!important;place-items:center!important;border:2px solid #fff!important;border-radius:7px!important;background:rgba(22,18,63,.35)!important;color:#fff!important;box-shadow:0 1px 4px rgba(0,0,0,.15)!important}
+    #root [data-wishlist-page] .wishlist-page__select[aria-checked=true]{border-color:#3a34d2!important;background:#3a34d2!important}
+    #root [data-wishlist-page] .wishlist-page__select svg{width:14px!important;height:14px!important;fill:none!important;stroke:currentColor!important;stroke-width:3!important;stroke-linecap:round!important;stroke-linejoin:round!important;opacity:0}
+    #root [data-wishlist-page] .wishlist-page__select[aria-checked=true] svg{opacity:1}
+    #root [data-wishlist-page] .wishlist-page__summary>button{display:block!important;flex:1 1 auto!important;width:auto!important;min-width:0!important;height:46px!important;margin:0!important;padding:0 10px!important;border:0!important;border-radius:12px!important;background-color:#3a34d2!important;color:#fff!important;box-shadow:none!important;font-size:14.5px!important;font-weight:800!important;line-height:1.15!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations{width:calc(100% + 24px)!important;margin:24px -12px 0!important;padding:0 0 4px 12px!important;overflow:hidden!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations h2{margin:0 0 10px!important;padding:0!important;color:#16123f!important;font-family:'Sora','Figtree',system-ui,sans-serif!important;font-size:17px!important;font-weight:700!important;line-height:1.2!important;letter-spacing:0!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations>ul{display:grid!important;grid-auto-flow:column!important;grid-auto-columns:40%!important;grid-template-columns:none!important;gap:10px!important;width:auto!important;margin:0!important;padding:0 12px 4px 0!important;overflow-x:auto!important;overflow-y:hidden!important;list-style:none!important;scroll-snap-type:x mandatory!important;scrollbar-width:none!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations>ul::-webkit-scrollbar{display:none!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations>ul>.alibaba-product-card{display:flex!important;min-width:0!important;width:auto!important;margin:0!important;padding:0!important;scroll-snap-align:start!important;border:0!important;border-radius:12px!important;background:#fff!important;box-shadow:none!important;overflow:hidden!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__media{width:100%!important;margin:0!important;aspect-ratio:1/1!important;border-radius:0!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__media-link,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__picture,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__picture img{display:block!important;width:100%!important;height:100%!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__picture img{object-fit:cover!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__body{padding:7px 8px 9px!important;gap:3px!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__title,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__title a{font-size:12px!important;font-weight:600!important;line-height:1.25!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__price-main{font-size:14px!important;font-weight:800!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist{position:absolute!important;z-index:3!important;top:8px!important;right:8px!important;left:auto!important;display:grid!important;width:32px!important;min-width:32px!important;max-width:32px!important;height:32px!important;min-height:32px!important;max-height:32px!important;margin:0!important;padding:0!important;place-items:center!important;border:0!important;border-radius:50%!important;background:#fff!important;background-image:none!important;color:#222!important;box-shadow:0 2px 6px rgba(0,0,0,.12)!important;transform:none!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist::before,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist::after{display:none!important;content:none!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist[aria-pressed=true]{background:#fff!important;color:#e53935!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist-icon{display:block!important;position:static!important;inset:auto!important;width:17px!important;height:17px!important;margin:0!important;fill:none!important;stroke:currentColor!important;stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important;transform:none!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist-icon path{fill:none!important;stroke:currentColor!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist[aria-pressed=true] .alibaba-card__wishlist-icon,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist[aria-pressed=true] .alibaba-card__wishlist-icon path{fill:#e53935!important;stroke:#e53935!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations :is(.alibaba-card__rotator,.alibaba-card__badges-row,.alibaba-card__rating,.alibaba-card__stock,.alibaba-card__stock-list,.alibaba-card__description,.alibaba-card__colors,.alibaba-card__moq,.alibaba-card__footer){display:none!important}
+  }
+</style>

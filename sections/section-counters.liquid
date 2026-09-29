@@ -1,0 +1,329 @@
+{% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+{%- liquid
+  assign no_paddings = false
+  if section.settings.paddings == 0
+    assign no_paddings = true
+  endif
+-%}
+<article
+  class="
+    palette-{{ section.settings.color_palette }}
+    module-color-palette
+    m6bx
+    large
+    text-{{ section.settings.text_position }}
+    {% if section.settings.numbers_accent_color %}numbers-accent{% endif %}
+    {{ section.settings.width }}
+    section-width-{{ section.settings.width_banner }}
+    {% if no_paddings %}no-paddings{% endif %}
+  "
+  style="
+    --dist_a:
+      {% if section.settings.color_palette.id == settings.default_color_scheme.id and section.settings.image == blank %}
+        {{ section.settings.paddings }}px
+      {% else %}
+        {{ section.settings.paddings | at_least: 25 }}px
+      {% endif %};
+    --dist_b: var(--dist_a);
+  "
+>
+  {%- if section.settings.image %}
+    <figure class="background plain">
+      <span class="img-overlay" style="opacity:{{ section.settings.overlay_opacity | divided_by: 100.0 }}"></span>
+      <picture>
+        <img
+          src="{{ section.settings.image | image_url: height: 373, width: 1400 }}"
+          srcset="{% render 'image-srcset', image: section.settings.image, max_width: 2900 %}"
+          sizes="            100vw"
+          width="1400"
+          height="373"
+          alt="{{ section.settings.image.alt | default: section.settings.title | escape }}"
+          style="object-position: {{ section.settings.image.presentation.focal_point }}"
+          loading="{% if section.index > 1 %}lazy{% else %}eager{% endif %}"
+        >
+      </picture>
+    </figure>
+  {%- endif -%}
+  <header class="w900 {% if section.settings.text_position == 'center' %}align-center{% endif %}">
+    {%- if section.settings.title != empty -%}
+      <div
+        class="
+          title-styling
+          {% if section.settings.title_underline_style != 'none' %}
+            title-underline-none
+            {% if section.settings.title_underline_style contains 'accent' %}
+              title-underline-accent
+            {% elsif section.settings.title_underline_style contains 'gradient' %}
+              title-underline-gradient
+            {% endif %}
+            {% if section.settings.title_underline_style contains 'secondary_font' %}
+              title-underline-secondary-font
+            {% endif %}
+          {% endif %}
+        "
+      >
+        {{ section.settings.title }}
+      </div>
+    {%- endif -%}
+    {%- if section.settings.text != empty -%}{{ section.settings.text }}{%- endif -%}
+  </header>
+  {%- if section.blocks.size > 0 -%}
+    {{ 'async-l4cu.css' | asset_url | stylesheet_tag: media: 'screen' }}
+    <ul class="l4cu{% if section.settings.numbers_boxed_overlay_opacity > 0 %} box{% endif %}">
+      {%- for block in section.blocks -%}
+        <li {{ block.shopify_attributes }}>
+          <span>{{ block.settings.number | replace: ',', '.' }}</span> {{ block.settings.text }}
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+</article>
+
+<style>
+  #shopify-section-{{ section.id }} { z-index: {{ section.settings.fix_zindex }} !important; --mr_sect: {{ section.settings.spacing_desktop }}px; --mr_sect_m: {{ section.settings.spacing_mobile }}px; --l4cu_op: {{ section.settings.numbers_boxed_overlay_opacity | divided_by: 100.0 }}; --m6bx_op: {{ section.settings.overlay_opacity | divided_by: 100.0 }}; }
+  	#shopify-section-{{ section.id }} .m6bx { margin-bottom: var(--mr_sect); }
+
+  @media only screen and (max-width: 760px) {
+  	#shopify-section-{{ section.id }} .m6bx { --mr_sect: var(--mr_sect_m); }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "t:sections.counters.name",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "max_blocks": 5,
+  "settings": [
+    {
+      "id": "image",
+      "type": "image_picker",
+      "label": "t:sections.counters.settings.image.label",
+      "info": "t:sections.counters.settings.image.info"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:sections.counters.settings.overlay_opacity.label",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_palette",
+      "label": "t:global.color_palette.label",
+      "default": "scheme-8"
+    },
+    {
+      "type": "range",
+      "id": "paddings",
+      "label": "t:global.padding.header",
+      "info": "t:sections.icon_text_blocks.settings.paddings.info",
+      "min": 0,
+      "max": 200,
+      "step": 2,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "id": "text_position",
+      "type": "select",
+      "label": "t:sections.counters.settings.text_position.label",
+      "info": "t:sections.counters.settings.text_position.info",
+      "options": [
+        {
+          "value": "start",
+          "label": "t:sections.counters.settings.text_position.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:sections.counters.settings.text_position.options__2.label"
+        },
+        {
+          "value": "end",
+          "label": "t:sections.counters.settings.text_position.options__3.label"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "width_banner",
+      "label": "t:global.layout.width.label_banner",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed",
+      "visible_if": "{{ settings.width < 2000 }}"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:global.layout.width.label_background",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "wide"
+    },
+    {
+      "type": "header",
+      "content": "t:global.typography.title.label"
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "t:global.typography.title.label",
+      "info": "t:global.typography.title.info",
+      "default": "<h2>Counters</h2>"
+    },
+    {
+      "type": "select",
+      "id": "title_underline_style",
+      "label": "t:global.typography.title_underline_style.label",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:global.typography.title_underline_style.none.label"
+        },
+        {
+          "value": "secondary_font",
+          "label": "t:global.typography.title_underline_style.secondary_font.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_accent",
+          "label": "t:global.typography.title_underline_style.secondary_font_accent.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_gradient",
+          "label": "t:global.typography.title_underline_style.secondary_font_gradient.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "accent",
+          "label": "t:global.typography.title_underline_style.accent.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        },
+        {
+          "value": "gradient",
+          "label": "t:global.typography.title_underline_style.gradient.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:global.typography.text.header"
+    },
+    {
+      "id": "text",
+      "type": "richtext",
+      "label": "t:global.typography.text.label",
+      "default": "<p>Share achievements, numbers, facts and information about your brand with your customers.</p>"
+    },
+    {
+      "type": "range",
+      "id": "numbers_boxed_overlay_opacity",
+      "label": "t:sections.counters.settings.numbers_boxed_overlay_opacity.label",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 10
+    },
+    {
+      "type": "checkbox",
+      "id": "numbers_accent_color",
+      "label": "t:sections.counters.settings.numbers_accent_color.label",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:global.spacing.header"
+    },
+    {
+      "id": "spacing_desktop",
+      "type": "range",
+      "label": "t:global.spacing.spacing_desktop.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "id": "spacing_mobile",
+      "type": "range",
+      "label": "t:global.spacing.spacing_mobile.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "id": "fix_zindex",
+      "type": "range",
+      "label": "t:global.fix_zindex.label",
+      "info": "t:global.fix_zindex.info",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "counter",
+      "name": "t:sections.counters.blocks.counter.name",
+      "settings": [
+        {
+          "id": "number",
+          "type": "text",
+          "label": "t:sections.counters.blocks.counter.settings.number.label",
+          "default": "50"
+        },
+        {
+          "id": "text",
+          "type": "richtext",
+          "label": "t:sections.counters.blocks.counter.settings.text.label",
+          "default": "<p>Describe facts or numbers</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.counters.presets.name",
+      "category": "t:categories.storytelling",
+      "blocks": [
+        {
+          "type": "counter"
+        },
+        {
+          "type": "counter"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

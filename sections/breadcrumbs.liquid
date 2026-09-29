@@ -1,0 +1,16 @@
+{%- render 'breadcrumbs', hide_mobile: section.settings.hide_mobile %}
+
+{% schema %}
+{
+  "name": "t:static_sections.breadcrumbs.name",
+  "class": "shopify-section-breadcrumbs",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "hide_mobile",
+      "label": "t:static_sections.breadcrumbs.settings.hide_mobile.label",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,358 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "settings": {
+        "hide_mobile": true
+      }
+    },
+    "main-product": {
+      "type": "main-product",
+      "blocks": {
+        "c7259cb9-7235-4028-b6df-3a68077fed80": {
+          "type": "title",
+          "settings": {
+            "layout": "title-right",
+            "title_size": "h1",
+            "title": "",
+            "show_vendor_brand": true,
+            "show_vendor_name": true,
+            "show_product_rating": true,
+            "share_whatsapp": true,
+            "share_facebook": true,
+            "share_twitter": true,
+            "share_pinterest": true,
+            "share_messenger": true,
+            "share_email": true,
+            "layout_mobile": "title-top"
+          }
+        },
+        "short_description": {
+          "type": "short_description",
+          "settings": {
+            "show_read_more": true
+          }
+        },
+        "variant_selection": {
+          "type": "variant_selection",
+          "settings": {
+            "selection_type": "dropdown",
+            "options": false,
+            "show_variant_images": true,
+            "show_unavailable_variants": true,
+            "show_single_options": false,
+            "enable_selling_plans": true
+          }
+        },
+        "inventory": {
+          "type": "inventory",
+          "settings": {}
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_tax": false
+          }
+        },
+        "buy_button": {
+          "type": "buy_button",
+          "settings": {
+            "button_style": "plain",
+            "show_amount_selection": true,
+            "show_dynamic_buybutton": true,
+            "button_style_dynamic_buybutton": "inv",
+            "preorder": true,
+            "preorder_button_text": "Pre-order",
+            "preorder_label": "<p>The estimated delivery time is 2-4 weeks</p>",
+            "preorder_label_color_palette": "light_2",
+            "preorder_show_dynamic_buybutton": false,
+            "show_gift_card_recipient": false
+          }
+        },
+        "e392c086-43ad-402d-944c-a74136bf7963": {
+          "type": "spacer",
+          "settings": {
+            "height": 20
+          }
+        },
+        "9eb645fd-1973-4512-9237-ddfd5ce37137": {
+          "type": "trustbadge",
+          "settings": {}
+        },
+        "e9431daf-3b99-40f6-89ff-dab164cda2ff": {
+          "type": "spacer",
+          "settings": {
+            "height": 15
+          }
+        },
+        "shipping_timer": {
+          "type": "shipping_timer",
+          "settings": {}
+        },
+        "usp_1": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>Free shipping </strong>on all orders above 50,00</p>"
+          }
+        },
+        "usp_2": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p>No <strong>hassle returns, </strong>30 days return</p>"
+          }
+        },
+        "usp_3": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>Next day </strong>delivery on all dogfood & catfood</p>"
+          }
+        },
+        "usp_4": {
+          "type": "usp",
+          "settings": {
+            "usp": "<p><strong>Largest stock</strong> in Europe and States</p>"
+          }
+        },
+        "fe69b038-2e1d-4df7-b5c4-53ffa454788b": {
+          "type": "content",
+          "settings": {
+            "enable_tab": true,
+            "collapse": true,
+            "title": "We care about pets",
+            "icon": "none",
+            "header_image_width": 25,
+            "text": "<p>All our pet products are sustainable and we think about the planet. <a href=\"/blogs/news/tips-to-keep-your-dog-entertained\" title=\"Tips to keep your dog entertained\"><strong>Read more</strong></a></p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "eec50782-a101-43d2-bc7c-b6f67935141a": {
+          "type": "content",
+          "settings": {
+            "enable_tab": true,
+            "collapse": true,
+            "title": "Buy now, pay later",
+            "icon": "none",
+            "header_image_width": 25,
+            "text": "<p>Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition. We ship worldwide. Your order will be packaged really carefully and delivered wherever you want. Delivery takes between 2-4 business days. </p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        }
+      },
+      "block_order": [
+        "c7259cb9-7235-4028-b6df-3a68077fed80",
+        "short_description",
+        "variant_selection",
+        "inventory",
+        "price",
+        "buy_button",
+        "e392c086-43ad-402d-944c-a74136bf7963",
+        "9eb645fd-1973-4512-9237-ddfd5ce37137",
+        "e9431daf-3b99-40f6-89ff-dab164cda2ff",
+        "shipping_timer",
+        "usp_1",
+        "usp_2",
+        "usp_3",
+        "usp_4",
+        "fe69b038-2e1d-4df7-b5c4-53ffa454788b",
+        "eec50782-a101-43d2-bc7c-b6f67935141a"
+      ],
+      "settings": {
+        "show_thumbs_desktop": true,
+        "show_thumbs_mobile": false,
+        "images_layout": "aside",
+        "show_product_description": true,
+        "product_description_enable_read_more": false,
+        "pros": "<p>Sustainably produced, Ideal for everyday use</p>",
+        "cons": "<p>May discolor in direct sunlight</p>",
+        "specifications": "<p>Weight: 200gr, Usage: Indoor & outdoor</p>",
+        "product_description_mobile_collapse": false
+      }
+    },
+    "1655736197e3f3d938": {
+      "type": "section-faq",
+      "blocks": {
+        "1655736197d4a3dd1a-0": {
+          "type": "text",
+          "settings": {
+            "faq_question": "When will my order be delivered?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>We ship worldwide. Your order will be packaged really carefully and delivered wherever you want. Delivery takes between 2-4 business days. You will receive an e-mail after ordering with more information about the delivery.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "1655736197d4a3dd1a-1": {
+          "type": "text",
+          "settings": {
+            "faq_question": "Can I return my product?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        },
+        "1655736197d4a3dd1a-2": {
+          "type": "text",
+          "settings": {
+            "faq_question": "What can I do if my item (or part of it) is damaged?",
+            "icon": "none",
+            "header_image_width": 25,
+            "faq_answer": "<p>We work hard to deliver your items without damage. Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "page": "",
+            "image_width": 465,
+            "liquid": "",
+            "html": "",
+            "show_contact_form": false
+          }
+        }
+      },
+      "block_order": [
+        "1655736197d4a3dd1a-0",
+        "1655736197d4a3dd1a-1",
+        "1655736197d4a3dd1a-2"
+      ],
+      "settings": {
+        "alignment": "left",
+        "compact": false,
+        "title": "",
+        "title_underline_style": "none",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "recommended_products_qty": 6,
+        "number_of_items": 5,
+        "text_alignment": "start",
+        "title": "<h2>You may also like</h2>",
+        "title_underline_style": "none",
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": true,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "spacing_desktop": 50,
+        "spacing_mobile": 0,
+        "mobile_collapse": false
+      }
+    },
+    "16551999062a9697ac": {
+      "type": "section-image-with-text",
+      "blocks": {
+        "1655199906a88142bc-0": {
+          "type": "title",
+          "settings": {
+            "title": "<h2>Top 10 bestselling products</h2>",
+            "title_underline_style": "none"
+          }
+        },
+        "1655199906a88142bc-1": {
+          "type": "text",
+          "settings": {
+            "text": "<p>You may also like these products. These products are the best in the test by our consumers.</p>"
+          }
+        },
+        "1655199906a88142bc-2": {
+          "type": "buttons",
+          "settings": {
+            "show_first_link": true,
+            "first_link_text": "Discover now",
+            "first_link_url": "/",
+            "first_button_style": "secondary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain"
+          }
+        }
+      },
+      "block_order": [
+        "1655199906a88142bc-0",
+        "1655199906a88142bc-1",
+        "1655199906a88142bc-2"
+      ],
+      "settings": {
+        "overlay_opacity": 0,
+        "color_palette": "scheme-3",
+        "layout": "image-right",
+        "text_position": "text-start",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "1655199380bd7f8fd3": {
+      "type": "section-collection-list",
+      "settings": {
+        "image_ratio": "square",
+        "fill_images": true,
+        "layout": "slider",
+        "number_of_items": 6,
+        "text_alignment": "start",
+        "title": "<h2>Collections with similar products</h2>",
+        "title_underline_style": "none",
+        "show_link": false,
+        "link_text": "",
+        "link_url": "",
+        "button_style": "primary plain",
+        "collection_title_size": "p",
+        "mobile_layout": "slider",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "recently-viewed": {
+      "type": "section-recently-viewed-products",
+      "settings": {
+        "number_of_items": 5,
+        "text_alignment": "left",
+        "title": "<h2>Recently viewed products</h2>",
+        "title_underline_style": "none",
+        "enable_quick_buy_desktop": true,
+        "enable_quick_buy_mobile": true,
+        "enable_quick_buy_drawer": false,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": true,
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "main-product",
+    "1655736197e3f3d938",
+    "recommendations",
+    "16551999062a9697ac",
+    "1655199380bd7f8fd3",
+    "recently-viewed"
+  ]
+}

@@ -1,0 +1,184 @@
+{% doc %}
+  Renders product delivery time and stock information with support for custom metafields and theme settings. Displays different messages based on stock availability and includes optional tooltips with additional delivery information.
+
+  @param {object} product - Product object to display delivery information for (required)
+  @param {object} [current_variant] - Variant to check inventory for. Defaults to product.selected_or_first_available_variant.
+  @param {string} [origin] - Display context: 'productpage' for bold styling and stock display, 'productitem' for grid items with aggregate stock calculation
+  @param {string} [container] - HTML element to wrap content in. Defaults to 'p'.
+  @param {boolean} [no_margin] - Whether to remove margins from the container. Defaults to false.
+  @param {string} [extra_class] - Additional CSS classes to apply to the container.
+  @param {string} [shopify_attributes] - Additional HTML attributes to apply to the container.
+  @param {string} [extra_element] - HTML content to render before the delivery time container.
+  @param {object} [block] - Block object to display delivery information for.
+  @example
+  {% render 'product-deliverytime', product: product %}
+  @example
+  {% render 'product-deliverytime', product: product, origin: 'productpage', container: 'div' %}
+  @example
+  {% render 'product-deliverytime', product: product, origin: 'productitem', extra_class: 'size-12', no_margin: true %}
+{% enddoc %}
+
+{%- liquid
+  assign current_variant = current_variant | default: product.selected_or_first_available_variant
+  assign no_margin = no_margin | default: false
+  assign extra_class = extra_class | default: false
+  assign container = container | default: 'p'
+  assign shopify_attributes = shopify_attributes | default: block.shopify_attributes | default: false
+  if block
+    assign show_stock = block.settings.show_stock
+    assign show_stock_qty = block.settings.show_stock_qty
+    assign show_product_stock_always = block.settings.show_product_stock_always
+    assign show_deliverytime_always = block.settings.show_deliverytime_always 
+    assign deliverytime_in_stock = block.settings.deliverytime_in_stock
+    assign deliverytime_not_in_stock = block.settings.deliverytime_not_in_stock
+    assign deliverytime_info = block.settings.deliverytime_info
+    assign default_deliverytime_in_stock = block.settings.default_deliverytime_in_stock
+    assign default_deliverytime_not_in_stock = block.settings.default_deliverytime_not_in_stock
+    assign default_product_deliverytime_info = block.settings.default_product_deliverytime_info
+  else 
+    assign show_stock = settings.show_product_stock
+    assign show_stock_qty = settings.show_product_stock_qty
+    assign show_product_stock_always = settings.show_product_stock_always
+    assign show_deliverytime_always = settings.show_deliverytime_always 
+    assign deliverytime_in_stock = settings.product_deliverytime_in_stock
+    assign deliverytime_not_in_stock = settings.product_deliverytime_not_in_stock
+    if deliverytime_in_stock or deliverytime_not_in_stock
+      assign deliverytime_in_stock_metafields_namespace = settings.product_deliverytime_in_stock | split: '.' | first
+      assign deliverytime_in_stock_metafields_key = settings.product_deliverytime_in_stock | split: '.' | last
+      assign deliverytime_not_in_stock_metafields_namespace = settings.product_deliverytime_not_in_stock | split: '.' | first
+      assign deliverytime_not_in_stock_metafields_key = settings.product_deliverytime_not_in_stock | split: '.' | last
+      assign deliverytime_in_stock = product.metafields[deliverytime_in_stock_metafields_namespace][deliverytime_in_stock_metafields_key]
+      assign deliverytime_not_in_stock = product.metafields[deliverytime_not_in_stock_metafields_namespace][deliverytime_not_in_stock_metafields_key]
+      unless deliverytime_in_stock
+        assign deliverytime_in_stock = settings.default_product_deliverytime_in_stock
+      endunless
+      unless deliverytime_not_in_stock
+        assign deliverytime_not_in_stock = settings.default_product_deliverytime_not_in_stock
+      endunless
+      assign deliverytime_info_metafields_namespace = settings.product_deliverytime_info | split: '.' | first
+      assign deliverytime_info_metafields_key = settings.product_deliverytime_info | split: '.' | last
+      assign deliverytime_info = product.metafields[deliverytime_info_metafields_namespace][deliverytime_info_metafields_key]
+      unless deliverytime_info
+        assign deliverytime_info = settings.default_product_deliverytime_info
+      endunless
+    endif
+  endif
+  assign total_stock = 0
+  if origin == 'productpage'
+    assign bold = true
+    if show_stock == false
+      assign list_layout = true
+    endif
+  elsif origin == 'productitem'
+    for variant in product.variants
+      if variant.matched and variant.inventory_management == 'shopify'
+        assign variant_stock = variant.inventory_quantity | at_least: 0
+        assign total_stock = total_stock | plus: variant_stock
+      endif
+    endfor
+  endif
+  if total_stock == 0 and current_variant.inventory_management == 'shopify'
+    assign total_stock = current_variant.inventory_quantity
+  endif
+-%}
+{%- if deliverytime_in_stock or deliverytime_not_in_stock -%}
+  {%- liquid
+    assign deliverytime_in_stock_text = deliverytime_in_stock | strip_html | strip
+    if deliverytime_in_stock_text == blank
+      assign deliverytime_in_stock = default_deliverytime_in_stock
+    endif
+    assign deliverytime_not_in_stock_text = deliverytime_not_in_stock | strip_html | strip
+    if deliverytime_not_in_stock_text == blank
+      assign deliverytime_not_in_stock = default_deliverytime_not_in_stock
+    endif
+    assign deliverytime_info_text = deliverytime_info | strip_html | strip
+    if deliverytime_info_text == blank
+      assign deliverytime_info = default_product_deliverytime_info
+    endif
+
+    assign deliverytime_in_stock_text = deliverytime_in_stock | strip_html | strip
+    if deliverytime_in_stock_text == blank
+      assign deliverytime_in_stock = ''
+    endif
+    assign deliverytime_not_in_stock_text = deliverytime_not_in_stock | strip_html | strip
+    if deliverytime_not_in_stock_text == blank
+      assign deliverytime_not_in_stock = ''
+    endif
+    assign deliverytime_info_text = deliverytime_info | strip_html | strip
+    if deliverytime_info_text == blank
+      assign deliverytime_info = ''
+    endif
+
+    if total_stock > show_stock_qty and show_product_stock_always == false
+      assign show_stock = false
+    endif
+    if current_variant.inventory_management == 'shopify'
+      assign inventory_tracking = true
+      if show_stock
+        assign show = true
+      elsif total_stock > 0 and deliverytime_in_stock != blank
+        assign show = true
+      elsif total_stock <= 0 and deliverytime_not_in_stock != blank
+        assign show = true
+      endif
+    elsif deliverytime_in_stock != blank and show_deliverytime_always
+      assign show = true
+      assign inventory_tracking = false
+      assign show_stock = false
+    endif
+  -%}
+{%- endif -%}
+{%- if show -%}
+  {%- if extra_element -%}{{ extra_element }}{%- endif -%}
+  {%- if total_stock > 0 or inventory_tracking == false -%}
+    <{{ container }}
+      class="stock {% if list_layout %}l4us{% endif %} overlay-valid {{ extra_class }} {% if no_margin %}m0{% endif %}"
+      {% if shopify_attributes %}
+        {{- shopify_attributes -}}
+      {% endif %}
+    >
+      {% if show_stock %}{{ 'product.form.in_stock' | t: amount: total_stock }}{% endif %}
+      {%- if deliverytime_in_stock != blank -%}
+        <span
+          {% if bold %}
+            class="strong"
+          {% endif %}
+        >
+          {% unless list_layout %}<i aria-hidden="true" class="icon-check"></i>{% endunless %}
+          {{ deliverytime_in_stock }}
+          {%- if deliverytime_info != blank -%}
+            &nbsp;<span class="s1tt{% if origin == 'productitem' %} mobile-hide{% endif %}"
+              ><span>{{ deliverytime_info | replace: '</p><p>', '<br>' | remove: '<p>' | remove: '</p>' }}</span></span
+            >
+          {%- endif -%}
+        </span>
+      {%- endif -%}
+    </{{ container }}>
+  {%- elsif inventory_tracking -%}
+    <{{ container }}
+      class="stock overlay-error {{ extra_class }} {% if no_margin %}m0{% endif %}"
+      {% if shopify_attributes %}
+        {{- shopify_attributes -}}
+      {% endif %}
+    >
+      {% if show_stock -%}
+        {{- 'product.form.not_in_stock' | t -}}
+        {%- if deliverytime_not_in_stock != blank -%},{%- endif %}
+      {% endif %}
+      {%- if deliverytime_not_in_stock != blank -%}
+        <span
+          {% if bold %}
+            class="strong"
+          {% endif %}
+        >
+          {{ deliverytime_not_in_stock }}
+          {%- if deliverytime_info != blank -%}
+            &nbsp;<span class="s1tt{% if origin == 'productitem' %} mobile-hide{% endif %}"
+              ><span>{{ deliverytime_info | replace: '</p><p>', '<br>' | remove: '<p>' | remove: '</p>' }}</span></span
+            >
+          {%- endif -%}
+        </span>
+      {%- endif -%}
+    </{{ container }}>
+  {%- endif -%}
+{%- endif -%}

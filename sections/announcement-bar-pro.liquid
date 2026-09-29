@@ -1,0 +1,596 @@
+{% comment %} ============================================
+   ANNOUNCEMENT BAR PRO — platinumshop
+   Supports: slide, fade, marquee animations
+   Full theme editor controls
+============================================ {% endcomment %}
+
+{%- assign slides = section.blocks | where: "type", "slide" -%}
+{%- assign anim = section.settings.animation_type -%}
+{%- assign speed = section.settings.animation_speed -%}
+
+{%- if speed == 'slow' -%}{%- assign ms = 7000 -%}
+{%- elsif speed == 'fast' -%}{%- assign ms = 3000 -%}
+{%- else -%}{%- assign ms = 5000 -%}
+{%- endif -%}
+
+{%- assign marquee_duration = 30 -%}
+{%- if speed == 'slow' -%}{%- assign marquee_duration = 50 -%}
+{%- elsif speed == 'fast' -%}{%- assign marquee_duration = 15 -%}
+{%- endif -%}
+
+<style>
+  /* ── BASE ── */
+  #ann-bar-{{ section.id }} {
+    background: {{ section.settings.bg_color }};
+    color: {{ section.settings.text_color }};
+    font-size: {{ section.settings.font_size }}px;
+    padding: {{ section.settings.bar_padding }}px 0;
+    position: {% if section.settings.sticky %}sticky{% else %}relative{% endif %};
+    top: 0;
+    z-index: 999;
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  #ann-bar-{{ section.id }} .ann-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  /* ── SLIDES WRAPPER ── */
+  .ann-slides-{{ section.id }} {
+    width: 100%;
+    overflow: hidden;
+    text-align: {{ section.settings.text_align }};
+  }
+  .ann-slide-{{ section.id }} {
+    display: none;
+    align-items: center;
+    justify-content: {{ section.settings.text_align }};
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .ann-slide-{{ section.id }}.active {
+    display: flex;
+  }
+
+  /* ── FADE ANIMATION ── */
+  {% if anim == 'fade' %}
+  .ann-slide-{{ section.id }} {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .ann-slide-{{ section.id }}.active {
+    opacity: 1;
+  }
+  {% endif %}
+
+  /* ── SLIDE ANIMATION ── */
+  {% if anim == 'slide' %}
+  .ann-slides-{{ section.id }} {
+    position: relative;
+  }
+  .ann-slide-{{ section.id }} {
+    position: absolute;
+    width: 100%;
+    transform: translateX(100%);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .ann-slide-{{ section.id }}.active {
+    position: relative;
+    transform: translateX(0);
+  }
+  .ann-slide-{{ section.id }}.leaving {
+    position: absolute;
+    transform: translateX(-100%);
+  }
+  {% endif %}
+
+  /* ── MARQUEE ANIMATION ── */
+  {% if anim == 'marquee' %}
+  .ann-slides-{{ section.id }} {
+    white-space: nowrap;
+  }
+  .ann-marquee-track-{{ section.id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 80px;
+    animation: marquee-{{ section.id }} {{ marquee_duration }}s linear infinite;
+    white-space: nowrap;
+  }
+  .ann-marquee-track-{{ section.id }}:hover {
+    animation-play-state: paused;
+  }
+  .ann-marquee-item-{{ section.id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  @keyframes marquee-{{ section.id }} {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  {% endif %}
+
+  /* ── BUTTON ── */
+  .ann-btn-{{ section.id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: {{ section.settings.btn_font_size }}px;
+    padding: {{ section.settings.btn_padding_v }}px {{ section.settings.btn_padding_h }}px;
+    background: {% if section.settings.btn_style == 'outline' %}transparent{% else %}{{ section.settings.btn_bg_color }}{% endif %};
+    color: {% if section.settings.btn_style == 'outline' %}{{ section.settings.btn_text_color }}{% else %}{{ section.settings.btn_text_color }}{% endif %};
+    border: 2px solid {{ section.settings.btn_bg_color }};
+    border-radius: {% if section.settings.btn_shape == 'pill' %}50px{% elsif section.settings.btn_shape == 'rounded' %}8px{% else %}0px{% endif %};
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .ann-btn-{{ section.id }}:hover {
+    background: {{ section.settings.btn_bg_color }};
+    color: {{ section.settings.btn_text_color }};
+    opacity: 0.85;
+    transform: translateY(-1px);
+  }
+
+  /* ── ARROWS ── */
+  .ann-arrow-{{ section.id }} {
+    background: transparent;
+    border: none;
+    color: {{ section.settings.text_color }};
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 10px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    line-height: 1;
+  }
+  .ann-arrow-{{ section.id }}:hover { opacity: 1; }
+  .ann-prev-{{ section.id }} { left: 0; }
+  .ann-next-{{ section.id }} { right: {% if section.settings.show_close %}36px{% else %}0{% endif %}; }
+
+  /* ── DOTS ── */
+  .ann-dots-{{ section.id }} {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 0 2px;
+  }
+  .ann-dot-{{ section.id }} {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: {{ section.settings.text_color }};
+    opacity: 0.35;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .ann-dot-{{ section.id }}.active {
+    opacity: 1;
+    transform: scale(1.4);
+  }
+
+  /* ── CLOSE ── */
+  .ann-close-{{ section.id }} {
+    background: transparent;
+    border: none;
+    color: {{ section.settings.text_color }};
+    font-size: 20px;
+    cursor: pointer;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.7;
+    line-height: 1;
+    padding: 2px 6px;
+  }
+  .ann-close-{{ section.id }}:hover { opacity: 1; }
+
+  /* ── HIDDEN ── */
+  #ann-bar-{{ section.id }}.ann-hidden { display: none !important; }
+</style>
+
+<div id="ann-bar-{{ section.id }}" role="region" aria-label="Announcement">
+  <div class="ann-inner">
+
+    {% if section.settings.show_arrows and anim != 'marquee' and slides.size > 1 %}
+      <button class="ann-arrow-{{ section.id }} ann-prev-{{ section.id }}" aria-label="Previous">&#8249;</button>
+    {% endif %}
+
+    <div class="ann-slides-{{ section.id }}">
+
+      {% if anim == 'marquee' %}
+        {%- comment %} Marquee: duplicate items for seamless loop {%- endcomment %}
+        <div class="ann-marquee-track-{{ section.id }}">
+          {% for block in slides %}
+            {% if block.settings.enabled %}
+              <span class="ann-marquee-item-{{ section.id }}" {{ block.shopify_attributes }}>
+                <span>{{ block.settings.message }}</span>
+                {% if block.settings.btn_label != blank and block.settings.btn_url != blank %}
+                  <a href="{{ block.settings.btn_url }}" class="ann-btn-{{ section.id }}">
+                    {{ block.settings.btn_label }}
+                  </a>
+                {% endif %}
+              </span>
+            {% endif %}
+          {% endfor %}
+          {% comment %} Duplicate for seamless loop {% endcomment %}
+          {% for block in slides %}
+            {% if block.settings.enabled %}
+              <span class="ann-marquee-item-{{ section.id }}" aria-hidden="true">
+                <span>{{ block.settings.message }}</span>
+                {% if block.settings.btn_label != blank and block.settings.btn_url != blank %}
+                  <a href="{{ block.settings.btn_url }}" class="ann-btn-{{ section.id }}" tabindex="-1">
+                    {{ block.settings.btn_label }}
+                  </a>
+                {% endif %}
+              </span>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+      {% else %}
+        {%- comment %} Slide / Fade mode {%- endcomment %}
+        {% for block in slides %}
+          {% if block.settings.enabled %}
+            <div class="ann-slide-{{ section.id }}{% if forloop.first %} active{% endif %}"
+                 data-index="{{ forloop.index0 }}"
+                 {{ block.shopify_attributes }}>
+              <span>{{ block.settings.message }}</span>
+              {% if block.settings.btn_label != blank and block.settings.btn_url != blank %}
+                <a href="{{ block.settings.btn_url }}" class="ann-btn-{{ section.id }}">
+                  {{ block.settings.btn_label }}
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+    </div>
+
+    {% if section.settings.show_arrows and anim != 'marquee' and slides.size > 1 %}
+      <button class="ann-arrow-{{ section.id }} ann-next-{{ section.id }}" aria-label="Next">&#8250;</button>
+    {% endif %}
+
+    {% if section.settings.show_close %}
+      <button class="ann-close-{{ section.id }}" aria-label="Close">&#10005;</button>
+    {% endif %}
+
+  </div>
+
+  {% if section.settings.show_dots and anim != 'marquee' and slides.size > 1 %}
+    <div class="ann-dots-{{ section.id }}">
+      {% for block in slides %}
+        {% if block.settings.enabled %}
+          <button class="ann-dot-{{ section.id }}{% if forloop.first %} active{% endif %}"
+                  data-index="{{ forloop.index0 }}"
+                  aria-label="Slide {{ forloop.index }}">
+          </button>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<script>
+(function() {
+  var bar     = document.getElementById('ann-bar-{{ section.id }}');
+  if (!bar) return;
+
+  var anim    = '{{ anim }}';
+  var slides  = bar.querySelectorAll('.ann-slide-{{ section.id }}');
+  var dots    = bar.querySelectorAll('.ann-dot-{{ section.id }}');
+  var prevBtn = bar.querySelector('.ann-prev-{{ section.id }}');
+  var nextBtn = bar.querySelector('.ann-next-{{ section.id }}');
+  var closeBtn= bar.querySelector('.ann-close-{{ section.id }}');
+  var current = 0;
+  var total   = slides.length;
+  var timer   = null;
+  var interval= {{ ms }};
+
+  function goTo(n) {
+    if (total === 0) return;
+    var prev = current;
+    current = (n + total) % total;
+
+    if (anim === 'slide') {
+      slides[prev].classList.add('leaving');
+      slides[prev].classList.remove('active');
+      setTimeout(function(){ slides[prev].classList.remove('leaving'); }, 520);
+    } else {
+      slides[prev].classList.remove('active');
+    }
+    slides[current].classList.add('active');
+
+    dots.forEach(function(d, i) {
+      d.classList.toggle('active', i === current);
+    });
+  }
+
+  function startAuto() {
+    if (total <= 1 || anim === 'marquee') return;
+    timer = setInterval(function() { goTo(current + 1); }, interval);
+  }
+
+  function resetAuto() {
+    clearInterval(timer);
+    startAuto();
+  }
+
+  if (prevBtn) prevBtn.addEventListener('click', function() { goTo(current - 1); resetAuto(); });
+  if (nextBtn) nextBtn.addEventListener('click', function() { goTo(current + 1); resetAuto(); });
+
+  dots.forEach(function(d) {
+    d.addEventListener('click', function() {
+      goTo(parseInt(this.dataset.index));
+      resetAuto();
+    });
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function() {
+      bar.classList.add('ann-hidden');
+      try { sessionStorage.setItem('ann_closed_{{ section.id }}', '1'); } catch(e) {}
+    });
+    try {
+      if (sessionStorage.getItem('ann_closed_{{ section.id }}') === '1') {
+        bar.classList.add('ann-hidden');
+      }
+    } catch(e) {}
+  }
+
+  startAuto();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Announcement Bar Pro",
+  "tag": "div",
+  "class": "announcement-bar-pro",
+  "settings": [
+    {
+      "type": "header",
+      "content": "🎨 Stile Barra"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Colore sfondo",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Colore testo",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Dimensione testo (px)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "bar_padding",
+      "label": "Altezza barra (padding px)",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "default": 10
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Allineamento testo",
+      "options": [
+        { "value": "left",   "label": "Sinistra" },
+        { "value": "center", "label": "Centro" },
+        { "value": "right",  "label": "Destra" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky",
+      "label": "Barra fissa (sticky)",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "🎬 Animazione"
+    },
+    {
+      "type": "select",
+      "id": "animation_type",
+      "label": "Tipo animazione",
+      "options": [
+        { "value": "slide",   "label": "Slide" },
+        { "value": "fade",    "label": "Fade" },
+        { "value": "marquee", "label": "Marquee (ticker)" }
+      ],
+      "default": "slide"
+    },
+    {
+      "type": "select",
+      "id": "animation_speed",
+      "label": "Velocità",
+      "options": [
+        { "value": "slow",   "label": "Lenta" },
+        { "value": "medium", "label": "Media" },
+        { "value": "fast",   "label": "Veloce" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "header",
+      "content": "🔘 Pulsante Link"
+    },
+    {
+      "type": "select",
+      "id": "btn_style",
+      "label": "Stile pulsante",
+      "options": [
+        { "value": "filled",  "label": "Pieno" },
+        { "value": "outline", "label": "Outline" }
+      ],
+      "default": "outline"
+    },
+    {
+      "type": "select",
+      "id": "btn_shape",
+      "label": "Forma pulsante",
+      "options": [
+        { "value": "pill",    "label": "Pill (arrotondato)" },
+        { "value": "rounded", "label": "Rounded" },
+        { "value": "square",  "label": "Quadrato" }
+      ],
+      "default": "pill"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color",
+      "label": "Colore pulsante",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_text_color",
+      "label": "Colore testo pulsante",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "range",
+      "id": "btn_font_size",
+      "label": "Font size pulsante (px)",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "btn_padding_v",
+      "label": "Padding verticale pulsante (px)",
+      "min": 2,
+      "max": 16,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "btn_padding_h",
+      "label": "Padding orizzontale pulsante (px)",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "⚙️ Controlli"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Mostra frecce navigazione",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Mostra indicatori (dots)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_close",
+      "label": "Mostra pulsante chiudi",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Messaggio",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "enabled",
+          "label": "Attivo",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "message",
+          "label": "Testo messaggio",
+          "default": "🔥 September Sale — 20% OFF on all hoodies & puffer jackets!"
+        },
+        {
+          "type": "text",
+          "id": "btn_label",
+          "label": "Testo pulsante",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "btn_url",
+          "label": "Link pulsante"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement Bar Pro",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "message": "🔥 September Sale — 20% OFF on Hoodies & Puffer Jackets!",
+            "btn_label": "Shop Now",
+            "enabled": true
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "message": "🚚 Free Shipping on orders over €80 — Limited time only!",
+            "btn_label": "Discover",
+            "enabled": true
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "message": "⭐ Premium quality, exclusive brands — Only on Platinumshop",
+            "btn_label": "View All",
+            "enabled": true
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

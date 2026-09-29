@@ -1,0 +1,973 @@
+{% comment %} 
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign has_discount = false
+  assign discount_pct = 0
+  assign savings_amount = 0
+
+  if current_variant.compare_at_price > current_variant.price
+    assign has_discount = true
+    assign savings_amount = current_variant.compare_at_price | minus: current_variant.price
+    assign discount_pct = savings_amount | times: 100.0 | divided_by: current_variant.compare_at_price | floor
+  endif
+
+  assign price_eur = current_variant.price | divided_by: 100.0
+  assign is_high_price = false
+  if price_eur > 80
+    assign is_high_price = true
+  endif
+-%}
+
+<div
+  class="disc-badge-wrap{% unless has_discount %} disc-badge-wrap--hidden{% endunless %}"
+  id="disc-badge-wrap"
+  data-is-high-price="{{ is_high_price }}"
+  aria-hidden="{% unless has_discount %}true{% else %}false{% endunless %}"
+>
+  {%- comment -%} ===== BADGE PERCENTUALE (≤ 80€) ===== {%- endcomment -%}
+  <div
+    class="disc-badge disc-badge--pct{% if is_high_price %} disc-badge--hidden-mode{% endif %}"
+    id="disc-badge-pct-mode"
+  >
+    <div class="disc-badge__bg" aria-hidden="true"></div>
+    <div class="disc-badge__content">
+      <span class="disc-badge__minus">−</span>
+      <span class="disc-badge__pct" id="disc-badge-pct">{{ discount_pct }}</span>
+      <span class="disc-badge__symbol">%</span>
+    </div>
+    <span class="disc-badge__arrow" aria-hidden="true">
+      <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+        <path class="arrow-curve" d="M4 3 C16 3, 22 10, 22 21" />
+        <path class="arrow-head" d="M16 16 L22 22 L26 15" />
+      </svg>
+    </span>
+  </div>
+
+  {%- comment -%} ===== BADGE RISPARMIO € (> 80€) ===== {%- endcomment -%}
+  <div class="disc-badge-eur{% unless is_high_price %} disc-badge--hidden-mode{% endunless %}" id="disc-badge-eur-mode">
+    <span class="disc-badge-eur__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 2L4.09 12.11a1.5 1.5 0 0 0 1.14 2.45h4.77l-2.09 7.54a1.5 1.5 0 0 0 2.63 1.28l8.91-10.11a1.5 1.5 0 0 0-1.14-2.45h-4.77l2.09-7.54A1.5 1.5 0 0 0 13 2Z"
+              fill="#ed7ad2c0" stroke="#e266ceff" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <span class="disc-badge-eur__text">
+      {{ 'discount_R.Risparmio' | t | default: 'Risparmio' }}
+      <strong id="disc-badge-eur-amount">{{ savings_amount | money }}</strong>
+    </span>
+  </div>
+
+  {%- comment -%} ===== INFO RISPARMIO (solo per badge %) ===== {%- endcomment -%}
+  <span class="disc-badge__savings{% if is_high_price %} disc-badge--hidden-mode{% endif %}" id="disc-badge-savings">
+    {{ 'discount_R.Risparmio' | t | default: 'Risparmio' }}
+    <strong>{{ savings_amount | money }}</strong>
+  </span>
+</div>
+
+<style>
+  /* === WRAPPER === */
+  .disc-badge-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .disc-badge-wrap--hidden {
+    display: none !important;
+  }
+  .disc-badge--hidden-mode {
+    display: none !important;
+  }
+
+  /* === BADGE PERCENTUALE (≤ 80€) === */
+  .disc-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    overflow: hidden;
+    clip-path: polygon(0% 0%, 88% 0%, 100% 50%, 88% 100%, 0% 100%);
+    background: linear-gradient(135deg, #e20f0fff 0%, #da5b54ed 50%, #fc3d36ff 100%);
+    {% comment %} box-shadow: 2px 3px 8px rgba(180,0,0,0.4); {% endcomment %}
+    min-width: 50px;
+    {% comment %} padding: 5px 20px 5px 11px; {% endcomment %}
+  }
+  .disc-badge__bg {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 3px,
+      rgba(255,255,255,0.06) 3px,
+      rgba(255,255,255,0.06) 6px
+    );
+    pointer-events: none;
+  }
+  .disc-badge::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent);
+    pointer-events: none;
+  }
+  .disc-badge::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0; right: 8%;
+    height: 4px;
+    background: rgba(100,0,0,0.3);
+    filter: blur(2px);
+  }
+  .disc-badge__content {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    gap: 1px;
+    z-index: 1;
+    line-height: 1;
+  }
+  .disc-badge__minus {
+    font-family: Arial, sans-serif;
+    font-size: 8px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    margin-top: -1px;
+  }
+  .disc-badge__pct {
+    font-family: Arial Black, Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+  .disc-badge__symbol {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 2px;
+  }
+
+  /* === FRECCIA ANIMATA === */
+  .disc-badge__arrow {
+    position: relative;
+    z-index: 2;
+    width: 25px;
+    height: 25px;
+    margin-left: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .disc-badge__arrow svg {
+    width: 25px;
+    height: 25px;
+    overflow: visible;
+  }
+  .arrow-curve {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: arrowCurveDraw 1.5s ease-in-out infinite;
+  }
+  .arrow-head {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    animation: arrowHeadShow 1.5s ease-in-out infinite;
+  }
+
+  /* === BADGE RISPARMIO € (> 80€) === */
+  .disc-badge-eur {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fff5f5;
+    border: 1px solid #ffcdd2;
+    border-radius: 6px;
+    padding: 4px 10px;
+    color: #c62828;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .disc-badge-eur__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+  .disc-badge-eur__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+  .disc-badge-eur__text strong {
+    color: #d32f2f;
+    font-weight: 700;
+  }
+
+  /* === INFO RISPARMIO SOTTO === */
+  .disc-badge__savings {
+    font-size: 12px;
+    color: #555;
+    white-space: nowrap;
+  }
+  .disc-badge__savings strong {
+    color: #cc0000;
+    font-weight: 700;
+  }
+
+  /* === ANIMAZIONI === */
+
+
+  /* Accessibilità */
+  @media (prefers-reduced-motion: reduce) {
+    .arrow-curve { animation: none; stroke-dashoffset: 0; opacity: 1; }
+    .arrow-head  { animation: none; opacity: 1; }
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 480px) {
+    .disc-badge__pct  { font-size: 16px; }
+    .disc-badge__savings { font-size: 11px; }
+    .disc-badge-eur { font-size: 12px; }
+  }
+</style>
+
+<script>
+  (function () {
+    function formatMoney(cents) {
+      return (cents / 100).toLocaleString('{{ localization.language.iso_code }}' || 'it-IT', {
+        style: 'currency',
+        currency:
+          (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) ||
+          '{{ cart.currency.iso_code }}',
+      });
+    }
+
+    document.addEventListener('variant:changed', function (e) {
+      var v = e.detail && e.detail.variant;
+      if (!v) return;
+
+      var wrap = document.getElementById('disc-badge-wrap');
+      var pctMode = document.getElementById('disc-badge-pct-mode');
+      var eurMode = document.getElementById('disc-badge-eur-mode');
+      var pctEl = document.getElementById('disc-badge-pct');
+      var savEl = document.getElementById('disc-badge-savings');
+      var eurAmt = document.getElementById('disc-badge-eur-amount');
+      if (!wrap) return;
+
+      var hasDiscount = v.compare_at_price && v.compare_at_price > v.price;
+      var priceEur = v.price / 100;
+      var isHighPrice = priceEur > 80;
+
+      if (hasDiscount) {
+        var pct = Math.floor(((v.compare_at_price - v.price) * 100) / v.compare_at_price);
+        var savings = v.compare_at_price - v.price;
+
+        wrap.classList.remove('disc-badge-wrap--hidden');
+        wrap.setAttribute('aria-hidden', 'false');
+
+        if (isHighPrice) {
+          // Modalità > 80€: mostra solo badge €
+          pctMode.classList.add('disc-badge--hidden-mode');
+          if (savEl) savEl.classList.add('disc-badge--hidden-mode');
+          eurMode.classList.remove('disc-badge--hidden-mode');
+          if (eurAmt) eurAmt.textContent = formatMoney(savings);
+        } else {
+          // Modalità ≤ 80€: mostra badge % + risparmio
+          eurMode.classList.add('disc-badge--hidden-mode');
+          pctMode.classList.remove('disc-badge--hidden-mode');
+          if (savEl) savEl.classList.remove('disc-badge--hidden-mode');
+          if (pctEl) pctEl.textContent = pct;
+          if (savEl) savEl.innerHTML = 'Risparmi <strong>' + formatMoney(savings) + '</strong>';
+        }
+      } else {
+        wrap.classList.add('disc-badge-wrap--hidden');
+        wrap.setAttribute('aria-hidden', 'true');
+      }
+    });
+  })();
+</script> {% endcomment %}
+
+
+
+
+
+{% comment %} 
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign has_discount = false
+  assign discount_pct = 0
+  assign savings_amount = 0
+
+  if current_variant.compare_at_price > current_variant.price
+    assign has_discount = true
+    assign savings_amount = current_variant.compare_at_price | minus: current_variant.price
+    assign discount_pct = savings_amount | times: 100.0 | divided_by: current_variant.compare_at_price | floor
+  endif
+
+  assign price_eur = current_variant.price | divided_by: 100.0
+  assign is_high_price = false
+  if price_eur > 80
+    assign is_high_price = true
+  endif
+
+  assign is_new_arrival = false
+  if product.tags contains 'new-arrival'
+    assign is_new_arrival = true
+  endif
+
+  # Animazione 360° attiva se c'è lo sconto + la tag new-arrival
+  assign enable_360_flip = false
+  if has_discount and is_new_arrival
+    assign enable_360_flip = true
+  endif
+
+  # Traduzioni multilingua
+  assign current_lang = localization.language.iso_code | downcase
+
+  case current_lang
+    when 'it'
+      assign text_savings = 'Risparmi'
+      assign text_new = 'NUOVI ARRIVI'
+    when 'fr'
+      assign text_savings = 'Économisez'
+      assign text_new = 'Nouveautés'
+    when 'de'
+      assign text_savings = 'Sie sparen'
+      assign text_new = 'Neuheiten'
+    when 'es'
+      assign text_savings = 'Ahorras'
+      assign text_new = 'Novedades'
+    else
+      assign text_savings = 'You save'
+      assign text_new = 'NEW ARRIVALS'
+  endcase
+-%}
+
+<div
+  class="badge-wrap-3d{% unless has_discount %} badge-wrap-3d--hidden{% endunless %}"
+  id="disc-badge-wrap"
+  data-is-high-price="{{ is_high_price }}"
+  data-has-new-arrival="{{ is_new_arrival }}"
+  aria-hidden="{% if has_discount %}false{% else %}true{% endif %}"
+>
+  {%- if enable_360_flip -%}
+    {%- comment -%} === BADGE 3D ANIMATO 360° (Sconto + Risparmi + Novità) === {%- endcomment -%}
+    <div class="cube-3d-scene">
+      <div class="cube-3d-flipper">
+        
+        <!-- FACCIA 1 (0°): SCONTO + RISPARMI -->
+        <div class="cube-3d-face cube-3d-face--front">
+          <div class="discount-combined-group">
+            {%- if is_high_price -%}
+              <span class="pill-badge pill-badge--discount">
+                <svg class="pill-badge__icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.09 12.11a1.5 1.5 0 0 0 1.14 2.45h4.77l-2.09 7.54a1.5 1.5 0 0 0 2.63 1.28l8.91-10.11a1.5 1.5 0 0 0-1.14-2.45h-4.77l2.09-7.54A1.5 1.5 0 0 0 13 2Z"/></svg>
+                {{ text_savings }} <strong id="disc-badge-eur-amount">{{ savings_amount | money }}</strong>
+              </span>
+            {%- else -%}
+              <span class="pill-badge pill-badge--discount">
+                −<span id="disc-badge-pct">{{ discount_pct }}</span>%
+              </span>
+              <span class="pill-badge-savings" id="disc-badge-savings">
+                <span class="disc-badge-savings__text">{{ text_savings }}</span> <strong id="disc-badge-savings-amount">{{ savings_amount | money }}</strong>
+              </span>
+            {%- endif -%}
+          </div>
+        </div>
+
+        <!-- FACCIA 2 (180°): NOVITÀ / NEW ARRIVAL -->
+        {% comment %} <div class="cube-3d-face cube-3d-face--back">
+          <span class="pill-badge pill-badge--new">
+            <span class="pill-badge__fire">🔥</span>
+            {{ text_new }}
+          </span>
+        </div> {% endcomment %}
+        <!-- FACCIA 2 (180°): NOVITÀ / NEW ARRIVAL -->
+<div class="cube-3d-face cube-3d-face--back">
+  <span class="pill-badge pill-badge--new">
+    <span class="pill-badge__sparkle">✨</span>
+    {{ text_new }}
+  </span>
+</div>
+
+      </div>
+    </div>
+
+  {%- else -%}
+    {%- comment -%} === BADGE STATICO (Solo Sconto) === {%- endcomment -%}
+    <div class="discount-combined-group">
+      {%- if is_high_price -%}
+        <span class="pill-badge pill-badge--discount">
+          <svg class="pill-badge__icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.09 12.11a1.5 1.5 0 0 0 1.14 2.45h4.77l-2.09 7.54a1.5 1.5 0 0 0 2.63 1.28l8.91-10.11a1.5 1.5 0 0 0-1.14-2.45h-4.77l2.09-7.54A1.5 1.5 0 0 0 13 2Z"/></svg>
+          {{ text_savings }} <strong>{{ savings_amount | money }}</strong>
+        </span>
+      {%- else -%}
+        <span class="pill-badge pill-badge--discount">
+          −{{ discount_pct }}%
+        </span>
+        <span class="pill-badge-savings">
+          {{ text_savings }} <strong>{{ savings_amount | money }}</strong>
+        </span>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</div>
+
+<style>
+  /* === WRAPPER PRINCIPALE RESPONSIVE === */
+  .badge-wrap-3d {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    vertical-align: middle;
+  }
+
+  .badge-wrap-3d--hidden {
+    display: none !important;
+  }
+
+  /* GRAFICA GRUPPO SCONTO + RISPARMI */
+  .discount-combined-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  /* === STILE BADGE === */
+  .pill-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    height: 1.875rem; /* 30px */
+    padding: 0 0.75rem;
+    border-radius: 0.35rem;
+    font-size: 0.875rem; /* 14px */
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+
+  .pill-badge--discount {
+    background: linear-gradient(135deg, #e11d48, #be123c);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25);
+  }
+
+.pill-badge--new {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  padding: 0 0.85rem; /* Padding maggiorato */
+  border-radius: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Bordino di luce */
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.35); /* Glow azzurro */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+
+.pill-badge__sparkle {
+  font-size: 0.85rem;
+  margin-right: 0.2rem;
+  display: inline-block;
+  animation: pulseSparkle 2s infinite ease-in-out;
+}
+
+/* Effetto di pulsazione sulla stella */
+@keyframes pulseSparkle {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+
+
+  .pill-badge__icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .pill-badge__fire {
+    font-size: 0.9rem;
+  }
+
+  /* TESTO RISPARMI */
+  .pill-badge-savings {
+    font-size: 0.875rem; /* 14px */
+    color: #374151;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .pill-badge-savings strong {
+    color: #e11d48;
+    font-weight: 800;
+  }
+
+  /* === ROTAZIONE 360 GRADI 3D === */
+.cube-3d-scene {
+  perspective: 800px;
+  height: 2rem; /* Altezza sufficiente per non tagliare il badge */
+  display: inline-flex;
+  align-items: center;
+}
+
+.cube-3d-flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: rotate360Cube 8s cubic-bezier(0.68, -0.15, 0.265, 1.15) infinite;
+}
+
+  .cube-3d-face {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Posizionamento Facce 3D */
+  .cube-3d-face--front {
+    transform: rotateX(0deg) translateZ(0.9375rem);
+  }
+
+  .cube-3d-face--back {
+    transform: rotateX(180deg) translateZ(0.9375rem);
+  }
+
+  /* Keyframe Animazione 0° -> 180° -> 360° */
+  @keyframes rotate360Cube {
+    0%, 35% {
+      transform: rotateX(0deg);
+    }
+    50%, 85% {
+      transform: rotateX(180deg);
+    }
+    100% {
+      transform: rotateX(360deg);
+    }
+  }
+
+  /* === MEDIA QUERIES (MOBILE RESPONSIVE) === */
+  @media (max-width: 480px) {
+    .pill-badge {
+      height: 1.625rem; /* 26px su mobile */
+      padding: 0 0.55rem;
+      font-size: 0.775rem;
+    }
+    .pill-badge-savings {
+      font-size: 0.775rem;
+    }
+    .cube-3d-scene {
+      height: 1.625rem;
+    }
+    .cube-3d-face--front {
+      transform: rotateX(0deg) translateZ(0.8125rem);
+    }
+    .cube-3d-face--back {
+      transform: rotateX(180deg) translateZ(0.8125rem);
+    }
+  }
+
+  /* Accessibilità Riduzione Movimento */
+  @media (prefers-reduced-motion: reduce) {
+    .cube-3d-flipper {
+      animation: none !important;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    function formatMoney(cents) {
+      return (cents / 100).toLocaleString('{{ localization.language.iso_code }}' || 'en-US', {
+        style: 'currency',
+        currency:
+          (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) ||
+          '{{ cart.currency.iso_code }}',
+      });
+    }
+
+    document.addEventListener('variant:changed', function (e) {
+      var v = e.detail && e.detail.variant;
+      if (!v) return;
+
+      var wrap = document.getElementById('disc-badge-wrap');
+      var pctEl = document.getElementById('disc-badge-pct');
+      var savAmtEl = document.getElementById('disc-badge-savings-amount');
+      var eurAmt = document.getElementById('disc-badge-eur-amount');
+      if (!wrap) return;
+
+      var hasDiscount = v.compare_at_price && v.compare_at_price > v.price;
+
+      if (hasDiscount) {
+        var pct = Math.floor(((v.compare_at_price - v.price) * 100) / v.compare_at_price);
+        var savings = v.compare_at_price - v.price;
+
+        wrap.classList.remove('badge-wrap-3d--hidden');
+        wrap.setAttribute('aria-hidden', 'false');
+
+        if (pctEl) pctEl.textContent = pct;
+        if (eurAmt) eurAmt.textContent = formatMoney(savings);
+        if (savAmtEl) savAmtEl.textContent = formatMoney(savings);
+      } else {
+        wrap.classList.add('badge-wrap-3d--hidden');
+        wrap.setAttribute('aria-hidden', 'true');
+      }
+    });
+  })();
+</script> {% endcomment %}
+
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign has_discount = false
+  assign discount_pct = 0
+  assign savings_amount = 0
+
+  if current_variant.compare_at_price > current_variant.price
+    assign has_discount = true
+    assign savings_amount = current_variant.compare_at_price | minus: current_variant.price
+    assign discount_pct = savings_amount | times: 100.0 | divided_by: current_variant.compare_at_price | floor
+  endif
+
+  assign price_eur = current_variant.price | divided_by: 100.0
+  assign is_high_price = false
+  if price_eur > 80
+    assign is_high_price = true
+  endif
+
+  assign is_new_arrival = false
+  if product.tags contains 'new-arrival'
+    assign is_new_arrival = true
+  endif
+
+  # Animazione 360° attiva se c'è lo sconto + la tag new-arrival
+  assign enable_360_flip = false
+  if has_discount and is_new_arrival
+    assign enable_360_flip = true
+  endif
+
+  # Traduzioni multilingua
+  assign current_lang = localization.language.iso_code | downcase
+
+  case current_lang
+    when 'it'
+      assign text_savings = 'Risparmi'
+      assign text_new = 'NUOVI ARRIVI'
+    when 'fr'
+      assign text_savings = 'Économisez'
+      assign text_new = 'Nouveautés'
+    when 'de'
+      assign text_savings = 'Sie sparen'
+      assign text_new = 'Neuheiten'
+    when 'es'
+      assign text_savings = 'Ahorras'
+      assign text_new = 'Novedades'
+    else
+      assign text_savings = 'You save'
+      assign text_new = 'NEW ARRIVALS'
+  endcase
+-%}
+
+<div
+  class="badge-wrap-3d{% unless has_discount %} badge-wrap-3d--hidden{% endunless %}"
+  id="disc-badge-wrap"
+  data-is-high-price="{{ is_high_price }}"
+  data-has-new-arrival="{{ is_new_arrival }}"
+  aria-hidden="{% if has_discount %}false{% else %}true{% endif %}"
+>
+  {%- if enable_360_flip -%}
+    {%- comment -%} === BADGE 3D ANIMATO 360° (Sconto + Risparmi + Novità) === {%- endcomment -%}
+    <div class="cube-3d-scene">
+      <div class="cube-3d-flipper">
+        
+        <!-- FACCIA 1 (0°): SCONTO + RISPARMI -->
+        <div class="cube-3d-face cube-3d-face--front">
+          <div class="discount-combined-group">
+            {%- if is_high_price -%}
+              <span class="pill-badge pill-badge--discount">
+                <svg class="pill-badge__icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.09 12.11a1.5 1.5 0 0 0 1.14 2.45h4.77l-2.09 7.54a1.5 1.5 0 0 0 2.63 1.28l8.91-10.11a1.5 1.5 0 0 0-1.14-2.45h-4.77l2.09-7.54A1.5 1.5 0 0 0 13 2Z"/></svg>
+                {{ text_savings }} <strong id="disc-badge-eur-amount">{{ savings_amount | money }}</strong>
+              </span>
+            {%- else -%}
+              <span class="pill-badge pill-badge--discount">
+                −<span id="disc-badge-pct">{{ discount_pct }}</span>%
+              </span>
+              <span class="pill-badge-savings" id="disc-badge-savings">
+                <span class="disc-badge-savings__text">{{ text_savings }}</span> <strong id="disc-badge-savings-amount">{{ savings_amount | money }}</strong>
+              </span>
+            {%- endif -%}
+          </div>
+        </div>
+
+        <!-- FACCIA 2 (180°): NOVITÀ / NEW ARRIVAL -->
+        <div class="cube-3d-face cube-3d-face--back">
+          <span class="pill-badge pill-badge--new">
+            <span class="pill-badge__sparkle">✨</span>
+            {{ text_new }}
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+  {%- else -%}
+    {%- comment -%} === BADGE STATICO (Solo Sconto) === {%- endcomment -%}
+    <div class="discount-combined-group">
+      {%- if is_high_price -%}
+        <span class="pill-badge pill-badge--discount">
+          <svg class="pill-badge__icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.09 12.11a1.5 1.5 0 0 0 1.14 2.45h4.77l-2.09 7.54a1.5 1.5 0 0 0 2.63 1.28l8.91-10.11a1.5 1.5 0 0 0-1.14-2.45h-4.77l2.09-7.54A1.5 1.5 0 0 0 13 2Z"/></svg>
+          {{ text_savings }} <strong>{{ savings_amount | money }}</strong>
+        </span>
+      {%- else -%}
+        <span class="pill-badge pill-badge--discount">
+          −{{ discount_pct }}%
+        </span>
+        <span class="pill-badge-savings">
+          {{ text_savings }} <strong>{{ savings_amount | money }}</strong>
+        </span>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</div>
+
+<style>
+  /* === WRAPPER PRINCIPALE RESPONSIVE === */
+  .badge-wrap-3d {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    vertical-align: middle;
+    position: relative;
+    z-index: 5;
+  }
+
+  .badge-wrap-3d--hidden {
+    display: none !important;
+  }
+
+  /* GRAFICA GRUPPO SCONTO + RISPARMI */
+  .discount-combined-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+  }
+
+  /* === STILE BADGE === */
+  .pill-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    height: 1.875rem; /* 30px */
+    padding: 0 0.65rem;
+    border-radius: 0.35rem;
+    font-size: 0.8125rem; /* 13px per evitare overflow */
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+
+  .pill-badge--discount {
+    background: linear-gradient(135deg, #e11d48, #be123c);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.25);
+  }
+
+  .pill-badge--new {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    letter-spacing: 0.03em;
+    padding: 0 0.75rem;
+    border-radius: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .pill-badge__sparkle {
+    font-size: 0.85rem;
+    margin-right: 0.15rem;
+    display: inline-block;
+    animation: pulseSparkle 2s infinite ease-in-out;
+  }
+
+  @keyframes pulseSparkle {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.2); opacity: 1; }
+  }
+
+  .pill-badge__icon {
+    width: 0.9rem;
+    height: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  /* TESTO RISPARMI */
+  .pill-badge-savings {
+    font-size: 0.8125rem;
+    color: #1f2937;
+    white-space: nowrap;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+  }
+
+  .pill-badge-savings strong {
+    color: #be123c;
+    font-weight: 800;
+  }
+
+  /* === ROTAZIONE 360 GRADI 3D === */
+  .cube-3d-scene {
+    perspective: 1000px;
+    height: 2rem;
+    min-width: 140px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .cube-3d-flipper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    animation: rotate360Cube 8s cubic-bezier(0.68, -0.15, 0.265, 1.15) infinite;
+  }
+
+  .cube-3d-face {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Posizionamento Facce 3D */
+  .cube-3d-face--front {
+    transform: rotateX(0deg) translateZ(1rem);
+  }
+
+  .cube-3d-face--back {
+    transform: rotateX(180deg) translateZ(1rem);
+  }
+
+  @keyframes rotate360Cube {
+    0%, 40% {
+      transform: rotateX(0deg);
+    }
+    50%, 90% {
+      transform: rotateX(180deg);
+    }
+    100% {
+      transform: rotateX(360deg);
+    }
+  }
+
+  /* === MEDIA QUERIES (MOBILE RESPONSIVE) === */
+  @media (max-width: 480px) {
+    .pill-badge {
+      height: 1.625rem;
+      padding: 0 0.45rem;
+      font-size: 0.725rem;
+    }
+    .pill-badge-savings {
+      font-size: 0.725rem;
+      padding: 0.1rem 0.3rem;
+    }
+    .cube-3d-scene {
+      height: 1.625rem;
+      min-width: 110px;
+    }
+    .cube-3d-face--front {
+      transform: rotateX(0deg) translateZ(0.8125rem);
+    }
+    .cube-3d-face--back {
+      transform: rotateX(180deg) translateZ(0.8125rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cube-3d-flipper {
+      animation: none !important;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    function formatMoney(cents) {
+      return (cents / 100).toLocaleString('{{ localization.language.iso_code }}' || 'en-US', {
+        style: 'currency',
+        currency:
+          (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) ||
+          '{{ cart.currency.iso_code }}',
+      });
+    }
+
+    document.addEventListener('variant:changed', function (e) {
+      var v = e.detail && e.detail.variant;
+      if (!v) return;
+
+      var wrap = document.getElementById('disc-badge-wrap');
+      var pctEl = document.getElementById('disc-badge-pct');
+      var savAmtEl = document.getElementById('disc-badge-savings-amount');
+      var eurAmt = document.getElementById('disc-badge-eur-amount');
+      if (!wrap) return;
+
+      var hasDiscount = v.compare_at_price && v.compare_at_price > v.price;
+
+      if (hasDiscount) {
+        var pct = Math.floor(((v.compare_at_price - v.price) * 100) / v.compare_at_price);
+        var savings = v.compare_at_price - v.price;
+
+        wrap.classList.remove('badge-wrap-3d--hidden');
+        wrap.setAttribute('aria-hidden', 'false');
+
+        if (pctEl) pctEl.textContent = pct;
+        if (eurAmt) eurAmt.textContent = formatMoney(savings);
+        if (savAmtEl) savAmtEl.textContent = formatMoney(savings);
+      } else {
+        wrap.classList.add('badge-wrap-3d--hidden');
+        wrap.setAttribute('aria-hidden', 'true');
+      }
+    });
+  })();
+</script>

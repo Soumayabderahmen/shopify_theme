@@ -1,0 +1,35 @@
+{% comment %}
+  Register Xtra's standard storefront action overrides before content_for_header.
+  Keep the lifecycle bootstrap inline; load the static implementation from a cacheable theme asset.
+{% endcomment %}
+<script>
+  (function () {
+    var cartUrl = {{ routes.cart_url | default: '/cart' | json }};
+    var actionConfig;
+
+    if (typeof cartUrl !== 'string' || !cartUrl) {
+      cartUrl = '/cart';
+    }
+
+    actionConfig = {
+      cartUrl: cartUrl,
+      updateCartSource: 'xtra-standard-action'
+    };
+
+    function configureStandardActions() {
+      var runtime = window.XtraStandardStorefrontActions;
+
+      if (!runtime || typeof runtime.configure !== 'function') return;
+      runtime.configure(actionConfig);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', configureStandardActions, { once: true });
+    } else {
+      configureStandardActions();
+    }
+
+    window.addEventListener('load', configureStandardActions, { once: true });
+  })();
+</script>
+<script defer src="{{ 'standard-storefront-actions.js' | asset_url }}"></script>

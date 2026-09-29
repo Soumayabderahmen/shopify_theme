@@ -1,0 +1,3951 @@
+.mobile-temu-header,
+.mobile-category-browser,
+.mobile-bottom-navigation,
+.mobile-explore-scrim,
+.mobile-explore-drawer {
+  display: none;
+}
+
+.mobile-wishlist__count[hidden],
+.mobile-wishlist__share[hidden] {
+  display: none !important;
+}
+
+.mobile-wishlist__count {
+  position: absolute;
+  top: -4px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: #e4323c;
+  color: #fff;
+  font: 700 10px/1 'Figtree', system-ui, sans-serif;
+}
+
+@media only screen and (max-width: 760px) {
+  .mobile-home-header__icon[href$="/pages/wishlist"],
+  .wishlist-header a[href$="/pages/wishlist"] {
+    position: relative;
+  }
+
+.alibaba-card__wishlist-icon {
+  display: none !important;
+}
+
+@media only screen and (max-width: 760px) {
+  :root {
+    --mobile-bottom-navigation-height: 68px;
+  }
+
+  .mobile-navigation-progress {
+    display: block;
+    position: fixed;
+    bottom: calc(var(--mobile-bottom-navigation-height) + env(safe-area-inset-bottom));
+    right: 0;
+    left: 0;
+    z-index: 999;
+    height: 3px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms ease;
+  }
+
+  html.mobile-page-loading .mobile-navigation-progress {
+    opacity: 1;
+  }
+
+  .mobile-navigation-progress > span {
+    display: block;
+    width: 36%;
+    height: 100% !important;
+    background: linear-gradient(90deg, #1769ff 0%, #69a3ff 48%, #1769ff 100%);
+    border-radius: 0 999px 999px 0;
+    box-shadow: 0 0 8px rgb(23 105 255 / 42%);
+    animation: mobile-navigation-progress 1.15s cubic-bezier(.4, 0, .2, 1) infinite;
+  }
+
+  @keyframes mobile-navigation-progress {
+    from {
+      transform: translateX(-110%);
+    }
+    to {
+      transform: translateX(290%);
+    }
+  }
+
+  /* Xtra impose overflow:hidden a #root sur mobile. On conserve seulement
+     la protection horizontale afin de ne plus couper les menus verticaux. */
+  html.mobile-temu-active #root {
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+  }
+
+  /*
+   * Isolation des composants mobiles.
+   * Les styles globaux Xtra ne doivent pas imposer leurs boutons, couleurs,
+   * marges ou pseudo-elements au header et a la navigation mobile Temu.
+   */
+  :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation),
+  :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation) * {
+    box-sizing: border-box;
+  }
+
+  #root :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation) button {
+    appearance: none !important;
+    float: none !important;
+    min-width: 0 !important;
+    min-height: 0;
+    margin: 0 !important;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    letter-spacing: normal;
+    text-indent: 0;
+    text-transform: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    border-radius: 0;
+    box-shadow: none !important;
+  }
+
+  #root :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation) button::before,
+  #root :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation) button::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  #root :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation) a {
+    color: inherit;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    text-decoration: none;
+  }
+
+  #root :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation) a::before,
+  #root :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation) a::after {
+    box-shadow: none;
+  }
+
+  #root :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation) ul,
+  #root :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation) li {
+    list-style: none;
+  }
+
+  #root :where(.mobile-temu-header, .mobile-category-browser, .mobile-bottom-navigation) img,
+  body > .mobile-bottom-navigation img {
+    display: block;
+    max-width: 100%;
+  }
+
+  body {
+    padding-bottom: calc(var(--mobile-bottom-navigation-height) + env(safe-area-inset-bottom));
+  }
+
+  /* Retrait horizontal compact et uniforme sur toutes les pages mobiles. */
+  body #root {
+    --rpp: 6px;
+    --rpn: -6px;
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  .shopify-section-header #header-outer > #header,
+  .shopify-section-header #header-outer > #nav-bar {
+    display: none !important;
+  }
+
+  /*
+   * Xtra reserve encore la hauteur de son ancien champ de recherche mobile
+   * via .has-mobile-visible-search, meme si ce champ est masque ci-dessus.
+   * Notre header contient deja sa propre recherche : cette reserve creait
+   * l'espace vide entre le header et le premier contenu de la page.
+   */
+  #root .shopify-section-header,
+  #root .shopify-section-header.has-mobile-visible-search,
+  #root .shopify-section-header:has(#header-inner.mobile-visible-search) {
+    margin-bottom: 0 !important;
+  }
+
+  .mobile-temu-header {
+    display: block;
+    position: relative;
+    z-index: 30;
+    left: 50%;
+    width: 100vw;
+    max-width: none;
+    margin-left: -50vw;
+    padding: 10px 12px 8px;
+    box-sizing: border-box;
+    color: #111;
+    background: #fff;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .mobile-temu-header {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    left: auto;
+    width: calc(100% + 12px);
+    margin-left: -6px;
+    padding: 12px 12px 0;
+    font-family: 'Sora', system-ui, sans-serif;
+    color: #16123f;
+    background: linear-gradient(180deg, #fdfdff 0%, #e7e8f6 100%);
+    border-bottom: 1px solid #3a34d2;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mobile-home-header__top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    min-height: 42px;
+    align-items: center;
+    column-gap: 8px;
+    padding-bottom: 0;
+  }
+
+  #root .mobile-temu-header .mobile-home-header__menu {
+    display: grid !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    justify-self: start;
+    place-items: center;
+    color: #16123f;
+  }
+
+  #root .mobile-temu-header .mobile-home-header__menu svg {
+    display: block;
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+
+  #root .mobile-temu-header .mobile-home-header__menu {
+    appearance: none;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    cursor: pointer;
+  }
+
+  #root .mobile-temu-header .mobile-home-header__menu:focus-visible {
+    outline: 2px solid #3a34d2;
+    outline-offset: 2px;
+  }
+
+  #root .mobile-temu-header .mobile-home-header__logo {
+    display: block;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+    min-width: 0;
+    overflow: hidden;
+    color: #16123f;
+    text-decoration: none;
+  }
+
+  #root .mobile-temu-header .mobile-home-header__logo-text {
+    display: block;
+    width: min(185px, calc(100vw - 196px));
+    height: auto;
+    overflow: visible;
+  }
+
+  .mobile-home-header__actions {
+    display: flex;
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .mobile-home-header__icon {
+    display: grid;
+    position: relative;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    color: #16123f;
+    border-radius: 21px;
+    text-decoration: none;
+  }
+
+  .mobile-home-header__icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+
+  .mobile-home-cart-count {
+    display: grid;
+    position: absolute;
+    top: 1px;
+    right: 0;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    place-items: center;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    background: #e4323c;
+    border-radius: 9px;
+  }
+
+  .mobile-home-cart-count[hidden] {
+    display: none;
+  }
+
+  .mobile-temu-search {
+    height: 48px;
+    border: 2px solid #3a34d2;
+    border-radius: 999px;
+  }
+
+  #root .mobile-temu-search #search fieldset > p {
+    padding: 3px 3px 3px 16px !important;
+  }
+
+  .mobile-temu-search input[type='search'] {
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 15px;
+  }
+
+  #root .mobile-temu-search button.mobile-temu-search__camera {
+    display: grid !important;
+    position: relative !important;
+    z-index: 2;
+    flex: 0 0 36px !important;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    color: #4a4f6b;
+    visibility: visible !important;
+    opacity: 1 !important;
+    inset: auto !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0;
+    overflow: visible;
+    text-indent: 0;
+    place-items: center;
+    cursor: pointer;
+  }
+
+  #root .mobile-temu-search button.mobile-temu-search__camera svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+
+  .mobile-home-header__trends {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 0 2px;
+    overflow-x: auto;
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 12.5px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-home-header__trends::-webkit-scrollbar,
+  .mobile-temu-categories ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  #root .mobile-temu-header .mobile-home-header__trends a {
+    flex: 0 0 auto;
+    padding: 4px 12px;
+    color: #4a4f6b;
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: normal;
+    background: rgb(255 255 255 / 75%);
+    border: 1px solid #cdd1d8;
+    border-radius: 999px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  #root .mobile-temu-header .mobile-home-header__trends a:hover {
+    color: #3a34d2;
+    border-color: #3a34d2;
+  }
+
+  .mobile-temu-categories {
+    width: 100%;
+    margin: 4px 0 0;
+    border-top: 0;
+  }
+
+  #root .mobile-temu-header .mobile-temu-categories ul {
+    gap: 24px;
+    padding: 0 12px;
+  }
+
+  #root .mobile-temu-header .mobile-temu-categories a {
+    padding: 10px 0 11px;
+    color: #4a4f6b;
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  #root .mobile-temu-header .mobile-temu-categories a.is-active,
+  #root .mobile-temu-header .mobile-temu-categories a.is-pending,
+  #root .mobile-temu-header .mobile-temu-categories a[aria-current='page'] {
+    color: #3a34d2;
+  }
+
+  #root .mobile-temu-header .mobile-temu-categories a.is-active::after,
+  #root .mobile-temu-header .mobile-temu-categories a.is-pending::after,
+  #root .mobile-temu-header .mobile-temu-categories a[aria-current='page']::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    right: 0;
+    bottom: 0 !important;
+    left: 0;
+    height: 3px !important;
+    background: #3a34d2 !important;
+    border-radius: 3px;
+  }
+
+  .shopify-section-announcement-bar-container {
+    color: #e6e8f2 !important;
+    background: linear-gradient(90deg, #16123f, #3a34d2) !important;
+  }
+
+  .shopify-section-announcement-bar-container .shopify-section-announcement-bar,
+  .shopify-section-announcement-bar-container .m6kn {
+    color: #e6e8f2 !important;
+    background: transparent !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+  }
+
+  .shopify-section-announcement-bar-container strong,
+  .shopify-section-announcement-bar-container b {
+    color: #ffd43b;
+  }
+
+  body.mobile-search-open #root > .shopify-section-header {
+    position: relative !important;
+    z-index: 100 !important;
+  }
+
+  body.mobile-search-open #root #nav-top {
+    display: none !important;
+  }
+
+  body.mobile-search-open #root > .shopify-section-announcement-bar-container {
+    display: none !important;
+  }
+
+  .mobile-temu-search {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 48px;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    border: 2px solid #3a34d2;
+    border-radius: 999px;
+    box-sizing: border-box;
+  }
+
+  #root .mobile-temu-search #search,
+  #root .mobile-temu-search #search fieldset,
+  #root .mobile-temu-search #search fieldset > p {
+    display: flex !important;
+    position: static !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: center;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  #root .mobile-temu-search #search.mobile-temu-search__native {
+    inset: auto !important;
+    float: none !important;
+    max-width: none !important;
+    overflow: visible !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 1 !important;
+  }
+
+  #root .mobile-temu-search #search.mobile-temu-search__native fieldset {
+    min-width: 0 !important;
+    max-width: none !important;
+    overflow: visible !important;
+  }
+
+  #root .mobile-temu-search #search fieldset > p {
+    padding: 3px 3px 3px 16px !important;
+  }
+
+  /* Neutralise uniquement les anciens calques visuels du search natif.
+     Le thème dessine notamment un grand rectangle via #search.no-bg::after. */
+  #root .mobile-temu-search #search::before,
+  #root .mobile-temu-search #search::after,
+  #root .mobile-temu-search #search fieldset::before,
+  #root .mobile-temu-search #search fieldset::after,
+  #root .mobile-temu-search #search fieldset > p::before,
+  #root .mobile-temu-search #search fieldset > p::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .mobile-temu-search #search legend,
+  .mobile-temu-search #search label {
+    display: none !important;
+  }
+
+  .mobile-temu-search input[type='search'] {
+    appearance: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0 10px 0 0 !important;
+    color: #111;
+    font: inherit;
+    font-size: 16px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    outline: 0;
+    border-radius: 0;
+  }
+
+  .mobile-temu-search input[type='search']::-webkit-search-cancel-button {
+    appearance: none;
+  }
+
+  #root .mobile-temu-search button[type='submit'] {
+    display: grid;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    margin: 0;
+    padding: 0;
+    place-items: center;
+    color: #fff;
+    background-color: #050505 !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m15.5 15.5 5 5'/%3E%3C/svg%3E") !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: 24px 24px !important;
+    border: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    font-size: 0;
+    text-indent: -9999px;
+  }
+
+  #root .mobile-temu-search button[type='submit'] {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    height: 38px;
+    min-height: 38px;
+    padding: 0 20px;
+    color: #fff;
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-indent: 0;
+    background-color: #3a34d2 !important;
+    background-image: none !important;
+    border-radius: 999px;
+  }
+
+  #root .mobile-temu-search input[type='search'] {
+    height: 100% !important;
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 15px;
+  }
+
+  #root .mobile-temu-search button::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  #root .mobile-temu-search button::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Les anciens boutons retour, overlay et effacement appartiennent au
+     header Xtra plein ecran et ne doivent pas revenir dans notre barre. */
+  #root .mobile-temu-search #search > a.toggle,
+  #root .mobile-temu-search #search p > a.search-back,
+  #root .mobile-temu-search #search .clear-toggle {
+    display: none !important;
+  }
+
+  #root .mobile-temu-search #livesearch {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: 0;
+    z-index: 110;
+    width: 100%;
+    min-width: 0;
+    max-height: min(65vh, 520px);
+    margin: 0;
+    padding: 12px;
+    overflow-y: auto;
+    color: #111;
+    background: #fff;
+    border: 1px solid #dedede;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .14);
+  }
+
+  #root .mobile-temu-search #search.has-text #livesearch:not(:empty),
+  #root .mobile-temu-search #livesearch.processing {
+    display: block;
+  }
+
+  .mobile-temu-categories {
+    width: calc(100% + 24px);
+    margin: 4px -12px 0;
+    overflow: hidden;
+  }
+
+  .mobile-temu-categories ul {
+    display: flex;
+    gap: 27px;
+    width: 100%;
+    margin: 0;
+    padding: 0 16px;
+    overflow-x: auto;
+    list-style: none;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-temu-categories ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-temu-categories li {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0;
+    scroll-snap-align: start;
+  }
+
+  .mobile-temu-categories a {
+    display: block;
+    position: relative;
+    padding: 10px 0 12px;
+    color: #555;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .mobile-temu-categories a.is-active,
+  .mobile-temu-categories a[aria-current='page'] {
+    color: #111;
+    font-weight: 800;
+  }
+
+  .mobile-temu-categories a.is-active::after,
+  .mobile-temu-categories a[aria-current='page']::after {
+    content: '';
+    position: absolute;
+    right: 22%;
+    bottom: 5px;
+    left: 22%;
+    height: 4px;
+    background: #111;
+    border-radius: 999px;
+  }
+
+  .mobile-bottom-navigation {
+    display: grid;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    height: calc(var(--mobile-bottom-navigation-height) + env(safe-area-inset-bottom));
+    padding: 6px 4px calc(5px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, .98);
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, .07);
+    backdrop-filter: blur(12px);
+    transform: none !important;
+  }
+
+  .mobile-bottom-navigation > a,
+  .mobile-bottom-navigation > button {
+    display: flex;
+    position: relative;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    color: #171717;
+    font-size: 10px;
+    font-weight: 650;
+    line-height: 1.15;
+    text-align: center;
+    text-decoration: none;
+    font-family: inherit;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .mobile-bottom-navigation > button[data-mobile-categories-trigger] {
+    transform: translateY(7px);
+  }
+
+  .mobile-bottom-navigation > a > svg,
+  .mobile-bottom-navigation > button > svg,
+  .mobile-bottom-navigation__icon > svg {
+    width: 25px;
+    height: 25px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+  }
+
+  .mobile-bottom-navigation > a.is-active,
+  .mobile-bottom-navigation > button.is-active {
+    color: #49a600;
+  }
+
+  .mobile-bottom-navigation__icon {
+    display: block;
+    position: relative;
+    width: 25px;
+    height: 25px;
+  }
+
+  .mobile-bottom-navigation__count {
+    display: grid;
+    position: absolute;
+    top: -7px;
+    right: -10px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    place-items: center;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    background: #ff5a00;
+    border: 2px solid #fff;
+    border-radius: 999px;
+  }
+
+  .mobile-bottom-navigation__count:empty,
+  .mobile-bottom-navigation__count[hidden] {
+    display: none;
+  }
+
+  body.mobile-categories-open {
+    overflow: hidden;
+  }
+
+  body.mobile-categories-open .mobile-temu-categories {
+    display: none !important;
+  }
+
+  body.mobile-categories-open #content {
+    display: none !important;
+  }
+
+  body.mobile-explore-open {
+    overflow: hidden;
+  }
+
+  body > .mobile-explore-drawer {
+    box-sizing: border-box;
+    font-family: 'Figtree', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body > dialog.mobile-explore-drawer {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    right: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    inset-inline-start: 0 !important;
+    z-index: 2147483647 !important;
+    width: min(84vw, 360px) !important;
+    max-width: 84vw !important;
+    min-width: 0 !important;
+    max-height: none !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: none;
+    overflow: visible !important;
+    color: #16123f !important;
+    background: #f6f7fb !important;
+    box-shadow: none !important;
+    transform: translateX(-105%) !important;
+    opacity: 0;
+    transition: transform 380ms cubic-bezier(.22, 1, .36, 1), opacity 320ms ease;
+    overscroll-behavior: contain;
+    flex-direction: column !important;
+  }
+
+  body > dialog.mobile-explore-drawer[open] {
+    display: flex !important;
+    transform: translateX(0) !important;
+    opacity: 1;
+  }
+
+  body > dialog.mobile-explore-drawer::backdrop {
+    background: rgb(0 0 0 / 0%);
+    transition: background 320ms ease;
+  }
+
+  body > dialog.mobile-explore-drawer[open]::backdrop {
+    background: rgb(0 0 0 / 55%);
+  }
+
+  body > dialog.mobile-explore-drawer.is-closing {
+    transform: translateX(-105%) !important;
+    opacity: 0;
+  }
+
+  body > dialog.mobile-explore-drawer.is-closing::backdrop {
+    background: rgb(0 0 0 / 0%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body > dialog.mobile-explore-drawer {
+      transition: none;
+    }
+
+    body > dialog.mobile-explore-drawer::backdrop {
+      transition: none;
+    }
+  }
+
+  body > dialog.mobile-explore-drawer[aria-hidden='true'] {
+    pointer-events: none;
+  }
+
+  body > dialog.mobile-explore-drawer button {
+    appearance: none;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    cursor: pointer;
+  }
+
+  body > dialog.mobile-explore-drawer a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  body > dialog.mobile-explore-drawer img {
+    display: block;
+    max-width: 100%;
+  }
+
+  .mobile-explore-drawer__close {
+    display: grid !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: -44px !important;
+    left: auto !important;
+    z-index: 1 !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    place-items: center !important;
+    color: #fff !important;
+    background: #000 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    opacity: 0 !important;
+    transition: opacity 180ms ease 120ms;
+  }
+
+  body.mobile-explore-open .mobile-explore-drawer__close {
+    opacity: 1 !important;
+  }
+
+  .mobile-explore-drawer__close svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-width: 2;
+  }
+
+  .mobile-explore-drawer__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #8c8aa8 #e6e6ee;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-explore-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-explore-drawer__scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .mobile-explore-drawer__scroll::-webkit-scrollbar-track {
+    background: #e6e6ee;
+  }
+
+  .mobile-explore-drawer__scroll::-webkit-scrollbar-thumb {
+    background: #8c8aa8;
+    border: 1px solid #e6e6ee;
+    border-radius: 999px;
+  }
+
+  .mobile-explore-drawer__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 20px 16px 14px;
+    color: #fff;
+    background: linear-gradient(135deg, #16123f, #2a2390 60%, #3a34d2);
+  }
+
+  .mobile-explore-drawer__heading strong {
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 24px;
+    letter-spacing: -.5px;
+  }
+
+  .mobile-explore-drawer__heading span {
+    font-size: 13px;
+    opacity: .85;
+  }
+
+  .mobile-explore-section {
+    padding: 16px 0 4px;
+  }
+
+  .mobile-explore-section[hidden] {
+    display: none !important;
+  }
+
+  .mobile-explore-section + .mobile-explore-section {
+    border-top: 8px solid #f4f5f9;
+  }
+
+  .mobile-explore-section__title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 14px 10px;
+  }
+
+  .mobile-explore-section__title h2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 15.5px;
+    font-weight: 700;
+  }
+
+  .mobile-explore-section__title > a {
+    flex: 0 0 auto;
+    color: #3a34d2;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+
+  .mobile-explore-section__title > button {
+    flex: 0 0 auto;
+    color: #4a4f6b !important;
+    font-size: 12px !important;
+    font-weight: 700;
+  }
+
+  .mobile-explore-tag--season {
+    color: #4a4f6b;
+    background: #f1f2f6;
+  }
+
+  .mobile-explore-tag.mobile-explore-tag--season-autunno {
+    color: #b45309;
+    background: #fff0df;
+  }
+
+  .mobile-explore-tag.mobile-explore-tag--season-estate {
+    color: #16803c;
+    background: #e5f7e9;
+  }
+
+  .mobile-explore-tag.mobile-explore-tag--season-inverno {
+    color: #1d4ed8;
+    background: #e8f0ff;
+  }
+
+  .mobile-explore-tag.mobile-explore-tag--season-primavera {
+    color: #a16207;
+    background: #fff7cc;
+  }
+
+  .mobile-explore-tag--gift {
+    color: #4a4f6b;
+    background: #f1f2f6;
+  }
+
+  .mobile-explore-rail {
+    display: grid;
+    grid-auto-flow: column;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 0 14px 12px;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-explore-rail--collections {
+    grid-auto-columns: 62%;
+  }
+
+  .mobile-explore-collection {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    color: #fff !important;
+    background: #e6e8f2;
+    border-radius: 16px;
+    scroll-snap-align: start;
+  }
+
+  .mobile-explore-collection > img,
+  .mobile-explore-collection__placeholder {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    place-items: center;
+    color: #3a34d2;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    background: #e6e8f2;
+  }
+
+  .mobile-explore-collection::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 45%, rgb(22 18 63 / 85%));
+    content: '';
+  }
+
+  .mobile-explore-collection__caption {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    z-index: 1;
+  }
+
+  .mobile-explore-collection__caption strong {
+    display: block;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.15;
+  }
+
+  .mobile-explore-rail--products {
+    grid-auto-columns: 34%;
+  }
+
+  .mobile-explore-product {
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .mobile-explore-product > img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: #e6e8f2;
+    border-radius: 12px;
+  }
+
+  .mobile-explore-product__image {
+    display: block;
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #e6e8f2;
+    border-radius: 12px;
+  }
+
+  .mobile-explore-product__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mobile-explore-product__image > span {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    padding: 2px 7px;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    background: #e4323c;
+    border-radius: 999px;
+  }
+
+  .mobile-explore-product--sale > strong {
+    color: #e4323c;
+  }
+
+  .mobile-explore-product--sale s {
+    margin-left: 3px;
+    color: #8a8fa8;
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+  }
+
+  .mobile-explore-product > span {
+    display: -webkit-box;
+    min-height: 29px;
+    margin-top: 5px;
+    overflow: hidden;
+    font-size: 11.5px;
+    line-height: 1.3;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .mobile-explore-product > .mobile-explore-product__image {
+    display: block;
+    min-height: 0;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .mobile-explore-product > strong {
+    display: block;
+    margin-top: 3px;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 13px;
+  }
+
+  .mobile-explore-tag {
+    padding: 2px 7px;
+    color: #3a34d2;
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 10px;
+    background: #ecebfd;
+    border-radius: 999px;
+  }
+
+  .mobile-explore-brands {
+    display: grid;
+    grid-auto-columns: 34%;
+    grid-auto-flow: column;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 14px 12px;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-explore-gifts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 0 14px 12px;
+  }
+
+  .mobile-explore-occasions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px 8px;
+    padding: 0 14px 12px;
+  }
+
+  .mobile-explore-occasion {
+    display: block;
+    min-width: 0;
+    color: #171717 !important;
+    text-align: left;
+    text-decoration: none;
+  }
+
+  .mobile-explore-occasion__image-wrap {
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #eef0f4;
+    border-radius: 10px;
+  }
+
+  .mobile-explore-occasion__image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .4s;
+  }
+
+  .mobile-explore-occasion:active .mobile-explore-occasion__image-wrap img {
+    transform: scale(1.05);
+  }
+
+  .mobile-explore-occasion b {
+    display: block;
+    margin-top: 7px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .mobile-explore-occasion small {
+    display: block;
+    margin-top: 1px;
+    overflow: hidden;
+    color: #7a7f95 !important;
+    font-size: 11px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-explore-brand {
+    display: grid;
+    position: relative;
+    min-width: 0;
+    height: 74px;
+    overflow: hidden;
+    place-items: center;
+    color: #fff !important;
+    background: #16123f;
+    border-radius: 12px;
+    scroll-snap-align: start;
+  }
+
+  .mobile-explore-brand img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mobile-explore-brand::after {
+    position: absolute;
+    inset: 0;
+    background: rgb(22 18 63 / 45%);
+    content: '';
+  }
+
+  .mobile-explore-brand strong {
+    position: relative;
+    z-index: 1;
+    padding: 4px;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .mobile-explore-gifts > a {
+    display: flex;
+    min-width: 0;
+    min-height: 92px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 9px 6px;
+    text-align: center;
+    background: #f3ecff;
+    border: 1px solid #efeded;
+    border-radius: 14px;
+  }
+
+  .mobile-explore-gifts i {
+    margin-bottom: 4px;
+    font-size: 22px;
+    font-style: normal;
+  }
+
+  .mobile-explore-gifts strong {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .mobile-explore-gifts small {
+    display: -webkit-box;
+    margin-top: 3px;
+    overflow: hidden;
+    color: #4a4f6b;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.2;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .mobile-explore-halloween {
+    display: flex;
+    min-height: 94px;
+    align-items: center;
+    gap: 10px;
+    margin: 0 14px 10px;
+    padding: 12px;
+    overflow: hidden;
+    color: #fff !important;
+    background: radial-gradient(circle at 90% 10%, #ff8a1f 0%, transparent 45%), linear-gradient(135deg, #1b1035, #3d1b5e);
+    border-radius: 16px;
+  }
+
+  .mobile-explore-halloween > span:first-child {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .mobile-explore-halloween small {
+    color: #ffb36b;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .mobile-explore-halloween strong {
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 16px;
+  }
+
+  .mobile-explore-halloween em {
+    font-size: 11px;
+    font-style: normal;
+    opacity: .85;
+  }
+
+  .mobile-explore-halloween__images {
+    display: flex;
+    flex: 0 0 auto;
+  }
+
+  .mobile-explore-halloween__images img {
+    width: 40px;
+    height: 56px;
+    object-fit: cover;
+    background: #2a1f4a;
+    border: 2px solid rgb(255 255 255 / 80%);
+    border-radius: 9px;
+  }
+
+  .mobile-explore-halloween__images img + img {
+    margin-left: -12px;
+    transform: rotate(6deg);
+  }
+
+  .mobile-explore-gifts > a {
+    background: linear-gradient(160deg, #fdf1f1, #f2f7ef);
+  }
+
+  .mobile-explore-top-products {
+    margin: 0;
+    padding: 0 14px 12px;
+    list-style: none;
+  }
+
+  .mobile-explore-top-products li + li {
+    border-top: 1px solid #f0f1f5;
+  }
+
+  .mobile-explore-top-products a {
+    display: flex;
+    min-height: 72px;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+  }
+
+  .mobile-explore-top-products img {
+    width: 54px;
+    height: 54px;
+    flex: 0 0 54px;
+    object-fit: cover;
+    background: #e6e8f2;
+    border-radius: 12px;
+  }
+
+  .mobile-explore-top-products__rank {
+    width: 22px;
+    flex: 0 0 22px;
+    color: #3a34d2;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+  }
+
+  .mobile-explore-top-products li:first-child .mobile-explore-top-products__rank {
+    color: #e0a100;
+  }
+
+  .mobile-explore-top-products__details {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  .mobile-explore-top-products__details > span {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .mobile-explore-top-products__details strong {
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 13px;
+  }
+
+  .mobile-explore-all-products {
+    display: flex;
+    min-height: 46px;
+    margin: 12px 14px 0;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: #fff !important;
+    font-size: 14px;
+    font-weight: 700;
+    background: #3a34d2;
+    border-radius: 999px;
+  }
+
+  .mobile-category-browser:not([hidden]) {
+    display: grid;
+    position: relative;
+    left: 50%;
+    z-index: 25;
+    grid-template-columns: minmax(92px, 29vw) minmax(0, 1fr);
+    width: 100vw;
+    min-height: 280px;
+    margin-left: -50vw;
+    overflow: hidden;
+    color: #111;
+    background: #fff;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .mobile-category-browser__sidebar,
+  .mobile-category-browser__main {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .mobile-category-browser__sidebar {
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    background: #f5f5f5;
+  }
+
+  .mobile-category-browser h2 {
+    flex: 0 0 auto;
+    margin: 0;
+    color: #111;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .mobile-category-browser__tabs {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .mobile-category-browser__tabs::-webkit-scrollbar,
+  .mobile-category-browser__main::-webkit-scrollbar {
+    display: none;
+  }
+
+  body.mobile-categories-open #root .mobile-category-browser__tabs .mobile-category-browser__tab {
+    display: block;
+    position: relative;
+    width: 100%;
+    min-height: 60px;
+    margin: 0;
+    padding: 11px 9px 11px 13px;
+    color: #181818 !important;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.25;
+    text-align: left;
+    white-space: normal !important;
+    overflow-wrap: normal;
+    word-break: normal;
+    background: #f3f3f3 !important;
+    background-color: #f3f3f3 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    text-transform: none !important;
+  }
+
+  body.mobile-categories-open #root .mobile-category-browser__tabs .mobile-category-browser__tab::after {
+    display: none !important;
+  }
+
+  body.mobile-categories-open #root .mobile-category-browser__tabs .mobile-category-browser__tab.is-active {
+    color: #000 !important;
+    font-weight: 700;
+    background: #fff !important;
+    background-color: #fff !important;
+  }
+
+  body.mobile-categories-open #root .mobile-category-browser__tabs .mobile-category-browser__tab.is-active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 4px;
+    background: #111;
+  }
+
+  body.mobile-categories-open #root .mobile-category-browser__tabs .mobile-category-browser__featured {
+    min-height: 50px;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .mobile-category-browser__main {
+    overflow-y: auto;
+    padding: 14px 10px 22px;
+    overscroll-behavior: contain;
+    background: #fff;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .mobile-category-browser__heading {
+    display: flex;
+    margin-bottom: 18px;
+    padding: 0 3px;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .mobile-category-browser__heading h2 {
+    margin: 0;
+    padding: 0;
+    font-size: 17px;
+  }
+
+  #root .mobile-category-browser__heading a {
+    flex: 0 0 auto;
+    color: #111;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  #root .mobile-category-browser__heading a.is-active {
+    font-weight: 800;
+  }
+
+  .mobile-category-browser__main > h2 {
+    margin-bottom: 18px;
+    padding: 0 3px;
+    font-size: 17px;
+  }
+
+  .mobile-category-browser__panel.is-active {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 22px 8px;
+  }
+
+  .mobile-category-loading {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 14px;
+    width: 100%;
+    padding: 12px 0 20px;
+  }
+
+  .mobile-category-loading__message {
+    display: flex;
+    min-height: 24px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    color: #555;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .mobile-category-loading__message::before {
+    width: 15px;
+    height: 15px;
+    border: 2px solid #dce3f8;
+    border-top-color: #3157e8;
+    border-radius: 50%;
+    content: '';
+    animation: mobile-category-loading 700ms linear infinite;
+  }
+
+  .mobile-category-loading__skeletons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px 8px;
+  }
+
+  .mobile-category-loading__card {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mobile-category-loading__image,
+  .mobile-category-loading__title {
+    background: linear-gradient(100deg, #f0f1f4 25%, #fafbfc 42%, #f0f1f4 62%);
+    background-size: 220% 100%;
+    animation: mobile-category-skeleton-shimmer 1.35s ease-in-out infinite;
+  }
+
+  .mobile-category-loading__image {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 14px;
+  }
+
+  .mobile-category-loading__title {
+    width: 82%;
+    height: 9px;
+    border-radius: 999px;
+  }
+
+  .mobile-category-loading__title::after {
+    display: block;
+    width: 68%;
+    height: 9px;
+    margin: 13px auto 0;
+    border-radius: 999px;
+    background: inherit;
+    content: '';
+  }
+
+  @keyframes mobile-category-loading {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes mobile-category-skeleton-shimmer {
+    to {
+      background-position: -220% 0;
+    }
+  }
+
+  .mobile-category-products {
+    display: contents;
+  }
+
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card {
+    opacity: 0;
+    animation: mobile-category-card-enter 240ms ease-out forwards;
+  }
+
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(1) { animation-delay: 0ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(2) { animation-delay: 15ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(3) { animation-delay: 30ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(4) { animation-delay: 45ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(5) { animation-delay: 60ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(6) { animation-delay: 75ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(7) { animation-delay: 90ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(8) { animation-delay: 105ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(9) { animation-delay: 120ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(10) { animation-delay: 135ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(11) { animation-delay: 150ms; }
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card:nth-child(12) { animation-delay: 165ms; }
+
+  .mobile-category-browser__panel .mobile-category-products > .mobile-category-card.is-load-more-item {
+    animation: mobile-category-load-more-card 420ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+    animation-delay: calc(var(--load-more-index, 0) * 28ms);
+  }
+
+  @keyframes mobile-category-card-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes mobile-category-load-more-card {
+    0% {
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+    }
+    65% {
+      opacity: 1;
+      transform: translateY(-2px) scale(1.01);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body > .mobile-explore-drawer,
+    .mobile-explore-drawer__close {
+      transition: none;
+    }
+
+    .mobile-navigation-progress > span {
+      width: 36%;
+      transform: translateX(90%);
+      animation: none;
+    }
+
+    .mobile-category-loading__message::before,
+    .mobile-category-loading__image,
+    .mobile-category-loading__title {
+      animation: none;
+    }
+
+    .mobile-category-products__more.is-loading::after {
+      animation: none;
+    }
+
+    .mobile-category-browser__panel .mobile-category-products > .mobile-category-card {
+      opacity: 1;
+      animation: none;
+    }
+
+    .mobile-category-browser__panel .mobile-category-products > .mobile-category-card.is-load-more-item {
+      animation: none;
+    }
+  }
+
+  .mobile-category-card {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-direction: column;
+    gap: 7px;
+    color: #171717;
+    font-size: clamp(10px, 2.8vw, 12px);
+    font-weight: 400 !important;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .mobile-category-card[hidden] {
+    display: none;
+  }
+
+  .mobile-category-browser .mobile-category-products__more {
+    display: inline-flex;
+    min-height: 42px;
+    min-width: 150px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    grid-column: 1 / -1;
+    justify-self: center;
+    margin-top: 2px;
+    padding: 10px 20px;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1;
+    text-decoration: none !important;
+    background: linear-gradient(135deg, #39a9ff, #1769e0) !important;
+    background-color: #247fe5 !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    box-shadow: 0 4px 12px rgb(23 105 224 / 28%) !important;
+    transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+  }
+
+  .mobile-category-browser .mobile-category-products__more::after {
+    display: inline-block !important;
+    color: #fff !important;
+    content: '↓' !important;
+    font-size: 15px !important;
+    line-height: 0.8;
+    transition: transform 180ms ease;
+  }
+
+  .mobile-category-browser .mobile-category-products__more:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 6px rgb(23 105 224 / 22%) !important;
+  }
+
+  .mobile-category-browser .mobile-category-products__more:active::after {
+    transform: translateY(2px);
+  }
+
+  .mobile-category-browser .mobile-category-products__more.is-loading {
+    opacity: 0.8;
+    pointer-events: none;
+  }
+
+  .mobile-category-browser .mobile-category-products__more.is-loading::after {
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgb(255 255 255 / 45%);
+    border-top-color: #fff;
+    border-radius: 50%;
+    content: '' !important;
+    animation: mobile-category-loading 700ms linear infinite;
+  }
+
+  .mobile-category-card__image {
+    display: grid;
+    width: min(22vw, 92px);
+    aspect-ratio: 1;
+    overflow: hidden;
+    place-items: center;
+    color: #555;
+    font-size: 26px;
+    font-weight: 800;
+    background: #f0f0f0;
+    border-radius: 38%;
+  }
+
+  .mobile-category-card__image > span {
+    color: #555 !important;
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+  .mobile-category-card__image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 38%;
+    clip-path: none;
+  }
+
+  .mobile-category-card__image em {
+    position: absolute;
+    top: 0;
+    right: -2px;
+    padding: 3px 5px;
+    color: #fff;
+    font-size: 8px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 1;
+    background: #ff6900;
+    border-radius: 999px;
+  }
+
+  .mobile-category-card__image em.mobile-category-card__badge--new {
+    right: -4px;
+    padding: 3px 5px;
+    font-size: 7px;
+    white-space: nowrap;
+    background: #27b9c7;
+    border-radius: 3px;
+  }
+
+  .mobile-category-card__image:has(em) {
+    position: relative;
+    overflow: visible;
+  }
+
+  .mobile-category-card--view-all .mobile-category-card__image {
+    color: #111;
+    background: #ededed;
+    border-radius: 38%;
+  }
+
+  .mobile-category-card--view-all svg {
+    width: 30px;
+    height: 30px;
+    fill: #111;
+    stroke: none;
+  }
+
+  .mobile-category-card--view-all .mobile-category-card__title {
+    color: #6a6a6a !important;
+  }
+
+  .mobile-category-card__title {
+    display: -webkit-box;
+    overflow: hidden;
+    color: #171717 !important;
+    font-weight: 400 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  #root #collection.l4cl:not(.list) {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 8px;
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+    /* #root fournit deja le retrait mobile global de 16px. */
+    padding-right: 0;
+    padding-left: 0;
+    overflow: visible;
+  }
+
+  #root #collection.l4cl:not(.list) > li {
+    width: auto !important;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-right-width: 0 !important;
+    border-left-width: 0 !important;
+  }
+
+  #root #collection.l4cl:not(.list) h1,
+  #root #collection.l4cl:not(.list) h2,
+  #root #collection.l4cl:not(.list) h3,
+  #root #collection.l4cl:not(.list) h4,
+  #root #collection.l4cl:not(.list) h5,
+  #root #collection.l4cl:not(.list) h6 {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+}
+
+/* Home hero slideshow — style mobile uniquement, aligné sur le prototype (coins arrondis, flèches masquées, pagination en pastille). Le desktop et la logique du carrousel (Swiper natif) ne sont pas touchés. */
+@media only screen and (max-width: 760px) {
+  #root [id$="section_slideshow_XNiKWa"] .m6fr.slider-fraction {
+    margin-left: 6px !important;
+    margin-right: 6px !important;
+    /* Le prototype laisse 16px entre la ligne USP et le hero.
+       Le contenu du thème ajoute déjà 15px de padding en tête. */
+    margin-top: -5px !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1;
+  }
+
+  [id$="section_slideshow_XNiKWa"] .m6fr.slider-fraction,
+  [id$="section_slideshow_XNiKWa"] .m6fr.slider-fraction .swiper-outer {
+    border-radius: 18px;
+  }
+
+  [id$="section_slideshow_XNiKWa"] .m6fr.slider-fraction .swiper-outer {
+    overflow: hidden;
+  }
+
+  #root [id$="section_slideshow_XNiKWa"] .swiper-custom-pagination .swiper-button-prev,
+  #root [id$="section_slideshow_XNiKWa"] .swiper-custom-pagination .swiper-button-next {
+    display: none !important;
+  }
+
+  /* Le compteur texte natif (« 1 / 6 ») reste dans le DOM (nécessaire pour lire l'index courant)
+     mais devient invisible : il est remplacé visuellement par de vrais points, façon prototype. */
+  #root [id$="section_slideshow_XNiKWa"] .swiper-custom-pagination {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #root [id$="section_slideshow_XNiKWa"] .mobile-hero-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(22, 18, 63, 0.45);
+    padding: 6px 8px;
+    border-radius: 999px;
+    z-index: 5;
+  }
+
+  #root [id$="section_slideshow_XNiKWa"] .mobile-hero-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    transition: width 0.3s;
+  }
+
+  #root [id$="section_slideshow_XNiKWa"] .mobile-hero-dots span.is-active {
+    width: 22px;
+    background: #fff;
+  }
+}
+
+@media only screen and (min-width: 761px) {
+  #root [id$="section_slideshow_XNiKWa"] .mobile-hero-dots {
+    display: none;
+  }
+}
+
+/* Bande "Free exchange" (usp du header) — même typo/couleur/graisse que le prototype en mobile
+   uniquement. Le contenu, les liens et le carrousel natif restent strictement inchangés.
+   Le prototype n'a aucun fond derrière ce texte : on neutralise donc le bandeau coloré
+   (#nav-top:before, piloté par le réglage "top_bar_color") uniquement en mobile, le desktop
+   conserve son fond d'origine. */
+@media only screen and (max-width: 760px) {
+  #root .shopify-section-header,
+  #root .shopify-section-header #nav-top {
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  #root .featured-collection-mobile {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    width: auto !important;
+    margin: 14px 12px 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    list-style: none !important;
+  }
+
+  #root header:has(+ .featured-collection-mobile) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    margin: 18px 12px 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  #root header:has(+ .featured-collection-mobile) h2,
+  #root header:has(+ .featured-collection-mobile) h3 {
+    margin: 0 !important;
+    color: #16123f !important;
+    font-family: 'Sora', system-ui, sans-serif !important;
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  #root header:has(+ .featured-collection-mobile) .link-btn a {
+    color: #3a34d2 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+  }
+
+  #root .featured-collection-mobile > li {
+    display: flex !important;
+    flex-direction: column !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    box-shadow: 0 2px 8px rgba(22, 18, 63, 0.1) !important;
+  }
+
+  #root .featured-collection-mobile > li > figure {
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 0 !important;
+    background: #e6e8ec !important;
+  }
+
+  #root .featured-collection-mobile > li > figure > a,
+  #root .featured-collection-mobile > li > figure picture {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  #root .featured-collection-mobile > li > figure img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  #root .featured-collection-mobile > li > figure .s1lb {
+    position: absolute !important;
+    z-index: 2 !important;
+    top: 8px !important;
+    left: 8px !important;
+    right: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #root .featured-collection-mobile > li > figure .s1lb > span {
+    display: inline-block !important;
+    margin: 0 !important;
+    padding: 6px 10px !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    background: #e4323c !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  #root .featured-collection-mobile > li > figure .wishlist-productcard {
+    display: grid !important;
+    position: absolute !important;
+    z-index: 3 !important;
+    top: 8px !important;
+    right: 8px !important;
+    width: 38px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    place-items: center !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    box-shadow: 0 2px 8px rgba(22, 18, 63, 0.12) !important;
+  }
+
+  #root .featured-collection-mobile > li > figure .wishlist-productcard i {
+    font-size: 20px !important;
+    color: #16123f !important;
+  }
+
+  #root .featured-collection-mobile > li > div {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    padding: 9px 10px 10px !important;
+    background: #fff !important;
+  }
+
+  #root .featured-collection-mobile > li > div > h3,
+  #root .featured-collection-mobile > li > div .alibaba-card__title {
+    min-height: 35px !important;
+    margin: 0 0 6px !important;
+    padding: 0 !important;
+    color: #16123f !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0 !important;
+    text-align: left !important;
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  #root .featured-collection-mobile > li > div > h3 a,
+  #root .featured-collection-mobile > li > div .alibaba-card__title a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  #root .featured-collection-mobile .price,
+  #root .featured-collection-mobile .alibaba-card__price-main {
+    margin: 0 !important;
+    color: #e4323c !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+  }
+
+  #root .featured-collection-mobile .old-price {
+    margin-left: 4px !important;
+    color: #8b92a0 !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+  }
+
+  #root .featured-collection-mobile .static,
+  #root .featured-collection-mobile .alibaba-card__body,
+  #root .featured-collection-mobile .alibaba-card__price-wrapper {
+    min-width: 0 !important;
+  }
+
+  #root .featured-collection-mobile .s1lb + *,
+  #root .featured-collection-mobile .alibaba-card__rotator,
+  #root .featured-collection-mobile .alibaba-card__stock-list {
+    font-family: 'Figtree', system-ui, sans-serif !important;
+  }
+
+  #root .featured-collection-mobile .link-btn,
+  #root .featured-collection-mobile .f8pr {
+    margin-top: auto !important;
+  }
+
+  #root article[id*="section_featured_collection"] > header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    margin: 18px 12px 12px !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  #root article[id*="section_featured_collection"] > header h2,
+  #root article[id*="section_featured_collection"] > header h3 {
+    margin: 0 !important;
+    color: #16123f !important;
+    font-family: 'Sora', system-ui, sans-serif !important;
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    width: auto !important;
+    margin: 0 12px 30px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    list-style: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) > li.alibaba-product-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-left-width: 0 !important;
+    border-right-width: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(20, 20, 40, 0.06), 0 6px 18px -10px rgba(20, 20, 40, 0.18) !important;
+    transform: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__media {
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px 12px 0 0 !important;
+    background: #f4f4f4 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__media-link,
+  #root article[id*="section_featured_collection"] .alibaba-card__picture {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__picture img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transform: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist {
+    display: flex !important;
+    top: 8px !important;
+    right: 8px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist i {
+    color: #222 !important;
+    font-size: 18px !important;
+  }
+
+  #root article[id*="section_featured_collection"] .s1lb {
+    position: absolute !important;
+    top: 8px !important;
+    left: 8px !important;
+    right: auto !important;
+    z-index: 4 !important;
+    max-width: calc(100% - 56px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .s1lb > span {
+    display: inline-block !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 6px 10px !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    background: #e53935 !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-top-selling-ribbon {
+    position: absolute !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 2 !important;
+    display: flex !important;
+    min-height: 28px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 5px 4px !important;
+    background: linear-gradient(90deg, #7b2fe0, #5b21c8) !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: 0.2px !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-top-selling-ribbon__main,
+  #root article[id*="section_featured_collection"] .alibaba-cube__face {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-top-selling-ribbon__star {
+    color: #ffc93c !important;
+    font-size: 12px !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-top-selling-ribbon--verified-only {
+    background: linear-gradient(90deg, #b3163f, #8e0e30) !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-cube-scene,
+  #root article[id*="section_featured_collection"] .alibaba-cube {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-cube__face {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    backface-visibility: visible !important;
+    transform: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-cube__face--top {
+    display: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__body {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-flow: row wrap !important;
+    align-content: flex-start !important;
+    align-items: center !important;
+    column-gap: 5px !important;
+    row-gap: 4px !important;
+    min-width: 0 !important;
+    padding: 9px 10px 10px !important;
+    background: #fff !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__header {
+    flex: 0 0 100% !important;
+    min-width: 0 !important;
+    order: 1 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__title,
+  #root article[id*="section_featured_collection"] .alibaba-card__title a {
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    color: #1a1a1a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0 !important;
+    text-align: left !important;
+    text-decoration: none !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__title a {
+    position: relative !important;
+    z-index: 1 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) > li.alibaba-product-card .alibaba-card__media,
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) > li.alibaba-product-card .alibaba-card__body {
+    cursor: default !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__rotator {
+    flex: 0 1 auto !important;
+    width: max-content !important;
+    max-width: 100% !important;
+    height: 18px !important;
+    margin: 0 !important;
+    order: 5 !important;
+    overflow: hidden !important;
+    border-radius: 5px !important;
+    background: #f1f2f5 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__rotator-track {
+    height: 18px !important;
+    padding-left: 6px !important;
+    animation-duration: 8s !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-rotator-item {
+    display: inline-flex !important;
+    height: 18px !important;
+    align-items: center !important;
+    padding: 0 6px !important;
+    color: #5e6070 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 18px !important;
+    white-space: nowrap !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-rotator-item i {
+    margin-right: 3px !important;
+    color: #3b6fd9 !important;
+    font-size: 10px !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__badges-row {
+    flex: 0 1 auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    order: 4 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-badge--shipping {
+    display: inline-flex !important;
+    min-height: 18px !important;
+    align-items: center !important;
+    gap: 3px !important;
+    padding: 2px 6px !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    background: #eaf6e6 !important;
+    color: #2e7d32 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__price-wrapper {
+    display: flex !important;
+    flex: 0 0 100% !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    order: 2 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__price-main {
+    display: flex !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #e4323c !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__price-main .old-price {
+    order: 2 !important;
+    margin: 0 0 0 1px !important;
+    color: #8b92a0 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__discount-badge {
+    display: inline-flex !important;
+    min-height: 16px !important;
+    align-items: center !important;
+    padding: 1px 5px !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    background: #ff6a00 !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .badge-wrap-3d {
+    display: flex !important;
+    flex: 0 0 100% !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    order: 3 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .discount-combined-group {
+    display: inline-flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  #root article[id*="section_featured_collection"] .pill-badge--discount {
+    display: inline-flex !important;
+    min-height: 16px !important;
+    align-items: center !important;
+    padding: 1px 5px !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    background: #ff6a00 !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .pill-badge-savings {
+    color: #d6153a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__moq {
+    flex: 0 0 100% !important;
+    margin: 0 !important;
+    color: #6a6c7a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    line-height: 1.25 !important;
+    order: 6 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .badge-wrap-3d.badge-wrap-3d--hidden,
+  #root article[id*="section_featured_collection"] .badge-wrap-3d[aria-hidden="true"] {
+    display: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:hover,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:focus,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:active {
+    display: flex !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    color: #222 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+    transform: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist::before,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:hover::before,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:focus::before,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:active::before {
+    border-color: #fff !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist i,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:hover i,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:focus i,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:active i {
+    color: #222 !important;
+    -webkit-text-stroke: 0 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__price-main {
+    color: #1a1a2e !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__price-main:has(.old-price) {
+    color: #e4323c !important;
+  }
+
+  #root article[id*="section_featured_collection"] .pill-badge-savings:empty {
+    display: none !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    align-self: stretch !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(20, 20, 40, 0.06), 0 6px 18px -10px rgba(20, 20, 40, 0.18) !important;
+    transform: none !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__media {
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px 12px 0 0 !important;
+    background: #f4f4f4 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__media-link,
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__picture {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__picture img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transform: none !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__wishlist {
+    display: flex !important;
+    top: 8px !important;
+    right: 8px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__wishlist i {
+    color: #222 !important;
+    font-size: 18px !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .s1lb {
+    position: absolute !important;
+    top: 8px !important;
+    left: 8px !important;
+    right: auto !important;
+    z-index: 4 !important;
+    max-width: calc(100% - 56px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .s1lb > span {
+    display: inline-block !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 6px 10px !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    background: #e53935 !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-top-selling-ribbon {
+    position: absolute !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 2 !important;
+    display: flex !important;
+    min-height: 28px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 5px 4px !important;
+    background: linear-gradient(90deg, #7b2fe0, #5b21c8) !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: 0.2px !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-top-selling-ribbon__main,
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-cube__face {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-top-selling-ribbon__star {
+    color: #ffc93c !important;
+    font-size: 12px !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-top-selling-ribbon--verified-only {
+    background: linear-gradient(90deg, #b3163f, #8e0e30) !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-cube-scene,
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-cube {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-cube__face {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    backface-visibility: visible !important;
+    transform: none !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-cube__face--top {
+    display: none !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__body {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+    padding: 9px 10px 10px !important;
+    background: #fff !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__header {
+    min-width: 0 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__title,
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__title a {
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    color: #1a1a1a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0 !important;
+    text-align: left !important;
+    text-decoration: none !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__rotator {
+    width: max-content !important;
+    max-width: 100% !important;
+    height: 18px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 5px !important;
+    background: #f1f2f5 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__rotator-track {
+    height: 18px !important;
+    gap: 0 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-rotator-item {
+    display: inline-flex !important;
+    height: 18px !important;
+    align-items: center !important;
+    padding: 0 6px !important;
+    color: #5e6070 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 18px !important;
+    white-space: nowrap !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__moq-desktop {
+    display: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__moq-mobile[hidden] {
+    display: inline !important;
+  }
+
+  #root article[id*="section_featured_collection"] .infinite-scroll-trigger {
+    padding: 14px 0 22px !important;
+    margin-top: 0 !important;
+    min-height: 0 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .infinite-scroll-loader {
+    gap: 7px !important;
+    align-items: center !important;
+  }
+
+  #root article[id*="section_featured_collection"] .infinite-scroll-loader .spinner-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 5px !important;
+    background: #c6c8da !important;
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .infinite-scroll-loader .spinner-dot:first-child {
+    width: 22px !important;
+    background: #3a34d2 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-rotator-item i {
+    margin-right: 3px !important;
+    color: #3b6fd9 !important;
+    font-size: 10px !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__badges-row {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-badge--shipping {
+    display: inline-flex !important;
+    min-height: 18px !important;
+    align-items: center !important;
+    gap: 3px !important;
+    padding: 2px 6px !important;
+    border-radius: 5px !important;
+    background: #eaf6e6 !important;
+    color: #2e7d32 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__price-wrapper {
+    display: flex !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__price-main {
+    display: flex !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #e4323c !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__price-main .old-price {
+    order: 2 !important;
+    margin: 0 0 0 1px !important;
+    color: #8b92a0 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__discount-badge {
+    display: inline-flex !important;
+    min-height: 16px !important;
+    align-items: center !important;
+    padding: 1px 5px !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    background: #ff6a00 !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__moq {
+    margin: 0 !important;
+    color: #6a6c7a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    line-height: 1.25 !important;
+  }
+
+  #root #nav-top,
+  #root #nav-top::before,
+  #root #nav-top > ul,
+  #root #nav-top .swiper-outer,
+  #root #nav-top .swiper-wrapper,
+  #root #nav-top .swiper-slide {
+    background: #f5f6f8 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  #root #nav-top {
+    color: #4A4F6B !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    padding-top: 12px !important;
+    padding-bottom: 0 !important;
+  }
+
+  #root #nav-top ul.l4us.l4us-mobile .inner,
+  #root #nav-top ul.l4us.l4us-mobile .inner * {
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 13.5px !important;
+    line-height: 1.2 !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    color: #4A4F6B !important;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root #nav-top ul.l4us.l4us-mobile .inner a {
+    color: #3A34D2 !important;
+    text-decoration: underline !important;
+  }
+
+  #root #nav-top ul.l4us.l4us-mobile .inner a strong {
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-weight: 800 !important;
+    color: #3A34D2 !important;
+  }
+
+  #root #nav-top ul.l4us.l4us-mobile .inner > svg,
+  #root #nav-top ul.l4us.l4us-mobile .inner > i {
+    display: none;
+  }
+
+  #root #nav-top ul.l4us.l4us-mobile .inner::before {
+    content: "📦";
+    display: inline-block;
+    margin-right: 4px;
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif;
+    font-size: 15px;
+    line-height: 1;
+  }
+}
+
+@media only screen and (max-width: 760px) {
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: auto !important;
+    margin: 0 6px 30px !important;
+    padding: 0 !important;
+    gap: 12px 10px !important;
+    overflow: visible !important;
+    list-style: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) > li.alibaba-product-card,
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) > li.alibaba-product-card:hover {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(20, 20, 40, 0.06), 0 6px 18px -10px rgba(20, 20, 40, 0.18) !important;
+    cursor: default !important;
+    transform: none !important;
+    transition: none !important;
+    cursor: pointer !important;
+  }
+
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) > li.alibaba-product-card .alibaba-card__media {
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px 12px 0 0 !important;
+    background: #f4f4f4 !important;
+  }
+
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) > li.alibaba-product-card .alibaba-card__picture img,
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) > li.alibaba-product-card:hover .alibaba-card__picture img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) > li.alibaba-product-card:hover .alibaba-card__picture--secondary {
+    opacity: 0 !important;
+    transition: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] > ul.l4cl:not(.list) > li.alibaba-product-card .alibaba-card__body {
+    box-sizing: border-box !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 9px 9px 10px !important;
+    background: #fff !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:hover,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:focus,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:active {
+    display: grid !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    top: 8px !important;
+    right: 8px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    appearance: none !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+    color: #222 !important;
+    line-height: 16px !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist::before,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:hover::before,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:focus::before,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:active::before {
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist i {
+    display: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist-icon {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    align-self: center !important;
+    justify-self: center !important;
+    width: 17px !important;
+    height: 17px !important;
+    overflow: visible !important;
+    color: #222 !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist-icon path {
+    fill: none !important;
+    stroke: currentColor !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist[aria-pressed="true"] .alibaba-card__wishlist-icon,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:has(i.icon-heart:not(.icon-heart-outline)) .alibaba-card__wishlist-icon {
+    color: #e53935 !important;
+    fill: #e53935 !important;
+    stroke: #e53935 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist[aria-pressed="true"] .alibaba-card__wishlist-icon path,
+  #root article[id*="section_featured_collection"] .alibaba-card__wishlist:has(i.icon-heart:not(.icon-heart-outline)) .alibaba-card__wishlist-icon path {
+    fill: #e53935 !important;
+    stroke: #e53935 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__body {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) max-content !important;
+    grid-template-rows: minmax(35px, auto) minmax(20px, auto) 15px 16px !important;
+    align-content: start !important;
+    align-items: baseline !important;
+    column-gap: 5px !important;
+    row-gap: 0 !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 9px 9px 10px !important;
+    background: #fff !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__meta,
+  #root article[id*="section_featured_collection"] .alibaba-card__stock {
+    grid-column: 1 / -1 !important;
+    order: 0 !important;
+    margin: 0 0 5px !important;
+    color: #7a7c8a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__stock,
+  #root article[id*="section_featured_collection"] .alibaba-card__stock-list,
+  #root article[id*="section_featured_collection"] .alibaba-card__meta {
+    display: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__meta:not(:has(*)),
+  #root article[id*="section_featured_collection"] .alibaba-card__stock:not(:has(*)) {
+    display: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__header {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    order: 1 !important;
+    min-width: 0 !important;
+    margin: 0 0 6px !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__title,
+  #root article[id*="section_featured_collection"] .alibaba-card__title a {
+    display: -webkit-box !important;
+    overflow: hidden !important;
+    color: #1a1a1a !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__price-main {
+    display: flex !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    order: 2 !important;
+    align-items: baseline !important;
+    flex-wrap: nowrap !important;
+    gap: 5px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #1a1a2e !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__price-wrapper {
+    display: contents !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__price-main > .money {
+    order: 1 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__price-main .old-price {
+    order: 2 !important;
+    color: #8b92a0 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__price-main:has(.old-price) {
+    color: #e53935 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__discount-badge {
+    order: 3 !important;
+    min-height: 16px !important;
+    margin: 0 !important;
+    padding: 1px 5px !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    background: #ff6a00 !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .badge-wrap-3d,
+  #root article[id*="section_featured_collection"] .discount-combined-group {
+    display: contents !important;
+  }
+
+  #root article[id*="section_featured_collection"] .pill-badge--discount {
+    display: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .pill-badge-savings {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    order: 3 !important;
+    justify-self: start !important;
+    margin: 2px 0 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    color: #d6153a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__moq {
+    grid-column: 2 !important;
+    grid-row: 3 !important;
+    order: 3 !important;
+    justify-self: end !important;
+    margin: 2px 0 0 !important;
+    padding: 0 !important;
+    color: #7a7c8a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    line-height: 1.2 !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__trust,
+  #root article[id*="section_featured_collection"] .alibaba-card__badges-row {
+    display: flex !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+    order: 4 !important;
+    justify-self: start !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+    margin: 6px 0 0 !important;
+    padding: 0 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 11px !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__trust > *,
+  #root article[id*="section_featured_collection"] .alibaba-badge--shipping {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    gap: 3px !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 2px 5px !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    background: #f1f2f5 !important;
+    color: #5e6070 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-badge--shipping {
+    background: #eaf6e6 !important;
+    color: #2e7d32 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__rotator {
+    display: none !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-card__trust .alibaba-badge--shipping {
+    background: #eaf6e6 !important;
+    color: #2e7d32 !important;
+  }
+
+  #root article[id*="section_featured_collection"] .alibaba-top-selling-ribbon {
+    min-height: 0 !important;
+    gap: 5px !important;
+    padding: 7px 4px !important;
+  }
+
+  #root article[id*="section_featured_collection"] .s1lb {
+    top: 10px !important;
+    left: 10px !important;
+  }
+
+  #root article[id*="section_featured_collection"] .s1lb > span {
+    padding: 4px 10px !important;
+    font-size: 12.5px !important;
+  }
+
+  #root article[id*="section_featured_collection"] .badge-wrap-3d.badge-wrap-3d--hidden,
+  #root article[id*="section_featured_collection"] .badge-wrap-3d[aria-hidden="true"] {
+    display: none !important;
+  }
+}
+
+/* Cartes produit unifiées — mobile uniquement.
+   Reprend le design des cartes de la home (section featured collection) sur les
+   autres grilles : collection, recherche, recommandations produit, featured
+   products et produits récemment consultés. Le desktop n'est pas concerné. */
+@media only screen and (max-width: 760px) {
+  #root #collection.l4cl:not(.list) {
+    gap: 12px 10px !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card:hover {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(20, 20, 40, 0.06), 0 6px 18px -10px rgba(20, 20, 40, 0.18) !important;
+    cursor: pointer !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Dans un carrousel, Swiper fixe la largeur de la slide : on recrée l'espacement
+     entre cartes et on aligne leurs hauteurs. */
+  #root .swiper-slide > li.alibaba-product-card:is(#root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card) {
+    height: calc(100% - 4px) !important;
+    margin: 0 5px 4px !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__media {
+    position: relative !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 12px 12px 0 0 !important;
+    background: #f4f4f4 !important;
+    cursor: default !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__media-link,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__picture {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__picture img,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card:hover .alibaba-card__picture img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card:hover .alibaba-card__picture--secondary {
+    opacity: 0 !important;
+    transition: none !important;
+  }
+
+  /* L'achat rapide n'existe pas sur les cartes de la home en mobile. */
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__form,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__action-link {
+    display: none !important;
+  }
+
+  /* Bouton favoris */
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:hover,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:focus,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:active {
+    display: grid !important;
+    position: absolute !important;
+    z-index: 4 !important;
+    place-items: center !important;
+    box-sizing: border-box !important;
+    top: 8px !important;
+    right: 8px !important;
+    left: auto !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    appearance: none !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+    color: #222 !important;
+    line-height: 16px !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist::before,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:hover::before,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:focus::before,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:active::before {
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: none !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist i {
+    display: none !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist-icon {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    align-self: center !important;
+    justify-self: center !important;
+    width: 17px !important;
+    height: 17px !important;
+    overflow: visible !important;
+    color: #222 !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist-icon path {
+    fill: none !important;
+    stroke: currentColor !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist[aria-pressed="true"] .alibaba-card__wishlist-icon,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist[aria-pressed="true"] .alibaba-card__wishlist-icon path {
+    color: #e53935 !important;
+    fill: #e53935 !important;
+    stroke: #e53935 !important;
+  }
+
+  /* Étiquettes et ruban sur l'image */
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .s1lb {
+    position: absolute !important;
+    top: 10px !important;
+    left: 10px !important;
+    right: auto !important;
+    z-index: 4 !important;
+    max-width: calc(100% - 56px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .s1lb > span {
+    display: inline-block !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 4px 10px !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    background: #e53935 !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-top-selling-ribbon {
+    position: absolute !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    z-index: 2 !important;
+    display: flex !important;
+    min-height: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    padding: 7px 4px !important;
+    border-radius: 0 !important;
+    background: linear-gradient(90deg, #7b2fe0, #5b21c8) !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    letter-spacing: 0.2px !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-top-selling-ribbon__main,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-cube__face {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-top-selling-ribbon__star {
+    color: #ffc93c !important;
+    font-size: 12px !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-top-selling-ribbon--verified-only {
+    background: linear-gradient(90deg, #b3163f, #8e0e30) !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-cube-scene,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-cube {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-cube__face {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    backface-visibility: visible !important;
+    transform: none !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-cube__face--top {
+    display: none !important;
+  }
+
+  /* Corps de la carte : titre, prix, économies / ventes, badges */
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__body {
+    display: grid !important;
+    flex: 1 1 auto !important;
+    grid-template-columns: minmax(0, 1fr) max-content !important;
+    grid-template-rows: minmax(35px, auto) minmax(20px, auto) 15px 16px !important;
+    align-content: start !important;
+    align-items: baseline !important;
+    column-gap: 5px !important;
+    row-gap: 0 !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 9px 9px 10px !important;
+    background: #fff !important;
+    cursor: default !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__meta,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__stock,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__stock-list,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__rotator,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__moq-desktop,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .pill-badge--discount,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .pill-badge-savings:empty,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .badge-wrap-3d.badge-wrap-3d--hidden,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .badge-wrap-3d[aria-hidden="true"] {
+    display: none !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__header {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    order: 1 !important;
+    min-width: 0 !important;
+    margin: 0 0 6px !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__title,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__title a {
+    display: -webkit-box !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    color: #1a1a1a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0 !important;
+    text-align: left !important;
+    text-decoration: none !important;
+    text-transform: none !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__title a {
+    position: relative !important;
+    z-index: 1 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__price-wrapper,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .badge-wrap-3d,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .discount-combined-group {
+    display: contents !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__price-main {
+    display: flex !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    order: 2 !important;
+    align-items: baseline !important;
+    flex-wrap: nowrap !important;
+    gap: 5px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #1a1a2e !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__price-main:has(.old-price) {
+    color: #e53935 !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__price-main > .money {
+    order: 1 !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__price-main .old-price {
+    order: 2 !important;
+    margin: 0 0 0 1px !important;
+    color: #8b92a0 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__discount-badge {
+    display: inline-flex !important;
+    order: 3 !important;
+    min-height: 16px !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 1px 5px !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    background: #ff6a00 !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .pill-badge-savings {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    order: 3 !important;
+    justify-self: start !important;
+    margin: 2px 0 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    color: #d6153a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__moq {
+    grid-column: 2 !important;
+    grid-row: 3 !important;
+    order: 3 !important;
+    justify-self: end !important;
+    margin: 2px 0 0 !important;
+    padding: 0 !important;
+    color: #7a7c8a !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10.5px !important;
+    line-height: 1.2 !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__moq-mobile[hidden] {
+    display: inline !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__trust,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__badges-row {
+    display: flex !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+    order: 4 !important;
+    justify-self: start !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 5px !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 6px 0 0 !important;
+    padding: 0 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 11px !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__trust > *,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-badge--shipping {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    gap: 3px !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 2px 5px !important;
+    border: 0 !important;
+    border-radius: 5px !important;
+    background: #f1f2f5 !important;
+    color: #5e6070 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-badge--shipping {
+    background: #eaf6e6 !important;
+    color: #2e7d32 !important;
+  }
+}

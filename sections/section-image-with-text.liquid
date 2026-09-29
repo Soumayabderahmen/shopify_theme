@@ -1,0 +1,590 @@
+{% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+{% liquid
+  assign overlay = false
+  if section.settings.color_palette.id != settings.default_color_scheme.id
+    assign overlay = true
+  endif
+-%}
+
+<article
+  class="
+    palette-{{ section.settings.color_palette }}
+    {% if overlay %}
+      overlay
+      no-border
+    {% endif %}
+    module-color-palette
+    m6as
+    {{ section.settings.text_position }}
+    {% if section.settings.layout == 'image-right' %}inv{% endif %}
+    section-width-{{ section.settings.width }}
+  "
+>
+  <figure
+    {% unless section.settings.image %}
+      class="no-img"
+    {% endunless %}
+  >
+    <span class="img-overlay" style="opacity:{{ section.settings.overlay_opacity | divided_by: 100.0 }}"></span>
+    {%- if section.settings.image -%}
+      <picture>
+        <img
+          src="{{ section.settings.image | image_url: width: 100, height: 100, width: 640 }}"
+          srcset="{% render 'image-srcset', image: section.settings.image %}"
+          sizes="
+            (min-width: 1300px) calc({% if settings.width < 2000 %}{{ settings.width }}px{% else %}100vw{% endif %} / 2),
+            100vw
+          "
+          width="640"
+          height="530"
+          alt="{{ section.settings.image.alt | default: section.settings.title | escape }}"
+          loading="{% if section.index > 1 %}lazy{% else %}eager{% endif %}"
+        >
+      </picture>
+    {% else %}
+      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+    {% endif %}
+  </figure>
+  <div>
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when '@app' -%}
+          {% render block %}
+        {%- when 'spacer' -%}
+          <div
+            class="module-spacer"
+            style="margin-bottom:{{ block.settings.height }}px;"
+            {{ block.shopify_attributes }}
+          ></div>
+        {% when 'title' -%}
+          {%- if block.settings.title -%}
+            <div
+              class="
+                {% if block.settings.title_underline_style != 'none' %}
+                  title-underline-none
+                  {% if block.settings.title_underline_style contains 'accent' %}
+                    title-underline-accent
+                  {% elsif block.settings.title_underline_style contains 'gradient' %}
+                    title-underline-gradient
+                  {% endif %}
+                  {% if block.settings.title_underline_style contains 'secondary_font' %}
+                    title-underline-secondary-font
+                  {% endif %}
+                {% endif %}
+              "
+              {{ block.shopify_attributes }}
+            >
+              {{ block.settings.title }}
+            </div>
+          {%- endif -%}
+        {% when 'text' -%}
+          {% if block.settings.text != empty -%}
+            <span {{ block.shopify_attributes }}>{{ block.settings.text }}</span>
+          {%- endif %}
+        {% when 'usp' -%}
+          <ul class="l4us" {{ block.shopify_attributes }}>
+            {%- if block.settings.usp != empty -%}
+              <li>{{ block.settings.usp | remove: '<p>' | remove: '</p>' }}</li>
+            {%- endif -%}
+          </ul>
+        {% when 'buttons' -%}
+          {%- liquid
+            assign first_link = false
+            assign first_show_link = false
+            assign second_link = false
+            assign second_show_link = false
+            assign button_dist = false
+            if block.settings.show_first_link and block.settings.first_link_text != empty and block.settings.first_link_url != blank
+              assign first_link = true
+              assign first_button_color = block.settings.first_button_style | split: ' ' | first
+              assign first_button_style = block.settings.first_button_style | split: ' ' | last
+              if first_button_style == 'link'
+                assign first_show_link = true
+              endif
+            endif
+            if block.settings.show_second_link and block.settings.second_link_text != empty and block.settings.second_link_url != blank
+              assign second_link = true
+              assign second_button_color = block.settings.second_button_style | split: ' ' | first
+              assign second_button_style = block.settings.second_button_style | split: ' ' | last
+              if second_button_style == 'link'
+                assign second_show_link = true
+              endif
+            endif
+            if first_show_link and second_show_link
+            elsif first_show_link or second_show_link
+              assign button_dist = true
+            endif
+          -%}
+          {%- if first_link or second_link -%}
+            <p
+              class="link-btn"
+              {% if button_dist %}
+                style="--btn_dist:var(--btn_ph);"
+              {% endif %}
+            >
+              {% if first_link %}
+                <a
+                  href="{{ block.settings.first_link_url }}"
+                  class="overlay-{{ first_button_color }} {% if first_show_link %} strong inline{% elsif first_button_style == 'inv' %} inv{% endif %}"
+                >
+                  {%- if first_show_link %}<span>{% endif -%}
+                  {{- block.settings.first_link_text -}}
+                  {%- if first_show_link -%}
+                    </span>&nbsp;<i aria-hidden="true" class="icon-chevron-right"></i>
+                  {%- endif -%}
+                </a>
+              {% endif %}
+              {%- if second_link -%}
+                <a
+                  href="{{ block.settings.second_link_url }}"
+                  class="overlay-{{ second_button_color }} {% if second_show_link %} strong inline{% elsif second_button_style == 'inv' %} inv{% endif %}"
+                >
+                  {%- if second_show_link %}<span>{% endif -%}
+                  {{- block.settings.second_link_text -}}
+                  {%- if second_show_link -%}
+                    </span>&nbsp;<i aria-hidden="true" class="icon-chevron-right"></i>
+                  {%- endif -%}
+                </a>
+              {%- endif -%}
+            </p>
+          {%- endif -%}
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+</article>
+
+<style>
+  #shopify-section-{{ section.id }} { position: relative; z-index: {{ section.settings.fix_zindex }}!important; }
+  #shopify-section-{{ section.id }} .m6as { margin-bottom: {{ section.settings.spacing_desktop | minus: 26 }}px; }
+  @media only screen and (max-width: 47.5em) {
+    #shopify-section-{{ section.id }} .m6as { margin-bottom: {{ section.settings.spacing_mobile }}px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "t:sections.image_with_text.name",
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "id": "image",
+      "type": "image_picker",
+      "label": "t:sections.image_with_text.settings.image.label"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "t:sections.image_with_text.settings.overlay_opacity.label",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 0
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_palette",
+      "label": "t:global.color_palette.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "t:sections.image_with_text.settings.layout.label",
+      "options": [
+        {
+          "value": "image-left",
+          "label": "t:sections.image_with_text.settings.layout.options__1.label"
+        },
+        {
+          "value": "image-right",
+          "label": "t:sections.image_with_text.settings.layout.options__2.label"
+        }
+      ],
+      "default": "image-left"
+    },
+    {
+      "id": "text_position",
+      "type": "select",
+      "label": "t:sections.image_with_text.settings.text_position.label",
+      "options": [
+        {
+          "value": "align-top text-start",
+          "label": "t:sections.image_with_text.settings.text_position.options__1.label"
+        },
+        {
+          "value": "align-top text-center",
+          "label": "t:sections.image_with_text.settings.text_position.options__2.label"
+        },
+        {
+          "value": "align-top text-end",
+          "label": "t:sections.image_with_text.settings.text_position.options__3.label"
+        },
+        {
+          "value": "text-start",
+          "label": "t:sections.image_with_text.settings.text_position.options__4.label"
+        },
+        {
+          "value": "text-center",
+          "label": "t:sections.image_with_text.settings.text_position.options__5.label"
+        },
+        {
+          "value": "text-end",
+          "label": "t:sections.image_with_text.settings.text_position.options__6.label"
+        },
+        {
+          "value": "align-bottom text-start",
+          "label": "t:sections.image_with_text.settings.text_position.options__7.label"
+        },
+        {
+          "value": "align-bottom text-center",
+          "label": "t:sections.image_with_text.settings.text_position.options__8.label"
+        },
+        {
+          "value": "align-bottom text-end",
+          "label": "t:sections.image_with_text.settings.text_position.options__9.label"
+        }
+      ],
+      "default": "text-start"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:global.layout.width.label",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed",
+      "visible_if": "{{ settings.width < 2000 }}"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:sections.image_with_text.settings.paragraph"
+    },
+    {
+      "type": "header",
+      "content": "t:global.spacing.header"
+    },
+    {
+      "id": "spacing_desktop",
+      "type": "range",
+      "label": "t:global.spacing.spacing_desktop.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "id": "spacing_mobile",
+      "type": "range",
+      "label": "t:global.spacing.spacing_mobile.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "id": "fix_zindex",
+      "type": "range",
+      "label": "t:global.fix_zindex.label",
+      "info": "t:global.fix_zindex.info",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "spacer",
+      "name": "t:sections.image_with_text.blocks.spacer.name",
+      "settings": [
+        {
+          "id": "height",
+          "type": "range",
+          "label": "t:sections.image_with_text.blocks.spacer.settings.height.label",
+          "min": -50,
+          "max": 200,
+          "step": 5,
+          "unit": "px",
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "name": "t:sections.image_with_text.blocks.title.name",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "title",
+          "label": "t:global.typography.title.label",
+          "info": "t:global.typography.title.info",
+          "default": "<h2>Image with text</h2>"
+        },
+        {
+          "type": "select",
+          "id": "title_underline_style",
+          "label": "t:global.typography.title_underline_style.label",
+          "options": [
+            {
+              "value": "none",
+              "label": "t:global.typography.title_underline_style.none.label"
+            },
+            {
+              "value": "secondary_font",
+              "label": "t:global.typography.title_underline_style.secondary_font.label",
+              "group": "t:global.typography.title_underline_style.group.fonts"
+            },
+            {
+              "value": "secondary_font_accent",
+              "label": "t:global.typography.title_underline_style.secondary_font_accent.label",
+              "group": "t:global.typography.title_underline_style.group.fonts"
+            },
+            {
+              "value": "secondary_font_gradient",
+              "label": "t:global.typography.title_underline_style.secondary_font_gradient.label",
+              "group": "t:global.typography.title_underline_style.group.fonts"
+            },
+            {
+              "value": "accent",
+              "label": "t:global.typography.title_underline_style.accent.label",
+              "group": "t:global.typography.title_underline_style.group.colors"
+            },
+            {
+              "value": "gradient",
+              "label": "t:global.typography.title_underline_style.gradient.label",
+              "group": "t:global.typography.title_underline_style.group.colors"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "t:sections.image_with_text.blocks.text.name",
+      "settings": [
+        {
+          "id": "text",
+          "type": "richtext",
+          "label": "t:sections.image_with_text.blocks.text.settings.text.label",
+          "default": "<p>Pair text with an image and tell your customers something about this product, collection, blogpost or a promotion.</p>"
+        }
+      ]
+    },
+    {
+      "type": "usp",
+      "name": "t:sections.image_with_text.blocks.usp.name",
+      "settings": [
+        {
+          "id": "usp",
+          "type": "richtext",
+          "label": "t:sections.image_with_text.blocks.usp.settings.usp.label",
+          "default": "<p>Tell a unique detail about this image</p>"
+        }
+      ]
+    },
+    {
+      "type": "buttons",
+      "name": "t:sections.image_with_text.blocks.buttons.name",
+      "settings": [
+        {
+          "type": "header",
+          "content": "t:sections.image_with_text.blocks.buttons.settings.first_link.header"
+        },
+        {
+          "id": "show_first_link",
+          "type": "checkbox",
+          "label": "t:global.button.show_link.label",
+          "default": true
+        },
+        {
+          "id": "first_link_text",
+          "type": "text",
+          "label": "t:global.button.link_text.label",
+          "default": "Button",
+          "visible_if": "{{ block.settings.show_first_link }}"
+        },
+        {
+          "id": "first_link_url",
+          "type": "url",
+          "label": "t:global.button.link_url.label",
+          "default": "/",
+          "visible_if": "{{ block.settings.show_first_link }}"
+        },
+        {
+          "type": "select",
+          "id": "first_button_style",
+          "label": "t:global.button.button_style.label",
+          "options": [
+            {
+              "value": "primary plain",
+              "label": "t:global.button.button_style.primary.label",
+              "group": "t:global.button.button_style.group.plain"
+            },
+            {
+              "value": "secondary plain",
+              "label": "t:global.button.button_style.secondary.label",
+              "group": "t:global.button.button_style.group.plain"
+            },
+            {
+              "value": "tertiary plain",
+              "label": "t:global.button.button_style.tertiary.label",
+              "group": "t:global.button.button_style.group.plain"
+            },
+            {
+              "value": "primary inv",
+              "label": "t:global.button.button_style.primary.label",
+              "group": "t:global.button.button_style.group.inv"
+            },
+            {
+              "value": "secondary inv",
+              "label": "t:global.button.button_style.secondary.label",
+              "group": "t:global.button.button_style.group.inv"
+            },
+            {
+              "value": "tertiary inv",
+              "label": "t:global.button.button_style.tertiary.label",
+              "group": "t:global.button.button_style.group.inv"
+            },
+            {
+              "value": "primary link",
+              "label": "t:global.button.button_style.primary.label",
+              "group": "t:global.button.button_style.group.link"
+            },
+            {
+              "value": "secondary link",
+              "label": "t:global.button.button_style.secondary.label",
+              "group": "t:global.button.button_style.group.link"
+            },
+            {
+              "value": "tertiary link",
+              "label": "t:global.button.button_style.tertiary.label",
+              "group": "t:global.button.button_style.group.link"
+            }
+          ],
+          "default": "primary plain",
+          "visible_if": "{{ block.settings.show_first_link }}"
+        },
+        {
+          "type": "header",
+          "content": "t:sections.image_with_text.blocks.buttons.settings.second_link.header"
+        },
+        {
+          "id": "show_second_link",
+          "type": "checkbox",
+          "label": "t:global.button.show_link.label"
+        },
+        {
+          "id": "second_link_text",
+          "type": "text",
+          "label": "t:global.button.link_text.label",
+          "default": "Button",
+          "visible_if": "{{ block.settings.show_second_link }}"
+        },
+        {
+          "id": "second_link_url",
+          "type": "url",
+          "label": "t:global.button.link_url.label",
+          "visible_if": "{{ block.settings.show_second_link }}"
+        },
+        {
+          "type": "select",
+          "id": "second_button_style",
+          "label": "t:global.button.button_style.label",
+          "options": [
+            {
+              "value": "primary plain",
+              "label": "t:global.button.button_style.primary.label",
+              "group": "t:global.button.button_style.group.plain"
+            },
+            {
+              "value": "secondary plain",
+              "label": "t:global.button.button_style.secondary.label",
+              "group": "t:global.button.button_style.group.plain"
+            },
+            {
+              "value": "tertiary plain",
+              "label": "t:global.button.button_style.tertiary.label",
+              "group": "t:global.button.button_style.group.plain"
+            },
+            {
+              "value": "primary inv",
+              "label": "t:global.button.button_style.primary.label",
+              "group": "t:global.button.button_style.group.inv"
+            },
+            {
+              "value": "secondary inv",
+              "label": "t:global.button.button_style.secondary.label",
+              "group": "t:global.button.button_style.group.inv"
+            },
+            {
+              "value": "tertiary inv",
+              "label": "t:global.button.button_style.tertiary.label",
+              "group": "t:global.button.button_style.group.inv"
+            },
+            {
+              "value": "primary link",
+              "label": "t:global.button.button_style.primary.label",
+              "group": "t:global.button.button_style.group.link"
+            },
+            {
+              "value": "secondary link",
+              "label": "t:global.button.button_style.secondary.label",
+              "group": "t:global.button.button_style.group.link"
+            },
+            {
+              "value": "tertiary link",
+              "label": "t:global.button.button_style.tertiary.label",
+              "group": "t:global.button.button_style.group.link"
+            }
+          ],
+          "default": "secondary plain",
+          "visible_if": "{{ block.settings.show_second_link }}"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.image_with_text.presets.name",
+     "category": "t:categories.storytelling",
+      "settings": {},
+      "blocks": [
+        {
+          "type": "title"
+        },
+        {
+          "type": "text"
+        },
+        {
+          "type": "usp"
+        },
+        {
+          "type": "usp"
+        },
+        {
+          "type": "usp"
+        },
+        {
+          "type": "buttons"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

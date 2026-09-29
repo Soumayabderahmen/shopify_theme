@@ -1,0 +1,302 @@
+{%- liquid
+  capture title_classes
+    echo 'w720 '
+    if section.settings.text_alignment == 'center'
+      echo ' text-center align-center'
+    endif
+  endcapture
+-%}
+
+<div class="m6tb static section-width-{{ section.settings.width }}">
+  <nav class="hidden">
+    <ul>
+      <li class="active">
+        <a href="#section-related">{{ section.settings.title }}</a>
+      </li>
+    </ul>
+  </nav>
+  <div>
+    <div
+      id="section-related"
+      {% if recommendations.products_count == 0 %}
+        data-hide
+      {% endif %}
+      class="product-recommendations{% if section.settings.mobile_collapse %} tab-closed{% endif %}"
+      data-template="{{ section.id }}"
+      data-product-id="{{ product.id }}"
+      data-limit="{{ section.settings.recommended_products_qty }}"
+      data-intent="related"
+    >
+      <article>
+        {%- if recommendations.products_count > 0 -%}
+          {%- liquid
+            assign product_count = recommendations.products_count
+            assign limit = product_count | at_most: section.settings.number_of_items
+            case limit
+              when 0
+                assign width_class = 'w20'
+              when 2
+                assign width_class = 'w50'
+              when 3
+                assign width_class = 'w33'
+              when 4
+                assign width_class = 'w25'
+              when 5
+                assign width_class = 'w20'
+              when 6
+                assign width_class = 'w16'
+              when 7
+                assign width_class = 'w14'
+              else
+                assign width_class = 'w12'
+            endcase
+          -%}
+          <header class="cols">
+            <div
+              class="
+                mobile-hide {{ title_classes }}
+                {% if section.settings.title_underline_style != 'none' %}
+                  title-underline-none
+                  {% if section.settings.title_underline_style contains 'accent' %}
+                    title-underline-accent
+                  {% elsif section.settings.title_underline_style contains 'gradient' %}
+                    title-underline-gradient
+                  {% endif %}
+                  {% if section.settings.title_underline_style contains 'secondary_font' %}
+                    title-underline-secondary-font
+                  {% endif %}
+                {% endif %}
+              "
+            >
+              {%- if section.settings.title != blank -%}
+                {{ section.settings.title }}
+              {%- endif -%}
+            </div>
+          </header>
+          <ul class="l4cl {% if settings.enable_quick_buy and section.settings.hide_quick_buy == false %}with-quick-buy{% endif %} slider {{ width_class }}">
+            {%- liquid
+              for product in recommendations.products
+                capture placeholder_int
+                  cycle 1, 2, 3, 4, 5, 6
+                endcapture
+                render 'product-item', product: product, placeholder_int: placeholder_int, enable_quick_buy_desktop: section.settings.enable_quick_buy_desktop, enable_quick_buy_mobile: section.settings.enable_quick_buy_mobile, enable_quick_buy_qty_selector: section.settings.enable_quick_buy_qty_selector, quick_buy_compact: section.settings.enable_quick_buy_compact, enable_quick_buy_drawer: section.settings.enable_quick_buy_drawer, enable_color_picker: section.settings.enable_color_picker
+              endfor
+            -%}
+          </ul>
+        {%- endif -%}
+      </article>
+    </div>
+  </div>
+</div>
+
+<style>
+  @media only screen and (min-width: 47.5em) {
+    #shopify-section-{{ section.id }} .l4cl { margin-bottom: {{ section.settings.spacing_desktop | minus: 22 }}px; }
+  }
+  @media only screen and (max-width: 47.5em) {
+    #shopify-section-{{ section.id }} { margin-bottom: {{ section.settings.spacing_mobile | minus: -26 }}px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "t:static_sections.product_recommendations.name",
+  "class": "with-mobile-tab hidden",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:static_sections.product_recommendations.settings.paragraph"
+    },
+    {
+      "type": "range",
+      "id": "recommended_products_qty",
+      "label": "t:static_sections.product_recommendations.settings.recommended_products_qty.label",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "number_of_items",
+      "label": "t:static_sections.product_recommendations.settings.number_of_items.label",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "t:static_sections.product_recommendations.settings.text_alignment.label",
+      "options": [
+        {
+          "value": "start",
+          "label": "t:static_sections.product_recommendations.settings.text_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:static_sections.product_recommendations.settings.text_alignment.options__2.label"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:global.layout.width.label",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed",
+      "visible_if": "{{ settings.width < 2000 }}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.typography.title.label"
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "t:global.typography.title.label",
+      "info": "t:global.typography.title.info",
+      "default": "<h2>You may also like</h2>"
+    },
+    {
+      "type": "select",
+      "id": "title_underline_style",
+      "label": "t:global.typography.title_underline_style.label",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:global.typography.title_underline_style.none.label"
+        },
+        {
+          "value": "secondary_font",
+          "label": "t:global.typography.title_underline_style.secondary_font.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_accent",
+          "label": "t:global.typography.title_underline_style.secondary_font_accent.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_gradient",
+          "label": "t:global.typography.title_underline_style.secondary_font_gradient.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "accent",
+          "label": "t:global.typography.title_underline_style.accent.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        },
+        {
+          "value": "gradient",
+          "label": "t:global.typography.title_underline_style.gradient.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:global.quick_buy.header"
+    },
+    {
+      "type": "paragraph",
+      "content": "t:global.quick_buy.paragraph"
+    },
+    {
+      "id": "enable_quick_buy_desktop",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_quick_buy_desktop.label",
+      "default": true
+    },
+    {
+      "id": "enable_quick_buy_mobile",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_quick_buy_mobile.label",
+      "default": true
+    },
+    {
+      "id": "enable_quick_buy_drawer",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_quick_buy_drawer.label",
+      "info": "t:global.quick_buy.enable_quick_buy_drawer.info",
+      "visible_if": "{{ section.settings.enable_quick_buy_desktop or section.settings.enable_quick_buy_mobile }}"
+    },
+    {
+      "id": "enable_quick_buy_qty_selector",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_quick_buy_qty_selector.label",
+      "info": "t:global.quick_buy.enable_quick_buy_qty_selector.info",
+      "default": true,
+      "visible_if": "{{ section.settings.enable_quick_buy_desktop or section.settings.enable_quick_buy_mobile }}"
+    },
+    {
+      "id": "enable_color_picker",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_color_picker.label",
+      "visible_if": "{{ section.settings.enable_quick_buy_desktop or section.settings.enable_quick_buy_mobile }}"
+    },
+    {
+      "id": "enable_quick_buy_compact",
+      "type": "checkbox",
+      "label": "t:global.quick_buy.enable_quick_buy_compact.label",
+      "info": "t:global.quick_buy.enable_quick_buy_compact.info",
+      "visible_if": "{{ section.settings.enable_quick_buy_desktop or section.settings.enable_quick_buy_mobile }}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.spacing.header"
+    },
+    {
+      "id": "spacing_desktop",
+      "type": "range",
+      "label": "t:global.spacing.spacing_desktop.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "id": "spacing_mobile",
+      "type": "range",
+      "label": "t:global.spacing.spacing_mobile.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "id": "fix_zindex",
+      "type": "range",
+      "label": "t:global.fix_zindex.label",
+      "info": "t:global.fix_zindex.info",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "t:static_sections.product_recommendations.settings.mobile.header"
+    },
+    {
+      "id": "mobile_collapse",
+      "type": "checkbox",
+      "label": "t:static_sections.product_recommendations.settings.mobile.mobile_collapse.label",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,119 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "settings": {
+        "hide_mobile": false
+      }
+    },
+    "1655209702a1c75d2c": {
+      "type": "section-slideshow",
+      "blocks": {
+        "1655209702b314cdd2-0": {
+          "type": "slide",
+          "settings": {
+            "layout": "right",
+            "overlay_opacity": 5,
+            "color_palette": "scheme-2",
+            "text_position": "text-start",
+            "title": "<h1>{{ blog.title }}</h1>",
+            "title_underline_style": "none",
+            "text": "<p>Get inspired by our blog posts</p>",
+            "show_first_link": false,
+            "first_link_text": "Button",
+            "first_link_url": "/",
+            "first_button_style": "primary plain",
+            "show_second_link": false,
+            "second_link_text": "Button",
+            "second_link_url": "",
+            "second_button_style": "secondary plain"
+          }
+        }
+      },
+      "block_order": [
+        "1655209702b314cdd2-0"
+      ],
+      "settings": {
+        "height": "32/9",
+        "width": "boxed",
+        "autoplay": false,
+        "autoplay_seconds": 3,
+        "enable_controls": false,
+        "height_mobile": "xs",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "main-blog": {
+      "type": "main-blog",
+      "settings": {
+        "title": "",
+        "show_tags": false,
+        "pagination_qty": 15,
+        "show_image": true,
+        "show_date": true,
+        "show_author": true,
+        "show_excerpt": false,
+        "button_style_post": "primary link"
+      }
+    },
+    "1663041206defc7049": {
+      "type": "section-blog-posts",
+      "settings": {
+        "blog": "news",
+        "number_of_items": 2,
+        "text_alignment": "start",
+        "title": "<h1>{{ section.settings.blog.title }}</h1>",
+        "title_underline_style": "none",
+        "show_link": false,
+        "link_text": "Button",
+        "link_url": "",
+        "button_style": "primary link",
+        "show_image": true,
+        "show_date": true,
+        "show_author": true,
+        "show_excerpt": false,
+        "button_style_post": "primary link",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    },
+    "1663055785f2c7b641": {
+      "type": "section-blog-posts",
+      "settings": {
+        "blog": "news",
+        "number_of_items": 3,
+        "text_alignment": "start",
+        "title": "<h1>{{ section.settings.blog.title }}</h1>",
+        "title_underline_style": "none",
+        "show_link": false,
+        "link_text": "Button",
+        "link_url": "",
+        "button_style": "primary link",
+        "show_image": true,
+        "show_date": true,
+        "show_author": true,
+        "show_excerpt": false,
+        "button_style_post": "primary link",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "1655209702a1c75d2c",
+    "main-blog",
+    "1663041206defc7049",
+    "1663055785f2c7b641"
+  ]
+}

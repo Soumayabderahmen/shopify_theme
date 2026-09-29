@@ -1,0 +1,108 @@
+{% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+
+{% doc %}
+  Renders a blog article card with optional image, title, excerpt, author, date, and customizable read more button. Used in blog grids and article listings.
+
+  @param [article] - Article object to display, or blank to render placeholder content.
+  @param {boolean} [show_image] - Whether to display the article's featured image.
+  @param {boolean} [show_excerpt] - Whether to display the article excerpt (truncated to 25 words).
+  @param {boolean} [show_author] - Whether to display the article author.
+  @param {boolean} [show_date] - Whether to display the article publication date.
+  @param {boolean} [show_link] - Whether to display the read more button.
+  @param {string} [blog_title_size] - HTML tag for the title (e.g., 'h2', 'h3').
+  @param {string} [button_style] - Button style in format 'color style' (e.g., 'primary link', 'secondary inv').
+  @param {boolean} [lazyload] - Whether to lazy load images. Defaults to true.
+
+  @example
+  {% render 'article-item', article: article, show_image: true, show_excerpt: true %}
+  @example
+  {% render 'article-item', article: article, show_author: true, show_date: true, blog_title_size: 'h3' %}
+  @example
+  {% render 'article-item', article: article, button_style: 'secondary inv', show_link: true %}
+{% enddoc %}
+
+{%- liquid
+  if lazyload != false
+    assign lazyload = true
+  endif
+  capture current
+    cycle 1, 2
+  endcapture
+  if article == blank
+    assign author = 'Author'
+    assign title = 'Article title'
+    assign date = 'now' | time_tag: format: 'month_day_year'
+  else
+    assign author = article.author
+    assign title = article.title
+    assign date = article.published_at | time_tag: format: 'month_day_year'
+  endif
+  assign button_style = button_style | default: 'primary link'
+  assign button_color = button_style | split: ' ' | first
+  assign button_style = button_style | split: ' ' | last
+  assign is_link = false
+  if button_style == 'link'
+    assign is_link = true
+  endif
+-%}
+
+<li>
+  {% if show_image %}
+    <figure>
+      <picture>
+        {% if article.image %}
+          <img
+            src="{{ article.image | image_url }}"
+            srcset="{% render 'image-srcset', image: article.image %}"
+            sizes="
+              {% if settings.width < 2000 %}
+                (min-width: 1300px) calc({{ settings.width }}px * 0.5)
+              {% endif %}
+              (min-width: 760px) calc(100vw * 0.5)
+              100vw
+            "
+            width="410"
+            height="310"
+            alt="{{ article.image.alt | default: article.title | escape }}"
+            loading="{% if lazyload %}lazy{% else %}eager{% endif %}"
+          >
+        {% else %}
+          {{ 'lifestyle-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
+        {% endif %}
+      </picture>
+    </figure>
+  {% endif %}
+  <div>
+  <{{ blog_title_size }}>
+    {% if show_author or show_date %}
+      <span class="small">
+        {%- if show_date %}{{ date }}{%- endif -%}
+        {% if show_author and show_date %}, {% endif %}
+        {%- if show_author -%}
+          {{ 'blog.written_by' | t }}
+          {{ author }}
+        {%- endif -%}
+      </span>
+    {% endif %}
+    {{ title }}
+  </{{ blog_title_size }}>
+  {%- if show_excerpt -%}
+    {%- if article.excerpt_or_content.size > 0 -%}
+      <p class="mobile-hide{% if show_link %} m0{% endif %}">
+        {{ article.excerpt_or_content | strip_html | truncatewords: 25 }}
+      </p>
+    {%- endif -%}
+  {% endif %}
+  <p class="link-btn">
+    <a
+      href="{{ article.url }}"
+      class="overlay-{{ button_color }} no-before {% if is_link %}inline strong{% elsif button_style == 'inv' %}inv{% endif %}"
+    >
+      {%- if is_link %}<span>{% endif -%}
+      {{- 'general.read_more.read_more' | t -}}
+      {%- if is_link %}</span>&nbsp;<i aria-hidden="true" class="icon-chevron-right"></i>{% endif -%}
+    </a>
+  </p>
+  {% if article != blank %}<a href="{{ article.url }}" class="link-overlay">{{ article.title }}</a>{% endif %}
+  </div>
+</li>

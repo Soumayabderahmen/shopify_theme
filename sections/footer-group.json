@@ -1,0 +1,122 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "footer",
+  "name": "t:static_sections.footer.name",
+  "sections": {
+    "section_newsletter_E9NdTg": {
+      "type": "section-newsletter",
+      "name": "t:sections.newsletter.presets.name",
+      "settings": {
+        "overlay_opacity": 0,
+        "color_palette": "scheme-2",
+        "width_banner": "wide",
+        "width": "wide",
+        "title": "<h2>Subscribe to our emails</h2>",
+        "title_underline_style": "none",
+        "text": "<p>Never miss any news and be the first to know about sale and offers</p>",
+        "link_text": "Subscribe",
+        "button_style": "primary plain",
+        "enable_newsletter_terms_checkbox": false,
+        "newsletter_terms_text": "",
+        "spacing_desktop": 50,
+        "spacing_mobile": 30,
+        "fix_zindex": 0
+      }
+    },
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "customer_support_VqA3XV": {
+          "type": "customer_support",
+          "settings": {
+            "title": "Customer service",
+            "title_underline_style": "none",
+            "customer_support_img_width": 200,
+            "customer_support_offset_right": 0,
+            "customer_support_offset_bottom": 0,
+            "extra_customer_support": "<p>Give your customers more details about your online store.</p>",
+            "show_phone_link": false,
+            "show_mail_link": true,
+            "show_whatsapp_link": true,
+            "customer_support_offset_right_mobile": 0,
+            "customer_support_offset_bottom_mobile": 0
+          }
+        },
+        "trustpilot_trustpilot_review_collector_widget_bwDyjX": {
+          "type": "shopify://apps/trustpilot/blocks/trustpilot_review_collector_widget/af628f2e-96c9-437f-bc0a-e8f7ff3fa8b4",
+          "settings": {
+            "locale": "en-US",
+            "width": 100,
+            "height": 52,
+            "vertical_space": 10,
+            "font_family": "Helvetica Neue",
+            "font_color": "#191919",
+            "border_color": "#00b67a"
+          }
+        },
+        "ali_reviews_review_badge_MgkFct": {
+          "type": "shopify://apps/ali-reviews/blocks/review-badge/bf2eea72-0400-4db1-8908-44b7418f9a88",
+          "settings": {
+            "template_id": "highlight",
+            "verified_text": "Verified reviews",
+            "scale": 100,
+            "product_ids": []
+          }
+        },
+        "4300adc0-a530-4961-bb5a-0ef06c6e64fb": {
+          "type": "socials_newsletter",
+          "settings": {
+            "title": "Follow us",
+            "show_socials": true,
+            "enable_follow_on_shop": true,
+            "show_newsletter": true,
+            "footer_button_style": "primary plain",
+            "enable_newsletter_terms_checkbox": false,
+            "newsletter_terms_text": ""
+          }
+        },
+        "c9a8027f-3a8d-4084-adbf-29db94608977": {
+          "type": "menu",
+          "settings": {
+            "menu": "footer",
+            "split_menu": false
+          }
+        }
+      },
+      "block_order": [
+        "customer_support_VqA3XV",
+        "trustpilot_trustpilot_review_collector_widget_bwDyjX",
+        "ali_reviews_review_badge_MgkFct",
+        "4300adc0-a530-4961-bb5a-0ef06c6e64fb",
+        "c9a8027f-3a8d-4084-adbf-29db94608977"
+      ],
+      "settings": {
+        "width": "boxed",
+        "footer_color": "scheme-1",
+        "title_font": "primary",
+        "title_size_blocks": "h5",
+        "bottom_color": "scheme-2",
+        "bottom_img_width": 50,
+        "bottom_img_link": "",
+        "enable_country_selector": true,
+        "enable_language_selector": true,
+        "enable_follow_on_shop": true,
+        "show_payment_methods": true,
+        "spacing_desktop": 0,
+        "spacing_mobile": 0
+      }
+    }
+  },
+  "order": [
+    "section_newsletter_E9NdTg",
+    "footer"
+  ]
+}

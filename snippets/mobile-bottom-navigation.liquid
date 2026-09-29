@@ -1,0 +1,206 @@
+{%- liquid
+  assign delivery_url = routes.root_url | append: 'pages/tracking-order'
+  if menu != blank
+    for menu_link in menu.links
+      assign menu_title = menu_link.title | downcase
+      assign menu_handle = menu_link.handle | downcase
+      if menu_title contains 'tracking' or menu_title contains 'livraison' or menu_title contains 'consegna' or menu_handle contains 'tracking'
+        assign delivery_url = menu_link.url
+        break
+      endif
+    endfor
+  endif
+
+  assign language_code = localization.language.iso_code | downcase | split: '-' | first
+  case language_code
+    when 'it'
+      assign home_label = 'Home'
+      assign categories_label = 'Categoria'
+      assign delivery_label = 'Consegna'
+      assign cart_label = 'Carrello'
+      assign account_label = 'Tu'
+    when 'fr'
+      assign home_label = 'Accueil'
+      assign categories_label = 'Catégories'
+      assign delivery_label = 'Livraison'
+      assign cart_label = 'Panier'
+      assign account_label = 'Compte'
+    else
+      assign home_label = 'Home'
+      assign categories_label = 'Categories'
+      assign delivery_label = 'Delivery'
+      assign cart_label = 'Cart'
+      assign account_label = 'Account'
+  endcase
+
+  assign account_url = routes.account_login_url
+  if customer
+    assign account_url = routes.account_url
+  endif
+-%}
+
+{% comment %} <nav class="mobile-bottom-navigation" aria-label="Mobile">
+  <a href="{{ routes.root_url }}"{% if request.page_type == 'index' %} class="is-active" aria-current="page"{% endif %}>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5z"></path><path d="M9 21v-7h6v7"></path></svg>
+    <span>{{ home_label }}</span>
+  </a>
+  <button type="button" data-mobile-categories-trigger>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"></path><circle cx="7" cy="5" r="1.7"></circle><circle cx="17" cy="12" r="1.7"></circle><circle cx="9" cy="19" r="1.7"></circle></svg>
+    <span>{{ categories_label }}</span>
+  </button>
+  <a href="{{ delivery_url }}"{% if request.path == delivery_url %} class="is-active" aria-current="page"{% endif %}>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"></path><circle cx="7" cy="19" r="2"></circle><circle cx="18" cy="19" r="2"></circle></svg>
+    <span>{{ delivery_label }}</span>
+  </a>
+  <a href="{{ routes.cart_url }}"{% if request.page_type == 'cart' %} class="is-active" aria-current="page"{% endif %}>
+    <span class="mobile-bottom-navigation__icon">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2.5 4h2l2.2 11.2h10.8l2.2-7.5H6"></path><circle cx="9" cy="19" r="1.5"></circle><circle cx="17" cy="19" r="1.5"></circle></svg>
+      <span id="cart-count--m" class="mobile-bottom-navigation__count"{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span>
+    </span>
+    <span>{{ cart_label }}</span>
+  </a>
+  <a href="{{ account_url }}"{% if request.page_type contains 'account' %} class="is-active" aria-current="page"{% endif %}>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 21c.6-4.2 3-6.3 7.5-6.3s6.9 2.1 7.5 6.3"></path></svg>
+    <span>{{ account_label }}</span>
+  </a>
+</nav> {% endcomment %}
+
+{% comment %} <nav class="mobile-bottom-navigation" aria-label="Mobile">
+  <a href="{{ routes.root_url }}"{% if request.page_type == 'index' %} class="is-active" aria-current="page"{% endif %}>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5z"></path><path d="M9 21v-7h6v7"></path></svg>
+    <span>{{ home_label }}</span>
+  </a>
+  <button type="button" data-mobile-categories-trigger>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"></path><circle cx="7" cy="5" r="1.7"></circle><circle cx="17" cy="12" r="1.7"></circle><circle cx="9" cy="19" r="1.7"></circle></svg>
+    <span>{{ categories_label }}</span>
+  </button>
+  <a href="{{ delivery_url }}"{% if request.path == delivery_url %} class="is-active" aria-current="page"{% endif %}>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"></path><circle cx="7" cy="19" r="2"></circle><circle cx="18" cy="19" r="2"></circle></svg>
+    <span>{{ delivery_label }}</span>
+  </a>
+  <a href="{{ routes.cart_url }}"{% if request.page_type == 'cart' %} class="is-active" aria-current="page"{% endif %}>
+    <span class="mobile-bottom-navigation__icon">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2.5 4h2l2.2 11.2h10.8l2.2-7.5H6"></path><circle cx="9" cy="19" r="1.5"></circle><circle cx="17" cy="19" r="1.5"></circle></svg>
+      <span id="cart-count--m" class="mobile-bottom-navigation__count"{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span>
+    </span>
+    <span>{{ cart_label }}</span>
+  </a>
+  <a href="{{ account_url }}"{% if request.page_type contains 'account' %} class="is-active" aria-current="page"{% endif %}>
+    <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 21c.6-4.2 3-6.3 7.5-6.3s6.9 2.1 7.5 6.3"></path></svg>
+    <span>{{ account_label }}</span>
+  </a>
+</nav> {% endcomment %}
+<nav class="mobile-bottom-navigation" aria-label="Mobile">
+  <!-- Home -->
+  <a href="{{ routes.root_url }}"{% if request.page_type == 'index' %} class="is-active" aria-current="page"{% endif %}>
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M3 10.5 12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5z"></path>
+      <path d="M9 21v-7h6v7"></path>
+    </svg>
+    <span>{{ home_label }}</span>
+  </a>
+
+  <!-- Categorie (Trigger) -->
+  <button type="button" data-mobile-categories-trigger>
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M4 5h16M4 12h16M4 19h16"></path>
+      <circle cx="7" cy="5" r="1.7"></circle>
+      <circle cx="17" cy="12" r="1.7"></circle>
+      <circle cx="9" cy="19" r="1.7"></circle>
+    </svg>
+    <span>{{ categories_label }}</span>
+  </button>
+
+  <!-- Delivery / Spedizioni -->
+  <a href="{{ delivery_url }}"{% if request.path == delivery_url %} class="is-active" aria-current="page"{% endif %}>
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"></path>
+      <circle cx="7" cy="19" r="2"></circle>
+      <circle cx="18" cy="19" r="2"></circle>
+    </svg>
+    <span>{{ delivery_label }}</span>
+  </a>
+
+  <!-- Carrello -->
+  <a href="{{ routes.cart_url }}"{% if request.page_type == 'cart' %} class="is-active" aria-current="page"{% endif %}>
+    <span class="mobile-bottom-navigation__icon">
+      <svg aria-hidden="true" viewBox="0 0 24 24">
+        <path d="M2.5 4h2l2.2 11.2h10.8l2.2-7.5H6"></path>
+        <circle cx="9" cy="19" r="1.5"></circle>
+        <circle cx="17" cy="19" r="1.5"></circle>
+      </svg>
+      <span id="cart-count--m" class="mobile-bottom-navigation__count"{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span>
+    </span>
+    <span>{{ cart_label }}</span>
+  </a>
+
+  <!-- Account -->
+  <a href="{{ account_url }}"{% if request.page_type contains 'account' %} class="is-active" aria-current="page"{% endif %}>
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4"></circle>
+      <path d="M4.5 21c.6-4.2 3-6.3 7.5-6.3s6.9 2.1 7.5 6.3"></path>
+    </svg>
+    <span>{{ account_label }}</span>
+  </a>
+</nav>
+
+<!-- Hidden element for React to hook onto -->
+<!-- Hidden element for React behavior -->
+<div id="react-nav-behavior" style="display: none;"></div>
+
+<!-- React via CDN + react-router-dom with useNavigate -->
+<script type="module">
+  import React, { useEffect } from 'https://esm.sh/react@18';
+  import { createRoot } from 'https://esm.sh/react-dom@18/client';
+  import { BrowserRouter, useNavigate } from 'https://esm.sh/react-router-dom@6';
+
+  function NavigationBehavior() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+      // Find all links generated by Liquid inside your navigation
+      const navLinks = document.querySelectorAll('.mobile-bottom-navigation a');
+
+      const handleLinkClick = (event) => {
+        event.preventDefault(); // Stop default browser action
+        const targetUrl = event.currentTarget.getAttribute('href');
+        
+        if (targetUrl) {
+          // Execute navigation using the hook
+          navigate(targetUrl);
+        }
+      };
+
+      // Attach event listeners
+      navLinks.forEach((link) => {
+        link.addEventListener('click', handleLinkClick);
+      });
+
+      // Cleanup listeners on unmount
+      return () => {
+        navLinks.forEach((link) => {
+          link.removeEventListener('click', handleLinkClick);
+        });
+      };
+    }, [navigate]);
+
+    // Returns no HTML
+    return null;
+  }
+
+  // Wrapper component with BrowserRouter to provide the routing context
+  function App() {
+    return React.createElement(
+      BrowserRouter,
+      null,
+      React.createElement(NavigationBehavior)
+    );
+  }
+
+  // Mount directly in the browser
+  const container = document.getElementById('react-nav-behavior');
+  if (container) {
+    const root = createRoot(container);
+    root.render(React.createElement(App));
+  }
+</script>

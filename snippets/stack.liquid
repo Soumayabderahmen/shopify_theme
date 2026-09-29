@@ -1,0 +1,120 @@
+{%- doc -%}
+  Renders block content for all blocks that extend the stack block.
+
+  @param {string} children - The DOM content of the stack block.
+  @param {object} settings - The settings of the stack block.
+  @param {string} shopify_attributes - String with Shopify attributes for the editor.
+  @param {string} [class] - Custom classes for the stack block.
+  @param {string} [style] - Custom inline styles for the stack block.
+
+  @example
+  {% render 'stack', children: children, settings: block.settings, shopify_attributes: block.shopify_attributes %}
+{%- enddoc -%}
+
+<div
+  class="
+    {% if settings.inherit_color_scheme == false %}
+    palette-{{ settings.color_scheme }}
+    module-color-palette
+      {% endif %}
+    stack
+    stack-block--height-{{ settings.height }}
+    stack-block--width-{{ settings.width }}
+    border-style
+    spacing-style
+    size-style
+    {{ class }}
+  "
+  style="
+      {% render 'border-override', settings: settings %}
+      padding: {{ settings.padding }}rem;
+      {% render 'size-style', settings: settings %}
+    {{ style }}
+  "
+  {{ shopify_attributes }}
+  data-testid="stack"
+>
+  {%- if settings.link != blank -%}
+    <a href="{{ settings.link }}" class="stack__link" {% if settings.open_in_new_tab %}target="_blank" rel="noopener"{% endif %}></a>
+  {%- endif -%}
+  {%- if settings.background_media == 'video' and settings.video -%}
+    {%- assign video_position = settings.video_position | default: 'cover' -%}
+    <div class="stack__media-wrapper" style="position: absolute; inset: 0; overflow: hidden; --video-object-fit: {{ video_position }};">
+      <span class="img-overlay" style="opacity: {{ settings.overlay_opacity | divided_by: 100.0 }};"></span>
+      {{ settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, image_size: '1920x' }}
+    </div>
+  {%- elsif settings.background_media == 'image' and settings.background_image -%}
+    {%- assign img_position = settings.background_image_position | default: 'cover' -%}
+    <div class="stack__media-wrapper background-image-container" style="position: absolute; inset: 0; overflow: hidden;">
+      <figure>
+        <span class="img-overlay" style="opacity: {{ settings.overlay_opacity | divided_by: 100.0 }};"></span>
+        <img
+          src="{{ settings.background_image | image_url: width: 1920 }}"
+          srcset="{% render 'image-srcset', image: settings.background_image, max_width: 1920 %}"
+          sizes="100vw"
+          width="1920"
+          height="1080"
+          alt="{{ settings.background_image.alt | escape }}"
+          loading="lazy"
+          style="position: absolute; inset: 0; width: 100%; height: 100%!important; object-fit: {% if img_position == 'fit' %}contain{% else %}cover{% endif %};"
+        >
+      </figure>
+    </div>
+  {%- endif -%}
+  <div
+    class="
+      stack-block-content
+      {% if request.design_mode %}group-block-content--design-mode{% endif %}
+      layout-panel-flex
+      layout-panel-flex--{{ settings.content_direction | default: 'column' }}
+      {% if settings.vertical_on_mobile %} mobile-column{% endif %}
+    "
+    style="{% render 'layout-panel-style', settings: settings %}"
+  >
+    {{- children -}}
+  </div>
+</div>
+
+{% stylesheet %}
+  .stack__link {
+    position: absolute;
+    inset: 0;
+  }
+
+  .stack__link ~ :is(.stack-content, .stack__media-wrapper) {
+    pointer-events: none;
+  }
+
+  /* Needs the .group-block__link ~ to be specific enough to take effect. */
+  .stack__link ~ .stack-content--design-mode {
+    pointer-events: auto;
+  }
+
+  .stack:has(> .stack__media-wrapper) {
+    overflow: hidden;
+  }
+
+  .stack__media-wrapper {
+    z-index: 0;
+  }
+
+  .stack__media-wrapper .img-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--primary_bg, rgba(0, 0, 0, 0.5));
+    pointer-events: none;
+  }
+
+  .stack__media-wrapper video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: var(--video-object-fit, cover);
+  }
+
+  .stack-block-content {
+    position: relative;
+    z-index: 1;
+  }
+{% endstylesheet %}

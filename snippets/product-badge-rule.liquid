@@ -1,0 +1,33 @@
+{%- liquid
+  assign matches_rule = false
+
+  if product != blank
+    case rule
+      when 'hot'
+        assign minimum_sold = hot_min_sold | default: 10 | plus: 0
+        assign sold_count = product.metafields.custom.sold_count.value | default: 0 | plus: 0
+        assign bestseller_count = product.metafields.custom.bestseller_count.value | default: 0 | plus: 0
+
+        for product_tag in product.tags
+          assign normalized_tag = product_tag | downcase | strip
+          if normalized_tag == 'hot' or normalized_tag == 'bestseller' or normalized_tag == 'best-seller' or normalized_tag == 'top-seller'
+            assign matches_rule = true
+            break
+          endif
+        endfor
+
+        if sold_count >= minimum_sold or bestseller_count > 0
+          assign matches_rule = true
+        endif
+      when 'new'
+        for product_tag in product.tags
+          assign normalized_tag = product_tag | downcase | strip
+          if normalized_tag == 'new-arrival'
+            assign matches_rule = true
+            break
+          endif
+        endfor
+    endcase
+  endif
+-%}
+{{- matches_rule -}}

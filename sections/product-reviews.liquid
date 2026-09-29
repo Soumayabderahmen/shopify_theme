@@ -1,0 +1,336 @@
+{%- liquid
+  assign product_image_ratio = settings.product_image_ratio
+  case product_image_ratio
+    when '310x430'
+      assign image_width =  "310"
+      assign image_height = "430"
+    when '430x310'
+      assign image_width =  "430"
+      assign image_height = "310"
+    else
+      assign image_width =  "430"
+      assign image_height = "430"
+  endcase
+
+  if settings.fill_product_images
+    assign fill_product_images = "filled"
+  else
+    assign fill_product_images = "centered"
+  endif
+
+  capture title_classes
+    echo 'w720 '
+    if section.settings.text_alignment == 'center'
+      echo ' text-center align-center'
+    endif
+  endcapture
+
+  if product.metafields.syncer.reviews
+    assign locale_ratings = product.metafields.syncer.reviews.value.reviews[localization.language.iso_code]
+    if locale_ratings
+      assign value = locale_ratings.rating
+      assign count = locale_ratings.count
+    else
+      assign value = product.metafields.syncer.reviews.value.cumulative_rating
+      assign count = product.metafields.syncer.reviews.value.total_reviews
+    endif
+  elsif product.metafields.reviews.rating
+    assign value = product.metafields.reviews.rating.value
+    assign count = product.metafields.reviews.rating_count
+  else
+    assign value = 0
+    assign count = 0
+  endif
+  assign value_in_bold = '<span class="strong">' | append: value | append: '</span>'
+  assign count_in_bold = '<span class="strong">' | append: count | append: '</span>'
+-%}
+
+<div class="m6tb static section-width-{{ section.settings.width }}">
+  <nav class="hidden">
+    <ul>
+      <li class="active"><a>{%- if section.settings.title != empty -%}{{ section.settings.title }}{%- else -%}{{ 'product.reviews.title' | t }}{%- endif -%}</a></li>
+    </ul>
+  </nav>
+  <div>
+    <div id="section-reviews"{% if section.settings.mobile_collapse %} class="tab-closed"{% endif %}>
+      <article>
+        <header class="cols">
+          <div class="mobile-hide {{ title_classes }}
+            {% if section.settings.title_underline_style != 'none' %}
+              title-underline-none
+              {% if section.settings.title_underline_style contains 'accent' %}
+                title-underline-accent
+              {% elsif section.settings.title_underline_style contains 'gradient' %}
+                title-underline-gradient
+              {% endif %}
+              {% if section.settings.title_underline_style contains 'secondary_font' %}
+                title-underline-secondary-font
+              {% endif %}
+            {% endif %}
+          ">
+            {%- if section.settings.title != blank -%}
+              {{ section.settings.title }}
+            {%- endif -%}
+          </div>
+        </header>
+        <div class="m6rv">
+          <header class="m6pe">
+            <figure>
+              <picture class="{% if settings.multiply_product_images == 'multiply' %}img-multiply{% elsif settings.multiply_product_images == 'multiply-bg' %}img-multiply-bg{% endif %}">
+                {%- if product.featured_image == blank -%}
+                  {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                {%- else -%}
+                  {%- liquid
+                    if settings.fill_product_images
+                      assign review_image_src = product.featured_image | image_url: width: image_width, height: image_height, crop: 'center'
+                    else
+                      assign review_image_src = product.featured_image | image_url: height: image_height
+                    endif
+                  -%}
+                  <img
+                    src="{{ review_image_src }}"
+                    width="{{ image_width }}"
+                    height="{{ image_height }}"
+                    alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                    class="{{ fill_product_images }}"
+                    loading="lazy"
+                  >
+                {%- endif -%}
+              </picture>
+            </figure>
+            <h3 {% if settings.product_titles_caps %}class="text-uppercase"{% endif %}>{{ product.title }}</h3>
+            <p class="r6rt" data-val="{{ value }}" data-of="5">
+              {{ 'product.reviews.rating' | t: rating: value, total: 5 | replace: value, value_in_bold }}
+            </p>
+            <p>{{ 'product.reviews.number_of_reviews' | t: count: count | replace: count, count_in_bold }}</p>
+            <p class="link-btn mobile-hide"><a data-popup="review-popup-{{ section.id }}" class='{% if settings.button_style == 'inv' %}inv{% endif %}'>{{ 'product.reviews.write_a_review' | t }}</a></p>
+          </header>
+          <div class="l4rv-container" data-product-id="{{ product.id }}" data-locale="{{ localization.language.iso_code }}"></div>
+          <p class="link-btn mobile-only text-center"><a data-popup="review-popup-{{ section.id }}" class='{% if settings.button_style == 'inv' %}inv{% endif %}'>{{ 'product.reviews.write_a_review' | t }}</a></p>
+        </div>
+      </article>
+    </div>
+  </div>
+</div>
+
+<article class="popup-a mobile-panel w630" id="review-popup-{{ section.id }}" data-title="review-popup-{{ section.id }}">
+  <form method="post" action="./" accept-charset="UTF-8" class="f8cm f8vl" id="add-review-form">
+    <fieldset>
+      <legend>{{ 'product.reviews.write_review_form.title' | t: product: product.title }}</legend>
+      <header class="title-styling">
+        <h3>{{ 'product.reviews.write_review_form.title' | t: product: product.title }}</h3>
+      </header>
+      <p>
+        <label for="rating">{{ 'product.reviews.write_review_form.rating' | t }}<span class="overlay-theme">*</span></label>
+        <span class="rating-stars-container">
+          <input class="rating-star" type="radio" id="st-1" value="1" name="rating" autocomplete="off" required />
+          <label for="st-1">
+            <span class="r6rt" data-val="1" data-of="1"></span>
+          </label>
+          <input class="rating-star" type="radio" id="st-2" value="2" name="rating" autocomplete="off" />
+          <label for="st-2">
+            <span class="r6rt" data-val="1" data-of="1"></span>
+          </label>
+          <input class="rating-star" type="radio" id="st-3" value="3" name="rating" autocomplete="off" />
+          <label for="st-3">
+            <span class="r6rt" data-val="1" data-of="1"></span>
+          </label>
+          <input class="rating-star" type="radio" id="st-4" value="4" name="rating" autocomplete="off" />
+          <label for="st-4">
+            <span class="r6rt" data-val="1" data-of="1"></span>
+          </label>
+          <input class="rating-star" type="radio" id="st-5" value="5" name="rating" autocomplete="off" />
+          <label for="st-5">
+            <span class="r6rt" data-val="1" data-of="1"></span>
+          </label>
+        </span>
+      </p>
+      <p>
+        <label for="name">{{ 'product.reviews.write_review_form.name' | t }}<span class="overlay-theme">*</span></label>
+        <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="{{ 'product.reviews.write_review_form.name' | t }}"
+                required
+        >
+      </p>
+      <p>
+        <label for="email">{{ 'product.reviews.write_review_form.email' | t }}<span class="overlay-theme">*</span></label>
+        <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="{{ 'product.reviews.write_review_form.email' | t }}"
+                required
+        >
+      </p>
+      <p>
+        <label for="body">{{ 'product.reviews.write_review_form.review_body' | t }}<span class="overlay-theme">*</span></label>
+        <textarea
+                id="body"
+                name="body"
+                placeholder="{{ 'product.reviews.write_review_form.review_body' | t }}"
+                required
+        ></textarea>
+      </p>
+      <p class="submit text-end"><button type="submit" id="post-review-button" class="{% if settings.button_style == 'inv' %}inv{% endif %}">{{ 'product.reviews.write_review_form.send' | t }}</button></p>
+    </fieldset>
+  </form>
+</article>
+<script>
+  document.querySelector('#root').appendChild(document.getElementById('review-popup-{{ section.id }}'));
+</script>
+
+{% if count > 0 %}
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org/",
+      "@type": "AggregateRating",
+      "reviewCount": "{{ count }}",
+      "ratingValue": "{{ value }}",
+      "itemReviewed": {
+        "@type" : "Product",
+        "name" : "{{ product.title | escape }}",
+        "offers": {
+          "@type": "AggregateOffer",
+          "lowPrice": "{{ product.price_min | divided_by: 100.00 }}",
+          "highPrice": "{{ product.price_max | divided_by: 100.00 }}",
+          "priceCurrency": "{{ cart.currency.iso_code }}"
+        }
+      }
+    }
+  </script>
+{% endif %}
+
+<style>
+  @media only screen and (min-width: 47.5em) {
+    #shopify-section-{{ section.id }} .l4cl { margin-bottom: {{ section.settings.spacing_desktop | minus: 22 }}px; }
+  }
+  @media only screen and (max-width: 47.5em) {
+    #shopify-section-{{ section.id }} { margin-bottom: {{ section.settings.spacing_mobile }}px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "t:static_sections.product_reviews.name",
+  "class": "with-mobile-tab",
+  "settings": [
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "t:static_sections.product_reviews.settings.text_alignment.label",
+      "options": [
+        {
+          "value": "start",
+          "label": "t:static_sections.product_reviews.settings.text_alignment.options__1.label"
+        },
+        {
+          "value": "center",
+          "label": "t:static_sections.product_reviews.settings.text_alignment.options__2.label"
+        }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:global.layout.width.label",
+      "options": [
+        {
+          "value": "boxed",
+          "label": "t:global.layout.width.options__1.label"
+        },
+        {
+          "value": "wide",
+          "label": "t:global.layout.width.options__2.label"
+        }
+      ],
+      "default": "boxed",
+      "visible_if": "{{ settings.width < 2000 }}"
+    },
+    {
+      "type": "header",
+      "content": "t:global.typography.title.label"
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "label": "t:global.typography.title.label",
+      "info": "t:global.typography.title.info",
+      "default": "<h3>Reviews</h3>"
+    },
+    {
+      "type": "select",
+      "id": "title_underline_style",
+      "label": "t:global.typography.title_underline_style.label",
+      "options": [
+        {
+          "value": "none",
+          "label": "t:global.typography.title_underline_style.none.label"
+        },
+        {
+          "value": "secondary_font",
+          "label": "t:global.typography.title_underline_style.secondary_font.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_accent",
+          "label": "t:global.typography.title_underline_style.secondary_font_accent.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "secondary_font_gradient",
+          "label": "t:global.typography.title_underline_style.secondary_font_gradient.label",
+          "group": "t:global.typography.title_underline_style.group.fonts"
+        },
+        {
+          "value": "accent",
+          "label": "t:global.typography.title_underline_style.accent.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        },
+        {
+          "value": "gradient",
+          "label": "t:global.typography.title_underline_style.gradient.label",
+          "group": "t:global.typography.title_underline_style.group.colors"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:global.spacing.header"
+    },
+    {
+      "id": "spacing_desktop",
+      "type": "range",
+      "label": "t:global.spacing.spacing_desktop.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "id": "spacing_mobile",
+      "type": "range",
+      "label": "t:global.spacing.spacing_mobile.label",
+      "min": -250,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "t:static_sections.product_reviews.settings.mobile.header"
+    },
+    {
+      "id": "mobile_collapse",
+      "type": "checkbox",
+      "label": "t:static_sections.product_reviews.settings.mobile.mobile_collapse.label",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

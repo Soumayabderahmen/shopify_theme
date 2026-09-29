@@ -1,0 +1,25 @@
+{%- liquid
+  assign standard_currency_code = cart.currency.iso_code | default: localization.country.currency.iso_code
+-%}
+{%- capture standard_product_select_data -%}
+  {%- case type -%}
+    {%- when 'product' -%}
+      {%- if product != blank -%}
+        {"id":{{ product.id | json }},"title":{{ product.title | json }},"handle":{{ product.handle | json }}}
+      {%- else -%}
+        null
+      {%- endif -%}
+    {%- when 'variant' -%}
+      {%- if variant != blank -%}
+        {"id":{{ variant.id | json }},"title":{{ variant.title | json }},"availableForSale":{{ variant.available | json }},"price":{"amount":{{ variant.price | money_amount | json }},"currencyCode":{{ standard_currency_code | json }}},"selectedOptions":[
+          {%- for option_name in product.options -%}
+            {%- assign option_value = variant.options[forloop.index0] -%}
+            {"name":{{ option_name | json }},"value":{{ option_value | json }}}{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]}
+      {%- else -%}
+        null
+      {%- endif -%}
+  {%- endcase -%}
+{%- endcapture -%}
+{{- standard_product_select_data | strip_newlines | strip | escape -}}
