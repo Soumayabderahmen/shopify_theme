@@ -319,6 +319,13 @@
     display: none;
   }
 
+  /* Pastille du cœur alignée sur celle du panier. */
+  .mobile-home-header__icon .mobile-wishlist__count {
+    top: 1px;
+    right: 0;
+    font-family: inherit;
+  }
+
   .mobile-temu-search {
     height: 48px;
     border: 2px solid #3a34d2;
@@ -2979,19 +2986,49 @@
     align-items: center !important;
   }
 
+  /* Chargement : la pastille bleue passe d'un point à l'autre. */
   #root article[id*="section_featured_collection"] .infinite-scroll-loader .spinner-dot {
-    width: 8px !important;
+    width: 8px;
     height: 8px !important;
     border-radius: 5px !important;
-    background: #c6c8da !important;
+    background: #c6c8da;
     opacity: 1 !important;
-    animation: none !important;
     transform: none !important;
+    animation: mobile-loader-pill 1.2s ease-in-out infinite !important;
   }
 
-  #root article[id*="section_featured_collection"] .infinite-scroll-loader .spinner-dot:first-child {
-    width: 22px !important;
-    background: #3a34d2 !important;
+  #root article[id*="section_featured_collection"] .infinite-scroll-loader .spinner-dot:nth-child(1) {
+    animation-delay: 0s !important;
+  }
+
+  #root article[id*="section_featured_collection"] .infinite-scroll-loader .spinner-dot:nth-child(2) {
+    animation-delay: 0.4s !important;
+  }
+
+  #root article[id*="section_featured_collection"] .infinite-scroll-loader .spinner-dot:nth-child(3) {
+    animation-delay: 0.8s !important;
+  }
+
+  @keyframes mobile-loader-pill {
+    0%, 45%, 100% {
+      width: 8px;
+      background: #c6c8da;
+    }
+    12%, 30% {
+      width: 22px;
+      background: #3a34d2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #root article[id*="section_featured_collection"] .infinite-scroll-loader .spinner-dot {
+      animation: none !important;
+    }
+
+    #root article[id*="section_featured_collection"] .infinite-scroll-loader .spinner-dot:first-child {
+      width: 22px;
+      background: #3a34d2;
+    }
   }
 
   #root .featured-collection-mobile > li.alibaba-product-card .alibaba-rotator-item i {
@@ -3514,8 +3551,8 @@
     gap: 12px 10px !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card:hover {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card:hover {
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
@@ -3536,12 +3573,12 @@
 
   /* Dans un carrousel, Swiper fixe la largeur de la slide : on recrée l'espacement
      entre cartes et on aligne leurs hauteurs. */
-  #root .swiper-slide > li.alibaba-product-card:is(#root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card) {
+  #root .swiper-slide > li.alibaba-product-card:is(#root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card) {
     height: calc(100% - 4px) !important;
     margin: 0 5px 4px !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__media {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__media {
     position: relative !important;
     flex: 0 0 auto !important;
     width: 100% !important;
@@ -3555,15 +3592,15 @@
     cursor: default !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__media-link,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__picture {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__media-link,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__picture {
     display: block !important;
     width: 100% !important;
     height: 100% !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__picture img,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card:hover .alibaba-card__picture img {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__picture img,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card:hover .alibaba-card__picture img {
     display: block !important;
     width: 100% !important;
     height: 100% !important;
@@ -3572,22 +3609,22 @@
     transition: none !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card:hover .alibaba-card__picture--secondary {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card:hover .alibaba-card__picture--secondary {
     opacity: 0 !important;
     transition: none !important;
   }
 
   /* L'achat rapide n'existe pas sur les cartes de la home en mobile. */
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__form,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__action-link {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__form,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__action-link {
     display: none !important;
   }
 
   /* Bouton favoris */
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:hover,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:focus,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:active {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist:hover,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist:focus,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist:active {
     display: grid !important;
     position: absolute !important;
     z-index: 4 !important;
@@ -3613,21 +3650,21 @@
     transition: none !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist::before,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:hover::before,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:focus::before,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist:active::before {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist::before,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist:hover::before,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist:focus::before,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist:active::before {
     border: 0 !important;
     border-radius: 50% !important;
     background: rgba(255, 255, 255, 0.95) !important;
     box-shadow: none !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist i {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist i {
     display: none !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist-icon {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist-icon {
     display: block !important;
     position: static !important;
     inset: auto !important;
@@ -3644,20 +3681,20 @@
     stroke-linejoin: round !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist-icon path {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist-icon path {
     fill: none !important;
     stroke: currentColor !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist[aria-pressed="true"] .alibaba-card__wishlist-icon,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__wishlist[aria-pressed="true"] .alibaba-card__wishlist-icon path {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist[aria-pressed="true"] .alibaba-card__wishlist-icon,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__wishlist[aria-pressed="true"] .alibaba-card__wishlist-icon path {
     color: #e53935 !important;
     fill: #e53935 !important;
     stroke: #e53935 !important;
   }
 
   /* Étiquettes et ruban sur l'image */
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .s1lb {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .s1lb {
     position: absolute !important;
     top: 10px !important;
     left: 10px !important;
@@ -3668,7 +3705,7 @@
     padding: 0 !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .s1lb > span {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .s1lb > span {
     display: inline-block !important;
     max-width: 100% !important;
     margin: 0 !important;
@@ -3683,7 +3720,7 @@
     line-height: 1 !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-top-selling-ribbon {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-top-selling-ribbon {
     position: absolute !important;
     right: 0 !important;
     bottom: 0 !important;
@@ -3707,25 +3744,25 @@
     text-transform: uppercase !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-top-selling-ribbon__main,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-cube__face {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-top-selling-ribbon__main,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-cube__face {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 5px !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-top-selling-ribbon__star {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-top-selling-ribbon__star {
     color: #ffc93c !important;
     font-size: 12px !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-top-selling-ribbon--verified-only {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-top-selling-ribbon--verified-only {
     background: linear-gradient(90deg, #b3163f, #8e0e30) !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-cube-scene,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-cube {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-cube-scene,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-cube {
     position: static !important;
     width: 100% !important;
     height: auto !important;
@@ -3733,7 +3770,7 @@
     animation: none !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-cube__face {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-cube__face {
     position: static !important;
     width: 100% !important;
     height: auto !important;
@@ -3742,12 +3779,12 @@
     transform: none !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-cube__face--top {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-cube__face--top {
     display: none !important;
   }
 
   /* Corps de la carte : titre, prix, économies / ventes, badges */
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__body {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__body {
     display: grid !important;
     flex: 1 1 auto !important;
     grid-template-columns: minmax(0, 1fr) max-content !important;
@@ -3764,19 +3801,19 @@
     cursor: default !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__meta,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__stock,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__stock-list,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__rotator,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__moq-desktop,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .pill-badge--discount,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .pill-badge-savings:empty,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .badge-wrap-3d.badge-wrap-3d--hidden,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .badge-wrap-3d[aria-hidden="true"] {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__meta,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__stock,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__stock-list,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__rotator,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__moq-desktop,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .pill-badge--discount,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .pill-badge-savings:empty,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .badge-wrap-3d.badge-wrap-3d--hidden,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .badge-wrap-3d[aria-hidden="true"] {
     display: none !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__header {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__header {
     grid-column: 1 / -1 !important;
     grid-row: 1 !important;
     order: 1 !important;
@@ -3784,8 +3821,8 @@
     margin: 0 0 6px !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__title,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__title a {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__title,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__title a {
     display: -webkit-box !important;
     min-height: 0 !important;
     margin: 0 !important;
@@ -3804,20 +3841,20 @@
     -webkit-line-clamp: 2 !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__title a {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__title a {
     position: relative !important;
     z-index: 1 !important;
     pointer-events: auto !important;
     cursor: pointer !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__price-wrapper,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .badge-wrap-3d,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .discount-combined-group {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__price-wrapper,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .badge-wrap-3d,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .discount-combined-group {
     display: contents !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__price-main {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__price-main {
     display: flex !important;
     grid-column: 1 / -1 !important;
     grid-row: 2 !important;
@@ -3836,15 +3873,15 @@
     line-height: 1.15 !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__price-main:has(.old-price) {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__price-main:has(.old-price) {
     color: #e53935 !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__price-main > .money {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__price-main > .money {
     order: 1 !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__price-main .old-price {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__price-main .old-price {
     order: 2 !important;
     margin: 0 0 0 1px !important;
     color: #8b92a0 !important;
@@ -3853,7 +3890,7 @@
     font-weight: 500 !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__discount-badge {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__discount-badge {
     display: inline-flex !important;
     order: 3 !important;
     min-height: 16px !important;
@@ -3871,7 +3908,7 @@
     line-height: 1 !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .pill-badge-savings {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .pill-badge-savings {
     grid-column: 1 !important;
     grid-row: 3 !important;
     order: 3 !important;
@@ -3887,7 +3924,7 @@
     white-space: nowrap !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__moq {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__moq {
     grid-column: 2 !important;
     grid-row: 3 !important;
     order: 3 !important;
@@ -3902,12 +3939,12 @@
     white-space: nowrap !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__moq-mobile[hidden] {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__moq-mobile[hidden] {
     display: inline !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__trust,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__badges-row {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__trust,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__badges-row {
     display: flex !important;
     grid-column: 1 / -1 !important;
     grid-row: 4 !important;
@@ -3924,8 +3961,8 @@
     font-size: 11px !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-card__trust > *,
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-badge--shipping {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__trust > *,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-badge--shipping {
     display: inline-flex !important;
     flex: 0 0 auto !important;
     align-items: center !important;
@@ -3944,8 +3981,27 @@
     white-space: nowrap !important;
   }
 
-  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl) li.alibaba-product-card .alibaba-badge--shipping {
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-badge--shipping {
     background: #eaf6e6 !important;
     color: #2e7d32 !important;
+  }
+}
+
+/* Mobile : l'espace entre prix barré et prix actuel deviendrait un élément flex et décalerait
+   le prix. L'ordre et l'espacement sont gérés par le flex (prix -> prix barré -> -X %). */
+@media only screen and (max-width: 760px) {
+  #root :is(article[id*="section_featured_collection"] .l4cl, #collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid, [data-wishlist-page] .wishlist-page__list) li.alibaba-product-card .alibaba-card__price-gap {
+    display: none !important;
+  }
+}
+/* Mobile : bande "Official Store" (snippets/badge--brand-products.liquid) sur sa propre ligne,
+   pleine largeur, sous les pastilles — comme la bande Official du prototype. */
+@media only screen and (max-width: 760px) {
+  #root :is(article[id*="section_featured_collection"] .l4cl, #collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .badge-scroll-wrapper {
+    grid-column: 1 / -1 !important;
+    grid-row: 5 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 6px 0 0 !important;
   }
 }

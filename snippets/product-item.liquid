@@ -3630,6 +3630,9 @@
         title="Wishlist"
         data-product-id="{{ product.id }}"
         data-variant-id="{{ current_variant.id }}"
+        data-variant-title="{{ current_variant.title | escape }}"
+        data-price-cents="{{ current_variant.price }}"
+        data-compare-at-price-cents="{{ current_variant.compare_at_price }}"
       >
         <svg class="alibaba-card__wishlist-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path>
@@ -3859,7 +3862,7 @@
             <span class="price-varies">&nbsp;- {{ price_max }}</span>
           {%- else -%}
             {%- if current_variant.compare_at_price > current_variant.price -%}
-              <span class="old-price">{{ current_variant.compare_at_price | money }}</span>&nbsp;
+              <span class="old-price">{{ current_variant.compare_at_price | money }}</span><span class="alibaba-card__price-gap">&nbsp;</span>
             {%- endif -%}
             {{ price }}
             {%- if discount_percent > 0 -%}
