@@ -1,0 +1,376 @@
+{%- comment -%}
+  "Offerte lampo" (prototype mobile) : rail horizontal de produits en promo d'une collection,
+  compte à rebours et barre "% venduto".
+  Le % vendu = ventes (metafield custom.bestseller_count) / (ventes + stock suivi par Shopify).
+  Sans stock suivi, on affiche seulement "N venduti" ; sans ventes, ni barre ni texte.
+{%- endcomment -%}
+{%- liquid
+  assign deals_collection = collections[section.settings.collection]
+  assign deals_limit = section.settings.limit
+  assign deals_count = 0
+-%}
+{%- if deals_collection != blank and deals_collection.products_count > 0 -%}
+  <div class="flash-deals" data-flash-deals data-end-date="{{ section.settings.end_date | escape }}">
+    <div class="flash-deals__head">
+      <div class="flash-deals__title">
+        <h2>
+          <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M13 2 4 14h7l-1 8 9-12h-7z"></path></svg>
+          {{ section.settings.title | escape }}
+        </h2>
+        {%- if section.settings.show_timer -%}
+          <div class="flash-deals__timer" data-flash-timer role="timer" aria-label="Tempo rimanente">
+            <span>00</span>:<span>00</span>:<span>00</span>
+          </div>
+        {%- endif -%}
+      </div>
+      <a class="flash-deals__all" href="{{ deals_collection.url }}">{{ section.settings.link_text | escape }}</a>
+    </div>
+
+    {%- comment -%}
+      Deux passes sur les 50 premiers produits : d'abord ceux qui ont des ventes enregistrées
+      (barre "% venduto"), puis les autres pour compléter.
+    {%- endcomment -%}
+    {%- capture deal_ids -%}{%- endcapture -%}
+    <ul class="flash-deals__rail">
+      {%- for pass in (1..2) -%}
+      {%- for product in deals_collection.products limit: 50 -%}
+        {%- liquid
+          if deals_count >= deals_limit
+            break
+          endif
+          assign deal_variant = product.selected_or_first_available_variant
+          if section.settings.only_on_sale and deal_variant.compare_at_price <= deal_variant.price
+            continue
+          endif
+          if product.available == false
+            continue
+          endif
+          assign deal_id = '|' | append: product.id | append: '|'
+          if deal_ids contains deal_id
+            continue
+          endif
+          assign deal_sold = product.metafields.custom.bestseller_count.value | default: 0 | plus: 0
+          if pass == 1 and deal_sold == 0
+            continue
+          endif
+
+          assign deal_ids = deal_ids | append: deal_id
+          assign deals_count = deals_count | plus: 1
+          assign deal_stock = 0
+          assign deal_stock_tracked = false
+          for variant in product.variants
+            if variant.inventory_management == 'shopify' and variant.inventory_quantity > 0
+              assign deal_stock = deal_stock | plus: variant.inventory_quantity
+              assign deal_stock_tracked = true
+            endif
+          endfor
+          assign deal_percent = 0
+          if deal_sold > 0 and deal_stock_tracked
+            assign deal_total = deal_sold | plus: deal_stock
+            assign deal_percent = deal_sold | times: 100 | divided_by: deal_total | at_most: 100
+          endif
+        -%}
+        <li class="flash-deals__item">
+          <a href="{{ product.url }}" class="flash-deals__link">
+            <span class="flash-deals__media">
+              {%- if product.featured_image != blank -%}
+                {{
+                  product.featured_image
+                  | image_url: width: 300, height: 300, crop: 'center'
+                  | image_tag:
+                    loading: 'lazy',
+                    widths: '150, 225, 300',
+                    sizes: '(max-width: 760px) 40vw, 180px',
+                    alt: product.title
+                }}
+              {%- endif -%}
+            </span>
+            <span class="flash-deals__price">{{ deal_variant.price | money }}</span>
+            {%- if deal_percent > 0 -%}
+              <span class="flash-deals__bar" aria-hidden="true"><i style="width: {{ deal_percent }}%;"></i></span>
+              <small>{{ deal_percent }}% venduto</small>
+            {%- elsif deal_sold > 0 -%}
+              <small>{{ deal_sold }} venduti</small>
+            {%- endif -%}
+          </a>
+        </li>
+      {%- endfor -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+{%- endif -%}
+
+<style>
+  {%- if section.settings.mobile_only %}
+    @media only screen and (min-width: 761px) {
+      #shopify-section-{{ section.id }} { display: none !important; }
+    }
+  {%- endif %}
+
+  #shopify-section-{{ section.id }} .flash-deals {
+    margin: 26px 6px 0;
+    font-family: 'Figtree', system-ui, sans-serif;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__title h2 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: #16123f;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.4px;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__title h2 svg {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    fill: #ff8a00;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__timer {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: #16123f;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__timer span {
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: #3a34d2;
+    color: #fff;
+  }
+
+  #root #shopify-section-{{ section.id }} .flash-deals__all {
+    flex: none;
+    color: #3a34d2;
+    font-size: 13.5px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__rail {
+    display: grid;
+    grid-auto-columns: 42%;
+    grid-auto-flow: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0 0 4px;
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__item {
+    margin: 0;
+    padding: 0;
+    scroll-snap-align: start;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__item::before {
+    content: none;
+  }
+
+  #root #shopify-section-{{ section.id }} .flash-deals__link {
+    display: block;
+    height: 100%;
+    padding: 8px;
+    border-radius: 12px;
+    background: #fff;
+    color: #16123f;
+    text-align: left;
+    text-decoration: none;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__media {
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #e6e8f2;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__price {
+    display: block;
+    margin-top: 8px;
+    color: #e4323c;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__bar {
+    display: block;
+    height: 6px;
+    margin-top: 6px;
+    overflow: hidden;
+    border-radius: 4px;
+    background: #fbe0e1;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals__bar i {
+    display: block;
+    height: 100%;
+    background: #e4323c;
+  }
+
+  #shopify-section-{{ section.id }} .flash-deals small {
+    display: block;
+    margin-top: 4px;
+    color: #4a4f6b;
+    font-size: 11.5px;
+  }
+</style>
+
+<script>
+  (function () {
+    const sectionId = '{{ section.id }}';
+
+    // Date de fin réglée dans l'éditeur (AAAA-MM-GG HH:MM), sinon minuit du jour.
+    function endTime(deals) {
+      const setting = (deals.dataset.endDate || '').trim();
+      if (setting) {
+        const parsed = new Date(setting.replace(' ', 'T'));
+        if (!Number.isNaN(parsed.getTime())) return parsed.getTime();
+        console.error('Invalid flash deals end date, expected YYYY-MM-DD HH:MM:', setting);
+      }
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0);
+      return midnight.getTime();
+    }
+
+    function init() {
+      const section = document.getElementById('shopify-section-' + sectionId);
+      const deals = section && section.querySelector('[data-flash-deals]');
+      const timer = deals && deals.querySelector('[data-flash-timer]');
+      if (!timer) return;
+      const end = endTime(deals);
+      const parts = timer.querySelectorAll('span');
+      const tick = () => {
+        const seconds = Math.max(0, Math.floor((end - Date.now()) / 1000));
+        [Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), seconds % 60].forEach((value, index) => {
+          parts[index].textContent = String(value).padStart(2, '0');
+        });
+        if (seconds === 0) window.clearInterval(interval);
+      };
+      const interval = window.setInterval(tick, 1000);
+      tick();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    if (window.Shopify && window.Shopify.designMode) {
+      document.addEventListener('shopify:section:load', (event) => {
+        if (event.detail.sectionId === sectionId) init();
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Offerte lampo",
+  "tag": "section",
+  "class": "shopify-section-flash-deals",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Titolo",
+      "default": "Offerte lampo"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collezione"
+    },
+    {
+      "type": "checkbox",
+      "id": "only_on_sale",
+      "label": "Solo prodotti in offerta",
+      "info": "Mostra solo i prodotti con un prezzo barrato.",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Numero di prodotti",
+      "min": 4,
+      "max": 16,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "text",
+      "id": "link_text",
+      "label": "Testo del link",
+      "default": "Vedi tutte"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_timer",
+      "label": "Mostra il conto alla rovescia",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "Fine dell'offerta",
+      "info": "Formato AAAA-MM-GG HH:MM. Vuoto: il conto alla rovescia termina a mezzanotte ogni giorno.",
+      "placeholder": "2026-10-05 23:59"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_only",
+      "label": "Solo su mobile",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Offerte lampo"
+    }
+  ]
+}
+{% endschema %}

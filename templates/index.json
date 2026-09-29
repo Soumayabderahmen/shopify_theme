@@ -25,9 +25,10 @@
         "coupon_jceb1xq31x8x"
       ],
       "settings": {
-        "title": "Offerta del giorno",
-        "text": "Riscatta il coupon prima che scada",
+        "title": "Coupon della settimana",
+        "text": "Si applicano al checkout, anche con Klarna in 3 rate",
         "show_timer": true,
+        "countdown_period": "week",
         "end_date": "",
         "mobile_only": true
       }
@@ -136,6 +137,19 @@
       ],
       "settings": {
         "label": "Categorie",
+        "mobile_only": true
+      }
+    },
+    "section_flash_deals_home": {
+      "type": "section-flash-deals",
+      "settings": {
+        "title": "Offerte lampo",
+        "collection": "bestsellers",
+        "only_on_sale": true,
+        "limit": 8,
+        "link_text": "Vedi tutte",
+        "show_timer": true,
+        "end_date": "",
         "mobile_only": true
       }
     },
@@ -411,6 +425,7 @@
     "section_slideshow_XNiKWa",
     "section_coupons_home",
     "section_category_tiles_home",
+    "section_flash_deals_home",
     "78836e0a-6131-4f01-afff-dbdd186d0914",
     "section_featured_collection_ekApHt",
     "165346832322a4db6f"
