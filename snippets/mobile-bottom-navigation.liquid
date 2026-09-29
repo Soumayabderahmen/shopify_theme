@@ -90,9 +90,10 @@
     <span>{{ account_label }}</span>
   </a>
 </nav> {% endcomment %}
+
 <nav class="mobile-bottom-navigation" aria-label="Mobile">
   <!-- Home -->
-  <a href="{{ routes.root_url }}"{% if request.page_type == 'index' %} class="is-active" aria-current="page"{% endif %}>
+  <a href="{{ routes.root_url }}"{% if request.page_type == 'index' %} class="is-active ajax-link" aria-current="page"{% endif %}>
     <svg aria-hidden="true" viewBox="0 0 24 24">
       <path d="M3 10.5 12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5z"></path>
       <path d="M9 21v-7h6v7"></path>
@@ -112,7 +113,7 @@
   </button>
 
   <!-- Delivery / Spedizioni -->
-  <a href="{{ delivery_url }}"{% if request.path == delivery_url %} class="is-active" aria-current="page"{% endif %}>
+  <a href="{{ delivery_url }}"{% if request.path == delivery_url %} class="is-active ajax-link" aria-current="page"{% endif %}>
     <svg aria-hidden="true" viewBox="0 0 24 24">
       <path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"></path>
       <circle cx="7" cy="19" r="2"></circle>
@@ -122,7 +123,7 @@
   </a>
 
   <!-- Carrello -->
-  <a href="{{ routes.cart_url }}"{% if request.page_type == 'cart' %} class="is-active" aria-current="page"{% endif %}>
+  <a href="{{ routes.cart_url }}"{% if request.page_type == 'cart' %} class="is-active ajax-link" aria-current="page"{% endif %}>
     <span class="mobile-bottom-navigation__icon">
       <svg aria-hidden="true" viewBox="0 0 24 24">
         <path d="M2.5 4h2l2.2 11.2h10.8l2.2-7.5H6"></path>
@@ -135,7 +136,7 @@
   </a>
 
   <!-- Account -->
-  <a href="{{ account_url }}"{% if request.page_type contains 'account' %} class="is-active" aria-current="page"{% endif %}>
+  <a href="{{ account_url }}"{% if request.page_type contains 'account' %} class="is-active ajax-link" aria-current="page"{% endif %}>
     <svg aria-hidden="true" viewBox="0 0 24 24">
       <circle cx="12" cy="8" r="4"></circle>
       <path d="M4.5 21c.6-4.2 3-6.3 7.5-6.3s6.9 2.1 7.5 6.3"></path>

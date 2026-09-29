@@ -304,11 +304,6 @@
           "enable_cwtracks_listener": false
         }
       },
-      "9670189827046205946": {
-        "type": "shopify://apps/hextom-translate-and-currency/blocks/app-block/b927a799-be04-4b97-9efb-5c8f0290a68e",
-        "disabled": false,
-        "settings": {}
-      },
       "6987625696575125306": {
         "type": "shopify://apps/weglot-translate-your-store/blocks/weglot/3097482a-fafe-42ff-bc33-ea19e35c4a20",
         "disabled": true,
@@ -405,6 +400,11 @@
       "9799509866644944741": {
         "type": "shopify://apps/firepush-sms-push/blocks/firepush-embed/69d6c7f1-669a-4101-81d1-6abc06d08bed",
         "disabled": false,
+        "settings": {}
+      },
+      "9670189827046205946": {
+        "type": "shopify://apps/hextom-translate-and-currency/blocks/app-block/b927a799-be04-4b97-9efb-5c8f0290a68e",
+        "disabled": true,
         "settings": {}
       }
     },
