@@ -370,6 +370,37 @@ html.mobile-quick-add-open {
   display: none !important;
 }
 
+/* Aperçu instantané pendant le chargement des options */
+#mobile-quick-add .qa-skel {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0 6px;
+}
+
+#mobile-quick-add .qa-skel i {
+  display: block;
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #eef0f5 25%, #f7f8fb 50%, #eef0f5 75%) 0 0 / 200% 100%;
+  animation: mobile-qa-skel 1.1s linear infinite;
+}
+
+#mobile-quick-add .qa-skel i:nth-child(1),
+#mobile-quick-add .qa-skel i:nth-child(3) {
+  width: 35%;
+}
+
+#mobile-quick-add .qa-skel i:nth-child(2),
+#mobile-quick-add .qa-skel i:nth-child(4) {
+  width: 100%;
+  height: 40px;
+  border-radius: 10px;
+}
+
+@keyframes mobile-qa-skel {
+  to { background-position: -200% 0; }
+}
+
 #mobile-quick-add .qa-grp {
   padding: 12px 0;
   border-bottom: 1px solid #f1f2f6;

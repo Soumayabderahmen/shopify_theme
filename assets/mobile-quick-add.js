@@ -61,9 +61,11 @@
   var COLOR_KEYS = Object.keys(COLOR_NAMES).sort(function (a, b) { return b.length - a.length; });
 
   var dataCache = new Map();
+  var detailsCache = new Map();
   var state = null;
   var history = [];
   var closeTimer = null;
+  var openRequest = null;
   var toastTimer = null;
   var busy = false;
 
@@ -79,8 +81,16 @@
     return fixed[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousands) + (fixed[1] ? decimal + fixed[1] : '');
   }
 
+  // Données de la boutique, disponibles tout de suite (attributs de la modale).
+  var shop = {
+    moneyFormat: dialog.dataset.moneyFormat || '€{{amount_with_comma_separator}}',
+    klarna: dialog.hasAttribute('data-klarna'),
+    country: dialog.dataset.country || '',
+    freeShippingThreshold: 5000
+  };
+
   function money(cents) {
-    var format = (state && state.product.moneyFormat) || '€{{amount_with_comma_separator}}';
+    var format = shop.moneyFormat;
     return format.replace(/\{\{\s*(\w+)\s*\}\}/, function (match, key) {
       switch (key) {
         case 'amount_no_decimals': return formatNumber(cents, 0, ',', '.');
@@ -123,19 +133,136 @@
     toastTimer = window.setTimeout(function () { toastElement.classList.remove('is-visible'); }, 1900);
   }
 
-  /* ---------- Données ---------- */
-  function loadProduct(handle) {
+  /* ---------- Données ----------
+     1) /products/<handle>.js (rapide, mis en cache par Shopify) : options, variantes, prix, disponibilité ;
+     2) en parallèle, /products/<handle>?view=quick-add (plus lent) : stock réel, guide des tailles,
+        pastilles de couleur, collection — ajoutés à la modale dès qu'ils arrivent. */
+  function fromProductJson(data) {
+    return {
+      id: data.id,
+      handle: data.handle,
+      title: data.title,
+      url: data.url || shopRoot + 'products/' + data.handle,
+      type: data.type || '',
+      image: data.featured_image || null,
+      collectionUrl: '',
+      sizeChart: null,
+      detailed: false,
+      options: (data.options || []).map(function (option) {
+        return {
+          name: option.name,
+          values: option.values.map(function (value) { return { name: value, color: null, image: null }; })
+        };
+      }),
+      variants: data.variants.map(function (variant) {
+        return {
+          id: variant.id,
+          title: variant.title,
+          options: variant.options,
+          available: variant.available,
+          price: variant.price,
+          compareAtPrice: variant.compare_at_price || 0,
+          quantity: null,
+          image: variant.featured_image ? variant.featured_image.src : null
+        };
+      })
+    };
+  }
+
+  function addDetails(product, details) {
+    product.options.forEach(function (option, index) {
+      var detailed = details.options[index];
+      if (!detailed) return;
+      option.values.forEach(function (value) {
+        var match = detailed.values.find(function (item) { return item.name === value.name; });
+        if (match) {
+          value.color = match.color;
+          value.image = match.image;
+        }
+      });
+    });
+    product.variants.forEach(function (variant) {
+      var match = details.variants.find(function (item) { return item.id === variant.id; });
+      if (match) variant.quantity = match.quantity;
+    });
+    product.sizeChart = details.sizeChart;
+    product.collectionUrl = details.collectionUrl;
+    product.detailed = true;
+  }
+
+  function fetchJson(url, label) {
+    return fetch(url, { credentials: 'same-origin' }).then(function (response) {
+      if (!response.ok) throw new Error(label + ' request failed with status ' + response.status + ' for ' + url);
+      return response.text();
+    }).then(function (text) { return JSON.parse(text); });
+  }
+
+  // Données de base (rapides) : préchargées pour les cartes visibles.
+  function loadBase(handle) {
     if (!dataCache.has(handle)) {
-      var request = fetch(shopRoot + 'products/' + encodeURIComponent(handle) + '?view=quick-add', { credentials: 'same-origin' })
-        .then(function (response) {
-          if (!response.ok) throw new Error('Quick add request failed with status ' + response.status + ' for ' + handle);
-          return response.text();
-        })
-        .then(function (text) { return JSON.parse(text); });
-      request.catch(function () { dataCache.delete(handle); });
-      dataCache.set(handle, request);
+      var base = fetchJson(shopRoot + 'products/' + encodeURIComponent(handle) + '.js', 'Product').then(fromProductJson);
+      base.catch(function () { dataCache.delete(handle); });
+      dataCache.set(handle, base);
     }
     return dataCache.get(handle);
+  }
+
+  // Détails (plus lents) : chargés seulement à l'intention d'ouvrir (survol, toucher, clic).
+  function loadProduct(handle) {
+    var base = loadBase(handle);
+    if (!detailsCache.has(handle)) {
+      var details = fetchJson(shopRoot + 'products/' + encodeURIComponent(handle) + '?view=quick-add', 'Quick add details');
+      detailsCache.set(handle, details);
+      Promise.all([base, details]).then(function (results) {
+        addDetails(results[0], results[1]);
+        // Modale déjà ouverte sur ce produit : on complète sans perdre la sélection.
+        if (state && state.product === results[0]) {
+          renderOptions();
+          paint();
+          el.simAll.href = results[0].collectionUrl || (shopRoot + 'collections/all');
+        }
+      }).catch(function (error) {
+        detailsCache.delete(handle);
+        console.error(error);
+      });
+    }
+    return base;
+  }
+
+  // Préchargement des cartes proches de l'écran, deux requêtes à la fois, quand le navigateur est libre.
+  var prefetchQueue = [];
+  var prefetchRunning = 0;
+  function runPrefetch() {
+    while (prefetchRunning < 2 && prefetchQueue.length) {
+      var handle = prefetchQueue.shift();
+      if (dataCache.has(handle)) continue;
+      prefetchRunning += 1;
+      loadBase(handle).catch(function () {}).then(function () {
+        prefetchRunning -= 1;
+        schedulePrefetch();
+      });
+    }
+  }
+  function schedulePrefetch() {
+    if (!prefetchQueue.length) return;
+    if ('requestIdleCallback' in window) window.requestIdleCallback(runPrefetch, { timeout: 1500 });
+    else window.setTimeout(runPrefetch, 200);
+  }
+  var visibleObserver = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      visibleObserver.unobserve(entry.target);
+      var handle = entry.target.dataset.quickAdd;
+      if (mobile.matches && handle && !dataCache.has(handle) && prefetchQueue.indexOf(handle) === -1) prefetchQueue.push(handle);
+    });
+    schedulePrefetch();
+  }, { rootMargin: '200px 0px' }) : null;
+  function observeCards(root) {
+    if (!visibleObserver || !mobile.matches) return;
+    (root || document).querySelectorAll('[data-quick-add]:not([data-qa-observed])').forEach(function (button) {
+      button.setAttribute('data-qa-observed', '');
+      visibleObserver.observe(button);
+    });
   }
 
   function loadSimilar(product) {
@@ -328,10 +455,10 @@
     el.qtyPlus.disabled = state.qty >= maxQty;
 
     // Avantages : même règle que la carte (livraison offerte au-delà du seuil), Klarna si activé.
-    var freeShipping = variant.price > (product.freeShippingThreshold || 5000);
+    var freeShipping = variant.price > shop.freeShippingThreshold;
     el.free.hidden = !freeShipping;
-    el.free.textContent = (flagEmoji(product.country) + ' Sped. gratuita').trim();
-    el.klarna.hidden = !product.klarna;
+    el.free.textContent = (flagEmoji(shop.country) + ' Sped. gratuita').trim();
+    el.klarna.hidden = !shop.klarna;
     el.klarnaValue.textContent = money(Math.round(variant.price / 3));
 
     el.more.href = product.url;
@@ -389,6 +516,7 @@
       error: '',
       token: Date.now() + Math.random()
     };
+    dialog.classList.remove('is-pending');
     el.title.textContent = product.title;
     renderOptions();
     paint();
@@ -418,16 +546,67 @@
   }
 
   /* ---------- Ouverture / fermeture ---------- */
-  function open(product, variantId) {
+  function showDialog() {
     window.clearTimeout(closeTimer);
-    history = [];
-    fill(product, variantId);
     if (!dialog.open) dialog.showModal();
     // Le défilement ne peut être remis à zéro qu'une fois la modale affichée.
     el.body.scrollTop = 0;
     document.documentElement.classList.add('mobile-quick-add-open');
     window.requestAnimationFrame(function () {
       window.requestAnimationFrame(function () { dialog.classList.add('is-visible'); });
+    });
+  }
+
+  // Ouverture instantanée : photo, titre et prix déjà présents sur la carte, options en chargement.
+  function showCardPreview(trigger) {
+    var card = trigger.closest('li') || trigger.parentElement;
+    var image = card.querySelector('.alibaba-card__picture img, img');
+    var titleLink = card.querySelector('.alibaba-card__title a, a[href*="/products/"]');
+    var wishlist = card.querySelector('.alibaba-card__wishlist[data-price-cents]');
+    var price = wishlist ? Number(wishlist.dataset.priceCents) : 0;
+    var compare = wishlist ? Number(wishlist.dataset.compareAtPriceCents) : 0;
+    var onSale = compare > price;
+    state = null;
+    dialog.classList.add('is-pending');
+    el.title.textContent = titleLink ? titleLink.textContent.trim() : '';
+    el.image.src = image ? image.currentSrc || image.src : '';
+    el.price.innerHTML = price
+      ? '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(price)) + '</b>'
+        + (onSale ? '<s>' + escapeHtml(money(compare)) + '</s><span class="pct">-' + Math.round((compare - price) / compare * 100) + '%</span>' : '')
+      : '';
+    el.stock.textContent = '';
+    el.stock.className = 'qa-stock';
+    el.options.innerHTML = '<div class="qa-skel" aria-hidden="true"><i></i><i></i><i></i><i></i></div>';
+    el.guidePanel.hidden = true;
+    el.qtyValue.textContent = '1';
+    el.free.hidden = true;
+    el.klarna.hidden = true;
+    el.sim.hidden = true;
+    el.back.hidden = true;
+    el.more.href = titleLink ? titleLink.href : '#';
+    el.add.textContent = 'Caricamento…';
+    el.add.classList.add('wait');
+  }
+
+  function openFromCard(trigger) {
+    var handle = trigger.dataset.quickAdd;
+    var variantId = cardVariantId(trigger);
+    var token = {};
+    openRequest = token;
+    history = [];
+    showCardPreview(trigger);
+    showDialog();
+    // Si le produit est déjà en cache, la promesse est résolue avant l'affichage : pas d'aperçu visible.
+    loadProduct(handle).then(function (product) {
+      if (openRequest !== token || !dialog.open) return;
+      openRequest = null;
+      fill(product, variantId);
+    }).catch(function (error) {
+      console.error(error);
+      if (openRequest !== token) return;
+      openRequest = null;
+      close();
+      if (el.more.href && el.more.href.slice(-1) !== '#') window.location.href = el.more.href;
     });
   }
 
@@ -513,11 +692,18 @@
     return wishlist ? wishlist.dataset.variantId : null;
   }
 
-  // Préchargement dès le toucher, pour une ouverture instantanée.
-  document.addEventListener('pointerdown', function (event) {
-    var trigger = mobile.matches && event.target.closest && event.target.closest('[data-quick-add]');
+  // Préchargement : au survol de la carte (souris) ou dès le toucher du bouton (tactile).
+  function prefetch(event) {
+    if (!mobile.matches || !event.target.closest) return;
+    var trigger = event.target.closest('[data-quick-add]');
+    if (!trigger && event.pointerType === 'mouse') {
+      var card = event.target.closest('li.alibaba-product-card');
+      trigger = card && card.querySelector('[data-quick-add]');
+    }
     if (trigger) loadProduct(trigger.dataset.quickAdd).catch(function () {});
-  }, { passive: true });
+  }
+  document.addEventListener('pointerover', prefetch, { passive: true });
+  document.addEventListener('pointerdown', prefetch, { passive: true });
 
   // Phase de capture : le clic sur le bouton panier ne doit pas ouvrir la fiche produit de la carte.
   document.addEventListener('click', function (event) {
@@ -525,17 +711,7 @@
     if (!trigger || !mobile.matches) return;
     event.preventDefault();
     event.stopPropagation();
-    if (trigger.classList.contains('is-loading')) return;
-    trigger.classList.add('is-loading');
-    loadProduct(trigger.dataset.quickAdd).then(function (product) {
-      open(product, cardVariantId(trigger));
-    }).catch(function (error) {
-      console.error(error);
-      var link = trigger.closest('li') && trigger.closest('li').querySelector('a[href*="/products/"]');
-      if (link) window.location.href = link.href;
-    }).finally(function () {
-      trigger.classList.remove('is-loading');
-    });
+    openFromCard(trigger);
   }, true);
 
   dialog.addEventListener('click', function (event) {
@@ -547,6 +723,8 @@
       close();
       return;
     }
+    // Options encore en chargement : rien d'autre n'est actif.
+    if (!state) return;
     if (event.target.closest('[data-qa-back]')) {
       var previous = history.pop();
       if (previous) {
@@ -613,5 +791,17 @@
 
   mobile.addEventListener('change', function () {
     if (!mobile.matches) close();
+    else observeCards();
   });
+
+  // Cartes visibles : préchargées ; nouvelles cartes (défilement infini, filtres) : observées à leur arrivée.
+  observeCards();
+  var observeTimer = null;
+  new MutationObserver(function () {
+    if (observeTimer) return;
+    observeTimer = window.setTimeout(function () {
+      observeTimer = null;
+      observeCards();
+    }, 300);
+  }).observe(document.body, { childList: true, subtree: true });
 })();

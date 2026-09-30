@@ -13,6 +13,9 @@
   aria-labelledby="mobile-quick-add-title"
   data-mobile-quick-add
   data-recommendations-url="{{ routes.product_recommendations_url }}"
+  data-money-format="{{ shop.money_format | strip_html | escape }}"
+  data-country="{{ localization.country.iso_code }}"
+  {% if shop.enabled_payment_types contains 'klarna' %}data-klarna{% endif %}
 >
   <span class="qa-grab" aria-hidden="true"></span>
   <button type="button" class="qa-back" data-qa-back hidden>
