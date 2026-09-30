@@ -2,12 +2,16 @@
    produit + modale bottom sheet (snippets/mobile-quick-add.liquid, assets/mobile-quick-add.js).
    Chargé uniquement en mobile (media="(max-width: 760px)"). */
 
-/* ===== Bouton panier sur l'image de la carte ===== */
+/* ===== Bouton panier sur l'image de la carte (prototype final 2) =====
+   Rond translucide toujours visible : bleu nuit à 18 % + flou d'arrière-plan, sans contour ni ombre,
+   chariot blanc 20px avec fine ombre portée ; zone tactile 50px ; appui : rétrécit et passe au bleu ;
+   après l'ajout au panier : coche verte qui se dessine pendant 2,4 s (classe .is-added). */
 /* #root + classes : plus fort que "#root button" du thème. */
-#root .alibaba-product-card .alibaba-card__qa {
+#root .alibaba-product-card .alibaba-card__qa,
+#root .alibaba-product-card .alibaba-card__qa:hover {
   position: absolute;
-  right: 8px;
-  bottom: 8px;
+  right: 9px;
+  bottom: 9px;
   z-index: 5;
   display: grid;
   float: none;
@@ -20,52 +24,57 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-  color: #16123f;
+  background: rgba(22, 18, 63, 0.18);
+  -webkit-backdrop-filter: blur(8px) saturate(1.2);
+  backdrop-filter: blur(8px) saturate(1.2);
+  box-shadow: none;
+  color: #fff;
   text-indent: 0;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s, background 0.2s, color 0.2s;
-}
-
-/* Comme le prototype : bleu au survol ; avec une souris (hover:hover), le bouton n'apparaît
-   qu'au survol de la carte (ou au focus clavier). Sur un téléphone tactile il reste visible. */
-#root .alibaba-product-card .alibaba-card__qa:hover {
-  background: #3a34d2;
-  color: #fff;
-}
-
-@media (hover: hover) {
-  #root .alibaba-product-card .alibaba-card__qa {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-
-  #root .alibaba-product-card:hover .alibaba-card__qa,
-  #root .alibaba-product-card .alibaba-card__qa:focus-visible,
-  #root .alibaba-product-card .alibaba-card__qa.is-loading {
-    opacity: 1;
-    transform: none;
-  }
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.25s, transform 0.2s;
 }
 
 #root .alibaba-product-card .alibaba-card__qa.is-up {
-  bottom: 32px;
+  bottom: 33px;
 }
 
-#root .alibaba-product-card .alibaba-card__qa::before,
+/* Zone tactile de 50px autour du rond (invisible : le thème dessine le fond de ses boutons en ::before). */
+#root .alibaba-product-card .alibaba-card__qa::before {
+  content: "";
+  display: block;
+  position: absolute;
+  inset: -6px;
+  z-index: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+}
+
 #root .alibaba-product-card .alibaba-card__qa::after {
   content: none;
   display: none;
 }
 
 #root .alibaba-product-card .alibaba-card__qa:active {
-  transform: scale(0.92);
+  transform: scale(0.9);
+  background: rgba(58, 52, 210, 0.78);
 }
 
-#root .alibaba-product-card .alibaba-card__qa.is-loading {
-  background: #3a34d2;
-  color: #fff;
+#root .alibaba-product-card .alibaba-card__qa.is-added,
+#root .alibaba-product-card .alibaba-card__qa.is-added:hover {
+  background: rgba(31, 138, 76, 0.82);
+}
+
+#root .alibaba-product-card .alibaba-card__qa:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 /* Le thème étire tous les SVG des images de carte (".l4cl figure svg" : absolute, inset 0, 100 %). */
@@ -73,13 +82,55 @@
   display: block;
   position: static;
   inset: auto;
-  width: 19px !important;
-  height: 19px !important;
+  width: 20px !important;
+  height: 20px !important;
+  overflow: visible;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+#root .alibaba-product-card .alibaba-card__qa .qa-cart {
+  transform-origin: 12px 12px;
+  transition: opacity 0.2s, transform 0.3s;
+}
+
+#root .alibaba-product-card .alibaba-card__qa .qa-tick {
+  opacity: 0;
+  stroke-width: 2.4;
+  stroke-dasharray: 14;
+  stroke-dashoffset: 14;
+  transition: stroke-dashoffset 0.4s 0.08s ease, opacity 0.15s;
+}
+
+#root .alibaba-product-card .alibaba-card__qa.is-added .qa-cart {
+  opacity: 0;
+  transform: scale(0.4);
+}
+
+#root .alibaba-product-card .alibaba-card__qa.is-added .qa-tick {
+  opacity: 1;
+  stroke-dashoffset: 0;
+}
+
+/* Vignette qui s'envole vers le panier ("fly to cart"). Affichée en popover pour passer au-dessus de la modale. */
+.mobile-quick-add-fly {
+  position: fixed;
+  inset: auto;
+  z-index: 2147483001;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid #fff;
+  border-radius: 12px;
+  background: #f4f4f4;
+  box-shadow: 0 14px 28px -8px rgba(22, 18, 63, 0.6);
+  object-fit: cover;
+  pointer-events: none;
+  will-change: transform, opacity;
 }
 
 /* ===== Modale (bottom sheet) ===== */
@@ -763,6 +814,9 @@ html.mobile-quick-add-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  #root .alibaba-product-card .alibaba-card__qa,
+  #root .alibaba-product-card .alibaba-card__qa .qa-cart,
+  #root .alibaba-product-card .alibaba-card__qa .qa-tick,
   #mobile-quick-add,
   #mobile-quick-add::backdrop,
   #mobile-quick-add .qa-top,

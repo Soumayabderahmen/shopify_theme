@@ -621,6 +621,14 @@
   }
 
   /* ---------- Panier ---------- */
+  function increaseCartCounts(quantity) {
+    document.querySelectorAll('#cart-count, #cart-count--m, .mobile-home-cart-count').forEach(function (element) {
+      var next = (parseInt(element.textContent, 10) || 0) + quantity;
+      element.textContent = String(next);
+      if (element.id === 'cart-count--m' || element.classList.contains('mobile-home-cart-count')) element.hidden = next <= 0;
+    });
+  }
+
   function refreshCartCounts() {
     document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
     if (typeof window.ajaxCart !== 'undefined' && typeof window.ajaxCart.refresh === 'function') window.ajaxCart.refresh();
@@ -661,7 +669,9 @@
       .map(function (option, index) { return option.values.length > 1 ? state.selected[index] : null; })
       .filter(Boolean)
       .join(' · ');
-    fetch(shopRoot + 'cart/add.js', {
+    var handle = state.product.handle;
+    // Ajout au panier dès le clic ; la modale se ferme pendant que la vignette s'envole vers le panier.
+    var request = fetch(shopRoot + 'cart/add.js', {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -671,17 +681,140 @@
         if (!response.ok) throw new Error(data.description || data.message || 'Impossibile aggiungere al carrello');
         return data;
       });
-    }).then(function () {
-      close();
+    });
+    var flight = new Promise(function (resolve) { flyToCart(el.image, resolve); });
+    close();
+    // Le compteur n'augmente qu'à l'arrivée de la vignette (et une fois l'ajout confirmé) ;
+    // le panier complet est ensuite resynchronisé en arrière-plan.
+    Promise.all([request, flight]).then(function () {
+      increaseCartCounts(quantity);
+      refreshCartCounts().catch(function (error) { console.error(error); });
+      bumpCart();
+      markAdded(handle);
       showToast('Aggiunto: ' + (summary ? summary + ' × ' : '× ') + quantity);
-      return refreshCartCounts().catch(function (error) { console.error(error); });
     }).catch(function (error) {
       console.error(error);
-      state.error = error.message;
-      paint();
+      showToast(error.message || 'Impossibile aggiungere al carrello');
     }).finally(function () {
       busy = false;
       el.add.disabled = false;
+    });
+  }
+
+  /* ---------- Animation "fly to cart" (comme le prototype : arc, rotation, rebond du panier) ---------- */
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // Courbe de Bézier cubique (équivalent de l'ease [.5, .02, .25, 1] du prototype).
+  function cubicBezier(x1, y1, x2, y2) {
+    function sample(a1, a2, t) { return ((1 - 3 * a2 + 3 * a1) * t + (3 * a2 - 6 * a1)) * t * t + 3 * a1 * t; }
+    return function (x) {
+      var low = 0;
+      var high = 1;
+      var t = x;
+      for (var i = 0; i < 20; i += 1) {
+        t = (low + high) / 2;
+        if (sample(x1, x2, t) < x) low = t;
+        else high = t;
+      }
+      return sample(y1, y2, t);
+    };
+  }
+  var flyEase = cubicBezier(0.5, 0.02, 0.25, 1);
+
+  // Icône Carrello de la barre du bas, sinon celle du header mobile.
+  function cartTarget() {
+    var candidates = [
+      document.querySelector('#cart-count--m'),
+      document.querySelector('.mobile-home-cart-count')
+    ];
+    for (var i = 0; i < candidates.length; i += 1) {
+      var badge = candidates[i];
+      var icon = badge && badge.parentElement && badge.parentElement.querySelector('svg');
+      if (icon && icon.getBoundingClientRect().width > 0) return icon;
+    }
+    return null;
+  }
+
+  function flyToCart(sourceImage, done) {
+    var target = cartTarget();
+    var source = sourceImage && sourceImage.getBoundingClientRect();
+    if (!target || !source || !source.width || reducedMotion.matches) {
+      done();
+      return;
+    }
+    var end = target.getBoundingClientRect();
+    var fly = document.createElement('img');
+    fly.src = sourceImage.currentSrc || sourceImage.src;
+    fly.alt = '';
+    fly.className = 'mobile-quick-add-fly';
+    fly.style.left = source.left + 'px';
+    fly.style.top = source.top + 'px';
+    fly.style.width = source.width + 'px';
+    fly.style.height = source.height + 'px';
+    document.body.appendChild(fly);
+    // En popover, la vignette passe au-dessus de la modale qui se ferme.
+    if (typeof fly.showPopover === 'function') {
+      fly.setAttribute('popover', 'manual');
+      try { fly.showPopover(); } catch (error) { console.error(error); }
+    }
+    var sx = source.left + source.width / 2;
+    var sy = source.top + source.height / 2;
+    var ex = end.left + end.width / 2;
+    var ey = end.top + end.height / 2;
+    var cx = (sx + ex) / 2 + (ex < sx ? -30 : 30);
+    var cy = Math.min(sy, ey) - 170;
+    var endScale = 26 / source.width;
+    var duration = 950;
+    // Horloge réelle (performance.now) : l'horodatage de la première image peut dater d'avant le clic.
+    var start = null;
+    function frame() {
+      var now = performance.now();
+      if (start === null) start = now;
+      var linear = Math.min(1, (now - start) / duration);
+      var p = flyEase(linear);
+      var u = 1 - p;
+      var x = u * u * sx + 2 * u * p * cx + p * p * ex;
+      var y = u * u * sy + 2 * u * p * cy + p * p * ey;
+      var scale = 1 + (endScale - 1) * Math.pow(p, 0.7);
+      fly.style.transform = 'translate(' + (x - sx) + 'px,' + (y - sy) + 'px) scale(' + scale + ') rotate(' + p * 260 + 'deg)';
+      fly.style.borderRadius = (12 + (source.width / 2 - 12) * Math.min(1, p * 2.2)) + 'px';
+      fly.style.opacity = p > 0.9 ? String(Math.max(0, 1 - (p - 0.9) * 6)) : '1';
+      if (linear < 1) {
+        window.requestAnimationFrame(frame);
+      } else {
+        fly.remove();
+        done();
+      }
+    }
+    window.requestAnimationFrame(frame);
+  }
+
+  // Petit rebond du panier et de sa pastille à l'arrivée.
+  function bumpCart() {
+    if (reducedMotion.matches) return;
+    var icon = cartTarget();
+    if (icon && typeof icon.animate === 'function') {
+      icon.animate([
+        { transform: 'scale(1) rotate(0deg)' },
+        { transform: 'scale(1.45) rotate(-12deg)' },
+        { transform: 'scale(0.9) rotate(8deg)' },
+        { transform: 'scale(1) rotate(0deg)' }
+      ], { duration: 550, easing: 'ease-out' });
+    }
+    document.querySelectorAll('#cart-count--m, .mobile-home-cart-count').forEach(function (badge) {
+      if (!badge.hidden && typeof badge.animate === 'function') {
+        badge.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.7)' }, { transform: 'scale(1)' }], { duration: 450, easing: 'ease-out' });
+      }
+    });
+  }
+
+  // Bouton panier de la carte : coche verte pendant 2,4 s.
+  function markAdded(handle) {
+    document.querySelectorAll('[data-quick-add]').forEach(function (button) {
+      if (button.dataset.quickAdd !== handle) return;
+      button.classList.add('is-added');
+      window.clearTimeout(button._qaAddedTimer);
+      button._qaAddedTimer = window.setTimeout(function () { button.classList.remove('is-added'); }, 2400);
     });
   }
 
