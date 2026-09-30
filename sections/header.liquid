@@ -196,15 +196,7 @@
     </div>
   </div>
   <div class="mobile-temu-search" data-mobile-search-host></div>
-
-  <nav class="mobile-home-header__trends" aria-label="Ricerche di tendenza">
-    <a href="{{ routes.search_url }}?q={{ 'orologi automatici' | url_encode }}">🔥 orologi automatici</a>
-    <a href="{{ routes.search_url }}?q={{ 'décolleté neri' | url_encode }}">décolleté neri</a>
-    <a href="{{ routes.search_url }}?q={{ 'pantaloni oversize' | url_encode }}">pantaloni oversize</a>
-    <a href="{{ routes.search_url }}?q={{ 'giacca antivento' | url_encode }}">giacca antivento</a>
-    <a href="{{ routes.search_url }}?q={{ 'mocassini' | url_encode }}">mocassini</a>
-    <a href="{{ routes.search_url }}?q={{ 'jeans baggy' | url_encode }}">jeans baggy</a>
-  </nav>
+  {%- comment -%} Les "ricerche di tendenza" sont maintenant dans le panneau de recherche (snippets/mobile-search.liquid). {%- endcomment -%}
 
   {%- if mobile_category_menu != blank -%}
     <nav class="mobile-temu-categories" aria-label="{{ 'general.accessibility.menu' | t }}">
@@ -241,6 +233,7 @@
 {%- render 'mobile-category-browser', menu: mobile_category_menu -%}
 {%- render 'mobile-wishlist-drawer' -%}
 {%- render 'mobile-quick-add' -%}
+{%- render 'mobile-search', trends: section.settings.mobile_trending_searches, disable_cart: section.settings.disable_online_store -%}
 
 <script>
   {%- if section.settings.sticky == 'sticky-menu' and section.settings.enable_sticky_header and section.settings.menu_scroll == false -%}
@@ -1358,6 +1351,17 @@
   "name": "Header",
   "class": "shopify-section-header",
   "settings": [
+    {
+      "type": "header",
+      "content": "Ricerca mobile"
+    },
+    {
+      "type": "textarea",
+      "id": "mobile_trending_searches",
+      "label": "Ricerche di tendenza",
+      "info": "Una ricerca per riga. Completano la classifica \"Di tendenza\" dopo le ricerche più frequenti del cliente.",
+      "default": "orologi automatici\ndécolleté neri\npantaloni oversize\ngiacca antivento\nmocassini\njeans baggy"
+    },
     {
       "type": "select",
       "id": "layout",

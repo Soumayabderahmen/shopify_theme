@@ -1,0 +1,75 @@
+{%- comment -%}
+  Recherche mobile (prototype "platinumshop-prototype-mobile-final (3)") — mobile uniquement.
+  - Panneau de recherche ouvert au tap sur la barre du header : "Ricerche recenti", "Di tendenza"
+    (classement des recherches les plus fréquentes du client, complété par les tendances des réglages),
+    puis résultats réels pendant la saisie (Predictive Search API de Shopify).
+  - Barre compacte qui remplace le header dès qu'il sort de l'écran (le header défile avec la page).
+  Params : trends (texte, une recherche par ligne), disable_cart
+  Script : assets/mobile-search.js — Styles : assets/mobile-search.css
+{%- endcomment -%}
+{%- liquid
+  assign trend_lines = trends | newline_to_br | replace: '<br />', '<br>' | split: '<br>'
+  assign wishlist_url = pages['wishlist'].url | default: '/pages/wishlist'
+-%}
+<link rel="stylesheet" href="{{ 'mobile-search.css' | asset_url }}" media="(max-width: 760px)">
+{%- comment -%} Hors mobile : rien de visible. {%- endcomment -%}
+<style>@media (min-width: 761px) { .mobile-search-scrim, .mobile-search-panel, .mobile-mini-header { display: none !important; } }</style>
+
+<div
+  class="mobile-search-root"
+  data-mobile-search
+  data-search-url="{{ routes.search_url }}"
+  data-suggest-url="{{ routes.predictive_search_url }}"
+  data-money-format="{{ shop.money_format | strip_html | escape }}"
+  hidden
+>
+  <script type="application/json" data-mobile-search-trends>
+    [
+      {%- assign first_trend = true -%}
+      {%- for line in trend_lines -%}
+        {%- assign term = line | strip_newlines | strip -%}
+        {%- if term != blank -%}
+          {%- unless first_trend -%},{%- endunless -%}{{ term | json }}
+          {%- assign first_trend = false -%}
+        {%- endif -%}
+      {%- endfor -%}
+    ]
+  </script>
+</div>
+
+<div class="mobile-search-scrim" data-mobile-search-scrim hidden></div>
+<section class="mobile-search-panel" id="mobile-search-panel" data-mobile-search-panel aria-label="Suggerimenti di ricerca" aria-hidden="true" inert>
+  <div class="sp-head">
+    <span>Cerca nel negozio</span>
+    <button type="button" data-mobile-search-cancel>Annulla</button>
+  </div>
+  <div class="sp-body" data-mobile-search-body></div>
+</section>
+
+<div class="mobile-mini-header" data-mobile-mini-header aria-hidden="true" inert>
+  <button type="button" class="mi-ic" data-mobile-mini-menu aria-label="Apri il menu">
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><rect x="3" y="5" width="18" height="2.4" rx=".4"></rect><rect x="3" y="10.8" width="18" height="2.4" rx=".4"></rect><rect x="3" y="16.6" width="11.5" height="2.4" rx=".4"></rect></svg>
+  </button>
+  <form class="msearch" action="{{ routes.search_url }}" method="get" role="search" data-mobile-mini-search>
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+    <input type="search" name="q" placeholder="Cerca nel negozio" aria-label="Cerca prodotti" autocomplete="off" aria-controls="mobile-search-panel" aria-expanded="false">
+  </form>
+  <a
+    class="mi-ic"
+    href="{{ wishlist_url }}"
+    aria-label="Wishlist"
+    aria-haspopup="dialog"
+    aria-controls="mobile-wishlist-drawer"
+    data-mobile-wishlist-trigger
+  >
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+  </a>
+  {%- unless disable_cart -%}
+    <a class="mi-ic" href="{{ routes.cart_url }}" data-panel="cart" aria-label="{{ 'cart.title' | t }}">
+      <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M6 6h15l-1.5 9h-12z"></path><path d="M6 6 5 2H2"></path><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle></svg>
+      <span class="mobile-mini-header__count" data-mobile-mini-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span>
+    </a>
+  {%- endunless -%}
+  <i class="mi-bar" aria-hidden="true"></i>
+</div>
+<script src="{{ 'mobile-search.js' | asset_url }}" defer></script>
