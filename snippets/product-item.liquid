@@ -3640,6 +3640,19 @@
         <i class="icon-heart-outline"></i>
       </button>
 
+      {%- comment -%} Bouton panier (mobile uniquement) : ouvre la modale couleur / taille (snippets/mobile-quick-add.liquid). {%- endcomment -%}
+      {%- if product.available -%}
+        <button
+          type="button"
+          class="alibaba-card__qa mobile-only{% if bestseller_count > 50 or matched_brand != '' %} is-up{% endif %}"
+          aria-label="Scegli opzioni e aggiungi al carrello"
+          aria-haspopup="dialog"
+          data-quick-add="{{ product.handle }}"
+        >
+          <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"></path><path d="M6 6 5 2H2"></path><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle></svg>
+        </button>
+      {%- endif -%}
+
       {%- if quick_buy and layout != 'list-compact' -%}
         {{ quick_buy | replace: 'alibaba-card__form', 'alibaba-card__form alibaba-card__quickbuy' | replace: '-quick-add-form_x', '1' }}
       {%- endif -%}

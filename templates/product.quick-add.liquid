@@ -1,0 +1,62 @@
+{%- layout none -%}
+{%- comment -%}
+  Données réelles du produit pour la modale "Aggiungi al carrello" mobile (assets/mobile-quick-add.js).
+  Appelé via /products/<handle>?view=quick-add — renvoie du JSON.
+{%- endcomment -%}
+{%- liquid
+  assign size_chart = product.metafields.custom.size_chart.value
+  assign size_chart_text = size_chart | strip_html | strip
+  assign collection_url = ''
+  if product.collections.size > 0
+    assign collection_url = product.collections.first.url
+  endif
+  assign klarna = false
+  if shop.enabled_payment_types contains 'klarna'
+    assign klarna = true
+  endif
+-%}
+{
+  "id": {{ product.id }},
+  "handle": {{ product.handle | json }},
+  "title": {{ product.title | json }},
+  "url": {{ product.url | json }},
+  "type": {{ product.type | json }},
+  "available": {{ product.available | json }},
+  "image": {% if product.featured_image %}{{ product.featured_image | image_url: width: 300 | json }}{% else %}null{% endif %},
+  "collectionUrl": {{ collection_url | json }},
+  "sizeChart": {% if size_chart_text != blank %}{{ size_chart | json }}{% else %}null{% endif %},
+  "moneyFormat": {{ shop.money_format | strip_html | json }},
+  "klarna": {{ klarna }},
+  "country": {{ localization.country.iso_code | json }},
+  "freeShippingThreshold": 5000,
+  "options": [
+    {%- for option in product.options_with_values -%}
+      {
+        "name": {{ option.name | json }},
+        "values": [
+          {%- for value in option.values -%}
+            {
+              "name": {{ value.name | json }},
+              "color": {% if value.swatch.color %}"{{ value.swatch.color }}"{% else %}null{% endif %},
+              "image": {% if value.swatch.image %}{{ value.swatch.image | image_url: width: 96 | json }}{% else %}null{% endif %}
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ],
+  "variants": [
+    {%- for variant in product.variants -%}
+      {
+        "id": {{ variant.id }},
+        "title": {{ variant.title | json }},
+        "options": {{ variant.options | json }},
+        "available": {{ variant.available | json }},
+        "price": {{ variant.price }},
+        "compareAtPrice": {{ variant.compare_at_price | default: 0 }},
+        "quantity": {% if variant.inventory_management == 'shopify' and variant.inventory_policy == 'deny' %}{{ variant.inventory_quantity }}{% else %}null{% endif %},
+        "image": {% if variant.featured_image %}{{ variant.featured_image | image_url: width: 300 | json }}{% else %}null{% endif %}
+      }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+}

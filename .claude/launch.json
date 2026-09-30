@@ -7,6 +7,11 @@
       "runtimeArgs": ["/c", "shopify", "theme", "dev", "--store", "0g5p1w-50.myshopify.com"],
       "port": 9292,
       "url": "http://127.0.0.1:9292"
+    },
+    {
+      "name": "shopify-theme-dev-attach",
+      "port": 9292,
+      "url": "http://127.0.0.1:9292"
     }
   ]
 }

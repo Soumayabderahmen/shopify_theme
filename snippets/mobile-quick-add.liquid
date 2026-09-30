@@ -1,0 +1,66 @@
+{%- comment -%}
+  Modale "Aggiungi al carrello" (bottom sheet) — mobile uniquement.
+  Ouverte par le bouton panier des cartes produit (snippets/product-item.liquid, [data-quick-add]).
+  Contenu rempli par assets/mobile-quick-add.js avec les vraies données du produit
+  (templates/product.quick-add.liquid) et les recommandations Shopify.
+{%- endcomment -%}
+<link rel="stylesheet" href="{{ 'mobile-quick-add.css' | asset_url }}" media="(max-width: 760px)">
+{%- comment -%} Le thème force dialog { display: block } : on masque la modale hors mobile. {%- endcomment -%}
+<style>@media (min-width: 761px) { #mobile-quick-add, .mobile-quick-add-toast { display: none !important; } }</style>
+<dialog
+  id="mobile-quick-add"
+  class="mobile-quick-add"
+  aria-labelledby="mobile-quick-add-title"
+  data-mobile-quick-add
+  data-recommendations-url="{{ routes.product_recommendations_url }}"
+>
+  <span class="qa-grab" aria-hidden="true"></span>
+  <button type="button" class="qa-back" data-qa-back hidden>
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m15 5-7 7 7 7"></path></svg>
+    Indietro
+  </button>
+  <button type="button" class="qa-x" data-qa-close aria-label="Chiudi">
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+  </button>
+
+  <div class="qa-top">
+    <img data-qa-image alt="" width="96" height="96">
+    <div>
+      <h3 id="mobile-quick-add-title" data-qa-title></h3>
+      <div class="qa-price" data-qa-price></div>
+      <div class="qa-stock" data-qa-stock></div>
+    </div>
+  </div>
+
+  <div class="qa-body" data-qa-body>
+    <div data-qa-options></div>
+    <div class="qa-guide-panel" data-qa-guide-panel hidden></div>
+    <div class="qa-grp">
+      <div class="qa-lbl">Quantità</div>
+      <div class="qa-qty">
+        <button type="button" data-qa-qty="-1" aria-label="Meno">−</button>
+        <output data-qa-qty-value>1</output>
+        <button type="button" data-qa-qty="1" aria-label="Più">+</button>
+      </div>
+    </div>
+    <ul class="qa-perks">
+      <li data-qa-free hidden></li>
+      <li>↩️ Reso facile 30 giorni</li>
+      <li data-qa-klarna hidden>Klarna: 3 rate da <b data-qa-klarna-value></b></li>
+    </ul>
+    <section class="qa-sim" data-qa-sim aria-labelledby="mobile-quick-add-sim-title" hidden>
+      <div class="qa-simhead">
+        <h4 id="mobile-quick-add-sim-title" data-qa-sim-title>Potrebbe piacerti anche</h4>
+        <a href="{{ routes.all_products_collection_url }}" data-qa-sim-all>Vedi tutti</a>
+      </div>
+      <div class="qa-simrail" data-qa-sim-rail></div>
+    </section>
+  </div>
+
+  <div class="qa-foot">
+    <a href="#" class="qa-more" data-qa-more>Vedi dettagli</a>
+    <button type="button" class="qa-add" data-qa-add>Aggiungi al carrello</button>
+  </div>
+</dialog>
+<div class="mobile-quick-add-toast" data-qa-toast role="status" aria-live="polite"></div>
+<script src="{{ 'mobile-quick-add.js' | asset_url }}" defer></script>
