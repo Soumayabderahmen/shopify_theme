@@ -1,0 +1,248 @@
+/* Barre du bas mobile — version "scura" du prototype ("platinumshop-prototype-mobile-final-scura (1)") :
+   fond blanc, libellés gris / actif bleu, faisceau lumineux bleu, icônes contour (inactif) -> pleines duotone (actif).
+   snippets/mobile-bottom-navigation.liquid, assets/mobile-bottom-nav.js.
+   Chargé uniquement en mobile (media="(max-width: 760px)").
+   "body .mobile-bottom-navigation" : plus fort que les anciennes règles de assets/mobile-temu-header.css. */
+
+:root {
+  --mobile-bottom-navigation-height: 66px;
+}
+
+body .mobile-bottom-navigation {
+  align-items: stretch;
+  overflow: hidden;
+  height: calc(66px + env(safe-area-inset-bottom, 0px));
+  padding: 0 6px env(safe-area-inset-bottom, 0px);
+  border: 0;
+  border-radius: 22px 22px 0 0;
+  background: #fff;
+  box-shadow: 0 -10px 26px -16px rgba(22, 18, 63, 0.45), inset 0 1px 0 #e1e3e8;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+body .mobile-bottom-navigation > a,
+body .mobile-bottom-navigation > button {
+  z-index: 1;
+  float: none;
+  justify-content: center;
+  gap: 4px;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #8a91a0;
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-indent: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.25s;
+}
+
+body .mobile-bottom-navigation > button::before,
+body .mobile-bottom-navigation > button::after {
+  content: none;
+  display: none;
+}
+
+/* L'ancien décalage du bouton Categoria n'a plus lieu d'être. */
+body .mobile-bottom-navigation > button[data-mobile-categories-trigger] {
+  transform: none;
+}
+
+/* Icônes à deux états : contour fin (.ol) quand inactif, glyphe plein duotone (.fl) quand actif.
+   Couleurs et traits portés par les groupes du SVG. */
+body .mobile-bottom-navigation > a > svg,
+body .mobile-bottom-navigation > button > svg,
+body .mobile-bottom-navigation .mobile-bottom-navigation__icon > svg {
+  width: 25px;
+  height: 25px;
+  overflow: visible;
+  fill: none;
+  stroke: none;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+body .mobile-bottom-navigation .mobile-bottom-navigation__icon {
+  width: 25px;
+  height: 25px;
+}
+
+body .mobile-bottom-navigation svg .ol,
+body .mobile-bottom-navigation svg .fl {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.22s, transform 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+body .mobile-bottom-navigation svg .fl {
+  opacity: 0;
+  transform: scale(0.75);
+}
+
+/* Onglet actif : bleu, glyphe plein avec rebond. */
+body .mobile-bottom-navigation > a.is-active,
+body .mobile-bottom-navigation > button.is-active {
+  color: #3a34d2;
+  font-weight: 700;
+}
+
+body .mobile-bottom-navigation > .is-active svg .fl {
+  opacity: 1;
+  transform: none;
+}
+
+body .mobile-bottom-navigation > .is-active svg .ol {
+  opacity: 0;
+  transform: scale(1.12);
+}
+
+body .mobile-bottom-navigation > :focus-visible {
+  outline: 2px solid #3a34d2;
+  outline-offset: -4px;
+  border-radius: 12px;
+}
+
+/* Pastille panier rouge avec liseré blanc. */
+body .mobile-bottom-navigation .mobile-bottom-navigation__count {
+  top: -6px;
+  right: -10px;
+  border: 0;
+  background: #e4323c;
+  box-shadow: 0 0 0 2px #fff;
+  color: #fff;
+}
+
+/* Faisceau lumineux bleu : trait avec halo + cône de lumière, sous l'onglet actif. */
+body .mobile-bottom-navigation .nb-spot {
+  position: absolute;
+  top: 0;
+  left: 6px;
+  z-index: 0;
+  width: calc((100% - 12px) / 5);
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+body .mobile-bottom-navigation .nb-spot.is-ready {
+  opacity: 1;
+}
+
+body .mobile-bottom-navigation .nb-spot::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 38px;
+  height: 3px;
+  margin-left: -19px;
+  border-radius: 0 0 6px 6px;
+  background: #3a34d2;
+  box-shadow: 0 0 12px 2px rgba(58, 52, 210, 0.55), 0 0 26px 6px rgba(58, 52, 210, 0.28);
+}
+
+body .mobile-bottom-navigation .nb-spot::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(180deg, rgba(58, 52, 210, 0.26) 0%, rgba(58, 52, 210, 0.1) 55%, rgba(58, 52, 210, 0) 100%);
+  clip-path: polygon(32% 0, 68% 0, 100% 100%, 0 100%);
+}
+
+/* Camion "Consegna" : en route quand l'onglet est actif (traits de vitesse, roues qui tournent,
+   caisse qui vibre) ; passage éclair au tap (classe .rush + animation du script). */
+body .mobile-bottom-navigation .ic-truck {
+  overflow: visible;
+}
+
+body .mobile-bottom-navigation .ic-truck .sl {
+  opacity: 0;
+}
+
+body .mobile-bottom-navigation .ic-truck .sl path {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+body .mobile-bottom-navigation .ic-truck .wh {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+body .mobile-bottom-navigation > .is-active .ic-truck .sl {
+  opacity: 1;
+}
+
+body .mobile-bottom-navigation > .is-active .ic-truck .sl path {
+  animation: mobile-nav-streak 0.7s linear infinite;
+}
+
+body .mobile-bottom-navigation > .is-active .ic-truck .sl .s2 {
+  animation-delay: 0.2s;
+}
+
+body .mobile-bottom-navigation > .is-active .ic-truck .sl .s3 {
+  animation-delay: 0.42s;
+}
+
+body .mobile-bottom-navigation > .is-active .ic-truck .bd {
+  animation: mobile-nav-bob 0.3s ease-in-out infinite alternate;
+}
+
+body .mobile-bottom-navigation > .is-active .ic-truck .wh {
+  animation: mobile-nav-wheel 0.42s linear infinite;
+}
+
+body .mobile-bottom-navigation > .is-active .ic-truck.rush .sl path {
+  animation-duration: 0.26s;
+}
+
+body .mobile-bottom-navigation > .is-active .ic-truck.rush .wh {
+  animation-duration: 0.14s;
+}
+
+@keyframes mobile-nav-streak {
+  0% { opacity: 0; transform: translateX(3px) scaleX(0.5); }
+  25% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateX(-6px) scaleX(1); }
+}
+
+@keyframes mobile-nav-bob {
+  from { transform: translateY(0.4px); }
+  to { transform: translateY(-0.45px); }
+}
+
+@keyframes mobile-nav-wheel {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .mobile-bottom-navigation .ic-truck .sl path,
+  body .mobile-bottom-navigation .ic-truck .bd,
+  body .mobile-bottom-navigation .ic-truck .wh {
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .mobile-bottom-navigation > a,
+  body .mobile-bottom-navigation > button,
+  body .mobile-bottom-navigation svg .ol,
+  body .mobile-bottom-navigation svg .fl {
+    transition: none;
+  }
+}
