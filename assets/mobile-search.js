@@ -365,13 +365,29 @@
     else renderHome();
   }
 
+  // Hauteur réellement visible : sur iPhone, 100vh inclut la zone cachée par les barres du navigateur
+  // et le clavier ; on s'arrête au bas de la zone visible (visualViewport) ou au-dessus de la barre du bas.
   function place() {
     var anchor = activeForm === miniForm ? mini : activeForm;
     if (!anchor) return;
     var rect = anchor.getBoundingClientRect();
     var top = Math.max(0, Math.round(rect.bottom + (activeForm === miniForm ? 0 : 10)));
+    var viewport = window.visualViewport;
+    var visibleBottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
+    var bottomNav = document.querySelector('.mobile-bottom-navigation');
+    var navTop = bottomNav ? bottomNav.getBoundingClientRect().top : visibleBottom;
+    var limit = Math.min(visibleBottom, navTop > top ? navTop : visibleBottom) - 8;
+    var head = panel.querySelector('.sp-head');
+    var headHeight = head ? head.offsetHeight : 0;
     panel.style.top = top + 'px';
-    body.style.maxHeight = 'calc(100vh - ' + top + 'px - 76px)';
+    panel.style.maxHeight = Math.max(160, limit - top) + 'px';
+    body.style.maxHeight = Math.max(120, limit - top - headHeight) + 'px';
+  }
+
+  // Clavier qui s'ouvre / barres du navigateur qui bougent : on recalcule.
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function () { if (isOpen()) place(); });
+    window.visualViewport.addEventListener('scroll', function () { if (isOpen()) place(); });
   }
 
   function isOpen() {
