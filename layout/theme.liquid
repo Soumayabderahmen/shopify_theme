@@ -167,10 +167,12 @@
       return;
     }
 
+    // Sur mobile : prefetch (léger) au lieu de prerender, qui exécute toutes les apps de la page.
+    const isMobile = window.matchMedia('(max-width: 760px)').matches;
     const rules = document.createElement('script');
     rules.type = 'speculationrules';
     rules.textContent = JSON.stringify({
-      prerender: [
+      [isMobile ? 'prefetch' : 'prerender']: [
         {
           source: 'document',
           where: {

@@ -118,7 +118,7 @@
     fond bleu nuit, icônes fines, faisceau lumineux sur l'onglet actif. Liens et compteur panier réels. {%- endcomment -%}
 <nav class="mobile-bottom-navigation" aria-label="Mobile" data-mobile-bottom-nav style="--nb-index: {{ nav_active_index }};">
   <!-- Home -->
-  <a href="{{ routes.root_url }}"{% if request.page_type == 'index' %} class="is-active ajax-link" aria-current="page"{% endif %}>
+  <a href="{{ routes.root_url }}"{% if request.page_type == 'index' %} class="is-active" aria-current="page"{% endif %}>
     <svg focusable="false" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="ol" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4.2 10.4 12 4l7.8 6.4v8a2 2 0 0 1-2 2h-3v-4.6a1.6 1.6 0 0 0-1.6-1.6h-2.4a1.6 1.6 0 0 0-1.6 1.6v4.6h-3a2 2 0 0 1-2-2z"/></g><g class="fl" fill="currentColor" stroke="currentColor" stroke-width="1.2"><path d="M4.2 10.4 12 4l7.8 6.4v8a2 2 0 0 1-2 2h-3v-4.6a1.6 1.6 0 0 0-1.6-1.6h-2.4a1.6 1.6 0 0 0-1.6 1.6v4.6h-3a2 2 0 0 1-2-2z"/></g></svg>
     <span>{{ home_label }}</span>
   </a>
@@ -130,13 +130,13 @@
   </button>
 
   <!-- Delivery / Spedizioni -->
-  <a href="{{ delivery_url }}"{% if request.path == delivery_url %} class="is-active ajax-link" aria-current="page"{% endif %}>
+  <a href="{{ delivery_url }}"{% if request.path == delivery_url %} class="is-active" aria-current="page"{% endif %}>
     <svg focusable="false" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="ic-truck"><g class="sl" fill="none" stroke="currentColor" stroke-width="1.5"><path class="s1" d="M-4.5 8.6h5"/><path class="s2" d="M-6.5 11.8h6.5"/><path class="s3" d="M-3.5 14.8h4.5"/></g><g class="truck"><g class="ol" fill="none" stroke="currentColor" stroke-width="1.7"><g class="bd"><path d="M3 6.6A1.6 1.6 0 0 1 4.6 5h8.6v10.6H3z"/><path d="M13.2 8.6h3.9l3.4 3.6v3.4h-7.3"/></g><g class="wh"><circle cx="7.4" cy="18.2" r="1.9"/><path d="M7.4 17.4v1.6M6.6 18.2h1.6" stroke-width=".9"/></g><g class="wh"><circle cx="17" cy="18.2" r="1.9"/><path d="M17 17.4v1.6M16.2 18.2h1.6" stroke-width=".9"/></g></g><g class="fl" fill="currentColor" stroke="currentColor" stroke-width="1.2"><g class="bd"><path d="M3 6.6A1.6 1.6 0 0 1 4.6 5h8.6v10.6H3z"/><path d="M13.2 8.6h3.9l3.4 3.6v3.4h-7.3z" fill-opacity=".55" stroke-opacity=".55"/></g><g class="wh"><circle cx="7.4" cy="18.2" r="1.9"/><path d="M7.4 17.2v2M6.4 18.2h2" stroke="#fff" stroke-width=".9" stroke-opacity=".95"/></g><g class="wh"><circle cx="17" cy="18.2" r="1.9"/><path d="M17 17.2v2M16 18.2h2" stroke="#fff" stroke-width=".9" stroke-opacity=".95"/></g></g></g></svg>
     <span>{{ delivery_label }}</span>
   </a>
 
   <!-- Carrello -->
-  <a href="{{ routes.cart_url }}"{% if request.page_type == 'cart' %} class="is-active ajax-link" aria-current="page"{% endif %}>
+  <a href="{{ routes.cart_url }}"{% if request.page_type == 'cart' %} class="is-active" aria-current="page"{% endif %}>
     <span class="mobile-bottom-navigation__icon">
       <svg focusable="false" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="ol" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2.6 4h2.4l2 9.2c.15.7.75 1.2 1.45 1.2h8.4c.7 0 1.3-.5 1.45-1.2L19.6 8H5.7"/><circle cx="9.2" cy="18.6" r="1.5"/><circle cx="16.4" cy="18.6" r="1.5"/></g><g class="fl" fill="currentColor" stroke="currentColor" stroke-width="1.2"><path d="M5.9 8h13.7l-1.25 5.3a1.5 1.5 0 0 1-1.45 1.1H8.45a1.5 1.5 0 0 1-1.45-1.2z"/><path d="M2.6 4h2.4l.9 4" fill="none" stroke-width="1.8"/><circle cx="9.2" cy="18.6" r="1.6"/><circle cx="16.4" cy="18.6" r="1.6"/></g></svg>
       <span id="cart-count--m" class="mobile-bottom-navigation__count"{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span>
@@ -145,7 +145,7 @@
   </a>
 
   <!-- Account -->
-  <a href="{{ account_url }}"{% if request.page_type contains 'account' %} class="is-active ajax-link" aria-current="page"{% endif %}>
+  <a href="{{ account_url }}"{% if request.page_type contains 'account' %} class="is-active" aria-current="page"{% endif %}>
     <svg focusable="false" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="ol" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 19.6c.5-3.6 3.5-5.6 7.2-5.6s6.7 2 7.2 5.6"/></g><g class="fl" fill="currentColor" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="8" r="3.7"/><path d="M4.6 19.8c.5-3.7 3.4-5.8 7.4-5.8s6.9 2.1 7.4 5.8a.9.9 0 0 1-.9 1H5.5a.9.9 0 0 1-.9-1z" fill-opacity=".55" stroke-opacity=".55"/></g></svg>
     <span>{{ account_label }}</span>
   </a>

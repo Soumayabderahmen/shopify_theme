@@ -1870,12 +1870,14 @@ function initMobileTemuHeader() {
 
   var loadPanelImages = function (panel, limit, priority) {
     if (!panel) return;
-    Array.prototype.slice.call(panel.querySelectorAll('img[data-src], img[loading="lazy"]'), 0, limit || 99).forEach(function (image, index) {
+    var eagerCount = limit || 12;
+    Array.prototype.slice.call(panel.querySelectorAll('img[data-src], img[loading="lazy"]')).forEach(function (image, index) {
+      var isEager = index < eagerCount;
+      image.loading = isEager ? 'eager' : 'lazy';
       if (image.dataset.src) {
         image.src = image.dataset.src;
         image.removeAttribute('data-src');
       }
-      image.loading = 'eager';
       image.fetchPriority = index < 3 ? (priority || 'high') : 'auto';
     });
   };
