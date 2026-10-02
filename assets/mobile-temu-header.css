@@ -164,6 +164,14 @@
     display: none !important;
   }
 
+  /* Menu desktop (#nav, tiroir Xtra) : jamais ouvert en mobile (ses boutons d'ouverture sont masqués,
+     notre header a son propre menu Esplora / Categoria). Caché, il faisait quand même télécharger
+     ~40 images et calculer ~360 liens à chaque page. display: none = images non téléchargées
+     (loading="lazy") et rien à mettre en page. Desktop inchangé (fichier chargé en mobile seulement). */
+  .shopify-section-header #nav {
+    display: none !important;
+  }
+
   /*
    * Xtra reserve encore la hauteur de son ancien champ de recherche mobile
    * via .has-mobile-visible-search, meme si ce champ est masque ci-dessus.

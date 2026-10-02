@@ -233,15 +233,47 @@
       }, 50);
     }
 
-    if (document.prerendering) {
-      document.addEventListener('prerenderingchange', handlePageActivation, { once: true });
-    }
+    {%- comment -%}
+      Mobile : version légère. Une seule exécution par page affichée (prerenderingchange et pageshow
+      se déclenchaient tous les deux), sans opacité sur toute la page ni faux événements globaux
+      (resize / scroll / shopify:section:load) qui faisaient clignoter la page et la barre du bas.
+      Retour arrière (cache du navigateur) : la page est déjà prête, seul le panier est remis à jour.
+      Desktop inchangé.
+    {%- endcomment -%}
+    if (window.matchMedia('(max-width: 760px)').matches) {
+      var mobilePageActivated = false;
+      var activateMobilePage = function () {
+        if (mobilePageActivated) return;
+        mobilePageActivated = true;
+        if (typeof updateCartCount === 'function') updateCartCount();
+        if (typeof window.initThemeComponents === 'function') window.initThemeComponents();
+        if (typeof AliReviews !== 'undefined' && typeof AliReviews.init === 'function') {
+          setTimeout(function () { AliReviews.init(); }, 300);
+        }
+      };
 
-    window.addEventListener('pageshow', function (event) {
-      if (event.persisted || performance.getEntriesByType('navigation')[0]?.activationStart > 0) {
-        handlePageActivation();
+      if (document.prerendering) {
+        document.addEventListener('prerenderingchange', activateMobilePage, { once: true });
       }
-    });
+
+      window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+          if (typeof updateCartCount === 'function') updateCartCount();
+        } else if (performance.getEntriesByType('navigation')[0]?.activationStart > 0) {
+          activateMobilePage();
+        }
+      });
+    } else {
+      if (document.prerendering) {
+        document.addEventListener('prerenderingchange', handlePageActivation, { once: true });
+      }
+
+      window.addEventListener('pageshow', function (event) {
+        if (event.persisted || performance.getEntriesByType('navigation')[0]?.activationStart > 0) {
+          handlePageActivation();
+        }
+      });
+    }
   </script>
 </head>
   <body class="template-{{ template.name | handle }}">
