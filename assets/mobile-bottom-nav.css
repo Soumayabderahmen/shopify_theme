@@ -132,6 +132,9 @@ body .mobile-bottom-navigation .nb-spot {
   height: 100%;
   opacity: 0;
   pointer-events: none;
+  /* Position de départ calculée par Shopify (--nb-index) : le faisceau est déjà sous l'onglet actif
+     à la première image ; le script ne fait ensuite que l'animer au toucher. */
+  transform: translateX(calc(var(--nb-index, 0) * 100%));
   will-change: transform, opacity;
 }
 

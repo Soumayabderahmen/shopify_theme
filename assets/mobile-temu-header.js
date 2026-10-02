@@ -1465,7 +1465,9 @@ function initMobileTemuHeader() {
   var exploreDrawer = document.querySelector('[data-mobile-explore-drawer]');
   var exploreTrigger = document.querySelector('[data-mobile-explore-trigger]');
   if (isMobile && exploreDrawer) document.body.appendChild(exploreDrawer);
-  if (isMobile && searchHost && nativeSearch) {
+  // Le header mobile contient maintenant son propre champ (rendu dans sections/header.liquid) :
+  // on ne déplace l'ancien champ que s'il n'y en a pas (ancienne version du header).
+  if (isMobile && searchHost && nativeSearch && !searchHost.querySelector('form')) {
     searchHost.appendChild(nativeSearch);
     nativeSearch.classList.add('mobile-temu-search__native');
   }
@@ -1985,8 +1987,12 @@ function initMobileTemuHeader() {
     });
   };
 
+  // Requêtes en cours partagées : le préchargement et l'ouverture du menu ne téléchargent pas deux fois.
+  var categoryRequests = {};
+
   var fetchCategoryHtml = function (url, failureMessage) {
-    return readCategoryCache(url).then(function (cachedHtml) {
+    if (categoryRequests[url]) return categoryRequests[url];
+    var request = readCategoryCache(url).then(function (cachedHtml) {
       if (cachedHtml !== null) return cachedHtml;
       return fetch(url, { credentials: 'same-origin' }).then(function (response) {
         if (!response.ok) throw new Error(failureMessage);
@@ -1999,6 +2005,9 @@ function initMobileTemuHeader() {
         return html;
       });
     });
+    categoryRequests[url] = request;
+    request.then(function () { delete categoryRequests[url]; }, function () { delete categoryRequests[url]; });
+    return request;
   };
 
   var createCategoryLoadingIndicator = function () {
@@ -2167,6 +2176,36 @@ function initMobileTemuHeader() {
   });
 
   updateFeaturedOnlyTab(categoryBrowser.querySelector('[data-category-tab].is-active'));
+
+  // Préchargement du menu "Categoria" (mobile) : les produits du premier onglet sont téléchargés en
+  // arrière-plan, quand le navigateur est libre, puis dès qu'on touche le bouton ; à l'ouverture le
+  // menu s'affiche alors déjà rempli au lieu de "Caricamento...". La page affichée n'est pas modifiée.
+  var prefetchCategoryPanel = function () {
+    if (!window.matchMedia('(max-width: 760px)').matches) return;
+    var panel = categoryBrowser.querySelector('.mobile-category-browser__panel.is-active');
+    if (!panel || panel.dataset.productsLoaded || panel.dataset.prefetched === 'true') return;
+    var endpoint = panel.getAttribute('data-category-products-endpoint');
+    if (!endpoint) return;
+    panel.dataset.prefetched = 'true';
+    fetchCategoryHtml(endpoint, 'Category products prefetch failed').catch(function (error) {
+      panel.dataset.prefetched = '';
+      console.warn('[Mobile category prefetch]', error);
+    });
+  };
+
+  var scheduleCategoryPrefetch = function () {
+    window.setTimeout(function () {
+      if ('requestIdleCallback' in window) window.requestIdleCallback(prefetchCategoryPanel, { timeout: 4000 });
+      else prefetchCategoryPanel();
+    }, 2500);
+  };
+
+  if (document.readyState === 'complete') scheduleCategoryPrefetch();
+  else window.addEventListener('load', scheduleCategoryPrefetch, { once: true });
+
+  document.addEventListener('pointerdown', function (event) {
+    if (event.target instanceof Element && event.target.closest('[data-mobile-categories-trigger]')) prefetchCategoryPanel();
+  }, { capture: true, passive: true });
 
   window.addEventListener('resize', sizeCategoryBrowser);
   if (window.visualViewport) {

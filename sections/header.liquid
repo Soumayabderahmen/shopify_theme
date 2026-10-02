@@ -177,6 +177,26 @@
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path>
         </svg>
       </a>
+      <script>
+        /* Pastille wishlist affichée dès la première image (mise à jour ensuite par assets/mobile-temu-header.js). */
+        (function () {
+          if (!window.matchMedia('(max-width: 760px)').matches) return;
+          var link = document.currentScript && document.currentScript.previousElementSibling;
+          var count = 0;
+          try {
+            var items = JSON.parse(window.localStorage.getItem('platinumshop:wishlist:v1') || '[]');
+            count = Array.isArray(items) ? items.length : 0;
+          } catch (error) {
+            count = 0;
+          }
+          if (!link || count <= 0 || link.querySelector('.mobile-wishlist__count')) return;
+          var badge = document.createElement('span');
+          badge.className = 'mobile-wishlist__count';
+          badge.setAttribute('aria-hidden', 'true');
+          badge.textContent = String(count);
+          link.appendChild(badge);
+        })();
+      </script>
       {%- unless section.settings.disable_online_store -%}
         <a
           class="mobile-home-header__icon mobile-home-header__cart"
@@ -195,7 +215,30 @@
       {%- endunless -%}
     </div>
   </div>
-  <div class="mobile-temu-search" data-mobile-search-host></div>
+  {%- comment -%}
+    Champ de recherche mobile rendu directement ici (et non plus déplacé par script après le chargement),
+    pour que le header soit complet dès la première image. Le panneau de recherche s'y branche (assets/mobile-search.js).
+  {%- endcomment -%}
+  <div class="mobile-temu-search" data-mobile-search-host>
+    <form action="{{ routes.search_url }}" method="get" role="search" class="mobile-temu-search__form" data-mobile-search-form>
+      <label class="mobile-temu-search__label" for="mobile-search-input">{{ 'search.title' | t }}</label>
+      <input
+        type="search"
+        id="mobile-search-input"
+        name="q"
+        placeholder="{{ 'search.search_form.placeholder' | t }}"
+        autocomplete="off"
+        {% if search.performed %}value="{{ search.terms | escape }}"{% endif %}
+      >
+      <button type="button" class="mobile-temu-search__camera" aria-label="Cerca con foto">
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+      </button>
+      <button type="submit">{{ 'search.search_form.submit' | t }}</button>
+    </form>
+  </div>
   {%- comment -%} Les "ricerche di tendenza" sont maintenant dans le panneau de recherche (snippets/mobile-search.liquid). {%- endcomment -%}
 
   {%- if mobile_category_menu != blank -%}

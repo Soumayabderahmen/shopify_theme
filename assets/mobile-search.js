@@ -346,7 +346,8 @@
   }
 
   /* ---------- Ouverture / fermeture ---------- */
-  var nativeForm = document.getElementById('search');
+  // Champ du header mobile (rendu dans le header) ; à défaut, l'ancien champ du thème.
+  var nativeForm = document.querySelector('[data-mobile-search-form]') || document.getElementById('search');
   var nativeInput = nativeForm && nativeForm.querySelector('input[type="search"]');
   var miniForm = mini.querySelector('[data-mobile-mini-search]');
   var miniInput = miniForm.querySelector('input');
@@ -423,6 +424,8 @@
     [nativeInput, miniInput].forEach(function (input) { if (input) input.setAttribute('aria-expanded', 'false'); });
     closeTimer = window.setTimeout(function () { if (!isOpen()) scrim.hidden = true; }, 260);
     if (!keepFocus && activeInput) activeInput.blur();
+    // Pendant la recherche la barre compacte ne bouge pas : on la remet dans le bon état.
+    updateMini();
   }
 
   function setValue(value) {

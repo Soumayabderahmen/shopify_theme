@@ -4139,3 +4139,28 @@
     overflow-wrap: normal !important;
   }
 }
+
+/* Champ de recherche rendu directement dans le header mobile (sections/header.liquid) :
+   mis en page dès la première image (ce fichier est chargé en tête de page). */
+@media only screen and (max-width: 760px) {
+  #root .mobile-temu-search .mobile-temu-search__form {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 3px 3px 3px 16px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  #root .mobile-temu-search .mobile-temu-search__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}

@@ -66,6 +66,8 @@
     {{ 'screen.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
     {{ 'theme-xtra.css' | asset_url | stylesheet_tag: media: 'screen' }}
     {{ 'mobile-temu-header.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
+    {%- comment -%} Barre du bas mobile : style chargé en tête de page pour qu'elle s'affiche finie dès la première image (mobile uniquement). {%- endcomment -%}
+    <link rel="stylesheet" href="{{ 'mobile-bottom-nav.css' | asset_url }}" media="(max-width: 760px)">
     <style id="mobile-critical-layout">
       @media only screen and (max-width: 760px) {
         #root #nav-top,

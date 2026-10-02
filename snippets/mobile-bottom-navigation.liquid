@@ -47,6 +47,19 @@
   if customer
     assign account_url = routes.account_url
   endif
+
+  # Onglet actif connu côté serveur : le faisceau est placé en CSS dès la première image
+  # (0 Home, 1 Categoria, 2 Consegna, 3 Carrello, 4 Tu ; -1 = aucun).
+  assign nav_active_index = -1
+  if request.page_type == 'index'
+    assign nav_active_index = 0
+  elsif request.path == delivery_url
+    assign nav_active_index = 2
+  elsif request.page_type == 'cart'
+    assign nav_active_index = 3
+  elsif request.page_type contains 'account'
+    assign nav_active_index = 4
+  endif
 -%}
 
 {% comment %} <nav class="mobile-bottom-navigation" aria-label="Mobile">
@@ -103,8 +116,7 @@
 
 {%- comment -%} Barre du bas mobile — design "scura" du prototype (assets/mobile-bottom-nav.css et .js) :
     fond bleu nuit, icônes fines, faisceau lumineux sur l'onglet actif. Liens et compteur panier réels. {%- endcomment -%}
-<link rel="stylesheet" href="{{ 'mobile-bottom-nav.css' | asset_url }}" media="(max-width: 760px)">
-<nav class="mobile-bottom-navigation" aria-label="Mobile" data-mobile-bottom-nav>
+<nav class="mobile-bottom-navigation" aria-label="Mobile" data-mobile-bottom-nav style="--nb-index: {{ nav_active_index }};">
   <!-- Home -->
   <a href="{{ routes.root_url }}"{% if request.page_type == 'index' %} class="is-active ajax-link" aria-current="page"{% endif %}>
     <svg focusable="false" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="ol" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4.2 10.4 12 4l7.8 6.4v8a2 2 0 0 1-2 2h-3v-4.6a1.6 1.6 0 0 0-1.6-1.6h-2.4a1.6 1.6 0 0 0-1.6 1.6v4.6h-3a2 2 0 0 1-2-2z"/></g><g class="fl" fill="currentColor" stroke="currentColor" stroke-width="1.2"><path d="M4.2 10.4 12 4l7.8 6.4v8a2 2 0 0 1-2 2h-3v-4.6a1.6 1.6 0 0 0-1.6-1.6h-2.4a1.6 1.6 0 0 0-1.6 1.6v4.6h-3a2 2 0 0 1-2-2z"/></g></svg>
@@ -139,7 +151,7 @@
   </a>
 
   <!-- Faisceau lumineux de l'onglet actif : dernier enfant (ne décale pas les nth-child). -->
-  <span class="nb-spot" aria-hidden="true"></span>
+  <span class="nb-spot{% if nav_active_index >= 0 %} is-ready{% endif %}" aria-hidden="true"></span>
 </nav>
 <script src="{{ 'mobile-bottom-nav.js' | asset_url }}" defer></script>
 {%- comment -%} L'ancien script React (esm.sh + react-router) a été retiré : il rechargeait 15 fichiers externes
