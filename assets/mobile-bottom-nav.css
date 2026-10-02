@@ -135,7 +135,18 @@ body .mobile-bottom-navigation .nb-spot {
   /* Position de départ calculée par Shopify (--nb-index) : le faisceau est déjà sous l'onglet actif
      à la première image ; le script ne fait ensuite que l'animer au toucher. */
   transform: translateX(calc(var(--nb-index, 0) * 100%));
+  /* Glissement vers l'onglet touché : transition CSS (le script ne fait que changer --nb-index).
+     Elle tourne hors du fil JavaScript, donc reste fluide même quand la page est occupée à changer.
+     Courbe linear() = le ressort d'origine (raideur 420, amortissement 30, masse 0,9) ;
+     cubic-bezier avant pour les navigateurs qui ne connaissent pas linear(). */
+  transition: transform 0.4s cubic-bezier(0.3, 1.2, 0.5, 1);
+  transition: transform 0.4s linear(0, 0.113, 0.333, 0.558, 0.741, 0.87, 0.951, 0.996, 1.016, 1.021, 1.02, 1.015, 1.01, 1.006, 1.003, 1.001, 1);
   will-change: transform, opacity;
+}
+
+/* Placement sans animation (retour arrière, mouvement réduit). */
+body .mobile-bottom-navigation .nb-spot.no-anim {
+  transition: none;
 }
 
 body .mobile-bottom-navigation .nb-spot.is-ready {
@@ -246,7 +257,8 @@ body .mobile-bottom-navigation > .is-active .ic-truck.rush .wh {
   body .mobile-bottom-navigation > a,
   body .mobile-bottom-navigation > button,
   body .mobile-bottom-navigation svg .ol,
-  body .mobile-bottom-navigation svg .fl {
+  body .mobile-bottom-navigation svg .fl,
+  body .mobile-bottom-navigation .nb-spot {
     transition: none;
   }
 }

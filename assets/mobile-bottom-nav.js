@@ -1,6 +1,7 @@
 /* Barre du bas mobile (prototype "scura") : l'onglet touché devient actif, le faisceau lumineux glisse vers l'onglet touché avec un
-   ressort (raideur 420, amortissement 30, masse 0,9) et pulse à l'arrivée ; l'icône touchée fait un "pop".
-   À l'ouverture d'une page, le faisceau est placé directement sur l'onglet actif (classe is-active). */
+   ressort et pulse à l'arrivée ; l'icône touchée fait un "pop".
+   Le glissement est une transition CSS sur --nb-index (assets/mobile-bottom-nav.css) : elle reste fluide même quand
+   la page est occupée à changer. À l'ouverture d'une page, Shopify place déjà le faisceau sur l'onglet actif. */
 (function () {
   'use strict';
 
@@ -12,60 +13,21 @@
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   var pageIndex = items.findIndex(function (item) { return item.classList.contains('is-active'); });
   var current = pageIndex;
-  var position = 0;
-  var velocity = 0;
-  var target = 0;
-  var frame = null;
-
-  function offsetFor(index) {
-    return index * spot.offsetWidth;
-  }
-
-  function paint() {
-    spot.style.transform = 'translateX(' + position + 'px)';
-  }
-
-  // Ressort amorti, intégré en petits pas pour rester stable à toutes les cadences d'image.
-  function step(previousTime) {
-    frame = window.requestAnimationFrame(function () {
-      // Horloge réelle : l'horodatage de l'image peut précéder le clic (pas de temps négatif).
-      var now = performance.now();
-      var elapsed = Math.min(0.05, Math.max(0, (now - previousTime) / 1000));
-      var steps = Math.max(1, Math.ceil(elapsed / 0.004));
-      var dt = elapsed / steps;
-      for (var i = 0; i < steps; i += 1) {
-        var force = -420 * (position - target) - 30 * velocity;
-        velocity += (force / 0.9) * dt;
-        position += velocity * dt;
-      }
-      paint();
-      if (Math.abs(position - target) < 0.3 && Math.abs(velocity) < 5) {
-        position = target;
-        velocity = 0;
-        paint();
-        frame = null;
-        return;
-      }
-      step(now);
-    });
-  }
 
   function moveTo(index, animated) {
     if (index < 0) {
       spot.classList.remove('is-ready');
       return;
     }
-    target = offsetFor(index);
     spot.classList.add('is-ready');
     if (!animated || reducedMotion.matches) {
-      if (frame) window.cancelAnimationFrame(frame);
-      frame = null;
-      position = target;
-      velocity = 0;
-      paint();
+      spot.classList.add('no-anim');
+      nav.style.setProperty('--nb-index', index);
+      void spot.offsetWidth;
+      spot.classList.remove('no-anim');
       return;
     }
-    if (!frame) step(performance.now());
+    nav.style.setProperty('--nb-index', index);
     if (typeof spot.animate === 'function') spot.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 350 });
   }
 
@@ -182,6 +144,6 @@
     moveTo(pageIndex, false);
   });
 
-  window.addEventListener('resize', function () { moveTo(current, false); });
+  // Position en pourcentage de la largeur d'un onglet : rien à recalculer au redimensionnement.
   moveTo(current, false);
 })();
