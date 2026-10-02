@@ -20,6 +20,16 @@
     endif
   endfor
 
+  # Lien du menu en adresse complète vers la boutique : on garde seulement le chemin (/apps/17TRACK)
+  # pour rester sur le site affiché (aperçu ou boutique en ligne).
+  assign own_prefixes = shop.secure_url | append: '|https://www.' | append: shop.domain | append: '|http://' | append: shop.domain | split: '|'
+  for own_prefix in own_prefixes
+    if tracking_url contains own_prefix
+      assign tracking_url = tracking_url | remove_first: own_prefix
+      break
+    endif
+  endfor
+
   assign wishlist_url = pages['wishlist'].url | default: '/pages/wishlist'
   if customer
     assign account_url = routes.account_url
