@@ -104,12 +104,13 @@
     }
   }
 
-  // Capture sur window : d'autres scripts (menu Categoria) arrêtent la propagation du clic.
-  window.addEventListener('click', function (event) {
+  function itemFromEvent(event) {
     var item = event.target.closest && event.target.closest('[data-mobile-bottom-nav] > a, [data-mobile-bottom-nav] > button');
-    if (!item) return;
+    return item && items.indexOf(item) !== -1 ? item : null;
+  }
+
+  function activate(item) {
     var index = items.indexOf(item);
-    if (index === -1) return;
     pop(item);
     rushTruck(item);
     if (index !== current) {
@@ -117,6 +118,51 @@
       setActive(index);
       moveTo(index, true);
     }
+  }
+
+  // Réaction immédiate : dès que le doigt touche l'onglet, avant le clic et les autres scripts
+  // (sur iPhone l'écran se fige souvent au moment où la page commence à changer).
+  // Si le geste est annulé (défilement, doigt qui glisse hors de l'onglet), on revient en arrière.
+  var pressed = null;
+  var pressedFrom = -1;
+  var revertTimer = null;
+
+  function revertPress() {
+    window.clearTimeout(revertTimer);
+    if (pressed && current !== pressedFrom) {
+      current = pressedFrom;
+      setActive(pressedFrom);
+      moveTo(pressedFrom, true);
+    }
+    pressed = null;
+  }
+
+  window.addEventListener('pointerdown', function (event) {
+    if (event.button !== 0) return;
+    var item = itemFromEvent(event);
+    if (!item) return;
+    window.clearTimeout(revertTimer);
+    pressed = item;
+    pressedFrom = current;
+    activate(item);
+    // Pas de clic dans la seconde (geste annulé) : retour à l'onglet précédent.
+    revertTimer = window.setTimeout(revertPress, 1000);
+  }, { capture: true, passive: true });
+
+  window.addEventListener('pointercancel', function () { if (pressed) revertPress(); }, true);
+
+  // Capture sur window : d'autres scripts (menu Categoria) arrêtent la propagation du clic.
+  window.addEventListener('click', function (event) {
+    var item = itemFromEvent(event);
+    if (!item) return;
+    window.clearTimeout(revertTimer);
+    // Déjà activé au toucher : rien à refaire (clavier ou clic sans pointerdown : on active ici).
+    if (pressed === item) {
+      pressed = null;
+      return;
+    }
+    pressed = null;
+    activate(item);
   }, true);
 
   // Menu "Categoria" refermé : le faisceau revient sur l'onglet de la page.

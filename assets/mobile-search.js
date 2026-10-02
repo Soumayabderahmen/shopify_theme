@@ -529,7 +529,6 @@
 
   /* ---------- Barre compacte : remplace le header dès qu'il sort de l'écran ---------- */
   var header = document.querySelector('.mobile-temu-header');
-  var ticking = false;
 
   function showMini(show) {
     if (mini.classList.contains('is-shown') === show) return;
@@ -539,26 +538,61 @@
     if (!show && activeForm === miniForm && isOpen()) close();
   }
 
+  // Aucune lecture de mise en page pendant le défilement (elle forçait le navigateur à tout
+  // recalculer à chaque image : saccades sur iPhone) :
+  // - apparition de la barre : le navigateur signale quand le header sort de l'écran (IntersectionObserver) ;
+  // - ligne de lecture : animation CSS liée au défilement si disponible, sinon mise à jour
+  //   espacée (150 ms) et seulement quand la barre est visible.
+  var headerVisible = true;
+  var scrollProgressInCss = window.CSS && CSS.supports && CSS.supports('animation-timeline: scroll()');
+  var maxScroll = 0;
+  var progressTimer = null;
+
   function updateMini() {
-    ticking = false;
     if (!mobile.matches || !header) {
       showMini(false);
       return;
     }
-    var y = window.scrollY;
-    var headerBottom = header.getBoundingClientRect().bottom + y;
-    var max = document.documentElement.scrollHeight - window.innerHeight;
-    mini.style.setProperty('--p', max > 0 ? Math.min(1, y / max).toFixed(3) : '0');
     // Le grand header défile avec la page ; dès qu'il est sorti de l'écran, la barre compacte
     // le remplace (en descendant comme en remontant) et disparaît quand il redevient visible.
-    if (!isOpen()) showMini(y > headerBottom - 10);
+    if (!isOpen()) showMini(!headerVisible);
   }
 
-  window.addEventListener('scroll', function () {
-    if (ticking) return;
-    ticking = true;
-    window.requestAnimationFrame(updateMini);
-  }, { passive: true });
+  if (header && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      headerVisible = entries[entries.length - 1].isIntersecting;
+      updateMini();
+    }, { rootMargin: '-10px 0px 0px 0px' }).observe(header);
+  }
+
+  function measureMax() {
+    maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  }
+
+  function updateProgress() {
+    progressTimer = null;
+    if (!mini.classList.contains('is-shown')) return;
+    if (!maxScroll) measureMax();
+    mini.style.setProperty('--p', maxScroll > 0 ? Math.min(1, window.scrollY / maxScroll).toFixed(3) : '0');
+  }
+
+  if (!scrollProgressInCss) {
+    window.addEventListener('scroll', function () {
+      if (!progressTimer) progressTimer = window.setTimeout(updateProgress, 150);
+    }, { passive: true });
+    window.addEventListener('load', measureMax);
+    window.addEventListener('resize', measureMax);
+    if ('ResizeObserver' in window) {
+      // Page qui s'allonge (produits ajoutés au défilement) : hauteur remesurée plus tard, hors défilement.
+      var maxTimer = null;
+      new ResizeObserver(function () {
+        window.clearTimeout(maxTimer);
+        maxTimer = window.setTimeout(function () { maxScroll = 0; }, 400);
+      }).observe(document.body);
+    }
+  }
+
+  window.addEventListener('resize', updateMini);
 
   // ☰ de la barre compacte : même menu "Esplora" que le header.
   mini.querySelector('[data-mobile-mini-menu]').addEventListener('click', function () {

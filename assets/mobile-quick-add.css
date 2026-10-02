@@ -3,7 +3,7 @@
    Chargé uniquement en mobile (media="(max-width: 760px)"). */
 
 /* ===== Bouton panier sur l'image de la carte (prototype final 2) =====
-   Rond translucide toujours visible : bleu nuit à 18 % + flou d'arrière-plan, sans contour ni ombre,
+   Rond translucide toujours visible : bleu nuit à 34 % (sans flou, pour la fluidité), sans contour ni ombre,
    chariot blanc 20px avec fine ombre portée ; zone tactile 50px ; appui : rétrécit et passe au bleu ;
    après l'ajout au panier : coche verte qui se dessine pendant 2,4 s (classe .is-added). */
 /* #root + classes : plus fort que "#root button" du thème. */
@@ -24,9 +24,9 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgba(22, 18, 63, 0.18);
-  -webkit-backdrop-filter: blur(8px) saturate(1.2);
-  backdrop-filter: blur(8px) saturate(1.2);
+  /* Fond translucide sans flou d'arrière-plan : le flou (backdrop-filter) sur chaque carte
+     faisait saccader le défilement sur iPhone. Fond un peu plus foncé pour garder la lisibilité. */
+  background: rgba(22, 18, 63, 0.34);
   box-shadow: none;
   color: #fff;
   text-indent: 0;

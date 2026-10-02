@@ -570,12 +570,28 @@ html.mobile-search-lock #root > .shopify-section-header {
   background: rgba(58, 52, 210, 0.16);
 }
 
+/* transform (et non width) : la ligne se remplit sans recalcul de mise en page. */
 .mobile-mini-header .mi-bar::after {
   content: "";
   display: block;
-  width: calc(var(--p, 0) * 100%);
+  width: 100%;
   height: 100%;
   background: #3a34d2;
+  transform: scaleX(var(--p, 0));
+  transform-origin: left center;
+}
+
+/* Navigateurs récents : la ligne suit le défilement directement en CSS, sans script. */
+@supports (animation-timeline: scroll()) {
+  .mobile-mini-header .mi-bar::after {
+    animation: mobile-mini-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+
+  @keyframes mobile-mini-progress {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

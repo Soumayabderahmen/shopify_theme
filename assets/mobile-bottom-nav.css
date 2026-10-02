@@ -43,7 +43,8 @@ body .mobile-bottom-navigation > button {
   font-weight: 600;
   text-indent: 0;
   -webkit-tap-highlight-color: transparent;
-  transition: color 0.25s;
+  touch-action: manipulation;
+  transition: color 0.12s;
 }
 
 body .mobile-bottom-navigation > button::before,
