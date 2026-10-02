@@ -4118,3 +4118,24 @@
     display: none !important;
   }
 }
+/* Petits écrans (320-360px) : les prix ne se coupent plus au milieu des chiffres ("€61,0 / 7").
+   Chaque prix et le badge -% restent entiers ; s'il manque de la place, ils passent à la ligne suivante. */
+@media only screen and (max-width: 760px) {
+  #root .featured-collection-mobile .alibaba-card__price-main,
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__price-main,
+  #root article[id*="section_featured_collection"] .alibaba-card__price-main,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__price-main {
+    flex-wrap: wrap !important;
+    row-gap: 2px !important;
+  }
+
+  #root .featured-collection-mobile .alibaba-card__price-main > *,
+  #root .featured-collection-mobile > li.alibaba-product-card .alibaba-card__price-main > *,
+  #root article[id*="section_featured_collection"] .alibaba-card__price-main > *,
+  #root :is(#collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card .alibaba-card__price-main > * {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+  }
+}

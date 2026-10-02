@@ -432,17 +432,17 @@
   margin-top: 24px;
 }
 
+/* Petits écrans (320px) : le logo garde sa taille ; "Follow us + Segui su shop" passent à la ligne, à droite. */
 .nf-brand {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px 8px;
 }
 
 .nf-logo {
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
+  flex: 0 0 auto;
   white-space: nowrap;
   background: linear-gradient(100deg, #fff, #c9ceea 40%, #fff 60%, #aeb4da);
   -webkit-background-clip: text;
@@ -458,8 +458,15 @@
   font-weight: 600;
 }
 
-.nf-follow {
+/* "Follow us" + pilule : un seul bloc, à droite (passe à la ligne entier sur les petits écrans). */
+.nf .nf-social {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-left: auto;
+}
+
+.nf-follow {
   color: var(--nf-muted);
   font-size: 12px;
   font-weight: 600;

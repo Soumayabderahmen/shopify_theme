@@ -213,11 +213,13 @@
         {%- if shop_name_lower == 'platinumshop' -%}Platinum<span>shop</span>{%- else -%}{{ shop.name | escape }}{%- endif -%}
       </span>
       {%- if shop.features.follow_on_shop? and section_settings.enable_follow_on_shop -%}
+        <span class="nf-social">
         <span class="nf-follow">{{ newsletter_block.settings.title | default: 'Follow us' | escape }}</span>
         <button type="button" class="nf-shop" data-mobile-footer-follow>
           <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
           <span>Segui su <b>shop</b></span>
         </button>
+        </span>
         <span class="nf-shop-real" data-mobile-footer-follow-real aria-hidden="true">
           {% # theme-check-disable %}
           {{ shop | login_button: action: 'follow' }}

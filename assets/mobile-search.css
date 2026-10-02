@@ -518,6 +518,26 @@ html.mobile-search-lock #root > .shopify-section-header {
   appearance: none;
 }
 
+/* Très petits écrans (≤ 360px) : "Cerca nel negozio" reste lisible en entier. */
+@media (max-width: 360px) {
+  .mobile-mini-header {
+    gap: 2px;
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  .mobile-mini-header .msearch {
+    gap: 6px;
+    margin: 0 2px;
+    padding: 0 10px;
+  }
+
+  #root .mobile-mini-header .msearch input,
+  .mobile-mini-header .msearch input {
+    font-size: 13.5px;
+  }
+}
+
 .mobile-mini-header .mobile-mini-header__count,
 .mobile-mini-header .mobile-wishlist__count {
   position: absolute;
