@@ -162,16 +162,46 @@
     <div class="mobile-category-browser__main">
       <div class="mobile-category-browser__heading">
         <h2>{{ shop_label }}</h2>
-        <a href="#mobile-category-panel-new" role="tab" class="mobile-category-browser__deferred-note" aria-selected="false" aria-controls="mobile-category-panel-new" data-category-tab="mobile-category-panel-new" data-featured-only-tab>{{ new_label }} ›</a>
-        {%- comment -%} Autres rayons : « Novità › » ouvre la collection du rayon triée par nouveautés (lien mis à jour par le script). {%- endcomment -%}
-        <a href="{{ routes.all_products_collection_url }}?sort_by=created-descending" class="mobile-category-browser__deferred-note" data-category-new-link hidden>{{ new_label }} ›</a>
+        {%- comment -%}
+          « Novità › » : dans le panneau, affiche les nouveautés du rayon choisi (In evidenza : collection « Nuovi
+          arrivi » ; autres rayons : leur collection triée par date d'ajout). Nouveau toucher = retour à la liste du
+          rayon. L'adresse sert seulement si le script n'est pas chargé.
+        {%- endcomment -%}
+        <a href="{% if new_collection != blank %}{{ new_collection.url }}{% else %}{{ routes.all_products_collection_url }}?sort_by=created-descending{% endif %}" class="mobile-category-browser__deferred-note" aria-pressed="false" data-category-new-toggle>{{ new_label }} ›</a>
       </div>
       {%- capture view_all_icon -%}<span class="mobile-category-card__image"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><rect class="q q1" x="3.4" y="3.4" width="7.4" height="7.4" rx="2.5" fill="url(#mobile-category-view-all-gradient)"></rect><rect class="q q2" x="13.2" y="3.4" width="7.4" height="7.4" rx="2.5" fill="#3a34d2" fill-opacity=".26"></rect><rect class="q q3" x="3.4" y="13.2" width="7.4" height="7.4" rx="2.5" fill="#3a34d2" fill-opacity=".26"></rect><rect class="q q4" x="13.2" y="13.2" width="7.4" height="7.4" rx="2.5" fill="url(#mobile-category-view-all-gradient)"></rect></svg></span>{%- endcapture -%}
-      <div id="mobile-category-panel-featured" class="mobile-category-browser__panel mobile-category-browser__panel--featured is-active" role="tabpanel" data-deferred-products{% if hot_collection != blank %} data-category-products-endpoint="{{ hot_collection.url }}?view=mobile-category"{% endif %}>
+      {%- comment -%}
+        « In evidenza » : les 12 premiers produits sont écrits directement ici (affichage immédiat à l'ouverture,
+        sans « Caricamento… ») ; la suite (page 2, 3…) est chargée par le bouton « Vedi più » / au défilement.
+        Images en data-src : téléchargées seulement à l'ouverture du panneau.
+      {%- endcomment -%}
+      <div id="mobile-category-panel-featured" class="mobile-category-browser__panel mobile-category-browser__panel--featured is-active" role="tabpanel" data-products-loaded="true">
         <a href="{% if hot_collection != blank %}{{ hot_collection.url }}{% else %}{{ routes.all_products_collection_url }}{% endif %}" class="mobile-category-card mobile-category-card--view-all">
           {{ view_all_icon }}
           <span class="mobile-category-card__title">{{ view_all_label }}</span>
         </a>
+        {%- if hot_collection != blank -%}
+          {%- comment -%} Sans l'attribut data-mobile-category-products : il doit rester unique dans les pages
+            « ?view=mobile-category » (le script y cherche la liste des produits de la collection demandée). {%- endcomment -%}
+          <div class="mobile-category-products">
+            {%- for hot_product in hot_collection.products limit: 12 -%}
+              <a href="{{ hot_product.url }}" class="mobile-category-card">
+                <span class="mobile-category-card__image">
+                  {%- if hot_product.featured_image != blank -%}
+                    <img data-src="{{ hot_product.featured_image | image_url: width: 184, height: 184, crop: 'center' }}" alt="{{ hot_product.featured_image.alt | default: hot_product.title | escape }}" width="120" height="120">
+                  {%- else -%}
+                    <span aria-hidden="true">{{ hot_product.title | slice: 0, 1 | upcase }}</span>
+                  {%- endif -%}
+                  <em>HOT</em>
+                </span>
+                <span class="mobile-category-card__title">{{ hot_product.title | escape }}</span>
+              </a>
+            {%- endfor -%}
+            {%- if hot_collection.products_count > 12 -%}
+              <a href="{{ hot_collection.url }}?page=2&view=mobile-category" class="mobile-category-products__more" data-category-products-more>Vedi più</a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
       </div>
       <div id="mobile-category-panel-new" class="mobile-category-browser__panel mobile-category-browser__panel--animated" role="tabpanel" data-deferred-products{% if new_collection != blank %} data-category-products-endpoint="{{ new_collection.url }}?view=mobile-category"{% endif %} hidden>
         {%- if new_collection != blank -%}
@@ -187,7 +217,7 @@
         {%- for category_link in main_link.links -%}
           {%- unless category_link.title contains 'Novità' or category_link.title contains 'Novita' -%}
             {%- assign category_index = category_index | plus: 1 -%}
-            <div id="mobile-category-panel-{{ category_index }}" class="mobile-category-browser__panel" role="tabpanel" data-category-products-endpoint="{{ category_link.url }}?view=mobile-category" hidden>
+            <div id="mobile-category-panel-{{ category_index }}" class="mobile-category-browser__panel" role="tabpanel"{% if category_link.links.size > 0 %} data-category-products-endpoint="{{ category_link.url }}?view=mobile-category"{% else %} data-products-loaded="true"{% endif %} hidden>
             <a href="{{ category_link.url }}" class="mobile-category-card mobile-category-card--view-all">
               <span class="mobile-category-card__image"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><rect class="q q1" x="3.4" y="3.4" width="7.4" height="7.4" rx="2.5" fill="url(#mobile-category-view-all-gradient)"></rect><rect class="q q2" x="13.2" y="3.4" width="7.4" height="7.4" rx="2.5" fill="#3a34d2" fill-opacity=".26"></rect><rect class="q q3" x="3.4" y="13.2" width="7.4" height="7.4" rx="2.5" fill="#3a34d2" fill-opacity=".26"></rect><rect class="q q4" x="13.2" y="13.2" width="7.4" height="7.4" rx="2.5" fill="url(#mobile-category-view-all-gradient)"></rect></svg></span>
               <span class="mobile-category-card__title">{{ view_all_label }}</span>
@@ -218,7 +248,7 @@
                 {%- endunless -%}
               {%- endfor -%}
             {%- else -%}
-              {%- for category_product in category_link.object.products limit: 10 -%}
+              {%- for category_product in category_link.object.products limit: 12 -%}
                 <a href="{{ category_product.url }}" class="mobile-category-card">
                   <span class="mobile-category-card__image">
                     {%- if category_product.featured_image != blank -%}
@@ -230,6 +260,9 @@
                   <span class="mobile-category-card__title">{{ category_product.title | escape }}</span>
                 </a>
               {%- endfor -%}
+              {%- if category_link.object.products_count > 12 -%}
+                <a href="{{ category_link.url }}?page=2&view=mobile-category" class="mobile-category-products__more" data-category-products-more>Vedi più</a>
+              {%- endif -%}
             {%- endif -%}
             </div>
           {%- endunless -%}
@@ -239,12 +272,12 @@
       {%- for main_link in menu.links -%}
         {%- if main_link.title == 'Abbigliamento Cinese' or main_link.title == 'Animal Print & Pet' or main_link.title == 'Bici/Monopattini' -%}
           {%- assign category_index = category_index | plus: 1 -%}
-          <div id="mobile-category-panel-{{ category_index }}" class="mobile-category-browser__panel" role="tabpanel" data-category-products-endpoint="{{ main_link.url }}?view=mobile-category" hidden>
+          <div id="mobile-category-panel-{{ category_index }}" class="mobile-category-browser__panel" role="tabpanel" data-products-loaded="true" hidden>
             <a href="{{ main_link.url }}" class="mobile-category-card mobile-category-card--view-all">
               <span class="mobile-category-card__image"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><rect class="q q1" x="3.4" y="3.4" width="7.4" height="7.4" rx="2.5" fill="url(#mobile-category-view-all-gradient)"></rect><rect class="q q2" x="13.2" y="3.4" width="7.4" height="7.4" rx="2.5" fill="#3a34d2" fill-opacity=".26"></rect><rect class="q q3" x="3.4" y="13.2" width="7.4" height="7.4" rx="2.5" fill="#3a34d2" fill-opacity=".26"></rect><rect class="q q4" x="13.2" y="13.2" width="7.4" height="7.4" rx="2.5" fill="url(#mobile-category-view-all-gradient)"></rect></svg></span>
               <span class="mobile-category-card__title">{{ view_all_label }}</span>
             </a>
-            {%- for category_product in main_link.object.products limit: 10 -%}
+            {%- for category_product in main_link.object.products limit: 12 -%}
               <a href="{{ category_product.url }}" class="mobile-category-card">
                 <span class="mobile-category-card__image">
                   {%- if category_product.featured_image != blank -%}
@@ -256,6 +289,9 @@
                 <span class="mobile-category-card__title">{{ category_product.title | escape }}</span>
               </a>
             {%- endfor -%}
+            {%- if main_link.object.products_count > 12 -%}
+              <a href="{{ main_link.url }}?page=2&view=mobile-category" class="mobile-category-products__more" data-category-products-more>Vedi più</a>
+            {%- endif -%}
           </div>
         {%- endif -%}
       {%- endfor -%}

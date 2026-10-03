@@ -1843,7 +1843,7 @@ function initMobileTemuHeader() {
 
     var link = target.closest('a[href]');
     if (!link
-      || link.matches('[data-category-tab], [data-category-panel-trigger], [data-category-products-more]')
+      || link.matches('[data-category-tab], [data-category-panel-trigger], [data-category-products-more], [data-category-new-toggle]')
       || event.defaultPrevented
       || event.button !== 0
       || event.metaKey
@@ -1875,7 +1875,6 @@ function initMobileTemuHeader() {
   }, true);
 
   if (!categoryBrowser) return;
-  var featuredOnlyTab = categoryBrowser.querySelector('[data-featured-only-tab]');
   var syncCategoryBrowserState = function () {
     if (!getCategoryTriggers().length) return;
     if (categoryBrowser.hidden) {
@@ -1891,24 +1890,70 @@ function initMobileTemuHeader() {
 
   window.addEventListener('pageshow', syncCategoryBrowserState);
 
-  // « Novità › » : rayon « In evidenza » = onglet des nouveaux arrivés ; autres rayons = lien vers la collection
-  // du rayon triée par nouveautés (adresse prise sur sa tuile « Vedi tutto »).
-  var newArrivalsLink = categoryBrowser.querySelector('[data-category-new-link]');
-  var updateFeaturedOnlyTab = function (selectedTab) {
-    if (!featuredOnlyTab || !selectedTab) return;
-    var panelId = selectedTab.getAttribute('data-category-tab');
-    var isFeatured = panelId === 'mobile-category-panel-featured' || panelId === 'mobile-category-panel-new';
-    featuredOnlyTab.hidden = !isFeatured;
-    if (!newArrivalsLink) return;
-    var panel = document.getElementById(panelId);
-    var viewAll = panel && panel.querySelector('.mobile-category-card--view-all[href]');
-    newArrivalsLink.hidden = isFeatured || !viewAll;
-    if (viewAll) {
-      var url = new URL(viewAll.getAttribute('href'), window.location.href);
-      url.searchParams.set('sort_by', 'created-descending');
-      newArrivalsLink.href = url.pathname + url.search;
-    }
+  // « Novità › » : affiche, dans le panneau, les nouveautés du rayon choisi à gauche.
+  // In evidenza -> panneau « Nuovi arrivi » existant ; autres rayons -> panneau créé au premier toucher avec la
+  // collection du rayon triée par date d'ajout (vraies données Shopify, suite chargée au défilement).
+  // Nouveau toucher sur « Novità » ou sur un rayon à gauche : retour à la liste du rayon.
+  var newToggle = categoryBrowser.querySelector('[data-category-new-toggle]');
+  var baseCategoryPanelId = 'mobile-category-panel-featured';
+  var setNewToggle = function (active) {
+    if (!newToggle) return;
+    newToggle.classList.toggle('is-active', active);
+    newToggle.setAttribute('aria-pressed', active ? 'true' : 'false');
   };
+  var sortedByNewest = function (href) {
+    var url = new URL(href, window.location.href);
+    url.searchParams.set('sort_by', 'created-descending');
+    return url.pathname + url.search;
+  };
+  var newPanelFor = function (baseId) {
+    if (baseId === 'mobile-category-panel-featured') return document.getElementById('mobile-category-panel-new');
+    var existing = document.getElementById(baseId + '-new');
+    if (existing) return existing;
+    var base = document.getElementById(baseId);
+    var viewAll = base && base.querySelector('.mobile-category-card--view-all[href]');
+    if (!viewAll) return null;
+    var newestUrl = sortedByNewest(viewAll.getAttribute('href'));
+    var panel = document.createElement('div');
+    panel.id = baseId + '-new';
+    panel.className = 'mobile-category-browser__panel';
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('data-category-products-endpoint', newestUrl + '&view=mobile-category');
+    panel.hidden = true;
+    var tile = viewAll.cloneNode(true);
+    tile.setAttribute('href', newestUrl);
+    panel.appendChild(tile);
+    base.parentNode.insertBefore(panel, base.nextSibling);
+    return panel;
+  };
+  var showCategoryPanel = function (selectedPanel) {
+    categoryBrowser.querySelectorAll('.mobile-category-browser__panel').forEach(function (panel) {
+      var selected = panel === selectedPanel;
+      panel.classList.toggle('is-active', selected);
+      panel.hidden = !selected;
+    });
+    loadPanelImages(selectedPanel);
+    loadCategoryProducts(selectedPanel);
+    categoryBrowser.querySelector('.mobile-category-browser__main').scrollTop = 0;
+  };
+  // Appelée au changement de rayon (onglets de gauche) : retour à la liste normale du rayon.
+  var updateFeaturedOnlyTab = function (selectedTab) {
+    if (!selectedTab) return;
+    baseCategoryPanelId = selectedTab.getAttribute('data-category-tab') || baseCategoryPanelId;
+    setNewToggle(false);
+    if (newToggle) newToggle.hidden = !newPanelFor(baseCategoryPanelId);
+  };
+  if (newToggle) {
+    newToggle.addEventListener('click', function (event) {
+      var basePanel = document.getElementById(baseCategoryPanelId);
+      var newPanel = newPanelFor(baseCategoryPanelId);
+      if (!basePanel || !newPanel) return;
+      event.preventDefault();
+      var showNew = newToggle.getAttribute('aria-pressed') !== 'true';
+      setNewToggle(showNew);
+      showCategoryPanel(showNew ? newPanel : basePanel);
+    });
+  }
 
   var loadPanelImages = function (panel, limit, priority) {
     if (!panel) return;
@@ -2113,6 +2158,14 @@ function initMobileTemuHeader() {
     load.observe(more);
   };
 
+  // Liste des produits de la collection demandée dans une page « ?view=mobile-category ». Cette page contient
+  // aussi le header (et son panneau Categoria) : on ignore toute liste qui s'y trouve.
+  var findCategoryProducts = function (parsed) {
+    return Array.prototype.find.call(parsed.querySelectorAll('[data-mobile-category-products]'), function (list) {
+      return !list.closest('[data-mobile-category-browser]');
+    }) || null;
+  };
+
   var bindMoreProducts = function (panel) {
     var more = panel.querySelector('[data-category-products-more]');
     if (!more || more.dataset.bound === 'true') return;
@@ -2127,7 +2180,7 @@ function initMobileTemuHeader() {
       fetchCategoryHtml(more.href, 'More category products request failed')
         .then(function (html) {
           var parsed = new DOMParser().parseFromString(html, 'text/html');
-          var products = parsed.querySelector('[data-mobile-category-products]');
+          var products = findCategoryProducts(parsed);
           if (!products) throw new Error('More category products markup missing');
           var currentProducts = more.closest('[data-mobile-category-products]') || panel;
           var addedIndex = 0;
@@ -2160,7 +2213,14 @@ function initMobileTemuHeader() {
   };
 
   var loadCategoryProducts = function (panel) {
-    if (!panel || panel.dataset.productsLoaded === 'true' || panel.dataset.productsLoaded === 'loading') return;
+    if (!panel) return;
+    // Produits déjà écrits dans la page (In evidenza, rayons sans sous-catégories) : rien à recharger,
+    // on active seulement la suite (« Vedi più » / chargement au défilement).
+    if (panel.dataset.productsLoaded === 'true') {
+      bindMoreProducts(panel);
+      return;
+    }
+    if (panel.dataset.productsLoaded === 'loading') return;
     var endpoint = panel.getAttribute('data-category-products-endpoint');
     if (!endpoint) return;
     panel.dataset.productsLoaded = 'loading';
@@ -2173,7 +2233,7 @@ function initMobileTemuHeader() {
     fetchCategoryHtml(endpoint, 'Category products request failed')
       .then(function (html) {
         var parsed = new DOMParser().parseFromString(html, 'text/html');
-        var products = parsed.querySelector('[data-mobile-category-products]');
+        var products = findCategoryProducts(parsed);
         if (!products) throw new Error('Category products markup missing');
         loadingIndicator.remove();
         panel.appendChild(products);
