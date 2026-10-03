@@ -825,8 +825,11 @@
 
   /* Panneau Categoria ouvert : il recouvre la page (plein écran), la page reste en place dessous
      et ne défile pas ; la barre compacte ne passe pas par-dessus. */
+  /* Ici c'est <html> qui fait défiler la page : le bloquer aussi, sinon la page défile derrière le panneau. */
+  html:has(> body.mobile-categories-open),
   body.mobile-categories-open {
     overflow: hidden;
+    overscroll-behavior: none;
   }
 
   body.mobile-categories-open .mobile-mini-header {

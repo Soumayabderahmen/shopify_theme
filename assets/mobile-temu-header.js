@@ -1465,6 +1465,10 @@ function initMobileTemuHeader() {
   var exploreDrawer = document.querySelector('[data-mobile-explore-drawer]');
   var exploreTrigger = document.querySelector('[data-mobile-explore-trigger]');
   if (isMobile && exploreDrawer) document.body.appendChild(exploreDrawer);
+  // Panneau Categoria sorti du header (enfant direct de #root, ses styles restent valables) :
+  // une fois la page défilée loin du header, le téléphone ne doit plus pouvoir le faire disparaître avec lui.
+  var pageRoot = document.getElementById('root');
+  if (isMobile && categoryBrowser && pageRoot) pageRoot.appendChild(categoryBrowser);
   // Le header mobile contient maintenant son propre champ (rendu dans sections/header.liquid) :
   // on ne déplace l'ancien champ que s'il n'y en a pas (ancienne version du header).
   if (isMobile && searchHost && nativeSearch && !searchHost.querySelector('form')) {
