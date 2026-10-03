@@ -1509,6 +1509,39 @@ function initMobileTemuHeader() {
       else trigger.removeAttribute('aria-current');
     });
   };
+  // Panneau Categoria plein écran : glisse depuis le bas à l'ouverture (classe is-open), redescend à la fermeture.
+  // Fermeture : nouveau toucher sur Categoria, touche Échap, ☰ / ♡ / panier du panneau, ou changement de page.
+  var categoryCloseTimer = null;
+  var openCategoryBrowser = function () {
+    if (!categoryBrowser) return;
+    window.clearTimeout(categoryCloseTimer);
+    categoryBrowser.hidden = false;
+    categoryBrowser.removeAttribute('aria-hidden');
+    document.body.classList.add('mobile-categories-open');
+    syncCategoryTriggers(true);
+    sizeCategoryBrowser();
+    void categoryBrowser.offsetWidth;
+    categoryBrowser.classList.add('is-open');
+    loadPanelImages(categoryBrowser.querySelector('.mobile-category-browser__panel.is-active'));
+    loadCategoryProducts(categoryBrowser.querySelector('.mobile-category-browser__panel.is-active'));
+  };
+  var closeCategoryBrowser = function (animated) {
+    if (!categoryBrowser || categoryBrowser.hidden) return;
+    window.clearTimeout(categoryCloseTimer);
+    categoryBrowser.classList.remove('is-open');
+    document.body.classList.remove('mobile-categories-open');
+    syncCategoryTriggers(false);
+    var hide = function () {
+      if (categoryBrowser.classList.contains('is-open')) return;
+      categoryBrowser.hidden = true;
+      categoryBrowser.setAttribute('aria-hidden', 'true');
+    };
+    if (animated && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      categoryCloseTimer = window.setTimeout(hide, 340);
+    } else {
+      hide();
+    }
+  };
   var exploreDrawerClosing = false;
   var finishCloseExploreDrawer = function (restoreFocus) {
     if (!exploreDrawer) return;
@@ -1546,12 +1579,7 @@ function initMobileTemuHeader() {
       exploreDrawer.classList.remove('is-closing');
       exploreDrawerClosing = false;
     }
-    if (categoryBrowser && !categoryBrowser.hidden) {
-      categoryBrowser.hidden = true;
-      categoryBrowser.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('mobile-categories-open');
-      syncCategoryTriggers(false);
-    }
+    closeCategoryBrowser(false);
     exploreDrawer.inert = false;
     exploreDrawer.setAttribute('aria-hidden', 'false');
     exploreDrawer.showModal();
@@ -1737,16 +1765,18 @@ function initMobileTemuHeader() {
   window.addEventListener('pageshow', stopNavigationProgress);
 
   window.addEventListener('pagehide', function () {
-    if (categoryBrowser) {
-      categoryBrowser.hidden = true;
-      categoryBrowser.setAttribute('aria-hidden', 'true');
-    }
+    closeCategoryBrowser(false);
     document.body.classList.remove('mobile-categories-open', 'mobile-search-open');
     syncCategoryTriggers(false);
     closeExploreDrawer(false);
   });
 
   document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && categoryBrowser && !categoryBrowser.hidden
+      && !document.body.classList.contains('mobile-explore-open')) {
+      closeCategoryBrowser(true);
+      return;
+    }
     if (!document.body.classList.contains('mobile-explore-open') || !exploreDrawer) return;
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -1802,16 +1832,14 @@ function initMobileTemuHeader() {
       event.stopPropagation();
       closeExploreDrawer(false);
       if (!categoryBrowser) return;
-      categoryBrowser.hidden = false;
-      categoryBrowser.removeAttribute('aria-hidden');
-      document.body.classList.add('mobile-categories-open');
-      syncCategoryTriggers(true);
-      window.scrollTo({ top: 0, behavior: 'auto' });
-      loadPanelImages(categoryBrowser.querySelector('.mobile-category-browser__panel.is-active'));
-      loadCategoryProducts(categoryBrowser.querySelector('.mobile-category-browser__panel.is-active'));
-      window.requestAnimationFrame(sizeCategoryBrowser);
+      // Deuxième toucher sur Categoria : le panneau se referme (retour à l'onglet de la page).
+      if (categoryBrowser.classList.contains('is-open')) closeCategoryBrowser(true);
+      else openCategoryBrowser();
       return;
     }
+
+    // ♡ et panier du panneau : on referme le panneau, puis leur action habituelle (favoris, panier latéral) continue.
+    if (categoryBrowser && target.closest('[data-mobile-category-leave]')) closeCategoryBrowser(false);
 
     var link = target.closest('a[href]');
     if (!link
@@ -1856,16 +1884,30 @@ function initMobileTemuHeader() {
       return;
     }
     document.body.classList.add('mobile-categories-open');
+    categoryBrowser.classList.add('is-open');
     syncCategoryTriggers(true);
     window.requestAnimationFrame(sizeCategoryBrowser);
   };
 
   window.addEventListener('pageshow', syncCategoryBrowserState);
 
+  // « Novità › » : rayon « In evidenza » = onglet des nouveaux arrivés ; autres rayons = lien vers la collection
+  // du rayon triée par nouveautés (adresse prise sur sa tuile « Vedi tutto »).
+  var newArrivalsLink = categoryBrowser.querySelector('[data-category-new-link]');
   var updateFeaturedOnlyTab = function (selectedTab) {
     if (!featuredOnlyTab || !selectedTab) return;
-    var isFeatured = selectedTab.getAttribute('data-category-tab') === 'mobile-category-panel-featured';
+    var panelId = selectedTab.getAttribute('data-category-tab');
+    var isFeatured = panelId === 'mobile-category-panel-featured' || panelId === 'mobile-category-panel-new';
     featuredOnlyTab.hidden = !isFeatured;
+    if (!newArrivalsLink) return;
+    var panel = document.getElementById(panelId);
+    var viewAll = panel && panel.querySelector('.mobile-category-card--view-all[href]');
+    newArrivalsLink.hidden = isFeatured || !viewAll;
+    if (viewAll) {
+      var url = new URL(viewAll.getAttribute('href'), window.location.href);
+      url.searchParams.set('sort_by', 'created-descending');
+      newArrivalsLink.href = url.pathname + url.search;
+    }
   };
 
   var loadPanelImages = function (panel, limit, priority) {
@@ -2153,16 +2195,14 @@ function initMobileTemuHeader() {
       });
   };
 
+  // Panneau fixé en haut de l'écran : hauteur = écran visible (iPhone : visualViewport) moins la barre du bas.
   var sizeCategoryBrowser = function () {
     if (categoryBrowser.hidden) return;
     var viewport = window.visualViewport;
     var viewportHeight = viewport ? viewport.height : window.innerHeight;
     var bottomNavigation = document.querySelector('.mobile-bottom-navigation');
     var bottomNavigationHeight = bottomNavigation ? bottomNavigation.getBoundingClientRect().height : 0;
-    var viewportTop = viewport ? viewport.offsetTop : 0;
-    var browserTop = categoryBrowser.getBoundingClientRect().top - viewportTop;
-    categoryBrowser.style.height = Math.max(280, viewportHeight
-      - Math.max(0, browserTop) - bottomNavigationHeight) + 'px';
+    categoryBrowser.style.height = Math.max(280, viewportHeight - bottomNavigationHeight) + 'px';
   };
 
   categoryBrowser.querySelectorAll('[data-category-tab]').forEach(function (tab) {

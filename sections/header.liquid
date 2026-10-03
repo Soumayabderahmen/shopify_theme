@@ -273,7 +273,7 @@
   })();
 </script>
 
-{%- render 'mobile-category-browser', menu: mobile_category_menu -%}
+{%- render 'mobile-category-browser', menu: mobile_category_menu, disable_cart: section.settings.disable_online_store -%}
 {%- render 'mobile-wishlist-drawer' -%}
 {%- render 'mobile-quick-add' -%}
 {%- render 'mobile-search', trends: section.settings.mobile_trending_searches, disable_cart: section.settings.disable_online_store -%}
