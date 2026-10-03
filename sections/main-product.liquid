@@ -204,6 +204,8 @@
   data-standard-view-event="product"
   data-standard-view-event-payload='{{ product | standard_event_data: "view", context: "page" | escape }}'
 >
+  {%- comment -%} Fiche produit mobile au design du prototype (masquée sur desktop, voir assets/pdp-mobile.css). {%- endcomment -%}
+  {%- render 'pdp-mobile-top', product: product -%}
   {%- if title_block.settings.layout == 'title-right' and title_block.settings.layout_mobile == 'title-top' -%}
     {{ header | replace: 'class-x', 'mobile-only' }}
   {%- elsif title_block.settings.layout == 'title-top' and title_block.settings.layout_mobile == 'title-bottom' -%}

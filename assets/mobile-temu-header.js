@@ -1833,9 +1833,28 @@ function initMobileTemuHeader() {
       closeExploreDrawer(false);
       if (!categoryBrowser) return;
       // Deuxième toucher sur Categoria : le panneau se referme (retour à l'onglet de la page).
-      if (categoryBrowser.classList.contains('is-open')) closeCategoryBrowser(true);
+      // L'état réel (hidden + is-open) fait foi : un état incohérent ne doit jamais bloquer la réouverture.
+      if (!categoryBrowser.hidden && categoryBrowser.classList.contains('is-open')) closeCategoryBrowser(true);
       else openCategoryBrowser();
       return;
+    }
+
+    // Lien vers la page déjà affichée (ex. Accueil depuis l'accueil) : pas de rechargement, on referme simplement le panneau.
+    var samePageLink = target.closest('.mobile-bottom-navigation a[href], .mobile-category-browser a[href]');
+    if (samePageLink && categoryBrowser && !categoryBrowser.hidden
+      && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
+      && !samePageLink.matches('[data-category-tab], [data-category-panel-trigger], [data-category-products-more], [data-category-new-toggle]')
+      && samePageLink.getAttribute('href').charAt(0) !== '#') {
+      var samePageUrl = new URL(samePageLink.href, window.location.href);
+      if (samePageUrl.origin === window.location.origin
+        && samePageUrl.pathname === window.location.pathname
+        && samePageUrl.search === window.location.search
+        && !samePageUrl.hash) {
+        event.preventDefault();
+        closeCategoryBrowser(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
     }
 
     // ♡ et panier du panneau : on referme le panneau, puis leur action habituelle (favoris, panier latéral) continue.
@@ -1888,7 +1907,16 @@ function initMobileTemuHeader() {
     window.requestAnimationFrame(sizeCategoryBrowser);
   };
 
-  window.addEventListener('pageshow', syncCategoryBrowserState);
+  window.addEventListener('pageshow', function (event) {
+    // Page restaurée depuis le cache (retour arrière) : on repart d'un panneau fermé et cohérent.
+    if (event.persisted) {
+      window.clearTimeout(categoryCloseTimer);
+      categoryBrowser.classList.remove('is-open');
+      categoryBrowser.hidden = true;
+      categoryBrowser.setAttribute('aria-hidden', 'true');
+    }
+    syncCategoryBrowserState();
+  });
 
   // « Novità › » : affiche, dans le panneau, les nouveautés du rayon choisi à gauche.
   // In evidenza -> panneau « Nuovi arrivi » existant ; autres rayons -> panneau créé au premier toucher avec la
