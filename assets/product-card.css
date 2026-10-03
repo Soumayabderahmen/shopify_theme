@@ -1,0 +1,1211 @@
+/* Cartes produit (snippets/product-item.liquid) et badge de marque (snippets/badge--brand-products.liquid).
+   Avant : ce CSS était écrit dans CHAQUE carte (26 Ko x nombre de produits). Maintenant : un seul fichier,
+   chargé une fois par page en début de <body> (layout/theme.liquid) et gardé en cache. Contenu identique. */
+
+/* ---------- Carte produit ---------- */
+    /* =========================================================
+     PRODUCT CARD — Ottimizzato mobile-first
+     Stile marketplace (Temu/AliExpress): info compatte,
+     prezzo protagonista, badge sconto, CTA flottante.
+     ========================================================= */
+
+  :root {
+    --apc-accent: #ff6a00;
+    --apc-accent-hover: #e55f00;
+    --apc-price: #1a1a1a;
+    --apc-bg: #ffffff;
+    --apc-border: #eeeeee;
+    --apc-text: #212121;
+    --apc-text-secondary: #757575;
+    --apc-success: #52c41a;
+    --apc-star: #ff9500;
+    --apc-chip-bg: #f5f5f5;
+    --apc-radius: 8px;
+    --apc-transition: 0.2s ease;
+  }
+
+  /* Card base */
+  .alibaba-product-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--apc-bg);
+    border: 1px solid var(--apc-border);
+    border-radius: var(--apc-radius);
+    overflow: hidden;
+    transition: box-shadow var(--apc-transition), transform var(--apc-transition);
+    height: 100%;
+  }
+
+  .alibaba-product-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+    transform: translateY(-2px);
+  }
+
+  /* Media */
+  .alibaba-card__media {
+    position: relative;
+    margin: 0;
+    background: #f8f8f8;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .alibaba-card__media-link { display: block; width: 100%; height: 100%; }
+  .alibaba-card__picture { display: block; width: 100%; height: 100%; }
+
+  .alibaba-card__picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+  }
+
+  .alibaba-product-card:hover .alibaba-card__picture img { transform: scale(1.04); }
+
+  .alibaba-card__picture--secondary {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .alibaba-product-card:hover .alibaba-card__picture--secondary { opacity: 1; }
+
+  /* Wishlist */
+  .alibaba-card__wishlist {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 3;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--apc-border);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--apc-transition);
+  }
+
+  .alibaba-card__wishlist:hover {
+    background: var(--apc-accent);
+    border-color: var(--apc-accent);
+    color: #fff;
+  }
+
+  /* Top Selling Ribbon */
+  
+.alibaba-top-selling-ribbon {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 28px;
+  background: linear-gradient(135deg, #6d28d9, #5b21b6);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  overflow: hidden;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.alibaba-top-selling-ribbon--animated {
+  background: linear-gradient(135deg, #4c1d95, #6d28d9, #2563eb);
+}
+
+/* Stile per badge solo Verified (quando bestseller_count <= 50) */
+.alibaba-top-selling-ribbon--verified-only {
+  background: linear-gradient(135deg, #332decff, #332decff);
+}
+
+.alibaba-verified-standalone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 6px;
+  padding: 0 8px;
+}
+
+.alibaba-top-selling-ribbon__main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 5px;
+}
+
+.alibaba-top-selling-ribbon__star {
+  font-size: 12px;
+  color: #fbbf24;
+  text-shadow: 0 0 4px rgba(251, 191, 36, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   STRUTTURA & ANIMAZIONE CUBO 3D (X-AXIS ROTATION)
+   -------------------------------------------------------------------------- */
+.alibaba-cube-scene {
+  width: 100%;
+  height: 100%;
+  perspective: 400px;
+}
+
+.alibaba-cube {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: rotateCubeX 6s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+.alibaba-cube__face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  backface-visibility: hidden;
+  box-sizing: border-box;
+}
+
+.alibaba-cube__face--front {
+  transform: translateZ(14px);
+  background: linear-gradient(135deg, #4567f0ff, #5b21b6);
+}
+
+.alibaba-cube__face--top {
+  transform: rotateX(90deg) translateZ(14px);
+  background: linear-gradient(135deg, #96052eff, #de2e69ff);
+}
+
+.alibaba-verified-badge__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  background: #ffffff;
+  color: #960505ff;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+@keyframes rotateCubeX {
+  0%, 40% {
+    transform: rotateX(0deg);
+  }
+  50%, 90% {
+    transform: rotateX(-90deg);
+  }
+  100% {
+    transform: rotateX(-360deg);
+  }
+}
+  /* Body — COMPATTO */
+  .alibaba-card__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: 10px 10px 12px;
+    gap: 4px;
+  }
+
+  .alibaba-card__header { min-width: 0; }
+
+  .alibaba-card__vendor {
+    color: var(--apc-text-secondary);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .alibaba-card__title {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 0;
+    color: var(--apc-text);
+  }
+
+  .alibaba-card__title a {
+    color: inherit;
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    /* Altezza fissa a 2 righe: le card restano perfettamente allineate in griglia */
+    min-height: calc(13px * 1.4 * 2);
+    cursor: pointer;
+    transition: color var(--apc-transition);
+  }
+
+  .alibaba-card__title a:hover { color: var(--apc-accent); }
+
+  .alibaba-card__variant {
+    display: block;
+    color: var(--apc-text-secondary);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* META — rating + venduti su UNA riga sola (stile Temu) */
+  .alibaba-card__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 11px;
+    line-height: 1.2;
+    margin-top: 1px;
+  }
+
+  .alibaba-card__rating-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--apc-star);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .alibaba-card__rating-inline svg { flex: 0 0 auto; }
+
+  .alibaba-card__rating-count {
+    color: var(--apc-text-secondary);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .alibaba-card__sold {
+    color: var(--apc-text-secondary);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* TRUST ROW — chip compatti su una riga sola */
+  .alibaba-card__trust {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 4px;
+    overflow: hidden;
+    margin-top: 2px;
+  }
+
+  .alibaba-trust-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: var(--apc-chip-bg);
+    color: var(--apc-text-secondary);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .alibaba-trust-chip i { font-style: normal; font-size: 10px; }
+
+  .alibaba-trust-chip--shipping {
+    color: #237804;
+    background: rgba(82, 196, 26, 0.1);
+  }
+
+  .alibaba-trust-chip--reorder {
+    color: var(--apc-accent);
+    background: rgba(255, 106, 0, 0.08);
+  }
+
+  /* Price */
+  .alibaba-card__price-wrapper {
+    margin-top: auto;
+    padding-top: 4px;
+  }
+
+  .alibaba-card__price-main,
+  .alibaba-card__price-inline {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--apc-price);
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
+
+  .alibaba-card__price-main .old-price,
+  .alibaba-card__price-inline .old-price {
+    font-size: 11px;
+    color: #9e9e9e;
+    text-decoration: line-through;
+    font-weight: 400;
+    margin-right: 4px;
+  }
+
+  /* Badge sconto % — segnale fiducia stile marketplace */
+  .alibaba-card__discount-badge {
+    display: inline-block;
+    vertical-align: 2px;
+    margin-left: 4px;
+    padding: 1px 4px;
+    background: var(--apc-accent);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+
+  .alibaba-card__price-main .small,
+  .alibaba-card__price-inline .small {
+    display: block;
+    font-size: 11px;
+    color: var(--apc-text-secondary);
+    font-weight: 400;
+    margin-top: 2px;
+    letter-spacing: 0;
+  }
+
+  .price-varies {
+    font-size: 12px;
+    color: var(--apc-text-secondary);
+    font-weight: 400;
+  }
+
+  .alibaba-card__moq {
+    font-size: 10px;
+    color: var(--apc-text-secondary);
+    margin: 2px 0 0;
+    font-weight: 500;
+  }
+
+  /* Stock / consegna — compatto, segnale di fiducia */
+  .alibaba-card__stock,
+  .alibaba-card__stock-list {
+    font-size: 10.5px;
+    color: var(--apc-success);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .alibaba-card__stock p,
+  .alibaba-card__stock-list p { margin: 0; }
+
+  /* Description — desktop: 2 righe; mobile: nascosta (risparmio maggiore) */
+  .alibaba-card__description {
+    font-size: 12px;
+    color: var(--apc-text-secondary);
+    line-height: 1.5;
+  }
+
+  .alibaba-card__description p {
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .alibaba-card__description .link-more { margin: 2px 0 0; }
+
+  /* Colors */
+  .alibaba-card__colors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+  }
+
+  .alibaba-card__colors li {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: border-color var(--apc-transition);
+    cursor: pointer;
+  }
+
+  .alibaba-card__colors li:hover { border-color: var(--apc-accent); }
+
+  .alibaba-card__colors img,
+  .alibaba-card__colors .icon-circle {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Footer / Actions */
+  .alibaba-card__footer {
+    padding: 0 10px 10px;
+    margin-top: auto;
+  }
+
+  .alibaba-card__footer.mobile-hide { display: none; }
+
+  .alibaba-card__footer footer { width: 100%; }
+
+  .alibaba-card__footer .form-card,
+  .alibaba-card__form {
+    width: 100%;
+    margin: 0;
+  }
+
+  .alibaba-card__form fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  .alibaba-card__form .submit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+  }
+
+  .alibaba-card__form .input-amount {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+
+  .alibaba-card__form .input-amount input {
+    width: 60px;
+    height: 40px;
+    padding: 0 8px;
+    text-align: center;
+    border: 1px solid var(--apc-border);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--apc-text);
+    font-size: 13px;
+  }
+
+  .alibaba-card__form .input-amount input:focus {
+    outline: none;
+    border-color: var(--apc-accent);
+    box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.12);
+  }
+
+  .alibaba-card__form button,
+  .alibaba-card__action-link a {
+    min-height: 40px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background var(--apc-transition),
+      border-color var(--apc-transition),
+      color var(--apc-transition),
+      transform var(--apc-transition),
+      box-shadow var(--apc-transition);
+  }
+
+  .alibaba-card__form button {
+    border: 1px solid var(--apc-accent);
+    background: var(--apc-accent);
+    color: #fff;
+  }
+
+  .alibaba-card__form button:hover {
+    background: var(--apc-accent-hover);
+    border-color: var(--apc-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(255, 106, 0, 0.18);
+  }
+
+  .alibaba-card__form button:active { transform: translateY(0); }
+
+  .alibaba-card__form button:disabled,
+  .alibaba-card__form button.unavailable {
+    background: #f1f1f1;
+    border-color: #ddd;
+    color: #999;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .alibaba-card__form button .icon-cart { font-size: 15px; }
+
+  .alibaba-card__form button.compact {
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+  }
+
+  .alibaba-card__form button.inv {
+    background: transparent;
+    color: var(--apc-accent);
+    border-color: var(--apc-accent);
+  }
+
+  .alibaba-card__form button.inv:hover {
+    background: var(--apc-accent);
+    color: #fff;
+  }
+
+  .alibaba-card__action-link {
+    width: 100%;
+    margin: 0;
+  }
+
+  .alibaba-card__action-link a {
+    background: transparent;
+    color: var(--apc-text);
+    border: 1px solid var(--apc-border);
+  }
+
+  .alibaba-card__action-link a:hover {
+    background: var(--apc-text);
+    border-color: var(--apc-text);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .alibaba-card__action-link a.inv {
+    color: var(--apc-text);
+    background: transparent;
+    border-color: var(--apc-text);
+  }
+
+  .alibaba-card__action-link a.inv:hover {
+    background: var(--apc-text);
+    color: #fff;
+  }
+
+  .alibaba-card__action-link.w160,
+  .alibaba-card__form .w160 { max-width: 160px; }
+
+  /* Variant selector */
+  .alibaba-card__variant-select { margin: 2px 0 4px; }
+
+  .alibaba-card__variant-select select,
+  .alibaba-card__form select {
+    width: 100%;
+    min-height: 36px;
+    padding: 0 32px 0 10px;
+    border: 1px solid var(--apc-border);
+    border-radius: 6px;
+    background-color: #fff;
+    color: var(--apc-text);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .alibaba-card__variant-select select:focus,
+  .alibaba-card__form select:focus {
+    outline: none;
+    border-color: var(--apc-accent);
+    box-shadow: 0 0 0 2px rgba(255, 106, 0, 0.1);
+  }
+
+  .alibaba-card__variant-popup {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 3px 0;
+    padding: 6px 8px;
+    border: 1px solid var(--apc-border);
+    border-radius: 5px;
+    background: #fafafa;
+    font-size: 11px;
+  }
+
+  .alibaba-card__variant-popup > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--apc-text-secondary);
+  }
+
+  .alibaba-card__variant-popup a {
+    flex: 0 0 auto;
+    color: var(--apc-accent);
+    text-decoration: none;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .alibaba-card__variant-popup a:hover { text-decoration: underline; }
+
+  /* Preorder */
+  .alibaba-card__form .overlay-preorder {
+    background: #1677ff;
+    border-color: #1677ff;
+  }
+
+  .alibaba-card__form .overlay-preorder:hover {
+    background: #0958d9;
+    border-color: #0958d9;
+  }
+
+  /* Unavailable card */
+  .alibaba-product-card.unavailable { opacity: 0.82; }
+
+  .alibaba-product-card.unavailable:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .alibaba-product-card.unavailable .alibaba-card__picture img {
+    filter: grayscale(12%);
+  }
+
+  .alibaba-product-card.unavailable .alibaba-card__price-main {
+    color: #888;
+  }
+
+  .alibaba-card__media .unavailable-faded { opacity: 0.62; }
+
+  /* Bestseller / analytics popup */
+  .alibaba-bestseller-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s ease;
+  }
+
+  .alibaba-bestseller-popup[aria-hidden="false"] {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .alibaba-bestseller-popup__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(3px);
+  }
+
+  .alibaba-bestseller-popup__content {
+    position: relative;
+    z-index: 1;
+    width: min(430px, 100%);
+    max-height: min(680px, calc(100vh - 40px));
+    overflow: auto;
+    background: #fff;
+    border: 1px solid var(--apc-border);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    transform: translateY(12px) scale(0.98);
+    transition: transform 0.25s ease;
+  }
+
+  .alibaba-bestseller-popup[aria-hidden="false"]
+    .alibaba-bestseller-popup__content {
+    transform: translateY(0) scale(1);
+  }
+
+  .alibaba-bestseller-popup__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--apc-border);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--apc-text);
+    cursor: pointer;
+    transition: all var(--apc-transition);
+  }
+
+  .alibaba-bestseller-popup__close:hover {
+    background: var(--apc-text);
+    border-color: var(--apc-text);
+    color: #fff;
+  }
+
+  .alibaba-bestseller-popup__header {
+    padding: 28px 50px 20px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .alibaba-bestseller-popup__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    background: #fff7e6;
+    font-size: 25px;
+  }
+
+  .alibaba-bestseller-popup__title {
+    margin: 0;
+    color: var(--apc-text);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .alibaba-bestseller-popup__subtitle {
+    margin: 6px 0 0;
+    color: var(--apc-text-secondary);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .alibaba-bestseller-popup__body { padding: 20px; }
+
+  .alibaba-bestseller-popup__current {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 7px;
+    margin-bottom: 26px;
+    padding: 16px;
+    border-radius: 10px;
+    background: #fafafa;
+  }
+
+  .alibaba-bestseller-popup__label {
+    color: var(--apc-text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .alibaba-bestseller-popup__value {
+    color: var(--apc-text);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .alibaba-bestseller-popup__value--current { color: var(--apc-accent); }
+
+  .alibaba-bestseller-popup__unit {
+    color: var(--apc-text-secondary);
+    font-size: 11px;
+  }
+
+  .alibaba-bestseller-popup__history {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    height: 210px;
+    padding: 15px 5px 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .alibaba-bestseller-popup__bar {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    flex: 1 1 0;
+    height: 100%;
+    min-width: 0;
+  }
+
+  .alibaba-bestseller-popup__bar-fill {
+    width: min(42px, 70%);
+    height: var(--bar-height, 0%);
+    min-height: 3px;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(to top, var(--apc-accent), #ff9d52);
+    transition: height 0.5s ease;
+  }
+
+  .alibaba-bestseller-popup__bar-label {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    width: 100%;
+    transform: translateX(-50%);
+    color: var(--apc-text-secondary);
+    font-size: 9px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .alibaba-bestseller-popup__bar-value {
+    position: absolute;
+    bottom: calc(var(--bar-height, 0%) + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--apc-text);
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .alibaba-bestseller-popup__footer { padding: 25px 20px 20px; }
+
+  .alibaba-bestseller-popup__note {
+    margin: 0;
+    color: #999;
+    font-size: 10px;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .alibaba-bestseller-popup__content::-webkit-scrollbar { width: 5px; }
+  .alibaba-bestseller-popup__content::-webkit-scrollbar-track { background: transparent; }
+  .alibaba-bestseller-popup__content::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+  /* Card animations */
+  .alibaba-product-card.anim-slide-left,
+  .alibaba-product-card.anim-slide-right,
+  .alibaba-product-card.anim-scale-in,
+  .alibaba-product-card.anim-flip-x,
+  .alibaba-product-card.anim-bounce-in {
+    animation-duration: 0.55s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: both;
+    animation-delay: var(--anim-delay, 0s);
+  }
+
+  .anim-slide-left { animation-name: alibabaSlideLeft; }
+  .anim-slide-right { animation-name: alibabaSlideRight; }
+  .anim-scale-in { animation-name: alibabaScaleIn; }
+  .anim-flip-x { animation-name: alibabaFlipX; }
+  .anim-bounce-in { animation-name: alibabaBounceIn; }
+
+  @keyframes alibabaSlideLeft {
+    from { opacity: 0; transform: translateX(-18px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes alibabaSlideRight {
+    from { opacity: 0; transform: translateX(18px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes alibabaScaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes alibabaFlipX {
+    from { opacity: 0; transform: perspective(500px) rotateX(-8deg); }
+    to { opacity: 1; transform: perspective(500px) rotateX(0); }
+  }
+
+  @keyframes alibabaBounceIn {
+    0% { opacity: 0; transform: scale(0.94); }
+    60% { opacity: 1; transform: scale(1.02); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* List layout */
+  .alibaba-product-card.list,
+  .alibaba-product-card.list-compact { border-radius: 6px; }
+
+  .alibaba-product-card.list .alibaba-card__media,
+  .alibaba-product-card.list-compact .alibaba-card__media { aspect-ratio: 1 / 1; }
+
+  .alibaba-product-card.list .alibaba-card__body,
+  .alibaba-product-card.list-compact .alibaba-card__body { padding: 10px 12px; }
+
+  .alibaba-product-card.list .alibaba-card__footer,
+  .alibaba-product-card.list-compact .alibaba-card__footer { padding: 0 12px 12px; }
+
+  /* Hotspot */
+  .alibaba-product-card.hotspot { border-radius: 6px; }
+  .alibaba-product-card.hotspot .alibaba-card__body { padding: 10px; }
+  .alibaba-product-card.hotspot .alibaba-card__title { font-size: 13px; }
+
+  /* Accessibility */
+  .alibaba-product-card a:focus-visible,
+  .alibaba-product-card button:focus-visible,
+  .alibaba-product-card input:focus-visible,
+  .alibaba-product-card select:focus-visible,
+  .alibaba-bestseller-popup button:focus-visible {
+    outline: 2px solid var(--apc-accent);
+    outline-offset: 2px;
+  }
+
+  body.alibaba-popup-open { overflow: hidden; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .alibaba-product-card,
+    .alibaba-card__picture img,
+    .alibaba-card__picture--secondary,
+    .alibaba-bestseller-popup,
+    .alibaba-bestseller-popup__content,
+    .alibaba-bestseller-popup__bar-fill {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .alibaba-product-card:hover { transform: none; }
+  }
+
+  /* =========================================================
+     MOBILE — stile marketplace professionale
+     ========================================================= */
+  
+
+@media screen and (max-width: 749px) {
+  .alibaba-product-card { 
+    border-radius: 8px; 
+  }
+
+  .alibaba-product-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .alibaba-card__body {
+    padding: 8px 8px 10px;
+    gap: 3px;
+  }
+
+  .alibaba-card__title { font-size: 12px; }
+  .alibaba-card__title a { min-height: calc(12px * 1.4 * 2); }
+  .alibaba-card__vendor { font-size: 9px; }
+
+  .alibaba-card__price-main,
+  .alibaba-card__price-inline { font-size: 15px; }
+
+  .alibaba-card__price-main .old-price,
+  .alibaba-card__price-inline .old-price { font-size: 10px; }
+
+  .alibaba-card__discount-badge { font-size: 9px; }
+
+  .alibaba-card__meta { font-size: 10px; }
+
+  .alibaba-trust-chip {
+    height: 16px;
+    font-size: 8.5px;
+    padding: 0 5px;
+  }
+
+  .alibaba-card__stock,
+  .alibaba-card__stock-list { font-size: 10px; }
+
+  .alibaba-card__description { display: none; }
+
+  .alibaba-card__wishlist {
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .alibaba-top-selling-ribbon { 
+    height: 24px;
+    font-size: 8.5px; 
+  }
+  .alibaba-top-selling-ribbon__star { 
+    font-size: 10px; 
+  }
+
+  .alibaba-cube__face--front {
+    transform: translateZ(12px);
+  }
+
+  .alibaba-cube__face--top {
+    transform: rotateX(90deg) translateZ(12px);
+  }
+
+  .alibaba-verified-badge__icon {
+    width: 11px;
+    height: 11px;
+    font-size: 8px;
+  }
+
+  .alibaba-card__footer { padding: 0 8px 8px; }
+
+  .alibaba-card__footer.mobile-hide { display: none !important; }
+
+  .alibaba-card__media .alibaba-card__quickbuy {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    z-index: 4;
+    width: auto !important;
+    margin: 0;
+  }
+
+  .alibaba-card__media .alibaba-card__quickbuy .submit {
+    width: auto;
+    margin: 0;
+    display: block;
+  }
+
+  .alibaba-card__media .alibaba-card__quickbuy .input-amount { display: none; }
+
+  .alibaba-card__media .alibaba-card__quickbuy button {
+    width: 34px !important;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .alibaba-card__media .alibaba-card__quickbuy button > span { display: none !important; }
+
+  .alibaba-card__media .alibaba-card__quickbuy button .icon-cart {
+    display: inline !important;
+    font-size: 15px;
+    margin: 0;
+  }
+
+  .alibaba-card__media .alibaba-card__action-link { display: none; }
+
+  .alibaba-bestseller-popup { padding: 12px; }
+
+  .alibaba-bestseller-popup__content {
+    max-height: calc(100vh - 24px);
+    border-radius: 12px;
+  }
+
+  .alibaba-bestseller-popup__header { padding: 24px 45px 16px; }
+  .alibaba-bestseller-popup__body { padding: 15px; }
+  .alibaba-bestseller-popup__history { height: 185px; }
+  .alibaba-bestseller-popup__value { font-size: 24px; }
+}
+  /* Very small mobile */
+  @media screen and (max-width: 389px) {
+    .alibaba-card__body { padding: 7px 7px 9px; }
+    .alibaba-card__footer { padding: 0 7px 7px; }
+    .alibaba-card__title { font-size: 11.5px; }
+    .alibaba-card__title a { min-height: calc(11.5px * 1.4 * 2); }
+    .alibaba-card__price-main,
+    .alibaba-card__price-inline { font-size: 14px; }
+    .alibaba-trust-chip { font-size: 8px; height: 15px; }
+    .alibaba-card__meta { font-size: 9.5px; }
+  }
+
+/* ---------- Badge de marque ---------- */
+      /* Container clipping and edge fading */
+  .badge-scroll-wrapper {
+    overflow: hidden;
+    width: 100%;
+    max-width: 420px;
+    margin: 12px 0;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  /* Animation Track with stepped pause keyframes */
+  .badge-scroll-track {
+    display: flex;
+    width: max-content;
+    gap: 12px;
+    animation: badgeStepScroll 18s ease-in-out infinite;
+  }
+
+  /* Pause scroll on mouse hover */
+  .badge-scroll-wrapper:hover .badge-scroll-track {
+    animation-play-state: paused;
+  }
+
+  .badge-scroll-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Base Badge Style */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 9px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* Color Styles */
+  .badge-store {
+    background-color: #3b2314;
+    color: #f2e3d5;
+  }
+
+  .badge-star {
+    background-color: #581c87;
+    color: #ffffff;
+  }
+
+  .badge-brand-check {
+    background-color: #4a2c11;
+    color: #fce7f3;
+  }
+
+  .badge-icon {
+    flex-shrink: 0;
+  }
+
+  /*
+    Keyframe sequence:
+    0% - 20%: Pause on Official Store badge (~2s pause out of 10s total)
+    50% - 70%: Pause when loop reaches second Official Store badge (~2s pause)
+    100%: Smoothly loop back to start
+  */
+  @keyframes badgeStepScroll {
+    0%, 20% {
+      transform: translateX(0);
+    }
+    50%, 70% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }

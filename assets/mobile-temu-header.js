@@ -2041,10 +2041,41 @@ function initMobileTemuHeader() {
     return indicator;
   };
 
+  // Conteneur qui défile autour du bouton « voir plus » (le panneau défile dans le menu, pas la page).
+  var scrollParentOf = function (element) {
+    var node = element.parentElement;
+    while (node && node !== document.body) {
+      var overflowY = window.getComputedStyle(node).overflowY;
+      if (overflowY === 'auto' || overflowY === 'scroll') return node;
+      node = node.parentElement;
+    }
+    return null;
+  };
+
+  // Produits suivants du panneau : préparés en fond vers ~1200 px du bas (même requête mise en cache
+  // que le clic), puis ajoutés tout seuls vers ~400 px du bas.
+  var autoLoadMoreProducts = function (more) {
+    if (!('IntersectionObserver' in window)) return;
+    var root = scrollParentOf(more);
+    var prepare = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      prepare.disconnect();
+      fetchCategoryHtml(more.href, 'More category products request failed').catch(function () {});
+    }, { root: root, rootMargin: '0px 0px 1200px 0px' });
+    var load = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      load.disconnect();
+      if (more.isConnected) more.click();
+    }, { root: root, rootMargin: '0px 0px 400px 0px' });
+    prepare.observe(more);
+    load.observe(more);
+  };
+
   var bindMoreProducts = function (panel) {
     var more = panel.querySelector('[data-category-products-more]');
     if (!more || more.dataset.bound === 'true') return;
     more.dataset.bound = 'true';
+    autoLoadMoreProducts(more);
     more.addEventListener('click', function (event) {
       event.preventDefault();
       if (more.dataset.loading === 'true') return;

@@ -279,6 +279,11 @@
   </script>
 </head>
   <body class="template-{{ template.name | handle }}">
+    {%- comment -%}
+      Styles des cartes produit et du badge de marque : un seul fichier pour toute la page (avant : copié dans
+      chaque carte). En début de <body>, comme avant après les CSS de l'en-tête, pour garder le même ordre.
+    {%- endcomment -%}
+    <link rel="stylesheet" href="{{ 'product-card.css' | asset_url }}">
     <div id="root">
       {%- render 'accessible-nav' -%}
       {%- sections 'header-group' -%}
@@ -312,6 +317,8 @@
     <script defer src="{{ 'custom.js' | asset_url }}"></script>
     {%- if template.name == 'collection' or template.name == 'search' -%}
       <script defer src="{{ 'page-collection.js' | asset_url }}"></script>
+      {%- comment -%} Mobile : produits suivants préparés et ajoutés pendant le défilement (s'arrête sur desktop). {%- endcomment -%}
+      <script defer src="{{ 'mobile-auto-load.js' | asset_url }}"></script>
     {%- endif -%}
     {%- if request.design_mode -%}<script defer src="{{ 'backend-listeners.js' | asset_url }}"></script>{%- endif -%}
     {{ settings.custom_script_for_body }}

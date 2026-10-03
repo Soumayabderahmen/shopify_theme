@@ -155,88 +155,9 @@
   </div>
 {% endif %}
 
-<style>
-      /* Container clipping and edge fading */
-  .badge-scroll-wrapper {
-    overflow: hidden;
-    width: 100%;
-    max-width: 420px;
-    margin: 12px 0;
-    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  }
-
-  /* Animation Track with stepped pause keyframes */
-  .badge-scroll-track {
-    display: flex;
-    width: max-content;
-    gap: 12px;
-    animation: badgeStepScroll 18s ease-in-out infinite;
-  }
-
-  /* Pause scroll on mouse hover */
-  .badge-scroll-wrapper:hover .badge-scroll-track {
-    animation-play-state: paused;
-  }
-
-  .badge-scroll-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  /* Base Badge Style */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 9px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.2;
-    white-space: nowrap;
-  }
-
-  /* Color Styles */
-  .badge-store {
-    background-color: #3b2314;
-    color: #f2e3d5;
-  }
-
-  .badge-star {
-    background-color: #581c87;
-    color: #ffffff;
-  }
-
-  .badge-brand-check {
-    background-color: #4a2c11;
-    color: #fce7f3;
-  }
-
-  .badge-icon {
-    flex-shrink: 0;
-  }
-
-  /*
-    Keyframe sequence:
-    0% - 20%: Pause on Official Store badge (~2s pause out of 10s total)
-    50% - 70%: Pause when loop reaches second Official Store badge (~2s pause)
-    100%: Smoothly loop back to start
-  */
-  @keyframes badgeStepScroll {
-    0%, 20% {
-      transform: translateX(0);
-    }
-    50%, 70% {
-      transform: translateX(-50%);
-    }
-    100% {
-      transform: translateX(-100%);
-    }
-  }
-</style>
+{%- comment -%} Styles du badge : assets/product-card.css (chargé une seule fois par page).
+  Balise <style> vide gardée ici : même structure qu'avant (ex. règle du thème « input[type=hidden] + * »). {%- endcomment -%}
+<style></style>
 
 
 
