@@ -1862,7 +1862,7 @@ function initMobileTemuHeader() {
 
     var link = target.closest('a[href]');
     if (!link
-      || link.matches('[data-category-tab], [data-category-panel-trigger], [data-category-products-more], [data-category-new-toggle]')
+      || link.matches('[data-category-tab], [data-category-panel-trigger], [data-category-products-more], [data-category-new-toggle], [data-panel], [data-mobile-wishlist-trigger]')
       || event.defaultPrevented
       || event.button !== 0
       || event.metaKey
@@ -1890,7 +1890,11 @@ function initMobileTemuHeader() {
         && destination.search === window.location.search
         && destination.hash)) return;
 
-    startNavigationProgress();
+    // Barre de chargement seulement si la page change vraiment : quand un script du thème ou d'une app
+    // annule le lien pour ouvrir un panneau (panier latéral, favoris…), il n'y a pas de nouvelle page à attendre.
+    window.setTimeout(function () {
+      if (!event.defaultPrevented) startNavigationProgress();
+    }, 0);
   }, true);
 
   if (!categoryBrowser) return;
