@@ -716,6 +716,20 @@
     });
   }
 
+  /* ---------- Klarna : message officiel de l'app Klarna On-site Messaging (bloc « Klarna Placement » de la fiche)
+     à la place de notre ligne calculée (prix ÷ 3), qui ne connaît pas les montants min / max de Klarna.
+     Sans le bloc (app retirée), notre ligne reste affichée. ---------- */
+  var klarnaPlacement = null;
+  var klarnaRow = root.querySelector('.pdp-m__kl');
+  var klarnaBlock = document.querySelector('#main-product .shopify-block[id*="klarna"]');
+  if (klarnaRow && klarnaBlock && klarnaBlock.querySelector('klarna-placement')) {
+    var klarnaHolder = document.createElement('div');
+    klarnaHolder.className = 'pdp-m__klo';
+    klarnaHolder.appendChild(klarnaBlock);
+    klarnaRow.replaceWith(klarnaHolder);
+    klarnaPlacement = klarnaBlock.querySelector('klarna-placement');
+  }
+
   /* ---------- Mise à jour quand la variante change ---------- */
   function onVariantChange(variant) {
     syncOptions();
@@ -724,6 +738,10 @@
     if (buy) {
       buy.querySelector('[data-pdp-buy-variant]').textContent = variant.title || '';
       buy.querySelector('[data-pdp-buy-price]').textContent = money(variant.price);
+    }
+    // Message officiel : Klarna le recalcule quand le montant change.
+    if (klarnaPlacement && klarnaPlacement.getAttribute('data-purchase-amount') !== String(variant.price)) {
+      klarnaPlacement.setAttribute('data-purchase-amount', String(variant.price));
     }
     var klarna = root.querySelector('[data-pdp-klarna]');
     if (klarna) klarna.textContent = T('klarna_installments', { amount: money(Math.round(variant.price / 3)) });

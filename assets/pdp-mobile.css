@@ -911,6 +911,24 @@ body.template-product {
   text-underline-offset: 3px;
 }
 
+/* Message officiel Klarna (bloc de l'app déplacé ici par pdp-mobile.js), dans la même carte sombre.
+   Plus précis que la règle qui masque les anciens blocs Klarna de la fiche. */
+#root #main-product .pdp-m__klo {
+  margin: 12px 12px 0;
+  padding: 12px 14px;
+  background: #17120f;
+  border-radius: 20px;
+}
+
+#root #main-product .pdp-m__klo .shopify-block[id*="klarna"] {
+  display: block !important;
+  margin: 0;
+}
+
+#root #main-product .pdp-m__klo klarna-placement {
+  display: block;
+}
+
 /* 11. Description : onglets collants + sections */
 /* Vrais onglets : une seule section affichée sous la barre (plus besoin de barre collante). */
 .pdp-m__tabs {
