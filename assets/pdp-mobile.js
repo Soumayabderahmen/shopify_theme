@@ -409,58 +409,9 @@
     if (/panoramic|overview|descri/.test(t)) return 'ov';
     return 'sec' + Math.random().toString(36).slice(2, 7);
   };
-  /* Ligne « size_info: {"sizeInfoList":[…]} » des descriptions importées (fournisseur) : données brutes de tailles.
-     Transformée en vrai tableau : taille, longueur (pied pour les chaussures) en cm / pouces, équivalences par pays. */
-  var SIZE_COUNTRIES = ['EU', 'US', 'UK', 'JP', 'KR', 'BR', 'MX'];
-  var readJsonObject = function (text) {
-    var start = text.indexOf('{');
-    if (start === -1) return null;
-    var depth = 0;
-    var inString = false;
-    for (var i = start; i < text.length; i += 1) {
-      var ch = text[i];
-      if (inString) {
-        if (ch === '\\') i += 1;
-        else if (ch === '"') inString = false;
-      } else if (ch === '"') {
-        inString = true;
-      } else if (ch === '{') {
-        depth += 1;
-      } else if (ch === '}') {
-        depth -= 1;
-        if (depth === 0) {
-          try { return JSON.parse(text.slice(start, i + 1)); } catch (error) { return null; }
-        }
-      }
-    }
-    return null;
-  };
+  // Ligne « size_info: {…} » des descriptions importées : tableau construit par assets/size-info.js (partagé avec le desktop).
   var sizeInfoTable = function (text) {
-    var data = readJsonObject(text);
-    var list = data && Array.isArray(data.sizeInfoList) ? data.sizeInfoList.filter(function (entry) { return entry && entry.size; }) : [];
-    if (!list.length) return null;
-    var countries = SIZE_COUNTRIES.filter(function (code) {
-      return list.some(function (entry) { return entry.countrySizeMap && entry.countrySizeMap[code]; });
-    });
-    var hasLength = list.some(function (entry) { return entry.length && entry.length.cm; });
-    var lengthTitle = T(countries.length ? 'pdp_size_foot_length' : 'pdp_size_length') + ' (cm / inch)';
-    var table = document.createElement('table');
-    var addRow = function (cells, head) {
-      var row = table.insertRow();
-      cells.forEach(function (value) {
-        var cell = document.createElement(head ? 'th' : 'td');
-        cell.textContent = value;
-        row.appendChild(cell);
-      });
-    };
-    addRow([T('size')].concat(hasLength ? [lengthTitle] : [], countries), true);
-    list.forEach(function (entry) {
-      var length = entry.length && entry.length.cm ? entry.length.cm + ' cm / ' + (entry.length.inch || '') + '″' : '';
-      addRow([String(entry.size)].concat(hasLength ? [length] : [], countries.map(function (code) {
-        return (entry.countrySizeMap && entry.countrySizeMap[code]) || '–';
-      })), false);
-    });
-    return table;
+    return window.sizeInfo ? window.sizeInfo.table(text) : null;
   };
 
   var buildDescription = function () {
@@ -493,7 +444,7 @@
     var supplierSizeTable = null;
     items = items.filter(function (el) {
       var text = el.textContent.trim();
-      if (!/^size_info\s*:/i.test(text)) return true;
+      if (!/^size_info\s*:/i.test(text)) return true; // même règle que window.sizeInfo.LINE
       if (!supplierSizeTable) supplierSizeTable = sizeInfoTable(text);
       return false;
     });

@@ -170,6 +170,10 @@
       </div>
     </div>
   </footer>
+  {%- comment -%} Ligne « size_info » brute de la description remplacée par un tableau (assets/size-info.js). {%- endcomment -%}
+  {%- if product.description contains 'size_info' -%}
+    <script defer src="{{ 'size-info.js' | asset_url }}"></script>
+  {%- endif -%}
 {%- endif -%}
 
 <style>

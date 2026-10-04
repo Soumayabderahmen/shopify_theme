@@ -125,6 +125,8 @@
       {{ 'page-product.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
       {%- comment -%} Fiche produit mobile au design du prototype (mobile uniquement). {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'pdp-mobile.css' | asset_url }}" media="(max-width: 760px)">
+      {%- comment -%} Tableau des tailles « size_info » des descriptions (desktop et mobile), avant pdp-mobile.js qui l'utilise. {%- endcomment -%}
+      <script defer src="{{ 'size-info.js' | asset_url }}"></script>
       <script defer src="{{ 'pdp-mobile.js' | asset_url }}"></script>
     {%- endif -%}
     {%- if template.name == 'collection' -%}
