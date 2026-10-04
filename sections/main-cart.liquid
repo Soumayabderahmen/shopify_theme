@@ -26,6 +26,9 @@
   assign checkout_button_style = settings.checkout_button_style | split: ' ' | last
 -%}
 
+{%- comment -%} Panier mobile au design du prototype (assets/cart-mobile.css le montre en mobile et cache le panier ci-dessous). {%- endcomment -%}
+{%- render 'cart-mobile', section: section, form_id: form_id -%}
+
 {%- if cart.item_count == 0 -%}
   <article
     class="cart-empty text-center w560 align-center"

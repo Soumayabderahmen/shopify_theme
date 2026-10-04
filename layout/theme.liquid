@@ -124,6 +124,11 @@
       <link rel="stylesheet" href="{{ 'pdp-mobile.css' | asset_url }}" media="(max-width: 760px)">
       <script defer src="{{ 'pdp-mobile.js' | asset_url }}"></script>
     {%- endif -%}
+    {%- if template.name == 'cart' -%}
+      {%- comment -%} Page panier mobile au design du prototype (mobile uniquement). {%- endcomment -%}
+      <link rel="stylesheet" href="{{ 'cart-mobile.css' | asset_url }}" media="(max-width: 760px)">
+      <script defer src="{{ 'cart-mobile.js' | asset_url }}"></script>
+    {%- endif -%}
     {%- if settings.favicon -%}
       {%- assign favicon_url = settings.favicon | image_url: width: 32, height: 32 -%}
       {%- assign favicon_no_query = favicon_url | split: '?' | first -%}

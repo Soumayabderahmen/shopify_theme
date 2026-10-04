@@ -1,0 +1,342 @@
+{%- comment -%}
+  Page panier MOBILE (prototype « platinumshop-cart-mobile ») — rendu par sections/main-cart.liquid.
+  Données réelles : lignes du panier, quantités, codes de réduction, note, livraison gratuite (réglages du thème),
+  boutons de paiement express et moyens de paiement de la boutique. Textes : clés mobile.cart.* (locales).
+  Affiché seulement en mobile (assets/cart-mobile.css) ; le desktop garde le panier Xtra.
+  Script : assets/cart-mobile.js (quantités, suppression avec « Annulla », code, note, barre de paiement).
+  Params : section, form_id
+{%- endcomment -%}
+{%- liquid
+  assign cm_threshold = 0
+  if settings.enable_free_shipping and settings.free_shipping_amount != blank
+    assign cm_threshold = settings.free_shipping_amount | replace: ',', '.' | times: 100 | round
+  endif
+  assign cm_discount = cart.items_subtotal_price | minus: cart.total_price
+  assign cm_free = false
+  if cm_threshold > 0 and cart.total_price >= cm_threshold
+    assign cm_free = true
+  endif
+  assign cm_ship_percent = 100
+  if cm_threshold > 0 and cm_free == false
+    assign cm_ship_percent = cart.total_price | times: 100 | divided_by: cm_threshold
+  endif
+  assign cm_has_codes = false
+  for application in cart.cart_level_discount_applications
+    if application.type == 'discount_code'
+      assign cm_has_codes = true
+    endif
+  endfor
+  for item in cart.items
+    for allocation in item.line_level_discount_allocations
+      if allocation.discount_application.type == 'discount_code'
+        assign cm_has_codes = true
+      endif
+    endfor
+  endfor
+  assign cm_terms = false
+  if section.settings.enable_terms_checkbox and section.settings.terms_text != empty
+    assign cm_terms = true
+  endif
+-%}
+<style>.cart-m{display:none}</style>
+<div
+  class="cart-m"
+  data-cart-mobile
+  data-section-id="{{ section.id }}"
+  data-threshold="{{ cm_threshold }}"
+  data-total="{{ cart.total_price }}"
+  data-money-format="{{ shop.money_format | strip_html | escape }}"
+>
+  <nav class="cm-bc" aria-label="{{ 'mobile.cart.breadcrumb' | t }}">
+    <a href="{{ routes.root_url }}">{{ 'mobile.cart.home' | t }}</a>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    <span aria-current="page">{{ 'mobile.cart.title' | t }}</span>
+  </nav>
+  <div class="cm-head">
+    <h1>{{ 'mobile.cart.title' | t }}</h1>
+    {%- if cart.item_count > 0 -%}
+      <span class="cm-count">{% if cart.item_count == 1 %}{{ 'mobile.cart.items_one' | t }}{% else %}{{ 'mobile.cart.items_other' | t: count: cart.item_count }}{% endif %}</span>
+    {%- endif -%}
+  </div>
+  <a class="cm-back" href="{{ routes.all_products_collection_url }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+    {{- 'mobile.cart.continue' | t -}}
+  </a>
+
+  {%- if cart.item_count == 0 -%}
+    <section class="cm-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+      <h2>{{ 'mobile.cart.empty_title' | t }}</h2>
+      <p>{{ 'mobile.cart.empty_text' | t }}</p>
+      <a class="cm-go" href="{{ routes.all_products_collection_url }}">{{ 'mobile.cart.continue' | t }}</a>
+    </section>
+  {%- else -%}
+    {%- comment -%} Livraison gratuite : seuil des réglages du thème (Paramètres du thème > Panier). {%- endcomment -%}
+    {%- if cm_threshold > 0 and cart.requires_shipping -%}
+      <section class="cm-card cm-ship{% if cm_free %} is-ok{% endif %}" data-cm-ship aria-live="polite">
+        <div class="cm-ship__t">
+          <span class="cm-ship__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span>
+          <span data-cm-ship-text>
+            {%- if cm_free -%}
+              <b>{{ 'mobile.cart.ship_free' | t }}</b>
+            {%- else -%}
+              {%- assign cm_left = cm_threshold | minus: cart.total_price | money -%}
+              {{- 'mobile.cart.ship_left_html' | t: amount: cm_left -}}
+            {%- endif -%}
+          </span>
+        </div>
+        <div class="cm-prog" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ cm_ship_percent }}"><i data-cm-ship-bar style="width: {{ cm_ship_percent }}%"></i></div>
+      </section>
+    {%- endif -%}
+
+    <section class="cm-card cm-items" aria-label="{{ 'mobile.cart.items_label' | t }}">
+      <ul class="cm-lines">
+        {%- for line_item in cart.items -%}
+          {%- liquid
+            assign can_update_quantity = line_item.instructions.can_update_quantity | default: true, allow_false: true
+            assign can_remove = line_item.instructions.can_remove | default: true, allow_false: true
+            assign cm_min = line_item.variant.quantity_rule.min | default: 1
+            assign cm_step = line_item.variant.quantity_rule.increment | default: 1
+            assign cm_max = ''
+            if line_item.variant.inventory_management == 'shopify' and line_item.variant.inventory_policy == 'deny'
+              assign cm_max = line_item.variant.inventory_quantity
+            elsif line_item.variant.quantity_rule.max
+              assign cm_max = line_item.variant.quantity_rule.max
+            endif
+          -%}
+          <li
+            class="cm-line"
+            data-cm-line
+            data-key="{{ line_item.key | escape }}"
+            data-variant-id="{{ line_item.variant_id }}"
+            data-quantity="{{ line_item.quantity }}"
+            data-min="{{ cm_min }}"
+            data-step="{{ cm_step }}"
+            data-max="{{ cm_max }}"
+            data-selling-plan="{{ line_item.selling_plan_allocation.selling_plan.id }}"
+            data-properties="{{ line_item.properties | json | escape }}"
+            data-title="{{ line_item.product.title | escape }}"
+          >
+            <a class="cm-th" href="{{ line_item.url }}" aria-label="{{ line_item.product.title | escape }}">
+              {%- if line_item.image -%}
+                <img
+                  src="{{ line_item | image_url: width: 168, height: 168, crop: 'center' }}"
+                  srcset="{{ line_item | image_url: width: 168, height: 168, crop: 'center' }} 1x, {{ line_item | image_url: width: 252, height: 252, crop: 'center' }} 2x"
+                  width="84"
+                  height="84"
+                  alt="{{ line_item.image.alt | default: line_item.product.title | escape }}"
+                  loading="lazy"
+                >
+              {%- endif -%}
+            </a>
+            <div class="cm-info">
+              <a class="cm-t" href="{{ line_item.url }}">{{ line_item.product.title }}</a>
+              {%- unless line_item.product.has_only_default_variant -%}
+                <div class="cm-v">{{ line_item.variant.title }}</div>
+              {%- endunless -%}
+              {%- if line_item.selling_plan_allocation -%}
+                <div class="cm-v">{{ line_item.selling_plan_allocation.selling_plan.name }}</div>
+              {%- endif -%}
+              {%- for property in line_item.properties -%}
+                {%- assign first_character = property.first | slice: 0 -%}
+                {%- if property.last != blank and first_character != '_' -%}
+                  <div class="cm-v">{{ property.first }}: {{ property.last }}</div>
+                {%- endif -%}
+              {%- endfor -%}
+              {%- for discount in line_item.line_level_discount_allocations -%}
+                <div class="cm-v cm-v--disc">{{ discount.discount_application.title }} (-{{ discount.amount | money }})</div>
+              {%- endfor -%}
+              <div class="cm-ctl">
+                {%- if can_update_quantity -%}
+                  <div class="cm-qty" role="group" aria-label="{{ 'mobile.cart.quantity' | t }}">
+                    <button type="button" data-cm-action="dec" aria-label="{{ 'mobile.cart.less' | t }}"{% if line_item.quantity <= cm_min %} disabled{% endif %}>−</button>
+                    <output>{{ line_item.quantity }}</output>
+                    <button type="button" data-cm-action="inc" aria-label="{{ 'mobile.cart.more' | t }}"{% if cm_max != '' and line_item.quantity >= cm_max %} disabled{% endif %}>+</button>
+                  </div>
+                {%- else -%}
+                  <span class="cm-qty-fixed">× {{ line_item.quantity }}</span>
+                {%- endif -%}
+                {%- if can_remove -%}
+                  <button class="cm-del" type="button" data-cm-action="remove" aria-label="{{ 'mobile.cart.remove' | t }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+                  </button>
+                {%- endif -%}
+              </div>
+            </div>
+            <div class="cm-p">
+              {%- if line_item.original_line_price > line_item.final_line_price -%}
+                <s>{{ line_item.original_line_price | money }}</s>
+              {%- elsif line_item.variant.compare_at_price > line_item.variant.price -%}
+                <s>{{ line_item.variant.compare_at_price | times: line_item.quantity | money }}</s>
+              {%- endif -%}
+              {{ line_item.final_line_price | money }}
+              {%- if line_item.quantity > 1 -%}
+                {%- assign cm_unit = line_item.final_price | money -%}
+                <small>{{ 'mobile.cart.unit_price_html' | t: quantity: line_item.quantity, price: cm_unit }}</small>
+              {%- endif -%}
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </section>
+
+    {%- comment -%} Crédit boutique : montant repris de l'app de fidélité (Koin) par le script ; caché tant qu'il est inconnu. {%- endcomment -%}
+    <section class="cm-credit" data-cm-credit hidden>
+      <span class="cm-credit__w"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="14.5" r="1.2" fill="currentColor"/></svg></span>
+      <span data-cm-credit-text></span>
+    </section>
+
+    <section class="cm-card cm-acc">
+      {%- if section.settings.enable_discount_tab -%}
+        <div>
+          <button class="cm-acc__h" type="button" aria-expanded="{% if cm_has_codes %}true{% else %}false{% endif %}" data-cm-toggle>
+            {{- 'mobile.cart.discount_title' | t -}}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="cm-acc__b"{% unless cm_has_codes %} hidden{% endunless %}>
+            <form class="cm-code" data-cm-code-form>
+              <input type="text" name="discount" placeholder="{{ 'mobile.cart.code_placeholder' | t }}" aria-label="{{ 'mobile.cart.discount_title' | t }}" autocomplete="off" autocapitalize="characters">
+              <button type="submit">{{ 'mobile.cart.apply' | t }}</button>
+            </form>
+            <p class="cm-msg" data-cm-code-msg role="status" hidden></p>
+            {%- comment -%}
+              Codes appliqués : remises de type « discount_code » sur le panier (montant) ou sur des articles.
+            {%- endcomment -%}
+            {%- assign cm_shown_codes = '|' -%}
+            {%- for application in cart.cart_level_discount_applications -%}
+              {%- if application.type == 'discount_code' -%}
+                {%- assign cm_code_key = '|' | append: application.title | append: '|' -%}
+                {%- assign cm_shown_codes = cm_shown_codes | append: application.title | append: '|' -%}
+                <span class="cm-chip">
+                  <span>{{ application.title }} · -{{ application.total_allocated_amount | money }}</span>
+                  <button type="button" data-cm-remove-code="{{ application.title | escape }}" aria-label="{{ 'mobile.cart.code_remove' | t }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                  </button>
+                </span>
+              {%- endif -%}
+            {%- endfor -%}
+            {%- for item in cart.items -%}
+              {%- for allocation in item.line_level_discount_allocations -%}
+                {%- assign cm_code_key = '|' | append: allocation.discount_application.title | append: '|' -%}
+                {%- if allocation.discount_application.type == 'discount_code' -%}
+                  {%- unless cm_shown_codes contains cm_code_key -%}
+                    {%- assign cm_shown_codes = cm_shown_codes | append: allocation.discount_application.title | append: '|' -%}
+                    <span class="cm-chip">
+                      <span>{{ allocation.discount_application.title }}</span>
+                      <button type="button" data-cm-remove-code="{{ allocation.discount_application.title | escape }}" aria-label="{{ 'mobile.cart.code_remove' | t }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                      </button>
+                    </span>
+                  {%- endunless -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+      {%- if section.settings.show_order_notes -%}
+        <div>
+          <button class="cm-acc__h" type="button" aria-expanded="{% if cart.note != blank %}true{% else %}false{% endif %}" data-cm-toggle>
+            {{- 'mobile.cart.note_title' | t -}}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="cm-acc__b"{% if cart.note == blank %} hidden{% endif %}>
+            <textarea class="cm-note" data-cm-note maxlength="500" placeholder="{{ 'mobile.cart.note_placeholder' | t }}" aria-label="{{ 'mobile.cart.note_title' | t }}">{{ cart.note }}</textarea>
+            <div class="cm-cnt"><span data-cm-note-count>{{ cart.note | size }}</span> / 500</div>
+          </div>
+        </div>
+      {%- endif -%}
+    </section>
+
+    <section class="cm-card cm-sum" data-cm-summary>
+      <div class="cm-row"><span>{{ 'mobile.cart.subtotal' | t: count: cart.item_count }}</span><b>{{ cart.items_subtotal_price | money }}</b></div>
+      {%- if cm_discount > 0 -%}
+        <div class="cm-row is-disc"><span>{{ 'mobile.cart.discount' | t }}</span><b>-{{ cm_discount | money }}</b></div>
+      {%- endif -%}
+      {%- if cart.requires_shipping -%}
+        <div class="cm-row{% if cm_free %} is-free{% endif %}" data-cm-ship-row><span>{{ 'mobile.cart.shipping' | t }}</span><b>{% if cm_free %}{{ 'mobile.cart.shipping_free' | t }}{% else %}{{ 'mobile.cart.shipping_checkout' | t }}{% endif %}</b></div>
+      {%- endif -%}
+      <div class="cm-row is-total">
+        <span>{{ 'mobile.cart.total' | t }}<small>{% if cart.taxes_included %}{{ 'mobile.cart.tax_included' | t }}{% else %}{{ 'mobile.cart.tax_excluded' | t }}{% endif %}</small></span>
+        <b>{{ cart.total_price | money }}</b>
+      </div>
+      {%- comment -%}
+        Propre formulaire de paiement : n'envoie pas les anciens champs quantité du panier Xtra (cachés en mobile),
+        la note est déjà enregistrée par le script.
+      {%- endcomment -%}
+      <form action="{{ routes.cart_url }}" method="post" class="cm-checkout" data-cm-checkout>
+        {%- if cm_terms -%}
+          <label class="cm-terms">
+            <input type="checkbox" required>
+            <span>{{ section.settings.terms_text | remove: '</p>' | remove: '<p>' }}</span>
+          </label>
+        {%- endif -%}
+        <button class="cm-go" type="submit" name="checkout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+          {{- 'mobile.cart.checkout' | t -}}
+        </button>
+      </form>
+      {%- assign usp_blocks = section.blocks | where: 'type', 'usp' -%}
+      {%- if usp_blocks.size > 0 -%}
+        <ul class="cm-notes">
+          {%- for block in usp_blocks -%}
+            {%- if block.settings.usp != empty -%}
+              <li {{ block.shopify_attributes }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+                <span>{{ block.settings.usp | replace: '</p><p>', '<br>' | remove: '<p>' | remove: '</p>' }}</span>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+      <p class="cm-iva">
+        {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
+          {{ 'cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
+        {%- elsif cart.taxes_included -%}
+          {{ 'cart.taxes_included_but_shipping_at_checkout' | t }}
+        {%- elsif shop.shipping_policy.body != blank -%}
+          {{ 'cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
+        {%- else -%}
+          {{ 'cart.taxes_and_shipping_at_checkout' | t }}
+        {%- endif -%}
+      </p>
+    </section>
+
+    {%- liquid
+      assign cm_express = false
+      if section.settings.show_dynamic_buybutton and additional_checkout_buttons
+        assign cm_express = true
+      endif
+    -%}
+    {%- if cm_express or section.settings.show_payment_methods -%}
+      <section class="cm-card cm-ex" aria-label="{{ 'mobile.cart.express_label' | t }}">
+        {%- if cm_express -%}
+          <div class="cm-ex__lab">{{ 'mobile.cart.or_pay_with' | t }}</div>
+          {%- comment -%} Les boutons express (Shop Pay, PayPal, G Pay) du panier Xtra sont déplacés ici par le script. {%- endcomment -%}
+          <div class="cm-ex__slot" data-cm-express></div>
+        {%- endif -%}
+        {%- if section.settings.show_payment_methods -%}
+          <ul class="cm-pay" aria-label="{{ 'mobile.cart.payment_methods' | t }}">
+            {%- for payment_method in shop.enabled_payment_types -%}
+              <li>{{ payment_method | payment_type_svg_tag }}</li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </section>
+    {%- endif -%}
+
+    {%- comment -%} Barre de paiement collante : visible quand le récapitulatif n'est pas à l'écran. {%- endcomment -%}
+    <div class="cm-bar" data-cm-bar>
+      <div class="cm-bar__t">
+        <small>{{ 'mobile.cart.total_count' | t: count: cart.item_count }}</small>
+        <b>{{ cart.total_price | money }}</b>
+      </div>
+      <button type="button" data-cm-bar-go>{{ 'mobile.cart.checkout' | t }}</button>
+    </div>
+  {%- endif -%}
+
+  <div class="cm-toast" data-cm-toast role="status" aria-live="polite">
+    <span data-cm-toast-text></span>
+    <button type="button" data-cm-toast-undo hidden>{{ 'mobile.cart.undo' | t }}</button>
+  </div>
+</div>
