@@ -730,8 +730,56 @@
     klarnaPlacement = klarnaBlock.querySelector('klarna-placement');
   }
 
+  /* ---------- Bouton de paiement dynamique (Shop Pay, PayPal, Apple Pay… : réglage « bouton de paiement dynamique »
+     du bloc « Buy button ») sous notre bouton « Aggiungi al carrello ». Il est rendu dans l'ancien formulaire du thème,
+     plus bas dans la page, et lit la variante dans le formulaire qui l'entoure : on le place dans un formulaire jumeau
+     (mêmes champs, y compris ceux ajoutés par les apps) dont la variante et la quantité suivent le vrai formulaire.
+     Le bouton est déplacé, jamais masqué. ---------- */
+  var dynamicSync = null;
+  (function () {
+    var realForm = document.querySelector('#main-product form[action*="/cart/add"]');
+    var dynamic = realForm && realForm.querySelector('.overlay-dynamic_buy_button');
+    var cta = root.querySelector('.pdp-m__cta');
+    if (!dynamic || !cta) return;
+    // Sans adresse /cart/add : le bouton Shopify lit seulement les champs du formulaire qui l'entoure
+    // (closest('form')), et le thème, les apps et ce script continuent de trouver le vrai formulaire.
+    var twin = document.createElement('form');
+    twin.className = 'pdp-m__express';
+    twin.addEventListener('submit', function (event) { event.preventDefault(); });
+    var fields = {};
+    function copyField(source) {
+      if (!source.name || fields[source.name] || source.type === 'radio' || source.type === 'checkbox' || source.type === 'file') return;
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = source.name;
+      input.value = source.value;
+      fields[source.name] = { input: input, source: source };
+      twin.appendChild(input);
+    }
+    realForm.querySelectorAll('input, select, textarea').forEach(copyField);
+    twin.appendChild(dynamic);
+    cta.insertAdjacentElement('afterend', twin);
+    // Variante, quantité et champs des apps recopiés tant qu'ils changent (simple lecture de valeurs).
+    // Le thème remplace le vrai formulaire quand la variante change : on le recherche à chaque fois.
+    dynamicSync = function () {
+      var live = document.querySelector('#main-product form[action*="/cart/add"]') || realForm;
+      Object.keys(fields).forEach(function (name) {
+        var field = fields[name];
+        var source = live.querySelector('[name="' + name.replace(/"/g, '\\"') + '"]:not([type="radio"]):not([type="checkbox"])');
+        if (source && field.input.value !== source.value) field.input.value = source.value;
+      });
+      live.querySelectorAll('input, select, textarea').forEach(copyField);
+    };
+    document.addEventListener('input', dynamicSync);
+    document.addEventListener('change', dynamicSync);
+    window.setInterval(function () {
+      if (!document.hidden) dynamicSync();
+    }, 500);
+  })();
+
   /* ---------- Mise à jour quand la variante change ---------- */
   function onVariantChange(variant) {
+    if (dynamicSync) dynamicSync();
     syncOptions();
     highlightSize();
     updateTotals();

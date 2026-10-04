@@ -81,7 +81,7 @@
           "settings": {
             "button_style": "plain",
             "show_amount_selection": true,
-            "show_dynamic_buybutton": false,
+            "show_dynamic_buybutton": true,
             "button_style_dynamic_buybutton": "plain",
             "preorder": false,
             "preorder_button_text": "Pre-order",

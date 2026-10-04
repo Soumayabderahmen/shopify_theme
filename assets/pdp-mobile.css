@@ -763,6 +763,30 @@ body.template-product {
   transform: scale(0.98);
 }
 
+/* Bouton de paiement dynamique de Shopify (Shop Pay, PayPal, Apple Pay…), déplacé sous « Aggiungi al carrello »
+   par pdp-mobile.js. Variables officielles de Shopify pour la hauteur et les coins arrondis. */
+#root .pdp-m .pdp-m__express {
+  display: block;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+/* Variables posées sur l'élément lui-même : le thème (screen.css) y impose déjà le rayon de ses boutons
+   avec !important ; notre sélecteur, plus précis, l'emporte. */
+#root .pdp-m .pdp-m__express shopify-accelerated-checkout {
+  --shopify-accelerated-checkout-button-block-size: 52px !important;
+  --shopify-accelerated-checkout-button-border-radius: 16px !important;
+  --shopify-accelerated-checkout-row-gap: 8px !important;
+}
+
+#root .pdp-m .pdp-m__express .overlay-dynamic_buy_button,
+#root .pdp-m .pdp-m__express .shopify-payment-button,
+#root .pdp-m .pdp-m__express shopify-accelerated-checkout {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
 .pdp-m__cta svg {
   width: 21px;
   height: 21px;
