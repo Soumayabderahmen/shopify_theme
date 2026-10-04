@@ -730,7 +730,14 @@
       "cart_ship_left_html": "Nog <b>{amount}</b> voor <b>gratis verzending</b>",
       "cart_shipping_free": "Gratis",
       "cart_shipping_checkout": "Berekend bij afrekenen",
-      "cart_credit_html": "Je krijgt <b>{amount}</b> winkeltegoed na deze aankoop"
+      "cart_credit_html": "Je krijgt <b>{amount}</b> winkeltegoed na deze aankoop",
+      "drawer_points": "+{points} punten met deze bestelling",
+      "drawer_variant": "Variant",
+      "drawer_best": "BESTSELLERS",
+      "drawer_free_shipping": "Gratis verzending",
+      "drawer_easy_returns": "Eenvoudig retourneren",
+      "drawer_save": "Je bespaart {amount}",
+      "drawer_add": "In winkelwagen"
     },
     "pdp": {
       "gallery": "Productfoto's",
@@ -937,6 +944,13 @@
       "payment_methods": "Betaalmethoden",
       "total_count": "Totaal ({{ count }})",
       "undo": "Ongedaan maken"
+    },
+    "drawer": {
+      "close": "Winkelwagen sluiten",
+      "go_cart": "Naar winkelwagen",
+      "secure_html": "Gegarandeerd <b>veilig en beschermd</b> afrekenen",
+      "points_login": "Log in om beloningen in te wisselen",
+      "login": "Inloggen"
     }
   },
   "discount_R": {

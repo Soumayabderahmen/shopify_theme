@@ -22,6 +22,8 @@
   var sectionElement = function () { return document.getElementById('shopify-section-' + sectionId); };
 
   var money = function (cents) {
+    // Même format que les prix du thème (format monétaire de la boutique), sinon format du navigateur.
+    if (window.Shopify && typeof window.Shopify.formatMoney === 'function') return String(window.Shopify.formatMoney(cents)).replace(/<[^>]*>/g, '');
     var currency = (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) || 'EUR';
     return new Intl.NumberFormat(document.documentElement.lang || 'it', { style: 'currency', currency: currency }).format(cents / 100);
   };
@@ -79,8 +81,19 @@
   var applyCart = function (data) {
     if (typeof data.item_count === 'number') updateCounts(data.item_count);
     renderSection(data.sections);
+    // Le tiroir panier (assets/cart-drawer-mobile.js) se redessine à son tour.
+    document.dispatchEvent(new CustomEvent('platinum:cart-changed', { detail: { source: 'page' } }));
     return data;
   };
+
+  // Changement fait dans le tiroir panier : la page est redessinée pour rester juste.
+  document.addEventListener('platinum:cart-changed', function (event) {
+    if (event.detail && event.detail.source === 'page') return;
+    fetch(window.location.pathname + '?sections=' + encodeURIComponent(sectionId), { credentials: 'same-origin' })
+      .then(function (response) { return response.json(); })
+      .then(renderSection)
+      .catch(function (error) { console.error('[Cart mobile] refresh failed', error); });
+  });
 
   var failed = function (error) {
     console.error('[Cart mobile]', error);
@@ -113,6 +126,7 @@
           cartRequest('cart/add.js', { items: [restore] })
             .then(function (added) {
               renderSection(added.sections);
+              document.dispatchEvent(new CustomEvent('platinum:cart-changed', { detail: { source: 'page' } }));
               toast(T('cart_restored'));
               return fetch(shopRoot + 'cart.js', { credentials: 'same-origin' }).then(function (response) { return response.json(); });
             })

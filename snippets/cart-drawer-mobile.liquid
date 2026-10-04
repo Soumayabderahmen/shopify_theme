@@ -1,0 +1,233 @@
+{%- comment -%}
+  Tiroir panier MOBILE (prototype « platinumshop-cart-drawer ») — rendu dans sections/side-cart.liquid, donc redessiné
+  par le thème à chaque ajout / modification du panier (assets/custom-async.js remplace le contenu de #cart).
+  Données réelles : lignes, quantités, livraison gratuite (réglages du thème), suggestions du thème (« Potrebbe piacerti
+  anche »), points de l'app de fidélité, moyens de paiement. Textes : clés mobile.cart.* / mobile.drawer.* (locales).
+  Affiché seulement en mobile (assets/cart-drawer-mobile.css) ; script : assets/cart-drawer-mobile.js.
+  Params : section
+{%- endcomment -%}
+{%- liquid
+  assign cd_threshold = 0
+  if settings.enable_free_shipping and settings.free_shipping_amount != blank
+    assign cd_threshold = settings.free_shipping_amount | replace: ',', '.' | times: 100 | round
+  endif
+  assign cd_free = false
+  if cd_threshold > 0 and cart.total_price >= cd_threshold
+    assign cd_free = true
+  endif
+  assign cd_ship_percent = 100
+  if cd_threshold > 0 and cd_free == false
+    assign cd_ship_percent = cart.total_price | times: 100 | divided_by: cd_threshold
+  endif
+-%}
+<style>.cd-m{display:none}</style>
+<div
+  class="cd-m"
+  data-cart-drawer-mobile
+  data-section-id="{{ section.id }}"
+  data-threshold="{{ cd_threshold }}"
+  data-total="{{ cart.total_price }}"
+>
+  <div class="cd-h">
+    <h2>
+      {{- 'mobile.cart.title' | t -}}
+      {%- if cart.item_count > 0 %} <span class="cd-n">{{ cart.item_count }}</span>{% endif -%}
+    </h2>
+    <a href="./" class="m6pn-close cd-x" role="button" aria-label="{{ 'mobile.drawer.close' | t }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </a>
+  </div>
+
+  <div class="cd-b">
+    {%- if cart.item_count == 0 -%}
+      <section class="cd-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+        <h3>{{ 'mobile.cart.empty_title' | t }}</h3>
+        <p>{{ 'mobile.cart.empty_text' | t }}</p>
+        <a href="./" class="m6pn-close cd-pri" role="button">{{ 'mobile.cart.continue' | t }}</a>
+      </section>
+    {%- else -%}
+      <a href="./" class="m6pn-close cd-back" role="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+        {{- 'mobile.cart.continue' | t -}}
+      </a>
+
+      {%- if cd_threshold > 0 and cart.requires_shipping -%}
+        <section class="cd-ship{% if cd_free %} is-ok{% endif %}" data-cd-ship aria-live="polite">
+          <div class="cd-ship__t">
+            <span class="cd-ship__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span>
+            <span data-cd-ship-text>
+              {%- if cd_free -%}
+                <b>{{ 'mobile.cart.ship_free' | t }}</b>
+              {%- else -%}
+                {%- assign cd_left = cd_threshold | minus: cart.total_price | money -%}
+                {{- 'mobile.cart.ship_left_html' | t: amount: cd_left -}}
+              {%- endif -%}
+            </span>
+          </div>
+          <div class="cd-prog" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ cd_ship_percent }}"><i data-cd-ship-bar style="width: {{ cd_ship_percent }}%"></i></div>
+        </section>
+      {%- endif -%}
+
+      <ul class="cd-lines" aria-label="{{ 'mobile.cart.items_label' | t }}">
+        {%- for line_item in cart.items -%}
+          {%- liquid
+            assign can_update_quantity = line_item.instructions.can_update_quantity | default: true, allow_false: true
+            assign can_remove = line_item.instructions.can_remove | default: true, allow_false: true
+            assign cd_min = line_item.variant.quantity_rule.min | default: 1
+            assign cd_step = line_item.variant.quantity_rule.increment | default: 1
+            assign cd_max = ''
+            if line_item.variant.inventory_management == 'shopify' and line_item.variant.inventory_policy == 'deny'
+              assign cd_max = line_item.variant.inventory_quantity
+            elsif line_item.variant.quantity_rule.max
+              assign cd_max = line_item.variant.quantity_rule.max
+            endif
+            assign cd_old = 0
+            if line_item.original_line_price > line_item.final_line_price
+              assign cd_old = line_item.original_line_price
+            elsif line_item.variant.compare_at_price > line_item.variant.price
+              assign cd_old = line_item.variant.compare_at_price | times: line_item.quantity
+            endif
+          -%}
+          <li
+            class="cd-line"
+            data-cd-line
+            data-key="{{ line_item.key | escape }}"
+            data-variant-id="{{ line_item.variant_id }}"
+            data-quantity="{{ line_item.quantity }}"
+            data-min="{{ cd_min }}"
+            data-step="{{ cd_step }}"
+            data-max="{{ cd_max }}"
+            data-selling-plan="{{ line_item.selling_plan_allocation.selling_plan.id }}"
+            data-properties="{{ line_item.properties | json | escape }}"
+          >
+            <a class="cd-th" href="{{ line_item.url }}" aria-label="{{ line_item.product.title | escape }}">
+              {%- if line_item.image -%}
+                <img
+                  src="{{ line_item | image_url: width: 144, height: 144, crop: 'center' }}"
+                  srcset="{{ line_item | image_url: width: 144, height: 144, crop: 'center' }} 1x, {{ line_item | image_url: width: 216, height: 216, crop: 'center' }} 2x"
+                  width="72"
+                  height="72"
+                  alt="{{ line_item.image.alt | default: line_item.product.title | escape }}"
+                  loading="lazy"
+                >
+              {%- endif -%}
+            </a>
+            <div class="cd-info">
+              <a class="cd-t" href="{{ line_item.url }}">{{ line_item.product.title }}</a>
+              {%- unless line_item.product.has_only_default_variant -%}
+                <div class="cd-v">{{ line_item.variant.title }}</div>
+              {%- endunless -%}
+              {%- if line_item.selling_plan_allocation -%}
+                <div class="cd-v">{{ line_item.selling_plan_allocation.selling_plan.name }}</div>
+              {%- endif -%}
+              {%- for property in line_item.properties -%}
+                {%- assign first_character = property.first | slice: 0 -%}
+                {%- if property.last != blank and first_character != '_' -%}
+                  <div class="cd-v">{{ property.first }}: {{ property.last }}</div>
+                {%- endif -%}
+              {%- endfor -%}
+              <div class="cd-pr{% if cd_old > 0 %} is-sale{% endif %}">
+                <b>{{ line_item.final_line_price | money }}</b>
+                {%- if cd_old > 0 %} <s>{{ cd_old | money }}</s>{% endif -%}
+              </div>
+              <div class="cd-ctl">
+                {%- if can_update_quantity -%}
+                  <div class="cd-qty" role="group" aria-label="{{ 'mobile.cart.quantity' | t }}">
+                    <button type="button" data-cd-action="dec" aria-label="{{ 'mobile.cart.less' | t }}"{% if line_item.quantity <= cd_min %} disabled{% endif %}>−</button>
+                    <output>{{ line_item.quantity }}</output>
+                    <button type="button" data-cd-action="inc" aria-label="{{ 'mobile.cart.more' | t }}"{% if cd_max != '' and line_item.quantity >= cd_max %} disabled{% endif %}>+</button>
+                  </div>
+                {%- else -%}
+                  <span class="cd-qty-fixed">× {{ line_item.quantity }}</span>
+                {%- endif -%}
+                {%- if can_remove -%}
+                  <button class="cd-del" type="button" data-cd-action="remove" aria-label="{{ 'mobile.cart.remove' | t }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+                  </button>
+                {%- endif -%}
+              </div>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- comment -%} Points de fidélité : nombre repris de l'app (Honeypop) par le script ; caché tant qu'il est inconnu. {%- endcomment -%}
+      <section class="cd-pts" data-cd-points hidden>
+        <span class="cd-pts__w"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.3 1.6 2.8-.1 1 2.6 2.3 1.6-.8 2.7.8 2.7-2.3 1.6-1 2.6-2.8-.1L12 21l-2.3-1.6-2.8.1-1-2.6-2.3-1.6.8-2.7-.8-2.7 2.3-1.6 1-2.6 2.8.1z"/><path d="m9 15 6-6"/><circle cx="9.5" cy="9.5" r=".9" fill="currentColor"/><circle cx="14.5" cy="14.5" r=".9" fill="currentColor"/></svg></span>
+        <span>
+          <b data-cd-points-text></b>
+          {%- unless customer -%}
+            <small>{{ 'mobile.drawer.points_login' | t }} · <a href="{{ routes.account_login_url }}">{{ 'mobile.drawer.login' | t }}</a></small>
+          {%- endunless -%}
+        </span>
+      </section>
+
+      {%- comment -%}
+        « Potrebbe piacerti anche » : recommandations Shopify pour le premier article du panier (réglages « suggestions »
+        du tiroir : activées, nombre), cartes construites par le script ; les produits déjà au panier sont exclus.
+      {%- endcomment -%}
+      {%- if section.settings.enable_cart_drawer_upsell_related or section.settings.enable_cart_drawer_upsell_complementary -%}
+        {%- liquid
+          assign cd_intent = 'related'
+          if section.settings.enable_cart_drawer_upsell_related == false
+            assign cd_intent = 'complementary'
+          endif
+          assign cd_in_cart = cart.items | map: 'product_id' | join: ','
+        -%}
+        <section
+          class="cd-rel"
+          data-cd-related
+          data-url="{{ routes.product_recommendations_url }}.json?product_id={{ cart.items.first.product_id }}&limit={{ section.settings.cart_drawer_upsell_limit | plus: 4 }}&intent={{ cd_intent }}"
+          data-limit="{{ section.settings.cart_drawer_upsell_limit }}"
+          data-in-cart="{{ cd_in_cart }}"
+          hidden
+        >
+          <h3>{{ 'mobile.common.you_may_like' | t }}</h3>
+          <div class="cd-rail" data-cd-rail></div>
+        </section>
+      {%- endif -%}
+
+      <section class="cd-trust">
+        <div class="cd-trust__t">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>
+          <span>{{ 'mobile.drawer.secure_html' | t }}</span>
+        </div>
+        <ul class="cd-pay" aria-label="{{ 'mobile.cart.payment_methods' | t }}">
+          {%- for payment_method in shop.enabled_payment_types -%}
+            <li>{{ payment_method | payment_type_svg_tag }}</li>
+          {%- endfor -%}
+        </ul>
+      </section>
+    {%- endif -%}
+  </div>
+
+  {%- if cart.item_count > 0 -%}
+    <footer class="cd-f">
+      <div class="cd-sum">
+        <span>{{ 'mobile.cart.subtotal' | t: count: cart.item_count }}</span>
+        <b>{{ cart.total_price | money }}<small>{% if cart.taxes_included %}{{ 'mobile.cart.tax_included' | t }}{% else %}{{ 'mobile.cart.tax_excluded' | t }}{% endif %}</small></b>
+      </div>
+      <p class="cd-vat">
+        {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
+          {{ 'cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
+        {%- elsif cart.taxes_included -%}
+          {{ 'cart.taxes_included_but_shipping_at_checkout' | t }}
+        {%- elsif shop.shipping_policy.body != blank -%}
+          {{ 'cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
+        {%- else -%}
+          {{ 'cart.taxes_and_shipping_at_checkout' | t }}
+        {%- endif -%}
+      </p>
+      <form class="cd-btns" action="{{ routes.cart_url }}" method="post">
+        <a class="cd-sec" href="{{ routes.cart_url }}">{{ 'mobile.drawer.go_cart' | t }}</a>
+        <button class="cd-pri" type="submit" name="checkout">{{ 'mobile.cart.checkout' | t }}</button>
+      </form>
+    </footer>
+  {%- endif -%}
+
+  <div class="cd-toast" data-cd-toast role="status" aria-live="polite">
+    <span data-cd-toast-text></span>
+    <button type="button" data-cd-toast-undo hidden>{{ 'mobile.cart.undo' | t }}</button>
+  </div>
+</div>

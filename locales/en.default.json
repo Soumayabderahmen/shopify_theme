@@ -3496,7 +3496,14 @@
       "cart_ship_left_html": "Add <b>{amount}</b> more for <b>free shipping</b>",
       "cart_shipping_free": "Free",
       "cart_shipping_checkout": "Calculated at checkout",
-      "cart_credit_html": "You'll get <b>{amount}</b> in store credit after this purchase"
+      "cart_credit_html": "You'll get <b>{amount}</b> in store credit after this purchase",
+      "drawer_points": "+{points} points with this order",
+      "drawer_variant": "Variant",
+      "drawer_best": "BEST SELLERS",
+      "drawer_free_shipping": "Free shipping",
+      "drawer_easy_returns": "Easy returns",
+      "drawer_save": "You save {amount}",
+      "drawer_add": "Add to cart"
     },
     "pdp": {
       "gallery": "Product photos",
@@ -3703,6 +3710,13 @@
       "payment_methods": "Payment methods",
       "total_count": "Total ({{ count }})",
       "undo": "Undo"
+    },
+    "drawer": {
+      "close": "Close cart",
+      "go_cart": "View cart",
+      "secure_html": "Guaranteed <b>safe and secure</b> checkout",
+      "points_login": "Log in to redeem rewards",
+      "login": "Log in"
     }
   }
 }

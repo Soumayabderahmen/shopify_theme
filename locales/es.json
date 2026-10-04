@@ -727,7 +727,14 @@
       "cart_ship_left_html": "Te faltan <b>{amount}</b> para el <b>envío gratis</b>",
       "cart_shipping_free": "Gratis",
       "cart_shipping_checkout": "Se calcula al pagar",
-      "cart_credit_html": "Recibirás <b>{amount}</b> de crédito en tienda tras esta compra"
+      "cart_credit_html": "Recibirás <b>{amount}</b> de crédito en tienda tras esta compra",
+      "drawer_points": "+{points} puntos con este pedido",
+      "drawer_variant": "Variante",
+      "drawer_best": "MÁS VENDIDOS",
+      "drawer_free_shipping": "Envío gratis",
+      "drawer_easy_returns": "Devolución fácil",
+      "drawer_save": "Ahorras {amount}",
+      "drawer_add": "Añadir al carrito"
     },
     "pdp": {
       "gallery": "Fotos del producto",
@@ -934,6 +941,13 @@
       "payment_methods": "Métodos de pago",
       "total_count": "Total ({{ count }})",
       "undo": "Deshacer"
+    },
+    "drawer": {
+      "close": "Cerrar el carrito",
+      "go_cart": "Ver carrito",
+      "secure_html": "Pago <b>seguro y protegido</b> garantizado",
+      "points_login": "Inicia sesión para canjear premios",
+      "login": "Iniciar sesión"
     }
   },
   "discount_R": {

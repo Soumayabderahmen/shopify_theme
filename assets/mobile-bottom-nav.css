@@ -45,7 +45,7 @@ body:has(.cm-bar.is-shown) pandectes-cmp {
   --mobile-cookie-bottom: calc(66px + 70px + 12px + env(safe-area-inset-bottom, 0px));
 }
 
-/* Panneaux plein écran ouverts (Categoria, Esplora, panier) : les bulles ne passent pas par-dessus. */
+/* Panneaux plein écran ouverts (Categoria, Esplora, panier) : les bulles et onglets d'apps (Ecomsend…) ne passent pas par-dessus. */
 body.mobile-categories-open #honeypop-app,
 body.mobile-categories-open .firepush-widget-container,
 body.mobile-explore-open #honeypop-app,
@@ -54,7 +54,10 @@ html.m6pn-open #honeypop-app,
 html.m6pn-open .firepush-widget-container,
 body.mobile-categories-open pandectes-cmp,
 body.mobile-explore-open pandectes-cmp,
-html.m6pn-open pandectes-cmp {
+html.m6pn-open pandectes-cmp,
+body.mobile-categories-open #ecomsend-widget,
+body.mobile-explore-open #ecomsend-widget,
+html.m6pn-open #ecomsend-widget {
   visibility: hidden !important;
 }
 
