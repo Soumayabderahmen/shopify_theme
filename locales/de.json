@@ -720,7 +720,18 @@
       "drawer_easy_returns": "Einfache Rückgabe",
       "drawer_save": "Du sparst {amount}",
       "drawer_add": "In den Warenkorb",
-      "collection_results_html": "<b>{count}</b> von <b>{total}</b> Produkten"
+      "collection_results_html": "<b>{count}</b> von <b>{total}</b> Produkten",
+      "collection_from": "Ab {amount}",
+      "collection_to": "Bis {amount}",
+      "collection_no_match": "Keine Ergebnisse für „{query}“",
+      "collection_more": "Mehr anzeigen ({count})",
+      "collection_less": "Weniger anzeigen",
+      "collection_remove": "{label} entfernen",
+      "collection_show_n": "{count} Produkte anzeigen",
+      "collection_show_one": "1 Produkt anzeigen",
+      "collection_show_none": "Keine Produkte",
+      "collection_any": "Alle",
+      "collection_hint_html": "90 % der Produkte kosten weniger als <b>{amount}</b>"
     },
     "pdp": {
       "gallery": "Produktfotos",
@@ -954,8 +965,15 @@
       "max": "Max",
       "price_min": "Mindestpreis",
       "price_max": "Höchstpreis",
-      "up_to_html": "bis {{ amount }}",
-      "over_html": "über {{ amount }}"
+      "up_to_html": "Bis {{ amount }}",
+      "over_html": "Über {{ amount }}",
+      "reset": "Zurücksetzen",
+      "selected": "Ausgewählte Filter",
+      "available": "Verfügbar",
+      "only_available": "Nur verfügbare Produkte anzeigen",
+      "search_in": "In {{ label }} suchen",
+      "quick_filters": "Schnellfilter",
+      "one_size": "Einheitsgröße"
     }
   },
   "t": {

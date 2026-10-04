@@ -3504,7 +3504,18 @@
       "drawer_easy_returns": "Easy returns",
       "drawer_save": "You save {amount}",
       "drawer_add": "Add to cart",
-      "collection_results_html": "Showing <b>{count}</b> of <b>{total}</b> products"
+      "collection_results_html": "Showing <b>{count}</b> of <b>{total}</b> products",
+      "collection_from": "From {amount}",
+      "collection_to": "Up to {amount}",
+      "collection_no_match": "No results for “{query}”",
+      "collection_more": "Show more ({count})",
+      "collection_less": "Show less",
+      "collection_remove": "Remove {label}",
+      "collection_show_n": "Show {count} products",
+      "collection_show_one": "Show 1 product",
+      "collection_show_none": "No products",
+      "collection_any": "All",
+      "collection_hint_html": "90% of products cost less than <b>{amount}</b>"
     },
     "pdp": {
       "gallery": "Product photos",
@@ -3738,8 +3749,15 @@
       "max": "Max",
       "price_min": "Minimum price",
       "price_max": "Maximum price",
-      "up_to_html": "up to {{ amount }}",
-      "over_html": "over {{ amount }}"
+      "up_to_html": "Up to {{ amount }}",
+      "over_html": "Over {{ amount }}",
+      "reset": "Reset",
+      "selected": "Selected filters",
+      "available": "In stock",
+      "only_available": "Show in-stock products only",
+      "search_in": "Search in {{ label }}",
+      "quick_filters": "Quick filters",
+      "one_size": "One size"
     }
   }
 }

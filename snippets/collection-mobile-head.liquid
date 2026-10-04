@@ -99,6 +99,42 @@
       <button type="button" data-clm-view="2" aria-pressed="true" aria-label="{{ 'mobile.collection.two_cols' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/></svg></button>
       <button type="button" data-clm-view="1" aria-pressed="false" aria-label="{{ 'mobile.collection.one_col' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="7" rx="1.8"/><rect x="4" y="13" width="16" height="7" rx="1.8"/></svg></button>
     </div>
+    {%- comment -%}
+      Raccourcis (prototype « Filtri v2 ») : « Disponibili » s'applique d'un toucher ; les autres ouvrent la feuille
+      directement sur leur filtre. Vrais filtres de la collection, dans l'ordre de Search & Discovery.
+    {%- endcomment -%}
+    {%- if collection.filters.size > 0 -%}
+      <div class="clm-qf" aria-label="{{ 'mobile.collection.quick_filters' | t }}">
+        {%- for filter in collection.filters -%}
+          {%- if filter.param_name == 'filter.v.availability' -%}
+            {%- for value in filter.values -%}
+              {%- if value.value == '1' -%}
+                <a class="clm-qf__av{% if value.active %} is-on{% endif %}" href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"><i aria-hidden="true"></i>{{ 'mobile.collection.available' | t }}</a>
+              {%- endif -%}
+            {%- endfor -%}
+          {%- else -%}
+            {%- liquid
+              assign clm_filter_active = 0
+              if filter.type == 'price_range'
+                if filter.min_value.value != nil or filter.max_value.value != nil
+                  assign clm_filter_active = 1
+                endif
+              else
+                assign clm_filter_active = filter.active_values.size
+              endif
+            -%}
+            <button type="button" class="{% if clm_filter_active > 0 %}is-on{% endif %}" data-clm-open="filters" data-clm-section="{{ forloop.index }}">
+              {{- filter.label | escape -}}
+              {%- if clm_filter_active > 0 -%}
+                <b>{{ clm_filter_active }}</b>
+              {%- else -%}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              {%- endif -%}
+            </button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
   </div>
 
   {%- if clm_active_count > 0 -%}
@@ -131,68 +167,161 @@
   {%- comment -%} « Mostrando N di T prodotti » : N suit les produits chargés (chargement automatique), par le script. {%- endcomment -%}
   <p class="clm-res" data-clm-results hidden></p>
 
-  {%- comment -%} Feuille Filtri : vrais filtres de la boutique ; « Mostra risultati » recharge la page filtrée. {%- endcomment -%}
+  {%- comment -%}
+    Feuille Filtri v2 (prototype « Filtri v2 ») : vrais filtres Search & Discovery dans l'ordre de l'app.
+    Disponibilità en interrupteur, Prezzo en double curseur (échelle non linéaire, max réel de la collection),
+    listes en accordéons (recherche + « Mostra altre » pour les longues listes, grille pour tailles / pointures,
+    pastilles pour les couleurs). Le bouton « Mostra N prodotti » est recalculé par Shopify à chaque changement
+    (assets/collection-mobile.js) ; la validation recharge la page filtrée.
+  {%- endcomment -%}
   {%- if collection.filters.size > 0 -%}
-    <section class="clm-sheet" data-clm-sheet="filters" role="dialog" aria-modal="true" aria-label="{{ 'mobile.collection.filters' | t }}" aria-hidden="true">
+    <section class="clm-sheet clm-fsheet" data-clm-sheet="filters" role="dialog" aria-modal="true" aria-label="{{ 'mobile.collection.filters' | t }}" aria-hidden="true">
       <span class="clm-grab" aria-hidden="true"></span>
       <div class="clm-sh">
-        <h4>{{ 'mobile.collection.filters' | t }}</h4>
-        <button class="clm-sx" type="button" data-clm-close aria-label="{{ 'mobile.common.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <h4>{{ 'mobile.collection.filters' | t }}<span class="clm-fc" data-clm-fcount hidden>0</span></h4>
+        <div class="clm-sh-r">
+          <button class="clm-clrlink" type="button" data-clm-reset>{{ 'mobile.collection.reset' | t }}</button>
+          <button class="clm-sx" type="button" data-clm-close aria-label="{{ 'mobile.common.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
       </div>
-      <form class="clm-form" action="{{ collection.url }}" method="get" data-clm-filter-form>
+      <div class="clm-fsel" data-clm-fsel aria-label="{{ 'mobile.collection.selected' | t }}" hidden></div>
+      <form class="clm-form" action="{{ collection.url }}" method="get" data-clm-filter-form data-section-id="{{ section.id }}" data-clear-url="{{ clm_clear_url }}" data-applied="{{ clm_active_count }}">
         {%- if collection.sort_by != blank -%}<input type="hidden" name="sort_by" value="{{ collection.sort_by | escape }}">{%- endif -%}
         <div class="clm-sb">
           {%- for filter in collection.filters -%}
-            <div class="clm-fs">
-              <h5>{{ filter.label | escape }}</h5>
-              {%- case filter.type -%}
-                {%- when 'price_range' -%}
-                  {%- assign clm_currency = cart.currency.symbol | default: '€' -%}
-                  <div class="clm-price">
-                    <label>{{ clm_currency }}<input type="number" inputmode="decimal" min="0" name="{{ filter.min_value.param_name }}" value="{% if filter.min_value.value %}{{ filter.min_value.value | divided_by: 100.0 }}{% endif %}" placeholder="{{ 'mobile.collection.min' | t }}" aria-label="{{ 'mobile.collection.price_min' | t }}" data-clm-min></label>
-                    <i aria-hidden="true"></i>
-                    <label>{{ clm_currency }}<input type="number" inputmode="decimal" min="0" name="{{ filter.max_value.param_name }}" value="{% if filter.max_value.value %}{{ filter.max_value.value | divided_by: 100.0 }}{% endif %}" placeholder="{{ 'mobile.collection.max' | t }}" aria-label="{{ 'mobile.collection.price_max' | t }}" data-clm-max></label>
-                  </div>
-                  <div class="clm-pills">
-                    {%- assign clm_ranges = '0-10,10-20,20-50,50-100,100-' | split: ',' -%}
-                    {%- for range in clm_ranges -%}
+            {%- if filter.param_name == 'filter.v.availability' -%}
+              {%- comment -%} Disponibilità : un seul interrupteur « disponibles » (valeur 1). {%- endcomment -%}
+              {%- for value in filter.values -%}
+                {%- if value.value == '1' -%}
+                  <label class="clm-frow" data-clm-sec="{{ forloop.parentloop.index }}">
+                    <input type="checkbox" name="{{ value.param_name }}" value="1"{% if value.active %} checked{% endif %} data-clm-label="{{ 'mobile.collection.available' | t | escape }}">
+                    <span class="clm-frow__tx"><b>{{ filter.label | escape }}</b><small>{{ 'mobile.collection.only_available' | t }} ({{ value.count }})</small></span>
+                    <span class="clm-frow__t" aria-hidden="true"></span>
+                  </label>
+                {%- elsif value.active -%}
+                  <input type="hidden" name="{{ value.param_name }}" value="{{ value.value | escape }}">
+                {%- endif -%}
+              {%- endfor -%}
+            {%- else -%}
+              {%- liquid
+                assign clm_kind = 'list'
+                if filter.type == 'price_range'
+                  assign clm_kind = 'price'
+                elsif filter.presentation == 'swatch'
+                  assign clm_kind = 'swatch'
+                else
+                  assign clm_kind = 'chips'
+                  for value in filter.values
+                    if value.label.size > 6
+                      assign clm_kind = 'list'
+                      break
+                    endif
+                  endfor
+                endif
+                assign clm_open = false
+                if clm_kind == 'price'
+                  assign clm_open = true
+                endif
+              -%}
+              <div class="clm-fsec" data-clm-sec="{{ forloop.index }}" data-clm-kind="{{ clm_kind }}">
+                <button type="button" class="clm-fh" aria-expanded="{{ clm_open }}" data-clm-acc>
+                  <span class="clm-fh__t">{{ filter.label | escape }}</span>
+                  <span class="clm-fh__v" data-clm-summary></span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div class="clm-fp"><div{% unless clm_open %} inert{% endunless %}><div class="clm-fp__in">
+                  {%- case clm_kind -%}
+                    {%- when 'price' -%}
                       {%- liquid
-                        assign clm_from = range | split: '-' | first
-                        assign clm_to = range | split: '-' | last
-                        assign clm_from_label = clm_from | times: 100 | money_without_trailing_zeros
-                        assign clm_to_label = clm_to | times: 100 | money_without_trailing_zeros
+                        assign clm_currency = cart.currency.symbol | default: '€'
+                        assign clm_range_max = filter.range_max | divided_by: 100.0 | ceil
                       -%}
-                      <button type="button" data-clm-range-min="{% if clm_from != '0' %}{{ clm_from }}{% endif %}" data-clm-range-max="{% unless forloop.last %}{{ clm_to }}{% endunless %}">
-                        {%- if forloop.first -%}
-                          {{ 'mobile.collection.up_to_html' | t: amount: clm_to_label }}
-                        {%- elsif forloop.last -%}
-                          {{ 'mobile.collection.over_html' | t: amount: clm_from_label }}
-                        {%- else -%}
-                          {{ clm_from_label }} – {{ clm_to_label }}
-                        {%- endif -%}
-                      </button>
-                    {%- endfor -%}
-                  </div>
-                {%- else -%}
-                  <div class="clm-pills{% if filter.presentation == 'swatch' %} clm-pills--swatch{% endif %}">
-                    {%- for value in filter.values -%}
-                      <label class="clm-pill{% if value.count == 0 and value.active == false %} is-empty{% endif %}">
-                        <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}"{% if value.active %} checked{% endif %}{% if value.count == 0 and value.active == false %} disabled{% endif %}>
-                        {%- if filter.presentation == 'swatch' and value.swatch.color -%}
-                          <i class="clm-dot" style="background: {{ value.swatch.color }}" aria-hidden="true"></i>
-                        {%- endif -%}
-                        <span>{{ value.label | escape }}</span>
-                        <small>{{ value.count }}</small>
-                      </label>
-                    {%- endfor -%}
-                  </div>
-              {%- endcase -%}
-            </div>
+                      <div class="clm-hist" data-clm-hist aria-hidden="true"></div>
+                      <div class="clm-rng" data-clm-range data-max="{{ clm_range_max }}">
+                        <div class="clm-rng__tr"><div class="clm-rng__fl" data-clm-fill></div></div>
+                        <input type="range" min="0" max="1000" value="0" aria-label="{{ 'mobile.collection.price_min' | t }}" data-clm-rmin>
+                        <input type="range" min="0" max="1000" value="1000" aria-label="{{ 'mobile.collection.price_max' | t }}" data-clm-rmax>
+                      </div>
+                      <div class="clm-price">
+                        <label>{{ clm_currency }}<input type="number" inputmode="decimal" min="0" name="{{ filter.min_value.param_name }}" value="{% if filter.min_value.value %}{% assign clm_cents = filter.min_value.value | modulo: 100 %}{% if clm_cents == 0 %}{{ filter.min_value.value | divided_by: 100 }}{% else %}{{ filter.min_value.value | divided_by: 100.0 }}{% endif %}{% endif %}" placeholder="0" aria-label="{{ 'mobile.collection.price_min' | t }}" data-clm-min></label>
+                        <i aria-hidden="true"></i>
+                        <label>{{ clm_currency }}<input type="number" inputmode="decimal" min="0" name="{{ filter.max_value.param_name }}" value="{% if filter.max_value.value %}{% assign clm_cents = filter.max_value.value | modulo: 100 %}{% if clm_cents == 0 %}{{ filter.max_value.value | divided_by: 100 }}{% else %}{{ filter.max_value.value | divided_by: 100.0 }}{% endif %}{% endif %}" placeholder="{{ clm_range_max }}" aria-label="{{ 'mobile.collection.price_max' | t }}" data-clm-max></label>
+                      </div>
+                      <div class="clm-pills">
+                        {%- assign clm_ranges = '0-10,10-25,25-50,50-100,100-' | split: ',' -%}
+                        {%- for range in clm_ranges -%}
+                          {%- liquid
+                            assign clm_from = range | split: '-' | first
+                            assign clm_to = range | split: '-' | last
+                            assign clm_from_label = clm_from | times: 100 | money_without_trailing_zeros
+                            assign clm_to_label = clm_to | times: 100 | money_without_trailing_zeros
+                          -%}
+                          <button type="button" aria-pressed="false" data-clm-range-min="{% if clm_from != '0' %}{{ clm_from }}{% endif %}" data-clm-range-max="{% unless forloop.last %}{{ clm_to }}{% endunless %}">
+                            {%- if forloop.first -%}
+                              {{ 'mobile.collection.up_to_html' | t: amount: clm_to_label }}
+                            {%- elsif forloop.last -%}
+                              {{ 'mobile.collection.over_html' | t: amount: clm_from_label }}
+                            {%- else -%}
+                              {{ clm_from_label }} – {{ clm_to_label }}
+                            {%- endif -%}
+                          </button>
+                        {%- endfor -%}
+                      </div>
+                      <p class="clm-phint" data-clm-phint hidden></p>
+                    {%- when 'swatch' -%}
+                      <div class="clm-sws">
+                        {%- for value in filter.values -%}
+                          <label class="clm-sw{% if value.count == 0 and value.active == false %} is-empty{% endif %}">
+                            <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}"{% if value.active %} checked{% endif %}{% if value.count == 0 and value.active == false %} disabled{% endif %} data-clm-label="{{ value.label | escape }}">
+                            <i style="{% if value.swatch.image %}background-image: url('{{ value.swatch.image | image_url: width: 80 }}');{% elsif value.swatch.color %}background: {{ value.swatch.color }};{% endif %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>
+                            <span>{{ value.label | escape }}</span>
+                            <small data-clm-count>{{ value.count }}</small>
+                          </label>
+                        {%- endfor -%}
+                      </div>
+                    {%- when 'chips' -%}
+                      <div class="clm-chips">
+                        {%- for value in filter.values -%}
+                          {%- assign clm_value_label = value.label -%}
+                          {%- assign clm_value_down = value.label | downcase | strip -%}
+                          {%- if clm_value_down == 'tu' or clm_value_down == 'taglia unica' or clm_value_down == 'one size' -%}{%- assign clm_value_label = 'mobile.collection.one_size' | t -%}{%- endif -%}
+                          <label class="clm-chp{% if value.count == 0 and value.active == false %} is-empty{% endif %}">
+                            <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}"{% if value.active %} checked{% endif %}{% if value.count == 0 and value.active == false %} disabled{% endif %} data-clm-label="{{ clm_value_label | escape }}">
+                            <span>{{ clm_value_label | escape }}</span>
+                            <small data-clm-count>{{ value.count }}</small>
+                          </label>
+                        {%- endfor -%}
+                      </div>
+                    {%- else -%}
+                      {%- if filter.values.size > 7 -%}
+                        <label class="clm-fsrch">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                          <input type="search" placeholder="{{ 'mobile.collection.search_in' | t: label: filter.label | escape }}" aria-label="{{ 'mobile.collection.search_in' | t: label: filter.label | escape }}" data-clm-search autocomplete="off">
+                        </label>
+                      {%- endif -%}
+                      <div class="clm-cks" data-clm-list>
+                        {%- for value in filter.values -%}
+                          <label class="clm-ck{% if value.count == 0 and value.active == false %} is-empty{% endif %}" data-clm-row>
+                            <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}"{% if value.active %} checked{% endif %}{% if value.count == 0 and value.active == false %} disabled{% endif %} data-clm-label="{{ value.label | escape }}">
+                            <span class="clm-ck__bx" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+                            <span class="clm-ck__l" data-clm-text>{{ value.label | escape }}</span>
+                            <span class="clm-ck__n" data-clm-count>{{ value.count }}</span>
+                          </label>
+                        {%- endfor -%}
+                        <p class="clm-fnone" data-clm-none hidden></p>
+                      </div>
+                      {%- if filter.values.size > 7 -%}
+                        <button type="button" class="clm-more" aria-expanded="false" data-clm-more data-count="{{ filter.values.size | minus: 7 }}"></button>
+                      {%- endif -%}
+                  {%- endcase -%}
+                </div></div></div>
+              </div>
+            {%- endif -%}
           {%- endfor -%}
         </div>
         <div class="clm-sf">
-          <a class="clm-c" href="{{ clm_clear_url }}">{{ 'mobile.collection.clear' | t }}</a>
-          <button class="clm-p" type="submit">{{ 'mobile.collection.show_results' | t }}</button>
+          <button class="clm-c" type="button" data-clm-reset>{{ 'mobile.collection.clear' | t }}</button>
+          <button class="clm-p" type="submit" data-clm-show>{{ 'mobile.collection.show_results' | t }}</button>
         </div>
       </form>
     </section>

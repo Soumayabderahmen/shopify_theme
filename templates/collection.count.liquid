@@ -1,0 +1,7 @@
+{%- comment -%}
+  Compteur léger pour la feuille Filtri mobile (assets/collection-mobile.js) : /collections/<handle>?view=count&filter...
+  renvoie seulement le nombre de produits correspondant aux filtres de l'adresse (bouton « Mostra N prodotti »,
+  histogramme des prix). Beaucoup plus rapide que le rendu de la section avec la grille de produits.
+{%- endcomment -%}
+{%- layout none -%}
+{{- collection.products_count -}}

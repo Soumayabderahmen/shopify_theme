@@ -809,7 +809,18 @@
       "drawer_easy_returns": "Reso facile",
       "drawer_save": "Risparmi {amount}",
       "drawer_add": "Aggiungi al carrello",
-      "collection_results_html": "Mostrando <b>{count}</b> di <b>{total}</b> prodotti"
+      "collection_results_html": "Mostrando <b>{count}</b> di <b>{total}</b> prodotti",
+      "collection_from": "Da {amount}",
+      "collection_to": "Fino a {amount}",
+      "collection_no_match": "Nessun risultato per “{query}”",
+      "collection_more": "Mostra altre ({count})",
+      "collection_less": "Mostra meno",
+      "collection_remove": "Rimuovi {label}",
+      "collection_show_n": "Mostra {count} prodotti",
+      "collection_show_one": "Mostra 1 prodotto",
+      "collection_show_none": "Nessun prodotto",
+      "collection_any": "Tutti",
+      "collection_hint_html": "Il 90% dei prodotti costa meno di <b>{amount}</b>"
     },
     "pdp": {
       "gallery": "Foto del prodotto",
@@ -1043,8 +1054,15 @@
       "max": "Max",
       "price_min": "Prezzo minimo",
       "price_max": "Prezzo massimo",
-      "up_to_html": "fino a {{ amount }}",
-      "over_html": "oltre {{ amount }}"
+      "up_to_html": "Fino a {{ amount }}",
+      "over_html": "Oltre {{ amount }}",
+      "reset": "Azzera",
+      "selected": "Filtri selezionati",
+      "available": "Disponibili",
+      "only_available": "Mostra solo i prodotti disponibili",
+      "search_in": "Cerca in {{ label }}",
+      "quick_filters": "Filtri rapidi",
+      "one_size": "Taglia unica"
     }
   }
 }

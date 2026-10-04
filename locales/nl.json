@@ -738,7 +738,18 @@
       "drawer_easy_returns": "Eenvoudig retourneren",
       "drawer_save": "Je bespaart {amount}",
       "drawer_add": "In winkelwagen",
-      "collection_results_html": "<b>{count}</b> van <b>{total}</b> producten"
+      "collection_results_html": "<b>{count}</b> van <b>{total}</b> producten",
+      "collection_from": "Vanaf {amount}",
+      "collection_to": "Tot {amount}",
+      "collection_no_match": "Geen resultaten voor ‘{query}’",
+      "collection_more": "Meer tonen ({count})",
+      "collection_less": "Minder tonen",
+      "collection_remove": "{label} verwijderen",
+      "collection_show_n": "{count} producten tonen",
+      "collection_show_one": "1 product tonen",
+      "collection_show_none": "Geen producten",
+      "collection_any": "Alle",
+      "collection_hint_html": "90% van de producten kost minder dan <b>{amount}</b>"
     },
     "pdp": {
       "gallery": "Productfoto's",
@@ -972,8 +983,15 @@
       "max": "Max",
       "price_min": "Minimumprijs",
       "price_max": "Maximumprijs",
-      "up_to_html": "tot {{ amount }}",
-      "over_html": "meer dan {{ amount }}"
+      "up_to_html": "Tot {{ amount }}",
+      "over_html": "Meer dan {{ amount }}",
+      "reset": "Resetten",
+      "selected": "Geselecteerde filters",
+      "available": "Op voorraad",
+      "only_available": "Alleen producten op voorraad tonen",
+      "search_in": "Zoeken in {{ label }}",
+      "quick_filters": "Snelfilters",
+      "one_size": "One size"
     }
   },
   "discount_R": {
