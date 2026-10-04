@@ -839,7 +839,11 @@
       "qa_cart_summary_other": "{count} articoli nel carrello · totale {total}",
       "qa_size_value": "Taglia {size}",
       "qa_go_cart": "Vai al carrello ({count})",
-      "qa_size_sold_out": "Esaurita"
+      "qa_size_sold_out": "Esaurita",
+      "pdp_ship_free_order": "Spedizione gratuita su questo ordine",
+      "pdp_ship_from": "Spedizione gratuita da {amount}",
+      "pdp_size_foot_length": "Lunghezza piede",
+      "pdp_size_length": "Lunghezza"
     },
     "pdp": {
       "gallery": "Foto del prodotto",
@@ -895,7 +899,9 @@
       "close": "Chiudi",
       "previous": "Precedente",
       "next": "Successivo",
-      "carousel": "carosello"
+      "carousel": "carosello",
+      "free_shipping_from": "Spedizione gratuita da {{ amount }}",
+      "shipping_details": "Dettagli"
     },
     "category": {
       "dialog": "Categorie",

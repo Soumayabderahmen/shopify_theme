@@ -13,6 +13,19 @@
 
   assign pm_coupon_code = 'JCEB1XQ31X8X'
 
+  # Livraison gratuite : seuil des réglages du thème (comme le tiroir panier), dans la devise du client.
+  # EUR, USD, CAD, CHF, GBP : même nombre (50 €, 50 $, 50 CA$…). Autres devises : seuil converti au taux
+  # de Shopify par assets/pdp-mobile.js (pm_ship_threshold = 0 ici).
+  assign pm_ship_base = 0
+  if settings.enable_free_shipping and settings.free_shipping_amount != blank
+    assign pm_ship_base = settings.free_shipping_amount | replace: ',', '.' | times: 100 | round
+  endif
+  assign pm_ship_same_currencies = 'EUR,USD,CAD,CHF,GBP' | split: ','
+  assign pm_ship_threshold = 0
+  if pm_ship_same_currencies contains cart.currency.iso_code
+    assign pm_ship_threshold = pm_ship_base
+  endif
+
   assign pm_rating = 0
   assign pm_rating_count = 0
   if product.metafields.syncer.reviews
@@ -88,8 +101,10 @@
           <span class="pdp-m__stars-off" aria-hidden="true">★★★★★</span>{{ 'mobile.pdp.reviews_title_short' | t }}
         {%- endif -%}
       </a>
-      {%- assign pm_moq = product.metafields.custom.moq | default: 0 | plus: 0 -%}
-      {%- if pm_moq > 0 -%}<span class="pdp-m__moq">{{ 'mobile.pdp.items_sold' | t: count: pm_moq }}</span>{%- endif -%}
+      {%- comment -%}
+        « +N articoli venduti » retiré : le nombre venait du métachamp custom.moq (saisi à la main), pas des vraies
+        ventes, et contredisait le nombre d'avis. Pour le remettre : product.metafields.custom.moq + clé mobile.pdp.items_sold.
+      {%- endcomment -%}
     </div>
     <div class="pdp-m__title" role="heading" aria-level="1" data-pdp-title>{{ product.title | escape }}</div>
     <button class="pdp-m__more" type="button" data-pdp-title-more hidden>{{ 'mobile.pdp.show_all' | t }}</button>
@@ -121,11 +136,41 @@
         <span class="pdp-m__t"><b>{{ 'mobile.pdp.coupon_title' | t }}</b><small>{{ 'mobile.pdp.coupon_long' | t }}</small></span>
         <button class="pdp-m__mini" type="button" data-pdp-open-terms>{{ 'mobile.pdp.terms' | t }}</button>
       </li>
-      <li>
-        <span class="pdp-m__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span>
-        <span class="pdp-m__t"><b>{{ 'mobile.pdp.free_shipping' | t }}</b><small>{{ 'mobile.pdp.free_shipping_order' | t }}</small></span>
-        <button class="pdp-m__mini" type="button" data-pdp-claim-ship>{{ 'mobile.pdp.claim' | t }}</button>
-      </li>
+      {%- comment -%}
+        Livraison gratuite dynamique : « su questo ordine » si le prix de la variante atteint le seuil, sinon « da 50 € ».
+        Mis à jour par assets/pdp-mobile.js au changement de variante (et pour les devises converties).
+      {%- endcomment -%}
+      {%- if pm_ship_base > 0 -%}
+        {%- liquid
+          assign pm_ship_text_free = 'mobile.pdp.free_shipping_order' | t
+          assign pm_ship_text_from = ''
+          if pm_ship_threshold > 0
+            assign pm_ship_amount = pm_ship_threshold | money_without_trailing_zeros | strip_html
+            assign pm_ship_text_from = 'mobile.pdp.free_shipping_from' | t: amount: pm_ship_amount
+          endif
+        -%}
+        <li
+          data-pdp-ship
+          data-threshold="{{ pm_ship_threshold }}"
+          data-base="{{ pm_ship_base }}"
+          data-text-free="{{ pm_ship_text_free | escape }}"
+          data-text-from="{{ pm_ship_text_from | escape }}"
+          data-money-sample="{{ 123456700 | money_without_trailing_zeros | strip_html | escape }}"
+        >
+          <span class="pdp-m__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span>
+          <span class="pdp-m__t">
+            <b>{{ 'mobile.pdp.free_shipping' | t }}</b>
+            <small data-pdp-ship-text>
+              {%- if pm_ship_threshold > 0 -%}
+                {%- if pm_price >= pm_ship_threshold -%}{{ pm_ship_text_free }}{%- else -%}{{ pm_ship_text_from }}{%- endif -%}
+              {%- endif -%}
+            </small>
+          </span>
+          {%- if shop.shipping_policy != blank -%}
+            <a class="pdp-m__mini" href="{{ shop.shipping_policy.url }}">{{ 'mobile.pdp.shipping_details' | t }}</a>
+          {%- endif -%}
+        </li>
+      {%- endif -%}
     </ul>
     <button class="pdp-m__trust" type="button" data-pdp-open-price>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg>

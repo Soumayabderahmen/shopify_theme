@@ -768,7 +768,11 @@
       "qa_cart_summary_other": "{count} artikelen in je winkelwagen · totaal {total}",
       "qa_size_value": "Maat {size}",
       "qa_go_cart": "Naar winkelwagen ({count})",
-      "qa_size_sold_out": "Uitverkocht"
+      "qa_size_sold_out": "Uitverkocht",
+      "pdp_ship_free_order": "Gratis verzending voor deze bestelling",
+      "pdp_ship_from": "Gratis verzending vanaf {amount}",
+      "pdp_size_foot_length": "Voetlengte",
+      "pdp_size_length": "Lengte"
     },
     "pdp": {
       "gallery": "Productfoto's",
@@ -824,7 +828,9 @@
       "close": "Sluiten",
       "previous": "Vorige",
       "next": "Volgende",
-      "carousel": "carrousel"
+      "carousel": "carrousel",
+      "free_shipping_from": "Gratis verzending vanaf {{ amount }}",
+      "shipping_details": "Details"
     },
     "category": {
       "dialog": "Categorieën",

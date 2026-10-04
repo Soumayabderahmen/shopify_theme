@@ -318,13 +318,37 @@
       if (badge) badge.click();
     });
   });
-  var shipClaim = root.querySelector('[data-pdp-claim-ship]');
-  if (shipClaim) {
-    shipClaim.addEventListener('click', function () {
-      shipClaim.textContent = T('activated');
-      shipClaim.classList.add('is-done');
-    });
+  /* ---------- Livraison gratuite : seuil des réglages du thème dans la devise du client ----------
+     EUR, USD, CAD, CHF, GBP : même nombre, déjà calculé par le Liquid (data-threshold). Autres devises
+     (data-threshold = 0) : seuil en euros converti au taux de Shopify, arrondi à deux chiffres significatifs. */
+  var ship = root.querySelector('[data-pdp-ship]');
+  var shipText = ship && ship.querySelector('[data-pdp-ship-text]');
+  var shipThreshold = ship ? Number(ship.getAttribute('data-threshold')) || 0 : 0;
+  if (ship && !shipThreshold) {
+    var rate = Number(window.Shopify && window.Shopify.currency && window.Shopify.currency.rate) || 1;
+    var converted = Number(ship.getAttribute('data-base')) * rate;
+    var magnitude = Math.pow(10, Math.max(0, Math.floor(Math.log10(converted)) - 1));
+    shipThreshold = Math.ceil(converted / magnitude) * magnitude;
   }
+  // Montant converti au format de prix de la boutique : modèle « 1 234 567 » rendu par Shopify
+  // (data-money-sample, ex. « Lek 1,234,567 ») dont on garde symbole et séparateur de milliers.
+  var shopMoney = function (cents) {
+    var sample = ship.getAttribute('data-money-sample') || '';
+    var match = sample.match(/^(.*?)1(\D?)234(?:\2)567(.*)$/);
+    var whole = String(Math.round(cents / 100));
+    if (!match) return money(cents).replace(/[.,]00(?=\D*$)/, '');
+    return match[1] + whole.replace(/\B(?=(\d{3})+(?!\d))/g, match[2]) + match[3];
+  };
+  // Textes déjà formatés par Shopify pour EUR, USD, CAD, CHF, GBP ; devises converties : montant calculé ici.
+  var updateShipping = function (price) {
+    if (!shipText || !shipThreshold) return;
+    var text = price >= shipThreshold
+      ? (ship.getAttribute('data-text-free') || T('pdp_ship_free_order'))
+      : (ship.getAttribute('data-text-from') || T('pdp_ship_from', { amount: shopMoney(shipThreshold) }));
+    if (shipText.textContent !== text) shipText.textContent = text;
+  };
+  var firstVariant = variants.find(function (item) { return String(item.id) === lastVariantId; }) || variants[0];
+  if (firstVariant) updateShipping(firstVariant.price);
   root.querySelectorAll('[data-pdp-protection]').forEach(function (button) {
     button.addEventListener('click', function () {
       var label = button.getAttribute('data-pdp-protection');
@@ -385,6 +409,60 @@
     if (/panoramic|overview|descri/.test(t)) return 'ov';
     return 'sec' + Math.random().toString(36).slice(2, 7);
   };
+  /* Ligne « size_info: {"sizeInfoList":[…]} » des descriptions importées (fournisseur) : données brutes de tailles.
+     Transformée en vrai tableau : taille, longueur (pied pour les chaussures) en cm / pouces, équivalences par pays. */
+  var SIZE_COUNTRIES = ['EU', 'US', 'UK', 'JP', 'KR', 'BR', 'MX'];
+  var readJsonObject = function (text) {
+    var start = text.indexOf('{');
+    if (start === -1) return null;
+    var depth = 0;
+    var inString = false;
+    for (var i = start; i < text.length; i += 1) {
+      var ch = text[i];
+      if (inString) {
+        if (ch === '\\') i += 1;
+        else if (ch === '"') inString = false;
+      } else if (ch === '"') {
+        inString = true;
+      } else if (ch === '{') {
+        depth += 1;
+      } else if (ch === '}') {
+        depth -= 1;
+        if (depth === 0) {
+          try { return JSON.parse(text.slice(start, i + 1)); } catch (error) { return null; }
+        }
+      }
+    }
+    return null;
+  };
+  var sizeInfoTable = function (text) {
+    var data = readJsonObject(text);
+    var list = data && Array.isArray(data.sizeInfoList) ? data.sizeInfoList.filter(function (entry) { return entry && entry.size; }) : [];
+    if (!list.length) return null;
+    var countries = SIZE_COUNTRIES.filter(function (code) {
+      return list.some(function (entry) { return entry.countrySizeMap && entry.countrySizeMap[code]; });
+    });
+    var hasLength = list.some(function (entry) { return entry.length && entry.length.cm; });
+    var lengthTitle = T(countries.length ? 'pdp_size_foot_length' : 'pdp_size_length') + ' (cm / inch)';
+    var table = document.createElement('table');
+    var addRow = function (cells, head) {
+      var row = table.insertRow();
+      cells.forEach(function (value) {
+        var cell = document.createElement(head ? 'th' : 'td');
+        cell.textContent = value;
+        row.appendChild(cell);
+      });
+    };
+    addRow([T('size')].concat(hasLength ? [lengthTitle] : [], countries), true);
+    list.forEach(function (entry) {
+      var length = entry.length && entry.length.cm ? entry.length.cm + ' cm / ' + (entry.length.inch || '') + '″' : '';
+      addRow([String(entry.size)].concat(hasLength ? [length] : [], countries.map(function (code) {
+        return (entry.countrySizeMap && entry.countrySizeMap[code]) || '–';
+      })), false);
+    });
+    return table;
+  };
+
   var buildDescription = function () {
     if (!descSource || !descBox) return;
     var doc = descSource.content.cloneNode(true);
@@ -411,6 +489,15 @@
     };
     collect(doc);
 
+    // La ligne « size_info » brute est retirée du texte ; son tableau devient un onglet « Guida alle taglie ».
+    var supplierSizeTable = null;
+    items = items.filter(function (el) {
+      var text = el.textContent.trim();
+      if (!/^size_info\s*:/i.test(text)) return true;
+      if (!supplierSizeTable) supplierSizeTable = sizeInfoTable(text);
+      return false;
+    });
+
     var sections = [];
     var current = null;
     items.forEach(function (el) {
@@ -430,12 +517,16 @@
       }
       current.nodes.push(el);
     });
+    // Tableau du fournisseur seulement si la description n'a pas déjà sa propre section de tailles.
+    if (supplierSizeTable && !sections.some(function (section) { return keyFor(section.title) === 'size'; })) {
+      sections.push({ title: T('size_guide'), key: 'size', nodes: [supplierSizeTable] });
+    }
     if (!sections.length && !photos.length) return;
 
     var html = '';
     var tabs = [];
     sections.forEach(function (section) {
-      var key = keyFor(section.title);
+      var key = section.key || keyFor(section.title);
       var body = '';
       var paragraphs = '';
       var flushParagraphs = function () {
@@ -780,6 +871,7 @@
   /* ---------- Mise à jour quand la variante change ---------- */
   function onVariantChange(variant) {
     if (dynamicSync) dynamicSync();
+    updateShipping(variant.price);
     syncOptions();
     highlightSize();
     updateTotals();

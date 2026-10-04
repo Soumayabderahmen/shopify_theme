@@ -4392,3 +4392,11 @@
     contain-intrinsic-size: auto 300px;
   }
 }
+
+/* « +N venduti » masqué sur les cartes produit mobiles : ce nombre vient du métachamp custom.moq (saisi à la main),
+   pas des vraies ventes, et contredisait le nombre d'avis. Desktop (« MOQ: N articoli ») inchangé. */
+@media only screen and (max-width: 760px) {
+  #root li.alibaba-product-card .alibaba-card__moq {
+    display: none !important;
+  }
+}

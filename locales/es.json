@@ -765,7 +765,11 @@
       "qa_cart_summary_other": "{count} artículos en el carrito · total {total}",
       "qa_size_value": "Talla {size}",
       "qa_go_cart": "Ir al carrito ({count})",
-      "qa_size_sold_out": "Agotada"
+      "qa_size_sold_out": "Agotada",
+      "pdp_ship_free_order": "Envío gratis en este pedido",
+      "pdp_ship_from": "Envío gratis desde {amount}",
+      "pdp_size_foot_length": "Largo del pie",
+      "pdp_size_length": "Largo"
     },
     "pdp": {
       "gallery": "Fotos del producto",
@@ -821,7 +825,9 @@
       "close": "Cerrar",
       "previous": "Anterior",
       "next": "Siguiente",
-      "carousel": "carrusel"
+      "carousel": "carrusel",
+      "free_shipping_from": "Envío gratis desde {{ amount }}",
+      "shipping_details": "Detalles"
     },
     "category": {
       "dialog": "Categorías",

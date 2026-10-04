@@ -509,6 +509,13 @@ body.template-product {
   border-radius: 999px;
 }
 
+/* « Dettagli » (livraison) : lien vers la politique de livraison, même look que les boutons. */
+#root .pdp-m a.pdp-m__mini {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 #root .pdp-m .pdp-m__mini.is-done {
   color: #fff;
   background: var(--pm-ok);
