@@ -424,31 +424,58 @@
         {%- endif -%}
       </section>
 
-      {%- assign brand_handles = 'nike,adidas,reebok' | split: ',' -%}
-      {%- assign brand_labels = 'Nike,Adidas,Reebok' | split: ',' -%}
+      {%- comment -%}
+        Marques de la boutique (rangée défilante à gauche / à droite), triées par nombre de produits.
+        Format : Nom|recherche|collection(s)|produit pour la photo.
+        Avec une collection (nike, adidas, rebok) : lien et photo de la collection ;
+        sinon : recherche limitée au titre / fabricant / type (pas aux descriptions) et photo d'un vrai produit de la marque.
+      {%- endcomment -%}
+      {%- capture brand_list -%}
+        Nike|Nike|nike|;
+        Adidas|Adidas|adidas|;
+        Pagani Design|Pagani||pagani-design-nuovo-orologio-da-polso-al-quarzo-da-uomo-con-quadrante-in-meteorite-vetro-zaffiro-cronografo-impermeabile-100m-in-acciaio-inossidabile;
+        Onemix|Onemix||onemix-2026-o-resilio-scarpe-da-corsa-per-uomo-traspiranti-leggere-sneakers-per-palestra-e-sport-allaperto;
+        Zadorin|Zadorin||zadorin-fashion-oversized-turn-down-collar-fluffy-faux-fur-coat-woman-vintage-faux-fur-jacket-coats-winter-clothes-woman-2025;
+        Jordan|Jordan||scarpe-da-basket-nike-originali-jordan-mvp-678-da-uomo-resistenti-e-pratiche-dz4475-100;
+        Skechers|Skechers||skechers-easy-going-flat-ankle-boots-high-zip-2-women-brown;
+        Reebok|Reebok|reebok,rebok|;
+        Olevs|Olevs||olevs-5885-orologio-da-uomo-orologio-al-quarzo-impermeabile-di-marca-originale-cinturino-in-acciaio-inossidabile-data-automatica-orologi-da-regalo-da-uomo-per-uomo-1;
+        Poedagar|Poedagar||poedagar-orologio-da-polso-al-quarzo-da-uomo-di-lusso-impermeabile-luminoso-data-settimana-orologio-da-uomo-orologi-da-uomo-daffari-in-acciaio-inossidabile-1
+      {%- endcapture -%}
+      {%- assign brand_entries = brand_list | split: ';' -%}
       <section class="mobile-explore-section">
         <div class="mobile-explore-section__title"><h2>{{ 'mobile.explore.brands' | t }}</h2></div>
         <div class="mobile-explore-brands" aria-label="{{ 'mobile.explore.scroll_brands' | t }}">
-          {%- for brand_handle in brand_handles -%}
-            {%- assign brand_collection = collections[brand_handle] -%}
-            {%- if brand_handle == 'reebok' and brand_collection == blank -%}
-              {%- assign brand_collection = collections['rebok'] -%}
-            {%- endif -%}
+          {%- for brand_entry in brand_entries -%}
             {%- liquid
-                assign brand_label = brand_labels[forloop.index0]
-                assign brand_image = brand_collection.featured_image
-                if brand_image == blank
-                  assign brand_image = brand_collection.image
+                assign brand_parts = brand_entry | strip | split: '|'
+                assign brand_label = brand_parts[0]
+                assign brand_query = brand_parts[1]
+                assign brand_collection = blank
+                assign brand_collection_handles = brand_parts[2] | split: ','
+                for brand_collection_handle in brand_collection_handles
+                  if brand_collection == blank and collections[brand_collection_handle].products_count > 0
+                    assign brand_collection = collections[brand_collection_handle]
+                  endif
+                endfor
+                assign brand_image = blank
+                if brand_collection != blank
+                  assign brand_image = brand_collection.featured_image
+                  if brand_image == blank
+                    assign brand_image = brand_collection.image
+                  endif
+                  if brand_image == blank and brand_collection.products.first != blank
+                    assign brand_image = brand_collection.products.first.featured_image
+                  endif
                 endif
-                if brand_image == blank and brand_collection.products.first != blank
-                  assign brand_image = brand_collection.products.first.featured_image
+                if brand_image == blank and brand_parts[3] != blank
+                  assign brand_image = all_products[brand_parts[3]].featured_image
                 endif
-                assign brand_query = brand_label | url_encode
-                assign brand_search_url = routes.search_url | append: '?q=' | append: brand_query | append: '&type=product'
-                assign brand_url = brand_search_url
-                if brand_collection != blank and brand_collection.products_count > 0
+                assign brand_query = brand_query | url_encode
+                assign brand_url = routes.search_url | append: '?q=' | append: brand_query | append: '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type'
+                if brand_collection != blank
                   assign brand_url = brand_collection.url
-              endif
+                endif
             -%}
             <a href="{{ brand_url }}" class="mobile-explore-brand">
               {%- if brand_image != blank -%}

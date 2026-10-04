@@ -1250,9 +1250,11 @@
     border-radius: 999px;
   }
 
+  /* 10 marques : la 4e dépasse à droite pour montrer qu'on peut faire défiler. */
   .mobile-explore-brands {
     display: grid;
-    grid-auto-columns: 34%;
+    grid-auto-columns: 28%;
+    scroll-padding-left: 14px;
     grid-auto-flow: column;
     gap: 8px;
     overflow-x: auto;
