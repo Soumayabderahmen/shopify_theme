@@ -207,6 +207,14 @@
                   selector_matches: 'a[data-mobile-categories-trigger], a[href*="/account"], a[href*="/cart"], a[href*="/checkout"], a[href*="/search"]',
                 },
               },
+              {
+                // Liens internes « #… » (onglets du menu Categoria : #mobile-category-panel-N) : pour le navigateur,
+                // c'est la page d'accueil entière ; ils la téléchargeaient une fois par onglet visible.
+                // Le menu Categoria (dans le header) ne précharge que ses fiches produit, pas ses rayons.
+                not: {
+                  selector_matches: 'a[href^="#"], .mobile-category-browser a:not([href*="/products/"])',
+                },
+              },
             ],
           },
           // "eager" fa partire il prerendering all'istante non appena il link appare nel viewport o viene sfiorato

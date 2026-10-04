@@ -35,9 +35,9 @@
     {%- endfor -%}
   {%- endfor -%}
   {%- comment -%}
-    Panneau Categoria plein écran (prototype « chiara-liens ») : en-tête compact (☰ | logo | ♡ | panier, mêmes
-    données et compteurs que le header), rangée des liens du menu (comme les onglets du header), puis la liste
-    des rayons à gauche et les produits réels à droite. Mobile uniquement (assets/mobile-temu-header.css/.js).
+    Panneau Categoria (prototype « chiara-liens ») : il s'ouvre juste sous le vrai header du site (☰, logo, ♡,
+    panier, recherche, liens du menu), qui reste visible au-dessus ; le panneau n'a donc pas son propre en-tête.
+    Liste des rayons à gauche, produits réels à droite. Mobile uniquement (assets/mobile-temu-header.css/.js).
   {%- endcomment -%}
   <section class="mobile-category-browser" data-mobile-category-browser hidden aria-hidden="true" data-category-loaded="true" role="dialog" aria-modal="true" aria-label="{{ 'mobile.category.dialog' | t }}" tabindex="-1">
     <svg class="mobile-category-browser__defs" aria-hidden="true" focusable="false" width="0" height="0">
@@ -48,71 +48,6 @@
         </linearGradient>
       </defs>
     </svg>
-    <header class="mobile-category-browser__header">
-      <button class="mobile-category-browser__icon mobile-category-browser__menu" type="button" aria-label="{{ 'mobile.explore.open' | t }}" aria-controls="mobile-explore-drawer" aria-expanded="false" data-mobile-explore-trigger>
-        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
-          <rect x="3" y="5" width="18" height="2.4" rx=".4"></rect>
-          <rect x="3" y="10.8" width="18" height="2.4" rx=".4"></rect>
-          <rect x="3" y="16.6" width="11.5" height="2.4" rx=".4"></rect>
-        </svg>
-      </button>
-      <a class="mobile-category-browser__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}">
-        <svg aria-hidden="true" viewBox="0 0 185 30" focusable="false">
-          <defs>
-            <linearGradient id="mobile-category-logo-gradient" x1="0" y1="0" x2="185" y2="0" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#16123f"></stop>
-              <stop offset="30%" stop-color="#3a34d2"></stop>
-              <stop offset="45%" stop-color="#9aa2c4"></stop>
-              <stop offset="60%" stop-color="#16123f"></stop>
-              <stop offset="100%" stop-color="#3a34d2"></stop>
-            </linearGradient>
-          </defs>
-          <text x="0" y="23" fill="url(#mobile-category-logo-gradient)" font-family="Sora, sans-serif" font-size="23" letter-spacing="-0.6">
-            <tspan font-weight="800">Platinum</tspan><tspan font-weight="500">shop</tspan>
-          </text>
-        </svg>
-      </a>
-      <div class="mobile-category-browser__actions">
-        <a
-          class="mobile-category-browser__icon"
-          href="{{ pages['wishlist'].url | default: '/pages/wishlist' }}"
-          aria-label="Wishlist"
-          aria-haspopup="dialog"
-          aria-controls="mobile-wishlist-drawer"
-          data-mobile-wishlist-trigger
-          data-mobile-category-leave
-        >
-          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
-        </a>
-        {%- unless disable_cart -%}
-          <a
-            class="mobile-category-browser__icon"
-            href="{{ routes.cart_url }}"
-            data-panel="cart"
-            data-mobile-category-leave
-            aria-label="{{ 'cart.title' | t }} {{ cart.total_price | money }}"
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"></path><path d="M6 6 5 2H2"></path><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle></svg>
-            <span class="mobile-home-cart-count"{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span>
-          </a>
-        {%- endunless -%}
-      </div>
-    </header>
-    <nav class="mobile-category-browser__links" aria-label="{{ 'general.accessibility.menu' | t }}">
-      <ul>
-        {%- for link in menu.links -%}
-          {%- unless link.url contains '/pages/wishlist' -%}
-            <li>
-              <a
-                href="{{ link.url }}"
-                class="{% if link.current or link.child_active %}is-active{% endif %}"
-                {% if link.current %}aria-current="page"{% endif %}
-              >{{ link.title | escape }}</a>
-            </li>
-          {%- endunless -%}
-        {%- endfor -%}
-      </ul>
-    </nav>
     <div class="mobile-category-browser__body">
     <aside class="mobile-category-browser__sidebar">
       <div class="mobile-category-browser__tabs" role="tablist" aria-label="{{ featured_label }}">

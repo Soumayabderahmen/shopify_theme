@@ -1552,12 +1552,18 @@ function initMobileTemuHeader() {
       else trigger.removeAttribute('aria-current');
     });
   };
-  // Panneau Categoria plein écran : glisse depuis le bas à l'ouverture (classe is-open), redescend à la fermeture.
-  // Fermeture : nouveau toucher sur Categoria, touche Échap, ☰ / ♡ / panier du panneau, ou changement de page.
+  // Panneau Categoria sous le vrai header : glisse depuis le bas à l'ouverture (classe is-open), redescend à la fermeture.
+  // Le header défile avec la page : on remonte en haut à l'ouverture et on rend la position de lecture à la fermeture.
+  // Fermeture : nouveau toucher sur Categoria, touche Échap, ♡ / panier du header, ou changement de page.
   var categoryCloseTimer = null;
+  var categoryScrollY = null;
   var openCategoryBrowser = function () {
     if (!categoryBrowser) return;
     window.clearTimeout(categoryCloseTimer);
+    if (categoryBrowser.hidden && window.scrollY > 0) {
+      categoryScrollY = window.scrollY;
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
     categoryBrowser.hidden = false;
     categoryBrowser.removeAttribute('aria-hidden');
     document.body.classList.add('mobile-categories-open');
@@ -1574,6 +1580,8 @@ function initMobileTemuHeader() {
     categoryBrowser.classList.remove('is-open');
     document.body.classList.remove('mobile-categories-open');
     syncCategoryTriggers(false);
+    if (categoryScrollY !== null) window.scrollTo({ top: categoryScrollY, behavior: 'instant' });
+    categoryScrollY = null;
     var hide = function () {
       if (categoryBrowser.classList.contains('is-open')) return;
       categoryBrowser.hidden = true;
@@ -1901,8 +1909,8 @@ function initMobileTemuHeader() {
       }
     }
 
-    // ♡ et panier du panneau : on referme le panneau, puis leur action habituelle (favoris, panier latéral) continue.
-    if (categoryBrowser && target.closest('[data-mobile-category-leave]')) closeCategoryBrowser(false);
+    // ♡ et panier du header : on referme le panneau, puis leur action habituelle (favoris, panier latéral) continue.
+    if (categoryBrowser && target.closest('[data-mobile-category-leave], .mobile-temu-header [data-mobile-wishlist-trigger], .mobile-temu-header [data-panel]')) closeCategoryBrowser(false);
 
     var link = target.closest('a[href]');
     if (!link
@@ -2331,14 +2339,18 @@ function initMobileTemuHeader() {
       });
   };
 
-  // Panneau fixé en haut de l'écran : hauteur = écran visible (iPhone : visualViewport) moins la barre du bas.
+  // Panneau fixé juste sous le vrai header : top = bas du header, hauteur = écran visible (iPhone : visualViewport)
+  // moins ce top et la barre du bas.
   var sizeCategoryBrowser = function () {
     if (categoryBrowser.hidden) return;
     var viewport = window.visualViewport;
     var viewportHeight = viewport ? viewport.height : window.innerHeight;
+    var siteHeader = document.querySelector('.mobile-temu-header');
+    var top = siteHeader ? Math.max(0, Math.round(siteHeader.getBoundingClientRect().bottom)) : 0;
     var bottomNavigation = document.querySelector('.mobile-bottom-navigation');
     var bottomNavigationHeight = bottomNavigation ? bottomNavigation.getBoundingClientRect().height : 0;
-    categoryBrowser.style.height = Math.max(280, viewportHeight - bottomNavigationHeight) + 'px';
+    categoryBrowser.style.setProperty('--mobile-category-top', top + 'px');
+    categoryBrowser.style.height = Math.max(200, viewportHeight - top - bottomNavigationHeight) + 'px';
   };
 
   categoryBrowser.querySelectorAll('[data-category-tab]').forEach(function (tab) {
@@ -2415,6 +2427,14 @@ function initMobileTemuHeader() {
   document.addEventListener('pointerdown', function (event) {
     if (event.target instanceof Element && event.target.closest('[data-mobile-categories-trigger]')) prefetchCategoryPanel();
   }, { capture: true, passive: true });
+
+  // Rayon de gauche (Donna, Uomo…) : téléchargement lancé dès que le doigt touche l'onglet, avant la fin du tap.
+  categoryBrowser.addEventListener('pointerdown', function (event) {
+    var tab = event.target instanceof Element && event.target.closest('[data-category-tab]');
+    var panel = tab && document.getElementById(tab.getAttribute('data-category-tab'));
+    var endpoint = panel && !panel.dataset.productsLoaded && panel.getAttribute('data-category-products-endpoint');
+    if (endpoint) fetchCategoryHtml(endpoint, 'Category products prefetch failed').catch(function () {});
+  }, { passive: true });
 
   window.addEventListener('resize', sizeCategoryBrowser);
   if (window.visualViewport) {
