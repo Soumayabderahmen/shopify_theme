@@ -40,7 +40,7 @@
   </script>
 
   {%- if pm_media_count > 0 -%}
-    <section class="pdp-m__gal" aria-roledescription="carosello" aria-label="Foto del prodotto">
+    <section class="pdp-m__gal" aria-roledescription="{{ 'mobile.pdp.carousel' | t }}" aria-label="{{ 'mobile.pdp.gallery' | t }}">
       <div class="pdp-m__slides" data-pdp-slides>
         {%- assign pm_index = 0 -%}
         {%- for media in product.media -%}
@@ -63,11 +63,11 @@
       <span class="pdp-m__cnt" data-pdp-count>1 / {{ pm_media_count }}</span>
     </section>
     {%- if pm_media_count > 1 -%}
-      <div class="pdp-m__thumbs" data-pdp-thumbs aria-label="Miniature">
+      <div class="pdp-m__thumbs" data-pdp-thumbs aria-label="{{ 'mobile.pdp.thumbnails' | t }}">
         {%- assign pm_index = 0 -%}
         {%- for media in product.media -%}
           {%- if media.preview_image -%}
-            <button type="button" class="pdp-m__th" data-index="{{ pm_index }}"{% if pm_index == 0 %} aria-current="true"{% endif %} aria-label="Foto {{ pm_index | plus: 1 }}">
+            <button type="button" class="pdp-m__th" data-index="{{ pm_index }}"{% if pm_index == 0 %} aria-current="true"{% endif %} {% assign pm_photo_number = pm_index | plus: 1 %}aria-label="{{ 'mobile.pdp.photo_n' | t: number: pm_photo_number }}">
               <img src="{{ media.preview_image | image_url: width: 108, height: 108, crop: 'center' }}" width="54" height="54" alt="" loading="lazy">
             </button>
             {%- assign pm_index = pm_index | plus: 1 -%}
@@ -79,20 +79,20 @@
 
   <section class="pdp-m__card pdp-m__price-card">
     <div class="pdp-m__tags">
-      <span class="pdp-m__tag">Scelta top</span>
+      <span class="pdp-m__tag">{{ 'mobile.pdp.top_pick' | t }}</span>
       <a href="#pdp-reviews" class="pdp-m__rate" data-pdp-goto-reviews>
         {%- if pm_rating_count > 0 -%}
-          <span class="pdp-m__rst" aria-label="{{ pm_rating }} su 5"><i style="width: {{ pm_stars_width }}%"></i></span>
-          {{ pm_rating | round: 1 }} · {{ pm_rating_count }} {% if pm_rating_count == 1 %}recensione{% else %}recensioni{% endif %}
+          <span class="pdp-m__rst" aria-label="{{ 'mobile.pdp.rating_out_of' | t: rating: pm_rating }}"><i style="width: {{ pm_stars_width }}%"></i></span>
+          {{ pm_rating | round: 1 }} · {{ pm_rating_count }} {% if pm_rating_count == 1 %}{{ 'mobile.pdp.review' | t }}{% else %}{{ 'mobile.pdp.reviews' | t }}{% endif %}
         {%- else -%}
-          <span class="pdp-m__stars-off" aria-hidden="true">★★★★★</span>Recensioni
+          <span class="pdp-m__stars-off" aria-hidden="true">★★★★★</span>{{ 'mobile.pdp.reviews_title_short' | t }}
         {%- endif -%}
       </a>
       {%- assign pm_moq = product.metafields.custom.moq | default: 0 | plus: 0 -%}
-      {%- if pm_moq > 0 -%}<span class="pdp-m__moq">+{{ pm_moq }} articoli venduti</span>{%- endif -%}
+      {%- if pm_moq > 0 -%}<span class="pdp-m__moq">{{ 'mobile.pdp.items_sold' | t: count: pm_moq }}</span>{%- endif -%}
     </div>
     <div class="pdp-m__title" role="heading" aria-level="1" data-pdp-title>{{ product.title | escape }}</div>
-    <button class="pdp-m__more" type="button" data-pdp-title-more hidden>Mostra tutto</button>
+    <button class="pdp-m__more" type="button" data-pdp-title-more hidden>{{ 'mobile.pdp.show_all' | t }}</button>
     <div class="pdp-m__prow">
       <span class="pdp-m__price{% if pm_compare > pm_price %} is-sale{% endif %}" data-pdp-price>{{ pm_price | money }}</span>
       <span class="pdp-m__old" data-pdp-old{% unless pm_compare > pm_price %} hidden{% endunless %}>{{ pm_compare | money }}</span>
@@ -103,33 +103,33 @@
         endif
       -%}
       <span class="pdp-m__save" data-pdp-save{% unless pm_save > 0 %} hidden{% endunless %}>-{{ pm_save }}%</span>
-      <span class="pdp-m__iva">{% if cart.taxes_included %}IVA inclusa{% else %}IVA esclusa{% endif %}</span>
+      <span class="pdp-m__iva">{% if cart.taxes_included %}{{ 'mobile.pdp.tax_included' | t }}{% else %}{{ 'mobile.pdp.tax_excluded' | t }}{% endif %}</span>
     </div>
     <div class="pdp-m__tkt">
       <span class="pdp-m__pc">-20%</span>
-      <span class="pdp-m__tx"><b>Coupon: 20% di sconto</b>Spesa min. 40 € · sconto max. 12 €<br>Scade tra <em data-pdp-coupon-timer>02g 00:00:00</em></span>
-      <button class="pdp-m__claim" type="button" data-pdp-claim>Riscuoti</button>
+      <span class="pdp-m__tx"><b>{{ 'mobile.pdp.coupon_title' | t }}</b>{{ 'mobile.pdp.coupon_short' | t }}<br>{{ 'mobile.pdp.expires_in' | t }} <em data-pdp-coupon-timer>02{{ 'mobile.pdp.days_short' | t }} 00:00:00</em></span>
+      <button class="pdp-m__claim" type="button" data-pdp-claim>{{ 'mobile.pdp.claim' | t }}</button>
     </div>
   </section>
 
   {%- comment -%} 4. Vantaggi esclusivi : mêmes avantages que le bloc du site ; « Termini » et la garantie ouvrent ses vraies fenêtres. {%- endcomment -%}
   <section class="pdp-m__card">
-    <div class="pdp-m__ctitle"><h3>Vantaggi esclusivi per l'articolo</h3></div>
+    <div class="pdp-m__ctitle"><h3>{{ 'mobile.pdp.benefits_title' | t }}</h3></div>
     <ul class="pdp-m__adv">
       <li>
         <span class="pdp-m__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 4v0a2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 0 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg></span>
-        <span class="pdp-m__t"><b>Coupon: 20% di sconto</b><small>Con una spesa min. di 40 €, sconto max. di 12 €</small></span>
-        <button class="pdp-m__mini" type="button" data-pdp-open-terms>Termini</button>
+        <span class="pdp-m__t"><b>{{ 'mobile.pdp.coupon_title' | t }}</b><small>{{ 'mobile.pdp.coupon_long' | t }}</small></span>
+        <button class="pdp-m__mini" type="button" data-pdp-open-terms>{{ 'mobile.pdp.terms' | t }}</button>
       </li>
       <li>
         <span class="pdp-m__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span>
-        <span class="pdp-m__t"><b>Spedizione gratuita</b><small>Spedizione gratuita su questo ordine</small></span>
-        <button class="pdp-m__mini" type="button" data-pdp-claim-ship>Riscuoti</button>
+        <span class="pdp-m__t"><b>{{ 'mobile.pdp.free_shipping' | t }}</b><small>{{ 'mobile.pdp.free_shipping_order' | t }}</small></span>
+        <button class="pdp-m__mini" type="button" data-pdp-claim-ship>{{ 'mobile.pdp.claim' | t }}</button>
       </li>
     </ul>
     <button class="pdp-m__trust" type="button" data-pdp-open-price>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg>
-      <span>Acquista con fiducia con la nostra garanzia sul prezzo</span>
+      <span>{{ 'mobile.pdp.price_guarantee_cta' | t }}</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>
     </button>
   </section>
@@ -149,23 +149,36 @@
           if option_name contains 'ship' or option_name contains 'spedit' or option_name contains 'country' or option_name contains 'paese'
             assign is_ship = true
           endif
+          assign is_size = false
           case option_name
             when 'color', 'colour'
-              assign option_label = 'Colore'
+              assign option_label = 'mobile.pdp.color' | t
             when 'size'
-              assign option_label = 'Taglia'
+              assign option_label = 'mobile.pdp.size' | t
+              assign is_size = true
             else
               assign option_label = option.name
           endcase
           if is_ship
-            assign option_label = 'Spedito da'
+            assign option_label = 'mobile.pdp.ships_from' | t
+          endif
+          # Noms d'options saisis en italien dans les produits (« Colore », « Misura della scarpa », « Spedizioni da ») :
+          # dans les autres langues, libellé traduit du thème. En italien, le nom du produit reste affiché tel quel.
+          if request.locale.iso_code != 'it'
+            if is_color
+              assign option_label = 'mobile.pdp.color' | t
+            elsif option_name contains 'misura' or option_name contains 'taglia'
+              assign option_label = 'mobile.pdp.size' | t
+            elsif option_name contains 'spedizion'
+              assign option_label = 'mobile.pdp.ships_from' | t
+            endif
           endif
         -%}
         <div class="pdp-m__opt" data-option-index="{{ forloop.index0 }}">
           <div class="pdp-m__olab">
             <span>{{ option_label }}: <b data-pdp-option-name>{{ option.selected_value }}</b></span>
-            {%- if option_label == 'Taglia' -%}
-              <button type="button" data-pdp-size-guide><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="6" rx="1.5"/><path d="M7 9v3M11 9v2M15 9v3M19 9v2"/></svg>Guida alle taglie</button>
+            {%- if is_size -%}
+              <button type="button" data-pdp-size-guide><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="6" rx="1.5"/><path d="M7 9v3M11 9v2M15 9v3M19 9v2"/></svg>{{ 'mobile.pdp.size_guide' | t }}</button>
             {%- endif -%}
           </div>
           {%- if is_color -%}
@@ -208,16 +221,16 @@
   {%- comment -%} 6. Quantité + livraison + bouton : pilotent le champ quantité et le bouton du formulaire du thème. {%- endcomment -%}
   <section class="pdp-m__card">
     <div class="pdp-m__qrow">
-      <div class="pdp-m__qty" role="group" aria-label="Quantità">
-        <button type="button" aria-label="Meno" data-pdp-qty="-1">−</button>
+      <div class="pdp-m__qty" role="group" aria-label="{{ 'mobile.pdp.quantity' | t }}">
+        <button type="button" aria-label="{{ 'mobile.pdp.less' | t }}" data-pdp-qty="-1">−</button>
         <output data-pdp-qty-value>1</output>
-        <button type="button" aria-label="Più" data-pdp-qty="1">+</button>
+        <button type="button" aria-label="{{ 'mobile.pdp.more' | t }}" data-pdp-qty="1">+</button>
       </div>
-      <div class="pdp-m__dl"><b>Consegna più rapida in 2-3 giorni lavorativi</b><br>Spedito oggi? Ordina entro <span class="pdp-m__cd" data-pdp-ship-timer>00:00:00</span></div>
+      <div class="pdp-m__dl"><b>{{ 'mobile.pdp.fast_delivery' | t }}</b><br>{{ 'mobile.pdp.ship_today' | t }} <span class="pdp-m__cd" data-pdp-ship-timer>00:00:00</span></div>
     </div>
     <button class="pdp-m__cta" type="button" data-pdp-add>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
-      <span data-pdp-cta-text>Aggiungi al carrello · {{ pm_price | money }}</span>
+      <span data-pdp-cta-text>{{ 'mobile.pdp.add_to_cart' | t }} · {{ pm_price | money }}</span>
     </button>
   </section>
 
@@ -225,43 +238,44 @@
   <section class="pdp-m__card pdp-m__rw" data-pdp-rewards hidden>
     <div class="pdp-m__rwr" data-pdp-points hidden>
       <span class="pdp-m__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="m8.5 14.5-1.5 6.5 5-2.5 5 2.5-1.5-6.5"/></svg></span>
-      <span><b data-pdp-points-text></b><small data-pdp-points-sub>con questo acquisto</small></span>
+      <span><b data-pdp-points-text></b><small data-pdp-points-sub>{{ 'mobile.pdp.with_purchase' | t }}</small></span>
     </div>
     <div class="pdp-m__rwr" data-pdp-credit hidden>
       <span class="pdp-m__ic pdp-m__ic--pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="14.5" r="1.2" fill="currentColor"/></svg></span>
-      <span><b data-pdp-credit-text></b><small>nel negozio, per ogni articolo acquistato</small></span>
+      <span><b data-pdp-credit-text></b><small>{{ 'mobile.pdp.credit_sub' | t }}</small></span>
     </div>
   </section>
 
   {%- comment -%} 8. Protezioni : chaque case ouvre le vrai tiroir « Protezioni platinumshop » du site. {%- endcomment -%}
   <section class="pdp-m__card">
-    <div class="pdp-m__ctitle"><h3>Protezioni platinumshop</h3></div>
+    <div class="pdp-m__ctitle"><h3>{{ 'protezioni.header_title' | t: shop_name: shop.name }}</h3></div>
     <div class="pdp-m__prot">
-      <button type="button" data-pdp-protection="Pagamenti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h4"/></svg>Pagamenti</button>
-      <button type="button" data-pdp-protection="Consegna"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>Consegna</button>
-      <button type="button" data-pdp-protection="Rimborso"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>Rimborso</button>
-      <button type="button" data-pdp-protection="Privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>Privacy</button>
+      <button type="button" data-pdp-protection="{{ 'protezioni.cards.pagamenti' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h4"/></svg>{{ 'protezioni.cards.pagamenti' | t }}</button>
+      <button type="button" data-pdp-protection="{{ 'protezioni.cards.consegna' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>{{ 'protezioni.cards.consegna' | t }}</button>
+      <button type="button" data-pdp-protection="{{ 'protezioni.cards.rimborso' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>{{ 'protezioni.cards.rimborso' | t }}</button>
+      <button type="button" data-pdp-protection="{{ 'protezioni.cards.privacy' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>{{ 'protezioni.cards.privacy' | t }}</button>
     </div>
   </section>
 
   {%- comment -%} 9. Garanzia Ordine : mêmes garanties que le bandeau du site (snippets/Garanzia .liquid). {%- endcomment -%}
   <section class="pdp-m__card">
-    <div class="pdp-m__ctitle"><h3>Garanzia Ordine</h3></div>
+    <div class="pdp-m__ctitle"><h3>{{ 'mobile.pdp.guarantee_title' | t }}</h3></div>
     <div class="pdp-m__gar">
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>Resi Gratuiti</span>
-      <button type="button" data-pdp-open-price><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg>Garanzia sul Prezzo</button>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/></svg>5,00€ Credito per Ritardi</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/></svg>Reso se Danneggiato</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>15 giorni senza aggiornamenti</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>30 giorni senza consegna</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>{{ 'mobile.pdp.free_returns' | t }}</span>
+      <button type="button" data-pdp-open-price><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg>{{ 'mobile.pdp.price_guarantee' | t }}</button>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/></svg>{{ 'mobile.pdp.late_credit' | t }}</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/></svg>{{ 'mobile.pdp.damaged_return' | t }}</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>{{ 'mobile.pdp.no_updates' | t }}</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>{{ 'mobile.pdp.no_delivery' | t }}</span>
     </div>
   </section>
 
   {%- comment -%} 10. Klarna : 3 rate calculées sur le prix réel de la variante. {%- endcomment -%}
   <div class="pdp-m__kl">
     <i>Klarna</i>
-    <p><b data-pdp-klarna>3 rate da {{ pm_price | divided_by: 3 | money }}</b><br>a interessi 0% con Klarna</p>
-    <a href="https://www.klarna.com/it/" target="_blank" rel="noopener">Scopri di più</a>
+    <p>{%- assign pm_klarna_amount = pm_price | divided_by: 3 | money -%}
+    <b data-pdp-klarna>{{ 'mobile.pdp.klarna_installments_html' | t: amount: pm_klarna_amount }}</b><br>{{ 'mobile.pdp.klarna_interest' | t }}</p>
+    <a href="https://www.klarna.com/it/" target="_blank" rel="noopener">{{ 'mobile.pdp.learn_more' | t }}</a>
   </div>
 
   {%- comment -%}
@@ -277,33 +291,33 @@
   <section class="pdp-m__sec" id="pdp-reviews">
     {%- comment -%} Fallback sans app d'avis : titre + note Shopify. Le bloc de l'app (résumé, barres, médias, liste) le remplace via le script. {%- endcomment -%}
     <div data-pdp-reviews-fallback>
-      <h2>Recensioni dei Clienti</h2>
-      <p class="pdp-m__sum-note">{% if pm_rating_count > 0 %}{{ pm_rating | round: 1 | replace: '.', ',' }} su 5 · {{ pm_rating_count }} {% if pm_rating_count == 1 %}recensione{% else %}recensioni{% endif %}{% else %}Sii il primo a lasciare una recensione su questo articolo.{% endif %}</p>
+      <h2>{{ 'mobile.pdp.reviews_title' | t }}</h2>
+      <p class="pdp-m__sum-note">{% if pm_rating_count > 0 %}{% assign pm_rating_text = pm_rating | round: 1 %}{% if request.locale.iso_code == 'it' %}{% assign pm_rating_text = pm_rating_text | replace: '.', ',' %}{% endif %}{{ 'mobile.pdp.rating_out_of' | t: rating: pm_rating_text }} · {{ pm_rating_count }} {% if pm_rating_count == 1 %}{{ 'mobile.pdp.review' | t }}{% else %}{{ 'mobile.pdp.reviews' | t }}{% endif %}{% else %}{{ 'mobile.pdp.first_review' | t }}{% endif %}</p>
     </div>
     <div data-pdp-reviews-slot></div>
   </section>
 
   {%- comment -%} 13. Potrebbe piacerti anche : recommandations Shopify (API), remplies par le script. {%- endcomment -%}
   <section class="pdp-m__rel" data-pdp-related data-url="{{ routes.product_recommendations_url }}.json?product_id={{ product.id }}&limit=8&intent=related" hidden>
-    <h2>Potrebbe piacerti anche</h2>
+    <h2>{{ 'mobile.pdp.you_may_like' | t }}</h2>
     <div class="pdp-m__rail" data-pdp-rail></div>
   </section>
 
   {%- comment -%} 14. Barre d'achat fixe (au-dessus de la barre du bas) : cachée quand le gros bouton est visible. {%- endcomment -%}
   <div class="pdp-m__buy" data-pdp-buy>
-    <button class="pdp-m__vr" type="button" data-pdp-to-options aria-label="Scegli le opzioni">
+    <button class="pdp-m__vr" type="button" data-pdp-to-options aria-label="{{ 'mobile.pdp.choose_options' | t }}">
       <small><span data-pdp-buy-variant>{{ pm_variant.title }}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></small>
       <b data-pdp-buy-price>{{ pm_price | money }}</b>
     </button>
-    <button class="pdp-m__go" type="button" data-pdp-add>Aggiungi al carrello</button>
+    <button class="pdp-m__go" type="button" data-pdp-add>{{ 'mobile.pdp.add_to_cart' | t }}</button>
   </div>
 
   {%- comment -%} Visionneuse des photos de la description. {%- endcomment -%}
-  <div class="pdp-m__lb" data-pdp-lightbox role="dialog" aria-modal="true" aria-label="Foto della descrizione" hidden>
-    <button class="pdp-m__lbx" type="button" aria-label="Chiudi" data-pdp-lb-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <div class="pdp-m__lb" data-pdp-lightbox role="dialog" aria-modal="true" aria-label="{{ 'mobile.pdp.desc_photos' | t }}" hidden>
+    <button class="pdp-m__lbx" type="button" aria-label="{{ 'mobile.pdp.close' | t }}" data-pdp-lb-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <span class="pdp-m__lbc" data-pdp-lb-count>1 / 1</span>
     <div class="pdp-m__lbs" data-pdp-lb-slides></div>
-    <button class="pdp-m__lbp" type="button" aria-label="Precedente" data-pdp-lb-step="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
-    <button class="pdp-m__lbn" type="button" aria-label="Successivo" data-pdp-lb-step="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
+    <button class="pdp-m__lbp" type="button" aria-label="{{ 'mobile.pdp.previous' | t }}" data-pdp-lb-step="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <button class="pdp-m__lbn" type="button" aria-label="{{ 'mobile.pdp.next' | t }}" data-pdp-lb-step="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
   </div>
 </div>

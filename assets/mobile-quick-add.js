@@ -9,6 +9,8 @@
   if (!dialog) return;
 
   var mobile = window.matchMedia('(max-width: 760px)');
+  // Textes traduits (snippets/mobile-i18n.liquid, clés mobile.js.* des fichiers locales).
+  var T = window.mobileT || function (key) { return key; };
   var shopRoot = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
   var toastElement = document.querySelector('[data-qa-toast]');
   var el = {
@@ -338,8 +340,8 @@
   }
 
   function optionLabel(option) {
-    if (isColorOption(option)) return 'Colore';
-    if (SIZE_OPTION.test(option.name)) return 'Taglia';
+    if (isColorOption(option)) return T('color');
+    if (SIZE_OPTION.test(option.name)) return T('size');
     return option.name;
   }
 
@@ -367,7 +369,7 @@
         var label = optionLabel(option);
         var guide = '';
         if (!color && !guideShown && product.sizeChart && SIZE_OPTION.test(option.name)) {
-          guide = '<a href="#" class="qa-guide" data-qa-guide aria-expanded="false">Guida alle taglie</a>';
+          guide = '<a href="#" class="qa-guide" data-qa-guide aria-expanded="false">' + T('size_guide') + '</a>';
           guideShown = true;
         }
         html += '<div class="qa-grp" data-qa-group="' + index + '">'
@@ -409,15 +411,15 @@
       var available = valueAvailable(index, name);
       if (isColorOption(product.options[index])) {
         button.classList.toggle('is-soldout', !available);
-        button.title = available ? name : name + ' — Esaurito';
+        button.title = available ? name : name + ' — ' + T('sold_out');
       } else {
         button.disabled = !available && !checked;
-        button.title = available ? '' : 'Esaurito';
+        button.title = available ? '' : T('sold_out');
       }
     });
     el.options.querySelectorAll('[data-qa-value]').forEach(function (label) {
       var index = Number(label.dataset.qaValue);
-      label.textContent = state.selected[index] || 'scegli';
+      label.textContent = state.selected[index] || T('choose');
     });
 
     // En-tête : image, prix (barré + -%), stock réel.
@@ -428,16 +430,16 @@
     el.price.innerHTML = '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(variant.price)) + '</b>'
       + (onSale ? '<s>' + escapeHtml(money(variant.compareAtPrice)) + '</s><span class="pct">-' + percent + '%</span>' : '');
 
-    var stockText = 'Disponibile';
+    var stockText = T('in_stock');
     var stockClass = '';
     if (exact && !exact.available) {
-      stockText = 'Esaurito';
+      stockText = T('sold_out');
       stockClass = 'out';
     } else if (exact && exact.quantity != null && exact.quantity > 0 && exact.quantity <= LOW_STOCK) {
-      stockText = exact.quantity === 1 ? 'Solo 1 pezzo disponibile' : 'Solo ' + exact.quantity + ' pezzi disponibili';
+      stockText = exact.quantity === 1 ? T('only_one_left') : T('only_n_left', { count: exact.quantity });
       stockClass = 'low';
     } else if (!exact && !product.variants.some(function (item) { return item.available; })) {
-      stockText = 'Esaurito';
+      stockText = T('sold_out');
       stockClass = 'out';
     }
     if (state.error) {
@@ -457,7 +459,7 @@
     // Avantages : même règle que la carte (livraison offerte au-delà du seuil), Klarna si activé.
     var freeShipping = variant.price > shop.freeShippingThreshold;
     el.free.hidden = !freeShipping;
-    el.free.textContent = (flagEmoji(shop.country) + ' Sped. gratuita').trim();
+    el.free.textContent = (flagEmoji(shop.country) + ' ' + T('free_shipping_short')).trim();
     el.klarna.hidden = !shop.klarna;
     el.klarnaValue.textContent = money(Math.round(variant.price / 3));
 
@@ -466,9 +468,9 @@
     // Bouton principal.
     var unavailable = exact && !exact.available;
     el.add.classList.toggle('wait', Boolean(missing) || Boolean(unavailable));
-    if (missing) el.add.textContent = SIZE_OPTION.test(missing.name) ? 'Scegli una taglia' : 'Scegli ' + optionLabel(missing).toLowerCase();
-    else if (unavailable) el.add.textContent = 'Esaurito';
-    else el.add.textContent = 'Aggiungi al carrello · ' + money(variant.price * state.qty);
+    if (missing) el.add.textContent = SIZE_OPTION.test(missing.name) ? T('choose_size') : T('choose_option', { option: optionLabel(missing).toLowerCase() });
+    else if (unavailable) el.add.textContent = T('sold_out');
+    else el.add.textContent = T('add_to_cart_total', { price: money(variant.price * state.qty) });
   }
 
   function renderSimilar(product) {
@@ -492,11 +494,11 @@
       var sameCount = list.filter(function (item) {
         return type && String(item.type || '').trim().toLowerCase() === type.toLowerCase();
       }).length;
-      el.simTitle.textContent = sameCount >= 2 ? 'Altri ' + type.toLowerCase() : 'Potrebbe piacerti anche';
+      el.simTitle.textContent = sameCount >= 2 ? T('more_of_type', { type: type.toLowerCase() }) : T('you_may_like');
       el.simRail.innerHTML = list.map(function (item) {
         var onSale = item.compare_at_price > item.price;
         var percent = onSale ? Math.round((item.compare_at_price - item.price) / item.compare_at_price * 100) : 0;
-        return '<button type="button" class="qs" data-qa-similar="' + escapeHtml(item.handle) + '" aria-label="Scegli opzioni: ' + escapeHtml(item.title) + '">'
+        return '<button type="button" class="qs" data-qa-similar="' + escapeHtml(item.handle) + '" aria-label="' + escapeHtml(T('choose_options_for', { title: item.title })) + '">'
           + '<span class="ph"><img src="' + escapeHtml(sizedImage(item.featured_image, 240)) + '" alt="" loading="lazy">'
           + (percent ? '<i>-' + percent + '%</i>' : '') + '</span>'
           + '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(item.price)) + '</b>'
@@ -584,7 +586,7 @@
     el.sim.hidden = true;
     el.back.hidden = true;
     el.more.href = titleLink ? titleLink.href : '#';
-    el.add.textContent = 'Caricamento…';
+    el.add.textContent = T('loading_short');
     el.add.classList.add('wait');
   }
 
@@ -678,7 +680,7 @@
       body: JSON.stringify({ items: [{ id: variant.id, quantity: quantity }] })
     }).then(function (response) {
       return response.json().then(function (data) {
-        if (!response.ok) throw new Error(data.description || data.message || 'Impossibile aggiungere al carrello');
+        if (!response.ok) throw new Error(data.description || data.message || T('cart_add_error'));
         return data;
       });
     });
@@ -694,7 +696,7 @@
       showToast('Aggiunto: ' + (summary ? summary + ' × ' : '× ') + quantity);
     }).catch(function (error) {
       console.error(error);
-      showToast(error.message || 'Impossibile aggiungere al carrello');
+      showToast(error.message || T('cart_add_error'));
     }).finally(function () {
       busy = false;
       el.add.disabled = false;
@@ -846,6 +848,15 @@
     event.stopPropagation();
     openFromCard(trigger);
   }, true);
+
+  // Photo de la carte : sur mobile elle ouvre la fiche produit, comme le titre (le cœur et le panier gardent leur action).
+  document.addEventListener('click', function (event) {
+    if (!mobile.matches || event.defaultPrevented || event.button !== 0 || !event.target.closest) return;
+    var media = event.target.closest('li.alibaba-product-card .alibaba-card__media');
+    if (!media || event.target.closest('a, button, label, input, [data-quick-add]')) return;
+    var link = media.closest('li').querySelector('.alibaba-card__title a[href]');
+    if (link) link.click();
+  });
 
   dialog.addEventListener('click', function (event) {
     if (event.target === dialog) {

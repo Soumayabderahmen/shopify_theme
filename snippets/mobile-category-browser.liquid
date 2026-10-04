@@ -1,22 +1,9 @@
 {%- liquid
-  assign language_code = localization.language.iso_code | downcase | split: '-' | first
-  case language_code
-    when 'it'
-      assign featured_label = 'In evidenza'
-      assign shop_label = 'Acquista per categoria'
-      assign view_all_label = 'Vedi tutto'
-      assign new_label = 'Novità'
-    when 'fr'
-      assign featured_label = 'En vedette'
-      assign shop_label = 'Acheter par catégorie'
-      assign view_all_label = 'Voir tout'
-      assign new_label = 'Nouveautés'
-    else
-      assign featured_label = 'Featured'
-      assign shop_label = 'Shop by category'
-      assign view_all_label = 'View all'
-      assign new_label = 'New arrivals'
-  endcase
+  # Libellés dans la langue du visiteur (clés mobile.category.* des fichiers locales).
+  assign featured_label = 'mobile.category.featured' | t
+  assign shop_label = 'mobile.category.shop_by' | t
+  assign view_all_label = 'mobile.category.view_all' | t
+  assign new_label = 'mobile.category.new' | t
 
 -%}
 
@@ -52,7 +39,7 @@
     données et compteurs que le header), rangée des liens du menu (comme les onglets du header), puis la liste
     des rayons à gauche et les produits réels à droite. Mobile uniquement (assets/mobile-temu-header.css/.js).
   {%- endcomment -%}
-  <section class="mobile-category-browser" data-mobile-category-browser hidden aria-hidden="true" data-category-loaded="true" role="dialog" aria-modal="true" aria-label="Categorie" tabindex="-1">
+  <section class="mobile-category-browser" data-mobile-category-browser hidden aria-hidden="true" data-category-loaded="true" role="dialog" aria-modal="true" aria-label="{{ 'mobile.category.dialog' | t }}" tabindex="-1">
     <svg class="mobile-category-browser__defs" aria-hidden="true" focusable="false" width="0" height="0">
       <defs>
         <linearGradient id="mobile-category-view-all-gradient" x1="0" y1="0" x2="1" y2="1">
@@ -62,7 +49,7 @@
       </defs>
     </svg>
     <header class="mobile-category-browser__header">
-      <button class="mobile-category-browser__icon mobile-category-browser__menu" type="button" aria-label="Apri Esplora" aria-controls="mobile-explore-drawer" aria-expanded="false" data-mobile-explore-trigger>
+      <button class="mobile-category-browser__icon mobile-category-browser__menu" type="button" aria-label="{{ 'mobile.explore.open' | t }}" aria-controls="mobile-explore-drawer" aria-expanded="false" data-mobile-explore-trigger>
         <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
           <rect x="3" y="5" width="18" height="2.4" rx=".4"></rect>
           <rect x="3" y="10.8" width="18" height="2.4" rx=".4"></rect>
@@ -198,7 +185,7 @@
               </a>
             {%- endfor -%}
             {%- if hot_collection.products_count > 12 -%}
-              <a href="{{ hot_collection.url }}?page=2&view=mobile-category" class="mobile-category-products__more" data-category-products-more>Vedi più</a>
+              <a href="{{ hot_collection.url }}?page=2&view=mobile-category" class="mobile-category-products__more" data-category-products-more>{{ 'mobile.category.see_more' | t }}</a>
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -261,7 +248,7 @@
                 </a>
               {%- endfor -%}
               {%- if category_link.object.products_count > 12 -%}
-                <a href="{{ category_link.url }}?page=2&view=mobile-category" class="mobile-category-products__more" data-category-products-more>Vedi più</a>
+                <a href="{{ category_link.url }}?page=2&view=mobile-category" class="mobile-category-products__more" data-category-products-more>{{ 'mobile.category.see_more' | t }}</a>
               {%- endif -%}
             {%- endif -%}
             </div>
@@ -290,7 +277,7 @@
               </a>
             {%- endfor -%}
             {%- if main_link.object.products_count > 12 -%}
-              <a href="{{ main_link.url }}?page=2&view=mobile-category" class="mobile-category-products__more" data-category-products-more>Vedi più</a>
+              <a href="{{ main_link.url }}?page=2&view=mobile-category" class="mobile-category-products__more" data-category-products-more>{{ 'mobile.category.see_more' | t }}</a>
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -303,25 +290,25 @@
     id="mobile-explore-drawer"
     class="mobile-explore-drawer"
     aria-modal="true"
-    aria-label="Esplora"
+    aria-label="{{ 'mobile.explore.title' | t }}"
     data-currency="{{ cart.currency.iso_code | default: shop.currency }}"
     aria-hidden="true"
     inert
     data-mobile-explore-drawer
   >
-    <button class="mobile-explore-drawer__close" type="button" aria-label="Chiudi Esplora" data-mobile-explore-close>
+    <button class="mobile-explore-drawer__close" type="button" aria-label="{{ 'mobile.explore.close' | t }}" data-mobile-explore-close>
       <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m6 6 12 12M18 6 6 18"></path></svg>
     </button>
     <div class="mobile-explore-drawer__scroll">
       <div class="mobile-explore-drawer__heading">
-        <strong>Esplora</strong>
-        <span>Collezioni, brand e idee per ogni occasione</span>
+        <strong>{{ 'mobile.explore.title' | t }}</strong>
+        <span>{{ 'mobile.explore.subtitle' | t }}</span>
       </div>
 
       <section class="mobile-explore-section mobile-explore-section--recent" data-mobile-explore-recent hidden>
         <div class="mobile-explore-section__title">
-          <h2>👀 Visti di recente</h2>
-          <button type="button" data-mobile-explore-recent-clear>Cancella</button>
+          <h2>👀 {{ 'mobile.explore.recently_viewed' | t }}</h2>
+          <button type="button" data-mobile-explore-recent-clear>{{ 'mobile.explore.clear' | t }}</button>
         </div>
         <div class="mobile-explore-rail mobile-explore-rail--products" data-mobile-explore-recent-products></div>
       </section>
@@ -329,16 +316,20 @@
       {%- assign current_month = 'now' | date: '%m' | plus: 0 -%}
       {%- liquid
         if current_month == 12 or current_month <= 2
-          assign current_season = 'Inverno'
+          assign current_season = 'mobile.explore.winter' | t
+          assign season_class = 'inverno'
           assign seasonal_handles = 'piumini,sweatshirt,casa-giardino' | split: ','
         elsif current_month <= 5
-          assign current_season = 'Primavera'
+          assign current_season = 'mobile.explore.spring' | t
+          assign season_class = 'primavera'
           assign seasonal_handles = 'new-trends,mocassini,abbigliamento-cinese-2026' | split: ','
         elsif current_month <= 8
-          assign current_season = 'Estate'
+          assign current_season = 'mobile.explore.summer' | t
+          assign season_class = 'estate'
           assign seasonal_handles = 'mare-spiaggia,set-uomo-estate,borse-da-spiaggia,casa-giardino' | split: ','
         else
-          assign current_season = 'Autunno'
+          assign current_season = 'mobile.explore.autumn' | t
+          assign season_class = 'autunno'
           assign seasonal_handles = 'piumini,sweatshirt,new-trends,casa-giardino' | split: ','
         endif
         assign seasonal_collection_count = 0
@@ -352,8 +343,8 @@
       {%- if seasonal_collection_count > 0 -%}
         <section class="mobile-explore-section">
           <div class="mobile-explore-section__title">
-            <h2>Collezioni <span class="mobile-explore-tag mobile-explore-tag--season mobile-explore-tag--season-{{ current_season | handleize }}">{{ current_season | escape }}</span></h2>
-            <a href="{{ routes.all_products_collection_url }}">Vedi tutte</a>
+            <h2>{{ 'mobile.explore.collections' | t }} <span class="mobile-explore-tag mobile-explore-tag--season mobile-explore-tag--season-{{ season_class }}">{{ current_season | escape }}</span></h2>
+            <a href="{{ routes.all_products_collection_url }}">{{ 'mobile.explore.see_all_f' | t }}</a>
           </div>
           <div class="mobile-explore-rail mobile-explore-rail--collections">
             {%- for seasonal_handle in seasonal_handles -%}
@@ -400,8 +391,8 @@
       {%- endif -%}
       <section class="mobile-explore-section">
         <div class="mobile-explore-section__title">
-          <h2>🔥 In offerta</h2>
-          <a href="{% if sale_collection.handle == 'in-offerta' %}{{ sale_collection.url }}{% else %}{{ routes.all_products_collection_url }}{% endif %}">Vedi tutte</a>
+          <h2>🔥 {{ 'mobile.explore.on_sale' | t }}</h2>
+          <a href="{% if sale_collection.handle == 'in-offerta' %}{{ sale_collection.url }}{% else %}{{ routes.all_products_collection_url }}{% endif %}">{{ 'mobile.explore.see_all_f' | t }}</a>
         </div>
         {%- if sale_product_count > 0 -%}
           <div class="mobile-explore-rail mobile-explore-rail--products">
@@ -436,8 +427,8 @@
       {%- assign brand_handles = 'nike,adidas,reebok' | split: ',' -%}
       {%- assign brand_labels = 'Nike,Adidas,Reebok' | split: ',' -%}
       <section class="mobile-explore-section">
-        <div class="mobile-explore-section__title"><h2>Shop per brand</h2></div>
-        <div class="mobile-explore-brands" aria-label="Scorri i brand">
+        <div class="mobile-explore-section__title"><h2>{{ 'mobile.explore.brands' | t }}</h2></div>
+        <div class="mobile-explore-brands" aria-label="{{ 'mobile.explore.scroll_brands' | t }}">
           {%- for brand_handle in brand_handles -%}
             {%- assign brand_collection = collections[brand_handle] -%}
             {%- if brand_handle == 'reebok' and brand_collection == blank -%}
@@ -476,7 +467,7 @@
       </section>
 
       {%- assign occasion_handles = 'scarpe-sport-uomo,borse-da-spiaggia,tacco-alto' | split: ',' -%}
-      {%- assign occasion_labels = 'Sport,Spiaggia,Tacco alto' | split: ',' -%}
+      {%- assign occasion_labels = 'mobile.explore.occasion_labels' | t | split: ',' -%}
       {%- assign occasion_collection_count = 0 -%}
       {%- for occasion_handle in occasion_handles -%}
         {%- assign occasion_collection = collections[occasion_handle] -%}
@@ -488,10 +479,10 @@
       {%- assign current_month = 'now' | date: '%m' | plus: 0 -%}
       {%- if current_month == 10 or occasion_collection_count > 0 -%}
         <section class="mobile-explore-section">
-          <div class="mobile-explore-section__title"><h2>Per occasione</h2></div>
+          <div class="mobile-explore-section__title"><h2>{{ 'mobile.explore.occasions' | t }}</h2></div>
           {%- if current_month == 10 and halloween_collection != blank and halloween_collection.products_count > 0 -%}
             <a class="mobile-explore-halloween" href="{{ halloween_collection.url }}">
-              <span><small>🎃 Halloween · 31 ottobre</small><strong>Anime &amp; Cosplay</strong><em>Costumi, kigurumi e giacche anime</em></span>
+              <span><small>🎃 {{ 'mobile.explore.halloween_date' | t }}</small><strong>Anime &amp; Cosplay</strong><em>{{ 'mobile.explore.halloween_text' | t }}</em></span>
               <span class="mobile-explore-halloween__images">
                 {%- for halloween_product in halloween_collection.products limit: 2 -%}
                   {%- if halloween_product.featured_image != blank -%}
@@ -552,17 +543,17 @@
       {%- if gift_month >= 11 and gift_month <= 12 -%}
         <section class="mobile-explore-section">
           <div class="mobile-explore-section__title">
-            <h2>🎁 Idee regalo <span class="mobile-explore-tag mobile-explore-tag--gift">Natale</span></h2>
+            <h2>🎁 {{ 'mobile.explore.gift_ideas' | t }} <span class="mobile-explore-tag mobile-explore-tag--gift">{{ 'mobile.explore.christmas' | t }}</span></h2>
           </div>
           <div class="mobile-explore-gifts">
             <a href="{{ routes.all_products_collection_url }}?filter.v.price.lte=20">
-              <i aria-hidden="true">💝</i><strong>Sotto 20€</strong><small>Piccoli pensieri</small>
+              <i aria-hidden="true">💝</i><strong>{{ 'mobile.explore.under_20' | t }}</strong><small>{{ 'mobile.explore.small_gifts' | t }}</small>
             </a>
             {%- if gifts_for_him != blank and gifts_for_him.products_count > 0 -%}
-              <a href="{{ gifts_for_him.url }}"><i aria-hidden="true">🧔</i><strong>Per lui</strong><small>{{ gifts_for_him.title | escape }}</small></a>
+              <a href="{{ gifts_for_him.url }}"><i aria-hidden="true">🧔</i><strong>{{ 'mobile.explore.for_him' | t }}</strong><small>{{ gifts_for_him.title | escape }}</small></a>
             {%- endif -%}
             {%- if gifts_for_her != blank and gifts_for_her.products_count > 0 -%}
-              <a href="{{ gifts_for_her.url }}"><i aria-hidden="true">💃</i><strong>Per lei</strong><small>{{ gifts_for_her.title | escape }}</small></a>
+              <a href="{{ gifts_for_her.url }}"><i aria-hidden="true">💃</i><strong>{{ 'mobile.explore.for_her' | t }}</strong><small>{{ gifts_for_her.title | escape }}</small></a>
             {%- endif -%}
           </div>
         </section>
@@ -571,8 +562,8 @@
       {%- if new_collection != blank and new_collection.products_count > 0 -%}
         <section class="mobile-explore-section">
           <div class="mobile-explore-section__title">
-            <h2>Nuovi arrivi <span class="mobile-explore-tag">NEW</span></h2>
-            <a href="{{ new_collection.url }}">Vedi tutti</a>
+            <h2>{{ 'mobile.explore.new_arrivals' | t }} <span class="mobile-explore-tag">NEW</span></h2>
+            <a href="{{ new_collection.url }}">{{ 'mobile.explore.see_all' | t }}</a>
           </div>
           <div class="mobile-explore-rail mobile-explore-rail--products">
             {%- for explore_product in new_collection.products limit: 8 -%}
@@ -607,8 +598,8 @@
       {%- if hot_collection != blank and hot_collection.products_count > 0 -%}
         <section class="mobile-explore-section mobile-explore-section--top">
           <div class="mobile-explore-section__title">
-            <h2>🏆 Più venduti</h2>
-            <a href="{{ hot_collection.url }}">Vedi tutti</a>
+            <h2>🏆 {{ 'mobile.explore.best_sellers' | t }}</h2>
+            <a href="{{ hot_collection.url }}">{{ 'mobile.explore.see_all' | t }}</a>
           </div>
           <ol class="mobile-explore-top-products">
             {%- for explore_product in hot_collection.products limit: 3 -%}
@@ -639,7 +630,7 @@
         </section>
       {%- endif -%}
 
-      <a class="mobile-explore-all-products" href="{{ routes.all_products_collection_url }}">Tutti i Prodotti <span aria-hidden="true">→</span></a>
+      <a class="mobile-explore-all-products" href="{{ routes.all_products_collection_url }}">{{ 'mobile.explore.all_products' | t }} <span aria-hidden="true">→</span></a>
     </div>
   </dialog>
 {%- endif -%}

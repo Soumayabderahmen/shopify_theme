@@ -21,27 +21,12 @@
     endif
   endfor
 
-  assign language_code = localization.language.iso_code | downcase | split: '-' | first
-  case language_code
-    when 'it'
-      assign home_label = 'Home'
-      assign categories_label = 'Categoria'
-      assign delivery_label = 'Consegna'
-      assign cart_label = 'Carrello'
-      assign account_label = 'Tu'
-    when 'fr'
-      assign home_label = 'Accueil'
-      assign categories_label = 'Catégories'
-      assign delivery_label = 'Livraison'
-      assign cart_label = 'Panier'
-      assign account_label = 'Compte'
-    else
-      assign home_label = 'Home'
-      assign categories_label = 'Categories'
-      assign delivery_label = 'Delivery'
-      assign cart_label = 'Cart'
-      assign account_label = 'Account'
-  endcase
+  # Libellés dans la langue du visiteur (clés mobile.nav.* des fichiers locales).
+  assign home_label = 'mobile.nav.home' | t
+  assign categories_label = 'mobile.nav.categories' | t
+  assign delivery_label = 'mobile.nav.delivery' | t
+  assign cart_label = 'mobile.nav.cart' | t
+  assign account_label = 'mobile.nav.account' | t
 
   assign account_url = routes.account_login_url
   if customer

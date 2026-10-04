@@ -8,6 +8,53 @@
   --mobile-bottom-navigation-height: 66px;
 }
 
+/* Panneaux latéraux du thème (panier, etc.) : ils s'arrêtent au-dessus de la barre du bas,
+   sinon leur pied collant (bouton "Guardare") passe dessous et ne peut plus être touché. */
+#root .m6pn {
+  bottom: calc(66px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Bulles des apps (Rewards = Honeypop, notifications = FirePush) : au-dessus de la barre du bas, jamais dessus. */
+body #honeypop-app button[class*="BubbleLauncher"] {
+  bottom: calc(66px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body .firepush-widget-container {
+  bottom: calc(66px + 14px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Fiche produit : la barre d'achat (≈70px) est posée sur la barre du bas, les bulles montent au-dessus d'elle
+   pour ne plus couvrir "Aggiungi al carrello". */
+body:has(.pdp-m__buy:not(.is-hidden)) #honeypop-app button[class*="BubbleLauncher"] {
+  bottom: calc(66px + 70px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body:has(.pdp-m__buy:not(.is-hidden)) .firepush-widget-container {
+  bottom: calc(66px + 70px + 14px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Bouton cookie (Pandectes) : déplacé à gauche par assets/mobile-bottom-nav.js, hauteur réglée ici. */
+pandectes-cmp {
+  --mobile-cookie-bottom: calc(66px + 12px + env(safe-area-inset-bottom, 0px));
+}
+
+body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
+  --mobile-cookie-bottom: calc(66px + 70px + 12px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Panneaux plein écran ouverts (Categoria, Esplora, panier) : les bulles ne passent pas par-dessus. */
+body.mobile-categories-open #honeypop-app,
+body.mobile-categories-open .firepush-widget-container,
+body.mobile-explore-open #honeypop-app,
+body.mobile-explore-open .firepush-widget-container,
+html.m6pn-open #honeypop-app,
+html.m6pn-open .firepush-widget-container,
+body.mobile-categories-open pandectes-cmp,
+body.mobile-explore-open pandectes-cmp,
+html.m6pn-open pandectes-cmp {
+  visibility: hidden !important;
+}
+
 body .mobile-bottom-navigation {
   align-items: stretch;
   overflow: hidden;

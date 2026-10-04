@@ -17,7 +17,7 @@
         </a>
       {%- endfor -%}
       {%- if paginate.next -%}
-        <a href="{{ paginate.next.url }}&view=mobile-category" class="mobile-category-products__more" data-category-products-more>Vedi più</a>
+        <a href="{{ paginate.next.url }}&view=mobile-category" class="mobile-category-products__more" data-category-products-more>{{ 'mobile.category.see_more' | t }}</a>
       {%- endif -%}
     {%- endpaginate -%}
   </div>

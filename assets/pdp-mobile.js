@@ -7,6 +7,8 @@
 
   var root = document.querySelector('[data-pdp-mobile]');
   if (!root || !window.matchMedia('(max-width: 760px)').matches) return;
+  // Textes traduits (snippets/mobile-i18n.liquid, clés mobile.js.* des fichiers locales).
+  var T = window.mobileT || function (key) { return key; };
 
   /* ---------- Pleine largeur : décalage = retrait réel de la page à gauche ---------- */
   var alignToScreen = function () {
@@ -72,7 +74,7 @@
     });
     titleMore.addEventListener('click', function () {
       var open = title.classList.toggle('is-open');
-      titleMore.textContent = open ? 'Mostra meno' : 'Mostra tutto';
+      titleMore.textContent = open ? T('show_less') : T('show_all');
     });
   }
 
@@ -98,7 +100,7 @@
     var hours = Math.floor((diff % 86400000) / 3600000);
     var minutes = Math.floor((diff % 3600000) / 60000);
     var seconds = Math.floor((diff % 60000) / 1000);
-    timer.textContent = pad(days) + 'g ' + pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
+    timer.textContent = pad(days) + T('days_short') + ' ' + pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
   };
   if (timer) {
     tick();
@@ -123,7 +125,7 @@
   if (claim) {
     claim.addEventListener('click', function () {
       copyText(root.getAttribute('data-coupon-code')).then(function () {
-        claim.textContent = 'Copiato ✓';
+        claim.textContent = T('copied');
         claim.classList.add('is-done');
       }).catch(function (error) {
         console.warn('[PDP mobile] Coupon copy failed', error);
@@ -271,7 +273,7 @@
   var updateTotals = function () {
     var variant = currentVariant();
     if (qtyOutput) qtyOutput.textContent = String(quantity());
-    if (variant && ctaText) ctaText.textContent = 'Aggiungi al carrello · ' + money(variant.price * quantity());
+    if (variant && ctaText) ctaText.textContent = T('add_to_cart_total', { price: money(variant.price * quantity()) });
   };
   root.querySelectorAll('[data-pdp-qty]').forEach(function (button) {
     button.addEventListener('click', function () {
@@ -319,7 +321,7 @@
   var shipClaim = root.querySelector('[data-pdp-claim-ship]');
   if (shipClaim) {
     shipClaim.addEventListener('click', function () {
-      shipClaim.textContent = 'Attivata ✓';
+      shipClaim.textContent = T('activated');
       shipClaim.classList.add('is-done');
     });
   }
@@ -344,8 +346,8 @@
     var pointsSource = document.querySelector('#main-product .honeypop-pp-text');
     var pointsMatch = pointsSource && pointsSource.textContent.match(/([\d.,]+)\s*points?[^~]*~?\s*([\d.,]+\s*€)?/i);
     if (pointsMatch) {
-      root.querySelector('[data-pdp-points-text]').textContent = 'Guadagna ' + pointsMatch[1] + ' punti';
-      root.querySelector('[data-pdp-points-sub]').textContent = 'con questo acquisto' + (pointsMatch[2] ? ' (≈ ' + pointsMatch[2].trim() + ')' : '');
+      root.querySelector('[data-pdp-points-text]').textContent = T('points_earn', { points: pointsMatch[1] });
+      root.querySelector('[data-pdp-points-sub]').textContent = T('points_sub') + (pointsMatch[2] ? ' (≈ ' + pointsMatch[2].trim() + ')' : '');
       root.querySelector('[data-pdp-points]').hidden = false;
       found = true;
     }
@@ -355,7 +357,7 @@
     });
     var creditMoney = creditHost && creditHost.querySelector('.money');
     if (creditMoney) {
-      root.querySelector('[data-pdp-credit-text]').textContent = 'Ricevi ' + creditMoney.textContent.trim() + ' di credito';
+      root.querySelector('[data-pdp-credit-text]').textContent = T('credit_receive', { amount: creditMoney.textContent.trim() });
       root.querySelector('[data-pdp-credit]').hidden = false;
       found = true;
     }
@@ -423,7 +425,7 @@
         return;
       }
       if (!current) {
-        current = { title: 'Descrizione', nodes: [] };
+        current = { title: T('description'), nodes: [] };
         sections.push(current);
       }
       current.nodes.push(el);
@@ -463,7 +465,7 @@
             }).join('') + '</dl>';
           } else {
             var dual = /cm\s*\/\s*pollici|cm\s*\/\s*inch/i.test(rows[0] ? rows[0].textContent : '');
-            if (dual) body += '<div class="pdp-m__unit" role="group" aria-label="Unità"><button type="button" aria-pressed="true" data-unit="cm">cm</button><button type="button" aria-pressed="false" data-unit="in">pollici</button></div>';
+            if (dual) body += '<div class="pdp-m__unit" role="group" aria-label="' + T('unit') + '"><button type="button" aria-pressed="true" data-unit="cm">cm</button><button type="button" aria-pressed="false" data-unit="in">' + T('inches') + '</button></div>';
             node.removeAttribute('style');
             node.querySelectorAll('[style]').forEach(function (cell) { cell.removeAttribute('style'); });
             body += '<div class="pdp-m__tw">' + node.outerHTML + '</div>';
@@ -487,12 +489,12 @@
       var shown = photos.slice(0, 6);
       html += '<section class="pdp-m__sec" id="pdp-sec-photo" data-pdp-section="photo" role="tabpanel"' + (tabs.length ? ' hidden' : '') + '><div class="pdp-m__media">' + shown.map(function (src, i) {
         var more = i === 5 && photos.length > 6 ? '<span class="pdp-m__more2">+' + (photos.length - 6) + '</span>' : '';
-        return '<button type="button" data-pdp-photo="' + i + '" aria-label="Foto ' + (i + 1) + '"><img src="' + src + '" alt="" loading="lazy">' + more + '</button>';
+        return '<button type="button" data-pdp-photo="' + i + '" aria-label="' + T('photo_n', { number: i + 1 }) + '"><img src="' + src + '" alt="" loading="lazy">' + more + '</button>';
       }).join('') + '</div></section>';
-      tabs.push({ key: 'photo', title: 'Foto' });
+      tabs.push({ key: 'photo', title: T('photos') });
     }
 
-    var tabsHtml = '<nav class="pdp-m__tabs" aria-label="Sezioni della descrizione"><div class="pdp-m__tabs-in" role="tablist">' + tabs.map(function (tab, i) {
+    var tabsHtml = '<nav class="pdp-m__tabs" aria-label="' + T('desc_sections') + '"><div class="pdp-m__tabs-in" role="tablist">' + tabs.map(function (tab, i) {
       return '<button type="button" class="pdp-m__tab" role="tab" aria-selected="' + (i === 0) + '" data-pdp-tab="' + tab.key + '">' + tab.title + '</button>';
     }).join('') + '<i class="pdp-m__ind" data-pdp-ind></i></div></nav>';
     descBox.innerHTML = tabsHtml + html;
@@ -553,7 +555,7 @@
         var text = cell.textContent.trim();
         var parts = text.split(/\s*\/\s*/);
         if (r === 0) {
-          cells.push({ cell: cell, cm: text.replace(/\(\s*cm\s*\/\s*(pollici|inch(es)?)\s*\)/i, '(cm)'), inch: text.replace(/\(\s*cm\s*\/\s*(pollici|inch(es)?)\s*\)/i, '(pollici)') });
+          cells.push({ cell: cell, cm: text.replace(/\(\s*cm\s*\/\s*(pollici|inch(es)?)\s*\)/i, '(cm)'), inch: text.replace(/\(\s*cm\s*\/\s*(pollici|inch(es)?)\s*\)/i, '(' + T('inches') + ')') });
         } else if (parts.length === 2 && /cm/i.test(parts[0])) {
           cells.push({ cell: cell, cm: parts[0], inch: parts[1] });
         }
@@ -632,13 +634,14 @@
       var average = reviewsBlock.querySelector('.alr-wh-rating-star-average');
       // Nombre d'avis lu dans son propre élément (dans le texte global il est collé à la note « 4.6 »).
       var countEl = Array.prototype.find.call(reviewsBlock.querySelectorAll('*'), function (el) {
-        return el.children.length === 0 && /^\s*\d+\s+recension/i.test(el.textContent);
+        return el.children.length === 0 && /^\s*\d+\s+(recension|review)/i.test(el.textContent);
       });
       var countMatch = countEl && countEl.textContent.match(/(\d+)/);
       var value = average ? parseFloat(average.textContent.replace(',', '.')) : NaN;
       if (!rateLink || isNaN(value) || !countMatch || Number(countMatch[1]) === 0) return false;
-      rateLink.innerHTML = '<span class="pdp-m__rst" aria-label="' + value + ' su 5"><i style="width:' + (value * 20) + '%"></i></span>'
-        + String(value.toFixed(1)).replace('.', ',') + ' · ' + countMatch[1] + ' recensioni';
+      var shown = value.toLocaleString(document.documentElement.lang || 'it', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      rateLink.innerHTML = '<span class="pdp-m__rst" aria-label="' + T('rating_out_of', { rating: shown }) + '"><i style="width:' + (value * 20) + '%"></i></span>'
+        + shown + ' · ' + T(Number(countMatch[1]) === 1 ? 'reviews_one' : 'reviews_other', { count: countMatch[1] });
       return true;
     };
     if (!readAppRating()) {
@@ -723,7 +726,7 @@
       buy.querySelector('[data-pdp-buy-price]').textContent = money(variant.price);
     }
     var klarna = root.querySelector('[data-pdp-klarna]');
-    if (klarna) klarna.textContent = '3 rate da ' + money(Math.round(variant.price / 3));
+    if (klarna) klarna.textContent = T('klarna_installments', { amount: money(Math.round(variant.price / 3)) });
   }
   updateTotals();
 })();

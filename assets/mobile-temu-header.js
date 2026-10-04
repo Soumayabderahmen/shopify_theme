@@ -1,5 +1,7 @@
 function initMobileTemuHeader() {
   var isMobile = window.matchMedia('(max-width: 760px)').matches;
+  // Textes traduits (snippets/mobile-i18n.liquid, clés mobile.js.* des fichiers locales).
+  var T = window.mobileT || function (key) { return key; };
   if (isMobile) document.documentElement.classList.add('mobile-temu-active');
 
   var wishlistStorageKey = 'platinumshop:wishlist:v1';
@@ -205,8 +207,8 @@ function initMobileTemuHeader() {
       var tag = document.createElement('span');
       tag.className = 'wishlist-page-card__tag ' + (available ? 'wishlist-page-card__tag--down' : 'wishlist-page-card__tag--soldout');
       tag.textContent = available
-        ? 'Prezzo sceso -' + formatWishlistMoney(Number(item.priceCents) - current.priceCents)
-        : 'Esaurito';
+        ? T('price_dropped_by', { amount: formatWishlistMoney(Number(item.priceCents) - current.priceCents) })
+        : T('sold_out');
       media.appendChild(tag);
       card.classList.add('has-status-tag');
     }
@@ -233,7 +235,7 @@ function initMobileTemuHeader() {
     if (down) {
       var was = document.createElement('p');
       was.className = 'wishlist-page-card__was';
-      was.textContent = 'Era ' + formatWishlistMoney(item.priceCents) + ' al salvataggio';
+      was.textContent = T('was_when_saved', { price: formatWishlistMoney(item.priceCents) });
       body.appendChild(was);
     }
 
@@ -244,10 +246,10 @@ function initMobileTemuHeader() {
     add.className = 'wishlist-page-card__add';
     if (available && current.variantId) {
       add.dataset.wishlistAdd = current.variantId;
-      add.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M6 6h15l-1.5 9h-12z"></path><path d="M6 6 5 2H2"></path><path d="M13.5 8.5v4M11.5 10.5h4"></path></svg><span>Aggiungi</span>';
+      add.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M6 6h15l-1.5 9h-12z"></path><path d="M6 6 5 2H2"></path><path d="M13.5 8.5v4M11.5 10.5h4"></path></svg><span>' + T('add') + '</span>';
     } else {
       add.disabled = true;
-      add.textContent = 'Esaurito';
+      add.textContent = T('sold_out');
     }
     action.appendChild(add);
     body.appendChild(action);
@@ -296,7 +298,7 @@ function initMobileTemuHeader() {
     summary.hidden = availableCount === 0 || wishlistEditMode;
     summary.querySelector('[data-wishlist-total]').textContent = formatWishlistMoney(totalCents);
     var addAll = summary.querySelector('[data-wishlist-add-all]');
-    addAll.textContent = 'Aggiungi tutto al carrello (' + availableCount + ')';
+    addAll.textContent = T('add_all_to_cart', { count: availableCount });
     addAll.disabled = availableCount === 0;
   }
 
@@ -307,8 +309,7 @@ function initMobileTemuHeader() {
     priceDrop.hidden = downCount === 0 || wishlistFilter === 'down';
     var priceDropText = priceDrop.querySelector('[data-wishlist-price-drop-text]');
     if (priceDropText) {
-      priceDropText.innerHTML = '<strong>' + downCount + (downCount === 1 ? ' articolo è sceso' : ' articoli sono scesi')
-        + ' di prezzo</strong> da quando ' + (downCount === 1 ? "l'hai salvato" : 'li hai salvati');
+      priceDropText.innerHTML = T(downCount === 1 ? 'price_drop_one_html' : 'price_drop_other_html', { count: downCount });
     }
   }
 
@@ -319,10 +320,10 @@ function initMobileTemuHeader() {
     var selectAll = wishlistPage.querySelector('[data-wishlist-select-all]');
     var removeSelected = wishlistPage.querySelector('[data-wishlist-remove-selected]');
     if (!edit || !editbar || !selectAll || !removeSelected) return;
-    edit.textContent = wishlistEditMode ? 'Fine' : 'Modifica';
+    edit.textContent = wishlistEditMode ? T('done') : T('edit');
     editbar.hidden = !wishlistEditMode;
     selectAll.checked = wishlistItems.length > 0 && selectedWishlistIds.size === wishlistItems.length;
-    removeSelected.textContent = 'Rimuovi (' + selectedWishlistIds.size + ')';
+    removeSelected.textContent = T('remove_count', { count: selectedWishlistIds.size });
     removeSelected.disabled = selectedWishlistIds.size === 0;
   }
 
@@ -341,7 +342,7 @@ function initMobileTemuHeader() {
       selector.setAttribute('role', 'checkbox');
       selector.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>';
       selector.setAttribute('aria-checked', String(selectedWishlistIds.has(itemId)));
-      selector.setAttribute('aria-label', 'Seleziona');
+      selector.setAttribute('aria-label', T('select'));
       if (!oldSelector) card.appendChild(selector);
     });
     updateWishlistEditControls();
@@ -373,14 +374,14 @@ function initMobileTemuHeader() {
     heart.type = 'button';
     heart.className = 'wishlist-mobile-card__heart';
     heart.dataset.wishlistRemove = item.id;
-    heart.setAttribute('aria-label', 'Rimuovi dalla wishlist');
+    heart.setAttribute('aria-label', T('remove_from_wishlist'));
     heart.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>';
     media.appendChild(heart);
 
     if (discount) {
       var badge = document.createElement('span');
       badge.className = 'wishlist-mobile-card__badge';
-      badge.textContent = 'Prezzo sceso -' + formatWishlistMoney(compareAtCents - priceCents);
+      badge.textContent = T('price_dropped_by', { amount: formatWishlistMoney(compareAtCents - priceCents) });
       media.appendChild(badge);
     }
     article.appendChild(media);
@@ -416,14 +417,14 @@ function initMobileTemuHeader() {
 
     var saved = document.createElement('p');
     saved.className = 'wishlist-mobile-card__saved';
-    saved.textContent = discount ? 'Era ' + formatWishlistMoney(compareAtCents) + ' al salvataggio' : '';
+    saved.textContent = discount ? T('was_when_saved', { price: formatWishlistMoney(compareAtCents) }) : '';
     body.appendChild(saved);
 
     var add = document.createElement('button');
     add.type = 'button';
     add.className = 'wishlist-mobile-card__add';
     add.dataset.wishlistAdd = item.variantId || '';
-    add.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"></path><path d="M6 6 5 2H2"></path><path d="M13.5 8.5v4M11.5 10.5h4"></path></svg><span>Aggiungi</span>';
+    add.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6h15l-1.5 9h-12z"></path><path d="M6 6 5 2H2"></path><path d="M13.5 8.5v4M11.5 10.5h4"></path></svg><span>' + T('add') + '</span>';
     add.disabled = !item.variantId;
     body.appendChild(add);
     article.appendChild(body);
@@ -437,8 +438,8 @@ function initMobileTemuHeader() {
     container.replaceChildren();
     [
       { id: 'all', label: 'Tutti', count: wishlistItems.length },
-      { id: 'down', label: 'Prezzo sceso', count: wishlistItems.filter(isWishlistItemDown).length },
-      { id: 'sale', label: 'In offerta', count: wishlistItems.filter(isWishlistItemOnSale).length },
+      { id: 'down', label: T('price_dropped'), count: wishlistItems.filter(isWishlistItemDown).length },
+      { id: 'sale', label: T('on_sale'), count: wishlistItems.filter(isWishlistItemOnSale).length },
       { id: 'available', label: 'Disponibili', count: wishlistItems.filter(isWishlistItemAvailable).length }
     ].forEach(function (filter) {
       var button = document.createElement('button');
@@ -495,7 +496,7 @@ function initMobileTemuHeader() {
     summary.hidden = cards.length === 0;
     summary.querySelector('[data-wishlist-total]').textContent = formatWishlistMoney(totalCents);
     var addAll = summary.querySelector('[data-wishlist-add-all]');
-    addAll.textContent = 'Aggiungi tutto al carrello (' + availableCount + ')';
+    addAll.textContent = T('add_all_to_cart', { count: availableCount });
     addAll.disabled = availableCount === 0;
   }
 
@@ -509,8 +510,8 @@ function initMobileTemuHeader() {
     container.replaceChildren();
     [
       { id: 'all', label: 'Tutti', count: wishlistItems.length },
-      { id: 'down', label: 'Prezzo sceso', count: saleCount },
-      { id: 'sale', label: 'In offerta', count: saleCount },
+      { id: 'down', label: T('price_dropped'), count: saleCount },
+      { id: 'sale', label: T('on_sale'), count: saleCount },
       { id: 'available', label: 'Disponibili', count: wishlistItems.filter(function (item) { return item.available !== false; }).length }
     ].forEach(function (filter) {
       var button = document.createElement('button');
@@ -537,7 +538,7 @@ function initMobileTemuHeader() {
     var saleCount = wishlistItems.filter(function (item) {
       return Number(item.compareAtPriceCents) > Number(item.priceCents);
     }).length;
-    count.textContent = wishlistItems.length + (wishlistItems.length === 1 ? ' articolo salvato' : ' articoli salvati');
+    count.textContent = T(wishlistItems.length === 1 ? 'saved_one' : 'saved_other', { count: wishlistItems.length });
     empty.hidden = wishlistItems.length > 0;
     tools.hidden = wishlistItems.length === 0;
     filters.hidden = wishlistItems.length === 0;
@@ -545,13 +546,13 @@ function initMobileTemuHeader() {
     if (priceDrop) {
       priceDrop.hidden = saleCount === 0;
       var priceDropText = priceDrop.querySelector('[data-wishlist-price-drop-text]');
-      if (priceDropText) priceDropText.innerHTML = '<strong>' + saleCount + (saleCount === 1 ? ' articolo è sceso' : ' articoli sono scesi') + ' di prezzo</strong> da quando li hai salvati';
+      if (priceDropText) priceDropText.innerHTML = T(saleCount === 1 ? 'price_drop_one_html' : 'price_drop_other_html', { count: saleCount });
     }
     if (summary) {
       summary.hidden = wishlistItems.length === 0;
       var total = wishlistItems.reduce(function (amount, item) { return amount + (Number(item.priceCents) || 0); }, 0);
       summary.querySelector('[data-wishlist-total]').textContent = formatWishlistMoney(total);
-      summary.querySelector('[data-wishlist-add-all]').textContent = 'Aggiungi tutto al carrello (' + wishlistItems.length + ')';
+      summary.querySelector('[data-wishlist-add-all]').textContent = T('add_all_to_cart', { count: wishlistItems.length });
     }
     error.hidden = true;
     wishlistPageList.hidden = filteredItems.length === 0;
@@ -578,14 +579,14 @@ function initMobileTemuHeader() {
     wishlistPageList.setAttribute('aria-busy', 'false');
     error.hidden = validCards.length === filteredItems.length;
     if (filteredItems.length && !validCards.length) {
-      empty.querySelector('h2').textContent = 'I prodotti salvati non sono disponibili';
+      empty.querySelector('h2').textContent = T('saved_unavailable');
       empty.hidden = false;
     } else if (wishlistItems.length && !filteredItems.length) {
-      empty.querySelector('h2').textContent = 'Nessun prodotto in offerta';
+      empty.querySelector('h2').textContent = T('no_sale_items');
       empty.hidden = false;
     } else if (!wishlistItems.length) {
-      empty.querySelector('h2').textContent = 'La tua wishlist è vuota';
-      empty.querySelector('p').textContent = 'Tocca il cuore sui prodotti che ti piacciono per ritrovarli qui.';
+      empty.querySelector('h2').textContent = T('wishlist_empty');
+      empty.querySelector('p').textContent = T('wishlist_empty_text');
       empty.hidden = false;
     }
     syncWishlistButtons(wishlistPage);
@@ -601,7 +602,7 @@ function initMobileTemuHeader() {
     var tools = wishlistPage.querySelector('[data-wishlist-tools]');
     var filters = wishlistPage.querySelector('[data-wishlist-filters]');
     var share = wishlistPage.querySelector('[data-wishlist-share]');
-    count.textContent = wishlistItems.length + (wishlistItems.length === 1 ? ' articolo salvato' : ' articoli salvati');
+    count.textContent = T(wishlistItems.length === 1 ? 'saved_one' : 'saved_other', { count: wishlistItems.length });
     empty.hidden = wishlistItems.length > 0;
     tools.hidden = wishlistItems.length === 0;
     filters.hidden = wishlistItems.length === 0;
@@ -644,15 +645,15 @@ function initMobileTemuHeader() {
     error.hidden = validCards.length === filteredItems.length;
     empty.hidden = true;
     if (filteredItems.length && !validCards.length) {
-      empty.querySelector('h2').textContent = 'I prodotti salvati non sono disponibili';
+      empty.querySelector('h2').textContent = T('saved_unavailable');
       empty.hidden = false;
     } else if (wishlistItems.length && !filteredItems.length) {
-      empty.querySelector('h2').textContent = 'Nessun articolo in questo filtro';
-      empty.querySelector('p').textContent = 'Prova un altro filtro per vedere gli altri articoli salvati.';
+      empty.querySelector('h2').textContent = T('no_filter_items');
+      empty.querySelector('p').textContent = T('no_filter_text');
       empty.hidden = false;
     } else if (!wishlistItems.length) {
-      empty.querySelector('h2').textContent = 'La tua wishlist è vuota';
-      empty.querySelector('p').textContent = 'Tocca il cuore sui prodotti che ti piacciono per ritrovarli qui.';
+      empty.querySelector('h2').textContent = T('wishlist_empty');
+      empty.querySelector('p').textContent = T('wishlist_empty_text');
       empty.hidden = false;
     }
     syncWishlistButtons(wishlistPage);
@@ -673,7 +674,7 @@ function initMobileTemuHeader() {
         badge.textContent = String(count);
         badge.hidden = count === 0;
       }
-      link.setAttribute('aria-label', count ? 'Wishlist (' + count + ')' : 'Wishlist');
+      link.setAttribute('aria-label', count ? T('wishlist_count', { count: count }) : T('wishlist'));
     });
     document.querySelectorAll('.wishlist-header').forEach(function (headerLink) {
       headerLink.classList.remove('hidden');
@@ -774,7 +775,7 @@ function initMobileTemuHeader() {
       if (!response.ok) throw new Error('Cart request failed with status ' + response.status);
       if (trigger) {
         var label = trigger.querySelector('span');
-        if (label) label.textContent = 'Aggiunto';
+        if (label) label.textContent = T('added');
       }
       document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
       // Mobile uniquement : met à jour le panneau panier du thème (assets/custom-async.js) et les compteurs du header.
@@ -891,7 +892,7 @@ function initMobileTemuHeader() {
     var oldBadge = thumb.querySelector('.mobile-wishlist-drawer__badge');
     if (oldBadge) oldBadge.remove();
     if (!state.available) {
-      thumb.appendChild(wishlistDrawerElement('span', 'mobile-wishlist-drawer__badge mobile-wishlist-drawer__badge--soldout', 'Esaurito'));
+      thumb.appendChild(wishlistDrawerElement('span', 'mobile-wishlist-drawer__badge mobile-wishlist-drawer__badge--soldout', T('sold_out')));
     } else if (wishlistDrawerPriceDropped(item)) {
       thumb.appendChild(wishlistDrawerElement(
         'span',
@@ -925,10 +926,10 @@ function initMobileTemuHeader() {
     add.dataset.wishlistDrawerAdd = state.variantId;
     if (state.available && state.variantId) {
       add.disabled = false;
-      add.innerHTML = wishlistDrawerIcons.cart + '<span>Aggiungi</span>';
+      add.innerHTML = wishlistDrawerIcons.cart + '<span>' + T('add') + '</span>';
     } else {
       add.disabled = true;
-      add.textContent = 'Esaurito';
+      add.textContent = T('sold_out');
     }
   }
 
@@ -962,7 +963,7 @@ function initMobileTemuHeader() {
     var trash = wishlistDrawerElement('button', 'mobile-wishlist-drawer__trash');
     trash.type = 'button';
     trash.dataset.wishlistDrawerRemove = item.id;
-    trash.setAttribute('aria-label', 'Rimuovi dalla wishlist');
+    trash.setAttribute('aria-label', T('remove_from_wishlist'));
     trash.innerHTML = wishlistDrawerIcons.trash;
     actions.appendChild(trash);
     info.appendChild(actions);
@@ -986,18 +987,16 @@ function initMobileTemuHeader() {
 
     wishlistDrawer.querySelector('[data-wishlist-drawer-count]').textContent = String(count);
     wishlistDrawer.querySelector('[data-wishlist-drawer-subtitle]').textContent = count
-      ? count + (count === 1 ? ' articolo salvato' : ' articoli salvati')
-      : 'Nessun articolo salvato';
+      ? T(count === 1 ? 'saved_one' : 'saved_other', { count: count })
+      : T('saved_none');
     wishlistDrawer.querySelector('[data-wishlist-drawer-drop]').hidden = droppedCount === 0;
-    wishlistDrawer.querySelector('[data-wishlist-drawer-drop-text]').innerHTML = '<b>' + droppedCount
-      + (droppedCount === 1 ? ' articolo è sceso' : ' articoli sono scesi') + ' di prezzo</b> dal salvataggio';
+    wishlistDrawer.querySelector('[data-wishlist-drawer-drop-text]').innerHTML = T(droppedCount === 1 ? 'drawer_drop_one_html' : 'drawer_drop_other_html', { count: droppedCount });
     wishlistDrawer.querySelector('[data-wishlist-drawer-empty]').hidden = count > 0;
     wishlistDrawer.querySelector('[data-wishlist-drawer-foot]').hidden = availableItems.length === 0;
     wishlistDrawer.querySelector('[data-wishlist-drawer-total]').textContent = formatWishlistMoney(total);
-    wishlistDrawer.querySelector('[data-wishlist-drawer-total-label]').textContent = 'Totale ('
-      + availableItems.length + (availableItems.length === 1 ? ' disponibile)' : ' disponibili)');
+    wishlistDrawer.querySelector('[data-wishlist-drawer-total-label]').textContent = T(availableItems.length === 1 ? 'total_available_one' : 'total_available_other', { count: availableItems.length });
     var addAll = wishlistDrawer.querySelector('[data-wishlist-drawer-add-all]');
-    addAll.textContent = 'Aggiungi tutto al carrello (' + availableItems.length + ')';
+    addAll.textContent = T('add_all_to_cart', { count: availableItems.length });
     addAll.disabled = availableItems.length === 0;
   }
 
@@ -1070,7 +1069,7 @@ function initMobileTemuHeader() {
       heart.type = 'button';
       heart.dataset.wishlistDrawerRecoAdd = String(product.id);
       heart.setAttribute('aria-pressed', 'false');
-      heart.setAttribute('aria-label', 'Aggiungi alla wishlist');
+      heart.setAttribute('aria-label', T('add_to_wishlist'));
       heart.innerHTML = wishlistDrawerIcons.heart;
       media.appendChild(heart);
       card.appendChild(wishlistDrawerElement('b', '', formatWishlistMoney(variant ? variant.price : product.price)));
@@ -1140,7 +1139,7 @@ function initMobileTemuHeader() {
         return;
       }
       wishlistDrawerRemoved = { item: removedItem, index: index };
-      showWishlistDrawerToast('Rimosso dalla wishlist', true);
+      showWishlistDrawerToast(T('removed_from_wishlist'), true);
     }, 240);
   }
 
@@ -1183,7 +1182,7 @@ function initMobileTemuHeader() {
       return;
     }
     wishlistDrawer.querySelector('[data-wishlist-drawer-body]').scrollTo({ top: 0, behavior: 'smooth' });
-    showWishlistDrawerToast('Aggiunto alla wishlist', false);
+    showWishlistDrawerToast(T('added_to_wishlist'), false);
   }
 
   function openWishlistDrawer(trigger) {
@@ -1252,16 +1251,16 @@ function initMobileTemuHeader() {
       if (addButton && addButton.dataset.wishlistDrawerAdd) {
         addWishlistVariantsToCart([addButton.dataset.wishlistDrawerAdd], addButton).then(function (added) {
           if (!added) {
-            showWishlistDrawerToast('Impossibile aggiungere al carrello', false);
+            showWishlistDrawerToast(T('cart_add_error'), false);
             return;
           }
           addButton.classList.add('is-done');
-          addButton.textContent = '✓ Aggiunto';
-          showWishlistDrawerToast('Aggiunto al carrello', false);
+          addButton.textContent = T('added_check');
+          showWishlistDrawerToast(T('added_to_cart'), false);
           window.setTimeout(function () {
             addButton.classList.remove('is-done');
             addButton.disabled = false;
-            addButton.innerHTML = wishlistDrawerIcons.cart + '<span>Aggiungi</span>';
+            addButton.innerHTML = wishlistDrawerIcons.cart + '<span>' + T('add') + '</span>';
           }, 1500);
         });
         return;
@@ -1276,8 +1275,8 @@ function initMobileTemuHeader() {
           addAllButton.disabled = false;
           updateWishlistDrawerSummary();
           showWishlistDrawerToast(added
-            ? variantIds.length + (variantIds.length === 1 ? ' articolo aggiunto' : ' articoli aggiunti') + ' al carrello'
-            : 'Impossibile aggiungere al carrello', false);
+            ? T(variantIds.length === 1 ? 'items_added_one' : 'items_added_other', { count: variantIds.length })
+            : T('cart_add_error'), false);
         });
       }
     });
@@ -1413,11 +1412,11 @@ function initMobileTemuHeader() {
       addWishlistVariantsToCart([addButton.dataset.wishlistAdd], addButton).then(function (added) {
         if (!added || !addButton.classList.contains('wishlist-page-card__add')) return;
         addButton.classList.add('is-done');
-        addButton.textContent = '✓ Aggiunto';
+        addButton.textContent = T('added_check');
         window.setTimeout(function () {
           addButton.classList.remove('is-done');
           addButton.disabled = false;
-          addButton.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M6 6h15l-1.5 9h-12z"></path><path d="M6 6 5 2H2"></path><path d="M13.5 8.5v4M11.5 10.5h4"></path></svg><span>Aggiungi</span>';
+          addButton.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M6 6h15l-1.5 9h-12z"></path><path d="M6 6 5 2H2"></path><path d="M13.5 8.5v4M11.5 10.5h4"></path></svg><span>' + T('add') + '</span>';
         }, 1600);
       });
       return;
@@ -1445,7 +1444,7 @@ function initMobileTemuHeader() {
         return item.title + '\n' + item.url;
       }).join('\n\n');
       if (navigator.share) {
-        navigator.share({ title: 'La mia Wishlist', text: shareText }).catch(function (error) {
+        navigator.share({ title: T('my_wishlist'), text: shareText }).catch(function (error) {
           if (error.name !== 'AbortError') console.error('Unable to share the wishlist.', error);
         });
       } else if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1556,7 +1555,8 @@ function initMobileTemuHeader() {
     exploreDrawer.setAttribute('aria-hidden', 'true');
     exploreDrawer.inert = true;
     if (exploreTrigger) exploreTrigger.setAttribute('aria-expanded', 'false');
-    if (restoreFocus && exploreTrigger) exploreTrigger.focus();
+    // preventScroll : le ☰ du header peut être loin au-dessus, la page ne doit pas sauter vers lui.
+    if (restoreFocus && exploreTrigger) exploreTrigger.focus({ preventScroll: true });
   };
   var closeExploreDrawer = function (restoreFocus) {
     if (!exploreDrawer || !exploreDrawer.open || exploreDrawerClosing) return;
@@ -2143,7 +2143,7 @@ function initMobileTemuHeader() {
 
     var message = document.createElement('span');
     message.className = 'mobile-category-loading__message';
-    message.textContent = 'Caricamento...';
+    message.textContent = T('loading');
     indicator.appendChild(message);
 
     var skeletons = document.createElement('div');

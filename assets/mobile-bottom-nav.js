@@ -146,4 +146,24 @@
 
   // Position en pourcentage de la largeur d'un onglet : rien à recalculer au redimensionnement.
   moveTo(current, false);
+
+  // Bouton cookie (app Pandectes) : posé sur l'onglet "Tu", il prenait le toucher. Il est dans un shadow DOM
+  // (hors d'atteinte du CSS du thème) : on y ajoute un style qui le place à gauche, au-dessus de la barre.
+  var cookieTries = 0;
+  var liftCookieButton = function () {
+    var host = document.querySelector('pandectes-cmp');
+    var root = host && host.shadowRoot;
+    if (root) {
+      if (!root.querySelector('style[data-mobile-nav-lift]')) {
+        var style = document.createElement('style');
+        style.setAttribute('data-mobile-nav-lift', '');
+        // Hauteur réglée depuis assets/mobile-bottom-nav.css (variable --mobile-cookie-bottom, plus haute sur la fiche produit).
+        style.textContent = '@media (max-width: 760px){.widget.bottom{bottom:var(--mobile-cookie-bottom,calc(78px + env(safe-area-inset-bottom,0px))) !important;left:12px !important;right:auto !important}}';
+        root.appendChild(style);
+      }
+      return;
+    }
+    if (++cookieTries < 40) window.setTimeout(liftCookieButton, 500);
+  };
+  liftCookieButton();
 })();

@@ -14,10 +14,10 @@
 >
   <div class="mobile-wishlist-drawer__head">
     <div>
-      <h2 id="mobile-wishlist-drawer-title">My Wishlist <span data-wishlist-drawer-count>0</span></h2>
+      <h2 id="mobile-wishlist-drawer-title">{{ 'mobile.wishlist.my_wishlist' | t }} <span data-wishlist-drawer-count>0</span></h2>
       <p data-wishlist-drawer-subtitle></p>
     </div>
-    <button class="mobile-wishlist-drawer__close" type="button" aria-label="Chiudi" data-wishlist-drawer-close>
+    <button class="mobile-wishlist-drawer__close" type="button" aria-label="{{ 'mobile.common.close' | t }}" data-wishlist-drawer-close>
       <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M6 6l12 12M18 6 6 18"></path></svg>
     </button>
   </div>
@@ -30,27 +30,27 @@
     <ul class="mobile-wishlist-drawer__list" data-wishlist-drawer-list></ul>
     <div class="mobile-wishlist-drawer__empty" data-wishlist-drawer-empty hidden>
       <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
-      <h3>La tua wishlist è vuota</h3>
-      <p>Tocca il cuore sui prodotti che ti piacciono per ritrovarli qui.</p>
-      <a class="mobile-wishlist-drawer__cta" href="{{ routes.all_products_collection_url }}">Scopri i più venduti</a>
+      <h3>{{ 'mobile.wishlist.empty' | t }}</h3>
+      <p>{{ 'mobile.wishlist.empty_text' | t }}</p>
+      <a class="mobile-wishlist-drawer__cta" href="{{ routes.all_products_collection_url }}">{{ 'mobile.wishlist.discover' | t }}</a>
     </div>
     <section class="mobile-wishlist-drawer__reco" data-wishlist-drawer-reco hidden>
-      <h4>Potrebbe piacerti anche</h4>
+      <h4>{{ 'mobile.common.you_may_like' | t }}</h4>
       <div class="mobile-wishlist-drawer__rail" data-wishlist-drawer-reco-list></div>
     </section>
   </div>
 
   <div class="mobile-wishlist-drawer__foot" data-wishlist-drawer-foot hidden>
     <div class="mobile-wishlist-drawer__total">
-      <span data-wishlist-drawer-total-label>Totale</span>
+      <span data-wishlist-drawer-total-label>{{ 'mobile.wishlist.total' | t }}</span>
       <b data-wishlist-drawer-total></b>
     </div>
-    <button class="mobile-wishlist-drawer__add-all" type="button" data-wishlist-drawer-add-all>Aggiungi tutto al carrello</button>
+    <button class="mobile-wishlist-drawer__add-all" type="button" data-wishlist-drawer-add-all>{{ 'mobile.wishlist.add_all' | t }}</button>
   </div>
-  <a class="mobile-wishlist-drawer__more" href="{{ wishlist_page_url }}">Vedi la wishlist completa</a>
+  <a class="mobile-wishlist-drawer__more" href="{{ wishlist_page_url }}">{{ 'mobile.wishlist.see_full' | t }}</a>
 
   <div class="mobile-wishlist-drawer__toast" role="status" aria-live="polite" data-wishlist-drawer-toast>
     <span data-wishlist-drawer-toast-text></span>
-    <button type="button" data-wishlist-drawer-undo hidden>Annulla</button>
+    <button type="button" data-wishlist-drawer-undo hidden>{{ 'mobile.common.undo' | t }}</button>
   </div>
 </dialog>

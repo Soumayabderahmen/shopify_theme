@@ -10,6 +10,8 @@
 (function () {
   'use strict';
 
+  // Textes traduits (snippets/mobile-i18n.liquid, clés mobile.js.* des fichiers locales).
+  var T = window.mobileT || function (key) { return key; };
   var root = document.querySelector('[data-mobile-search]');
   var panel = document.querySelector('[data-mobile-search-panel]');
   var scrim = document.querySelector('[data-mobile-search-scrim]');
@@ -215,8 +217,8 @@
   /* ---------- Rendu : accueil du panneau ---------- */
   function trendSubtitle(item, meta) {
     if (meta && meta.sub) return meta.sub;
-    if (item.count > 1) return 'Cercato ' + item.count + ' volte';
-    if (item.count === 1) return 'Cercato di recente';
+    if (item.count > 1) return T('searched_times', { count: item.count });
+    if (item.count === 1) return T('searched_recently');
     return '';
   }
 
@@ -224,18 +226,18 @@
     var recent = getRecent();
     var html = '';
     if (recent.length) {
-      html += '<div class="sp-t"><span>Ricerche recenti</span><button type="button" data-sp-clear>Cancella</button></div>';
+      html += '<div class="sp-t"><span>' + T('recent_searches') + '</span><button type="button" data-sp-clear>' + T('clear') + '</button></div>';
       html += recent.map(function (term, index) {
         return '<div class="sp-row" style="animation-delay:' + index * 30 + 'ms" data-sp-query="' + escapeHtml(term) + '" role="button" tabindex="0">'
           + '<span class="sp-ic">' + icon('clock') + '</span>'
           + '<span class="sp-txt"><b>' + escapeHtml(term) + '</b></span>'
-          + '<button type="button" class="sp-x" data-sp-delete="' + index + '" aria-label="Rimuovi ' + escapeHtml(term) + '">' + icon('x') + '</button>'
+          + '<button type="button" class="sp-x" data-sp-delete="' + index + '" aria-label="' + escapeHtml(T('remove_term', { term: term })) + '">' + icon('x') + '</button>'
           + '</div>';
       }).join('');
     }
     var trends = trendList();
     if (trends.length) {
-      html += '<div class="sp-t"><span>Di tendenza</span></div>';
+      html += '<div class="sp-t"><span>' + T('trending') + '</span></div>';
       html += trends.map(function (item, index) {
         var meta = metaCache[normalize(item.term)];
         var subtitle = trendSubtitle(item, meta);
@@ -290,7 +292,7 @@
   function searchRow(query) {
     return '<div class="sp-row sp-do" data-sp-query="' + escapeHtml(query) + '" role="button" tabindex="0">'
       + '<span class="sp-ic">' + icon('search') + '</span>'
-      + '<span class="sp-txt"><b>Risultati della ricerca per “' + escapeHtml(query) + '”</b></span>'
+      + '<span class="sp-txt"><b>' + escapeHtml(T('results_for', { query: query })) + '</b></span>'
       + icon('arrow', 'sp-go') + '</div>';
   }
 
@@ -308,14 +310,14 @@
         var products = (results.products || []).slice(0, 5);
         var pages = (results.pages || []).concat(results.articles || []);
         if (queries.length) {
-          html += '<div class="sp-t"><span>Suggerimenti</span></div>' + queries.map(function (item) {
+          html += '<div class="sp-t"><span>' + T('suggestions') + '</span></div>' + queries.map(function (item) {
             return '<div class="sp-row" data-sp-query="' + escapeHtml(item.text) + '" role="button" tabindex="0">'
               + '<span class="sp-ic">' + icon('search') + '</span>'
               + '<span class="sp-txt"><b>' + highlight(item.text, tokens) + '</b></span></div>';
           }).join('');
         }
         if (products.length) {
-          html += '<div class="sp-t"><span>Prodotti</span></div>' + products.map(function (product) {
+          html += '<div class="sp-t"><span>' + T('products') + '</span></div>' + products.map(function (product) {
             var price = toCents(product.price);
             var compare = toCents(product.compare_at_price_max);
             var onSale = compare > price;
@@ -325,16 +327,16 @@
               + '<span class="sp-pl">' + (onSale ? '<s>' + escapeHtml(money(compare)) + '</s>' : '')
               + '<strong class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(price)) + '</strong></span></span></a>';
           }).join('');
-          html += '<button type="button" class="sp-all" data-sp-query="' + escapeHtml(query) + '">Visualizza tutti i risultati ' + icon('arrow') + '</button>';
+          html += '<button type="button" class="sp-all" data-sp-query="' + escapeHtml(query) + '">' + T('view_all_results') + ' ' + icon('arrow') + '</button>';
         }
         if (pages.length) {
-          html += '<div class="sp-t"><span>Pagine e post del blog</span></div>' + pages.map(function (page) {
+          html += '<div class="sp-t"><span>' + T('pages_posts') + '</span></div>' + pages.map(function (page) {
             return '<a class="sp-row sp-page" href="' + escapeHtml(page.url) + '">'
               + '<span class="sp-txt"><b>' + highlight(page.title, tokens) + '</b></span>' + icon('arrow', 'sp-go') + '</a>';
           }).join('');
         }
         if (!queries.length && !products.length && !pages.length) {
-          html += '<div class="sp-empty"><b>Nessun risultato per “' + escapeHtml(query) + '”</b>Prova con un altro termine o guarda le ricerche di tendenza.</div>';
+          html += '<div class="sp-empty"><b>' + escapeHtml(T('no_results', { query: query })) + '</b>' + T('no_results_hint') + '</div>';
         }
         body.innerHTML = html;
       }).catch(function (error) {

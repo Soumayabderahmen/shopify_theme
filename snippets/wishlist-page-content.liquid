@@ -2,19 +2,19 @@
   <header class="wishlist-page__heading">
     <div>
       <h1>{{ page.title | default: 'La mia Wishlist' | escape }}</h1>
-      <p data-wishlist-count>0 articoli salvati</p>
+      <p data-wishlist-count>{{ 'mobile.wishlist.zero_saved' | t }}</p>
     </div>
     <button type="button" data-wishlist-share hidden>
       <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"></path></svg>
-      <span>Condividi</span>
+      <span>{{ 'mobile.wishlist.share' | t }}</span>
     </button>
   </header>
 
   {%- unless customer -%}
     <aside class="wishlist-page__guest">
       <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>
-      <p><b>Salva la tua wishlist</b>Accedi per ritrovarla su tutti i dispositivi</p>
-      <a href="{{ routes.account_login_url }}">Accedi</a>
+      <p><b>{{ 'mobile.wishlist.save_title' | t }}</b>{{ 'mobile.wishlist.save_text' | t }}</p>
+      <a href="{{ routes.account_login_url }}">{{ 'mobile.wishlist.login' | t }}</a>
     </aside>
   {%- endunless -%}
 
@@ -23,39 +23,39 @@
     <span data-wishlist-price-drop-text></span><b aria-hidden="true">›</b>
   </button>
 
-  <div class="wishlist-page__filters" role="group" aria-label="Filtra la wishlist" data-wishlist-filters hidden></div>
+  <div class="wishlist-page__filters" role="group" aria-label="{{ 'mobile.wishlist.filter' | t }}" data-wishlist-filters hidden></div>
   <div class="wishlist-page__tools" data-wishlist-tools hidden>
     <label>Ordina:
       <select data-wishlist-sort>
-        <option value="recent">Aggiunti di recente</option>
-        <option value="asc">Prezzo crescente</option>
-        <option value="desc">Prezzo decrescente</option>
+        <option value="recent">{{ 'mobile.wishlist.sort_recent' | t }}</option>
+        <option value="asc">{{ 'mobile.wishlist.sort_asc' | t }}</option>
+        <option value="desc">{{ 'mobile.wishlist.sort_desc' | t }}</option>
       </select>
     </label>
-    <button type="button" class="wishlist-page__edit" data-wishlist-edit>Modifica</button>
+    <button type="button" class="wishlist-page__edit" data-wishlist-edit>{{ 'mobile.wishlist.edit' | t }}</button>
   </div>
 
   <div class="wishlist-page__editbar" data-wishlist-editbar hidden>
-    <label><input type="checkbox" data-wishlist-select-all> <span>Seleziona tutto</span></label>
-    <button type="button" data-wishlist-remove-selected disabled>Rimuovi (0)</button>
+    <label><input type="checkbox" data-wishlist-select-all> <span>{{ 'mobile.wishlist.select_all' | t }}</span></label>
+    <button type="button" data-wishlist-remove-selected disabled>{{ 'mobile.wishlist.remove_zero' | t }}</button>
   </div>
 
   <section class="wishlist-page__empty" data-wishlist-empty hidden>
     <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
-    <h2>La tua wishlist è vuota</h2>
-    <p>Tocca il cuore sui prodotti che ti piacciono per ritrovarli qui.</p>
-    <a href="{{ routes.all_products_collection_url }}">Scopri i più venduti</a>
+    <h2>{{ 'mobile.wishlist.empty' | t }}</h2>
+    <p>{{ 'mobile.wishlist.empty_text' | t }}</p>
+    <a href="{{ routes.all_products_collection_url }}">{{ 'mobile.wishlist.discover' | t }}</a>
   </section>
 
   <div id="section_featured_collection-wishlist">
     <ul class="wishlist-page__list" data-wishlist-list></ul>
   </div>
-  <p class="wishlist-page__error" data-wishlist-error role="status" hidden>Non è stato possibile caricare tutti i prodotti salvati. Riprova tra poco.</p>
+  <p class="wishlist-page__error" data-wishlist-error role="status" hidden>{{ 'mobile.wishlist.load_error' | t }}</p>
 
   {%- assign wishlist_recommendations = collections.all.products -%}
   {%- if wishlist_recommendations != blank -%}
     <section class="wishlist-page__recommendations" data-wishlist-recommendations>
-      <h2>Potrebbe piacerti anche</h2>
+      <h2>{{ 'mobile.common.you_may_like' | t }}</h2>
       <ul>
         {%- for recommendation in wishlist_recommendations limit: 16 -%}
           {%- assign recommendation_variant = recommendation.selected_or_first_available_variant -%}
@@ -92,8 +92,8 @@
   {%- endif -%}
 
   <div class="wishlist-page__summary" data-wishlist-summary hidden>
-    <p>Totale <b data-wishlist-total>€0,00</b></p>
-    <button type="button" data-wishlist-add-all>Aggiungi tutto al carrello</button>
+    <p>{{ 'mobile.wishlist.total' | t }} <b data-wishlist-total>€0,00</b></p>
+    <button type="button" data-wishlist-add-all>{{ 'mobile.wishlist.add_all' | t }}</button>
   </div>
 </section>
 

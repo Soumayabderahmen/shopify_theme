@@ -38,21 +38,21 @@
 </div>
 
 <div class="mobile-search-scrim" data-mobile-search-scrim hidden></div>
-<section class="mobile-search-panel" id="mobile-search-panel" data-mobile-search-panel aria-label="Suggerimenti di ricerca" aria-hidden="true" inert>
+<section class="mobile-search-panel" id="mobile-search-panel" data-mobile-search-panel aria-label="{{ 'mobile.search.suggestions' | t }}" aria-hidden="true" inert>
   <div class="sp-head">
-    <span>Cerca nel negozio</span>
-    <button type="button" data-mobile-search-cancel>Annulla</button>
+    <span>{{ 'mobile.search.placeholder' | t }}</span>
+    <button type="button" data-mobile-search-cancel>{{ 'mobile.search.cancel' | t }}</button>
   </div>
   <div class="sp-body" data-mobile-search-body></div>
 </section>
 
 <div class="mobile-mini-header" data-mobile-mini-header aria-hidden="true" inert>
-  <button type="button" class="mi-ic" data-mobile-mini-menu aria-label="Apri il menu">
+  <button type="button" class="mi-ic" data-mobile-mini-menu aria-label="{{ 'mobile.search.open_menu' | t }}">
     <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><rect x="3" y="5" width="18" height="2.4" rx=".4"></rect><rect x="3" y="10.8" width="18" height="2.4" rx=".4"></rect><rect x="3" y="16.6" width="11.5" height="2.4" rx=".4"></rect></svg>
   </button>
   <form class="msearch" action="{{ routes.search_url }}" method="get" role="search" data-mobile-mini-search>
     <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-    <input type="search" name="q" placeholder="Cerca nel negozio" aria-label="Cerca prodotti" autocomplete="off" aria-controls="mobile-search-panel" aria-expanded="false">
+    <input type="search" name="q" placeholder="{{ 'mobile.search.placeholder' | t }}" aria-label="{{ 'mobile.search.products' | t }}" autocomplete="off" aria-controls="mobile-search-panel" aria-expanded="false">
   </form>
   <a
     class="mi-ic"

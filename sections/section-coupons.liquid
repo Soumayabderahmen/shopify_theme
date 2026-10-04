@@ -22,7 +22,7 @@
         <p>{{ section.settings.text | escape }}</p>
       {%- endif -%}
       {%- if section.settings.show_timer -%}
-        <div class="coupons-offer__timer" data-coupons-timer role="timer" aria-label="Tempo rimanente">
+        <div class="coupons-offer__timer" data-coupons-timer role="timer" aria-label="{{ 'mobile.coupons.time_left' | t }}">
           <span>00</span>:<span>00</span>:<span>00</span>
         </div>
       {%- endif -%}
@@ -33,7 +33,7 @@
           type="button"
           class="coupons-offer__ticket"
           data-coupon-code="{{ block.settings.code | strip | escape }}"
-          aria-label="Riscatta il coupon {{ block.settings.code | strip | escape }}"
+          {% assign coupon_code = block.settings.code | strip | escape %}aria-label="{{ 'mobile.coupons.redeem' | t: code: coupon_code }}"
           {{ block.shopify_attributes }}
         >
           <strong>{{ block.settings.amount | escape }}</strong>
@@ -287,10 +287,10 @@
         ticket.classList.add('is-taken');
         const taken = readTaken();
         if (!taken.includes(code)) saveTaken(taken.concat(code));
-        toast.textContent = 'Coupon ' + code + ' riscattato: verrà applicato al checkout.';
+        toast.textContent = {{ 'mobile.coupons.redeemed' | t | json }}.replace('{code}', code);
       } catch (error) {
         console.error('Unable to apply the coupon.', error);
-        toast.textContent = 'Codice ' + code + ' copiato: inseriscilo al checkout.';
+        toast.textContent = {{ 'mobile.coupons.copied' | t | json }}.replace('{code}', code);
       }
     }
 
