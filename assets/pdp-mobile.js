@@ -107,6 +107,22 @@
     window.setInterval(tick, 1000);
   }
 
+  /* Badges de marque des produits de marque (snippets/prodducts--brand-popap.liquid : « Negozio Ufficiale del Marchio »,
+     snippets/badge--brand-products.liquid : « Official Store · Star seller · Brand Official ») : rendus dans l'ancien
+     formulaire du thème, bas de page ; placés sous les vignettes. Déplacés, pas copiés : la flèche garde
+     l'ouverture du tiroir des produits de la marque. */
+  (function () {
+    var thumbs = root.querySelector('.pdp-m__thumbs');
+    var store = document.querySelector('#main-product .f8pr .brand-badges-container');
+    var strip = document.querySelector('#main-product .f8pr .badge-scroll-wrapper');
+    if (!thumbs || (!store && !strip)) return;
+    var box = document.createElement('div');
+    box.className = 'pdp-m__brand';
+    if (store) box.appendChild(store);
+    if (strip) box.appendChild(strip);
+    thumbs.insertAdjacentElement('afterend', box);
+  })();
+
   // « Riscuoti » : copie le code du coupon (comme le bouton du bloc « Vantaggi esclusivi » du site).
   var claim = root.querySelector('[data-pdp-claim]');
   var copyText = function (text) {

@@ -942,6 +942,37 @@ body.template-product {
   text-underline-offset: 3px;
 }
 
+/* Badges de marque déplacés sous les vignettes par pdp-mobile.js (« Negozio Ufficiale del Marchio », « Official Store »). */
+#root .pdp-m .pdp-m__brand {
+  display: grid;
+  gap: 8px;
+  margin: 10px 12px 0;
+}
+
+#root .pdp-m .pdp-m__brand .brand-badges-container,
+#root .pdp-m .pdp-m__brand .badge-scroll-wrapper {
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+}
+
+/* Barre « Negozio Ufficiale » : pleine largeur, texte en « … » et flèche › toujours visible. */
+#root .pdp-m .pdp-m__brand .badge-store {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+}
+
+#root .pdp-m .pdp-m__brand .badge-store .badge-content,
+#root .pdp-m .pdp-m__brand .badge-store .badge-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#root .pdp-m .pdp-m__brand .badge-store .arrow-icon {
+  flex: none;
+}
+
 /* Message officiel Klarna (bloc de l'app déplacé ici par pdp-mobile.js), avec le design d'origine de l'app
    (thème, marges : réglages du bloc « Klarna Placement » dans l'éditeur). Seul l'espacement de la fiche est ajouté.
    Plus précis que la règle qui masque les anciens blocs Klarna de la fiche. */
