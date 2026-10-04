@@ -1,0 +1,220 @@
+{%- comment -%}
+  Page collection MOBILE (prototype « platinumshop-collection-mobile ») — zone au-dessus de la grille, rendue par
+  sections/main-collection.liquid. Données réelles : titre et nombre de produits, sous-collections du menu (réglage
+  « Menu des filtres » de la section), filtres Search & Discovery (collection.filters), tris Shopify (collection.sort_options).
+  Filtres et tri rechargent la page avec les paramètres Shopify (filter.*, sort_by) ; la grille reste celle du thème
+  (cartes produit + chargement automatique, assets/mobile-auto-load.js).
+  Affiché seulement en mobile (assets/collection-mobile.css) ; script : assets/collection-mobile.js.
+  Params : section, menu (linklist des sous-collections)
+{%- endcomment -%}
+{%- liquid
+  assign clm_sort = collection.sort_by | default: collection.default_sort_by
+  assign clm_sort_label = ''
+  for option in collection.sort_options
+    if option.value == clm_sort
+      assign clm_sort_label = option.name
+    endif
+  endfor
+
+  assign clm_active_count = 0
+  for filter in collection.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != nil or filter.max_value.value != nil
+        assign clm_active_count = clm_active_count | plus: 1
+      endif
+    else
+      assign clm_active_count = clm_active_count | plus: filter.active_values.size
+    endif
+  endfor
+
+  assign clm_clear_url = collection.url
+  if collection.sort_by != blank
+    assign clm_clear_url = collection.url | append: '?sort_by=' | append: collection.sort_by
+  endif
+
+  # Sous-collections : lien du menu de la collection (ses enfants), sinon lien parent (ses frères).
+  assign clm_parent = nil
+  assign clm_children = nil
+  for link in menu.links
+    if link.url == collection.url and link.links.size > 0
+      assign clm_parent = link
+    endif
+    for child in link.links
+      if child.url == collection.url
+        if child.links.size > 0
+          assign clm_parent = child
+        else
+          assign clm_parent = link
+        endif
+      endif
+      for grandchild in child.links
+        if grandchild.url == collection.url
+          assign clm_parent = child
+        endif
+      endfor
+    endfor
+  endfor
+-%}
+<style>.clm{display:none}</style>
+<div class="clm" data-collection-mobile data-total="{{ collection.products_count }}">
+  <nav class="clm-bc" aria-label="{{ 'mobile.cart.breadcrumb' | t }}">
+    <a href="{{ routes.root_url }}">{{ 'mobile.cart.home' | t }}</a>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    <span aria-current="page">{{ collection.title }}</span>
+  </nav>
+  <div class="clm-title">
+    <h1>{{ collection.title }}</h1>
+    <p>
+      {%- if collection.products_count == 1 -%}
+        {{ 'mobile.collection.count_one' | t }}
+      {%- else -%}
+        {{ 'mobile.collection.count_other_html' | t: count: collection.products_count }}
+      {%- endif -%}
+    </p>
+  </div>
+
+  {%- if clm_parent != nil and clm_parent.links.size > 0 -%}
+    <nav class="clm-cats" aria-label="{{ 'mobile.collection.subcategories' | t }}">
+      <a href="{{ clm_parent.url }}"{% if clm_parent.url == collection.url %} aria-current="true"{% endif %}>{{ 'mobile.collection.all' | t }}</a>
+      {%- for child in clm_parent.links -%}
+        <a href="{{ child.url }}"{% if child.url == collection.url %} aria-current="true"{% endif %}>{{ child.title }}</a>
+      {%- endfor -%}
+    </nav>
+  {%- endif -%}
+
+  <div class="clm-tb" data-clm-toolbar>
+    {%- if collection.filters.size > 0 -%}
+      <button class="clm-f{% if clm_active_count > 0 %} is-on{% endif %}" type="button" data-clm-open="filters" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg>
+        {{- 'mobile.collection.filters' | t -}}
+        {%- if clm_active_count > 0 %}<span class="clm-badge">{{ clm_active_count }}</span>{% endif -%}
+      </button>
+    {%- endif -%}
+    <button class="clm-s" type="button" data-clm-open="sort" aria-haspopup="dialog">
+      <svg class="clm-s__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5v14M4.5 15.5 8 19l3.5-3.5M16 19V5m-3.5 3.5L16 5l3.5 3.5"/></svg>
+      <span>{% if clm_sort_label != blank %}{{ clm_sort_label | escape }}{% else %}{{ 'mobile.collection.sort' | t }}{% endif %}</span>
+      <svg class="clm-s__cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="clm-seg" role="group" aria-label="{{ 'mobile.collection.view' | t }}">
+      <button type="button" data-clm-view="2" aria-pressed="true" aria-label="{{ 'mobile.collection.two_cols' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/></svg></button>
+      <button type="button" data-clm-view="1" aria-pressed="false" aria-label="{{ 'mobile.collection.one_col' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="7" rx="1.8"/><rect x="4" y="13" width="16" height="7" rx="1.8"/></svg></button>
+    </div>
+  </div>
+
+  {%- if clm_active_count > 0 -%}
+    <div class="clm-act">
+      {%- for filter in collection.filters -%}
+        {%- if filter.type == 'price_range' -%}
+          {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+            {%- liquid
+              assign clm_min = filter.min_value.value | default: 0 | money_without_trailing_zeros
+              assign clm_max = filter.max_value.value | default: filter.range_max | money_without_trailing_zeros
+            -%}
+            <a class="clm-chip" href="{{ filter.url_to_remove }}" aria-label="{{ 'mobile.collection.remove_filter' | t }}: {{ filter.label | escape }}">
+              {{- clm_min }} – {{ clm_max -}}
+              <span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
+            </a>
+          {%- endif -%}
+        {%- else -%}
+          {%- for value in filter.active_values -%}
+            <a class="clm-chip" href="{{ value.url_to_remove }}" aria-label="{{ 'mobile.collection.remove_filter' | t }}: {{ value.label | escape }}">
+              {{- value.label | escape -}}
+              <span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
+            </a>
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+      <a class="clm-clr" href="{{ clm_clear_url }}">{{ 'mobile.collection.clear_all' | t }}</a>
+    </div>
+  {%- endif -%}
+
+  {%- comment -%} « Mostrando N di T prodotti » : N suit les produits chargés (chargement automatique), par le script. {%- endcomment -%}
+  <p class="clm-res" data-clm-results hidden></p>
+
+  {%- comment -%} Feuille Filtri : vrais filtres de la boutique ; « Mostra risultati » recharge la page filtrée. {%- endcomment -%}
+  {%- if collection.filters.size > 0 -%}
+    <section class="clm-sheet" data-clm-sheet="filters" role="dialog" aria-modal="true" aria-label="{{ 'mobile.collection.filters' | t }}" aria-hidden="true">
+      <span class="clm-grab" aria-hidden="true"></span>
+      <div class="clm-sh">
+        <h4>{{ 'mobile.collection.filters' | t }}</h4>
+        <button class="clm-sx" type="button" data-clm-close aria-label="{{ 'mobile.common.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+      <form class="clm-form" action="{{ collection.url }}" method="get" data-clm-filter-form>
+        {%- if collection.sort_by != blank -%}<input type="hidden" name="sort_by" value="{{ collection.sort_by | escape }}">{%- endif -%}
+        <div class="clm-sb">
+          {%- for filter in collection.filters -%}
+            <div class="clm-fs">
+              <h5>{{ filter.label | escape }}</h5>
+              {%- case filter.type -%}
+                {%- when 'price_range' -%}
+                  {%- assign clm_currency = cart.currency.symbol | default: '€' -%}
+                  <div class="clm-price">
+                    <label>{{ clm_currency }}<input type="number" inputmode="decimal" min="0" name="{{ filter.min_value.param_name }}" value="{% if filter.min_value.value %}{{ filter.min_value.value | divided_by: 100.0 }}{% endif %}" placeholder="{{ 'mobile.collection.min' | t }}" aria-label="{{ 'mobile.collection.price_min' | t }}" data-clm-min></label>
+                    <i aria-hidden="true"></i>
+                    <label>{{ clm_currency }}<input type="number" inputmode="decimal" min="0" name="{{ filter.max_value.param_name }}" value="{% if filter.max_value.value %}{{ filter.max_value.value | divided_by: 100.0 }}{% endif %}" placeholder="{{ 'mobile.collection.max' | t }}" aria-label="{{ 'mobile.collection.price_max' | t }}" data-clm-max></label>
+                  </div>
+                  <div class="clm-pills">
+                    {%- assign clm_ranges = '0-10,10-20,20-50,50-100,100-' | split: ',' -%}
+                    {%- for range in clm_ranges -%}
+                      {%- liquid
+                        assign clm_from = range | split: '-' | first
+                        assign clm_to = range | split: '-' | last
+                        assign clm_from_label = clm_from | times: 100 | money_without_trailing_zeros
+                        assign clm_to_label = clm_to | times: 100 | money_without_trailing_zeros
+                      -%}
+                      <button type="button" data-clm-range-min="{% if clm_from != '0' %}{{ clm_from }}{% endif %}" data-clm-range-max="{% unless forloop.last %}{{ clm_to }}{% endunless %}">
+                        {%- if forloop.first -%}
+                          {{ 'mobile.collection.up_to_html' | t: amount: clm_to_label }}
+                        {%- elsif forloop.last -%}
+                          {{ 'mobile.collection.over_html' | t: amount: clm_from_label }}
+                        {%- else -%}
+                          {{ clm_from_label }} – {{ clm_to_label }}
+                        {%- endif -%}
+                      </button>
+                    {%- endfor -%}
+                  </div>
+                {%- else -%}
+                  <div class="clm-pills{% if filter.presentation == 'swatch' %} clm-pills--swatch{% endif %}">
+                    {%- for value in filter.values -%}
+                      <label class="clm-pill{% if value.count == 0 and value.active == false %} is-empty{% endif %}">
+                        <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}"{% if value.active %} checked{% endif %}{% if value.count == 0 and value.active == false %} disabled{% endif %}>
+                        {%- if filter.presentation == 'swatch' and value.swatch.color -%}
+                          <i class="clm-dot" style="background: {{ value.swatch.color }}" aria-hidden="true"></i>
+                        {%- endif -%}
+                        <span>{{ value.label | escape }}</span>
+                        <small>{{ value.count }}</small>
+                      </label>
+                    {%- endfor -%}
+                  </div>
+              {%- endcase -%}
+            </div>
+          {%- endfor -%}
+        </div>
+        <div class="clm-sf">
+          <a class="clm-c" href="{{ clm_clear_url }}">{{ 'mobile.collection.clear' | t }}</a>
+          <button class="clm-p" type="submit">{{ 'mobile.collection.show_results' | t }}</button>
+        </div>
+      </form>
+    </section>
+  {%- endif -%}
+
+  {%- comment -%} Feuille Ordina per : tris Shopify (noms déjà dans la langue du visiteur). {%- endcomment -%}
+  <section class="clm-sheet" data-clm-sheet="sort" role="dialog" aria-modal="true" aria-label="{{ 'mobile.collection.sort_title' | t }}" aria-hidden="true">
+    <span class="clm-grab" aria-hidden="true"></span>
+    <div class="clm-sh">
+      <h4>{{ 'mobile.collection.sort_title' | t }}</h4>
+      <button class="clm-sx" type="button" data-clm-close aria-label="{{ 'mobile.common.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <ul class="clm-so" role="radiogroup">
+      {%- for option in collection.sort_options -%}
+        <li>
+          <button type="button" role="radio" aria-checked="{% if option.value == clm_sort %}true{% else %}false{% endif %}" data-clm-sort="{{ option.value | escape }}">
+            {{- option.name | escape -}}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+          </button>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </section>
+  <div class="clm-scrim" data-clm-scrim hidden></div>
+</div>

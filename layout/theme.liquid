@@ -127,6 +127,11 @@
       <link rel="stylesheet" href="{{ 'pdp-mobile.css' | asset_url }}" media="(max-width: 760px)">
       <script defer src="{{ 'pdp-mobile.js' | asset_url }}"></script>
     {%- endif -%}
+    {%- if template.name == 'collection' -%}
+      {%- comment -%} Page collection mobile au design du prototype (mobile uniquement). {%- endcomment -%}
+      <link rel="stylesheet" href="{{ 'collection-mobile.css' | asset_url }}" media="(max-width: 760px)">
+      <script defer src="{{ 'collection-mobile.js' | asset_url }}"></script>
+    {%- endif -%}
     {%- if template.name == 'cart' -%}
       {%- comment -%} Page panier mobile au design du prototype (mobile uniquement). {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'cart-mobile.css' | asset_url }}" media="(max-width: 760px)">

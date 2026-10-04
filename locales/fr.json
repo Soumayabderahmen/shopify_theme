@@ -806,7 +806,8 @@
       "drawer_free_shipping": "Livraison gratuite",
       "drawer_easy_returns": "Retours faciles",
       "drawer_save": "Économisez {amount}",
-      "drawer_add": "Ajouter au panier"
+      "drawer_add": "Ajouter au panier",
+      "collection_results_html": "Affichage de <b>{count}</b> sur <b>{total}</b> produits"
     },
     "pdp": {
       "gallery": "Photos du produit",
@@ -1020,6 +1021,28 @@
       "secure_html": "Paiement <b>sûr et sécurisé garanti</b>",
       "points_login": "Connectez-vous pour utiliser vos récompenses",
       "login": "Se connecter"
+    },
+    "collection": {
+      "count_one": "1 produit",
+      "count_other_html": "<b>{{ count }}</b> produits",
+      "subcategories": "Sous-catégories",
+      "all": "Tout",
+      "filters": "Filtres",
+      "sort": "Trier",
+      "sort_title": "Trier par",
+      "view": "Affichage",
+      "two_cols": "2 colonnes",
+      "one_col": "1 colonne",
+      "remove_filter": "Retirer le filtre",
+      "clear_all": "Tout effacer",
+      "clear": "Effacer",
+      "show_results": "Voir les résultats",
+      "min": "Min",
+      "max": "Max",
+      "price_min": "Prix minimum",
+      "price_max": "Prix maximum",
+      "up_to_html": "jusqu'à {{ amount }}",
+      "over_html": "plus de {{ amount }}"
     }
   }
 }

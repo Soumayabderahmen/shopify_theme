@@ -57,7 +57,11 @@ body.mobile-explore-open pandectes-cmp,
 html.m6pn-open pandectes-cmp,
 body.mobile-categories-open #ecomsend-widget,
 body.mobile-explore-open #ecomsend-widget,
-html.m6pn-open #ecomsend-widget {
+html.m6pn-open #ecomsend-widget,
+body.clm-lock #honeypop-app,
+body.clm-lock .firepush-widget-container,
+body.clm-lock pandectes-cmp,
+body.clm-lock #ecomsend-widget {
   visibility: hidden !important;
 }
 

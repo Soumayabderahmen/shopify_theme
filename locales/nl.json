@@ -737,7 +737,8 @@
       "drawer_free_shipping": "Gratis verzending",
       "drawer_easy_returns": "Eenvoudig retourneren",
       "drawer_save": "Je bespaart {amount}",
-      "drawer_add": "In winkelwagen"
+      "drawer_add": "In winkelwagen",
+      "collection_results_html": "<b>{count}</b> van <b>{total}</b> producten"
     },
     "pdp": {
       "gallery": "Productfoto's",
@@ -951,6 +952,28 @@
       "secure_html": "Gegarandeerd <b>veilig en beschermd</b> afrekenen",
       "points_login": "Log in om beloningen in te wisselen",
       "login": "Inloggen"
+    },
+    "collection": {
+      "count_one": "1 product",
+      "count_other_html": "<b>{{ count }}</b> producten",
+      "subcategories": "Subcategorieën",
+      "all": "Alles",
+      "filters": "Filters",
+      "sort": "Sorteren",
+      "sort_title": "Sorteren op",
+      "view": "Weergave",
+      "two_cols": "2 kolommen",
+      "one_col": "1 kolom",
+      "remove_filter": "Filter verwijderen",
+      "clear_all": "Alles wissen",
+      "clear": "Wissen",
+      "show_results": "Resultaten tonen",
+      "min": "Min",
+      "max": "Max",
+      "price_min": "Minimumprijs",
+      "price_max": "Maximumprijs",
+      "up_to_html": "tot {{ amount }}",
+      "over_html": "meer dan {{ amount }}"
     }
   },
   "discount_R": {

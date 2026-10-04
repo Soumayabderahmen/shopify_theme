@@ -146,6 +146,18 @@
   {%- endif -%}
 {%- endcapture -%}
 
+{%- comment -%}
+  En-tête mobile au design du prototype (titre, sous-collections, Filtri / Ordina, filtres actifs) ;
+  assets/collection-mobile.css le montre en mobile et cache le titre et la barre de tri ci-dessous.
+{%- endcomment -%}
+{%- liquid
+  assign clm_menu = quick_links
+  if clm_menu == empty or clm_menu == blank
+    assign clm_menu = linklists['main-menu']
+  endif
+-%}
+{%- render 'collection-mobile-head', section: section, menu: clm_menu -%}
+
 <div
   class="collection-wrapper {% if show_filters_and_menu %}m6cl{% if section.settings.filter_sticky %} sticky{% endif %}{% endif %}{% if section.settings.filters_menu_alignment == 'right' %} m6cl-inv{% endif %} section-width-{{ section.settings.width }}"
   data-standard-view-event="collection"
