@@ -820,7 +820,26 @@
       "collection_show_one": "Mostra 1 prodotto",
       "collection_show_none": "Nessun prodotto",
       "collection_any": "Tutti",
-      "collection_hint_html": "Il 90% dei prodotti costa meno di <b>{amount}</b>"
+      "collection_hint_html": "Il 90% dei prodotti costa meno di <b>{amount}</b>",
+      "qa_colors_count": "{count} colori",
+      "qa_see_all": "Vedi tutti",
+      "qa_last_n": "Ultimi {count}",
+      "qa_for_you": "Per te",
+      "qa_find_size": "Trova la tua taglia",
+      "qa_your_height": "La tua altezza",
+      "qa_fit_hint": "Ti suggeriamo la taglia in base alle misure del produttore.",
+      "qa_fit_result_html": "Per <b>{height} cm</b> ti consigliamo la taglia <b>{size}</b>.",
+      "qa_fit_closest_html": "Per <b>{height} cm</b> ti consigliamo la taglia <b>{size}</b> (la più vicina).",
+      "qa_fit_none": "Nessuna taglia disponibile per questa altezza.",
+      "qa_fit_select": "Seleziona {size}",
+      "qa_pieces": "{count} pezzi",
+      "qa_pick_size_error": "Seleziona una taglia per continuare",
+      "qa_pick_option_error": "Seleziona {option} per continuare",
+      "qa_cart_summary_one": "{count} articolo nel carrello · totale {total}",
+      "qa_cart_summary_other": "{count} articoli nel carrello · totale {total}",
+      "qa_size_value": "Taglia {size}",
+      "qa_go_cart": "Vai al carrello ({count})",
+      "qa_size_sold_out": "Esaurita"
     },
     "pdp": {
       "gallery": "Foto del prodotto",
@@ -958,7 +977,14 @@
       "more": "Più",
       "easy_return": "Reso facile 30 giorni",
       "klarna": "Klarna: 3 rate da",
-      "details": "Vedi dettagli"
+      "details": "Vedi dettagli",
+      "back": "Indietro",
+      "product_details": "Dettagli prodotto ›",
+      "in_country": "in {{ country }}",
+      "return_days": "30 giorni",
+      "added_title": "Aggiunto al carrello!",
+      "go_cart": "Vai al carrello",
+      "complete_look": "Completa il look"
     },
     "footer": {
       "account": "Account cliente",

@@ -758,6 +758,46 @@ function initMobileTemuHeader() {
     renderWishlistPage();
   }
 
+  // Wishlist pour les scripts sans carte produit (modale quick add, assets/mobile-quick-add.js).
+  window.mobileWishlist = {
+    has: function (productId) {
+      return wishlistItems.some(function (item) { return item.id === String(productId); });
+    },
+    toggle: function (product) {
+      var productId = String(product.id);
+      var productUrl = safeProductUrl(product.url);
+      if (!productUrl) {
+        console.error('Wishlist product has an invalid product URL.', product);
+        return false;
+      }
+      var isSaved = this.has(productId);
+      var updatedItems = wishlistItems.filter(function (item) { return item.id !== productId; });
+      if (!isSaved) {
+        updatedItems.push({
+          id: productId,
+          variantId: String(product.variantId || ''),
+          title: product.title,
+          url: productUrl,
+          image: product.image || '',
+          price: product.price || '',
+          priceCents: Number(product.priceCents) || 0,
+          compareAtPrice: product.compareAtPrice || '',
+          compareAtPriceCents: Number(product.compareAtPriceCents) || 0,
+          discountPercent: Number(product.compareAtPriceCents) > Number(product.priceCents)
+            ? Math.round((Number(product.compareAtPriceCents) - Number(product.priceCents)) / Number(product.compareAtPriceCents) * 100)
+            : 0,
+          variantTitle: product.variantTitle && product.variantTitle !== 'Default Title' ? product.variantTitle : '',
+          badge: ''
+        });
+      }
+      if (!writeWishlist(updatedItems)) return isSaved;
+      syncWishlistButtons(document);
+      updateWishlistHeader();
+      renderWishlistPage();
+      return !isSaved;
+    }
+  };
+
   async function addWishlistVariantsToCart(variantIds, trigger) {
     var items = variantIds.filter(Boolean).map(function (variantId) {
       return { id: Number(variantId), quantity: 1 };

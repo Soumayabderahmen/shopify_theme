@@ -749,7 +749,26 @@
       "collection_show_one": "1 product tonen",
       "collection_show_none": "Geen producten",
       "collection_any": "Alle",
-      "collection_hint_html": "90% van de producten kost minder dan <b>{amount}</b>"
+      "collection_hint_html": "90% van de producten kost minder dan <b>{amount}</b>",
+      "qa_colors_count": "{count} kleuren",
+      "qa_see_all": "Alles bekijken",
+      "qa_last_n": "Laatste {count}",
+      "qa_for_you": "Voor jou",
+      "qa_find_size": "Vind je maat",
+      "qa_your_height": "Je lengte",
+      "qa_fit_hint": "We raden een maat aan op basis van de maten van de fabrikant.",
+      "qa_fit_result_html": "Voor <b>{height} cm</b> raden we maat <b>{size}</b> aan.",
+      "qa_fit_closest_html": "Voor <b>{height} cm</b> raden we maat <b>{size}</b> aan (dichtstbij).",
+      "qa_fit_none": "Geen maat beschikbaar voor deze lengte.",
+      "qa_fit_select": "{size} kiezen",
+      "qa_pieces": "{count} stuks",
+      "qa_pick_size_error": "Kies een maat om verder te gaan",
+      "qa_pick_option_error": "Kies {option} om verder te gaan",
+      "qa_cart_summary_one": "{count} artikel in je winkelwagen · totaal {total}",
+      "qa_cart_summary_other": "{count} artikelen in je winkelwagen · totaal {total}",
+      "qa_size_value": "Maat {size}",
+      "qa_go_cart": "Naar winkelwagen ({count})",
+      "qa_size_sold_out": "Uitverkocht"
     },
     "pdp": {
       "gallery": "Productfoto's",
@@ -887,7 +906,14 @@
       "more": "Meer",
       "easy_return": "Eenvoudig retourneren binnen 30 dagen",
       "klarna": "Klarna: 3 termijnen van",
-      "details": "Details bekijken"
+      "details": "Details bekijken",
+      "back": "Terug",
+      "product_details": "Productdetails ›",
+      "in_country": "naar {{ country }}",
+      "return_days": "30 dagen",
+      "added_title": "Toegevoegd aan winkelwagen!",
+      "go_cart": "Naar winkelwagen",
+      "complete_look": "Maak de look compleet"
     },
     "footer": {
       "account": "Klantaccount",

@@ -1,6 +1,6 @@
-/* Quick add mobile — bouton panier des cartes produit + modale "Aggiungi al carrello".
+/* Quick add mobile — bouton panier des cartes produit + modale "Aggiungi al carrello" v2 (prototype "Modale quick add v2").
    Données réelles : templates/product.quick-add.liquid (options, variantes, stock, guide des tailles)
-   et Product Recommendations API (produits similaires). Ajout via /cart/add.js.
+   et Product Recommendations API (produits similaires, "Completa il look"). Ajout via /cart/add.js, total via /cart.js.
    Actif uniquement sous 760px : sur desktop le bouton n'est pas affiché (.mobile-only) et rien ne change. */
 (function () {
   'use strict';
@@ -13,27 +13,52 @@
   var T = window.mobileT || function (key) { return key; };
   var shopRoot = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
   var toastElement = document.querySelector('[data-qa-toast]');
+  var scrim = document.querySelector('[data-qa-scrim]');
+  function $(selector) { return dialog.querySelector(selector); }
   var el = {
-    back: dialog.querySelector('[data-qa-back]'),
-    image: dialog.querySelector('[data-qa-image]'),
-    title: dialog.querySelector('[data-qa-title]'),
-    price: dialog.querySelector('[data-qa-price]'),
-    stock: dialog.querySelector('[data-qa-stock]'),
-    body: dialog.querySelector('[data-qa-body]'),
-    options: dialog.querySelector('[data-qa-options]'),
-    guidePanel: dialog.querySelector('[data-qa-guide-panel]'),
-    qtyValue: dialog.querySelector('[data-qa-qty-value]'),
-    qtyMinus: dialog.querySelector('[data-qa-qty="-1"]'),
-    qtyPlus: dialog.querySelector('[data-qa-qty="1"]'),
-    free: dialog.querySelector('[data-qa-free]'),
-    klarna: dialog.querySelector('[data-qa-klarna]'),
-    klarnaValue: dialog.querySelector('[data-qa-klarna-value]'),
-    sim: dialog.querySelector('[data-qa-sim]'),
-    simTitle: dialog.querySelector('[data-qa-sim-title]'),
-    simAll: dialog.querySelector('[data-qa-sim-all]'),
-    simRail: dialog.querySelector('[data-qa-sim-rail]'),
-    more: dialog.querySelector('[data-qa-more]'),
-    add: dialog.querySelector('[data-qa-add]')
+    drag: $('[data-qa-drag]'),
+    back: $('[data-qa-back]'),
+    mini: $('[data-qa-mini]'),
+    miniImage: $('[data-qa-mini-image]'),
+    miniPrice: $('[data-qa-mini-price]'),
+    miniSelection: $('[data-qa-mini-selection]'),
+    scroll: $('[data-qa-scroll]'),
+    pick: $('[data-qa-pick]'),
+    hero: $('[data-qa-hero]'),
+    image: $('[data-qa-image]'),
+    tag: $('[data-qa-tag]'),
+    fav: $('[data-qa-fav]'),
+    price: $('[data-qa-price]'),
+    save: $('[data-qa-save]'),
+    title: $('[data-qa-title]'),
+    stock: $('[data-qa-stock]'),
+    more: $('[data-qa-more]'),
+    options: $('[data-qa-options]'),
+    free: $('[data-qa-free]'),
+    klarna: $('[data-qa-klarna]'),
+    klarnaValue: $('[data-qa-klarna-value]'),
+    sim: $('[data-qa-sim]'),
+    simTitle: $('[data-qa-sim-title]'),
+    simAll: $('[data-qa-sim-all]'),
+    simRail: $('[data-qa-sim-rail]'),
+    done: $('[data-qa-done]'),
+    doneSummary: $('[data-qa-done-summary]'),
+    doneImage: $('[data-qa-done-image]'),
+    doneTitle: $('[data-qa-done-title]'),
+    doneOptions: $('[data-qa-done-options]'),
+    donePrice: $('[data-qa-done-price]'),
+    goal: $('[data-qa-goal]'),
+    goalText: $('[data-qa-goal-text]'),
+    goalProgress: $('[data-qa-goal-progress]'),
+    goalBar: $('[data-qa-goal-bar]'),
+    goCart: $('[data-qa-go-cart]'),
+    look: $('[data-qa-look]'),
+    lookRail: $('[data-qa-look-rail]'),
+    foot: $('[data-qa-foot]'),
+    qtyValue: $('[data-qa-qty-value]'),
+    qtyMinus: $('[data-qa-qty="-1"]'),
+    qtyPlus: $('[data-qa-qty="1"]'),
+    add: $('[data-qa-add]')
   };
 
   var COLOR_OPTION = /colou?r|colore|colori|farbe|couleur|kleur/i;
@@ -41,8 +66,18 @@
   var DEFAULT_TITLE = 'Default Title';
   var MAX_QTY = 10;
   var LOW_STOCK = 5;
+  var COLORS_VISIBLE = 5;
+  // Ordre des tailles de vêtements (XXL = 2XL, XXXL = 3XL…).
+  var SIZE_RANK = {
+    XXXS: -1, XXS: 0, XS: 1, S: 2, M: 3, L: 4, XL: 5, XXL: 6, '2XL': 6, XXXL: 7, '3XL': 7,
+    XXXXL: 8, '4XL': 8, XXXXXL: 9, '5XL': 9, '6XL': 10, '7XL': 11
+  };
+  var ERROR_ICON = '<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg>';
+  var CHEVRON_ICON = '<svg class="cv" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m6 9 6 6 6-6"></path></svg>';
+  var RULER_ICON = '<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M3 8h18v8H3z"></path><path d="M7 8v3M11 8v4M15 8v3M19 8v4"></path></svg>';
+  var PLUS_ICON = '<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M12 5v14M5 12h14"></path></svg>';
 
-  /* Noms de couleurs courants (italien / anglais) -> pastille ; sinon image de la variante ou texte. */
+  /* Noms de couleurs courants (italien / anglais) -> pastille unie quand la variante n'a pas de photo. */
   var COLOR_NAMES = {
     'light blue': '#8EC5FF', 'sky blue': '#8EC5FF', 'navy blue': '#1F2A44', 'dark blue': '#1F2A44',
     'royal blue': '#2748A8', 'army green': '#4B5320', 'dark green': '#2F4F3A', 'light gray': '#C9CDD3',
@@ -63,6 +98,8 @@
   var COLOR_KEYS = Object.keys(COLOR_NAMES).sort(function (a, b) { return b.length - a.length; });
 
   var dataCache = new Map();
+  // Produits déjà arrivés, lisibles sans attendre une promesse (ouverture en une seule passe d'affichage).
+  var readyProducts = new Map();
   var detailsCache = new Map();
   var state = null;
   var history = [];
@@ -87,13 +124,12 @@
   var shop = {
     moneyFormat: dialog.dataset.moneyFormat || '€{{amount_with_comma_separator}}',
     klarna: dialog.hasAttribute('data-klarna'),
-    country: dialog.dataset.country || '',
-    freeShippingThreshold: 5000
+    freeShipping: Number(dialog.dataset.freeShipping) || 0,
+    allUrl: dialog.dataset.allUrl || (shopRoot + 'collections/all')
   };
 
   function money(cents) {
-    var format = shop.moneyFormat;
-    return format.replace(/\{\{\s*(\w+)\s*\}\}/, function (match, key) {
+    return shop.moneyFormat.replace(/\{\{\s*(\w+)\s*\}\}/, function (match, key) {
       switch (key) {
         case 'amount_no_decimals': return formatNumber(cents, 0, ',', '.');
         case 'amount_with_comma_separator': return formatNumber(cents, 2, '.', ',');
@@ -111,13 +147,6 @@
     return clean + (clean.indexOf('?') === -1 ? '?' : '&') + 'width=' + width;
   }
 
-  function flagEmoji(countryCode) {
-    if (!/^[A-Z]{2}$/i.test(countryCode || '')) return '';
-    return String.fromCodePoint.apply(null, countryCode.toUpperCase().split('').map(function (letter) {
-      return 127397 + letter.charCodeAt(0);
-    }));
-  }
-
   function colorFromName(name) {
     var lower = String(name || '').toLowerCase().trim();
     if (COLOR_NAMES[lower]) return COLOR_NAMES[lower];
@@ -127,16 +156,86 @@
     return null;
   }
 
+  /* Performance : sur les pages de collection (≈ 13 000 éléments et les nombreux :has() du thème), chaque calcul
+     de mise en page de la page coûte ≈ 0,1 s. Donc :
+     - fond, feuille et toast en popover (couche supérieure : quelques ms) au lieu de showModal() / blocage de <html> ;
+     - animations par element.animate() (pas de offsetWidth) ;
+     - défilement remis à zéro seulement s'il a bougé (lire ou écrire scrollTop force la mise en page). */
+  var hasPopover = typeof dialog.showPopover === 'function';
+  function setLayer(element, show) {
+    if (!hasPopover || !element) return;
+    var open = element.matches(':popover-open');
+    if (show && !open) element.showPopover();
+    else if (!show && open) element.hidePopover();
+  }
+
   function showToast(message) {
     if (!toastElement) return;
     toastElement.textContent = message;
-    toastElement.classList.add('is-visible');
+    // Ré-affiché à chaque fois : passe au-dessus de la feuille dans la couche supérieure.
+    setLayer(toastElement, false);
+    setLayer(toastElement, true);
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(function () { toastElement.classList.add('is-visible'); });
+    });
     window.clearTimeout(toastTimer);
-    toastTimer = window.setTimeout(function () { toastElement.classList.remove('is-visible'); }, 1900);
+    toastTimer = window.setTimeout(function () {
+      toastElement.classList.remove('is-visible');
+      toastTimer = window.setTimeout(function () { setLayer(toastElement, false); }, 260);
+    }, 2400);
+  }
+
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function play(element, keyframes, duration) {
+    if (reducedMotion.matches || typeof element.animate !== 'function') return;
+    element.animate(keyframes, { duration: duration, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+  }
+
+  // Écritures seulement si la valeur change : chaque modification du DOM relance le calcul de style de la page.
+  function setText(node, value) {
+    if (node.textContent !== value) node.textContent = value;
+  }
+  function setHTML(node, html) {
+    if (node.qaHtml !== html) {
+      node.qaHtml = html;
+      node.innerHTML = html;
+    }
+  }
+
+  var scrolled = false;
+  function resetScroll() {
+    if (!scrolled) return;
+    el.scroll.scrollTop = 0;
+    scrolled = false;
+    el.mini.classList.remove('is-shown');
+  }
+
+  /* Libellés bruts des tailles : "XL fit 174-183CM" -> { code: "XL", lo: 174, hi: 183 }. */
+  function parseSize(raw) {
+    var match = String(raw).match(/^(\S+)\s*(?:fit)?\s*(\d{2,3})\s*[-–]\s*(\d{2,3})\s*cm$/i);
+    return match ? { raw: raw, code: match[1].toUpperCase(), lo: Number(match[2]), hi: Number(match[3]) } : { raw: raw, code: raw };
+  }
+
+  function sizeRank(code) {
+    var rank = SIZE_RANK[String(code).toUpperCase()];
+    return rank === undefined ? null : rank;
+  }
+
+  // Tri S → M → L → XL → XXL, ou numérique (pointures, longueurs) ; sinon l'ordre de la boutique.
+  function sortSizes(values) {
+    return values.map(function (value) { return parseSize(value.name); }).sort(function (a, b) {
+      var rankA = sizeRank(a.code);
+      var rankB = sizeRank(b.code);
+      if (rankA !== null && rankB !== null) return rankA - rankB;
+      var numberA = parseFloat(a.code);
+      var numberB = parseFloat(b.code);
+      if (!isNaN(numberA) && !isNaN(numberB)) return numberA - numberB;
+      return 0;
+    });
   }
 
   /* ---------- Données ----------
-     1) /products/<handle>.js (rapide, mis en cache par Shopify) : options, variantes, prix, disponibilité ;
+     1) /products/<handle>.js (rapide, mis en cache par Shopify) : options, variantes, prix, disponibilité, photos ;
      2) en parallèle, /products/<handle>?view=quick-add (plus lent) : stock réel, guide des tailles,
         pastilles de couleur, collection — ajoutés à la modale dès qu'ils arrivent. */
   function fromProductJson(data) {
@@ -203,7 +302,7 @@
   function loadBase(handle) {
     if (!dataCache.has(handle)) {
       var base = fetchJson(shopRoot + 'products/' + encodeURIComponent(handle) + '.js', 'Product').then(fromProductJson);
-      base.catch(function () { dataCache.delete(handle); });
+      base.then(function (product) { readyProducts.set(handle, product); }, function () { dataCache.delete(handle); });
       dataCache.set(handle, base);
     }
     return dataCache.get(handle);
@@ -219,9 +318,9 @@
         addDetails(results[0], results[1]);
         // Modale déjà ouverte sur ce produit : on complète sans perdre la sélection.
         if (state && state.product === results[0]) {
-          renderOptions();
+          renderOptions(true);
           paint();
-          el.simAll.href = results[0].collectionUrl || (shopRoot + 'collections/all');
+          el.simAll.href = results[0].collectionUrl || shop.allUrl;
         }
       }).catch(function (error) {
         detailsCache.delete(handle);
@@ -231,11 +330,12 @@
     return base;
   }
 
-  // Préchargement des cartes proches de l'écran, deux requêtes à la fois, quand le navigateur est libre.
+  // Préchargement des cartes proches de l'écran (600px avant), trois requêtes à la fois, quand le navigateur est libre :
+  // un produit pas encore en cache chez Shopify met jusqu'à 3 s à répondre, il doit être prêt avant le tap.
   var prefetchQueue = [];
   var prefetchRunning = 0;
   function runPrefetch() {
-    while (prefetchRunning < 2 && prefetchQueue.length) {
+    while (prefetchRunning < 3 && prefetchQueue.length) {
       var handle = prefetchQueue.shift();
       if (dataCache.has(handle)) continue;
       prefetchRunning += 1;
@@ -258,7 +358,7 @@
       if (mobile.matches && handle && !dataCache.has(handle) && prefetchQueue.indexOf(handle) === -1) prefetchQueue.push(handle);
     });
     schedulePrefetch();
-  }, { rootMargin: '200px 0px' }) : null;
+  }, { rootMargin: '600px 0px' }) : null;
   function observeCards(root) {
     if (!visibleObserver || !mobile.matches) return;
     (root || document).querySelectorAll('[data-quick-add]:not([data-qa-observed])').forEach(function (button) {
@@ -267,14 +367,16 @@
     });
   }
 
-  function loadSimilar(product) {
+  function loadRecommendations(product, intent) {
     var base = dialog.dataset.recommendationsUrl || (shopRoot + 'recommendations/products');
-    return fetch(base + '.json?product_id=' + encodeURIComponent(product.id) + '&limit=10&intent=related', { credentials: 'same-origin' })
+    return fetch(base + '.json?product_id=' + encodeURIComponent(product.id) + '&limit=10&intent=' + intent, { credentials: 'same-origin' })
       .then(function (response) {
         if (!response.ok) throw new Error('Recommendations request failed with status ' + response.status);
         return response.json();
       })
-      .then(function (data) { return data.products || []; });
+      .then(function (data) {
+        return (data.products || []).filter(function (item) { return item.id !== product.id && item.available !== false; });
+      });
   }
 
   /* ---------- Sélection ---------- */
@@ -284,8 +386,13 @@
     return !(options.length === 1 && options[0].values.length === 1 && options[0].values[0].name === DEFAULT_TITLE);
   }
 
-  function isColorOption(option) {
-    return COLOR_OPTION.test(option.name);
+  // Option affichée en vignettes : la première option couleur du produit.
+  function colorIndexOf(product) {
+    if (!hasOptions(product)) return -1;
+    for (var index = 0; index < product.options.length; index += 1) {
+      if (COLOR_OPTION.test(product.options[index].name)) return index;
+    }
+    return -1;
   }
 
   function matches(variant, selected, skipIndex) {
@@ -311,125 +418,328 @@
       || variants[0];
   }
 
+  // Prix affiché tant que la taille n'est pas choisie : le moins cher des choix possibles (comme la carte).
+  function priceVariant() {
+    var exact = selectedVariant();
+    if (exact) return exact;
+    var candidates = state.product.variants.filter(function (variant) { return variant.available && matches(variant, state.selected, -1); });
+    if (!candidates.length) return displayVariant();
+    return candidates.reduce(function (cheapest, variant) { return variant.price < cheapest.price ? variant : cheapest; });
+  }
+
   function valueAvailable(optionIndex, value) {
     return state.product.variants.some(function (variant) {
       return variant.available && variant.options[optionIndex] === value && matches(variant, state.selected, optionIndex);
     });
   }
 
-  function initialSelection(product, variantId) {
-    var selected = product.options.map(function () { return null; });
+  // Couleur grisée seulement si plus aucune variante de cette couleur n'est en stock.
+  function colorAvailable(value) {
+    return state.product.variants.some(function (variant) {
+      return variant.available && variant.options[state.colorIndex] === value;
+    });
+  }
+
+  function initialSelection(product, variantId, colorIndex) {
     if (!hasOptions(product)) return product.options.map(function (option) { return option.values[0].name; });
+    var selected = product.options.map(function () { return null; });
     var start = product.variants.find(function (variant) { return String(variant.id) === String(variantId) && variant.available; })
       || product.variants.find(function (variant) { return variant.available; })
       || product.variants[0];
     product.options.forEach(function (option, index) {
       // Couleur : celle de la carte ; options à une seule valeur : sélectionnées d'office ; tailles : au choix du client.
       if (option.values.length === 1) selected[index] = option.values[0].name;
-      else if (isColorOption(option) && start) selected[index] = start.options[index];
+      else if (index === colorIndex && start) selected[index] = start.options[index];
     });
     return selected;
   }
 
-  function missingOption() {
-    var product = state.product;
-    for (var index = 0; index < product.options.length; index += 1) {
-      if (state.selected[index] == null) return product.options[index];
+  function missingIndex() {
+    for (var index = 0; index < state.selected.length; index += 1) {
+      if (state.selected[index] == null) return index;
     }
-    return null;
+    return -1;
   }
 
   function optionLabel(option) {
-    if (isColorOption(option)) return T('color');
+    if (COLOR_OPTION.test(option.name)) return T('color');
     if (SIZE_OPTION.test(option.name)) return T('size');
     return option.name;
   }
 
-  /* ---------- Rendu ---------- */
-  function swatchFor(option, optionIndex, value) {
-    if (value.color) return { style: '--sw:' + value.color };
-    if (value.image) return { style: 'background-image:url("' + value.image + '")' };
-    var named = colorFromName(value.name);
-    if (named) return { style: '--sw:' + named };
-    var withImage = state.product.variants.find(function (variant) {
-      return variant.options[optionIndex] === value.name && variant.image;
-    });
-    if (withImage) return { style: 'background-image:url("' + sizedImage(withImage.image, 96) + '")' };
-    return null;
+  function isSizeOption(index) {
+    return index !== state.colorIndex && SIZE_OPTION.test(state.product.options[index].name);
   }
 
-  function renderOptions() {
+  function sizeInfo(index, raw) {
+    var list = state.sizes[index];
+    return (list && list.find(function (size) { return size.raw === raw; })) || parseSize(raw);
+  }
+
+  // Valeurs choisies, dans l'ordre d'affichage (couleur, taille…).
+  function selectionParts(withSizeWord) {
+    var product = state.product;
+    if (!hasOptions(product)) return [];
+    return state.order.map(function (index) {
+      var value = state.selected[index];
+      if (value == null || product.options[index].values.length === 1) return null;
+      if (index === state.colorIndex) return value;
+      var code = sizeInfo(index, value).code;
+      return withSizeWord && isSizeOption(index) ? T('qa_size_value', { size: code }) : code;
+    }).filter(Boolean);
+  }
+
+  /* ---------- Rendu ---------- */
+  function swatchMarkup(index, value) {
+    var withImage = state.product.variants.find(function (variant) {
+      return variant.options[index] === value.name && variant.image;
+    });
+    var image = withImage ? sizedImage(withImage.image, 120) : (value.image || '');
+    if (image) return '<span class="im"><img src="' + escapeHtml(image) + '" alt="" loading="lazy" width="56" height="56"></span>';
+    var color = value.color || colorFromName(value.name);
+    return '<span class="im flat"' + (color ? ' style="--sw:' + escapeHtml(color) + '"' : '') + '></span>';
+  }
+
+  function colorGroup(index) {
+    var option = state.product.options[index];
+    var count = option.values.length;
+    var html = '<div class="qa-grp" data-qa-group="' + index + '">'
+      + '<div class="qa-lbl"><span>' + escapeHtml(optionLabel(option)) + '</span><b data-qa-value="' + index + '"></b>'
+      + (count > 1 ? '<span class="qa-cnt">' + escapeHtml(T('qa_colors_count', { count: count })) + '</span>' : '')
+      + (count > COLORS_VISIBLE ? '<button type="button" class="qa-link" data-qa-cols aria-expanded="false"><span>' + escapeHtml(T('qa_see_all')) + '</span>' + CHEVRON_ICON + '</button>' : '')
+      + '</div><div class="qa-cols" data-qa-cols-list role="radiogroup" aria-label="' + escapeHtml(optionLabel(option)) + '">';
+    option.values.forEach(function (value) {
+      html += '<button type="button" class="qa-sw" role="radio" aria-checked="false" aria-label="' + escapeHtml(value.name) + '"'
+        + ' data-qa-option="' + index + '" data-qa-value-name="' + escapeHtml(value.name) + '">'
+        + swatchMarkup(index, value) + '<small aria-hidden="true">' + escapeHtml(value.name) + '</small></button>';
+    });
+    return html + '</div>' + errorMarkup(index) + '</div>';
+  }
+
+  function sizeGroup(index, withFit, withGuide) {
+    var option = state.product.options[index];
+    var sizes = sortSizes(option.values);
+    state.sizes[index] = sizes;
+    var numeric = sizes.every(function (size) { return !size.lo && /^\d+([.,]\d+)?$/.test(size.code); });
+    var wide = sizes.some(function (size) { return String(size.code).length > 6; });
+    var layout = sizes.length === 1 ? ' one' : wide ? ' wide' : numeric ? ' num' : '';
+    var label = optionLabel(option);
+    var link = '';
+    var extra = '';
+    if (withFit) {
+      link = '<button type="button" class="qa-link" data-qa-fit-toggle aria-expanded="false">' + RULER_ICON + '<span>' + escapeHtml(T('qa_find_size')) + '</span></button>';
+      extra = '<div class="qa-fit" data-qa-fit><div inert><div class="box">'
+        + '<label>' + escapeHtml(T('qa_your_height'))
+        + '<input type="number" inputmode="numeric" min="100" max="230" placeholder="170" data-qa-height>cm</label>'
+        + '<p data-qa-fit-result>' + escapeHtml(T('qa_fit_hint')) + '</p></div></div></div>';
+    } else if (withGuide) {
+      link = '<button type="button" class="qa-link" data-qa-guide aria-expanded="false"><span>' + escapeHtml(T('size_guide')) + '</span>' + CHEVRON_ICON + '</button>';
+      extra = '<div class="qa-guide-panel" data-qa-guide-panel hidden>' + state.product.sizeChart + '</div>';
+    }
+    var html = '<div class="qa-grp" data-qa-group="' + index + '">'
+      + '<div class="qa-lbl"><span>' + escapeHtml(label) + '</span><b data-qa-value="' + index + '"></b>' + link + '</div>'
+      + extra
+      + '<div class="qa-sizes' + layout + '" data-qa-sizes role="radiogroup" aria-label="' + escapeHtml(label) + '">';
+    sizes.forEach(function (size) {
+      html += '<button type="button" class="qa-sz" role="radio" aria-checked="false"'
+        + ' data-qa-option="' + index + '" data-qa-value-name="' + escapeHtml(size.raw) + '">'
+        + '<b>' + escapeHtml(size.code) + '</b><small data-qa-sub></small></button>';
+    });
+    return html + '</div>' + errorMarkup(index) + '</div>';
+  }
+
+  function errorMarkup(index) {
+    return '<p class="qa-err" data-qa-err="' + index + '" hidden>' + ERROR_ICON + '<span></span></p>';
+  }
+
+  // keepUi : redessin à l'arrivée des détails (stock, pastilles) sans refermer ce que le client a ouvert.
+  function renderOptions(keepUi) {
     var product = state.product;
     var html = '';
+    var fitShown = false;
     var guideShown = false;
+    var previous = null;
+    if (keepUi) {
+      var oldFit = el.options.querySelector('[data-qa-fit]');
+      var oldPanel = el.options.querySelector('[data-qa-guide-panel]');
+      var oldList = el.options.querySelector('[data-qa-cols-list]');
+      var oldError = el.options.querySelector('[data-qa-err]:not([hidden])');
+      previous = {
+        fitOpen: Boolean(oldFit && oldFit.classList.contains('is-open')),
+        height: (el.options.querySelector('[data-qa-height]') || {}).value || '',
+        fitResult: (el.options.querySelector('[data-qa-fit-result]') || {}).innerHTML || '',
+        guideOpen: Boolean(oldPanel && !oldPanel.hidden),
+        colsAll: state.colsAll,
+        colsLeft: oldList ? oldList.scrollLeft : 0,
+        rec: state.rec,
+        error: oldError ? { index: oldError.dataset.qaErr, text: oldError.textContent } : null
+      };
+    }
+    state.sizes = {};
+    state.fitIndex = -1;
+    state.rec = null;
+    state.colsAll = false;
     if (hasOptions(product)) {
-      product.options.forEach(function (option, index) {
-        if (option.values.length === 1 && option.values[0].name === DEFAULT_TITLE) return;
-        var color = isColorOption(option);
-        var label = optionLabel(option);
-        var guide = '';
-        if (!color && !guideShown && product.sizeChart && SIZE_OPTION.test(option.name)) {
-          guide = '<a href="#" class="qa-guide" data-qa-guide aria-expanded="false">' + T('size_guide') + '</a>';
-          guideShown = true;
+      state.order.forEach(function (index) {
+        var option = product.options[index];
+        if (index === state.colorIndex) {
+          html += colorGroup(index);
+          return;
         }
-        html += '<div class="qa-grp" data-qa-group="' + index + '">'
-          + '<div class="qa-lbl">' + escapeHtml(label) + ': <b data-qa-value="' + index + '"></b>' + guide + '</div>'
-          + '<div class="' + (color ? 'qa-colors' : 'qa-sizes') + '" role="radiogroup" aria-label="' + escapeHtml(label) + '">';
-        option.values.forEach(function (value) {
-          if (color) {
-            var swatch = swatchFor(option, index, value);
-            html += '<button type="button" role="radio" aria-checked="false" aria-label="' + escapeHtml(value.name) + '"'
-              + ' data-qa-option="' + index + '" data-qa-value-name="' + escapeHtml(value.name) + '"'
-              + (swatch ? ' style="' + escapeHtml(swatch.style) + '"' : ' class="is-text"') + '>'
-              + (swatch ? '' : escapeHtml(value.name)) + '</button>';
-          } else {
-            html += '<button type="button" role="radio" aria-checked="false"'
-              + ' data-qa-option="' + index + '" data-qa-value-name="' + escapeHtml(value.name) + '">'
-              + escapeHtml(value.name) + '</button>';
-          }
-        });
-        html += '</div></div>';
+        // Options à une seule valeur ("Ships From"…) : choisies d'office, pas affichées.
+        if (option.values.length === 1) return;
+        var size = SIZE_OPTION.test(option.name);
+        var ranged = size && !fitShown && option.values.some(function (value) { return parseSize(value.name).lo; });
+        var guide = size && !ranged && !guideShown && Boolean(product.sizeChart);
+        if (ranged) {
+          fitShown = true;
+          state.fitIndex = index;
+        }
+        if (guide) guideShown = true;
+        html += sizeGroup(index, ranged, guide);
       });
     }
     el.options.innerHTML = html;
-    el.guidePanel.hidden = true;
-    el.guidePanel.innerHTML = product.sizeChart || '';
+    if (previous) restoreOptionsUi(previous);
+  }
+
+  function restoreOptionsUi(previous) {
+    var list = el.options.querySelector('[data-qa-cols-list]');
+    var colsToggle = el.options.querySelector('[data-qa-cols]');
+    if (list && previous.colsAll && colsToggle) {
+      state.colsAll = true;
+      list.classList.add('is-all');
+      colsToggle.setAttribute('aria-expanded', 'true');
+      colsToggle.querySelector('span').textContent = T('show_less');
+    } else if (list && previous.colsLeft) {
+      list.scrollLeft = previous.colsLeft;
+    }
+    var fit = el.options.querySelector('[data-qa-fit]');
+    if (fit && previous.fitOpen) {
+      fit.classList.add('is-open');
+      fit.firstElementChild.inert = false;
+      el.options.querySelector('[data-qa-fit-toggle]').setAttribute('aria-expanded', 'true');
+      el.options.querySelector('[data-qa-height]').value = previous.height;
+      el.options.querySelector('[data-qa-fit-result]').innerHTML = previous.fitResult;
+      state.rec = previous.rec;
+    }
+    var panel = el.options.querySelector('[data-qa-guide-panel]');
+    if (panel && previous.guideOpen) {
+      panel.hidden = false;
+      el.options.querySelector('[data-qa-guide]').setAttribute('aria-expanded', 'true');
+    }
+    var error = previous.error && el.options.querySelector('[data-qa-err="' + previous.error.index + '"]');
+    if (error) {
+      error.querySelector('span').textContent = previous.error.text;
+      error.hidden = false;
+    }
+  }
+
+  function sizeBadge(index, raw) {
+    if (index === state.fitIndex && state.rec === raw) return { text: T('qa_for_you'), className: 'bdg rec' };
+    var selected = state.selected.slice();
+    selected[index] = raw;
+    var variant = state.product.variants.find(function (item) { return item.available && matches(item, selected, -1); });
+    if (variant && variant.quantity != null && variant.quantity > 0 && variant.quantity <= LOW_STOCK) {
+      return { text: T('qa_last_n', { count: variant.quantity }), className: 'bdg' };
+    }
+    return null;
+  }
+
+  // Photo de la couleur choisie (variant.featured_image), sinon photo principale + étiquette couleur.
+  function currentImage(variant) {
+    if (variant.image) return variant.image;
+    if (state.colorIndex !== -1 && state.selected[state.colorIndex] != null) {
+      var sameColor = state.product.variants.find(function (item) {
+        return item.options[state.colorIndex] === state.selected[state.colorIndex] && item.image;
+      });
+      if (sameColor) return sameColor.image;
+    }
+    return null;
   }
 
   function paint() {
     var product = state.product;
     var exact = selectedVariant();
     var variant = displayVariant();
-    var missing = missingOption();
+    var missing = missingIndex();
 
-    // Valeurs sélectionnées, tailles épuisées barrées, couleurs sans stock atténuées.
+    // Couleurs et tailles : sélection, épuisées, badges "Ultimi N" / "Per te".
     el.options.querySelectorAll('[data-qa-option]').forEach(function (button) {
       var index = Number(button.dataset.qaOption);
       var name = button.dataset.qaValueName;
       var checked = state.selected[index] === name;
       button.setAttribute('aria-checked', String(checked));
+      if (index === state.colorIndex) {
+        var inStock = colorAvailable(name);
+        button.disabled = !inStock && !checked;
+        button.setAttribute('aria-label', inStock ? name : name + ' — ' + T('sold_out'));
+        return;
+      }
       var available = valueAvailable(index, name);
-      if (isColorOption(product.options[index])) {
-        button.classList.toggle('is-soldout', !available);
-        button.title = available ? name : name + ' — ' + T('sold_out');
-      } else {
-        button.disabled = !available && !checked;
-        button.title = available ? '' : T('sold_out');
+      var size = sizeInfo(index, name);
+      button.disabled = !available && !checked;
+      var sub = button.querySelector('[data-qa-sub]');
+      setText(sub, size.lo ? size.lo + '–' + size.hi + ' cm' : (!available ? T('qa_size_sold_out') : ''));
+      sub.hidden = !sub.textContent;
+      var old = button.querySelector('.bdg');
+      var badge = available ? sizeBadge(index, name) : null;
+      var badgeHtml = badge ? '<span class="' + badge.className + '">' + escapeHtml(badge.text) + '</span>' : '';
+      if ((old ? old.outerHTML : '') !== badgeHtml) {
+        if (old) old.remove();
+        if (badgeHtml) button.insertAdjacentHTML('afterbegin', badgeHtml);
       }
     });
     el.options.querySelectorAll('[data-qa-value]').forEach(function (label) {
       var index = Number(label.dataset.qaValue);
-      label.textContent = state.selected[index] || T('choose');
+      var value = state.selected[index];
+      if (value == null) {
+        setText(label, T('choose'));
+        label.className = 'need';
+      } else if (index === state.colorIndex) {
+        setText(label, value);
+        label.className = '';
+      } else {
+        var size = sizeInfo(index, value);
+        setText(label, size.code + (size.lo ? ' · ' + size.lo + '–' + size.hi + ' cm' : ''));
+        label.className = 'pick';
+      }
+    });
+    el.options.querySelectorAll('[data-qa-err]').forEach(function (error) {
+      if (state.selected[Number(error.dataset.qaErr)] != null) error.hidden = true;
     });
 
-    // En-tête : image, prix (barré + -%), stock réel.
-    el.image.src = sizedImage(variant.image || product.image, 240);
+    // Image : change avec la couleur.
+    var image = currentImage(variant);
+    var source = sizedImage(image || product.image, 400);
+    if (el.image.getAttribute('src') !== source) {
+      if (el.image.getAttribute('src')) play(el.image, [{ opacity: 0, transform: 'scale(1.05)' }, { opacity: 1, transform: 'none' }], 300);
+      el.image.src = source;
+    }
     el.image.alt = product.title;
+    var miniSource = sizedImage(image || product.image, 120);
+    if (el.miniImage.getAttribute('src') !== miniSource) el.miniImage.src = miniSource;
+    var colorName = state.colorIndex !== -1 ? state.selected[state.colorIndex] : null;
+    var showTag = !image && colorName != null && product.options[state.colorIndex].values.length > 1;
+    el.tag.hidden = !showTag;
+    if (showTag) {
+      var colorValue = product.options[state.colorIndex].values.find(function (value) { return value.name === colorName; });
+      el.tag.querySelector('i').style.setProperty('--sw', (colorValue && colorValue.color) || colorFromName(colorName) || '#ccc');
+      setText(el.tag.querySelector('span'), colorName);
+    }
+
+    // Prix d'abord (rouge si soldé) + "Risparmi €x".
+    variant = priceVariant();
     var onSale = variant.compareAtPrice > variant.price;
     var percent = onSale ? Math.round((variant.compareAtPrice - variant.price) / variant.compareAtPrice * 100) : 0;
-    el.price.innerHTML = '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(variant.price)) + '</b>'
-      + (onSale ? '<s>' + escapeHtml(money(variant.compareAtPrice)) + '</s><span class="pct">-' + percent + '%</span>' : '');
+    setHTML(el.price, '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(variant.price)) + '</b>'
+      + (onSale ? '<s>' + escapeHtml(money(variant.compareAtPrice)) + '</s><span class="pct">-' + percent + '%</span>' : ''));
+    el.save.hidden = !onSale;
+    setText(el.save, onSale ? T('drawer_save', { amount: money(variant.compareAtPrice - variant.price) }) : '');
+    setText(el.miniPrice, money(variant.price));
+    el.miniPrice.className = onSale ? 'sale' : '';
 
+    // Stock réel de la variante choisie.
     var stockText = T('in_stock');
     var stockClass = '';
     if (exact && !exact.available) {
@@ -446,85 +756,164 @@
       stockText = state.error;
       stockClass = 'out';
     }
-    el.stock.textContent = stockText;
+    setText(el.stock, stockText);
     el.stock.className = 'qa-stock' + (stockClass ? ' ' + stockClass : '');
 
     // Quantité : limitée au stock réel quand il est suivi.
     var maxQty = exact && exact.quantity != null && exact.quantity > 0 ? Math.min(MAX_QTY, exact.quantity) : MAX_QTY;
     if (state.qty > maxQty) state.qty = maxQty;
-    el.qtyValue.textContent = String(state.qty);
+    setText(el.qtyValue, String(state.qty));
     el.qtyMinus.disabled = state.qty <= 1;
     el.qtyPlus.disabled = state.qty >= maxQty;
+    var total = variant.price * state.qty;
 
-    // Avantages : même règle que la carte (livraison offerte au-delà du seuil), Klarna si activé.
-    var freeShipping = variant.price > shop.freeShippingThreshold;
-    el.free.hidden = !freeShipping;
-    el.free.textContent = (flagEmoji(shop.country) + ' ' + T('free_shipping_short')).trim();
+    // Avantages : livraison gratuite au-delà du seuil du thème, Klarna si activé.
+    el.free.hidden = !shop.freeShipping;
+    el.free.classList.toggle('off', total < shop.freeShipping);
     el.klarna.hidden = !shop.klarna;
-    el.klarnaValue.textContent = money(Math.round(variant.price / 3));
+    setText(el.klarnaValue, T('klarna_installments', { amount: money(Math.round(total / 3)) }));
 
-    el.more.href = product.url;
+    setText(el.miniSelection, selectionParts(false).join(' · ') + (state.qty > 1 ? ' · ×' + state.qty : ''));
+    if (el.more.getAttribute('href') !== product.url) el.more.href = product.url;
 
     // Bouton principal.
     var unavailable = exact && !exact.available;
-    el.add.classList.toggle('wait', Boolean(missing) || Boolean(unavailable));
-    if (missing) el.add.textContent = SIZE_OPTION.test(missing.name) ? T('choose_size') : T('choose_option', { option: optionLabel(missing).toLowerCase() });
-    else if (unavailable) el.add.textContent = T('sold_out');
-    else el.add.textContent = T('add_to_cart_total', { price: money(variant.price * state.qty) });
+    el.add.classList.toggle('wait', missing !== -1 || Boolean(unavailable));
+    if (missing !== -1) {
+      setHTML(el.add, escapeHtml(isSizeOption(missing) ? T('choose_size') : T('choose_option', { option: optionLabel(product.options[missing]).toLowerCase() })));
+    } else if (unavailable) {
+      setHTML(el.add, escapeHtml(T('sold_out')));
+    } else {
+      setHTML(el.add, escapeHtml(T('drawer_add')) + '<small>' + escapeHtml(money(total))
+        + (state.qty > 1 ? ' · ' + escapeHtml(T('qa_pieces', { count: state.qty })) : '') + '</small>');
+    }
+  }
+
+  function recCard(item) {
+    var onSale = item.compare_at_price > item.price;
+    var percent = onSale ? Math.round((item.compare_at_price - item.price) / item.compare_at_price * 100) : 0;
+    return '<button type="button" class="qa-rc" data-qa-similar="' + escapeHtml(item.handle) + '" aria-label="' + escapeHtml(T('choose_options_for', { title: item.title })) + '">'
+      + '<span class="ph"><img src="' + escapeHtml(sizedImage(item.featured_image, 240)) + '" alt="" loading="lazy" width="118" height="118">'
+      + (percent ? '<i class="off">-' + percent + '%</i>' : '') + '<span class="pl">' + PLUS_ICON + '</span></span>'
+      + '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(item.price)) + '</b>'
+      + '<small>' + escapeHtml(item.title) + '</small></button>';
   }
 
   function renderSimilar(product) {
     el.sim.hidden = true;
     el.simRail.innerHTML = '';
-    el.simAll.href = product.collectionUrl || (shopRoot + 'collections/all');
+    el.simAll.href = product.collectionUrl || shop.allUrl;
     var token = state.token;
-    loadSimilar(product).then(function (items) {
-      if (!state || state.token !== token) return;
-      var type = String(product.type || '').trim();
-      var list = items
-        .filter(function (item) { return item.id !== product.id && item.available !== false; })
+    state.similar = loadRecommendations(product, 'related').then(function (items) {
+      var type = String(product.type || '').trim().toLowerCase();
+      var price = displayVariant().price || 0;
+      return items
         .map(function (item, order) {
-          var sameType = type && String(item.type || '').trim().toLowerCase() === type.toLowerCase();
-          return { item: item, score: (sameType ? 0 : 1) * 1e9 + order * 1e6 + Math.abs((item.price || 0) - (displayVariant().price || 0)) };
+          var sameType = type && String(item.type || '').trim().toLowerCase() === type;
+          return { item: item, score: (sameType ? 0 : 1) * 1e9 + order * 1e6 + Math.abs((item.price || 0) - price) };
         })
         .sort(function (a, b) { return a.score - b.score; })
-        .slice(0, 6)
+        .slice(0, 8)
         .map(function (entry) { return entry.item; });
-      if (!list.length) return;
+    });
+    state.similar.then(function (list) {
+      if (!state || state.token !== token || !list.length) return;
+      var type = String(product.type || '').trim();
       var sameCount = list.filter(function (item) {
         return type && String(item.type || '').trim().toLowerCase() === type.toLowerCase();
       }).length;
       el.simTitle.textContent = sameCount >= 2 ? T('more_of_type', { type: type.toLowerCase() }) : T('you_may_like');
-      el.simRail.innerHTML = list.map(function (item) {
-        var onSale = item.compare_at_price > item.price;
-        var percent = onSale ? Math.round((item.compare_at_price - item.price) / item.compare_at_price * 100) : 0;
-        return '<button type="button" class="qs" data-qa-similar="' + escapeHtml(item.handle) + '" aria-label="' + escapeHtml(T('choose_options_for', { title: item.title })) + '">'
-          + '<span class="ph"><img src="' + escapeHtml(sizedImage(item.featured_image, 240)) + '" alt="" loading="lazy">'
-          + (percent ? '<i>-' + percent + '%</i>' : '') + '</span>'
-          + '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(item.price)) + '</b>'
-          + '<small>' + escapeHtml(item.title) + '</small></button>';
-      }).join('');
+      el.simRail.innerHTML = list.map(recCard).join('');
       el.sim.hidden = false;
     }).catch(function (error) {
       console.error(error);
     });
   }
 
+  // "Completa il look" : produits complémentaires de Search & Discovery, sinon les similaires dans l'autre ordre.
+  function renderLook(product) {
+    el.look.hidden = true;
+    el.lookRail.innerHTML = '';
+    var token = state.token;
+    var similar = state.similar || Promise.resolve([]);
+    loadRecommendations(product, 'complementary').catch(function (error) {
+      console.error(error);
+      return [];
+    }).then(function (items) {
+      if (items.length >= 2) return items.slice(0, 8);
+      return similar.then(function (list) { return list.slice().reverse(); });
+    }).then(function (list) {
+      if (!state || state.token !== token || !list.length) return;
+      el.lookRail.innerHTML = list.map(recCard).join('');
+      el.look.hidden = false;
+    }).catch(function (error) {
+      console.error(error);
+    });
+  }
+
+  /* Cœur : wishlist du thème (window.mobileWishlist, assets/mobile-temu-header.js), pour tous les produits. */
+  function paintFavorite() {
+    var wishlist = window.mobileWishlist;
+    el.fav.hidden = !wishlist || !state;
+    if (el.fav.hidden) return;
+    var saved = wishlist.has(state.product.id);
+    el.fav.setAttribute('aria-pressed', String(saved));
+    el.fav.setAttribute('aria-label', saved ? T('remove_from_wishlist') : T('add_to_wishlist'));
+  }
+
+  function toggleFavorite() {
+    var product = state.product;
+    var variant = displayVariant();
+    window.mobileWishlist.toggle({
+      id: product.id,
+      variantId: variant.id,
+      variantTitle: variant.title,
+      title: product.title,
+      url: product.url,
+      image: sizedImage(product.image, 600),
+      price: money(variant.price),
+      priceCents: variant.price,
+      compareAtPrice: variant.compareAtPrice > variant.price ? money(variant.compareAtPrice) : '',
+      compareAtPriceCents: variant.compareAtPrice
+    });
+    paintFavorite();
+    play(el.fav, [{ transform: 'scale(1)' }, { transform: 'scale(1.25)', offset: 0.4 }, { transform: 'scale(1)' }], 350);
+  }
+
+  function showView(done) {
+    el.pick.hidden = done;
+    el.done.hidden = !done;
+    el.foot.hidden = done;
+    el.mini.classList.remove('is-shown');
+    // À l'ouverture la feuille glisse déjà : la vue n'est animée qu'en changeant de vue ou de produit.
+    if (dialog.classList.contains('is-visible')) {
+      play(done ? el.done : el.pick, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], 300);
+    }
+    resetScroll();
+  }
+
   function fill(product, variantId) {
+    var colorIndex = colorIndexOf(product);
+    var order = product.options.map(function (option, index) { return index; });
+    if (colorIndex > 0) order = [colorIndex].concat(order.filter(function (index) { return index !== colorIndex; }));
     state = {
       product: product,
-      selected: initialSelection(product, variantId),
+      colorIndex: colorIndex,
+      order: order,
+      selected: initialSelection(product, variantId, colorIndex),
       qty: 1,
       error: '',
+      sizes: {},
       token: Date.now() + Math.random()
     };
     dialog.classList.remove('is-pending');
     el.title.textContent = product.title;
     renderOptions();
     paint();
+    paintFavorite();
     renderSimilar(product);
     el.back.hidden = history.length === 0;
-    el.body.scrollTop = 0;
+    showView(false);
   }
 
   function swapTo(handle, variantId, pushCurrent) {
@@ -548,14 +937,24 @@
   }
 
   /* ---------- Ouverture / fermeture ---------- */
+  var isOpen = false;
   function showDialog() {
     window.clearTimeout(closeTimer);
-    if (!dialog.open) dialog.showModal();
-    // Le défilement ne peut être remis à zéro qu'une fois la modale affichée.
-    el.body.scrollTop = 0;
-    document.documentElement.classList.add('mobile-quick-add-open');
+    dialog.style.transform = '';
+    scrim.style.opacity = '';
+    if (!isOpen) {
+      isOpen = true;
+      setLayer(scrim, true);
+      setLayer(dialog, true);
+      dialog.classList.add('is-open');
+    }
+    // Réouverture pendant l'animation de fermeture : on revient en haut.
+    resetScroll();
     window.requestAnimationFrame(function () {
-      window.requestAnimationFrame(function () { dialog.classList.add('is-visible'); });
+      window.requestAnimationFrame(function () {
+        dialog.classList.add('is-visible');
+        scrim.classList.add('is-visible');
+      });
     });
   }
 
@@ -570,23 +969,34 @@
     var onSale = compare > price;
     state = null;
     dialog.classList.add('is-pending');
+    el.pick.hidden = false;
+    el.done.hidden = true;
+    el.foot.hidden = false;
+    el.mini.classList.remove('is-shown');
     el.title.textContent = titleLink ? titleLink.textContent.trim() : '';
     el.image.src = image ? image.currentSrc || image.src : '';
-    el.price.innerHTML = price
+    el.miniImage.src = el.image.src;
+    el.tag.hidden = true;
+    // Cœur visible dès l'ouverture, avec l'état réel de la wishlist.
+    var productId = wishlist && wishlist.dataset.productId;
+    el.fav.hidden = !window.mobileWishlist || !productId;
+    if (!el.fav.hidden) el.fav.setAttribute('aria-pressed', String(window.mobileWishlist.has(productId)));
+    setHTML(el.price, price
       ? '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(price)) + '</b>'
         + (onSale ? '<s>' + escapeHtml(money(compare)) + '</s><span class="pct">-' + Math.round((compare - price) / compare * 100) + '%</span>' : '')
-      : '';
+      : '');
+    el.save.hidden = !onSale;
+    el.save.textContent = onSale ? T('drawer_save', { amount: money(compare - price) }) : '';
     el.stock.textContent = '';
     el.stock.className = 'qa-stock';
     el.options.innerHTML = '<div class="qa-skel" aria-hidden="true"><i></i><i></i><i></i><i></i></div>';
-    el.guidePanel.hidden = true;
     el.qtyValue.textContent = '1';
     el.free.hidden = true;
     el.klarna.hidden = true;
     el.sim.hidden = true;
     el.back.hidden = true;
     el.more.href = titleLink ? titleLink.href : '#';
-    el.add.textContent = T('loading_short');
+    setHTML(el.add, escapeHtml(T('loading_short')));
     el.add.classList.add('wait');
   }
 
@@ -596,11 +1006,19 @@
     var token = {};
     openRequest = token;
     history = [];
+    // Produit déjà chargé (préchargement des cartes) : rempli directement, sans passer par l'aperçu.
+    var ready = readyProducts.get(handle);
+    if (ready) {
+      openRequest = null;
+      loadProduct(handle);
+      fill(ready, variantId);
+      showDialog();
+      return;
+    }
     showCardPreview(trigger);
     showDialog();
-    // Si le produit est déjà en cache, la promesse est résolue avant l'affichage : pas d'aperçu visible.
     loadProduct(handle).then(function (product) {
-      if (openRequest !== token || !dialog.open) return;
+      if (openRequest !== token || !isOpen) return;
       openRequest = null;
       fill(product, variantId);
     }).catch(function (error) {
@@ -613,67 +1031,78 @@
   }
 
   function close() {
-    if (!dialog.open) return;
-    dialog.classList.remove('is-visible');
-    document.documentElement.classList.remove('mobile-quick-add-open');
+    if (!isOpen) return;
+    isOpen = false;
+    dialog.classList.remove('is-visible', 'is-dragging');
+    scrim.classList.remove('is-visible');
+    dialog.style.transform = '';
+    scrim.style.opacity = '';
     window.clearTimeout(closeTimer);
     closeTimer = window.setTimeout(function () {
-      if (dialog.open) dialog.close();
-    }, 340);
+      dialog.classList.remove('is-open');
+      setLayer(dialog, false);
+      setLayer(scrim, false);
+      // Fermée (display: none), la zone défilante repart d'en haut.
+      scrolled = false;
+      el.mini.classList.remove('is-shown');
+    }, 380);
   }
 
   /* ---------- Panier ---------- */
-  function increaseCartCounts(quantity) {
+  function setCartCounts(count) {
     document.querySelectorAll('#cart-count, #cart-count--m, .mobile-home-cart-count').forEach(function (element) {
-      var next = (parseInt(element.textContent, 10) || 0) + quantity;
-      element.textContent = String(next);
-      if (element.id === 'cart-count--m' || element.classList.contains('mobile-home-cart-count')) element.hidden = next <= 0;
+      element.textContent = String(count);
+      if (element.id === 'cart-count--m' || element.classList.contains('mobile-home-cart-count')) element.hidden = count <= 0;
     });
   }
 
-  function refreshCartCounts() {
-    document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
-    if (typeof window.ajaxCart !== 'undefined' && typeof window.ajaxCart.refresh === 'function') window.ajaxCart.refresh();
-    return fetch(shopRoot + 'cart.js', { credentials: 'same-origin' })
-      .then(function (response) {
-        if (!response.ok) throw new Error('Cart request failed with status ' + response.status);
-        return response.json();
-      })
-      .then(function (cart) {
-        document.querySelectorAll('#cart-count, #cart-count--m, .mobile-home-cart-count').forEach(function (element) {
-          element.textContent = String(cart.item_count);
-          if (element.id === 'cart-count--m' || element.classList.contains('mobile-home-cart-count')) {
-            element.hidden = cart.item_count <= 0;
-          }
-        });
-      });
+  function currentCartCount() {
+    var badge = document.querySelector('#cart-count--m, #cart-count, .mobile-home-cart-count');
+    return badge ? parseInt(badge.textContent, 10) || 0 : 0;
+  }
+
+  // Notre /cart.js part d'abord : le rafraîchissement du thème (tiroir panier) et les apps qui relisent le panier
+  // après un ajout passent ensuite, sinon notre requête attendait derrière elles (jusqu'à 17 s mesurées).
+  function refreshCart() {
+    var request = fetchJson(shopRoot + 'cart.js', 'Cart');
+    request.catch(function () {}).then(function () {
+      document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+      if (typeof window.ajaxCart !== 'undefined' && typeof window.ajaxCart.refresh === 'function') window.ajaxCart.refresh();
+    });
+    return request;
+  }
+
+  // Taille manquante : défile jusqu'au groupe, le secoue et affiche le message rouge.
+  function showMissing(index) {
+    var group = el.options.querySelector('[data-qa-group="' + index + '"]');
+    if (!group) return;
+    var error = group.querySelector('[data-qa-err]');
+    error.querySelector('span').textContent = isSizeOption(index)
+      ? T('qa_pick_size_error')
+      : T('qa_pick_option_error', { option: optionLabel(state.product.options[index]).toLowerCase() });
+    error.hidden = false;
+    el.scroll.scrollTo({ top: Math.max(0, group.offsetTop - 60), behavior: 'smooth' });
+    var choices = group.querySelector('[data-qa-sizes], [data-qa-cols-list]');
+    window.setTimeout(function () {
+      if (choices) play(choices, [0, -6, 6, -6, 6, 0].map(function (x) { return { transform: 'translateX(' + x + 'px)' }; }), 380);
+    }, 250);
   }
 
   function addToCart() {
-    var missing = missingOption();
-    if (missing) {
-      var group = el.options.querySelector('[data-qa-group="' + state.product.options.indexOf(missing) + '"] .qa-sizes, [data-qa-group="' + state.product.options.indexOf(missing) + '"] .qa-colors');
-      if (group) {
-        group.classList.remove('shake');
-        void group.offsetWidth;
-        group.classList.add('shake');
-        group.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
+    var missing = missingIndex();
+    if (missing !== -1) {
+      showMissing(missing);
       return;
     }
     var variant = selectedVariant();
     if (!variant || !variant.available || busy) return;
     busy = true;
-    el.add.disabled = true;
+    el.add.classList.add('is-busy');
     state.error = '';
     var quantity = state.qty;
-    var summary = state.product.options
-      .map(function (option, index) { return option.values.length > 1 ? state.selected[index] : null; })
-      .filter(Boolean)
-      .join(' · ');
+    var token = state.token;
     var handle = state.product.handle;
-    // Ajout au panier dès le clic ; la modale se ferme pendant que la vignette s'envole vers le panier.
-    var request = fetch(shopRoot + 'cart/add.js', {
+    fetch(shopRoot + 'cart/add.js', {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -683,52 +1112,76 @@
         if (!response.ok) throw new Error(data.description || data.message || T('cart_add_error'));
         return data;
       });
-    });
-    var flight = new Promise(function (resolve) { flyToCart(el.image, resolve); });
-    close();
-    // Le compteur n'augmente qu'à l'arrivée de la vignette (et une fois l'ajout confirmé) ;
-    // le panier complet est ensuite resynchronisé en arrière-plan.
-    Promise.all([request, flight]).then(function () {
-      increaseCartCounts(quantity);
-      refreshCartCounts().catch(function (error) { console.error(error); });
-      bumpCart();
+    }).then(function () {
+      // Confirmation dès que Shopify a ajouté l'article ; total et progression arrivent avec /cart.js.
+      var count = currentCartCount() + quantity;
+      setCartCounts(count);
       markAdded(handle);
-      showToast('Aggiunto: ' + (summary ? summary + ' × ' : '× ') + quantity);
+      bumpCart();
+      var visible = state && state.token === token && isOpen;
+      if (visible) showDone(variant, quantity, count);
+      refreshCart().then(function (cart) {
+        setCartCounts(cart.item_count);
+        if (visible && state && state.token === token && isOpen) showDoneCart(cart);
+      }).catch(function (error) {
+        console.error(error);
+      });
     }).catch(function (error) {
       console.error(error);
+      if (state && state.token === token) {
+        state.error = error.message || T('cart_add_error');
+        paint();
+      }
       showToast(error.message || T('cart_add_error'));
     }).finally(function () {
       busy = false;
-      el.add.disabled = false;
+      el.add.classList.remove('is-busy');
     });
   }
 
-  /* ---------- Animation "fly to cart" (comme le prototype : arc, rotation, rebond du panier) ---------- */
-  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-  // Courbe de Bézier cubique (équivalent de l'ease [.5, .02, .25, 1] du prototype).
-  function cubicBezier(x1, y1, x2, y2) {
-    function sample(a1, a2, t) { return ((1 - 3 * a2 + 3 * a1) * t + (3 * a2 - 6 * a1)) * t * t + 3 * a1 * t; }
-    return function (x) {
-      var low = 0;
-      var high = 1;
-      var t = x;
-      for (var i = 0; i < 20; i += 1) {
-        t = (low + high) / 2;
-        if (sample(x1, x2, t) < x) low = t;
-        else high = t;
-      }
-      return sample(y1, y2, t);
-    };
+  // Écran de confirmation dans la feuille : ligne ajoutée, total du panier, progression vers la livraison gratuite.
+  function showDone(variant, quantity, count) {
+    var product = state.product;
+    showView(true);
+    el.doneImage.src = el.image.currentSrc || el.image.src;
+    el.doneTitle.textContent = product.title;
+    el.doneOptions.textContent = selectionParts(true).concat('×' + quantity).join(' · ');
+    el.donePrice.textContent = money(variant.price * quantity);
+    el.goCart.textContent = T('qa_go_cart', { count: count });
+    el.doneSummary.hidden = true;
+    el.goal.hidden = true;
+    renderLook(product);
+    window.setTimeout(function () { el.goCart.focus({ preventScroll: true }); }, 350);
   }
-  var flyEase = cubicBezier(0.5, 0.02, 0.25, 1);
 
-  // Icône Carrello de la barre du bas, sinon celle du header mobile.
+  // Total réel du panier : résumé, bouton "Vai al carrello (N)" et barre de livraison gratuite.
+  function showDoneCart(cart) {
+    el.doneSummary.textContent = T(cart.item_count === 1 ? 'qa_cart_summary_one' : 'qa_cart_summary_other', {
+      count: cart.item_count,
+      total: money(cart.total_price)
+    });
+    el.doneSummary.hidden = false;
+    el.goCart.textContent = T('qa_go_cart', { count: cart.item_count });
+    var showGoal = Boolean(shop.freeShipping);
+    el.goal.hidden = !showGoal;
+    play(el.doneSummary, [{ opacity: 0 }, { opacity: 1 }], 250);
+    if (showGoal) {
+      play(el.goal, [{ opacity: 0 }, { opacity: 1 }], 250);
+      var left = shop.freeShipping - cart.total_price;
+      var percent = Math.max(0, Math.min(100, Math.round(cart.total_price / shop.freeShipping * 100)));
+      el.goal.classList.toggle('is-ok', left <= 0);
+      el.goalText.innerHTML = left > 0 ? T('cart_ship_left_html', { amount: escapeHtml(money(left)) }) : escapeHtml(T('cart_ship_free'));
+      el.goalProgress.setAttribute('aria-valuenow', String(percent));
+      el.goalBar.style.width = '0';
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () { el.goalBar.style.width = percent + '%'; });
+      });
+    }
+  }
+
+  // Petit rebond du panier et de sa pastille.
   function cartTarget() {
-    var candidates = [
-      document.querySelector('#cart-count--m'),
-      document.querySelector('.mobile-home-cart-count')
-    ];
+    var candidates = [document.querySelector('#cart-count--m'), document.querySelector('.mobile-home-cart-count')];
     for (var i = 0; i < candidates.length; i += 1) {
       var badge = candidates[i];
       var icon = badge && badge.parentElement && badge.parentElement.querySelector('svg');
@@ -737,61 +1190,6 @@
     return null;
   }
 
-  function flyToCart(sourceImage, done) {
-    var target = cartTarget();
-    var source = sourceImage && sourceImage.getBoundingClientRect();
-    if (!target || !source || !source.width || reducedMotion.matches) {
-      done();
-      return;
-    }
-    var end = target.getBoundingClientRect();
-    var fly = document.createElement('img');
-    fly.src = sourceImage.currentSrc || sourceImage.src;
-    fly.alt = '';
-    fly.className = 'mobile-quick-add-fly';
-    fly.style.left = source.left + 'px';
-    fly.style.top = source.top + 'px';
-    fly.style.width = source.width + 'px';
-    fly.style.height = source.height + 'px';
-    document.body.appendChild(fly);
-    // En popover, la vignette passe au-dessus de la modale qui se ferme.
-    if (typeof fly.showPopover === 'function') {
-      fly.setAttribute('popover', 'manual');
-      try { fly.showPopover(); } catch (error) { console.error(error); }
-    }
-    var sx = source.left + source.width / 2;
-    var sy = source.top + source.height / 2;
-    var ex = end.left + end.width / 2;
-    var ey = end.top + end.height / 2;
-    var cx = (sx + ex) / 2 + (ex < sx ? -30 : 30);
-    var cy = Math.min(sy, ey) - 170;
-    var endScale = 26 / source.width;
-    var duration = 950;
-    // Horloge réelle (performance.now) : l'horodatage de la première image peut dater d'avant le clic.
-    var start = null;
-    function frame() {
-      var now = performance.now();
-      if (start === null) start = now;
-      var linear = Math.min(1, (now - start) / duration);
-      var p = flyEase(linear);
-      var u = 1 - p;
-      var x = u * u * sx + 2 * u * p * cx + p * p * ex;
-      var y = u * u * sy + 2 * u * p * cy + p * p * ey;
-      var scale = 1 + (endScale - 1) * Math.pow(p, 0.7);
-      fly.style.transform = 'translate(' + (x - sx) + 'px,' + (y - sy) + 'px) scale(' + scale + ') rotate(' + p * 260 + 'deg)';
-      fly.style.borderRadius = (12 + (source.width / 2 - 12) * Math.min(1, p * 2.2)) + 'px';
-      fly.style.opacity = p > 0.9 ? String(Math.max(0, 1 - (p - 0.9) * 6)) : '1';
-      if (linear < 1) {
-        window.requestAnimationFrame(frame);
-      } else {
-        fly.remove();
-        done();
-      }
-    }
-    window.requestAnimationFrame(frame);
-  }
-
-  // Petit rebond du panier et de sa pastille à l'arrivée.
   function bumpCart() {
     if (reducedMotion.matches) return;
     var icon = cartTarget();
@@ -818,6 +1216,35 @@
       window.clearTimeout(button._qaAddedTimer);
       button._qaAddedTimer = window.setTimeout(function () { button.classList.remove('is-added'); }, 2400);
     });
+  }
+
+  /* ---------- "Trova la tua taglia" ---------- */
+  function updateFit(input) {
+    var result = el.options.querySelector('[data-qa-fit-result]');
+    var height = Number(input.value);
+    state.rec = null;
+    if (!height || height < 100) {
+      result.textContent = T('qa_fit_hint');
+      paint();
+      return;
+    }
+    var ranged = (state.sizes[state.fitIndex] || []).filter(function (size) {
+      return size.lo && valueAvailable(state.fitIndex, size.raw);
+    });
+    var best = ranged.find(function (size) { return height >= size.lo && height <= size.hi; })
+      || ranged.slice().sort(function (a, b) {
+        return Math.min(Math.abs(height - a.lo), Math.abs(height - a.hi)) - Math.min(Math.abs(height - b.lo), Math.abs(height - b.hi));
+      })[0];
+    if (!best) {
+      result.textContent = T('qa_fit_none');
+      paint();
+      return;
+    }
+    state.rec = best.raw;
+    var exact = height >= best.lo && height <= best.hi;
+    result.innerHTML = T(exact ? 'qa_fit_result_html' : 'qa_fit_closest_html', { height: height, size: escapeHtml(best.code) })
+      + (state.selected[state.fitIndex] === best.raw ? '' : '<button type="button" data-qa-fit-pick="' + escapeHtml(best.raw) + '">' + escapeHtml(T('qa_fit_select', { size: best.code })) + '</button>');
+    paint();
   }
 
   /* ---------- Événements ---------- */
@@ -859,11 +1286,7 @@
   });
 
   dialog.addEventListener('click', function (event) {
-    if (event.target === dialog) {
-      close();
-      return;
-    }
-    if (event.target.closest('[data-qa-close]')) {
+    if (event.target === dialog || event.target.closest('[data-qa-close]')) {
       close();
       return;
     }
@@ -871,22 +1294,53 @@
     if (!state) return;
     if (event.target.closest('[data-qa-back]')) {
       var previous = history.pop();
-      if (previous) {
-        swapTo(previous.handle, previous.variantId, false);
+      if (previous) swapTo(previous.handle, previous.variantId, false);
+      return;
+    }
+    if (event.target.closest('[data-qa-fav]')) {
+      toggleFavorite();
+      return;
+    }
+    if (event.target.closest('[data-qa-cols]')) {
+      var toggle = event.target.closest('[data-qa-cols]');
+      var list = el.options.querySelector('[data-qa-cols-list]');
+      state.colsAll = !state.colsAll;
+      list.classList.toggle('is-all', state.colsAll);
+      toggle.setAttribute('aria-expanded', String(state.colsAll));
+      toggle.querySelector('span').textContent = state.colsAll ? T('show_less') : T('qa_see_all');
+      if (!state.colsAll) {
+        var checked = list.querySelector('[aria-checked="true"]');
+        if (checked) list.scrollLeft = Math.max(0, checked.offsetLeft - list.offsetLeft - (list.clientWidth - checked.offsetWidth) / 2);
+      }
+      return;
+    }
+    var fitToggle = event.target.closest('[data-qa-fit-toggle]');
+    if (fitToggle) {
+      var fit = el.options.querySelector('[data-qa-fit]');
+      var open = !fit.classList.contains('is-open');
+      fit.classList.toggle('is-open', open);
+      fit.firstElementChild.inert = !open;
+      fitToggle.setAttribute('aria-expanded', String(open));
+      if (open) {
+        window.setTimeout(function () {
+          var height = el.options.querySelector('[data-qa-height]');
+          if (height) height.focus({ preventScroll: true });
+        }, 250);
       }
       return;
     }
     var guide = event.target.closest('[data-qa-guide]');
     if (guide) {
-      event.preventDefault();
-      var expanded = el.guidePanel.hidden;
-      el.guidePanel.hidden = !expanded;
-      guide.setAttribute('aria-expanded', String(expanded));
-      var group = guide.closest('.qa-grp');
-      if (expanded && group) {
-        group.after(el.guidePanel);
-        el.guidePanel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      }
+      var panel = el.options.querySelector('[data-qa-guide-panel]');
+      panel.hidden = !panel.hidden;
+      guide.setAttribute('aria-expanded', String(!panel.hidden));
+      return;
+    }
+    var fitPick = event.target.closest('[data-qa-fit-pick]');
+    if (fitPick) {
+      state.selected[state.fitIndex] = fitPick.dataset.qaFitPick;
+      fitPick.remove();
+      paint();
       return;
     }
     var optionButton = event.target.closest('[data-qa-option]');
@@ -895,7 +1349,7 @@
       var name = optionButton.dataset.qaValueName;
       var option = state.product.options[index];
       state.error = '';
-      if (!isColorOption(option) && state.selected[index] === name && option.values.length > 1) {
+      if (index !== state.colorIndex && state.selected[index] === name && option.values.length > 1) {
         state.selected[index] = null;
       } else {
         state.selected[index] = name;
@@ -903,8 +1357,12 @@
       // Changement de couleur : on retire les tailles devenues indisponibles.
       state.product.options.forEach(function (other, otherIndex) {
         if (otherIndex === index || state.selected[otherIndex] == null || other.values.length === 1) return;
-        if (!isColorOption(other) && !valueAvailable(otherIndex, state.selected[otherIndex])) state.selected[otherIndex] = null;
+        if (otherIndex !== state.colorIndex && !valueAvailable(otherIndex, state.selected[otherIndex])) state.selected[otherIndex] = null;
       });
+      if (index === state.fitIndex) {
+        var pick = el.options.querySelector('[data-qa-fit-pick]');
+        if (pick && pick.dataset.qaFitPick === state.selected[index]) pick.remove();
+      }
       paint();
       return;
     }
@@ -916,11 +1374,55 @@
     }
     var similar = event.target.closest('[data-qa-similar]');
     if (similar) {
-      swapTo(similar.dataset.qaSimilar, null, true);
+      // Depuis la confirmation, le produit ajouté n'a pas besoin d'un retour.
+      swapTo(similar.dataset.qaSimilar, null, el.done.hidden);
       return;
     }
     if (event.target.closest('[data-qa-add]')) addToCart();
   });
+
+  dialog.addEventListener('input', function (event) {
+    if (state && event.target.matches('[data-qa-height]')) updateFit(event.target);
+  });
+
+  // Barre compacte (vignette + prix + sélection) quand le haut de la fiche sort de l'écran.
+  el.scroll.addEventListener('scroll', function () {
+    var top = el.scroll.scrollTop;
+    scrolled = top > 0;
+    var shown = !el.pick.hidden && top > el.hero.offsetTop + el.hero.offsetHeight - 40;
+    el.mini.classList.toggle('is-shown', shown);
+  }, { passive: true });
+
+  // Glisser la poignée vers le bas ferme la feuille.
+  (function () {
+    var startY = null;
+    var distance = 0;
+    el.drag.addEventListener('pointerdown', function (event) {
+      startY = event.clientY;
+      distance = 0;
+      dialog.classList.add('is-dragging');
+      el.drag.setPointerCapture(event.pointerId);
+    });
+    el.drag.addEventListener('pointermove', function (event) {
+      if (startY === null) return;
+      distance = Math.max(0, event.clientY - startY);
+      dialog.style.transform = 'translateY(' + distance + 'px)';
+      scrim.style.opacity = String(Math.max(0, 1 - distance / 400));
+    });
+    function end() {
+      if (startY === null) return;
+      startY = null;
+      dialog.classList.remove('is-dragging');
+      if (distance > 110) {
+        close();
+      } else {
+        dialog.style.transform = '';
+        scrim.style.opacity = '';
+      }
+    }
+    el.drag.addEventListener('pointerup', end);
+    el.drag.addEventListener('pointercancel', end);
+  })();
 
   // Une app d'étiquettes injecte ses badges ("New Arrivals"…) à côté des titres produit, avec un
   // style en ligne prioritaire : on les retire de la modale dès leur ajout.
@@ -928,10 +1430,19 @@
     dialog.querySelectorAll('[class*="dos-badge"]').forEach(function (badge) { badge.remove(); });
   }).observe(dialog, { childList: true, subtree: true });
 
-  dialog.addEventListener('cancel', function (event) {
-    event.preventDefault();
-    close();
+  scrim.addEventListener('click', close);
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && isOpen) close();
   });
+
+  // La page derrière ne défile pas : seul le contenu de la feuille (et ses carrousels) suit le doigt.
+  function blockPageScroll(event) {
+    if (!event.target.closest || !event.target.closest('[data-qa-scroll]')) event.preventDefault();
+  }
+  scrim.addEventListener('touchmove', blockPageScroll, { passive: false });
+  dialog.addEventListener('touchmove', blockPageScroll, { passive: false });
+  scrim.addEventListener('wheel', blockPageScroll, { passive: false });
 
   mobile.addEventListener('change', function () {
     if (!mobile.matches) close();

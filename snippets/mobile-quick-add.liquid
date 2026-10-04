@@ -1,69 +1,145 @@
 {%- comment -%}
-  Modale "Aggiungi al carrello" (bottom sheet) — mobile uniquement.
+  Modale "Aggiungi al carrello" v2 (bottom sheet) — mobile uniquement (prototype « Modale quick add v2 »).
   Ouverte par le bouton panier des cartes produit (snippets/product-item.liquid, [data-quick-add]).
   Contenu rempli par assets/mobile-quick-add.js avec les vraies données du produit
-  (templates/product.quick-add.liquid) et les recommandations Shopify.
+  (templates/product.quick-add.liquid) et les recommandations Shopify. Textes : clés mobile.quick_add.* / mobile.js.*.
+  Barre de progression de la confirmation : seuil de livraison gratuite des réglages du thème (comme le tiroir panier).
 {%- endcomment -%}
+{%- liquid
+  assign qa_threshold = 0
+  if settings.enable_free_shipping and settings.free_shipping_amount != blank
+    assign qa_threshold = settings.free_shipping_amount | replace: ',', '.' | times: 100 | round
+  endif
+-%}
 <link rel="stylesheet" href="{{ 'mobile-quick-add.css' | asset_url }}" media="(max-width: 760px)">
-{%- comment -%} Le thème force dialog { display: block } : on masque la modale hors mobile. {%- endcomment -%}
-<style>@media (min-width: 761px) { #mobile-quick-add, .mobile-quick-add-toast { display: none !important; } }</style>
-<dialog
+<style>@media (min-width: 761px) { #mobile-quick-add, .mobile-quick-add-scrim, .mobile-quick-add-toast { display: none !important; } }</style>
+{%- comment -%}
+  Fond, feuille et toast en popover (couche supérieure, au-dessus des apps) plutôt qu'en <dialog> showModal() :
+  sur les pages avec beaucoup de produits, showModal() et le blocage du défilement de <html> recalculaient
+  toute la page (≈ 0,25 s de gel à chaque ouverture) ; showPopover() coûte quelques millisecondes.
+{%- endcomment -%}
+<div class="mobile-quick-add-scrim" data-qa-scrim popover="manual"></div>
+<div
   id="mobile-quick-add"
   class="mobile-quick-add"
+  role="dialog"
+  aria-modal="true"
+  popover="manual"
+  tabindex="-1"
   aria-labelledby="mobile-quick-add-title"
   data-mobile-quick-add
   data-recommendations-url="{{ routes.product_recommendations_url }}"
+  data-all-url="{{ routes.all_products_collection_url }}"
   data-money-format="{{ shop.money_format | strip_html | escape }}"
   data-country="{{ localization.country.iso_code }}"
+  data-free-shipping="{{ qa_threshold }}"
   {% if shop.enabled_payment_types contains 'klarna' %}data-klarna{% endif %}
 >
-  <span class="qa-grab" aria-hidden="true"></span>
-  <button type="button" class="qa-back" data-qa-back hidden>
-    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m15 5-7 7 7 7"></path></svg>
-    Indietro
-  </button>
+  <div class="qa-drag" data-qa-drag aria-hidden="true"><span class="qa-grab"></span></div>
   <button type="button" class="qa-x" data-qa-close aria-label="{{ 'mobile.common.close' | t }}">
     <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M6 6l12 12M18 6 6 18"></path></svg>
   </button>
+  <button type="button" class="qa-back" data-qa-back hidden>
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m15 5-7 7 7 7"></path></svg>
+    {{- 'mobile.quick_add.back' | t -}}
+  </button>
 
-  <div class="qa-top">
-    <img data-qa-image alt="" width="96" height="96">
-    <div>
-      <h3 id="mobile-quick-add-title" data-qa-title></h3>
-      <div class="qa-price" data-qa-price></div>
-      <div class="qa-stock" data-qa-stock></div>
+  {%- comment -%} Barre compacte affichée en haut quand on fait défiler le choix. {%- endcomment -%}
+  <div class="qa-mini" data-qa-mini aria-hidden="true">
+    <img data-qa-mini-image alt="" width="40" height="40">
+    <div><b data-qa-mini-price></b><span data-qa-mini-selection></span></div>
+  </div>
+
+  <div class="qa-scroll" data-qa-scroll>
+    {%- comment -%} Vue 1 : choix des options {%- endcomment -%}
+    <div class="qa-view" data-qa-pick>
+      <div class="qa-hero" data-qa-hero>
+        <div class="qa-media">
+          <img data-qa-image alt="" width="132" height="165">
+          <span class="qa-tag" data-qa-tag hidden><i></i><span></span></span>
+          <button type="button" class="qa-fav" data-qa-fav aria-pressed="false" hidden>
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+          </button>
+        </div>
+        <div class="qa-info">
+          <div class="qa-price" data-qa-price></div>
+          <div class="qa-save" data-qa-save hidden></div>
+          <h3 id="mobile-quick-add-title" data-qa-title></h3>
+          <div class="qa-meta">
+            <span class="qa-stock" data-qa-stock></span>
+            <a href="#" class="qa-det" data-qa-more>{{ 'mobile.quick_add.product_details' | t }}</a>
+          </div>
+        </div>
+      </div>
+
+      <div data-qa-options></div>
+
+      <div class="qa-grp">
+        <ul class="qa-perks">
+          <li data-qa-free>
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M1 5h14v11H1zM15 9h4l3 3v4h-7"></path><circle cx="6" cy="18.5" r="2"></circle><circle cx="18" cy="18.5" r="2"></circle></svg>
+            <b>{{ 'mobile.js.free_shipping_short' | t }}</b>
+            <span>{{ 'mobile.quick_add.in_country' | t: country: localization.country.name }}</span>
+          </li>
+          <li>
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M9 14 4 9l5-5"></path><path d="M4 9h11a5 5 0 0 1 0 10h-3"></path></svg>
+            <b>{{ 'mobile.js.drawer_easy_returns' | t }}</b>
+            <span>{{ 'mobile.quick_add.return_days' | t }}</span>
+          </li>
+          <li data-qa-klarna hidden>
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><rect x="2" y="5" width="20" height="14" rx="3"></rect><path d="M2 10h20M6 15h4"></path></svg>
+            <b>Klarna</b>
+            <span data-qa-klarna-value></span>
+          </li>
+        </ul>
+      </div>
+
+      <section class="qa-grp" data-qa-sim aria-labelledby="mobile-quick-add-sim-title" hidden>
+        <div class="qa-lbl">
+          <span id="mobile-quick-add-sim-title" data-qa-sim-title>{{ 'mobile.common.you_may_like' | t }}</span>
+          <a href="{{ routes.all_products_collection_url }}" class="qa-link" data-qa-sim-all>{{ 'mobile.explore.see_all' | t }}</a>
+        </div>
+        <div class="qa-recs" data-qa-sim-rail></div>
+      </section>
+    </div>
+
+    {%- comment -%} Vue 2 : confirmation après l'ajout {%- endcomment -%}
+    <div class="qa-view" data-qa-done hidden>
+      <div class="qa-done">
+        <div class="qa-ok" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>
+        </div>
+        <h3 role="status">{{ 'mobile.quick_add.added_title' | t }}</h3>
+        <p data-qa-done-summary></p>
+        <div class="qa-line">
+          <img data-qa-done-image alt="" width="58" height="58">
+          <div><span data-qa-done-title></span><em data-qa-done-options></em></div>
+          <b data-qa-done-price></b>
+        </div>
+        <div class="qa-goal" data-qa-goal hidden>
+          <p data-qa-goal-text></p>
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-qa-goal-progress><i data-qa-goal-bar></i></div>
+        </div>
+        <div class="qa-dbtn">
+          <button type="button" class="c" data-qa-close>{{ 'mobile.cart.continue' | t }}</button>
+          <a href="{{ routes.cart_url }}" class="p" data-qa-go-cart>{{ 'mobile.quick_add.go_cart' | t }}</a>
+        </div>
+      </div>
+      <section class="qa-grp" data-qa-look aria-labelledby="mobile-quick-add-look-title" hidden>
+        <div class="qa-lbl"><span id="mobile-quick-add-look-title">{{ 'mobile.quick_add.complete_look' | t }}</span></div>
+        <div class="qa-recs" data-qa-look-rail></div>
+      </section>
     </div>
   </div>
 
-  <div class="qa-body" data-qa-body>
-    <div data-qa-options></div>
-    <div class="qa-guide-panel" data-qa-guide-panel hidden></div>
-    <div class="qa-grp">
-      <div class="qa-lbl">{{ 'mobile.quick_add.quantity' | t }}</div>
-      <div class="qa-qty">
-        <button type="button" data-qa-qty="-1" aria-label="{{ 'mobile.quick_add.less' | t }}">−</button>
-        <output data-qa-qty-value>1</output>
-        <button type="button" data-qa-qty="1" aria-label="{{ 'mobile.quick_add.more' | t }}">+</button>
-      </div>
+  <div class="qa-foot" data-qa-foot>
+    <div class="qa-qty" role="group" aria-label="{{ 'mobile.quick_add.quantity' | t }}">
+      <button type="button" data-qa-qty="-1" aria-label="{{ 'mobile.quick_add.less' | t }}">−</button>
+      <output data-qa-qty-value aria-live="polite">1</output>
+      <button type="button" data-qa-qty="1" aria-label="{{ 'mobile.quick_add.more' | t }}">+</button>
     </div>
-    <ul class="qa-perks">
-      <li data-qa-free hidden></li>
-      <li>↩️ {{ 'mobile.quick_add.easy_return' | t }}</li>
-      <li data-qa-klarna hidden>{{ 'mobile.quick_add.klarna' | t }} <b data-qa-klarna-value></b></li>
-    </ul>
-    <section class="qa-sim" data-qa-sim aria-labelledby="mobile-quick-add-sim-title" hidden>
-      <div class="qa-simhead">
-        <h4 id="mobile-quick-add-sim-title" data-qa-sim-title>{{ 'mobile.common.you_may_like' | t }}</h4>
-        <a href="{{ routes.all_products_collection_url }}" data-qa-sim-all>{{ 'mobile.explore.see_all' | t }}</a>
-      </div>
-      <div class="qa-simrail" data-qa-sim-rail></div>
-    </section>
+    <button type="button" class="qa-add" data-qa-add>{{ 'mobile.js.drawer_add' | t }}</button>
   </div>
-
-  <div class="qa-foot">
-    <a href="#" class="qa-more" data-qa-more>{{ 'mobile.quick_add.details' | t }}</a>
-    <button type="button" class="qa-add" data-qa-add>{{ 'mobile.pdp.add_to_cart' | t }}</button>
-  </div>
-</dialog>
-<div class="mobile-quick-add-toast" data-qa-toast role="status" aria-live="polite"></div>
+</div>
+<div class="mobile-quick-add-toast" data-qa-toast role="status" aria-live="polite" popover="manual"></div>
 <script src="{{ 'mobile-quick-add.js' | asset_url }}" defer></script>

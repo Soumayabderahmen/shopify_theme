@@ -818,7 +818,26 @@
       "collection_show_one": "Voir 1 produit",
       "collection_show_none": "Aucun produit",
       "collection_any": "Tous",
-      "collection_hint_html": "90 % des produits coûtent moins de <b>{amount}</b>"
+      "collection_hint_html": "90 % des produits coûtent moins de <b>{amount}</b>",
+      "qa_colors_count": "{count} couleurs",
+      "qa_see_all": "Voir tout",
+      "qa_last_n": "Plus que {count}",
+      "qa_for_you": "Pour vous",
+      "qa_find_size": "Trouver ma taille",
+      "qa_your_height": "Votre hauteur",
+      "qa_fit_hint": "Nous vous suggérons une taille selon les mesures du fabricant.",
+      "qa_fit_result_html": "Pour <b>{height} cm</b>, nous vous conseillons la taille <b>{size}</b>.",
+      "qa_fit_closest_html": "Pour <b>{height} cm</b>, nous vous conseillons la taille <b>{size}</b> (la plus proche).",
+      "qa_fit_none": "Aucune taille disponible pour cette hauteur.",
+      "qa_fit_select": "Choisir {size}",
+      "qa_pieces": "{count} pièces",
+      "qa_pick_size_error": "Choisissez une taille pour continuer",
+      "qa_pick_option_error": "Choisissez {option} pour continuer",
+      "qa_cart_summary_one": "{count} article dans le panier · total {total}",
+      "qa_cart_summary_other": "{count} articles dans le panier · total {total}",
+      "qa_size_value": "Taille {size}",
+      "qa_go_cart": "Voir le panier ({count})",
+      "qa_size_sold_out": "Épuisée"
     },
     "pdp": {
       "gallery": "Photos du produit",
@@ -956,7 +975,14 @@
       "more": "Plus",
       "easy_return": "Retour facile sous 30 jours",
       "klarna": "Klarna : 3 paiements de",
-      "details": "Voir les détails"
+      "details": "Voir les détails",
+      "back": "Retour",
+      "product_details": "Détails du produit ›",
+      "in_country": "{{ country }}",
+      "return_days": "30 jours",
+      "added_title": "Ajouté au panier !",
+      "go_cart": "Voir le panier",
+      "complete_look": "Complétez le look"
     },
     "footer": {
       "account": "Compte client",

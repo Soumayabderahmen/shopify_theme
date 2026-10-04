@@ -9,6 +9,12 @@
       "url": "http://127.0.0.1:9292"
     },
     {
+      "name": "prototypes",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8765", "--bind", "127.0.0.1", "--directory", "C:\\Users\\TROOPY\\Downloads"],
+      "port": 8765
+    },
+    {
       "name": "shopify-theme-dev-attach",
       "port": 9292,
       "url": "http://127.0.0.1:9292"

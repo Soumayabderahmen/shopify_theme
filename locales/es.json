@@ -746,7 +746,26 @@
       "collection_show_one": "Ver 1 producto",
       "collection_show_none": "Ningún producto",
       "collection_any": "Todos",
-      "collection_hint_html": "El 90 % de los productos cuesta menos de <b>{amount}</b>"
+      "collection_hint_html": "El 90 % de los productos cuesta menos de <b>{amount}</b>",
+      "qa_colors_count": "{count} colores",
+      "qa_see_all": "Ver todos",
+      "qa_last_n": "Últimos {count}",
+      "qa_for_you": "Para ti",
+      "qa_find_size": "Encuentra tu talla",
+      "qa_your_height": "Tu altura",
+      "qa_fit_hint": "Te sugerimos la talla según las medidas del fabricante.",
+      "qa_fit_result_html": "Para <b>{height} cm</b> te recomendamos la talla <b>{size}</b>.",
+      "qa_fit_closest_html": "Para <b>{height} cm</b> te recomendamos la talla <b>{size}</b> (la más cercana).",
+      "qa_fit_none": "No hay tallas disponibles para esta altura.",
+      "qa_fit_select": "Elegir {size}",
+      "qa_pieces": "{count} piezas",
+      "qa_pick_size_error": "Elige una talla para continuar",
+      "qa_pick_option_error": "Elige {option} para continuar",
+      "qa_cart_summary_one": "{count} artículo en el carrito · total {total}",
+      "qa_cart_summary_other": "{count} artículos en el carrito · total {total}",
+      "qa_size_value": "Talla {size}",
+      "qa_go_cart": "Ir al carrito ({count})",
+      "qa_size_sold_out": "Agotada"
     },
     "pdp": {
       "gallery": "Fotos del producto",
@@ -884,7 +903,14 @@
       "more": "Más",
       "easy_return": "Devolución fácil en 30 días",
       "klarna": "Klarna: 3 pagos de",
-      "details": "Ver detalles"
+      "details": "Ver detalles",
+      "back": "Atrás",
+      "product_details": "Detalles del producto ›",
+      "in_country": "a {{ country }}",
+      "return_days": "30 días",
+      "added_title": "¡Añadido al carrito!",
+      "go_cart": "Ir al carrito",
+      "complete_look": "Completa el look"
     },
     "footer": {
       "account": "Cuenta de cliente",
