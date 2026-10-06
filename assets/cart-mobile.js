@@ -231,9 +231,14 @@
         if (found && found.applicable) {
           codeMessage(T('cart_code_applied'), false);
           toast(T('cart_code_applied'));
-        } else {
-          codeMessage(T('cart_code_invalid'), true);
+          return;
         }
+        // Code refusé : Shopify le garde sur le panier (« non applicable ») et il partait jusqu'au paiement.
+        // On remet les seuls codes valides, puis on affiche le message.
+        return cartRequest('cart/update.js', { discount: codes.join(',') })
+          .then(applyCart)
+          .catch(function (error) { console.error('[Cart mobile] Invalid code not removed', error); })
+          .then(function () { codeMessage(T('cart_code_invalid'), true); });
       })
       .catch(function (error) {
         form.querySelector('button').disabled = false;
