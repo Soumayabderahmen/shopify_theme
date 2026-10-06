@@ -3565,7 +3565,16 @@
       "pdp_sz_for_you": "For you",
       "pdp_sz_asian_html": "<b>Asian sizes</b> · they run smaller than European sizes.",
       "pdp_sz_label_asian": "{label} (Asian)",
-      "pdp_sz_compare": "Compare the product’s real measurements"
+      "pdp_sz_compare": "Compare the product’s real measurements",
+      "pdp_sz_shoe_label": "Size",
+      "pdp_sz_shoe_hint_html": "<b>Choose by foot length</b>, not by the size you usually wear. Measure from heel to big toe, standing.",
+      "pdp_sz_your_foot": "Your foot",
+      "pdp_sz_shoe_rec_html": "We recommend <b>{size}</b>",
+      "pdp_sz_shoe_edge": "wide foot? consider {size}",
+      "pdp_sz_foot_long_html": "Foot longer than the largest size ({max}). Closest: <b>{size}</b>",
+      "pdp_sz_foot_short_html": "Foot shorter than the smallest size. Closest: <b>{size}</b>",
+      "pdp_sz_foot_length": "Foot length",
+      "pdp_sz_foot": "foot {foot}"
     },
     "pdp": {
       "gallery": "Product photos",

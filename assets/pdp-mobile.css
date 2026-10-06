@@ -779,6 +779,35 @@ body.template-product {
   color: #cdd0db;
 }
 
+/* Pointures (prototype « pointures ») : grille de 5, pointure EU en gros, longueur du pied en petit. */
+.pdp-m__sz--shoe {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px 7px;
+}
+
+#root .pdp-m .pdp-m__sz--shoe .pdp-m__szb {
+  height: 60px;
+  padding: 0 2px;
+  border-radius: 13px;
+}
+
+.pdp-m__sz--shoe .pdp-m__szb b {
+  font-size: 18px;
+}
+
+.pdp-m__sz--shoe .pdp-m__szb small {
+  font-size: 10.5px;
+}
+
+.pdp-m__sz--shoe .pdp-m__bdg {
+  padding: 1px 6px;
+  font-size: 9px;
+}
+
+.pdp-m__szr-e .pdp-m__szr-c {
+  color: #c3c6d3;
+}
+
 .pdp-m__bdg {
   position: absolute;
   top: -8px;

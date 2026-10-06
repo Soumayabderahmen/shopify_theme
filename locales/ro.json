@@ -876,7 +876,16 @@
       "pdp_sz_for_you": "Pentru tine",
       "pdp_sz_asian_html": "<b>Mărimi asiatice</b> · sunt mai mici decât mărimile europene.",
       "pdp_sz_label_asian": "{label} (asiatică)",
-      "pdp_sz_compare": "Compară măsurătorile reale ale produsului"
+      "pdp_sz_compare": "Compară măsurătorile reale ale produsului",
+      "pdp_sz_shoe_label": "Mărime",
+      "pdp_sz_shoe_hint_html": "<b>Alege după lungimea piciorului</b>, nu după mărimea pe care o porți de obicei. Măsoară în picioare, de la călcâi la degetul mare.",
+      "pdp_sz_your_foot": "Piciorul tău",
+      "pdp_sz_shoe_rec_html": "Îți recomandăm <b>{size}</b>",
+      "pdp_sz_shoe_edge": "picior lat? ia în calcul {size}",
+      "pdp_sz_foot_long_html": "Picior mai lung decât mărimea maximă ({max}). Cea mai apropiată: <b>{size}</b>",
+      "pdp_sz_foot_short_html": "Picior mai scurt decât mărimea minimă. Cea mai apropiată: <b>{size}</b>",
+      "pdp_sz_foot_length": "Lungimea piciorului",
+      "pdp_sz_foot": "picior {foot}"
     },
     "pdp": {
       "gallery": "Fotografiile produsului",

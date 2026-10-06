@@ -419,6 +419,72 @@
   var rangeText = function (size) {
     return (size.bare ? size.unit : size.lo + '–' + size.hi + ' ' + size.unit) + (size.extra ? ' · ' + size.extra : '');
   };
+  /* ---------- Pointures (prototype « pointures ») : vraie longueur du pied du produit, jamais inventée. Sources, dans
+     l'ordre : la valeur de la variante (« 39(Foot24.5cm) »), la ligne « size_info » de la description (longueur + pointure
+     EU, assets/size-info.js), le tableau « Lunghezza piede (cm) » de la description. Il faut une longueur pour chaque
+     pointure ; sinon la grille reste celle des tailles. ---------- */
+  var FOOT_VALUE = /^\s*(\d{2}(?:[.,]5)?)\s*\(\s*foot\s*(\d{2}(?:[.,]\d+)?)\s*cm\s*\)\s*$/i;
+  var FOOT_HEADER = /(lunghezza\s+(?:del\s+)?piede|foot\s*length|longueur\s+du\s+pied|fu(?:ß|ss)l(?:ä|a)nge|longitud\s+del\s+pie|voetlengte|lungimea\s+piciorului)/i;
+  var shoeNumber = function (text) {
+    var match = String(text).match(/^\s*(\d{2}(?:[.,]5)?)(?!\d)/);
+    return match ? String(Number(match[1].replace(',', '.'))) : null;
+  };
+  // Longueurs du pied de la description, par source : tableau « Lunghezza piede (cm) », et colonnes « EU » et « size »
+  // du size_info (le fournisseur y met deux numérotations différentes : « size 39 » = « EU 38,5 »).
+  var descriptionFeet = function () {
+    var feet = { table: {}, eu: {}, size: {} };
+    var source = root.querySelector('[data-pdp-desc-src]');
+    if (!source) return feet;
+    var doc = source.content;
+    var line = Array.prototype.find.call(doc.querySelectorAll('p, div, li'), function (el) {
+      return window.sizeInfo && window.sizeInfo.LINE.test(el.textContent.trim());
+    });
+    (line && window.sizeInfo.list ? window.sizeInfo.list(line.textContent.trim()) : []).forEach(function (entry) {
+      var cm = entry.length && parseFloat(String(entry.length.cm).replace(',', '.'));
+      // Seulement un tableau de chaussures (avec équivalence EU) : ailleurs « length » est la longueur du vêtement.
+      var eu = cm && entry.countrySizeMap && shoeNumber(entry.countrySizeMap.EU);
+      if (!eu) return;
+      feet.eu[eu] = cm;
+      var size = shoeNumber(entry.size);
+      if (size) feet.size[size] = cm;
+    });
+    doc.querySelectorAll('table').forEach(function (table) {
+      var head = table.rows[0] ? Array.prototype.map.call(table.rows[0].cells, function (cell) { return cell.textContent; }) : [];
+      var column = head.findIndex(function (text) { return FOOT_HEADER.test(text) && /cm/i.test(text); });
+      if (column < 1) return;
+      Array.prototype.slice.call(table.rows, 1).forEach(function (row) {
+        var eu = row.cells[0] && shoeNumber(row.cells[0].textContent);
+        var cm = row.cells[column] && parseFloat(row.cells[column].textContent.replace(',', '.'));
+        if (eu && cm && !feet.table[eu]) feet.table[eu] = cm;
+      });
+    });
+    return feet;
+  };
+  // Pointures avec leur longueur réelle, triées. Une source n'est prise que si elle couvre toutes les pointures ; si les
+  // deux colonnes du size_info les couvrent avec des longueurs différentes, c'est ambigu : aucune longueur (null).
+  var shoeSizes = function (sizes) {
+    var codes = sizes.map(function (size) {
+      var value = String(size.raw).match(FOOT_VALUE);
+      return value ? { code: shoeNumber(value[1]), foot: Number(value[2].replace(',', '.')) }
+        : /^\d{2}(?:[.,]5)?$/.test(size.code) ? { code: shoeNumber(size.code), foot: null } : null;
+    });
+    if (sizes.length < 2 || !codes.every(Boolean)) return null;
+    if (codes.some(function (item) { return !item.foot; })) {
+      var feet = descriptionFeet();
+      var covers = function (map) { return codes.every(function (item) { return map[item.code]; }); };
+      var same = function (a, b) { return codes.every(function (item) { return a[item.code] === b[item.code]; }); };
+      var map = covers(feet.table) ? feet.table
+        : covers(feet.eu) && covers(feet.size) ? (same(feet.eu, feet.size) ? feet.eu : null)
+        : covers(feet.eu) ? feet.eu : covers(feet.size) ? feet.size : null;
+      if (!map) return null;
+      codes.forEach(function (item) { item.foot = item.foot || map[item.code]; });
+    }
+    return sizes.map(function (size, i) { return { raw: size.raw, code: codes[i].code, foot: codes[i].foot, shoe: true }; })
+      .sort(function (a, b) { return a.foot - b.foot || Number(a.code) - Number(b.code); });
+  };
+  var footText = function (cm) {
+    return Number(cm).toLocaleString(document.documentElement.lang || 'it', { maximumFractionDigits: 1 }) + ' cm';
+  };
   var readFit = function () {
     try { return JSON.parse(window.localStorage.getItem(FIT_KEY)) || {}; } catch (error) { return {}; }
   };
@@ -442,6 +508,11 @@
     if (!grid) return;
     var buttons = Array.prototype.slice.call(grid.querySelectorAll('[data-value]'));
     var sizes = sortSizes(buttons.map(function (button) { return parseSize(button.getAttribute('data-value')); }));
+    var shoes = shoeSizes(sizes);
+    if (shoes) {
+      setupShoe(block, grid, buttons, shoes);
+      return;
+    }
     var ranged = sizes.filter(function (size) { return size.lo; });
     // Valeurs longues sans plage (« 43(Foot26.5cm) », « 29 Waist 73cm », dimensions d'un sac) : puces et libellés
     // d'origine gardés, seulement remis dans l'ordre logique (ordre de la boutique si aucun ordre sûr).
@@ -540,6 +611,10 @@
     var ui = sizeUi;
     ui.rec = null;
     if (!ui.input) return;
+    if (ui.shoe) {
+      suggestShoe(ui);
+      return;
+    }
     var value = parseFloat(ui.input.value);
     var available = ui.sizes.filter(function (size) {
       var button = ui.grid.querySelector('[data-value="' + CSS.escape(size.raw) + '"]');
@@ -581,7 +656,7 @@
     var current = ui.byRaw[value];
     var name = ui.block.querySelector('[data-pdp-option-name]');
     if (name && current) {
-      name.textContent = current.lo && !current.bare ? current.code + ' · ' + rangeText(current) : current.note ? current.note + ' ' + current.code : current.code;
+      name.textContent = current.shoe ? current.code + ' · ' + T('pdp_sz_foot', { foot: footText(current.foot) }) : current.lo && !current.bare ? current.code + ' · ' + rangeText(current) : current.note ? current.note + ' ' + current.code : current.code;
     }
     ui.grid.querySelectorAll('[data-value]').forEach(function (button) {
       var raw = button.getAttribute('data-value');
@@ -606,6 +681,93 @@
         item.classList.toggle('is-rec', item.getAttribute('data-s') === ui.rec);
       });
     }
+  };
+  // Pointures : grille de 5 (pointure en gros, longueur du pied en petit), conseil selon la longueur du pied saisie,
+  // règle à segments égaux de la plus petite à la plus grande longueur.
+  var setupShoe = function (block, grid, buttons, sizes) {
+    var ui = { shoe: true, unit: 'foot', block: block, grid: grid, sizes: sizes, byRaw: {}, index: Number(block.getAttribute('data-option-index')), rec: null };
+    sizes.forEach(function (size) {
+      ui.byRaw[size.raw] = size;
+      var button = buttons.find(function (item) { return item.getAttribute('data-value') === size.raw; });
+      button.setAttribute('aria-label', size.raw);
+      button.innerHTML = '<b>' + escapeText(size.code) + '</b><small>' + escapeText(footText(size.foot)) + '</small>';
+      grid.appendChild(button);
+    });
+    grid.classList.add('pdp-m__sz--grid', 'pdp-m__sz--shoe');
+    var label = block.querySelector('[data-pdp-option-label]');
+    if (label) label.textContent = T('pdp_sz_shoe_label');
+    var guide = block.querySelector('[data-pdp-size-guide]');
+    if (guide) guide.hidden = false;
+    var steps = sizes.slice(1).map(function (size, i) { return size.foot - sizes[i].foot; }).filter(function (step) { return step > 0; });
+    ui.min = sizes[0].foot - (steps.length ? Math.min.apply(null, steps) : 0.5);
+    ui.max = sizes[sizes.length - 1].foot;
+
+    var box = document.createElement('div');
+    box.className = 'pdp-m__asn';
+    box.innerHTML = '<div class="pdp-m__asn-h">' + INFO_ICON + '<span>' + T('pdp_sz_shoe_hint_html') + '</span></div>'
+      + '<div class="pdp-m__asn-w"><label for="pdp-fit">' + escapeText(T('pdp_sz_your_foot')) + '</label>'
+      + '<span class="pdp-m__asn-in"><input id="pdp-fit" type="number" inputmode="decimal" min="15" max="35" step="0.1" placeholder="'
+      + escapeText((24).toLocaleString(document.documentElement.lang || 'it', { minimumFractionDigits: 1 })) + '" aria-describedby="pdp-fit-res"><span>cm</span></span>'
+      + '<span class="pdp-m__asn-r" id="pdp-fit-res" aria-live="polite"></span></div>';
+    block.insertBefore(box, grid);
+    ui.input = box.querySelector('input');
+    ui.result = box.querySelector('.pdp-m__asn-r');
+    var saved = readFit().foot;
+    if (saved) ui.input.value = saved;
+    ui.input.addEventListener('input', function () {
+      saveFit('foot', ui.input.value);
+      paintSize();
+    });
+    box.addEventListener('click', function (event) {
+      var pick = event.target.closest('[data-pdp-fit-pick]');
+      if (!pick) return;
+      var target = buttons.find(function (item) { return item.getAttribute('data-value') === pick.getAttribute('data-pdp-fit-pick'); });
+      if (target) target.click();
+    });
+
+    var rail = document.createElement('div');
+    rail.className = 'pdp-m__szr';
+    rail.setAttribute('aria-hidden', 'true');
+    rail.innerHTML = '<div class="pdp-m__szr-wrap"><span class="pdp-m__szr-m" hidden></span><div class="pdp-m__szr-t">'
+      + sizes.map(function (size) { return '<i data-s="' + escapeText(size.raw) + '" style="flex:1"></i>'; }).join('') + '</div></div>'
+      + '<div class="pdp-m__szr-l">' + sizes.map(function (size) { return '<span data-s="' + escapeText(size.raw) + '" style="flex:1">' + escapeText(size.code) + '</span>'; }).join('') + '</div>'
+      + '<div class="pdp-m__szr-e"><span>' + escapeText(footText(ui.min)) + '</span><span class="pdp-m__szr-c">' + escapeText(T('pdp_sz_foot_length')) + '</span><span>' + escapeText(footText(ui.max)) + '</span></div>';
+    grid.parentNode.insertBefore(rail, grid.nextSibling);
+    ui.rail = rail;
+    ui.marker = rail.querySelector('.pdp-m__szr-m');
+    sizeUi = ui;
+  };
+  // Pointure conseillée : la 1re (disponible) dont la longueur couvre le pied ; à 1,5 mm près de la limite, la suivante aussi.
+  var suggestShoe = function (ui) {
+    var value = parseFloat(String(ui.input.value).replace(',', '.'));
+    var available = ui.sizes.filter(function (size) {
+      var button = ui.grid.querySelector('[data-value="' + CSS.escape(size.raw) + '"]');
+      return button && !button.classList.contains('is-unavailable');
+    });
+    if (!value || value < 15 || !available.length) {
+      ui.result.innerHTML = '';
+      ui.marker.hidden = true;
+      return;
+    }
+    var best = available.find(function (size) { return size.foot >= value - 0.05; });
+    var html;
+    if (!best) {
+      best = available[available.length - 1];
+      html = T('pdp_sz_foot_long_html', { max: escapeText(footText(ui.max)), size: escapeText(best.code) });
+    } else if (value < ui.min) {
+      html = T('pdp_sz_foot_short_html', { size: escapeText(best.code) });
+    } else {
+      var next = available[available.indexOf(best) + 1];
+      var edge = best.foot - value <= 0.15 && next;
+      html = T('pdp_sz_shoe_rec_html', { size: escapeText(best.code) }) + (edge ? ' · ' + escapeText(T('pdp_sz_shoe_edge', { size: next.code })) : '');
+    }
+    ui.rec = best.raw;
+    if (selectedValues()[ui.index] !== best.raw) {
+      html += ' <button type="button" data-pdp-fit-pick="' + escapeText(best.raw) + '">' + escapeText(T('pdp_sz_pick')) + '</button>';
+    }
+    ui.result.innerHTML = html;
+    ui.marker.hidden = false;
+    ui.marker.style.left = (Math.max(0, Math.min(1, (value - ui.min) / (ui.max - ui.min))) * 100) + '%';
   };
   setupSize();
 
@@ -1021,7 +1183,8 @@
     var current = sizeUi && sizeUi.byRaw[values[sizeUi.index]];
     Array.prototype.forEach.call(table.rows, function (row, r) {
       var label = row.cells[0] ? row.cells[0].textContent.trim() : '';
-      var same = values.indexOf(label) !== -1 || Boolean(current && parseSize(label).code === current.code);
+      // Pointures : « 39 (Foot24.5cm) » ou « 39 » dans le tableau = pointure 39 choisie.
+      var same = values.indexOf(label) !== -1 || Boolean(current && (current.shoe ? shoeNumber(label) === current.code : parseSize(label).code === current.code));
       row.classList.toggle('is-selected', r > 0 && same);
     });
   };

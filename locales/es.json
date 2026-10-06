@@ -796,7 +796,16 @@
       "pdp_sz_for_you": "Para ti",
       "pdp_sz_asian_html": "<b>Tallas asiáticas</b> · son más pequeñas que las tallas europeas.",
       "pdp_sz_label_asian": "{label} (asiática)",
-      "pdp_sz_compare": "Compara las medidas reales del producto"
+      "pdp_sz_compare": "Compara las medidas reales del producto",
+      "pdp_sz_shoe_label": "Talla",
+      "pdp_sz_shoe_hint_html": "<b>Elige según la longitud del pie</b>, no según la talla que sueles usar. Mide del talón al dedo gordo, de pie.",
+      "pdp_sz_your_foot": "Tu pie",
+      "pdp_sz_shoe_rec_html": "Te recomendamos la <b>{size}</b>",
+      "pdp_sz_shoe_edge": "¿pie ancho? valora la {size}",
+      "pdp_sz_foot_long_html": "Pie más largo que la talla máx. ({max}). Más cercana: <b>{size}</b>",
+      "pdp_sz_foot_short_html": "Pie más corto que la talla mín. Más cercana: <b>{size}</b>",
+      "pdp_sz_foot_length": "Longitud del pie",
+      "pdp_sz_foot": "pie {foot}"
     },
     "pdp": {
       "gallery": "Fotos del producto",

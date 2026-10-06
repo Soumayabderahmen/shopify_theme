@@ -799,7 +799,16 @@
       "pdp_sz_for_you": "Voor jou",
       "pdp_sz_asian_html": "<b>Aziatische maten</b> · vallen kleiner uit dan Europese maten.",
       "pdp_sz_label_asian": "{label} (Aziatisch)",
-      "pdp_sz_compare": "Vergelijk de echte maten van het product"
+      "pdp_sz_compare": "Vergelijk de echte maten van het product",
+      "pdp_sz_shoe_label": "Maat",
+      "pdp_sz_shoe_hint_html": "<b>Kies op voetlengte</b>, niet op de maat die je meestal draagt. Meet staand van hiel tot grote teen.",
+      "pdp_sz_your_foot": "Jouw voet",
+      "pdp_sz_shoe_rec_html": "Wij raden <b>{size}</b> aan",
+      "pdp_sz_shoe_edge": "brede voet? overweeg {size}",
+      "pdp_sz_foot_long_html": "Voet langer dan de grootste maat ({max}). Dichtstbij: <b>{size}</b>",
+      "pdp_sz_foot_short_html": "Voet korter dan de kleinste maat. Dichtstbij: <b>{size}</b>",
+      "pdp_sz_foot_length": "Voetlengte",
+      "pdp_sz_foot": "voet {foot}"
     },
     "pdp": {
       "gallery": "Productfoto's",

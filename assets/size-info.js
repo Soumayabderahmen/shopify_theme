@@ -40,9 +40,14 @@
 
   // Tableau construit à partir du texte « size_info: {…} » ; null si les données sont illisibles.
   // L'en-tête « (cm / inch) » et les cellules « 20.5 cm / 8.07″ » permettent le bouton cm / pouces du mobile.
-  function table(text) {
+  // Lignes brutes (taille, longueur, équivalences par pays) : le sélecteur de pointure mobile y lit la longueur du pied.
+  function entries(text) {
     var data = readJsonObject(text);
-    var list = data && Array.isArray(data.sizeInfoList) ? data.sizeInfoList.filter(function (entry) { return entry && entry.size; }) : [];
+    return data && Array.isArray(data.sizeInfoList) ? data.sizeInfoList.filter(function (entry) { return entry && entry.size; }) : [];
+  }
+
+  function table(text) {
+    var list = entries(text);
     if (!list.length) return null;
     var countries = COUNTRIES.filter(function (code) {
       return list.some(function (entry) { return entry.countrySizeMap && entry.countrySizeMap[code]; });
@@ -107,7 +112,7 @@
     });
   }
 
-  window.sizeInfo = { LINE: LINE, table: table, convert: convert };
+  window.sizeInfo = { LINE: LINE, list: entries, table: table, convert: convert };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { convert(); });
   else convert();
