@@ -774,14 +774,11 @@
     var src = slide ? slide.currentSrc || slide.src : swatch ? swatch.currentSrc || swatch.src : '';
     if (!src) return;
     if (!preview) {
-      preview = document.createElement('button');
-      preview.type = 'button';
+      // Affichage seul, jamais cliquable : la bulle peut passer sur « Aggiungi al carrello », le tap suivant doit l'atteindre.
+      preview = document.createElement('div');
       preview.className = 'pdp-m__cprev';
+      preview.setAttribute('aria-hidden', 'true');
       preview.innerHTML = '<img alt="" loading="eager" decoding="async"><span></span>';
-      preview.addEventListener('click', function () {
-        preview.classList.remove('is-shown');
-        gallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
       root.appendChild(preview);
     }
     var block = button.closest('[data-option-index]');

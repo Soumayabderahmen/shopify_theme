@@ -725,7 +725,8 @@ body.template-product {
   text-decoration: line-through;
 }
 
-/* Aperçu de la photo de la couleur choisie quand la galerie est hors de l'écran (un toucher y remonte). */
+/* Aperçu de la photo de la couleur choisie quand la galerie est hors de l'écran. Jamais cliquable (pointer-events: none) :
+   il ne doit pas intercepter un tap rapide sur « Aggiungi al carrello » en dessous. */
 #root .pdp-m .pdp-m__cprev {
   position: fixed;
   left: 50%;
@@ -749,7 +750,6 @@ body.template-product {
 
 #root .pdp-m .pdp-m__cprev.is-shown {
   opacity: 1;
-  pointer-events: auto;
   transform: translate(-50%, 0);
 }
 
