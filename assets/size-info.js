@@ -73,6 +73,67 @@
     return element;
   }
 
+  /* Pointures avec la vraie longueur du pied (fiche produit et ajout rapide mobiles), jamais inventée. Sources, dans
+     l'ordre : la valeur (« 39(Foot24.5cm) »), le tableau « Lunghezza piede (cm) » de la description, le size_info
+     (colonne EU ou colonne size : le fournisseur y met deux numérotations, « size 39 » = « EU 38,5 »). Une source doit
+     couvrir toutes les pointures ; deux colonnes en désaccord = ambigu. Renvoie [{ raw, code, foot }] trié, sinon null. */
+  var FOOT_VALUE = /^\s*(\d{2}(?:[.,]5)?)\s*\(\s*foot\s*(\d{2}(?:[.,]\d+)?)\s*cm\s*\)\s*$/i;
+  var PLAIN_SHOE = /^\s*(?:eur?\s*[:\-]?\s*)?(\d{2}(?:[.,]5)?)\.?\s*$/i;
+  var FOOT_HEADER = /(lunghezza\s+(?:del\s+)?piede|foot\s*length|longueur\s+du\s+pied|fu(?:ß|ss)l(?:ä|a)nge|longitud\s+del\s+pie|voetlengte|lungimea\s+piciorului)/i;
+
+  function shoeNumber(text) {
+    var match = String(text == null ? '' : text).match(/^\s*(\d{2}(?:[.,]5)?)(?!\d)/);
+    return match ? String(Number(match[1].replace(',', '.'))) : null;
+  }
+
+  function descriptionFeet(html) {
+    var feet = { table: {}, eu: {}, size: {} };
+    // Document inerte : les images de la description ne sont pas téléchargées.
+    var doc = new DOMParser().parseFromString(html || '', 'text/html');
+    var line = Array.prototype.find.call(doc.querySelectorAll('p, div, li'), function (el) { return LINE.test(el.textContent.trim()); });
+    (line ? entries(line.textContent.trim()) : []).forEach(function (entry) {
+      var cm = entry.length && parseFloat(String(entry.length.cm).replace(',', '.'));
+      // Seulement un tableau de chaussures (avec équivalence EU) : ailleurs « length » est la longueur du vêtement.
+      var eu = cm && entry.countrySizeMap && shoeNumber(entry.countrySizeMap.EU);
+      if (!eu) return;
+      feet.eu[eu] = cm;
+      var size = shoeNumber(entry.size);
+      if (size) feet.size[size] = cm;
+    });
+    doc.querySelectorAll('table').forEach(function (table) {
+      var head = table.rows[0] ? Array.prototype.map.call(table.rows[0].cells, function (cell) { return cell.textContent; }) : [];
+      var column = head.findIndex(function (text) { return FOOT_HEADER.test(text) && /cm/i.test(text); });
+      if (column < 1) return;
+      Array.prototype.slice.call(table.rows, 1).forEach(function (row) {
+        var eu = row.cells[0] && shoeNumber(row.cells[0].textContent);
+        var cm = row.cells[column] && parseFloat(row.cells[column].textContent.replace(',', '.'));
+        if (eu && cm && !feet.table[eu]) feet.table[eu] = cm;
+      });
+    });
+    return feet;
+  }
+
+  function shoes(values, html) {
+    var list = values.map(function (raw) {
+      var value = String(raw).match(FOOT_VALUE);
+      if (value) return { raw: raw, code: shoeNumber(value[1]), foot: Number(value[2].replace(',', '.')) };
+      var plain = String(raw).match(PLAIN_SHOE);
+      return plain ? { raw: raw, code: shoeNumber(plain[1]), foot: null } : null;
+    });
+    if (list.length < 2 || !list.every(Boolean)) return null;
+    if (list.some(function (item) { return !item.foot; })) {
+      var feet = descriptionFeet(html);
+      var covers = function (map) { return list.every(function (item) { return map[item.code]; }); };
+      var same = list.every(function (item) { return feet.eu[item.code] === feet.size[item.code]; });
+      var map = covers(feet.table) ? feet.table
+        : covers(feet.eu) && covers(feet.size) ? (same ? feet.eu : null)
+        : covers(feet.eu) ? feet.eu : covers(feet.size) ? feet.size : null;
+      if (!map) return null;
+      list.forEach(function (item) { item.foot = item.foot || map[item.code]; });
+    }
+    return list.sort(function (a, b) { return a.foot - b.foot || Number(a.code) - Number(b.code); });
+  }
+
   var styled = false;
   function addStyles() {
     if (styled) return;
@@ -112,7 +173,7 @@
     });
   }
 
-  window.sizeInfo = { LINE: LINE, list: entries, table: table, convert: convert };
+  window.sizeInfo = { LINE: LINE, list: entries, table: table, convert: convert, shoes: shoes, shoeNumber: shoeNumber };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { convert(); });
   else convert();

@@ -142,4 +142,11 @@
   </div>
 </div>
 <div class="mobile-quick-add-toast" data-qa-toast role="status" aria-live="polite" popover="manual"></div>
+{%- comment -%}
+  Longueur du pied des pointures (window.sizeInfo.shoes). Sur la fiche produit, size-info.js est déjà chargé par
+  layout/theme.liquid : chargé ici seulement sur les autres pages (une seule fois par page).
+{%- endcomment -%}
+{%- unless template.name == 'product' -%}
+  <script src="{{ 'size-info.js' | asset_url }}" defer></script>
+{%- endunless -%}
 <script src="{{ 'mobile-quick-add.js' | asset_url }}" defer></script>

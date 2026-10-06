@@ -286,6 +286,8 @@
       image: data.featured_image || null,
       collectionUrl: '',
       sizeChart: null,
+      // Description : vraie longueur du pied des pointures (tableau ou size_info, window.sizeInfo.shoes).
+      description: data.description || '',
       detailed: false,
       options: (data.options || []).map(function (option) {
         return {
@@ -554,17 +556,35 @@
     return html + '</div>' + errorMarkup(index) + '</div>';
   }
 
-  function sizeGroup(index, withFit, withGuide) {
+  // Pointures : longueur du pied en petit et conseil selon le pied (comme la fiche produit), seulement avec la vraie
+  // longueur de chaque pointure (window.sizeInfo.shoes, assets/size-info.js).
+  function shoeSizesOf(option) {
+    if (!window.sizeInfo || !window.sizeInfo.shoes) return null;
+    return window.sizeInfo.shoes(option.values.map(function (value) { return value.name; }), state.product.description);
+  }
+
+  function footText(cm) {
+    return Number(cm).toLocaleString(document.documentElement.lang || 'it', { maximumFractionDigits: 1 }) + ' cm';
+  }
+
+  function sizeGroup(index, withFit, withGuide, shoes) {
     var option = state.product.options[index];
-    var sizes = sortSizes(option.values);
+    var sizes = shoes || sortSizes(option.values);
     state.sizes[index] = sizes;
     var numeric = sizes.every(function (size) { return !size.lo && /^\d+([.,]\d+)?$/.test(size.code); });
     var wide = sizes.some(function (size) { return String(size.code).length > 6; });
-    var layout = sizes.length === 1 ? ' one' : wide ? ' wide' : numeric ? ' num' : '';
-    var label = optionLabel(option);
+    var layout = shoes ? ' shoe' : sizes.length === 1 ? ' one' : wide ? ' wide' : numeric ? ' num' : '';
+    var label = shoes ? T('pdp_sz_shoe_label') : optionLabel(option);
     var link = '';
     var extra = '';
-    if (withFit) {
+    if (withFit && shoes) {
+      link = '<button type="button" class="qa-link" data-qa-fit-toggle aria-expanded="false">' + RULER_ICON + '<span>' + escapeHtml(T('qa_find_size')) + '</span></button>';
+      extra = '<div class="qa-fit" data-qa-fit><div inert><div class="box">'
+        + '<label>' + escapeHtml(T('pdp_sz_your_foot'))
+        + '<input type="number" inputmode="decimal" min="15" max="35" step="0.1" placeholder="'
+        + escapeHtml((24).toLocaleString(document.documentElement.lang || 'it', { minimumFractionDigits: 1 })) + '" data-qa-height>cm</label>'
+        + '<p data-qa-fit-result>' + T('pdp_sz_shoe_hint_html') + '</p></div></div></div>';
+    } else if (withFit) {
       link = '<button type="button" class="qa-link" data-qa-fit-toggle aria-expanded="false">' + RULER_ICON + '<span>' + escapeHtml(T('qa_find_size')) + '</span></button>';
       extra = '<div class="qa-fit" data-qa-fit><div inert><div class="box">'
         + '<label>' + escapeHtml(T('qa_your_height'))
@@ -615,6 +635,7 @@
     }
     state.sizes = {};
     state.fitIndex = -1;
+    state.fitShoe = false;
     state.rec = null;
     state.colsAll = false;
     if (hasOptions(product)) {
@@ -627,14 +648,16 @@
         // Options à une seule valeur ("Ships From"…) : choisies d'office, pas affichées.
         if (option.values.length === 1) return;
         var size = SIZE_OPTION.test(option.name);
-        var ranged = size && !fitShown && option.values.some(function (value) { return parseSize(value.name).lo; });
+        var shoes = size ? shoeSizesOf(option) : null;
+        var ranged = size && !fitShown && (Boolean(shoes) || option.values.some(function (value) { return parseSize(value.name).lo; }));
         var guide = size && !ranged && !guideShown && Boolean(product.sizeChart);
         if (ranged) {
           fitShown = true;
           state.fitIndex = index;
+          state.fitShoe = Boolean(shoes);
         }
         if (guide) guideShown = true;
-        html += sizeGroup(index, ranged, guide);
+        html += sizeGroup(index, ranged, guide, shoes);
       });
     }
     el.options.innerHTML = html;
@@ -718,7 +741,7 @@
       var size = sizeInfo(index, name);
       button.disabled = !available && !checked;
       var sub = button.querySelector('[data-qa-sub]');
-      setText(sub, size.lo ? size.lo + '–' + size.hi + ' cm' : size.kg ? size.kg : (!available ? T('qa_size_sold_out') : ''));
+      setText(sub, size.foot ? footText(size.foot) : size.lo ? size.lo + '–' + size.hi + ' cm' : size.kg ? size.kg : (!available ? T('qa_size_sold_out') : ''));
       sub.hidden = !sub.textContent;
       var old = button.querySelector('.bdg');
       var badge = available ? sizeBadge(index, name) : null;
@@ -739,7 +762,7 @@
         label.className = '';
       } else {
         var size = sizeInfo(index, value);
-        setText(label, size.code + (size.lo ? ' · ' + size.lo + '–' + size.hi + ' cm' : size.kg ? ' · ' + size.kg : ''));
+        setText(label, size.code + (size.foot ? ' · ' + T('pdp_sz_foot', { foot: footText(size.foot) }) : size.lo ? ' · ' + size.lo + '–' + size.hi + ' cm' : size.kg ? ' · ' + size.kg : ''));
         label.className = 'pick';
       }
     });
@@ -1272,8 +1295,40 @@
   }
 
   /* ---------- "Trova la tua taglia" ---------- */
+  // Pointures : la 1re (disponible) dont la longueur couvre le pied ; à 1,5 mm près de la limite, la suivante aussi.
+  function updateShoeFit(input, result) {
+    var foot = parseFloat(String(input.value).replace(',', '.'));
+    var sizes = state.sizes[state.fitIndex] || [];
+    var available = sizes.filter(function (size) { return valueAvailable(state.fitIndex, size.raw); });
+    state.rec = null;
+    if (!foot || foot < 15 || !available.length) {
+      result.innerHTML = T('pdp_sz_shoe_hint_html');
+      paint();
+      return;
+    }
+    var best = available.find(function (size) { return size.foot >= foot - 0.05; });
+    var html;
+    if (!best) {
+      best = available[available.length - 1];
+      html = T('pdp_sz_foot_long_html', { max: escapeHtml(footText(sizes[sizes.length - 1].foot)), size: escapeHtml(best.code) });
+    } else if (foot < sizes[0].foot - 0.5) {
+      html = T('pdp_sz_foot_short_html', { size: escapeHtml(best.code) });
+    } else {
+      var next = available[available.indexOf(best) + 1];
+      html = T('pdp_sz_shoe_rec_html', { size: escapeHtml(best.code) })
+        + (best.foot - foot <= 0.15 && next ? ' · ' + escapeHtml(T('pdp_sz_shoe_edge', { size: next.code })) : '');
+    }
+    state.rec = best.raw;
+    result.innerHTML = html + (state.selected[state.fitIndex] === best.raw ? '' : ' <button type="button" data-qa-fit-pick="' + escapeHtml(best.raw) + '">' + escapeHtml(T('qa_fit_select', { size: best.code })) + '</button>');
+    paint();
+  }
+
   function updateFit(input) {
     var result = el.options.querySelector('[data-qa-fit-result]');
+    if (state.fitShoe) {
+      updateShoeFit(input, result);
+      return;
+    }
     var height = Number(input.value);
     state.rec = null;
     if (!height || height < 100) {

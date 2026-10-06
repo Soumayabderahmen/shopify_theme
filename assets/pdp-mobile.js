@@ -419,68 +419,17 @@
   var rangeText = function (size) {
     return (size.bare ? size.unit : size.lo + '–' + size.hi + ' ' + size.unit) + (size.extra ? ' · ' + size.extra : '');
   };
-  /* ---------- Pointures (prototype « pointures ») : vraie longueur du pied du produit, jamais inventée. Sources, dans
-     l'ordre : la valeur de la variante (« 39(Foot24.5cm) »), la ligne « size_info » de la description (longueur + pointure
-     EU, assets/size-info.js), le tableau « Lunghezza piede (cm) » de la description. Il faut une longueur pour chaque
-     pointure ; sinon la grille reste celle des tailles. ---------- */
-  var FOOT_VALUE = /^\s*(\d{2}(?:[.,]5)?)\s*\(\s*foot\s*(\d{2}(?:[.,]\d+)?)\s*cm\s*\)\s*$/i;
-  var FOOT_HEADER = /(lunghezza\s+(?:del\s+)?piede|foot\s*length|longueur\s+du\s+pied|fu(?:ß|ss)l(?:ä|a)nge|longitud\s+del\s+pie|voetlengte|lungimea\s+piciorului)/i;
+  /* ---------- Pointures (prototype « pointures ») : vraie longueur du pied du produit, jamais inventée (lecture partagée
+     avec l'ajout rapide : window.sizeInfo.shoes, assets/size-info.js). Sans longueur réelle pour chaque pointure, la grille
+     reste celle des tailles. ---------- */
   var shoeNumber = function (text) {
-    var match = String(text).match(/^\s*(\d{2}(?:[.,]5)?)(?!\d)/);
-    return match ? String(Number(match[1].replace(',', '.'))) : null;
+    return window.sizeInfo ? window.sizeInfo.shoeNumber(text) : null;
   };
-  // Longueurs du pied de la description, par source : tableau « Lunghezza piede (cm) », et colonnes « EU » et « size »
-  // du size_info (le fournisseur y met deux numérotations différentes : « size 39 » = « EU 38,5 »).
-  var descriptionFeet = function () {
-    var feet = { table: {}, eu: {}, size: {} };
-    var source = root.querySelector('[data-pdp-desc-src]');
-    if (!source) return feet;
-    var doc = source.content;
-    var line = Array.prototype.find.call(doc.querySelectorAll('p, div, li'), function (el) {
-      return window.sizeInfo && window.sizeInfo.LINE.test(el.textContent.trim());
-    });
-    (line && window.sizeInfo.list ? window.sizeInfo.list(line.textContent.trim()) : []).forEach(function (entry) {
-      var cm = entry.length && parseFloat(String(entry.length.cm).replace(',', '.'));
-      // Seulement un tableau de chaussures (avec équivalence EU) : ailleurs « length » est la longueur du vêtement.
-      var eu = cm && entry.countrySizeMap && shoeNumber(entry.countrySizeMap.EU);
-      if (!eu) return;
-      feet.eu[eu] = cm;
-      var size = shoeNumber(entry.size);
-      if (size) feet.size[size] = cm;
-    });
-    doc.querySelectorAll('table').forEach(function (table) {
-      var head = table.rows[0] ? Array.prototype.map.call(table.rows[0].cells, function (cell) { return cell.textContent; }) : [];
-      var column = head.findIndex(function (text) { return FOOT_HEADER.test(text) && /cm/i.test(text); });
-      if (column < 1) return;
-      Array.prototype.slice.call(table.rows, 1).forEach(function (row) {
-        var eu = row.cells[0] && shoeNumber(row.cells[0].textContent);
-        var cm = row.cells[column] && parseFloat(row.cells[column].textContent.replace(',', '.'));
-        if (eu && cm && !feet.table[eu]) feet.table[eu] = cm;
-      });
-    });
-    return feet;
-  };
-  // Pointures avec leur longueur réelle, triées. Une source n'est prise que si elle couvre toutes les pointures ; si les
-  // deux colonnes du size_info les couvrent avec des longueurs différentes, c'est ambigu : aucune longueur (null).
   var shoeSizes = function (sizes) {
-    var codes = sizes.map(function (size) {
-      var value = String(size.raw).match(FOOT_VALUE);
-      return value ? { code: shoeNumber(value[1]), foot: Number(value[2].replace(',', '.')) }
-        : /^\d{2}(?:[.,]5)?$/.test(size.code) ? { code: shoeNumber(size.code), foot: null } : null;
-    });
-    if (sizes.length < 2 || !codes.every(Boolean)) return null;
-    if (codes.some(function (item) { return !item.foot; })) {
-      var feet = descriptionFeet();
-      var covers = function (map) { return codes.every(function (item) { return map[item.code]; }); };
-      var same = function (a, b) { return codes.every(function (item) { return a[item.code] === b[item.code]; }); };
-      var map = covers(feet.table) ? feet.table
-        : covers(feet.eu) && covers(feet.size) ? (same(feet.eu, feet.size) ? feet.eu : null)
-        : covers(feet.eu) ? feet.eu : covers(feet.size) ? feet.size : null;
-      if (!map) return null;
-      codes.forEach(function (item) { item.foot = item.foot || map[item.code]; });
-    }
-    return sizes.map(function (size, i) { return { raw: size.raw, code: codes[i].code, foot: codes[i].foot, shoe: true }; })
-      .sort(function (a, b) { return a.foot - b.foot || Number(a.code) - Number(b.code); });
+    if (!window.sizeInfo || !window.sizeInfo.shoes) return null;
+    var source = root.querySelector('[data-pdp-desc-src]');
+    var list = window.sizeInfo.shoes(sizes.map(function (size) { return size.raw; }), source ? source.innerHTML : '');
+    return list && list.map(function (item) { return { raw: item.raw, code: item.code, foot: item.foot, shoe: true }; });
   };
   var footText = function (cm) {
     return Number(cm).toLocaleString(document.documentElement.lang || 'it', { maximumFractionDigits: 1 }) + ' cm';

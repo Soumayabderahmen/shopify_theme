@@ -957,6 +957,26 @@
   grid-template-columns: 1fr 1fr;
 }
 
+/* Pointures : grille de 5, pointure EU en gros, longueur du pied en petit (comme la fiche produit). */
+#mobile-quick-add .qa-sizes.shoe {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px 7px;
+}
+
+#mobile-quick-add .qa-sizes.shoe .qa-sz {
+  padding: 0 2px;
+  border-radius: 13px;
+}
+
+#mobile-quick-add .qa-sizes.shoe .qa-sz b {
+  font-size: 17px;
+}
+
+#mobile-quick-add .qa-sizes.shoe .qa-sz small {
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
 #mobile-quick-add .qa-sz {
   position: relative;
   flex-direction: column;
