@@ -785,7 +785,9 @@
       "pdp_sz_out_html": "Buiten de beschikbare maten ({min}–{max} {unit}). Dichtstbij: <b>{size}</b>",
       "pdp_sz_last": "Nog {count}",
       "pdp_sz_for_you": "Voor jou",
-      "pdp_sz_asian_html": "<b>Aziatische maten</b> · vallen kleiner uit dan Europese maten."
+      "pdp_sz_asian_html": "<b>Aziatische maten</b> · vallen kleiner uit dan Europese maten.",
+      "pdp_sz_label_asian": "{label} (Aziatisch)",
+      "pdp_sz_compare": "Vergelijk de echte maten van het product"
     },
     "pdp": {
       "gallery": "Productfoto's",

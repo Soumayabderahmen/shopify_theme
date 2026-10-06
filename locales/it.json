@@ -856,7 +856,9 @@
       "pdp_sz_out_html": "Fuori dalle taglie disponibili ({min}–{max} {unit}). Più vicina: <b>{size}</b>",
       "pdp_sz_last": "Ultimi {count}",
       "pdp_sz_for_you": "Per te",
-      "pdp_sz_asian_html": "<b>Taglie asiatiche</b> · vestono più piccole delle taglie europee."
+      "pdp_sz_asian_html": "<b>Taglie asiatiche</b> · vestono più piccole delle taglie europee.",
+      "pdp_sz_label_asian": "{label} (asiatica)",
+      "pdp_sz_compare": "Confronta le misure reali del prodotto"
     },
     "pdp": {
       "gallery": "Foto del prodotto",

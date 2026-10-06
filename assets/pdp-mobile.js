@@ -286,7 +286,8 @@
     var match = text.match(/(\d{2,3})\s*[-–~]\s*(\d{2,3})\s*\)?\s*(kg|cm)?(?![a-z])/i);
     if (!match) {
       // "Asian M" sans plage : « M » sur le bouton, « taglie asiatiche » dit une seule fois au-dessus.
-      var plain = text.match(/^(?:asian|asia|chn|china)(?:\s*size)?\s+(\S+)$/i);
+      // "Asian M", "CHN size XL", "4XL Asian size".
+      var plain = text.match(/^(?:asian|asia|chn|china)(?:\s*size)?\s+(\S+)$/i) || text.match(/^(\S+)\s+(?:asian|asia|chn|china)(?:\s*size)?$/i);
       if (plain && sizeRank(plain[1]) !== null) return { raw: raw, code: plain[1].toUpperCase() };
       // Pointures "EU:42", "US 9.5" : « 42 » en gros, « EU » en petit.
       var shoe = text.match(/^(EU|US|UK|CN|JP|BR)\s*[:\-]?\s*(\d{1,2}(?:[.,]5)?)$/i);
@@ -370,13 +371,18 @@
     if (ranged.length) {
       grid.classList.add('pdp-m__sz--ranged');
       // « Dimensione » avec de vraies tailles : libellé « Taglia » et guide des tailles visibles.
-      var label = block.querySelector('[data-pdp-option-label]');
-      if (label && block.getAttribute('data-size-label')) label.textContent = block.getAttribute('data-size-label');
+      if (!ui.asian && optionLabel && block.getAttribute('data-size-label')) optionLabel.textContent = block.getAttribute('data-size-label');
       var guide = block.querySelector('[data-pdp-size-guide]');
       if (guide) guide.hidden = false;
     }
     var unit = ranged.length && ranged.every(function (size) { return size.unit === ranged[0].unit; }) ? ranged[0].unit : null;
-    if (!unit && sizes.some(function (size) { return /\b(asian|asia|chn|china)\b/i.test(size.raw); })) {
+    // Seulement quand les valeurs du produit le disent (« Asian L… », « CHN XL… ») : « Taglia (asiatica) ».
+    ui.asian = sizes.some(function (size) { return /\b(asian|asia|chn|china)\b/i.test(size.raw); });
+    var optionLabel = block.querySelector('[data-pdp-option-label]');
+    if (ui.asian && optionLabel && block.getAttribute('data-size-label')) {
+      optionLabel.textContent = T('pdp_sz_label_asian', { label: block.getAttribute('data-size-label') });
+    }
+    if (!unit && ui.asian) {
       var note = document.createElement('div');
       note.className = 'pdp-m__asn';
       note.innerHTML = '<div class="pdp-m__asn-h">' + INFO_ICON + '<span>' + T('pdp_sz_asian_html') + '</span></div>';
@@ -886,10 +892,27 @@
     var table = descBox.querySelector('[data-pdp-section="size"] .pdp-m__tw table');
     if (!table) return;
     var values = selectedValues();
+    var current = sizeUi && sizeUi.byRaw[values[sizeUi.index]];
     Array.prototype.forEach.call(table.rows, function (row, r) {
       var label = row.cells[0] ? row.cells[0].textContent.trim() : '';
-      row.classList.toggle('is-selected', r > 0 && values.indexOf(label) !== -1);
+      var same = values.indexOf(label) !== -1 || Boolean(current && parseSize(label).code === current.code);
+      row.classList.toggle('is-selected', r > 0 && same);
     });
+  };
+  // Encadré des tailles : lien vers le vrai tableau des mesures du produit (fournisseur ou description),
+  // seulement s'il existe, pour comparer avec les mesures d'un vêtement européen.
+  var addMeasuresLink = function () {
+    var box = sizeUi && sizeUi.block.querySelector('.pdp-m__asn');
+    if (!box || !descBox || !descBox.querySelector('[data-pdp-section="size"] table')) return;
+    var link = document.createElement('button');
+    link.type = 'button';
+    link.className = 'pdp-m__asn-link';
+    link.innerHTML = escapeText(T('pdp_sz_compare')) + ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
+    link.addEventListener('click', function () {
+      highlightSize();
+      if (openDescTab) openDescTab('size');
+    });
+    box.appendChild(link);
   };
 
   // Visionneuse des photos de la description.
@@ -926,6 +949,7 @@
   };
 
   buildDescription();
+  addMeasuresLink();
 
   /* ---------- Avis : le bloc de l'app d'avis (Ali Reviews) est placé dans la section « Recensioni » ---------- */
   var reviewsSlot = root.querySelector('[data-pdp-reviews-slot]');

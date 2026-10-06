@@ -767,7 +767,9 @@
       "pdp_sz_out_html": "Außerhalb der verfügbaren Größen ({min}–{max} {unit}). Am nächsten: <b>{size}</b>",
       "pdp_sz_last": "Nur noch {count}",
       "pdp_sz_for_you": "Für dich",
-      "pdp_sz_asian_html": "<b>Asiatische Größen</b> · fallen kleiner aus als europäische Größen."
+      "pdp_sz_asian_html": "<b>Asiatische Größen</b> · fallen kleiner aus als europäische Größen.",
+      "pdp_sz_label_asian": "{label} (asiatisch)",
+      "pdp_sz_compare": "Echte Maße des Produkts vergleichen"
     },
     "pdp": {
       "gallery": "Produktfotos",
