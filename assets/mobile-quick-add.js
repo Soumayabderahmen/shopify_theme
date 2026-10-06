@@ -247,19 +247,29 @@
     return many ? 4 + Number(many[1]) : null;
   }
 
-  // Tri S → M → L → XL → XXL, ou numérique (pointures « 38. », « EU:38 », longueurs) ; sinon l'ordre de la boutique.
+  // Repère de tri : lettre de taille (« XS(26) », « XS（old） ») ou premier nombre (« Eu:38 », « 38. », « 43(Foot26.5cm) »,
+  // « 47 1/3 », « US30-IT46 », « 29 Waist 73cm »). Les lettres collées au nombre font partie du repère : « 12M » (mois)
+  // et « 3T » (années) ne sont pas mélangés.
+  function orderKey(size) {
+    var rank = sizeRank(size.code);
+    if (rank !== null) return { kind: 'rank', value: rank };
+    var text = String(size.raw).trim().replace(/^(?:asian|asia|chn|china)\s+(?:sizes?\s+)?/i, '');
+    var letter = text.match(/^(\d{0,2}X{0,6}[SL]|M)(?![a-z])/i);
+    if (letter && sizeRank(letter[1]) !== null) return { kind: 'rank', value: sizeRank(letter[1]) };
+    var number = text.match(/(\d+(?:[.,]\d+)?)(?:\s+(\d)\/(\d))?([a-z]{0,4})/i);
+    if (!number) return null;
+    return { kind: 'n' + number[4].toLowerCase(), value: parseFloat(number[1].replace(',', '.')) + (number[2] ? number[2] / number[3] : 0) };
+  }
+
+  // Tri par repère quand toutes les tailles ont le même type (S → M → XL…, ou numérique) ; sinon l'ordre de la boutique.
   function sortSizes(values) {
-    return values.map(function (value) { return parseSize(value.name); }).sort(function (a, b) {
-      var rankA = sizeRank(a.code);
-      var rankB = sizeRank(b.code);
-      if (rankA !== null && rankB !== null) return rankA - rankB;
-      var numberA = String(a.code).match(/\d+(?:[.,]\d+)?/);
-      var numberB = String(b.code).match(/\d+(?:[.,]\d+)?/);
-      if (numberA && numberB && String(a.code).replace(numberA[0], '#').toUpperCase() === String(b.code).replace(numberB[0], '#').toUpperCase()) {
-        return parseFloat(numberA[0].replace(',', '.')) - parseFloat(numberB[0].replace(',', '.'));
-      }
-      return 0;
-    });
+    var sizes = values.map(function (value) { return parseSize(value.name); });
+    var keys = sizes.map(orderKey);
+    var kind = keys[0] && keys[0].kind;
+    if (!kind || !keys.every(function (key) { return key && key.kind === kind; })) return sizes;
+    return sizes.map(function (size, index) { return { size: size, key: keys[index].value, index: index }; })
+      .sort(function (a, b) { return a.key - b.key || a.index - b.index; })
+      .map(function (entry) { return entry.size; });
   }
 
   /* ---------- Données ----------

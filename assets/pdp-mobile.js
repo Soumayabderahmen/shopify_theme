@@ -391,22 +391,30 @@
     }
     return { raw: raw, code: code || lo + '–' + hi, lo: lo, hi: hi, unit: unit, bare: !code, extra: [height && unit === 'kg' ? height[1] + ' cm' : '', pounds ? pounds[1] + ' lbs' : ''].filter(Boolean).join(' · ') };
   };
-  // Ordre logique : par plage quand toutes en ont une, sinon S → M → L → XL…, sinon numérique, sinon ordre de la boutique.
+  // Repère de tri : lettre de taille (« XS(26) », « XS（old） ») ou premier nombre (« 43(Foot26.5cm) », « 47 1/3 »,
+  // « US30-IT46 », « 29 Waist 73cm », « Asian Sizes 38 »). Les lettres collées au nombre font partie du repère :
+  // « 12M » (mois) et « 3T » (années) ne sont pas mélangés.
+  var orderKey = function (size) {
+    var rank = sizeRank(size.code);
+    if (rank !== null) return { kind: 'rank', value: rank };
+    var text = String(size.raw).trim().replace(/^(?:asian|asia|chn|china)\s+(?:sizes?\s+)?/i, '');
+    var letter = text.match(/^(\d{0,2}X{0,6}[SL]|M)(?![a-z])/i);
+    if (letter && sizeRank(letter[1]) !== null) return { kind: 'rank', value: sizeRank(letter[1]) };
+    var number = String(/\d/.test(size.code) ? size.code : text).match(/(\d+(?:[.,]\d+)?)(?:\s+(\d)\/(\d))?([a-z]{0,4})/i);
+    if (!number) return null;
+    return { kind: 'n' + number[4].toLowerCase(), value: parseFloat(number[1].replace(',', '.')) + (number[2] ? number[2] / number[3] : 0) };
+  };
+  // Ordre logique : par plage quand toutes en ont une, sinon par repère quand toutes ont le même type ; sinon ordre de la boutique.
   var sortSizes = function (sizes) {
-    var ranged = sizes.every(function (size) { return size.lo; });
-    return sizes.slice().sort(function (a, b) {
-      if (ranged) return a.lo - b.lo || a.hi - b.hi;
-      var rankA = sizeRank(a.code);
-      var rankB = sizeRank(b.code);
-      if (rankA !== null && rankB !== null) return rankA - rankB;
-      // Même format avec un nombre ("38", "EU:38", "6T") : ordre numérique.
-      var numberA = String(a.code).match(/\d+(?:[.,]\d+)?/);
-      var numberB = String(b.code).match(/\d+(?:[.,]\d+)?/);
-      if (numberA && numberB && String(a.code).replace(numberA[0], '#') === String(b.code).replace(numberB[0], '#')) {
-        return parseFloat(numberA[0].replace(',', '.')) - parseFloat(numberB[0].replace(',', '.'));
-      }
-      return 0;
-    });
+    if (sizes.every(function (size) { return size.lo; })) {
+      return sizes.slice().sort(function (a, b) { return a.lo - b.lo || a.hi - b.hi; });
+    }
+    var keys = sizes.map(orderKey);
+    var kind = keys[0] && keys[0].kind;
+    if (!kind || !keys.every(function (key) { return key && key.kind === kind; })) return sizes.slice();
+    return sizes.map(function (size, index) { return { size: size, key: keys[index].value, index: index }; })
+      .sort(function (a, b) { return a.key - b.key || a.index - b.index; })
+      .map(function (entry) { return entry.size; });
   };
   var rangeText = function (size) {
     return (size.bare ? size.unit : size.lo + '–' + size.hi + ' ' + size.unit) + (size.extra ? ' · ' + size.extra : '');
@@ -435,8 +443,15 @@
     var buttons = Array.prototype.slice.call(grid.querySelectorAll('[data-value]'));
     var sizes = sortSizes(buttons.map(function (button) { return parseSize(button.getAttribute('data-value')); }));
     var ranged = sizes.filter(function (size) { return size.lo; });
-    // Valeurs longues sans plage (ex. dimensions d'un sac) : on garde les puces actuelles.
-    if (!ranged.length && !sizes.every(function (size) { return String(size.code).length <= 5; })) return;
+    // Valeurs longues sans plage (« 43(Foot26.5cm) », « 29 Waist 73cm », dimensions d'un sac) : puces et libellés
+    // d'origine gardés, seulement remis dans l'ordre logique (ordre de la boutique si aucun ordre sûr).
+    if (!ranged.length && !sizes.every(function (size) { return String(size.code).length <= 5; })) {
+      sizes.forEach(function (size) {
+        var chip = buttons.find(function (item) { return item.getAttribute('data-value') === size.raw; });
+        if (chip) grid.appendChild(chip);
+      });
+      return;
+    }
     var ui = { block: block, grid: grid, sizes: sizes, byRaw: {}, index: Number(block.getAttribute('data-option-index')), rec: null };
     // Deux valeurs différentes affichées pareil (doublon « Asian 3XL 77-83KG » / « Asian 3XL 77-83KG 1 ») : libellé complet.
     var shown = function (size) { return size.code + '|' + (size.lo ? rangeText(size) : size.note || ''); };
