@@ -320,7 +320,8 @@
       var index = Number(block.getAttribute('data-option-index'));
       var value = selected[index];
       var name = block.querySelector('[data-pdp-option-name]');
-      if (name && value) name.textContent = value;
+      // Couleurs : nom affiché sans le code fournisseur répété (setupColors) ; sinon la valeur telle quelle.
+      if (name && value) name.textContent = (block.pdpNames && block.pdpNames[value]) || value;
       block.querySelectorAll('[data-value]').forEach(function (button) {
         button.setAttribute('aria-checked', button.getAttribute('data-value') === value ? 'true' : 'false');
         // Épuisé avec les autres options choisies : barré (comme le prototype).
@@ -720,6 +721,79 @@
   };
   setupSize();
 
+  /* ---------- Couleurs (comme l'ajout rapide) : noms sans le code fournisseur répété, « Vedi tutti » en grille,
+     couleur choisie visible dans la rangée, aperçu de sa vraie photo quand la galerie est hors de l'écran. ---------- */
+  var colorRows = optionsCard ? Array.prototype.slice.call(optionsCard.querySelectorAll('.pdp-m__sw')) : [];
+  var centerChecked = function (list) {
+    var checked = list.querySelector('[aria-checked="true"]');
+    if (checked && !list.classList.contains('is-all')) list.scrollLeft = checked.offsetLeft - (list.clientWidth - checked.offsetWidth) / 2;
+  };
+  colorRows.forEach(function (list) {
+    var block = list.closest('[data-option-index]');
+    var buttons = Array.prototype.slice.call(list.querySelectorAll('[data-value]'));
+    var values = buttons.map(function (button) { return button.getAttribute('data-value'); });
+    block.pdpNames = window.sizeInfo && window.sizeInfo.shortNames ? window.sizeInfo.shortNames(values) : {};
+    buttons.forEach(function (button) {
+      var value = button.getAttribute('data-value');
+      var label = button.querySelector('.pdp-m__n');
+      if (label) label.textContent = block.pdpNames[value] || value;
+      button.setAttribute('aria-label', value);
+    });
+    var toggle = block.querySelector('[data-pdp-colors-all]');
+    if (toggle) {
+      var text = toggle.querySelector('span');
+      var more = text.textContent;
+      toggle.addEventListener('click', function () {
+        var open = toggle.getAttribute('aria-expanded') !== 'true';
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        list.classList.toggle('is-all', open);
+        text.textContent = open ? toggle.getAttribute('data-less') : more;
+        centerChecked(list);
+      });
+    }
+    centerChecked(list);
+  });
+  // Titre de variante de la barre d'achat : couleur sans le code fournisseur répété, comme dans la carte des options.
+  var variantLabel = function (variant) {
+    return variant.options ? variant.options.map(function (value, i) {
+      var block = optionsCard && optionsCard.querySelector('[data-option-index="' + i + '"]');
+      return (block && block.pdpNames && block.pdpNames[value]) || value;
+    }).join(' / ') : (variant.title || '');
+  };
+  var buyVariant = root.querySelector('[data-pdp-buy-variant]');
+  if (buyVariant && colorRows.length && currentVariant()) buyVariant.textContent = variantLabel(currentVariant());
+
+  var gallery = root.querySelector('.pdp-m__gal');
+  var preview = null;
+  var previewTimer = null;
+  var showColorPreview = function (button) {
+    if (!gallery || gallery.getBoundingClientRect().bottom > 80) return;
+    var variant = chosenVariant || currentVariant();
+    var slide = variant && variant.media && slides && slides.querySelector('[data-media-id="' + variant.media + '"] img');
+    var swatch = button.querySelector('img');
+    var src = slide ? slide.currentSrc || slide.src : swatch ? swatch.currentSrc || swatch.src : '';
+    if (!src) return;
+    if (!preview) {
+      preview = document.createElement('button');
+      preview.type = 'button';
+      preview.className = 'pdp-m__cprev';
+      preview.innerHTML = '<img alt="" loading="eager" decoding="async"><span></span>';
+      preview.addEventListener('click', function () {
+        preview.classList.remove('is-shown');
+        gallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      root.appendChild(preview);
+    }
+    var block = button.closest('[data-option-index]');
+    var value = button.getAttribute('data-value');
+    preview.querySelector('img').src = src;
+    preview.querySelector('span').textContent = (block.pdpNames && block.pdpNames[value]) || value;
+    preview.setAttribute('aria-label', preview.querySelector('span').textContent);
+    preview.classList.add('is-shown');
+    window.clearTimeout(previewTimer);
+    previewTimer = window.setTimeout(function () { preview.classList.remove('is-shown'); }, 2200);
+  };
+
   if (optionsCard) {
     optionsCard.addEventListener('click', function (event) {
       var button = event.target.closest('[data-value]');
@@ -733,6 +807,7 @@
       syncOptions();
       highlightSize();
       showVariant();
+      if (button.classList.contains('pdp-m__swb')) showColorPreview(button);
     });
     syncOptions();
   }
@@ -1348,7 +1423,7 @@
     highlightSize();
     updateTotals();
     if (buy) {
-      buy.querySelector('[data-pdp-buy-variant]').textContent = variant.title || '';
+      buy.querySelector('[data-pdp-buy-variant]').textContent = variantLabel(variant);
       buy.querySelector('[data-pdp-buy-price]').textContent = money(variant.price);
     }
     // Message officiel : Klarna le recalcule quand le montant change.

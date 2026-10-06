@@ -573,12 +573,30 @@ body.template-product {
 }
 
 #root .pdp-m .pdp-m__olab button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   color: var(--pm-blue);
   font-size: 12.5px;
   font-weight: 700;
+}
+
+/* Zone de tap au doigt (~40 px) sans changer la mise en page : le texte seul ne fait que 15 px de haut. */
+#root .pdp-m .pdp-m__olab button::before {
+  content: '';
+  position: absolute;
+  inset: -12px -10px;
+  z-index: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  opacity: 0;
+  transform: none;
 }
 
 .pdp-m__olab svg {
@@ -653,6 +671,93 @@ body.template-product {
   height: 18px;
   background: var(--pm-blue) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'><path d='m6 12.5 4 4 8-9'/></svg>") center / 12px no-repeat;
   border-radius: 50%;
+}
+
+/* Couleurs comme l'ajout rapide : « N colori », « Vedi tutti » = grille de 5, couleurs épuisées barrées. */
+.pdp-m__ccount {
+  margin-left: 6px;
+  color: #8a8ea3;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pdp-m__cv {
+  transition: transform 0.2s;
+}
+
+[aria-expanded='true'] > .pdp-m__cv {
+  transform: rotate(180deg);
+}
+
+.pdp-m__sw.is-all {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px 8px;
+  margin: 0;
+  padding: 4px 0 0;
+  overflow: visible;
+}
+
+#root .pdp-m .pdp-m__sw.is-all .pdp-m__swb {
+  width: auto;
+  min-width: 0;
+}
+
+.pdp-m__sw.is-all .pdp-m__im {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.pdp-m__swb.is-unavailable .pdp-m__im img {
+  opacity: 0.5;
+}
+
+.pdp-m__swb.is-unavailable .pdp-m__im::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 47%, #7a7e94 47% 53%, transparent 53%);
+}
+
+.pdp-m__swb.is-unavailable .pdp-m__n {
+  color: #a9acbc;
+  text-decoration: line-through;
+}
+
+/* Aperçu de la photo de la couleur choisie quand la galerie est hors de l'écran (un toucher y remonte). */
+#root .pdp-m .pdp-m__cprev {
+  position: fixed;
+  left: 50%;
+  bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  color: var(--pm-ink);
+  font-size: 13px;
+  font-weight: 800;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 14px 34px -12px rgb(22 18 63 / 45%), 0 0 0 1px rgb(22 18 63 / 8%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 12px);
+  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#root .pdp-m .pdp-m__cprev.is-shown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.pdp-m__cprev img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 12px;
 }
 
 .pdp-m__sz {

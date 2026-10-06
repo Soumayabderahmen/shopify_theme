@@ -134,6 +134,21 @@
     return list.sort(function (a, b) { return a.foot - b.foot || Number(a.code) - Number(b.code); });
   }
 
+  /* Noms affichés des valeurs d'option (couleurs : fiche produit et ajout rapide mobiles). Un code fournisseur répété devant
+     toutes les valeurs (« 1829-2 Champagne », « 1829-2 Silver ») est retiré de l'affichage seulement ; la valeur complète
+     reste celle envoyée au panier. Rien n'est retiré si le code n'a pas de chiffre (« Light Blue ») ou si deux noms
+     deviendraient identiques. Renvoie { valeur: nom affiché }. */
+  function shortNames(values) {
+    var names = {};
+    var words = values.map(function (value) { return String(value).trim().split(/\s+/); });
+    var code = words[0] && words[0][0];
+    var common = values.length > 1 && /\d/.test(code || '') && words.every(function (parts) { return parts.length > 1 && parts[0] === code; });
+    var short = values.map(function (value, i) { return common ? words[i].slice(1).join(' ') : String(value); });
+    var unique = short.every(function (name, i) { return short.indexOf(name) === i; });
+    values.forEach(function (value, i) { names[value] = unique ? short[i] : String(value); });
+    return names;
+  }
+
   var styled = false;
   function addStyles() {
     if (styled) return;
@@ -173,7 +188,7 @@
     });
   }
 
-  window.sizeInfo = { LINE: LINE, list: entries, table: table, convert: convert, shoes: shoes, shoeNumber: shoeNumber };
+  window.sizeInfo = { LINE: LINE, list: entries, table: table, convert: convert, shoes: shoes, shoeNumber: shoeNumber, shortNames: shortNames };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { convert(); });
   else convert();

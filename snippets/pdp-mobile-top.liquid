@@ -271,7 +271,20 @@
         -%}
         <div class="pdp-m__opt" data-option-index="{{ forloop.index0 }}"{% if is_size %} data-pdp-size data-size-label="{{ 'mobile.pdp.size' | t | escape }}"{% endif %}>
           <div class="pdp-m__olab">
-            <span><span data-pdp-option-label>{{ option_label }}</span>: <b data-pdp-option-name>{{ option.selected_value }}</b></span>
+            <span><span data-pdp-option-label>{{ option_label }}</span>: <b data-pdp-option-name>{{ option.selected_value }}</b>
+              {%- if is_color and option.values.size > 1 -%}
+                {%- comment -%} Nombre réel de couleurs (comme l'ajout rapide). {%- endcomment -%}
+                {%- liquid
+                  assign pm_colors_text = 'mobile.js.qa_colors_count' | t
+                  assign pm_colors_text = pm_colors_text | replace: '{count}', option.values.size
+                -%}
+                <span class="pdp-m__ccount">{{ pm_colors_text }}</span>
+              {%- endif -%}
+            </span>
+            {%- if is_color and option.values.size > 4 -%}
+              {%- comment -%} Couleurs cachées dans la rangée défilante : « Vedi tutti » les montre toutes en grille (assets/pdp-mobile.js). {%- endcomment -%}
+              <button type="button" data-pdp-colors-all aria-expanded="false" data-less="{{ 'mobile.js.show_less' | t | escape }}"><span>{{ 'mobile.js.qa_see_all' | t }}</span><svg class="pdp-m__cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+            {%- endif -%}
             {%- if is_size -%}
               <button type="button" data-pdp-size-guide{% if is_dimension %} hidden{% endif %}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="6" rx="1.5"/><path d="M7 9v3M11 9v2M15 9v3M19 9v2"/></svg>{{ 'mobile.pdp.size_guide' | t }}</button>
             {%- endif -%}

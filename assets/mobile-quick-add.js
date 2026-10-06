@@ -523,7 +523,7 @@
     return state.order.map(function (index) {
       var value = state.selected[index];
       if (value == null || product.options[index].values.length === 1) return null;
-      if (index === state.colorIndex) return value;
+      if (index === state.colorIndex) return colorNames(product.options[index])[value] || value;
       var code = sizeInfo(index, value).code;
       return withSizeWord && isSizeOption(index) ? T('qa_size_value', { size: code }) : code;
     }).filter(Boolean);
@@ -540,8 +540,18 @@
     return '<span class="im flat"' + (color ? ' style="--sw:' + escapeHtml(color) + '"' : '') + '></span>';
   }
 
+  // Noms affichés des couleurs, sans le code fournisseur répété (window.sizeInfo.shortNames, assets/size-info.js).
+  function colorNames(option) {
+    if (!option.names) {
+      var values = option.values.map(function (value) { return value.name; });
+      option.names = window.sizeInfo && window.sizeInfo.shortNames ? window.sizeInfo.shortNames(values) : {};
+    }
+    return option.names;
+  }
+
   function colorGroup(index) {
     var option = state.product.options[index];
+    var names = colorNames(option);
     var count = option.values.length;
     var html = '<div class="qa-grp" data-qa-group="' + index + '">'
       + '<div class="qa-lbl"><span>' + escapeHtml(optionLabel(option)) + '</span><b data-qa-value="' + index + '"></b>'
@@ -551,7 +561,7 @@
     option.values.forEach(function (value) {
       html += '<button type="button" class="qa-sw" role="radio" aria-checked="false" aria-label="' + escapeHtml(value.name) + '"'
         + ' data-qa-option="' + index + '" data-qa-value-name="' + escapeHtml(value.name) + '">'
-        + swatchMarkup(index, value) + '<small aria-hidden="true">' + escapeHtml(value.name) + '</small></button>';
+        + swatchMarkup(index, value) + '<small aria-hidden="true">' + escapeHtml(names[value.name] || value.name) + '</small></button>';
     });
     return html + '</div>' + errorMarkup(index) + '</div>';
   }
@@ -758,7 +768,7 @@
         setText(label, T('choose'));
         label.className = 'need';
       } else if (index === state.colorIndex) {
-        setText(label, value);
+        setText(label, colorNames(product.options[index])[value] || value);
         label.className = '';
       } else {
         var size = sizeInfo(index, value);
@@ -786,7 +796,7 @@
     if (showTag) {
       var colorValue = product.options[state.colorIndex].values.find(function (value) { return value.name === colorName; });
       el.tag.querySelector('i').style.setProperty('--sw', (colorValue && colorValue.color) || colorFromName(colorName) || '#ccc');
-      setText(el.tag.querySelector('span'), colorName);
+      setText(el.tag.querySelector('span'), colorNames(product.options[state.colorIndex])[colorName] || colorName);
     }
 
     // Prix d'abord (rouge si soldé) + "Risparmi €x".
@@ -1184,8 +1194,9 @@
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ items: [{ id: variant.id, quantity: quantity }] })
     }).then(function (response) {
-      return response.json().then(function (data) {
-        if (!response.ok) throw new Error(data.description || data.message || T('cart_add_error'));
+      // Réponse illisible (erreur 502, page HTML, coupure) : message traduit plutôt que l'erreur technique du navigateur.
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        if (!response.ok || !data.items) throw new Error(data.description || data.message || T('cart_add_error'));
         return data;
       });
     }).then(function () {
@@ -1204,11 +1215,13 @@
       });
     }).catch(function (error) {
       console.error(error);
+      // Coupure réseau (« Failed to fetch ») : message traduit.
+      var message = error instanceof TypeError ? T('cart_add_error') : error.message || T('cart_add_error');
       if (state && state.token === token) {
-        state.error = error.message || T('cart_add_error');
+        state.error = message;
         paint();
       }
-      showToast(error.message || T('cart_add_error'));
+      showToast(message);
     }).finally(function () {
       busy = false;
       el.add.classList.remove('is-busy');
