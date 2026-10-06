@@ -3107,6 +3107,13 @@
     animation-delay: 0.8s !important;
   }
 
+  /* L'animation change la largeur (recalcul à chaque image) : elle ne tourne que quand le chargeur est à l'écran
+     (classes is-watched / is-in-view posées par assets/mobile-temu-header.js), pas en permanence en bas de la page.
+     Un chargeur créé plus tard (non surveillé) garde son animation normale. */
+  #root article[id*="section_featured_collection"] .infinite-scroll-trigger.is-watched:not(.is-in-view) .infinite-scroll-loader .spinner-dot {
+    animation-play-state: paused !important;
+  }
+
   @keyframes mobile-loader-pill {
     0%, 45%, 100% {
       width: 8px;

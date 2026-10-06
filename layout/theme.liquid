@@ -35,17 +35,15 @@
     >
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-config" content="{{ 'browserconfig.xml' | asset_url }}">
-    {%- comment -%}dl-bc-v3{%- endcomment -%}
     {%- if template contains 'product' and product.metafields.deeplumen.ap_deployed.value == true -%}
-      <link rel="canonical" href="https://{{ request.host }}/a/shop/products/{{ product.handle }}">
-    {%- elsif template contains 'collection' and collection.metafields.deeplumen.ap_deployed.value == true -%}
-      <link rel="canonical" href="https://{{ request.host }}/a/shop/collections/{{ collection.handle }}">
-    {%- elsif template contains 'article' and article.metafields.deeplumen.ap_deployed.value == true -%}
-      <link rel="canonical" href="https://{{ request.host }}/a/shop/blogs/{{ article.handle }}">
-    {%- else -%}
-      <link rel="canonical" href="{{ canonical_url }}">
-    {%- endif -%}
-    {%- comment -%}/dl-bc{%- endcomment -%}
+  <link rel="canonical" href="https://{{ request.host }}/a/shop/products/{{ product.handle }}">
+{%- elsif template contains 'collection' and collection.metafields.deeplumen.ap_deployed.value == true -%}
+  <link rel="canonical" href="https://{{ request.host }}/a/shop/collections/{{ collection.handle }}">
+{%- elsif template contains 'article' and article.metafields.deeplumen.ap_deployed.value == true -%}
+  <link rel="canonical" href="https://{{ request.host }}/a/shop/blogs/{{ article.handle }}">
+{%- else -%}
+  <link rel="canonical" href="{{ canonical_url }}">
+{%- endif -%}
     {% unless settings.heading_font.system? -%}
       {%- assign heading_font_url = settings.heading_font | font_url -%}
       {{ heading_font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
@@ -312,6 +310,53 @@
       chaque carte). En début de <body>, comme avant après les CSS de l'en-tête, pour garder le même ordre.
     {%- endcomment -%}
     <link rel="stylesheet" href="{{ 'product-card.css' | asset_url }}">
+    {%- comment -%}
+      Badge remise des cartes (snippets/badge--discount-products.liquid) : styles et script une seule fois par page,
+      au lieu d'une copie dans chaque carte (24 cartes = ~115 Ko de HTML et 24 écouteurs identiques en moins).
+    {%- endcomment -%}
+    <link rel="stylesheet" href="{{ 'badge-discount-products.css' | asset_url }}">
+    <script>
+      (function () {
+        function formatMoney(cents) {
+          return (cents / 100).toLocaleString('{{ localization.language.iso_code }}' || 'en-US', {
+            style: 'currency',
+            currency:
+              (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) ||
+              '{{ cart.currency.iso_code }}',
+          });
+        }
+
+        document.addEventListener('variant:changed', function (e) {
+          var v = e.detail && e.detail.variant;
+          if (!v) return;
+
+          var wrap = document.getElementById('disc-badge-wrap');
+          var pctEl = document.getElementById('disc-badge-pct');
+          var savAmtEl = document.getElementById('disc-badge-savings-amount');
+          var eurAmt = document.getElementById('disc-badge-eur-amount');
+          if (!wrap) return;
+
+          var hasDiscount = v.compare_at_price && v.compare_at_price > v.price;
+
+          if (hasDiscount) {
+            var pct = Math.floor(((v.compare_at_price - v.price) * 100) / v.compare_at_price);
+            var savings = v.compare_at_price - v.price;
+
+            wrap.classList.remove('badge-wrap-3d--hidden');
+            wrap.setAttribute('aria-hidden', 'false');
+
+            if (pctEl) pctEl.textContent = pct;
+            if (eurAmt) eurAmt.textContent = formatMoney(savings);
+            if (savAmtEl) savAmtEl.textContent = formatMoney(savings);
+          } else {
+            wrap.classList.add('badge-wrap-3d--hidden');
+            wrap.setAttribute('aria-hidden', 'true');
+          }
+        });
+      })();
+    </script>
+    {%- comment -%} Choix automatique langue / pays : une seule fois par page (avant : 4 copies dans le header et le footer). {%- endcomment -%}
+    {%- render 'language-country-selector-script' -%}
     <div id="root">
       {%- render 'accessible-nav' -%}
       {%- sections 'header-group' -%}

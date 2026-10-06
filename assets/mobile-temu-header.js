@@ -2497,6 +2497,74 @@ function initHeroPaginationDots(attemptsLeft) {
   observer.observe(totalEl, { characterData: true, childList: true, subtree: true });
 }
 
+// Mobile : les sliders en défilement automatique (Swiper du thème, assets/scripts.js) s'arrêtent quand on ne les voit
+// pas — hors écran, ou cachés sous Categoria / ☰ / la recherche — et repartent dès qu'ils redeviennent visibles.
+// Chaque changement de diapo recalcule toute la page : inutile de le faire pour un slider que personne ne regarde.
+function initSliderAutoplayPause() {
+  if (!window.matchMedia('(max-width: 760px)').matches || !('IntersectionObserver' in window)) return;
+
+  var overlayClasses = ['mobile-categories-open', 'mobile-explore-open', 'mobile-search-open'];
+  var sliders = [];
+
+  function coveredByOverlay() {
+    return overlayClasses.some(function (className) { return document.body.classList.contains(className); });
+  }
+
+  // On ne relance que ce qu'on a arrêté nous-mêmes : un slider stoppé par le client (glissement) reste arrêté.
+  function update(item) {
+    var swiper = item.el.swiper;
+    if (!swiper || swiper.destroyed || !swiper.autoplay) return;
+    var shouldRun = item.visible && !coveredByOverlay();
+    if (!shouldRun && swiper.autoplay.running) {
+      swiper.autoplay.stop();
+      item.stoppedByUs = true;
+    } else if (shouldRun && item.stoppedByUs) {
+      item.stoppedByUs = false;
+      swiper.autoplay.start();
+    }
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      var item = sliders.find(function (slider) { return slider.el === entry.target; });
+      if (!item) return;
+      item.visible = entry.isIntersecting;
+      update(item);
+    });
+  });
+
+  function scan() {
+    document.querySelectorAll('.swiper-initialized').forEach(function (el) {
+      var swiper = el.swiper;
+      var autoplay = swiper && swiper.params && swiper.params.autoplay;
+      if (!autoplay || !(autoplay === true || autoplay.enabled)) return;
+      if (sliders.some(function (slider) { return slider.el === el; })) return;
+      sliders.push({ el: el, visible: true, stoppedByUs: false });
+      observer.observe(el);
+    });
+  }
+
+  new MutationObserver(function () { sliders.forEach(update); })
+    .observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+  // Les sliders sont créés par scripts.js (defer) : on les cherche une fois la page chargée.
+  if (document.readyState === 'complete') scan();
+  else window.addEventListener('load', scan, { once: true });
+  setTimeout(scan, 4000);
+
+  // Chargeur du défilement infini (sections featured collection) : son animation ne tourne qu'à l'écran
+  // (voir .infinite-scroll-trigger.is-in-view dans assets/mobile-temu-header.css).
+  var loaderObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      entry.target.classList.toggle('is-in-view', entry.isIntersecting);
+    });
+  }, { rootMargin: '100px 0px' });
+  document.querySelectorAll('.infinite-scroll-trigger').forEach(function (trigger) {
+    trigger.classList.add('is-watched');
+    loaderObserver.observe(trigger);
+  });
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initMobileTemuHeader, { once: true });
   document.addEventListener('DOMContentLoaded', initHeroPaginationDots, { once: true });
@@ -2504,3 +2572,4 @@ if (document.readyState === 'loading') {
   initMobileTemuHeader();
   initHeroPaginationDots();
 }
+initSliderAutoplayPause();
