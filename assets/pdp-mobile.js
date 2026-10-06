@@ -200,6 +200,27 @@
      (data-pdp-variants) ; elle est réécrite jusqu'à ce que le thème ait remplacé son formulaire avec la même. */
   var chosenVariant = null;
   var chosenForm = null;
+  // Quantité choisie (définie plus bas, avec les boutons − / +) ; vide tant qu'elle n'est pas prête.
+  var applyQuantity = function () {};
+  // Champs cachés ajoutés au formulaire par les apps (ex. Ali Reviews : properties[_visitor_id], pour relier l'achat
+  // au visiteur) : ajoutés une seule fois au chargement, ils disparaissaient quand le thème refait son formulaire.
+  // On les retient et on les remet dans le nouveau formulaire.
+  var appFields = {};
+  var keepAppFields = function () {
+    var form = currentForm();
+    if (!form) return;
+    form.querySelectorAll('input[type="hidden"][name^="properties["], input[type="hidden"][name^="attributes["]').forEach(function (input) {
+      if (input.value) appFields[input.name] = input.value;
+    });
+    Object.keys(appFields).forEach(function (name) {
+      if (form.querySelector('[name="' + name.replace(/"/g, '\\"') + '"]')) return;
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = appFields[name];
+      form.appendChild(input);
+    });
+  };
   var currentForm = function () {
     return document.querySelector('#main-product form[action*="/cart/add"]');
   };
@@ -247,6 +268,8 @@
     window.setInterval(function () {
       if (document.hidden) return;
       applyChosenVariant();
+      applyQuantity();
+      keepAppFields();
       showVariant();
     }, 250);
   }
@@ -589,8 +612,18 @@
   var ctaText = root.querySelector('[data-pdp-cta-text]');
   var quantityInput = function () { return document.querySelector('#main-product form[action*="/cart/add"] [name="quantity"]'); };
   var quantity = function () {
+    if (wantedQty) return wantedQty;
     var input = quantityInput();
     return Math.max(1, parseInt(input ? input.value : '1', 10) || 1);
+  };
+  // Quantité choisie ici : le thème remet son champ à 1 quand il recharge son formulaire après un choix de
+  // variante (ajout de 1 article alors que l'écran en affichait 2). Elle est réécrite dans le formulaire.
+  var wantedQty = 0;
+  applyQuantity = function () {
+    var input = quantityInput();
+    if (!wantedQty || !input || String(input.value) === String(wantedQty)) return;
+    input.value = String(wantedQty);
+    if (dynamicSync) dynamicSync();
   };
   var updateTotals = function () {
     var variant = currentVariant();
@@ -601,7 +634,8 @@
     button.addEventListener('click', function () {
       var input = quantityInput();
       if (!input) return;
-      input.value = String(Math.max(1, quantity() + Number(button.getAttribute('data-pdp-qty'))));
+      wantedQty = Math.max(1, quantity() + Number(button.getAttribute('data-pdp-qty')));
+      input.value = String(wantedQty);
       input.dispatchEvent(new Event('input', { bubbles: true }));
       input.dispatchEvent(new Event('change', { bubbles: true }));
       updateTotals();
@@ -611,6 +645,8 @@
   // rechargé). Variante choisie épuisée : rien n'est ajouté (son bouton est déjà barré), retour aux options.
   var addToCart = function () {
     applyChosenVariant();
+    applyQuantity();
+    keepAppFields();
     if (dynamicSync) dynamicSync();
     if (chosenVariant && !chosenVariant.available) {
       var options = document.getElementById('pdp-variants');
