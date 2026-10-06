@@ -356,8 +356,8 @@
     var text = String(raw).trim();
     var size = { raw: raw, code: text };
     if (/\d+(?:\.\d+)?\s*[-–x×*]\s*\d+(?:\.\d+)?\s*[-–x×*]\s*\d+/i.test(text)) return size;
-    // Unité après le second nombre ("61-70KG") ou collée au premier ("65KG-75KG").
-    var match = text.match(/(\d{2,3})\s*(kg|cm)?\s*[-–~]\s*(\d{2,3})\s*\)?\s*(kg|cm)?(?![a-z])/i);
+    // Unité après le second nombre ("61-70KG") ou collée au premier ("65KG-75KG") ; décimales gardées ("75-82.5KG").
+    var match = text.match(/(\d{2,3}(?:[.,]\d)?)\s*(kg|cm)?\s*[-–~]\s*(\d{2,3}(?:[.,]\d)?)\s*\)?\s*(kg|cm)?(?![a-z\d])/i);
     if (!match) {
       // "Asian M" sans plage : « M » sur le bouton, « taglie asiatiche » dit une seule fois au-dessus.
       // "Asian M", "CHN size XL", "4XL Asian size".
@@ -367,14 +367,20 @@
       var shoe = text.match(/^(EU|US|UK|CN|JP|BR)\s*[:\-]?\s*(\d{1,2}(?:[.,]5)?)$/i);
       return shoe ? { raw: raw, code: shoe[2], note: shoe[1].toUpperCase() } : size;
     }
-    var lo = Number(match[1]);
-    var hi = Number(match[3]);
+    var lo = Number(match[1].replace(',', '.'));
+    var hi = Number(match[3].replace(',', '.'));
     if (!(hi > lo)) return size;
-    var rest = (text.slice(0, match.index) + ' ' + text.slice(match.index + match[0].length))
-      .replace(/\d{2,3}\s*cm/gi, ' ')
+    var outside = text.slice(0, match.index) + ' ' + text.slice(match.index + match[0].length);
+    // Plage de poids : hauteur ("M (160cm 50-60kg)", "175-L(45-55KG") et livres ("XXL 60-80Kg 175lbs") gardées sous la plage.
+    // Plage en cm ("150 for 140-145cm") : le nombre à 3 chiffres est le nom de la taille, pas une hauteur.
+    var weightRange = /kg/i.test(match[4] || match[2] || '') || (!(match[4] || match[2]) && hi <= 130);
+    var height = weightRange ? outside.match(/(\d{3})\s*cm/i) || outside.match(/(?:^|[\s(\-–])(\d{3})(?=[\s)\-–]|$)/) : null;
+    var pounds = outside.match(/(\d{2,3})\s*lbs?\b/i);
+    var rest = outside
+      .replace(/\d{2,3}\s*(?:cm|lbs?)\b/gi, ' ')
       .replace(SIZE_NOISE, ' ')
       .replace(/[()[\]{}:,]/g, ' ');
-    var parts = rest.split(/[\s\-–]+/).filter(Boolean);
+    var parts = rest.split(/[\s\-–]+/).filter(function (part) { return part && !(height && part === height[1]); });
     var letter = parts.filter(function (part) { return sizeRank(part) !== null; })[0];
     var code = letter ? letter.toUpperCase() : parts.join(' ');
     var unit = match[4] || match[2] ? (match[4] || match[2]).toLowerCase() : null;
@@ -383,7 +389,7 @@
       if (!letter) return size;
       unit = hi > 130 ? 'cm' : 'kg';
     }
-    return { raw: raw, code: code || lo + '–' + hi, lo: lo, hi: hi, unit: unit, bare: !code };
+    return { raw: raw, code: code || lo + '–' + hi, lo: lo, hi: hi, unit: unit, bare: !code, extra: [height && unit === 'kg' ? height[1] + ' cm' : '', pounds ? pounds[1] + ' lbs' : ''].filter(Boolean).join(' · ') };
   };
   // Ordre logique : par plage quand toutes en ont une, sinon S → M → L → XL…, sinon numérique, sinon ordre de la boutique.
   var sortSizes = function (sizes) {
@@ -403,7 +409,7 @@
     });
   };
   var rangeText = function (size) {
-    return size.bare ? size.unit : size.lo + '–' + size.hi + ' ' + size.unit;
+    return (size.bare ? size.unit : size.lo + '–' + size.hi + ' ' + size.unit) + (size.extra ? ' · ' + size.extra : '');
   };
   var readFit = function () {
     try { return JSON.parse(window.localStorage.getItem(FIT_KEY)) || {}; } catch (error) { return {}; }
@@ -432,12 +438,18 @@
     // Valeurs longues sans plage (ex. dimensions d'un sac) : on garde les puces actuelles.
     if (!ranged.length && !sizes.every(function (size) { return String(size.code).length <= 5; })) return;
     var ui = { block: block, grid: grid, sizes: sizes, byRaw: {}, index: Number(block.getAttribute('data-option-index')), rec: null };
+    // Deux valeurs différentes affichées pareil (doublon « Asian 3XL 77-83KG » / « Asian 3XL 77-83KG 1 ») : libellé complet.
+    var shown = function (size) { return size.code + '|' + (size.lo ? rangeText(size) : size.note || ''); };
+    var shownCount = {};
+    sizes.forEach(function (size) { shownCount[shown(size)] = (shownCount[shown(size)] || 0) + 1; });
     sizes.forEach(function (size) {
       ui.byRaw[size.raw] = size;
       var button = buttons.find(function (item) { return item.getAttribute('data-value') === size.raw; });
       button.setAttribute('aria-label', size.raw);
       var small = size.lo ? rangeText(size) : size.note;
-      button.innerHTML = '<b>' + escapeText(size.code) + '</b>' + (small ? '<small>' + escapeText(small) + '</small>' : '');
+      button.innerHTML = shownCount[shown(size)] > 1
+        ? '<b>' + escapeText(size.raw) + '</b>'
+        : '<b>' + escapeText(size.code) + '</b>' + (small ? '<small>' + escapeText(small) + '</small>' : '');
       grid.appendChild(button);
     });
     grid.classList.add('pdp-m__sz--grid');

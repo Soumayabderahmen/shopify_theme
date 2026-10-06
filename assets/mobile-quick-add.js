@@ -212,37 +212,52 @@
 
   /* Libellés bruts des tailles : "XL fit 174-183CM" -> { code: "XL", lo: 174, hi: 183 } (hauteur, sert à « Trova la tua
      taglia ») ; "XL 65KG-75KG", "L 55-65kg" -> { code: "XL", kg: "65–75" } (poids : affiché et trié, pas de calcul). */
-  // "Asian L 61-70KG" : les mots autour de la taille ne sont pas la taille ; sans taille unique, libellé d'origine.
+  // "Asian L 61-70KG", "2XL-75-82KG", "175-L(45-55KG", "M (160cm 50-60kg)" : les mots autour de la taille ne sont pas
+  // la taille ; une hauteur à 3 chiffres est gardée (« 160 cm ») ; sans taille unique, libellé d'origine.
+  // Aucune donnée perdue : tous les nombres du libellé restent affichés, et le bouton garde la valeur complète.
   function parseSize(raw) {
     var text = String(raw).trim();
-    var match = text.match(/\(?\s*(\d{2,3})\s*(kg|cm)?\s*[-–]\s*(\d{2,3})\s*(kg|cm)\s*\)?$/i);
+    var match = text.match(/\(?\s*(\d{2,3}(?:[.,]\d)?)\s*(kg|cm)?\s*[-–]\s*(\d{2,3}(?:[.,]\d)?)\s*(kg|cm)\s*\)?$/i);
     if (!match) return { raw: raw, code: raw };
-    var words = text.slice(0, match.index).replace(/\b(?:fit|asian|asia|chn|china|size|taglia)\b/gi, ' ').trim().split(/\s+/).filter(Boolean);
+    var height = '';
+    var words = text.slice(0, match.index).replace(/\b(?:fit|asian|asia|chn|china|size|taglia|height|weight)\b/gi, ' ')
+      .split(/[\s\-–(),:]+/).filter(function (word) {
+        var cm = !height && word.match(/^(\d{3})(?:cm)?$/i);
+        if (cm) height = cm[1] + ' cm';
+        return word && !cm;
+      });
     if (words.length !== 1) return { raw: raw, code: raw };
     var size = { raw: raw, code: words[0].toUpperCase() };
     if ((match[4] || match[2]).toLowerCase() === 'cm') {
-      size.lo = Number(match[1]);
-      size.hi = Number(match[3]);
+      if (height) return { raw: raw, code: raw };
+      size.lo = Number(match[1].replace(',', '.'));
+      size.hi = Number(match[3].replace(',', '.'));
     } else {
-      size.kg = match[1] + '–' + match[3];
+      size.kg = match[1] + '–' + match[3] + ' kg' + (height ? ' · ' + height : '');
     }
     return size;
   }
 
+  // XXL = 2XL… ; au-delà de 7XL (8XL, 10XL, 14XL) : même suite.
   function sizeRank(code) {
-    var rank = SIZE_RANK[String(code).toUpperCase()];
-    return rank === undefined ? null : rank;
+    var upper = String(code).toUpperCase();
+    var rank = SIZE_RANK[upper];
+    if (rank !== undefined) return rank;
+    var many = upper.match(/^(\d{1,2})XL$/);
+    return many ? 4 + Number(many[1]) : null;
   }
 
-  // Tri S → M → L → XL → XXL, ou numérique (pointures, longueurs) ; sinon l'ordre de la boutique.
+  // Tri S → M → L → XL → XXL, ou numérique (pointures « 38. », « EU:38 », longueurs) ; sinon l'ordre de la boutique.
   function sortSizes(values) {
     return values.map(function (value) { return parseSize(value.name); }).sort(function (a, b) {
       var rankA = sizeRank(a.code);
       var rankB = sizeRank(b.code);
       if (rankA !== null && rankB !== null) return rankA - rankB;
-      var numberA = parseFloat(a.code);
-      var numberB = parseFloat(b.code);
-      if (!isNaN(numberA) && !isNaN(numberB)) return numberA - numberB;
+      var numberA = String(a.code).match(/\d+(?:[.,]\d+)?/);
+      var numberB = String(b.code).match(/\d+(?:[.,]\d+)?/);
+      if (numberA && numberB && String(a.code).replace(numberA[0], '#').toUpperCase() === String(b.code).replace(numberB[0], '#').toUpperCase()) {
+        return parseFloat(numberA[0].replace(',', '.')) - parseFloat(numberB[0].replace(',', '.'));
+      }
       return 0;
     });
   }
@@ -693,7 +708,7 @@
       var size = sizeInfo(index, name);
       button.disabled = !available && !checked;
       var sub = button.querySelector('[data-qa-sub]');
-      setText(sub, size.lo ? size.lo + '–' + size.hi + ' cm' : size.kg ? size.kg + ' kg' : (!available ? T('qa_size_sold_out') : ''));
+      setText(sub, size.lo ? size.lo + '–' + size.hi + ' cm' : size.kg ? size.kg : (!available ? T('qa_size_sold_out') : ''));
       sub.hidden = !sub.textContent;
       var old = button.querySelector('.bdg');
       var badge = available ? sizeBadge(index, name) : null;
@@ -714,7 +729,7 @@
         label.className = '';
       } else {
         var size = sizeInfo(index, value);
-        setText(label, size.code + (size.lo ? ' · ' + size.lo + '–' + size.hi + ' cm' : size.kg ? ' · ' + size.kg + ' kg' : ''));
+        setText(label, size.code + (size.lo ? ' · ' + size.lo + '–' + size.hi + ' cm' : size.kg ? ' · ' + size.kg : ''));
         label.className = 'pick';
       }
     });
