@@ -772,7 +772,20 @@
       "pdp_ship_free_order": "Gratis verzending voor deze bestelling",
       "pdp_ship_from": "Gratis verzending vanaf {amount}",
       "pdp_size_foot_length": "Voetlengte",
-      "pdp_size_length": "Lengte"
+      "pdp_size_length": "Lengte",
+      "pdp_sz_asian_kg_html": "<b>Aziatische maten</b> · vallen kleiner uit dan Europese maten. Kies op basis van je gewicht.",
+      "pdp_sz_asian_cm_html": "<b>Aziatische maten</b> · vallen kleiner uit dan Europese maten. Kies op basis van je lengte.",
+      "pdp_sz_hint_kg": "Kies je maat op basis van je gewicht.",
+      "pdp_sz_hint_cm": "Kies je maat op basis van je lengte.",
+      "pdp_sz_your_weight": "Je gewicht",
+      "pdp_sz_your_height": "Je lengte",
+      "pdp_sz_rec_html": "Wij raden <b>{size}</b> aan",
+      "pdp_sz_edge": "op de grens: overweeg {size}",
+      "pdp_sz_pick": "Kiezen",
+      "pdp_sz_out_html": "Buiten de beschikbare maten ({min}–{max} {unit}). Dichtstbij: <b>{size}</b>",
+      "pdp_sz_last": "Nog {count}",
+      "pdp_sz_for_you": "Voor jou",
+      "pdp_sz_asian_html": "<b>Aziatische maten</b> · vallen kleiner uit dan Europese maten."
     },
     "pdp": {
       "gallery": "Productfoto's",

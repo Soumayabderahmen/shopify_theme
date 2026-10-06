@@ -843,7 +843,20 @@
       "pdp_ship_free_order": "Spedizione gratuita su questo ordine",
       "pdp_ship_from": "Spedizione gratuita da {amount}",
       "pdp_size_foot_length": "Lunghezza piede",
-      "pdp_size_length": "Lunghezza"
+      "pdp_size_length": "Lunghezza",
+      "pdp_sz_asian_kg_html": "<b>Taglie asiatiche</b> · vestono più piccole delle taglie europee. Scegli in base al tuo peso.",
+      "pdp_sz_asian_cm_html": "<b>Taglie asiatiche</b> · vestono più piccole delle taglie europee. Scegli in base alla tua altezza.",
+      "pdp_sz_hint_kg": "Scegli la taglia in base al tuo peso.",
+      "pdp_sz_hint_cm": "Scegli la taglia in base alla tua altezza.",
+      "pdp_sz_your_weight": "Il tuo peso",
+      "pdp_sz_your_height": "La tua altezza",
+      "pdp_sz_rec_html": "Ti consigliamo la <b>{size}</b>",
+      "pdp_sz_edge": "al limite: valuta la {size}",
+      "pdp_sz_pick": "Scegli",
+      "pdp_sz_out_html": "Fuori dalle taglie disponibili ({min}–{max} {unit}). Più vicina: <b>{size}</b>",
+      "pdp_sz_last": "Ultimi {count}",
+      "pdp_sz_for_you": "Per te",
+      "pdp_sz_asian_html": "<b>Taglie asiatiche</b> · vestono più piccole delle taglie europee."
     },
     "pdp": {
       "gallery": "Foto del prodotto",

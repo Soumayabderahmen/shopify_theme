@@ -213,10 +213,17 @@
 
   /* ---------- Options : un choix ici coche l'option réelle du formulaire du thème ---------- */
   var optionsCard = root.querySelector('[data-pdp-options]');
+  // Produit à une seule option avec photos : le thème affiche des vignettes « variant-id » (valeur = id de variante,
+  // nom de l'option dans title) au lieu des boutons options[…].
+  var radioValue = function (radio) {
+    return radio.name === 'variant-id' ? radio.title : radio.value;
+  };
   var themeOptionGroups = function () {
     var groups = [];
     var names = [];
-    document.querySelectorAll('#main-product input[type="radio"][name^="options["]').forEach(function (radio) {
+    var radios = document.querySelectorAll('#main-product input[type="radio"][name^="options["]');
+    if (!radios.length) radios = document.querySelectorAll('#main-product input[type="radio"][name="variant-id"]');
+    radios.forEach(function (radio) {
       var index = names.indexOf(radio.name);
       if (index === -1) {
         names.push(radio.name);
@@ -230,7 +237,7 @@
   var selectedValues = function () {
     return themeOptionGroups().map(function (group) {
       var checked = group.find(function (radio) { return radio.checked; });
-      return checked ? checked.value : null;
+      return checked ? radioValue(checked) : null;
     });
   };
   var syncOptions = function () {
@@ -252,14 +259,256 @@
         button.classList.toggle('is-unavailable', !match || !match.available);
       });
     });
+    if (sizeUi) paintSize();
   };
+  /* ---------- Taille (prototype « taille v2 ») : "36 weight 82-90kg" -> gros « 36 » + petit « 82–90 kg », tailles
+     triées, grille de 4, conseil selon le poids (ou la hauteur) saisi, règle graduée, badges « Per te » / « Ultimi N ». ---------- */
+  var SIZE_NOISE = /\b(asian|asia|chn|china|eu|size|taglia|weight|peso|fit|for|adult|height|altezza|tall)\b/gi;
+  var FIT_KEY = 'platinumshop:fit:v1';
+  var INFO_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.01"/></svg>';
+  var sizeUi = null;
+  var escapeText = function (text) {
+    return String(text).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  };
+  var sizeRank = function (code) {
+    var c = String(code).toUpperCase();
+    var fixed = { XXXS: -1, XXS: 0, XS: 1, S: 2, M: 3, L: 4, XL: 5, XXL: 6, XXXL: 7, XXXXL: 8, XXXXXL: 9 };
+    if (fixed[c] !== undefined) return fixed[c];
+    var many = c.match(/^(\d{1,2})XL$/);
+    return many ? 4 + Number(many[1]) : null;
+  };
+  // "Asian L 61-70KG", "XL(50-60KG)", "CHN 3XL (75-83kg)", "L fit 174-183CM"… -> { code, lo, hi, unit }.
+  // Les dimensions d'objets ("20-20-10cm") ne sont pas des tailles.
+  var parseSize = function (raw) {
+    var text = String(raw).trim();
+    var size = { raw: raw, code: text };
+    if (/\d+(?:\.\d+)?\s*[-–x×*]\s*\d+(?:\.\d+)?\s*[-–x×*]\s*\d+/i.test(text)) return size;
+    var match = text.match(/(\d{2,3})\s*[-–~]\s*(\d{2,3})\s*\)?\s*(kg|cm)?(?![a-z])/i);
+    if (!match) {
+      // "Asian M" sans plage : « M » sur le bouton, « taglie asiatiche » dit une seule fois au-dessus.
+      var plain = text.match(/^(?:asian|asia|chn|china)(?:\s*size)?\s+(\S+)$/i);
+      if (plain && sizeRank(plain[1]) !== null) return { raw: raw, code: plain[1].toUpperCase() };
+      // Pointures "EU:42", "US 9.5" : « 42 » en gros, « EU » en petit.
+      var shoe = text.match(/^(EU|US|UK|CN|JP|BR)\s*[:\-]?\s*(\d{1,2}(?:[.,]5)?)$/i);
+      return shoe ? { raw: raw, code: shoe[2], note: shoe[1].toUpperCase() } : size;
+    }
+    var lo = Number(match[1]);
+    var hi = Number(match[2]);
+    if (!(hi > lo)) return size;
+    var rest = (text.slice(0, match.index) + ' ' + text.slice(match.index + match[0].length))
+      .replace(/\d{2,3}\s*cm/gi, ' ')
+      .replace(SIZE_NOISE, ' ')
+      .replace(/[()[\]{}:,]/g, ' ');
+    var parts = rest.split(/[\s\-–]+/).filter(Boolean);
+    var letter = parts.filter(function (part) { return sizeRank(part) !== null; })[0];
+    var code = letter ? letter.toUpperCase() : parts.join(' ');
+    var unit = match[3] ? match[3].toLowerCase() : null;
+    // Plage sans unité ("XXL 175-185") : seulement avec une vraie taille ; au-dessus de 130, c'est une hauteur.
+    if (!unit) {
+      if (!letter) return size;
+      unit = hi > 130 ? 'cm' : 'kg';
+    }
+    return { raw: raw, code: code || lo + '–' + hi, lo: lo, hi: hi, unit: unit, bare: !code };
+  };
+  // Ordre logique : par plage quand toutes en ont une, sinon S → M → L → XL…, sinon numérique, sinon ordre de la boutique.
+  var sortSizes = function (sizes) {
+    var ranged = sizes.every(function (size) { return size.lo; });
+    return sizes.slice().sort(function (a, b) {
+      if (ranged) return a.lo - b.lo || a.hi - b.hi;
+      var rankA = sizeRank(a.code);
+      var rankB = sizeRank(b.code);
+      if (rankA !== null && rankB !== null) return rankA - rankB;
+      // Même format avec un nombre ("38", "EU:38", "6T") : ordre numérique.
+      var numberA = String(a.code).match(/\d+(?:[.,]\d+)?/);
+      var numberB = String(b.code).match(/\d+(?:[.,]\d+)?/);
+      if (numberA && numberB && String(a.code).replace(numberA[0], '#') === String(b.code).replace(numberB[0], '#')) {
+        return parseFloat(numberA[0].replace(',', '.')) - parseFloat(numberB[0].replace(',', '.'));
+      }
+      return 0;
+    });
+  };
+  var rangeText = function (size) {
+    return size.bare ? size.unit : size.lo + '–' + size.hi + ' ' + size.unit;
+  };
+  var readFit = function () {
+    try { return JSON.parse(window.localStorage.getItem(FIT_KEY)) || {}; } catch (error) { return {}; }
+  };
+  var saveFit = function (unit, value) {
+    var fit = readFit();
+    fit[unit] = value;
+    try { window.localStorage.setItem(FIT_KEY, JSON.stringify(fit)); } catch (error) { /* stockage indisponible */ }
+  };
+  // Stock bas (1 à 3) de la variante qu'on obtiendrait avec cette taille et les autres options déjà choisies.
+  var stockLeft = function (index, raw) {
+    var combination = selectedValues();
+    combination[index] = raw;
+    var match = variants.find(function (variant) {
+      return variant.options && variant.options.every(function (optionValue, i) { return optionValue === combination[i]; });
+    });
+    return match && match.available && match.inv > 0 && match.inv <= 3 ? match.inv : 0;
+  };
+  var setupSize = function () {
+    var block = optionsCard && optionsCard.querySelector('[data-pdp-size]');
+    var grid = block && block.querySelector('.pdp-m__sz');
+    if (!grid) return;
+    var buttons = Array.prototype.slice.call(grid.querySelectorAll('[data-value]'));
+    var sizes = sortSizes(buttons.map(function (button) { return parseSize(button.getAttribute('data-value')); }));
+    var ranged = sizes.filter(function (size) { return size.lo; });
+    // Valeurs longues sans plage (ex. dimensions d'un sac) : on garde les puces actuelles.
+    if (!ranged.length && !sizes.every(function (size) { return String(size.code).length <= 5; })) return;
+    var ui = { block: block, grid: grid, sizes: sizes, byRaw: {}, index: Number(block.getAttribute('data-option-index')), rec: null };
+    sizes.forEach(function (size) {
+      ui.byRaw[size.raw] = size;
+      var button = buttons.find(function (item) { return item.getAttribute('data-value') === size.raw; });
+      button.setAttribute('aria-label', size.raw);
+      var small = size.lo ? rangeText(size) : size.note;
+      button.innerHTML = '<b>' + escapeText(size.code) + '</b>' + (small ? '<small>' + escapeText(small) + '</small>' : '');
+      grid.appendChild(button);
+    });
+    grid.classList.add('pdp-m__sz--grid');
+    if (sizes.some(function (size) { return size.note; })) grid.classList.add('pdp-m__sz--noted');
+    if (ranged.length) {
+      grid.classList.add('pdp-m__sz--ranged');
+      // « Dimensione » avec de vraies tailles : libellé « Taglia » et guide des tailles visibles.
+      var label = block.querySelector('[data-pdp-option-label]');
+      if (label && block.getAttribute('data-size-label')) label.textContent = block.getAttribute('data-size-label');
+      var guide = block.querySelector('[data-pdp-size-guide]');
+      if (guide) guide.hidden = false;
+    }
+    var unit = ranged.length && ranged.every(function (size) { return size.unit === ranged[0].unit; }) ? ranged[0].unit : null;
+    if (!unit && sizes.some(function (size) { return /\b(asian|asia|chn|china)\b/i.test(size.raw); })) {
+      var note = document.createElement('div');
+      note.className = 'pdp-m__asn';
+      note.innerHTML = '<div class="pdp-m__asn-h">' + INFO_ICON + '<span>' + T('pdp_sz_asian_html') + '</span></div>';
+      block.insertBefore(note, grid);
+    }
+    if (unit) {
+      ui.unit = unit;
+      ui.min = Math.min.apply(null, ranged.map(function (size) { return size.lo; }));
+      ui.max = Math.max.apply(null, ranged.map(function (size) { return size.hi; }));
+      var asian = sizes.some(function (size) { return /\b(asian|asia|chn|china)\b/i.test(size.raw); });
+      var box = document.createElement('div');
+      box.className = 'pdp-m__asn';
+      box.innerHTML = '<div class="pdp-m__asn-h">' + INFO_ICON + '<span>' + (asian ? T('pdp_sz_asian_' + unit + '_html') : escapeText(T('pdp_sz_hint_' + unit))) + '</span></div>'
+        + '<div class="pdp-m__asn-w"><label for="pdp-fit">' + escapeText(T(unit === 'kg' ? 'pdp_sz_your_weight' : 'pdp_sz_your_height')) + '</label>'
+        + '<span class="pdp-m__asn-in"><input id="pdp-fit" type="number" inputmode="numeric" min="' + (unit === 'kg' ? 30 : 80) + '" max="' + (unit === 'kg' ? 200 : 230) + '" placeholder="—" aria-describedby="pdp-fit-res"><span>' + unit + '</span></span>'
+        + '<span class="pdp-m__asn-r" id="pdp-fit-res" aria-live="polite"></span></div>';
+      block.insertBefore(box, grid);
+      ui.input = box.querySelector('input');
+      ui.result = box.querySelector('.pdp-m__asn-r');
+      var saved = readFit()[unit];
+      if (saved) ui.input.value = saved;
+      ui.input.addEventListener('input', function () {
+        saveFit(unit, ui.input.value);
+        paintSize();
+      });
+      // « Scegli » du conseil : même chemin qu'un toucher sur la taille.
+      box.addEventListener('click', function (event) {
+        var pick = event.target.closest('[data-pdp-fit-pick]');
+        if (!pick) return;
+        var target = buttons.find(function (item) { return item.getAttribute('data-value') === pick.getAttribute('data-pdp-fit-pick'); });
+        if (target) target.click();
+      });
+      // Règle graduée : un segment par taille (largeur = plage), repère du poids saisi.
+      if (ranged.length === sizes.length) {
+        var rail = document.createElement('div');
+        rail.className = 'pdp-m__szr';
+        rail.setAttribute('aria-hidden', 'true');
+        var segment = function (tag, size, content) {
+          return '<' + tag + ' data-s="' + escapeText(size.raw) + '" style="flex:' + (size.hi - size.lo + 1) + '">' + content + '</' + tag + '>';
+        };
+        rail.innerHTML = '<div class="pdp-m__szr-wrap"><span class="pdp-m__szr-m" hidden></span><div class="pdp-m__szr-t">'
+          + sizes.map(function (size) { return segment('i', size, ''); }).join('') + '</div></div>'
+          + '<div class="pdp-m__szr-l">' + sizes.map(function (size) { return segment('span', size, escapeText(size.bare ? '' : size.code)); }).join('') + '</div>'
+          + '<div class="pdp-m__szr-e"><span>' + ui.min + ' ' + unit + '</span><span>' + ui.max + ' ' + unit + '</span></div>';
+        grid.parentNode.insertBefore(rail, grid.nextSibling);
+        ui.rail = rail;
+        ui.marker = rail.querySelector('.pdp-m__szr-m');
+      }
+    }
+    sizeUi = ui;
+  };
+  // Taille conseillée : celle dont la plage contient la valeur saisie ; en haut de plage, on propose aussi la suivante.
+  var suggestSize = function () {
+    var ui = sizeUi;
+    ui.rec = null;
+    if (!ui.input) return;
+    var value = parseFloat(ui.input.value);
+    var available = ui.sizes.filter(function (size) {
+      var button = ui.grid.querySelector('[data-value="' + CSS.escape(size.raw) + '"]');
+      return size.lo && button && !button.classList.contains('is-unavailable');
+    });
+    if (!value || value < (ui.unit === 'kg' ? 30 : 80) || !available.length) {
+      ui.result.innerHTML = '';
+      if (ui.marker) ui.marker.hidden = true;
+      return;
+    }
+    var best = available.find(function (size) { return value >= size.lo && value <= size.hi + 0.99; });
+    var outside = value < ui.min || value > ui.max + 0.99;
+    if (!best) {
+      var distance = function (size) { return Math.min(Math.abs(value - size.lo), Math.abs(value - size.hi)); };
+      best = available.slice().sort(function (a, b) { return distance(a) - distance(b); })[0];
+    }
+    ui.rec = best.raw;
+    var html;
+    if (outside) {
+      html = T('pdp_sz_out_html', { min: ui.min, max: ui.max, unit: ui.unit, size: escapeText(best.code) });
+    } else {
+      var next = available[available.indexOf(best) + 1];
+      var edge = value >= best.hi - 1 && next;
+      html = T('pdp_sz_rec_html', { size: escapeText(best.code) }) + (edge ? ' · ' + escapeText(T('pdp_sz_edge', { size: next.code })) : '');
+    }
+    if (selectedValues()[ui.index] !== best.raw) {
+      html += ' <button type="button" data-pdp-fit-pick="' + escapeText(best.raw) + '">' + escapeText(T('pdp_sz_pick')) + '</button>';
+    }
+    ui.result.innerHTML = html;
+    if (ui.marker) {
+      ui.marker.hidden = false;
+      ui.marker.style.left = (Math.max(0, Math.min(1, (value - ui.min) / (ui.max + 1 - ui.min))) * 100) + '%';
+    }
+  };
+  var paintSize = function () {
+    var ui = sizeUi;
+    suggestSize();
+    var value = selectedValues()[ui.index];
+    var current = ui.byRaw[value];
+    var name = ui.block.querySelector('[data-pdp-option-name]');
+    if (name && current) {
+      name.textContent = current.lo && !current.bare ? current.code + ' · ' + rangeText(current) : current.note ? current.note + ' ' + current.code : current.code;
+    }
+    ui.grid.querySelectorAll('[data-value]').forEach(function (button) {
+      var raw = button.getAttribute('data-value');
+      var left = raw === ui.rec ? 0 : stockLeft(ui.index, raw);
+      var text = raw === ui.rec ? T('pdp_sz_for_you') : left ? T('pdp_sz_last', { count: left }) : '';
+      var badge = button.querySelector('.pdp-m__bdg');
+      if (!text) {
+        if (badge) badge.remove();
+        return;
+      }
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'pdp-m__bdg';
+        button.insertBefore(badge, button.firstChild);
+      }
+      badge.textContent = text;
+      badge.classList.toggle('is-rec', raw === ui.rec);
+    });
+    if (ui.rail) {
+      ui.rail.querySelectorAll('[data-s]').forEach(function (item) {
+        item.classList.toggle('is-on', item.getAttribute('data-s') === value);
+        item.classList.toggle('is-rec', item.getAttribute('data-s') === ui.rec);
+      });
+    }
+  };
+  setupSize();
+
   if (optionsCard) {
     optionsCard.addEventListener('click', function (event) {
       var button = event.target.closest('[data-value]');
       if (!button) return;
       var block = button.closest('[data-option-index]');
       var group = themeOptionGroups()[Number(block.getAttribute('data-option-index'))];
-      var radio = group && group.find(function (item) { return item.value === button.getAttribute('data-value'); });
+      var radio = group && group.find(function (item) { return radioValue(item) === button.getAttribute('data-value'); });
       if (!radio) return;
       radio.click();
       syncOptions();

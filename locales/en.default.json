@@ -3538,7 +3538,20 @@
       "pdp_ship_free_order": "Free shipping on this order",
       "pdp_ship_from": "Free shipping from {amount}",
       "pdp_size_foot_length": "Foot length",
-      "pdp_size_length": "Length"
+      "pdp_size_length": "Length",
+      "pdp_sz_asian_kg_html": "<b>Asian sizes</b> · they run smaller than European sizes. Choose by your weight.",
+      "pdp_sz_asian_cm_html": "<b>Asian sizes</b> · they run smaller than European sizes. Choose by your height.",
+      "pdp_sz_hint_kg": "Choose your size by your weight.",
+      "pdp_sz_hint_cm": "Choose your size by your height.",
+      "pdp_sz_your_weight": "Your weight",
+      "pdp_sz_your_height": "Your height",
+      "pdp_sz_rec_html": "We recommend <b>{size}</b>",
+      "pdp_sz_edge": "borderline: consider {size}",
+      "pdp_sz_pick": "Select",
+      "pdp_sz_out_html": "Outside the available sizes ({min}–{max} {unit}). Closest: <b>{size}</b>",
+      "pdp_sz_last": "Last {count}",
+      "pdp_sz_for_you": "For you",
+      "pdp_sz_asian_html": "<b>Asian sizes</b> · they run smaller than European sizes."
     },
     "pdp": {
       "gallery": "Product photos",
