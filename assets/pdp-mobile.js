@@ -194,11 +194,60 @@
     }
     onVariantChange(variant);
   };
+  /* Variante choisie ici : écrite tout de suite dans le formulaire du thème. Après un choix, le thème recharge son
+     formulaire depuis le serveur (~4 s sur mobile) ; pendant ce temps son champ « id » gardait l'ancienne variante
+     et « Aggiungi al carrello » ajoutait l'ancienne taille. La variante vient des vraies variantes du produit
+     (data-pdp-variants) ; elle est réécrite jusqu'à ce que le thème ait remplacé son formulaire avec la même. */
+  var chosenVariant = null;
+  var chosenForm = null;
+  var currentForm = function () {
+    return document.querySelector('#main-product form[action*="/cart/add"]');
+  };
+  // Choix lu sur nos boutons, pas sur les boutons du thème : pendant qu'il recharge son formulaire, le thème
+  // remet parfois l'ancienne valeur (couleur puis taille touchées vite : la couleur était perdue).
+  var chooseVariant = function (index, value) {
+    var wanted = chosenVariant ? chosenVariant.options.slice() : selectedValues();
+    wanted[index] = value;
+    var match = variants.find(function (variant) {
+      return variant.options && variant.options.every(function (optionValue, i) { return optionValue === wanted[i]; });
+    });
+    if (!match) return;
+    chosenVariant = match;
+    chosenForm = currentForm();
+    applyChosenVariant();
+  };
+  var applyChosenVariant = function () {
+    if (!chosenVariant) return;
+    var form = currentForm();
+    if (!form) return;
+    var inputs = form.querySelectorAll('[name="id"]');
+    // Formulaire refait par le thème avec la variante choisie : il est à jour, on le laisse faire.
+    if (form !== chosenForm && Array.prototype.every.call(inputs, function (input) { return String(input.value) === String(chosenVariant.id); })) {
+      chosenVariant = null;
+      return;
+    }
+    // Formulaire refait avec une autre variante (réponse d'un choix précédent) : on recoche le choix du client
+    // dans ce nouveau formulaire, une seule fois par formulaire, pour que le thème le rattrape.
+    if (form !== chosenForm) {
+      chosenForm = form;
+      themeOptionGroups().forEach(function (group, i) {
+        var radio = group.find(function (item) { return radioValue(item) === chosenVariant.options[i]; });
+        if (radio && !radio.checked) radio.click();
+      });
+      form = currentForm() || form;
+      inputs = form.querySelectorAll('[name="id"]');
+    }
+    inputs.forEach(function (input) {
+      if (String(input.value) !== String(chosenVariant.id)) input.value = String(chosenVariant.id);
+    });
+  };
   if (idInput) {
     // Le thème met à jour l'identifiant de variante après coup, sans événement fiable : on le compare
     // régulièrement (simple lecture d'une valeur, coût négligeable), seulement quand la page est visible.
     window.setInterval(function () {
-      if (!document.hidden) showVariant();
+      if (document.hidden) return;
+      applyChosenVariant();
+      showVariant();
     }, 250);
   }
 
@@ -242,7 +291,8 @@
   };
   var syncOptions = function () {
     if (!optionsCard) return;
-    var selected = selectedValues();
+    // Choix en cours d'application par le thème : on affiche le choix du client.
+    var selected = chosenVariant ? chosenVariant.options.slice() : selectedValues();
     optionsCard.querySelectorAll('[data-option-index]').forEach(function (block) {
       var index = Number(block.getAttribute('data-option-index'));
       var value = selected[index];
@@ -517,9 +567,10 @@
       var radio = group && group.find(function (item) { return radioValue(item) === button.getAttribute('data-value'); });
       if (!radio) return;
       radio.click();
+      chooseVariant(Number(block.getAttribute('data-option-index')), button.getAttribute('data-value'));
       syncOptions();
       highlightSize();
-      window.setTimeout(showVariant, 0);
+      showVariant();
     });
     syncOptions();
   }
@@ -556,11 +607,22 @@
       updateTotals();
     });
   });
+  // Ajout au panier : le formulaire du thème reçoit d'abord la variante choisie (même si le thème ne l'a pas encore
+  // rechargé). Variante choisie épuisée : rien n'est ajouté (son bouton est déjà barré), retour aux options.
+  var addToCart = function () {
+    applyChosenVariant();
+    if (dynamicSync) dynamicSync();
+    if (chosenVariant && !chosenVariant.available) {
+      var options = document.getElementById('pdp-variants');
+      if (options) options.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    var submit = document.querySelector('#main-product form[action*="/cart/add"] [type="submit"]');
+    if (submit) submit.click();
+  };
+  // Tous les boutons « Aggiungi al carrello » de la fiche (carte et barre fixe).
   root.querySelectorAll('[data-pdp-add]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      var submit = document.querySelector('#main-product form[action*="/cart/add"] [type="submit"]');
-      if (submit) submit.click();
-    });
+    button.addEventListener('click', addToCart);
   });
 
   // « Spedito oggi ? Ordina entro » : temps restant avant la fin de la journée.
@@ -1038,12 +1100,6 @@
     buy.querySelector('[data-pdp-to-options]').addEventListener('click', function () {
       var target = document.getElementById('pdp-variants') || mainCta;
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-    buy.querySelectorAll('[data-pdp-add]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        var submit = document.querySelector('#main-product form[action*="/cart/add"] [type="submit"]');
-        if (submit) submit.click();
-      });
     });
   }
 
