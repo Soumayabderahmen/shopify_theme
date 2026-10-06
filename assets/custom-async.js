@@ -6302,7 +6302,11 @@ window.addEventListener('recentlyViewedProducts', function (evt) {
 			itemsDone = 0,
 			data = productData.reverse();
 		Array.from(data).forEach(function (product, index, array) {
-			fetch(product.productUrl + '/?section_id=' + template)
+			// Adresse gardée lors d'une visite dans une autre langue : on la remet dans la langue affichée.
+			var productPath = String(product.productUrl).replace(/^https?:\/\/[^/]+/, '');
+			var productAt = productPath.indexOf('/products/');
+			if (productAt !== -1) productPath = ((window.Shopify && Shopify.routes && Shopify.routes.root) || '/').replace(/\/$/, '') + productPath.slice(productAt);
+			fetch(productPath + '/?section_id=' + template)
 				.then((response) => {
 					if (!response.ok) {
 						console.warn('Request failed:', response.status, response.statusText);

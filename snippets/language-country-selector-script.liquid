@@ -129,6 +129,13 @@
       return browserPrefers(['de', 'fr', 'it']) || 'de';
     }
 
+    // Belgique : néerlandais (Flandre) si le téléphone est en néerlandais et que la langue est publiée sur la boutique,
+    // sinon français (Wallonie, Bruxelles, et tant que le néerlandais n'est pas publié).
+    function belgianLanguage() {
+      var dutchPublished = availableLocales.some(function (locale) { return locale.split('-')[0] === 'nl'; });
+      return browserPrefers(['nl', 'fr']) === 'nl' && dutchPublished ? 'nl' : 'fr';
+    }
+
     var countryLanguageMap = {
       IT: 'it', SM: 'it', VA: 'it',
       US: 'en', GB: 'en', UK: 'en', AU: 'en', IE: 'en', NZ: 'en',
@@ -143,7 +150,9 @@
 
     var targetLanguage = country === 'CA'
       ? canadianLanguage()
-      : country === 'CH'
+      : country === 'BE'
+        ? belgianLanguage()
+        : country === 'CH'
         ? swissLanguage()
         : countryLanguageMap[country] || suggestedLanguage;
 

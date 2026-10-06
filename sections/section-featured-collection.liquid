@@ -696,7 +696,7 @@
       {{ link | replace: 'class-x', 'mobile-hide' }}
     {%- endif -%}
     {%- if section.settings.show_mobile_filters and collection != blank -%}
-      <a class="featured-filters__all mobile-only" href="{{ collection.url }}">Vedi tutti</a>
+      <a class="featured-filters__all mobile-only" href="{{ collection.url }}">{{ 'mobile.home.see_all' | t }}</a>
     {%- endif -%}
   </header>
 {%- endif -%}
@@ -704,17 +704,17 @@
   <div
     class="featured-filters mobile-only"
     role="group"
-    aria-label="Filtra"
+    aria-label="{{ 'mobile.home.filter' | t }}"
     data-featured-filters
     data-feed-url="{{ collection.url }}?section_id=featured-collection-feed"
   >
-    <button type="button" aria-pressed="true" data-filter-sort="">Consigliati</button>
-    <button type="button" aria-pressed="false" data-filter-sort="price-ascending">Prezzo più basso</button>
-    <button type="button" aria-pressed="false" data-filter-sort="created-descending">Novità</button>
-    <button type="button" aria-pressed="false" data-filter-sort="" data-filter-match="sale">In offerta</button>
-    <button type="button" aria-pressed="false" data-filter-sort="" data-filter-match="free-shipping">Spedizione gratis</button>
+    <button type="button" aria-pressed="true" data-filter-sort="">{{ 'mobile.home.recommended' | t }}</button>
+    <button type="button" aria-pressed="false" data-filter-sort="price-ascending">{{ 'mobile.home.price_low' | t }}</button>
+    <button type="button" aria-pressed="false" data-filter-sort="created-descending">{{ 'mobile.home.newest' | t }}</button>
+    <button type="button" aria-pressed="false" data-filter-sort="" data-filter-match="sale">{{ 'mobile.home.on_sale' | t }}</button>
+    <button type="button" aria-pressed="false" data-filter-sort="" data-filter-match="free-shipping">{{ 'mobile.home.free_shipping' | t }}</button>
   </div>
-  <p class="featured-filters__empty mobile-only" data-featured-filters-empty hidden>Nessun prodotto per questo filtro.</p>
+  <p class="featured-filters__empty mobile-only" data-featured-filters-empty hidden>{{ 'mobile.home.filter_empty' | t }}</p>
 {%- endif -%}
 {%- if aside %}<div>{%- endif -%}
 

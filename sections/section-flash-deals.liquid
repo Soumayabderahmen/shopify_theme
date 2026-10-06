@@ -88,9 +88,9 @@
             <span class="flash-deals__price">{{ deal_variant.price | money }}</span>
             {%- if deal_percent > 0 -%}
               <span class="flash-deals__bar" aria-hidden="true"><i style="width: {{ deal_percent }}%;"></i></span>
-              <small>{{ deal_percent }}% venduto</small>
+              <small>{{ 'mobile.home.sold_percent' | t: percent: deal_percent }}</small>
             {%- elsif deal_sold > 0 -%}
-              <small>{{ deal_sold }} venduti</small>
+              <small>{{ 'mobile.home.sold_count' | t: count: deal_sold }}</small>
             {%- endif -%}
           </a>
         </li>

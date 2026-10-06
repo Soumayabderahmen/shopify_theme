@@ -702,6 +702,18 @@
     }
   },
   "mobile": {
+    "home": {
+      "see_all": "Vedi tutti",
+      "filter": "Filtra",
+      "recommended": "Consigliati",
+      "price_low": "Prezzo più basso",
+      "newest": "Novità",
+      "on_sale": "In offerta",
+      "free_shipping": "Spedizione gratis",
+      "filter_empty": "Nessun prodotto per questo filtro.",
+      "sold_percent": "{{ percent }}% venduto",
+      "sold_count": "{{ count }} venduti"
+    },
     "js": {
       "show_all": "Mostra tutto",
       "show_less": "Mostra meno",

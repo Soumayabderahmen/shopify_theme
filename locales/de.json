@@ -613,6 +613,18 @@
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
   "mobile": {
+    "home": {
+      "see_all": "Alle ansehen",
+      "filter": "Filtern",
+      "recommended": "Empfohlen",
+      "price_low": "Niedrigster Preis",
+      "newest": "Neuheiten",
+      "on_sale": "Im Angebot",
+      "free_shipping": "Kostenloser Versand",
+      "filter_empty": "Keine Produkte für diesen Filter.",
+      "sold_percent": "{{ percent }} % verkauft",
+      "sold_count": "{{ count }} verkauft"
+    },
     "js": {
       "show_all": "Alle anzeigen",
       "show_less": "Weniger anzeigen",

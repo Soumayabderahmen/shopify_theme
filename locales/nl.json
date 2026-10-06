@@ -631,6 +631,18 @@
     "top_picks": "Topkeuzes"
   },
   "mobile": {
+    "home": {
+      "see_all": "Alles bekijken",
+      "filter": "Filteren",
+      "recommended": "Aanbevolen",
+      "price_low": "Laagste prijs",
+      "newest": "Nieuw",
+      "on_sale": "In de aanbieding",
+      "free_shipping": "Gratis verzending",
+      "filter_empty": "Geen producten voor dit filter.",
+      "sold_percent": "{{ percent }}% verkocht",
+      "sold_count": "{{ count }} verkocht"
+    },
     "js": {
       "show_all": "Alles tonen",
       "show_less": "Minder tonen",

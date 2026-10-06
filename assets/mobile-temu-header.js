@@ -44,10 +44,21 @@ function initMobileTemuHeader() {
     }
   }
 
+  // Les adresses gardées viennent parfois d'une visite dans une autre langue (« /products/… » en italien,
+  // « /en/products/… ») : on les remet dans la langue affichée, sinon la carte et le lien repassent en italien.
+  function localizedPath(pathname) {
+    var at = pathname.indexOf('/products/');
+    if (at === -1) return pathname;
+    var root = window.Shopify && window.Shopify.routes && window.Shopify.routes.root ? window.Shopify.routes.root : '/';
+    return root.replace(/\/$/, '') + pathname.slice(at);
+  }
+
   function safeProductUrl(value) {
     try {
       var url = new URL(value, window.location.origin);
-      return url.origin === window.location.origin ? url.href : '';
+      if (url.origin !== window.location.origin) return '';
+      url.pathname = localizedPath(url.pathname);
+      return url.href;
     } catch (error) {
       console.error('Unable to validate a wishlist product URL.', error);
       return '';
@@ -1717,6 +1728,7 @@ function initMobileTemuHeader() {
 
     Promise.allSettled(validProducts.map(function (item) {
       var productUrl = new URL(item.productUrl, window.location.href);
+      productUrl.pathname = localizedPath(productUrl.pathname);
       productUrl.search = '';
       productUrl.hash = '';
       productUrl.pathname = productUrl.pathname.replace(/\/$/, '') + '.js';
@@ -1737,7 +1749,7 @@ function initMobileTemuHeader() {
           && variant.compare_at_price > variant.price;
         var card = document.createElement('a');
         card.className = onSale ? 'mobile-explore-product mobile-explore-product--sale' : 'mobile-explore-product';
-        card.href = validProducts[index].productUrl;
+        card.href = safeProductUrl(validProducts[index].productUrl);
         var imageWrap = document.createElement('span');
         imageWrap.className = 'mobile-explore-product__image';
         if (product.featured_image) {
