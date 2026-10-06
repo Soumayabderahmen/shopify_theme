@@ -234,6 +234,9 @@ function initMobileTemuHeader() {
     }
 
     var variantTitle = current.variantTitle || item.variantTitle || '';
+    // Plusieurs variantes : seulement la couleur (la taille enregistrée n'a pas été choisie par le client).
+    var productInfo = wishlistProductInfo.get(item.id);
+    if (productInfo && productInfo.multi) variantTitle = productInfo.color;
     if (variantTitle && variantTitle !== 'Default Title') {
       var variant = document.createElement('p');
       variant.className = 'wishlist-page-card__variant';
@@ -292,8 +295,11 @@ function initMobileTemuHeader() {
     return moneyMatch ? parseWishlistMoney(moneyMatch[0]) : 0;
   }
 
+  // Produits à plusieurs variantes exclus : leur taille se choisit à l'ajout (fenêtre d'ajout rapide).
   function wishlistAvailableVariantIds() {
-    return wishlistItems.filter(isWishlistItemAvailable).map(function (item) {
+    return wishlistItems.filter(function (item) {
+      return isWishlistItemAvailable(item) && !isWishlistItemMulti(item);
+    }).map(function (item) {
       var current = wishlistItemCurrent(item);
       return current ? current.variantId : item.variantId || '';
     }).filter(Boolean);
@@ -629,6 +635,14 @@ function initMobileTemuHeader() {
     // avant d'appliquer les filtres "Prezzo sceso", "In offerta" et "Disponibili".
     var loadedCards = await Promise.all(wishlistItems.map(async function (item) {
       try {
+        // Nombre de variantes et couleur (choix de la taille à l'ajout, « Aggiungi tutto » sans ces produits).
+        if (!wishlistProductInfo.has(item.id)) {
+          await loadWishlistDrawerProduct(item).then(function (product) {
+            rememberWishlistProduct(item, product);
+          }).catch(function (infoError) {
+            console.error('Unable to read the variants of a saved wishlist product.', infoError);
+          });
+        }
         var card = await loadWishlistCardCached(item);
         wishlistCurrentData.set(item.id, readWishlistCardCurrent(card));
         return [item.id, card];
@@ -909,6 +923,60 @@ function initMobileTemuHeader() {
     return wishlistDrawerProducts.get(jsonUrl);
   }
 
+  /* Produit à plusieurs variantes : le cœur d'une carte enregistre la première variante disponible, que le client
+     n'a pas choisie (« Aggiungi » mettait au panier une taille jamais choisie). « Aggiungi » ouvre alors la fenêtre
+     d'ajout rapide (assets/mobile-quick-add.js) avec la couleur enregistrée pré-cochée : le client choisit sa taille.
+     Produit à variante unique : ajout direct, comme avant. */
+  var wishlistProductInfo = new Map();
+
+  function wishlistColorOf(product, variant) {
+    var options = (product && product.options) || [];
+    for (var index = 0; index < options.length; index += 1) {
+      var name = typeof options[index] === 'string' ? options[index] : options[index] && options[index].name;
+      if (/colou?r|colore|farbe|couleur|kleur/i.test(name || '')) return variant && variant.options ? variant.options[index] || '' : '';
+    }
+    return '';
+  }
+
+  function rememberWishlistProduct(item, product) {
+    var variant = wishlistDrawerVariant(product, item.variantId);
+    var info = {
+      multi: Boolean(product && Array.isArray(product.variants) && product.variants.length > 1),
+      color: wishlistColorOf(product, variant)
+    };
+    wishlistProductInfo.set(item.id, info);
+    return info;
+  }
+
+  function isWishlistItemMulti(item) {
+    var info = wishlistProductInfo.get(item.id);
+    return Boolean(info && info.multi);
+  }
+
+  // true : la fenêtre de choix est ouverte (rien n'est ajouté ici) ; false : ajout direct de la variante enregistrée.
+  function openWishlistChoice(item) {
+    if (!item || !window.mobileQuickAdd || !isMobileWishlistViewport()) return Promise.resolve(false);
+    return loadWishlistDrawerProduct(item).then(function (product) {
+      if (!rememberWishlistProduct(item, product).multi) return false;
+      if (wishlistDrawer && wishlistDrawer.open) closeWishlistDrawer(false);
+      return window.mobileQuickAdd.open(product.handle, item.variantId, {
+        title: product.title,
+        image: wishlistDrawerImage(product.featured_image, 600),
+        url: safeProductUrl(item.url) || '',
+        price: Number(item.priceCents) || 0,
+        compare: Number(item.compareAtPriceCents) || 0,
+        productId: item.id
+      });
+    }).catch(function (error) {
+      console.error('Unable to open the size choice for a wishlist product.', error);
+      return false;
+    });
+  }
+
+  function wishlistItemById(itemId) {
+    return wishlistItems.find(function (item) { return item.id === itemId; }) || null;
+  }
+
   function wishlistDrawerVariant(product, variantId) {
     if (!product || !Array.isArray(product.variants) || !product.variants.length) return null;
     return product.variants.find(function (variant) { return String(variant.id) === String(variantId); })
@@ -954,7 +1022,8 @@ function initMobileTemuHeader() {
     if (state.image) thumb.querySelector('img').src = state.image;
 
     var variant = row.querySelector('.mobile-wishlist-drawer__variant');
-    var variantTitle = state.loaded ? state.variantTitle : item.variantTitle;
+    // Avant le chargement, la variante enregistrée n'est pas affichée : sa taille n'a peut-être pas été choisie.
+    var variantTitle = state.loaded ? state.variantTitle : '';
     variant.textContent = variantTitle || '';
     variant.hidden = !variantTitle;
 
@@ -1046,9 +1115,19 @@ function initMobileTemuHeader() {
     wishlistDrawer.querySelector('[data-wishlist-drawer-foot]').hidden = availableItems.length === 0;
     wishlistDrawer.querySelector('[data-wishlist-drawer-total]').textContent = formatWishlistMoney(total);
     wishlistDrawer.querySelector('[data-wishlist-drawer-total-label]').textContent = T(availableItems.length === 1 ? 'total_available_one' : 'total_available_other', { count: availableItems.length });
+    // « Tout ajouter » : seulement les produits à variante unique (les autres demandent le choix de la taille).
+    var directCount = wishlistDrawerDirectVariantIds().length;
     var addAll = wishlistDrawer.querySelector('[data-wishlist-drawer-add-all]');
-    addAll.textContent = T('add_all_to_cart', { count: availableItems.length });
-    addAll.disabled = availableItems.length === 0;
+    addAll.textContent = T('add_all_to_cart', { count: directCount });
+    addAll.disabled = directCount === 0;
+    addAll.hidden = directCount === 0;
+  }
+
+  function wishlistDrawerDirectVariantIds() {
+    return wishlistItems.map(function (item) {
+      var state = wishlistDrawerItemState(item);
+      return state.loaded && state.available && !state.multi ? state.variantId : '';
+    }).filter(Boolean);
   }
 
   function renderWishlistDrawer() {
@@ -1064,11 +1143,14 @@ function initMobileTemuHeader() {
         var variant = wishlistDrawerVariant(product, item.variantId);
         if (!variant) throw new Error('Product has no variants: ' + item.url);
         var image = (variant.featured_image && variant.featured_image.src) || product.featured_image;
+        var info = rememberWishlistProduct(item, product);
         wishlistDrawerState.set(item.id, {
           loaded: true,
+          multi: info.multi,
           available: Boolean(variant.available),
           variantId: String(variant.id),
-          variantTitle: variant.title && variant.title !== 'Default Title' ? variant.title : '',
+          // Plusieurs variantes : seulement la couleur (la taille se choisit à l'ajout).
+          variantTitle: info.multi ? info.color : (variant.title && variant.title !== 'Default Title' ? variant.title : ''),
           priceCents: Number(variant.price) || 0,
           compareAtCents: Number(variant.compare_at_price) || 0,
           image: wishlistDrawerImage(image, 200)
@@ -1300,7 +1382,15 @@ function initMobileTemuHeader() {
       }
       var addButton = target.closest('[data-wishlist-drawer-add]');
       if (addButton && addButton.dataset.wishlistDrawerAdd) {
-        addWishlistVariantsToCart([addButton.dataset.wishlistDrawerAdd], addButton).then(function (added) {
+        var addRow = addButton.closest('[data-wishlist-drawer-item]');
+        if (addButton.dataset.choosing === 'true') return;
+        addButton.dataset.choosing = 'true';
+        openWishlistChoice(wishlistItemById(addRow && addRow.dataset.wishlistDrawerItem)).then(function (opened) {
+          delete addButton.dataset.choosing;
+          if (opened) return null;
+          return addWishlistVariantsToCart([addButton.dataset.wishlistDrawerAdd], addButton);
+        }).then(function (added) {
+          if (added === null) return;
           if (!added) {
             showWishlistDrawerToast(T('cart_add_error'), false);
             return;
@@ -1318,10 +1408,8 @@ function initMobileTemuHeader() {
       }
       var addAllButton = target.closest('[data-wishlist-drawer-add-all]');
       if (addAllButton) {
-        var variantIds = wishlistItems.map(function (item) {
-          var state = wishlistDrawerItemState(item);
-          return state.available ? state.variantId : '';
-        }).filter(Boolean);
+        var variantIds = wishlistDrawerDirectVariantIds();
+        if (!variantIds.length) return;
         addWishlistVariantsToCart(variantIds, addAllButton).then(function (added) {
           addAllButton.disabled = false;
           updateWishlistDrawerSummary();
@@ -1460,7 +1548,15 @@ function initMobileTemuHeader() {
 
     var addButton = target.closest('[data-wishlist-add]');
     if (addButton) {
-      addWishlistVariantsToCart([addButton.dataset.wishlistAdd], addButton).then(function (added) {
+      var addCard = addButton.closest('[data-wishlist-item-id], [data-product-id]');
+      var addItemId = addCard && (addCard.dataset.wishlistItemId || addCard.dataset.productId);
+      if (addButton.dataset.choosing === 'true') return;
+      addButton.dataset.choosing = 'true';
+      openWishlistChoice(wishlistItemById(addItemId)).then(function (opened) {
+        delete addButton.dataset.choosing;
+        if (opened) return false;
+        return addWishlistVariantsToCart([addButton.dataset.wishlistAdd], addButton);
+      }).then(function (added) {
         if (!added || !addButton.classList.contains('wishlist-page-card__add')) return;
         addButton.classList.add('is-done');
         addButton.textContent = T('added_check');

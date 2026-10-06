@@ -972,13 +972,24 @@
   }
 
   // Ouverture instantanée : photo, titre et prix déjà présents sur la carte, options en chargement.
-  function showCardPreview(trigger) {
+  function cardPreview(trigger) {
     var card = trigger.closest('li') || trigger.parentElement;
     var image = card.querySelector('.alibaba-card__picture img, img');
     var titleLink = card.querySelector('.alibaba-card__title a, a[href*="/products/"]');
     var wishlist = card.querySelector('.alibaba-card__wishlist[data-price-cents]');
-    var price = wishlist ? Number(wishlist.dataset.priceCents) : 0;
-    var compare = wishlist ? Number(wishlist.dataset.compareAtPriceCents) : 0;
+    return {
+      title: titleLink ? titleLink.textContent.trim() : '',
+      image: image ? image.currentSrc || image.src : '',
+      url: titleLink ? titleLink.href : '',
+      price: wishlist ? Number(wishlist.dataset.priceCents) : 0,
+      compare: wishlist ? Number(wishlist.dataset.compareAtPriceCents) : 0,
+      productId: wishlist && wishlist.dataset.productId
+    };
+  }
+
+  function showPreview(preview) {
+    var price = preview.price || 0;
+    var compare = preview.compare || 0;
     var onSale = compare > price;
     state = null;
     dialog.classList.add('is-pending');
@@ -986,12 +997,12 @@
     el.done.hidden = true;
     el.foot.hidden = false;
     el.mini.classList.remove('is-shown');
-    el.title.textContent = titleLink ? titleLink.textContent.trim() : '';
-    el.image.src = image ? image.currentSrc || image.src : '';
+    el.title.textContent = preview.title || '';
+    el.image.src = preview.image || '';
     el.miniImage.src = el.image.src;
     el.tag.hidden = true;
     // Cœur visible dès l'ouverture, avec l'état réel de la wishlist.
-    var productId = wishlist && wishlist.dataset.productId;
+    var productId = preview.productId;
     el.fav.hidden = !window.mobileWishlist || !productId;
     if (!el.fav.hidden) el.fav.setAttribute('aria-pressed', String(window.mobileWishlist.has(productId)));
     setHTML(el.price, price
@@ -1008,14 +1019,18 @@
     el.klarna.hidden = true;
     el.sim.hidden = true;
     el.back.hidden = true;
-    el.more.href = titleLink ? titleLink.href : '#';
+    el.more.href = preview.url || '#';
     setHTML(el.add, escapeHtml(T('loading_short')));
     el.add.classList.add('wait');
   }
 
   function openFromCard(trigger) {
-    var handle = trigger.dataset.quickAdd;
-    var variantId = cardVariantId(trigger);
+    openProduct(trigger.dataset.quickAdd, cardVariantId(trigger), cardPreview(trigger));
+  }
+
+  // Ouverture pour un produit (handle) : depuis une carte, ou depuis la wishlist (window.mobileQuickAdd.open).
+  // variantId : variante dont la couleur est pré-cochée ; la taille reste au choix du client.
+  function openProduct(handle, variantId, preview) {
     var token = {};
     openRequest = token;
     history = [];
@@ -1028,7 +1043,7 @@
       showDialog();
       return;
     }
-    showCardPreview(trigger);
+    showPreview(preview || { url: shopRoot + 'products/' + encodeURIComponent(handle) });
     showDialog();
     loadProduct(handle).then(function (product) {
       if (openRequest !== token || !isOpen) return;
@@ -1461,6 +1476,16 @@
     if (!mobile.matches) close();
     else observeCards();
   });
+
+  // Ouverture par d'autres scripts mobiles : wishlist (assets/mobile-temu-header.js), pour choisir la taille avant l'ajout.
+  // preview (facultatif) : { title, image, url, price, compare, productId } affichés pendant le chargement.
+  window.mobileQuickAdd = {
+    open: function (handle, variantId, preview) {
+      if (!mobile.matches || !handle) return false;
+      openProduct(handle, variantId, preview);
+      return true;
+    }
+  };
 
   // Cartes visibles : préchargées ; nouvelles cartes (défilement infini, filtres) : observées à leur arrivée.
   observeCards();
