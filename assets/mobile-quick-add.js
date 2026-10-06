@@ -210,10 +210,23 @@
     el.mini.classList.remove('is-shown');
   }
 
-  /* Libellés bruts des tailles : "XL fit 174-183CM" -> { code: "XL", lo: 174, hi: 183 }. */
+  /* Libellés bruts des tailles : "XL fit 174-183CM" -> { code: "XL", lo: 174, hi: 183 } (hauteur, sert à « Trova la tua
+     taglia ») ; "XL 65KG-75KG", "L 55-65kg" -> { code: "XL", kg: "65–75" } (poids : affiché et trié, pas de calcul). */
+  // "Asian L 61-70KG" : les mots autour de la taille ne sont pas la taille ; sans taille unique, libellé d'origine.
   function parseSize(raw) {
-    var match = String(raw).match(/^(\S+)\s*(?:fit)?\s*(\d{2,3})\s*[-–]\s*(\d{2,3})\s*cm$/i);
-    return match ? { raw: raw, code: match[1].toUpperCase(), lo: Number(match[2]), hi: Number(match[3]) } : { raw: raw, code: raw };
+    var text = String(raw).trim();
+    var match = text.match(/\(?\s*(\d{2,3})\s*(kg|cm)?\s*[-–]\s*(\d{2,3})\s*(kg|cm)\s*\)?$/i);
+    if (!match) return { raw: raw, code: raw };
+    var words = text.slice(0, match.index).replace(/\b(?:fit|asian|asia|chn|china|size|taglia)\b/gi, ' ').trim().split(/\s+/).filter(Boolean);
+    if (words.length !== 1) return { raw: raw, code: raw };
+    var size = { raw: raw, code: words[0].toUpperCase() };
+    if ((match[4] || match[2]).toLowerCase() === 'cm') {
+      size.lo = Number(match[1]);
+      size.hi = Number(match[3]);
+    } else {
+      size.kg = match[1] + '–' + match[3];
+    }
+    return size;
   }
 
   function sizeRank(code) {
@@ -680,7 +693,7 @@
       var size = sizeInfo(index, name);
       button.disabled = !available && !checked;
       var sub = button.querySelector('[data-qa-sub]');
-      setText(sub, size.lo ? size.lo + '–' + size.hi + ' cm' : (!available ? T('qa_size_sold_out') : ''));
+      setText(sub, size.lo ? size.lo + '–' + size.hi + ' cm' : size.kg ? size.kg + ' kg' : (!available ? T('qa_size_sold_out') : ''));
       sub.hidden = !sub.textContent;
       var old = button.querySelector('.bdg');
       var badge = available ? sizeBadge(index, name) : null;
@@ -701,7 +714,7 @@
         label.className = '';
       } else {
         var size = sizeInfo(index, value);
-        setText(label, size.code + (size.lo ? ' · ' + size.lo + '–' + size.hi + ' cm' : ''));
+        setText(label, size.code + (size.lo ? ' · ' + size.lo + '–' + size.hi + ' cm' : size.kg ? ' · ' + size.kg + ' kg' : ''));
         label.className = 'pick';
       }
     });

@@ -356,7 +356,8 @@
     var text = String(raw).trim();
     var size = { raw: raw, code: text };
     if (/\d+(?:\.\d+)?\s*[-–x×*]\s*\d+(?:\.\d+)?\s*[-–x×*]\s*\d+/i.test(text)) return size;
-    var match = text.match(/(\d{2,3})\s*[-–~]\s*(\d{2,3})\s*\)?\s*(kg|cm)?(?![a-z])/i);
+    // Unité après le second nombre ("61-70KG") ou collée au premier ("65KG-75KG").
+    var match = text.match(/(\d{2,3})\s*(kg|cm)?\s*[-–~]\s*(\d{2,3})\s*\)?\s*(kg|cm)?(?![a-z])/i);
     if (!match) {
       // "Asian M" sans plage : « M » sur le bouton, « taglie asiatiche » dit une seule fois au-dessus.
       // "Asian M", "CHN size XL", "4XL Asian size".
@@ -367,7 +368,7 @@
       return shoe ? { raw: raw, code: shoe[2], note: shoe[1].toUpperCase() } : size;
     }
     var lo = Number(match[1]);
-    var hi = Number(match[2]);
+    var hi = Number(match[3]);
     if (!(hi > lo)) return size;
     var rest = (text.slice(0, match.index) + ' ' + text.slice(match.index + match[0].length))
       .replace(/\d{2,3}\s*cm/gi, ' ')
@@ -376,7 +377,7 @@
     var parts = rest.split(/[\s\-–]+/).filter(Boolean);
     var letter = parts.filter(function (part) { return sizeRank(part) !== null; })[0];
     var code = letter ? letter.toUpperCase() : parts.join(' ');
-    var unit = match[3] ? match[3].toLowerCase() : null;
+    var unit = match[4] || match[2] ? (match[4] || match[2]).toLowerCase() : null;
     // Plage sans unité ("XXL 175-185") : seulement avec une vraie taille ; au-dessus de 130, c'est une hauteur.
     if (!unit) {
       if (!letter) return size;
