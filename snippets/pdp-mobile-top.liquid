@@ -101,6 +101,40 @@
           <span class="pdp-m__stars-off" aria-hidden="true">★★★★★</span>{{ 'mobile.pdp.reviews_title_short' | t }}
         {%- endif -%}
       </a>
+      {%- if pm_rating_count == 0 -%}
+        {%- comment -%}
+          Note réelle de l'app d'avis (Ali Reviews), déjà écrite dans le <head> par l'app SEO (JSON-LD aggregateRating) :
+          on l'affiche tout de suite, sans attendre que le bloc de l'app se charge (plusieurs secondes sur mobile).
+          Sans note dans la page, la ligne reste « Recensioni » et assets/pdp-mobile.js la remplit comme avant.
+        {%- endcomment -%}
+        <script>
+          (function () {
+            var link = document.currentScript.previousElementSibling;
+            var title = {{ product.title | json }};
+            var found = null;
+            var visit = function (node) {
+              if (!node || typeof node !== 'object' || found) return;
+              if (Array.isArray(node)) { node.forEach(visit); return; }
+              if (node.aggregateRating && (!node.name || node.name === title)) found = node.aggregateRating;
+              if (node['@graph']) visit(node['@graph']);
+            };
+            document.querySelectorAll('script[type="application/ld+json"]').forEach(function (script) {
+              try { visit(JSON.parse(script.textContent)); } catch (error) { /* JSON-LD invalide d'une autre app */ }
+            });
+            var value = found ? parseFloat(found.ratingValue) : NaN;
+            var count = found ? parseInt(found.reviewCount || found.ratingCount, 10) : 0;
+            if (!link || isNaN(value) || !(count > 0)) return;
+            var shown = value.toLocaleString(document.documentElement.lang || 'it', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            var label = {{ 'mobile.pdp.rating_out_of' | t: rating: '__R__' | json }}.replace('__R__', shown);
+            var star = document.createElement('span');
+            star.className = 'pdp-m__rst';
+            star.setAttribute('aria-label', label);
+            star.innerHTML = '<i style="width:' + Math.min(100, value * 20) + '%"></i>';
+            link.textContent = shown + ' · ' + count + ' ' + (count === 1 ? {{ 'mobile.pdp.review' | t | json }} : {{ 'mobile.pdp.reviews' | t | json }});
+            link.insertBefore(star, link.firstChild);
+          })();
+        </script>
+      {%- endif -%}
       {%- comment -%}
         « +N articoli venduti » retiré : le nombre venait du métachamp custom.moq (saisi à la main), pas des vraies
         ventes, et contredisait le nombre d'avis. Pour le remettre : product.metafields.custom.moq + clé mobile.pdp.items_sold.
