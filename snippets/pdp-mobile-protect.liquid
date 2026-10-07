@@ -69,12 +69,13 @@
           </defs>
           <path d="M60 5 110 23v41c0 35-22 60-50 72C32 124 10 99 10 64V23z" fill="url(#pdp-pt-shb)" stroke="url(#pdp-pt-shs)" stroke-width="1.6"/>
           <path d="M60 14 101 29v35c0 29-18 50-41 61C37 114 19 93 19 64V29z" fill="none" stroke="#5a4bf0" stroke-width=".7" opacity=".3"/>
-          <g transform="translate(37 44) scale(.72)">
+          {%- comment -%} Monogramme en <svg> imbriqué (x/y) plutôt qu'un transform : le thème impose un transform-origin aux SVG, qui décalait le logo. {%- endcomment -%}
+          <svg x="37" y="44" width="46.08" height="46.08" viewBox="0 0 64 64">
             <rect width="64" height="64" rx="16" fill="url(#pl-logo-g)"/>
             <path fill="#fff" fill-rule="evenodd" d="M12 15h12.5a10 10 0 0 1 0 20H20v14h-8zM20 22v6h4.2a3 3 0 0 0 0-6z"/>
             <path fill="#fff" d="M36.5 15h8v26H54v8H36.5z"/>
             <circle cx="51" cy="18.5" r="3.6" fill="#ffb020"/>
-          </g>
+          </svg>
         </svg>
         <nav class="pdp-m__pt-nav" aria-label="{{ 'protezioni.header_title' | t: shop_name: shop.name }}">
           <button type="button" data-pdp-pt-go="ret">{{ 'protezioni.cards.rimborso' | t }}</button>

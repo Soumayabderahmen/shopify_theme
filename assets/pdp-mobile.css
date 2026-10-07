@@ -624,12 +624,14 @@ body.template-product {
   right: 0;
   left: 0;
   z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   height: 64px;
   margin: 0;
   padding: 0 60px;
+  overflow: hidden;
+  line-height: 64px;
+  text-align: center;
+  text-overflow: ellipsis;
   color: #16123f;
   font-family: 'Sora', system-ui, sans-serif;
   font-size: 16px;
