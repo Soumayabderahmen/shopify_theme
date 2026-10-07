@@ -1,0 +1,220 @@
+{%- comment -%}
+  Pages de politique (/policies/…) : bouton retour + mise en page des politiques Shopify.
+  Politique d'expédition : tant que le texte de l'admin est celui d'origine (« Ultimo aggiornamento: agosto 2026 »),
+  version structurée et traduite dans la langue du client (clés policy_shipping.*). Si la politique est modifiée
+  ou traduite dans l'admin (Translate & Adapt), le texte de Shopify s'affiche tel quel : jamais une ancienne version
+  d'un texte légal.
+  Params : content (content_for_layout)
+{%- endcomment -%}
+{%- liquid
+  assign pp_root = routes.root_url | append: '/' | replace: '//', '/'
+  assign pp_custom = false
+  if request.path contains 'shipping-policy'
+    assign pp_body = shop.shipping_policy.body
+    if pp_body contains 'Ultimo aggiornamento: agosto 2026' and pp_body contains '9. CONTATTI'
+      assign pp_custom = true
+    endif
+  endif
+  assign pp_email = 'contact@platinumshop.it'
+  assign pp_email_link = '<a href="mailto:' | append: pp_email | append: '">' | append: pp_email | append: '</a>'
+-%}
+<div class="pp">
+  <a class="pp__back" href="{{ routes.root_url }}" data-pp-back>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+    {{- 'policy_shipping.back' | t -}}
+  </a>
+
+  {%- if pp_custom -%}
+    <article class="pp__card">
+      <header class="pp__head">
+        <span class="pp__ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span>
+        <h1>{{ 'policy_shipping.title' | t }}</h1>
+        <p class="pp__date">{{ 'policy_shipping.updated' | t }}</p>
+      </header>
+
+      <section class="pp__sec">
+        <h2><i>1</i>{{ 'policy_shipping.s1_title' | t }}</h2>
+        <p>{{ 'policy_shipping.s1_text' | t }}</p>
+      </section>
+
+      <section class="pp__sec">
+        <h2><i>2</i>{{ 'policy_shipping.s2_title' | t }}</h2>
+        <ul class="pp__zones">
+          <li><span>{{ 'policy_shipping.zone_italy' | t }}</span><b>{{ 'policy_shipping.days' | t: range: '3–7' }}</b></li>
+          <li><span>{{ 'policy_shipping.zone_eu' | t }}</span><b>{{ 'policy_shipping.days' | t: range: '7–15' }}</b></li>
+          <li><span>{{ 'policy_shipping.zone_world' | t }}</span><b>{{ 'policy_shipping.days' | t: range: '15–30' }}</b></li>
+        </ul>
+        <p class="pp__note">{{ 'policy_shipping.s2_note' | t }}</p>
+      </section>
+
+      <section class="pp__sec">
+        <h2><i>3</i>{{ 'policy_shipping.s3_title' | t }}</h2>
+        <p>{{ 'policy_shipping.s3_text' | t }}</p>
+      </section>
+
+      <section class="pp__sec">
+        <h2><i>4</i>{{ 'policy_shipping.s4_title' | t }}</h2>
+        <p>{{ 'policy_shipping.s4_text_html' | t: email: pp_email_link }}</p>
+        <a class="pp__cta" href="{{ pp_root }}apps/17TRACK">{{ 'policy_shipping.track_cta' | t }}</a>
+      </section>
+
+      <section class="pp__sec">
+        <h2><i>5</i>{{ 'policy_shipping.s5_title' | t }}</h2>
+        <p>{{ 'policy_shipping.s5_text' | t }}</p>
+      </section>
+
+      <section class="pp__sec">
+        <h2><i>6</i>{{ 'policy_shipping.s6_title' | t }}</h2>
+        <p>{{ 'policy_shipping.s6_text' | t }}</p>
+      </section>
+
+      <section class="pp__sec">
+        <h2><i>7</i>{{ 'policy_shipping.s7_title' | t }}</h2>
+        <p>{{ 'policy_shipping.s7_text' | t }}</p>
+      </section>
+
+      <section class="pp__sec">
+        <h2><i>8</i>{{ 'policy_shipping.s8_title' | t }}</h2>
+        <p>{{ 'policy_shipping.s8_text_html' | t: email: pp_email_link }}</p>
+      </section>
+
+      <section class="pp__sec">
+        <h2><i>9</i>{{ 'policy_shipping.s9_title' | t }}</h2>
+        <p>{{ 'policy_shipping.s9_text' | t }}</p>
+        <ul class="pp__contact">
+          <li><span>{{ 'policy_shipping.label_email' | t }}</span><a href="mailto:{{ pp_email }}">{{ pp_email }}</a></li>
+          <li><span>{{ 'policy_shipping.label_phone' | t }}</span><a href="tel:+393703723588">+39 370 372 3588</a></li>
+          <li><span>{{ 'policy_shipping.label_web' | t }}</span><a href="{{ routes.root_url }}">platinumshop.it</a></li>
+        </ul>
+      </section>
+    </article>
+  {%- else -%}
+    <div class="pp__card pp__card--shopify">{{ content }}</div>
+  {%- endif -%}
+</div>
+
+<style>
+  .pp {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 14px 16px 40px;
+    color: #16123f;
+    font-family: 'Figtree', system-ui, sans-serif;
+  }
+  .pp__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    margin-bottom: 10px;
+    padding: 0 14px 0 8px;
+    border-radius: 999px;
+    background: #f1f0fe;
+    color: #3a34d2;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .pp__back svg { width: 18px; height: 18px; }
+  .pp__card {
+    padding: 22px 18px;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 1px 0 rgb(22 18 63 / 6%), 0 10px 30px -18px rgb(22 18 63 / 30%);
+  }
+  .pp__head { margin-bottom: 8px; text-align: center; }
+  .pp__ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    border-radius: 14px;
+    background: #ecebfd;
+    color: #3a34d2;
+  }
+  .pp__ico svg { width: 26px; height: 26px; }
+  .pp h1 {
+    margin: 0;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+  .pp__date { margin: 4px 0 0; color: #6b6f86; font-size: 13px; }
+  .pp__sec { padding: 16px 0; border-top: 1px solid #eceef5; }
+  .pp__sec:first-of-type { border-top: 0; }
+  .pp h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .pp h2 i {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #3a34d2;
+    color: #fff;
+    font-size: 13px;
+    font-style: normal;
+  }
+  .pp p { margin: 0; color: #3c4058; font-size: 14.5px; line-height: 1.6; }
+  .pp p a, .pp__contact a { color: #3a34d2; font-weight: 700; word-break: break-word; }
+  .pp__zones, .pp__contact { margin: 0; padding: 0; list-style: none; }
+  .pp__zones li, .pp__contact li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 12px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    background: #f6f7fb;
+    font-size: 14px;
+  }
+  .pp__zones li + li, .pp__contact li + li { margin-top: 8px; }
+  .pp__zones b { color: #3a34d2; }
+  .pp__contact span { color: #6b6f86; }
+  .pp__note { margin-top: 10px !important; color: #6b6f86 !important; font-size: 13px !important; }
+  .pp__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    margin-top: 12px;
+    border-radius: 12px;
+    background: #3a34d2;
+    color: #fff;
+    font-weight: 800;
+    text-decoration: none;
+  }
+  /* Autres politiques (texte de Shopify) : même carte, texte lisible. */
+  .pp__card--shopify .shopify-policy__container { max-width: none; margin: 0; padding: 0; }
+  .pp__card--shopify .shopify-policy__title h1 { margin-bottom: 14px; text-align: center; }
+  .pp__card--shopify .rte { font-size: 14.5px; line-height: 1.6; }
+</style>
+
+<script>
+  // Retour : page précédente du site si elle existe, sinon l'accueil (lien du bouton).
+  (function () {
+    var back = document.querySelector('[data-pp-back]');
+    if (!back) return;
+    back.addEventListener('click', function (event) {
+      var sameSite = document.referrer && document.referrer.indexOf(window.location.origin) === 0;
+      if (sameSite && window.history.length > 1) {
+        event.preventDefault();
+        window.history.back();
+      }
+    });
+  })();
+</script>

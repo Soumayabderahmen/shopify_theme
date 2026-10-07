@@ -362,7 +362,12 @@
       {%- sections 'header-group' -%}
       {%- sections 'overlay-group' -%}
       <main id="content">
-        {{ content_for_layout }}
+        {%- comment -%} Politiques : bouton retour, mise en page et politique d'expédition traduite (snippets/policy-page.liquid). {%- endcomment -%}
+        {%- if request.page_type == 'policy' -%}
+          {%- render 'policy-page', content: content_for_layout -%}
+        {%- else -%}
+          {{ content_for_layout }}
+        {%- endif -%}
         {%- sections 'footer-group' -%}
       </main>
       {%- liquid

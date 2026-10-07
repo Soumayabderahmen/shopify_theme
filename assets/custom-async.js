@@ -1282,19 +1282,15 @@ window.addEventListener('nav', function (evt) {
 				const originalHTML = em.innerHTML;
 				const dataIndex = 'usp-' + [...listUspHeader].indexOf(el) + in2;
 
-				if (typeof translations === 'undefined') {
-					var translations = {
-						readmore_text: 'Read more'
-					};
-				} else if (!translations.readmore_text) {
-					translations.readmore_text = 'Read more';
-				}
+				// Texte traduit de snippets/global-variables.liquid (window.translations). L'ancien « var translations »
+				// local masquait cette variable globale : « Read more » s'affichait en anglais dans toutes les langues.
+				const readMoreLabel = (window.translations && window.translations.readmore_text) || 'Read more';
 
 				// Wrap inner content and append read more link
 				/*em.innerHTML = `
 					<span class="outer">
 						<span class="inner">${innerText}</span>
-						<a href="#" class="linked" data-popup="${dataIndex}">${translations.readmore_text}</a>
+						<a href="#" class="linked" data-popup="${dataIndex}">${readMoreLabel}</a>
 						<span class="inner-text">${innerText}</span>
 					</span>
 				`;*/
@@ -1310,7 +1306,7 @@ window.addEventListener('nav', function (evt) {
 				linkEl.href = '#';
 				linkEl.className = 'linked';
 				linkEl.setAttribute('data-popup', dataIndex);
-				linkEl.textContent = translations.readmore_text;
+				linkEl.textContent = readMoreLabel;
 
 				const innerTextSpan = document.createElement('span');
 				innerTextSpan.className = 'inner-text';

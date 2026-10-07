@@ -950,8 +950,9 @@
     var sample = ship.getAttribute('data-money-sample') || '';
     var match = sample.match(/^(.*?)1(\D?)234(?:\2)567(.*)$/);
     var whole = String(Math.round(cents / 100));
-    if (!match) return money(cents).replace(/[.,]00(?=\D*$)/, '');
-    return match[1] + whole.replace(/\B(?=(\d{3})+(?!\d))/g, match[2]) + match[3];
+    // Espaces insécables : « CHF 48 » ne se coupe pas en « CHF » / « 48 » sur deux lignes.
+    if (!match) return money(cents).replace(/[.,]00(?=\D*$)/, '').replace(/ /g, ' ');
+    return (match[1] + whole.replace(/\B(?=(\d{3})+(?!\d))/g, match[2]) + match[3]).replace(/ /g, ' ');
   };
   // Textes déjà formatés par Shopify en euros ; devises converties : montant calculé ici.
   var updateShipping = function (price) {

@@ -1,7 +1,17 @@
 {%- comment -%}
   Tuile de la grille de catégories (sections/section-category-tiles.liquid).
   Params : url, image, label, hidden (bool), attributes (attributs d'éditeur optionnels).
+  Libellé traduit dans la langue du client s'il existe une clé editor_text.tiles.<libellé> (ex. « Stile Cinese » ->
+  stile_cinese) ; un libellé modifié dans l'éditeur (sans clé) s'affiche tel quel.
 {%- endcomment -%}
+{%- liquid
+  assign tile_key = label | handleize | replace: '-', '_'
+  assign tile_key = 'editor_text.tiles.' | append: tile_key
+  assign tile_text = tile_key | t
+  if tile_text contains 'translation missing' or tile_text == tile_key
+    assign tile_text = label
+  endif
+-%}
 <a class="category-tiles__item" href="{{ url }}"{% if hidden %} hidden{% endif %} {{ attributes }}>
   <span class="category-tiles__media">
     {%- if image != blank -%}
@@ -16,5 +26,5 @@
       }}
     {%- endif -%}
   </span>
-  <span class="category-tiles__label">{{ label | escape }}</span>
+  <span class="category-tiles__label">{{ tile_text | escape }}</span>
 </a>

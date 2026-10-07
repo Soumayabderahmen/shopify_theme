@@ -187,7 +187,8 @@
           assign pm_ship_text_free = 'mobile.pdp.free_shipping_order' | t
           assign pm_ship_text_from = ''
           if pm_ship_threshold > 0
-            assign pm_ship_amount = pm_ship_threshold | money_without_trailing_zeros | strip_html | append: mm_cur
+            # Espace insécable : « 50 € » ne se coupe pas sur deux lignes.
+            assign pm_ship_amount = pm_ship_threshold | money_without_trailing_zeros | strip_html | append: mm_cur | replace: ' ', ' '
             assign pm_ship_text_from = 'mobile.pdp.free_shipping_from' | t: amount: pm_ship_amount
           endif
         -%}
