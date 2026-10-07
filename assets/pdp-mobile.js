@@ -923,32 +923,30 @@
       if (terms) terms.click();
     });
   });
-  /* ---------- Feuille « Protections » (snippets/pdp-mobile-protect.liquid) ----------
-     Paiements, livraison, retours, confidentialité, garantie de prix : un onglet chacun ; chaque bouton de la fiche
-     (data-pdp-pt-open) ouvre la feuille sur son onglet. Fermeture : croix, OK, tap sur le fond, touche Échap. */
+  /* ---------- Feuille « Protections » (snippets/pdp-mobile-protect.liquid, modèle « Protezioni TikTok Shop ») ----------
+     Une carte par engagement ; chaque bouton de la fiche (data-pdp-pt-open) ouvre la feuille et la fait défiler jusqu'à
+     sa carte. Fermeture : croix, OK, tap sur le fond, touche Échap. */
   var protectSheet = root.querySelector('[data-pdp-pt]');
   if (protectSheet) {
     var protectBody = protectSheet.querySelector('[data-pdp-pt-body]');
-    var protectTabs = Array.prototype.slice.call(protectSheet.querySelectorAll('[data-pdp-pt-tab]'));
-    var showProtectTab = function (key) {
-      if (!protectSheet.querySelector('[data-pdp-pt-panel="' + key + '"]')) key = 'pay';
-      protectTabs.forEach(function (tab) {
-        var on = tab.getAttribute('data-pdp-pt-tab') === key;
-        tab.setAttribute('aria-selected', on ? 'true' : 'false');
-        if (on) tab.scrollIntoView({ block: 'nearest', inline: 'center' });
-      });
-      protectSheet.querySelectorAll('[data-pdp-pt-panel]').forEach(function (panel) {
-        panel.hidden = panel.getAttribute('data-pdp-pt-panel') !== key;
-      });
-      protectBody.scrollTop = 0;
+    var showProtectCard = function (key) {
+      var card = protectSheet.querySelector('[data-pdp-pt-card="' + key + '"]');
+      // Première carte (retours) : la feuille s'ouvre en haut, avec l'en-tête ; sinon la carte demandée en haut.
+      protectBody.scrollTop = card && card.previousElementSibling && card.previousElementSibling.hasAttribute('data-pdp-pt-card')
+        ? card.offsetTop - 12
+        : 0;
     };
     var closeProtect = function () {
       protectSheet.classList.remove('is-open');
       window.setTimeout(function () { if (protectSheet.open) protectSheet.close(); }, 220);
     };
-    protectTabs.forEach(function (tab) {
-      tab.addEventListener('click', function () { showProtectTab(tab.getAttribute('data-pdp-pt-tab')); });
-    });
+    // Titre de la barre : seulement quand le grand titre de l'en-tête est sorti de l'écran (comme TikTok Shop).
+    var protectHeroTitle = protectSheet.querySelector('.pdp-m__pt-hero h2');
+    var syncProtectBar = function () {
+      var past = protectHeroTitle && protectBody.scrollTop > protectHeroTitle.offsetTop + protectHeroTitle.offsetHeight - 8;
+      protectSheet.classList.toggle('is-scrolled', Boolean(past));
+    };
+    protectBody.addEventListener('scroll', syncProtectBar, { passive: true });
     protectSheet.querySelectorAll('[data-pdp-pt-close]').forEach(function (button) {
       button.addEventListener('click', closeProtect);
     });
@@ -963,7 +961,8 @@
       button.addEventListener('click', function () {
         if (typeof protectSheet.showModal !== 'function') return;
         if (!protectSheet.open) protectSheet.showModal();
-        showProtectTab(button.getAttribute('data-pdp-pt-open'));
+        showProtectCard(button.getAttribute('data-pdp-pt-open'));
+        syncProtectBar();
         window.requestAnimationFrame(function () { protectSheet.classList.add('is-open'); });
       });
     });

@@ -626,7 +626,7 @@
     "support_title": "Service et assistance client"
   },
   "protezioni": {
-    "header_title": "{{ shop_name }} Protections",
+    "header_title": "Protections {{ shop_name }}",
     "ok": "Ok",
     "cards": {
       "pagamenti": "Paiements",
@@ -700,6 +700,8 @@
     }
   },
   "mobile_protect": {
+    "support_title": "Assistance client",
+    "support_text_html": "Une question sur votre commande ? Écrivez-nous à {{ email }} ou appelez le {{ phone }} : notre équipe vous aide.",
     "chip_prep": "Préparation en 1 à 3 jours ouvrés",
     "chip_tracking": "Suivi de colis par e-mail",
     "chip_report": "Colis abîmé : signalement sous 7 jours",

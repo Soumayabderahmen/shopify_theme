@@ -554,8 +554,9 @@ body.template-product {
   height: 16px;
 }
 
-/* Feuille « Protections » (snippets/pdp-mobile-protect.liquid) : style Temu / AliExpress — en-tête bleu, onglets en
-   pastilles, chiffres clés, étapes numérotées. Les boutons du thème imposent min-height / padding 0 : valeurs forcées. */
+/* Feuille « Protections » (snippets/pdp-mobile-protect.liquid), modèle « Protezioni TikTok Shop » : en-tête bleu
+   clair en dégradé, cartes blanches empilées, titres surlignés, liens « En savoir plus », bouton OK gris.
+   Les boutons du thème imposent min-height / padding 0 : valeurs forcées. */
 #root .pdp-m .pdp-m__pt {
   position: fixed;
   inset: auto 0 0;
@@ -565,10 +566,10 @@ body.template-product {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  color: var(--pm-ink);
-  background: #f6f7fb;
+  color: #16123f;
+  background: #fff;
   border: 0;
-  border-radius: 22px 22px 0 0;
+  border-radius: 20px 20px 0 0;
   box-shadow: 0 -12px 40px -12px rgb(22 18 63 / 35%);
   transform: translateY(100%);
   transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -579,431 +580,250 @@ body.template-product {
 }
 
 #root .pdp-m .pdp-m__pt::backdrop {
-  background: rgb(22 18 63 / 45%);
+  background: rgb(0 0 0 / 45%);
 }
 
 .pdp-m__pt-in {
-  position: relative;
   display: flex;
   flex-direction: column;
   max-height: 92vh;
+  background: linear-gradient(180deg, #dceafc 0, #eef4fe 300px, #fff 420px);
 }
 
-.pdp-m__pt-grip {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  z-index: 2;
-  width: 42px;
-  height: 5px;
-  background: rgb(255 255 255 / 70%);
-  border-radius: 3px;
-  transform: translateX(-50%);
+.pdp-m__pt-bar {
+  position: relative;
+  flex: none;
+  padding: 16px 56px 10px;
+  text-align: center;
+}
+
+#root .pdp-m .pdp-m__pt-bar-title {
+  margin: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: #16123f;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.3;
 }
 
 #root .pdp-m .pdp-m__pt-x {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 2;
+  top: 10px;
+  right: 10px;
   display: flex !important;
   align-items: center;
   justify-content: center;
-  width: 36px !important;
-  height: 36px !important;
-  min-height: 36px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
   padding: 0 !important;
-  color: #fff;
-  background: rgb(255 255 255 / 22%);
+  color: #16123f;
+  background: transparent;
   border: 0;
   border-radius: 50%;
 }
 
+#root .pdp-m .pdp-m__pt.is-scrolled .pdp-m__pt-bar-title {
+  opacity: 1;
+}
+
 .pdp-m__pt-x svg {
-  width: 18px;
-  height: 18px;
-}
-
-.pdp-m__pt-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 24px 60px 16px 18px;
-  color: #fff;
-  background: linear-gradient(120deg, #2a2390 0%, #3a34d2 60%, #5a55e6 100%);
-}
-
-.pdp-m__pt-shield {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  background: rgb(255 255 255 / 20%);
-  border-radius: 12px;
-}
-
-.pdp-m__pt-shield svg {
-  width: 22px;
-  height: 22px;
-}
-
-#root .pdp-m .pdp-m__pt-top h2 {
-  margin: 0;
-  color: #fff;
-  font-family: 'Sora', system-ui, sans-serif;
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.25;
-  text-transform: none;
-}
-
-.pdp-m__pt-tabs {
-  display: flex;
-  flex: none;
-  gap: 8px;
-  padding: 12px 14px;
-  overflow-x: auto;
-  background: #fff;
-  border-bottom: 1px solid #eceef5;
-  scrollbar-width: none;
-}
-
-.pdp-m__pt-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-#root .pdp-m .pdp-m__pt-tabs button {
-  display: inline-flex !important;
-  flex: none;
-  align-items: center;
-  gap: 6px;
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 0 14px !important;
-  color: #4a4f6b;
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  background: #f1f2f7;
-  border: 0;
-  border-radius: 999px;
-}
-
-#root .pdp-m .pdp-m__pt-tabs button[aria-selected='true'] {
-  color: #fff;
-  background: #16123f;
-}
-
-.pdp-m__pt-tabs svg {
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
 }
 
 .pdp-m__pt-body {
+  position: relative;
   flex: 1 1 auto;
-  padding: 14px 14px 18px;
+  padding: 2px 16px 18px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
 .pdp-m__pt-hero {
   display: flex;
-  gap: 12px;
-  padding: 14px;
-  background: #fff;
-  border-radius: 16px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 2px 18px;
 }
 
-.pdp-m__pt-hero > span {
+.pdp-m__pt-hero-txt {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pdp-m__pt-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+
+.pdp-m__pt-brand b {
+  color: #16123f;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+#root .pdp-m .pdp-m__pt-hero h2 {
+  margin: 0 0 6px;
+  color: #16123f;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.pdp-m__pt-hero p {
+  margin: 0;
+  color: #5b6077;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+/* Bouclier illustré avec le logo PL (comme le bouclier TikTok). */
+.pdp-m__pt-shield {
+  position: relative;
   display: flex;
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  color: #3a34d2;
-  background: #ecebfd;
-  border-radius: 14px;
+  width: 96px;
+  height: 110px;
 }
 
-.pdp-m__pt-hero > span svg {
-  width: 24px;
-  height: 24px;
+.pdp-m__pt-shield > svg:first-child {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-#root .pdp-m .pdp-m__pt h3 {
-  margin: 0 0 4px;
-  color: var(--pm-ink);
+.pdp-m__pt-shield .pl-logo {
+  position: relative;
+  margin-top: -6px;
+  opacity: 0.9;
+}
+
+.pdp-m__pt-card {
+  padding: 18px 18px 16px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 0 rgb(22 18 63 / 4%), 0 6px 20px -10px rgb(22 18 63 / 22%);
+}
+
+.pdp-m__pt-card + .pdp-m__pt-card {
+  margin-top: 14px;
+}
+
+#root .pdp-m .pdp-m__pt-card h3 {
+  margin: 0 0 8px;
+  color: #16123f;
   font-family: 'Sora', system-ui, sans-serif;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
   line-height: 1.3;
   text-transform: none;
 }
 
-#root .pdp-m .pdp-m__pt h4 {
-  margin: 18px 2px 10px;
-  color: var(--pm-ink);
-  font-family: 'Sora', system-ui, sans-serif;
-  font-size: 14.5px;
-  font-weight: 700;
-  text-transform: none;
+/* Titre surligné en bleu clair sur sa moitié basse. */
+.pdp-m__pt-card h3 span {
+  background: linear-gradient(transparent 58%, #d6e6fd 58%);
 }
 
-.pdp-m__pt p {
+.pdp-m__pt-card p {
   margin: 0;
-  color: #4a4f6b;
-  font-size: 13.5px;
-  line-height: 1.55;
+  color: #5b6077;
+  font-size: 14.5px;
+  line-height: 1.5;
 }
 
-.pdp-m__pt p a,
-.pdp-m__pt-steps a {
-  color: var(--pm-blue);
+.pdp-m__pt-card ul {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdp-m__pt-card ul li {
+  position: relative;
+  padding: 3px 0 3px 18px;
+  color: #5b6077;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.pdp-m__pt-card ul li::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 4px;
+  width: 5px;
+  height: 5px;
+  background: #5b6077;
+  border-radius: 50%;
+}
+
+.pdp-m__pt-card a {
+  color: #2f6fe0;
   font-weight: 700;
   word-break: break-word;
 }
 
-/* Chiffres clés (comme les badges « 90 days » / « Free returns » de Temu). */
-.pdp-m__pt-hl {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.pdp-m__pt-sub {
+  margin-top: 6px !important;
+}
+
+#root .pdp-m .pdp-m__pt-card .pdp-m__pt-pay {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  margin: 10px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.pdp-m__pt-hl--one {
-  grid-template-columns: 1fr;
-}
-
-.pdp-m__pt-hl li {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 12px 8px;
-  text-align: center;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: inset 0 0 0 1px #e4e3fb;
-}
-
-.pdp-m__pt-hl b {
-  color: #3a34d2;
-  font-family: 'Sora', system-ui, sans-serif;
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.1;
-}
-
-.pdp-m__pt-hl span {
-  color: #6b6f86;
-  font-size: 11.5px;
-  line-height: 1.3;
-}
-
-.pdp-m__pt-box {
-  margin-top: 10px !important;
-  padding: 12px 14px;
-  background: #fff;
-  border-radius: 14px;
-}
-
-.pdp-m__pt-list {
-  margin: 10px 0 0;
-  padding: 4px 14px;
-  list-style: none;
-  background: #fff;
-  border-radius: 14px;
-}
-
-.pdp-m__pt-list li {
-  display: flex;
-  gap: 10px;
-  padding: 10px 0;
-  color: #3c4058;
-  font-size: 13.5px;
-  line-height: 1.45;
-}
-
-.pdp-m__pt-list li + li {
-  border-top: 1px solid #f0f1f6;
-}
-
-.pdp-m__pt-list svg {
-  flex: none;
-  width: 18px;
-  height: 18px;
-  margin-top: 1px;
-  color: #3a34d2;
-}
-
-.pdp-m__pt-zones {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.pdp-m__pt-zones li {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 4px 10px;
-  padding: 11px 14px;
-  font-size: 13.5px;
-  background: #fff;
-  border-radius: 12px;
-}
-
-.pdp-m__pt-zones li + li {
-  margin-top: 6px;
-}
-
-.pdp-m__pt-zones b {
-  color: #3a34d2;
-}
-
-.pdp-m__pt-note {
-  margin: 8px 2px 0 !important;
-  color: #8a8ea3 !important;
-  font-size: 12px !important;
-}
-
-.pdp-m__pt-steps {
-  margin: 0;
-  padding: 14px 14px 2px;
-  list-style: none;
-  background: #fff;
-  border-radius: 14px;
-  counter-reset: pt-step;
-}
-
-.pdp-m__pt-steps li {
-  position: relative;
-  padding: 0 0 14px 38px;
-  color: #3c4058;
-  font-size: 13.5px;
-  line-height: 1.5;
-  counter-increment: pt-step;
-}
-
-.pdp-m__pt-steps li::before {
-  content: counter(pt-step);
-  position: absolute;
-  top: -2px;
-  left: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 800;
-  background: #3a34d2;
-  border-radius: 50%;
-}
-
-.pdp-m__pt-steps li:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  top: 26px;
-  bottom: 2px;
-  left: 12px;
-  width: 2px;
-  background: #dcdafb;
-}
-
-.pdp-m__pt-warn {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
   margin-top: 10px;
-  padding: 12px 14px;
-  color: #8a4b08;
-  font-size: 13px;
-  line-height: 1.45;
-  background: #fff6e8;
-  border-radius: 14px;
 }
 
-.pdp-m__pt-pay {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0;
-  padding: 12px;
-  list-style: none;
-  background: #fff;
-  border-radius: 14px;
+.pdp-m__pt-card .pdp-m__pt-pay li {
+  padding: 0;
+}
+
+.pdp-m__pt-card .pdp-m__pt-pay li::before {
+  content: none;
 }
 
 .pdp-m__pt-pay svg {
   display: block;
-  width: 38px;
-  height: 24px;
-}
-
-.pdp-m__pt-contact {
-  margin-top: 12px;
-  padding: 14px;
-  background: #f1f0fe;
-  border-radius: 14px;
-}
-
-.pdp-m__pt-contact b {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 14.5px;
-}
-
-#root .pdp-m .pdp-m__pt-contact a:last-child {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  margin-top: 12px;
-  color: #fff;
-  font-weight: 800;
-  text-decoration: none;
-  background: var(--pm-blue);
-  border-radius: 12px;
+  width: 44px;
+  height: 28px;
 }
 
 #root .pdp-m .pdp-m__pt-more {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin: 14px 2px 0;
-  color: var(--pm-blue);
-  font-size: 13.5px;
+  margin-top: 10px;
+  color: #2f6fe0;
+  font-size: 15px;
   font-weight: 700;
   text-decoration: none;
 }
 
 .pdp-m__pt-more svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
 }
 
 .pdp-m__pt-rte {
-  margin-top: 10px;
-  padding: 14px;
-  color: #3c4058;
-  font-size: 13.5px;
-  line-height: 1.6;
-  background: #fff;
-  border-radius: 14px;
+  color: #5b6077;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .pdp-m__pt-foot {
   flex: none;
-  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   background: #fff;
-  border-top: 1px solid #eceef5;
 }
 
 #root .pdp-m .pdp-m__pt-foot button {
@@ -1011,16 +831,16 @@ body.template-product {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 48px !important;
-  min-height: 48px !important;
+  height: 50px !important;
+  min-height: 50px !important;
   padding: 0 16px !important;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 800;
+  color: #16123f;
+  font-size: 16px;
+  font-weight: 700;
   text-align: center;
-  background: #16123f;
+  background: #eceef3;
   border: 0;
-  border-radius: 999px;
+  border-radius: 12px;
 }
 
 /* 5. Options */
