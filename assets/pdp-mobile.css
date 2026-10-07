@@ -529,13 +529,13 @@ body.template-product {
   width: 100%;
   margin-top: 12px;
   padding: 11px 12px;
-  color: #15603a;
+  color: #2a2390;
   font-size: 13px;
   font-weight: 700;
   text-align: left;
-  background: #eaf7ef;
+  background: #ecebfd;
   border-radius: 14px;
-  box-shadow: inset 0 0 0 1px #cbe9d6;
+  box-shadow: inset 0 0 0 1px #d6d4fa;
 }
 
 .pdp-m__trust svg:first-child {
@@ -554,7 +554,7 @@ body.template-product {
   height: 16px;
 }
 
-/* Feuille « Protections » (snippets/pdp-mobile-protect.liquid) : style Temu / AliExpress — en-tête vert, onglets en
+/* Feuille « Protections » (snippets/pdp-mobile-protect.liquid) : style Temu / AliExpress — en-tête bleu, onglets en
    pastilles, chiffres clés, étapes numérotées. Les boutons du thème imposent min-height / padding 0 : valeurs forcées. */
 #root .pdp-m .pdp-m__pt {
   position: fixed;
@@ -630,7 +630,7 @@ body.template-product {
   gap: 10px;
   padding: 24px 60px 16px 18px;
   color: #fff;
-  background: linear-gradient(120deg, #137a43 0%, #1f9a55 60%, #2bb566 100%);
+  background: linear-gradient(120deg, #2a2390 0%, #3a34d2 60%, #5a55e6 100%);
 }
 
 .pdp-m__pt-shield {
@@ -723,8 +723,8 @@ body.template-product {
   justify-content: center;
   width: 44px;
   height: 44px;
-  color: #1f8a4c;
-  background: #eaf7ef;
+  color: #3a34d2;
+  background: #ecebfd;
   border-radius: 14px;
 }
 
@@ -788,11 +788,11 @@ body.template-product {
   text-align: center;
   background: #fff;
   border-radius: 14px;
-  box-shadow: inset 0 0 0 1px #e3f3e9;
+  box-shadow: inset 0 0 0 1px #e4e3fb;
 }
 
 .pdp-m__pt-hl b {
-  color: #1f8a4c;
+  color: #3a34d2;
   font-family: 'Sora', system-ui, sans-serif;
   font-size: 17px;
   font-weight: 800;
@@ -838,7 +838,7 @@ body.template-product {
   width: 18px;
   height: 18px;
   margin-top: 1px;
-  color: #1f8a4c;
+  color: #3a34d2;
 }
 
 .pdp-m__pt-zones {
@@ -863,7 +863,7 @@ body.template-product {
 }
 
 .pdp-m__pt-zones b {
-  color: #1f8a4c;
+  color: #3a34d2;
 }
 
 .pdp-m__pt-note {
@@ -903,7 +903,7 @@ body.template-product {
   color: #fff;
   font-size: 13px;
   font-weight: 800;
-  background: #1f8a4c;
+  background: #3a34d2;
   border-radius: 50%;
 }
 
@@ -914,7 +914,7 @@ body.template-product {
   bottom: 2px;
   left: 12px;
   width: 2px;
-  background: #d6f1e0;
+  background: #dcdafb;
 }
 
 .pdp-m__pt-warn {
@@ -1020,7 +1020,7 @@ body.template-product {
   text-align: center;
   background: #16123f;
   border: 0;
-  border-radius: 14px;
+  border-radius: 999px;
 }
 
 /* 5. Options */
