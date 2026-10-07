@@ -1650,6 +1650,32 @@
     ]
   },
   {
+    "name": "Coupon (mobile)",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Coupon mostrato nella scheda prodotto mobile. Il codice deve esistere in Shopify > Sconti con la stessa percentuale."
+      },
+      {
+        "type": "text",
+        "id": "mobile_coupon_code",
+        "label": "Codice sconto",
+        "info": "Vuoto = il coupon non viene mostrato.",
+        "default": "JCEB1XQ31X8X"
+      },
+      {
+        "type": "range",
+        "id": "mobile_coupon_percent",
+        "label": "Sconto",
+        "min": 1,
+        "max": 90,
+        "step": 1,
+        "unit": "%",
+        "default": 20
+      }
+    ]
+  },
+  {
     "name": "t:settings_schema.shipping_delivery.name",
     "settings": [
       {

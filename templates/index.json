@@ -16,7 +16,7 @@
           "type": "coupon",
           "settings": {
             "amount": "-20%",
-            "condition": "su 40€ di spesa · max 12€",
+            "condition": "su tutto l'ordine",
             "code": "JCEB1XQ31X8X"
           }
         }

@@ -7741,7 +7741,7 @@ var ajaxCart = (function (module) {
 			config = {
 				method: 'POST',
 				credentials: 'same-origin',
-				body: JSON.stringify({ items: allItems, sections: sectionsToFetch }),
+				body: JSON.stringify(Object.assign({ items: allItems, sections: sectionsToFetch }, getMobileSectionsUrl() ? { sections_url: getMobileSectionsUrl() } : {})),
 				headers: {
 					'Content-Type': 'application/json',
 					'X-Requested-With': 'xmlhttprequest'
@@ -7751,6 +7751,7 @@ var ajaxCart = (function (module) {
 		} else {
 			formData = new FormData(form);
 			formData.append('sections', sectionsToFetch);
+			if (getMobileSectionsUrl()) formData.append('sections_url', getMobileSectionsUrl());
 			config = {
 				method: 'POST',
 				body: formData,
@@ -7824,6 +7825,7 @@ var ajaxCart = (function (module) {
 		let mutationSucceeded = false;
 
 		if (sectionsToFetch) requestBody.sections = sectionsToFetch;
+		if (sectionsToFetch && getMobileSectionsUrl()) requestBody.sections_url = getMobileSectionsUrl();
 
 		return fetch(getRouteUrl('cart_add_url', 'cart/add.js'), {
 			method: 'POST',
@@ -8459,6 +8461,12 @@ var ajaxCart = (function (module) {
 			.join(',');
 	}
 
+	// Mobile : sans sections_url, Shopify rend le tiroir et la page panier dans la langue par défaut (italien),
+	// même depuis /fr/… ou /de/…. Desktop inchangé (chaîne vide = paramètre non envoyé).
+	function getMobileSectionsUrl() {
+		return window.matchMedia('(max-width: 760px)').matches ? window.location.pathname : '';
+	}
+
 	function refreshNativeCartSurfaces(response, container, options = {}) {
 		const updates = [];
 		const refreshPanel = options.refreshPanel !== false;
@@ -8701,10 +8709,10 @@ var ajaxCart = (function (module) {
 		element.classList.add('processing');
 		config = {
 			method: 'POST',
-			body: JSON.stringify({
+			body: JSON.stringify(Object.assign({
 				'discount': discounts.join(','),
 				'sections': getNativeCartSectionsValue()
-			}),
+			}, getMobileSectionsUrl() ? { 'sections_url': getMobileSectionsUrl() } : {})),
 			headers: {
 				'X-Requested-With': 'XMLHttpRequest',
 				'Content-Type': 'application/json',
@@ -8798,11 +8806,11 @@ var ajaxCart = (function (module) {
 		let mutationSucceeded = false;
 		config = {
 			method: 'POST',
-			body: JSON.stringify({
+			body: JSON.stringify(Object.assign({
 				'line': line,
 				'quantity': quantity,
 				'sections': getNativeCartSectionsValue()
-			}),
+			}, getMobileSectionsUrl() ? { 'sections_url': getMobileSectionsUrl() } : {})),
 			headers: {
 				'X-Requested-With': 'XMLHttpRequest',
 				'Content-Type': 'application/json',
@@ -8882,11 +8890,11 @@ var ajaxCart = (function (module) {
 		}
 		config = {
 			method: 'POST',
-			body: JSON.stringify({
+			body: JSON.stringify(Object.assign({
 				'line': line,
 				'quantity': 0,
 				'sections': getNativeCartSectionsValue()
-			}),
+			}, getMobileSectionsUrl() ? { 'sections_url': getMobileSectionsUrl() } : {})),
 			headers: {
 				'X-Requested-With': 'XMLHttpRequest',
 				'Content-Type': 'application/json',

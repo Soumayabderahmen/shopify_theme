@@ -2,7 +2,8 @@
   Fiche produit MOBILE – haut de page (prototype « platinumshop-pdp-mobile-b ») :
   galerie plein écran (compteur n / N) + vignettes, puis carte titre / prix / ticket coupon.
   Données réelles : photos du produit, titre, prix de la variante, note (métachamps d'avis),
-  coupon du site (même règle et même code que snippets/copons.liquid : 20 %, dépense min. 40 €, max. 12 €).
+  coupon : code et % des réglages du thème « Coupon (mobile) » ; la réduction s'applique à toute la commande
+  (vérifié sur le panier : pas de minimum ni de plafond).
   Affiché seulement en mobile (assets/pdp-mobile.css), le desktop garde la fiche Xtra.
   Les variantes, le panier et les apps restent ceux du thème (formulaire existant).
 {%- endcomment -%}
@@ -11,7 +12,9 @@
   assign pm_price = pm_variant.price
   assign pm_compare = pm_variant.compare_at_price | default: 0
 
-  assign pm_coupon_code = 'JCEB1XQ31X8X'
+  # Coupon : réglages du thème « Coupon (mobile) » (code et % de la réduction Shopify), plus de valeurs en dur.
+  assign pm_coupon_code = settings.mobile_coupon_code | strip
+  assign pm_coupon_percent = settings.mobile_coupon_percent | default: 20
 
   # Livraison gratuite : seuil des réglages du thème (comme le tiroir panier), dans la devise du client.
   # EUR, USD, CAD, CHF, GBP : même nombre (50 €, 50 $, 50 CA$…). Autres devises : seuil converti au taux
@@ -154,22 +157,26 @@
       <span class="pdp-m__save" data-pdp-save{% unless pm_save > 0 %} hidden{% endunless %}>-{{ pm_save }}%</span>
       <span class="pdp-m__iva">{% if cart.taxes_included %}{{ 'mobile.pdp.tax_included' | t }}{% else %}{{ 'mobile.pdp.tax_excluded' | t }}{% endif %}</span>
     </div>
-    <div class="pdp-m__tkt">
-      <span class="pdp-m__pc">-20%</span>
-      <span class="pdp-m__tx"><b>{{ 'mobile.pdp.coupon_title' | t }}</b>{{ 'mobile.pdp.coupon_short' | t }}<br>{{ 'mobile.pdp.expires_in' | t }} <em data-pdp-coupon-timer>02{{ 'mobile.pdp.days_short' | t }} 00:00:00</em></span>
-      <button class="pdp-m__claim" type="button" data-pdp-claim>{{ 'mobile.pdp.claim' | t }}</button>
-    </div>
+    {%- if pm_coupon_code != blank -%}
+      <div class="pdp-m__tkt">
+        <span class="pdp-m__pc">-{{ pm_coupon_percent }}%</span>
+        <span class="pdp-m__tx"><b>{{ 'mobile.pdp.coupon_title' | t: percent: pm_coupon_percent }}</b>{{ 'mobile.pdp.coupon_short' | t }}<br>{{ 'mobile.pdp.expires_in' | t }} <em data-pdp-coupon-timer>02{{ 'mobile.pdp.days_short' | t }} 00:00:00</em></span>
+        <button class="pdp-m__claim" type="button" data-pdp-claim>{{ 'mobile.pdp.claim' | t }}</button>
+      </div>
+    {%- endif -%}
   </section>
 
   {%- comment -%} 4. Vantaggi esclusivi : mêmes avantages que le bloc du site ; « Termini » et la garantie ouvrent ses vraies fenêtres. {%- endcomment -%}
   <section class="pdp-m__card">
     <div class="pdp-m__ctitle"><h3>{{ 'mobile.pdp.benefits_title' | t }}</h3></div>
     <ul class="pdp-m__adv">
-      <li>
-        <span class="pdp-m__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 4v0a2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 0 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg></span>
-        <span class="pdp-m__t"><b>{{ 'mobile.pdp.coupon_title' | t }}</b><small>{{ 'mobile.pdp.coupon_long' | t }}</small></span>
-        <button class="pdp-m__mini" type="button" data-pdp-open-terms>{{ 'mobile.pdp.terms' | t }}</button>
-      </li>
+      {%- if pm_coupon_code != blank -%}
+        <li>
+          <span class="pdp-m__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 4v0a2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 0 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg></span>
+          <span class="pdp-m__t"><b>{{ 'mobile.pdp.coupon_title' | t: percent: pm_coupon_percent }}</b><small>{{ 'mobile.pdp.coupon_long' | t: percent: pm_coupon_percent, code: pm_coupon_code }}</small></span>
+          <button class="pdp-m__mini" type="button" data-pdp-open-terms>{{ 'mobile.pdp.terms' | t }}</button>
+        </li>
+      {%- endif -%}
       {%- comment -%}
         Livraison gratuite dynamique : « su questo ordine » si le prix de la variante atteint le seuil, sinon « da 50 € ».
         Mis à jour par assets/pdp-mobile.js au changement de variante (et pour les devises converties).

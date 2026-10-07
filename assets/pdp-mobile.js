@@ -123,7 +123,10 @@
     thumbs.insertAdjacentElement('afterend', box);
   })();
 
-  // « Riscuoti » : copie le code du coupon (comme le bouton du bloc « Vantaggi esclusivi » du site).
+  /* « Riscuoti » : ajoute le vrai code au panier (/cart/update.js, en gardant les codes déjà saisis) ; Shopify le reprend
+     au checkout. « Appliqué ✓ » seulement si Shopify enregistre le code et le confirme (discount_codes[].applicable,
+     ou panier encore vide). /discount/<code> n'est pas utilisé : en local, shopify theme dev ne le sert pas. La copie dans le
+     presse-papiers est un bonus (elle peut être refusée ou rester bloquée selon le navigateur). */
   var claim = root.querySelector('[data-pdp-claim]');
   var copyText = function (text) {
     if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
@@ -140,11 +143,37 @@
   };
   if (claim) {
     claim.addEventListener('click', function () {
-      copyText(root.getAttribute('data-coupon-code')).then(function () {
-        claim.textContent = T('copied');
+      var code = root.getAttribute('data-coupon-code');
+      if (!code || claim.classList.contains('is-done')) return;
+      copyText(code).catch(function (error) {
+        console.warn('[PDP mobile] Coupon copy failed', error);
+      });
+      var shopRoot = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+      var readJson = function (response) {
+        if (!response.ok) throw new Error('Cart request failed with status ' + response.status);
+        return response.json();
+      };
+      claim.disabled = true;
+      fetch(shopRoot + 'cart.js', { credentials: 'same-origin' }).then(readJson).then(function (cart) {
+        var codes = (cart.discount_codes || []).map(function (item) { return item.code; });
+        if (codes.indexOf(code) === -1) codes.push(code);
+        return fetch(shopRoot + 'cart/update.js', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ discount: codes.join(',') })
+        }).then(readJson);
+      }).then(function (cart) {
+        // Panier vide : Shopify garde le code mais le dit « non applicable » tant qu'il n'y a rien à réduire.
+        var applied = (cart.discount_codes || []).some(function (item) {
+          return item.code === code && (item.applicable || cart.item_count === 0);
+        });
+        if (!applied) throw new Error('Discount code not applicable: ' + code);
+        claim.textContent = T('coupon_applied');
         claim.classList.add('is-done');
       }).catch(function (error) {
-        console.warn('[PDP mobile] Coupon copy failed', error);
+        console.error('[PDP mobile] Coupon apply failed', error);
+        claim.disabled = false;
       });
     });
   }
