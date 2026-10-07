@@ -107,21 +107,28 @@
       return null;
     }
 
+    // Canada : la langue du téléphone décide d'abord (français ou anglais, dans l'ordre choisi par le client).
+    // Le fuseau horaire ne sert que si le téléphone n'est ni en français ni en anglais : il ne distingue pas
+    // le Québec (les navigateurs récents donnent America/Toronto aussi à Montréal ; America/Montreal est un ancien nom).
     function canadianLanguage() {
       var preferred = browserPrefers(['fr', 'en']);
-      if (preferred === 'fr') return 'fr';
+      if (preferred) return preferred;
 
       var timeZone = '';
       try { timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (error) {}
       if (timeZone === 'America/Montreal') return 'fr';
 
+      // Fuseaux canadiens majoritairement anglophones (America/Toronto couvre aussi le Québec : gardé en anglais, comme avant).
       var knownEnglishZones = [
-        'America/Toronto', 'America/Vancouver', 'America/Edmonton', 'America/Winnipeg',
-        'America/Halifax', 'America/St_Johns', 'America/Regina', 'America/Whitehorse'
+        'America/Toronto', 'America/Vancouver', 'America/Edmonton', 'America/Winnipeg', 'America/Regina', 'America/Swift_Current',
+        'America/Halifax', 'America/Glace_Bay', 'America/Moncton', 'America/Goose_Bay', 'America/St_Johns',
+        'America/Whitehorse', 'America/Dawson', 'America/Dawson_Creek', 'America/Fort_Nelson', 'America/Creston',
+        'America/Yellowknife', 'America/Inuvik', 'America/Cambridge_Bay', 'America/Rankin_Inlet', 'America/Resolute',
+        'America/Iqaluit', 'America/Atikokan', 'America/Thunder_Bay', 'America/Nipigon', 'America/Rainy_River'
       ];
       if (knownEnglishZones.indexOf(timeZone) !== -1) return 'en';
 
-      // Shopify ne fournit pas toujours la province : Canada utilise alors le français.
+      // Fuseau inconnu et téléphone ni FR ni EN : français, comme avant.
       return 'fr';
     }
 
