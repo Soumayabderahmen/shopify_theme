@@ -478,7 +478,7 @@
       "other": "{{ amount }} Ergebnisse"
     },
     "search_form": {
-      "submit": "Zoeken",
+      "submit": "Suchen",
       "search_again": "Erneut suchen",
       "placeholder": "Wonach suchen Sie?"
     },

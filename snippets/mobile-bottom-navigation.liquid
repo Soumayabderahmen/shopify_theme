@@ -1,10 +1,13 @@
 {%- liquid
-  assign delivery_url = routes.root_url | append: 'pages/tracking-order'
+  # Suivi de commande : le lien « Traccia ordine » du menu (app 17TRACK), sinon la page « Traccia il tuo Ordine »
+  # de la boutique (URL dans la langue du visiteur). /pages/tracking-order n'existe pas (404).
+  assign delivery_url = pages['traccia-ordine'].url | default: '/apps/17TRACK'
   if menu != blank
     for menu_link in menu.links
       assign menu_title = menu_link.title | downcase
       assign menu_handle = menu_link.handle | downcase
-      if menu_title contains 'tracking' or menu_title contains 'livraison' or menu_title contains 'consegna' or menu_handle contains 'tracking'
+      assign menu_url = menu_link.url | downcase
+      if menu_title contains 'tracking' or menu_title contains 'traccia' or menu_title contains 'livraison' or menu_title contains 'consegna' or menu_handle contains 'tracking' or menu_url contains 'track'
         assign delivery_url = menu_link.url
         break
       endif
@@ -20,6 +23,11 @@
       break
     endif
   endfor
+  # App de suivi (/apps/…) : dans la langue du visiteur (/de/apps/17TRACK).
+  assign delivery_start = delivery_url | slice: 0, 6
+  if delivery_start == '/apps/' and routes.root_url != '/'
+    assign delivery_url = routes.root_url | append: delivery_url
+  endif
 
   # Libellés dans la langue du visiteur (clés mobile.nav.* des fichiers locales).
   assign home_label = 'mobile.nav.home' | t

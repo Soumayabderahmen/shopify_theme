@@ -124,7 +124,9 @@
   var shop = {
     moneyFormat: dialog.dataset.moneyFormat || '€{{amount_with_comma_separator}}',
     klarna: dialog.hasAttribute('data-klarna'),
-    freeShipping: Number(dialog.dataset.freeShipping) || 0,
+    // Seuil des réglages en euros, converti au taux Shopify (comme le tiroir panier) : c'est la vraie règle de livraison
+    // (vérifiée avec les tarifs Shopify : 48 CHF gratuit, 46 CHF payant pour 50 €).
+    freeShipping: Math.round((Number(dialog.dataset.freeShipping) || 0) * (Number(window.Shopify && window.Shopify.currency && window.Shopify.currency.rate) || 1)),
     allUrl: dialog.dataset.allUrl || (shopRoot + 'collections/all')
   };
 

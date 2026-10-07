@@ -525,7 +525,7 @@
       "other": "{{ amount }} resultados"
     },
     "search_form": {
-      "submit": "Busque en",
+      "submit": "Buscar",
       "placeholder": "¿Qué buscas?",
       "search_again": "Busca de nuevo"
     },

@@ -930,15 +930,18 @@
     });
   });
   /* ---------- Livraison gratuite : seuil des réglages du thème dans la devise du client ----------
-     EUR, USD, CAD, CHF, GBP : même nombre, déjà calculé par le Liquid (data-threshold). Autres devises
-     (data-threshold = 0) : seuil en euros converti au taux de Shopify, arrondi à deux chiffres significatifs. */
+     En euros (devise de la boutique) : seuil du Liquid (data-threshold). Autres devises (data-threshold = 0) : Shopify
+     compare au seuil converti au taux (vérifié avec ses tarifs : 48 CHF gratuit, 46 CHF payant pour 50 €) ;
+     comparaison sur le seuil exact, affichage arrondi au-dessus à deux chiffres significatifs (« dès CHF 48 »). */
   var ship = root.querySelector('[data-pdp-ship]');
   var shipText = ship && ship.querySelector('[data-pdp-ship-text]');
   var shipThreshold = ship ? Number(ship.getAttribute('data-threshold')) || 0 : 0;
+  var shipLimit = shipThreshold;
   if (ship && !shipThreshold) {
     var rate = Number(window.Shopify && window.Shopify.currency && window.Shopify.currency.rate) || 1;
     var converted = Number(ship.getAttribute('data-base')) * rate;
     var magnitude = Math.pow(10, Math.max(0, Math.floor(Math.log10(converted)) - 1));
+    shipLimit = Math.round(converted);
     shipThreshold = Math.ceil(converted / magnitude) * magnitude;
   }
   // Montant converti au format de prix de la boutique : modèle « 1 234 567 » rendu par Shopify
@@ -950,10 +953,10 @@
     if (!match) return money(cents).replace(/[.,]00(?=\D*$)/, '');
     return match[1] + whole.replace(/\B(?=(\d{3})+(?!\d))/g, match[2]) + match[3];
   };
-  // Textes déjà formatés par Shopify pour EUR, USD, CAD, CHF, GBP ; devises converties : montant calculé ici.
+  // Textes déjà formatés par Shopify en euros ; devises converties : montant calculé ici.
   var updateShipping = function (price) {
     if (!shipText || !shipThreshold) return;
-    var text = price >= shipThreshold
+    var text = price >= shipLimit
       ? (ship.getAttribute('data-text-free') || T('pdp_ship_free_order'))
       : (ship.getAttribute('data-text-from') || T('pdp_ship_from', { amount: shopMoney(shipThreshold) }));
     if (shipText.textContent !== text) shipText.textContent = text;

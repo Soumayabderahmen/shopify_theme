@@ -9,7 +9,9 @@
   Params : menu (linklist), customer_block, newsletter_block, section_settings, rating, trustpilot_url
 {%- endcomment -%}
 {%- liquid
-  assign tracking_url = routes.root_url | append: 'pages/tracking-order'
+  # Secours si le menu n'a pas de lien de suivi : la page « Traccia il tuo Ordine » (URL dans la langue du visiteur).
+  # /pages/tracking-order n'existe pas (404).
+  assign tracking_url = pages['traccia-ordine'].url | default: '/apps/17TRACK'
   assign tracking_title = 'Tracking_order'
   for main_link in linklists['main-menu'].links
     assign main_title = main_link.title | downcase
@@ -29,6 +31,11 @@
       break
     endif
   endfor
+  # App de suivi (/apps/…) : dans la langue du visiteur (/de/apps/17TRACK).
+  assign tracking_start = tracking_url | slice: 0, 6
+  if tracking_start == '/apps/' and routes.root_url != '/'
+    assign tracking_url = routes.root_url | append: tracking_url
+  endif
 
   assign wishlist_url = pages['wishlist'].url | default: '/pages/wishlist'
   if customer

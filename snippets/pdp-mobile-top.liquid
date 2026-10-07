@@ -16,16 +16,15 @@
   assign pm_coupon_code = settings.mobile_coupon_code | strip
   assign pm_coupon_percent = settings.mobile_coupon_percent | default: 20
 
-  # Livraison gratuite : seuil des réglages du thème (comme le tiroir panier), dans la devise du client.
-  # EUR, USD, CAD, CHF, GBP : même nombre (50 €, 50 $, 50 CA$…). Autres devises : seuil converti au taux
-  # de Shopify par assets/pdp-mobile.js (pm_ship_threshold = 0 ici).
+  # Livraison gratuite : seuil des réglages du thème (en euros, devise de la boutique). Dans une autre devise, Shopify
+  # compare au seuil converti au taux (vérifié : 48 CHF gratuit, 46 CHF payant pour 50 €) : assets/pdp-mobile.js le
+  # convertit et l'arrondit au-dessus (pm_ship_threshold = 0 ici), comme le tiroir panier.
   assign pm_ship_base = 0
   if settings.enable_free_shipping and settings.free_shipping_amount != blank
     assign pm_ship_base = settings.free_shipping_amount | replace: ',', '.' | times: 100 | round
   endif
-  assign pm_ship_same_currencies = 'EUR,USD,CAD,CHF,GBP' | split: ','
   assign pm_ship_threshold = 0
-  if pm_ship_same_currencies contains cart.currency.iso_code
+  if cart.currency.iso_code == shop.currency
     assign pm_ship_threshold = pm_ship_base
   endif
 
