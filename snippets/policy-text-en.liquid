@@ -1,0 +1,168 @@
+{%- comment -%}
+  Policies in English (translation of the original Italian admin text, split into <h2> sections): refund, legal notice,
+  terms of service. Used by snippets/policy-page.liquid only while the admin text is the original one. Params: policy, root
+{%- endcomment -%}
+{%- assign mail = '<a href="mailto:contact@platinumshop.it">contact@platinumshop.it</a>' -%}
+{%- assign tel = '<a href="tel:+393314511142">+39 33 1451 1142</a>' -%}
+{%- case policy -%}
+{%- when 'refund' -%}
+<p>We have a 30-day return policy, which means you have 30 days after receiving your item to request a return.</p>
+<h2>How to request a return</h2>
+<p>To be eligible for a return, your item must be in the same condition that you received it, unworn or unused, with tags, and in its original packaging. You’ll also need the receipt or proof of purchase.</p>
+<p>To start a return, you can contact us at {{ mail }}.</p>
+<p>If your return is accepted, we’ll send you a return shipping label, as well as instructions on how and where to send your package. Items sent back to us without first requesting a return will not be accepted.</p>
+<p>You can always contact us for any return question at {{ mail }}.</p>
+<h2>Damages and issues</h2>
+<p>Please inspect your order upon reception and contact us immediately if the item is defective, damaged or if you receive the wrong item, so that we can evaluate the issue and make it right.</p>
+<h2>Exceptions / non-returnable items</h2>
+<p>Some items cannot be accepted for return:</p>
+<ul>
+<li>Items <strong>worn, washed or damaged</strong> after receipt</li>
+<li><strong>Personalised</strong> or custom-made products</li>
+<li>Items bought on <strong>final sale</strong>, clearly indicated at the time of purchase</li>
+</ul>
+<p>If you have doubts about a specific item, contact us at {{ mail }}: our team will be happy to help.</p>
+<h2>Exchanges</h2>
+<p>The fastest way to ensure you get what you want is to return the item you have, and once the return is accepted, make a separate purchase for the new item.</p>
+<h2>European Union 14-day cooling-off period</h2>
+<p>Notwithstanding the above, if the merchandise is being shipped into the European Union, you have the right to cancel or return your order within 14 days, for any reason and without a justification. As above, your item must be in the same condition that you received it, unworn or unused, with tags, and in its original packaging. You’ll also need the receipt or proof of purchase.</p>
+<h2>Refunds</h2>
+<p>We will notify you once we’ve received and inspected your return, and let you know if the refund was approved or not. If approved, you’ll be automatically refunded on your original payment method within 10 business days. Please remember it can take some time for your bank or credit card company to process and post the refund too.</p>
+<p>If more than 15 business days have passed since we’ve approved your return, please contact us at {{ mail }}.</p>
+{%- when 'legal' -%}
+<p>Last updated: August 2026</p>
+<h2>Company information</h2>
+<ul>
+<li><strong>Company name:</strong> platinum group</li>
+<li><strong>Website:</strong> <a href="{{ root }}">www.platinumshop.it</a></li>
+<li><strong>Email:</strong> {{ mail }}</li>
+<li><strong>Phone:</strong> {{ tel }}</li>
+<li><strong>Country of registration:</strong> Italy</li>
+</ul>
+<h2>Intellectual property</h2>
+<p>All content on this website, including but not limited to text, images, logos, graphics, videos and design, is the exclusive property of Platinumshop or of the respective rights holders and is protected by applicable intellectual property and copyright laws.</p>
+<p>Any reproduction, distribution, modification or use of the content without the prior written permission of Platinumshop is prohibited.</p>
+<h2>Liability</h2>
+<p>Platinumshop strives to provide accurate and up-to-date information on its website. However, it does not guarantee the completeness, accuracy or timeliness of the published information and declines all liability for any errors or omissions.</p>
+<p>Platinumshop is not liable for direct or indirect damages arising from the use of the website or from the inability to access it.</p>
+<h2>Links to external websites</h2>
+<p>The website may contain links to third-party websites. Platinumshop has no control over such websites and declines all liability for their content, privacy policies or business practices.</p>
+<h2>Protection of personal data (GDPR)</h2>
+<p>Platinumshop processes users’ personal data in compliance with Regulation (EU) 2016/679 (GDPR) and Italian Legislative Decree 196/2003 (Italian Privacy Code) as amended by Legislative Decree 101/2018.</p>
+<p>The data collected is used exclusively to:</p>
+<ul>
+<li>Process orders and manage shipments</li>
+<li>Communicate with customers about their orders</li>
+<li>Improve the services offered</li>
+<li>Comply with legal obligations</li>
+</ul>
+<p>Data is not sold or transferred to third parties without explicit consent, except as necessary to provide the service (e.g. carriers, payment processors).</p>
+<p>To exercise your rights (access, rectification, erasure, portability), contact us at: {{ mail }}</p>
+<p>For more details, please see our <a href="{{ root }}policies/privacy-policy">Privacy Policy</a>.</p>
+<h2>Cookies</h2>
+<p>The website uses technical cookies necessary for its operation and, subject to consent, analytics and profiling cookies. For more information, please see our Cookie Policy.</p>
+<h2>Governing law and jurisdiction</h2>
+<p>This website and the legal relationships arising from it are governed by Italian law. Any dispute shall fall under the exclusive jurisdiction of the Court of Florence, unless otherwise provided by consumer protection law.</p>
+<h2>Online dispute resolution (ODR)</h2>
+<p>Pursuant to EU Regulation No. 524/2013, consumers resident in the European Union may use the ODR (Online Dispute Resolution) platform for the out-of-court resolution of disputes: <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">https://ec.europa.eu/consumers/odr</a></p>
+<h2>Contact</h2>
+<p>For any information or clarification:</p>
+<ul>
+<li><strong>Email:</strong> {{ mail }}</li>
+<li><strong>Phone:</strong> {{ tel }}</li>
+<li><strong>Website:</strong> <a href="{{ root }}">www.platinumshop.it</a></li>
+<li><strong>Location:</strong> Italy</li>
+</ul>
+{%- when 'terms' -%}
+<p>Welcome to platinumshop! The terms “we”, “us” and “our” refer to platinumshop. platinumshop operates this store and website, including all related information, content, features, tools, products and services, in order to provide you, the customer, with a curated shopping experience (the “Services”). platinumshop is powered by Shopify, which enables us to provide the Services to you.</p>
+<p>The below terms and conditions, together with any policies referenced herein (these “Terms of Service” or “Terms”), describe your rights and responsibilities when you use the Services.</p>
+<p>Please read these Terms of Service carefully, as they include important information about your legal rights and cover areas such as warranty disclaimers and limitations of liability.</p>
+<p>By visiting, interacting with or using our Services, you agree to be bound by these Terms of Service and our <a href="{{ root }}policies/privacy-policy">Privacy Policy</a>. If you do not agree to these Terms of Service or Privacy Policy, you should not use or access our Services.</p>
+<h2>Access and account</h2>
+<p>By agreeing to these Terms of Service, you represent that you are at least the age of majority in your state or province of residence, and you have given us your consent to allow any of your minor dependents to use the Services on devices you own, purchase or manage.</p>
+<p>To use the Services, including accessing or browsing our online stores or purchasing any of the products or services we offer, you may be asked to provide certain information, such as your email address, billing, payment and shipping information. You represent and warrant that all the information you provide in our stores is correct, current and complete and that you have all rights necessary to provide this information.</p>
+<p>You are solely responsible for maintaining the security of your account credentials and for all of your account activity. You may not transfer, sell, assign or license your account to any other person.</p>
+<h2>Our products</h2>
+<p>We have made every effort to provide an accurate representation of our products and services in our online stores. However, please note that colours or product appearance may differ from how they may appear on your screen due to the type of device you use to access the store and your device settings and configuration.</p>
+<p>We do not warrant that the appearance or quality of any products or services purchased by you will meet your expectations or be the same as depicted or rendered in our online stores.</p>
+<p>All descriptions of products are subject to change at any time without notice at our sole discretion. We reserve the right to discontinue any product at any time and may limit the quantities of any products that we offer to any person, geographic region or jurisdiction, on a case-by-case basis.</p>
+<h2>Orders</h2>
+<p>When you place an order, you are making an offer to purchase. platinumshop reserves the right to accept or decline your order for any reason at its discretion. Your order is not accepted until platinumshop confirms acceptance. We must receive and process your payment before your order is accepted. Please review your order carefully before submitting, as platinumshop may be unable to accommodate cancellation requests after an order is accepted. In the event that we do not accept, make a change to, or cancel an order, we will attempt to notify you by contacting the email, billing address and/or phone number provided at the time the order was made.</p>
+<p>Your purchases are subject to return or exchange solely in accordance with our <a href="{{ root }}policies/refund-policy">Refund Policy</a>.</p>
+<p>You represent and warrant that your purchases are for your own personal or household use and not for commercial resale or export.</p>
+<h2>Prices and billing</h2>
+<p>Prices, discounts and promotions are subject to change without notice. The price charged for a product or service will be the price in effect at the time the order is placed and will be set out in your order confirmation email. Unless otherwise expressly stated, posted prices do not include taxes, shipping, handling, customs or import charges.</p>
+<p>Prices posted in our online stores may be different from prices offered in physical stores or in online or other stores operated by third parties. We may offer, from time to time, promotions on the Services that may affect pricing and that are governed by terms and conditions separate from these Terms. If there is a conflict between the terms for a promotion and these Terms, the promotion terms will govern.</p>
+<p>You agree to provide current, complete and accurate purchase, payment and account information for all purchases made at our stores. You agree to promptly update your account and other information, including your email address, credit card numbers and expiration dates, so that we can complete your transactions and contact you as needed.</p>
+<p>You represent and warrant that (i) the credit card information you supply to us is true, correct and complete, (ii) you are duly authorized to use such credit card for the purchase, (iii) charges incurred by you will be honored by your credit card company, and (iv) you will pay charges incurred by you at the posted prices, including shipping and handling charges and all applicable taxes, if any.</p>
+<h2>Shipping and delivery</h2>
+<p>We are not liable for shipping and delivery delays. All delivery times are estimates only and are not guaranteed. We are not responsible for delays caused by shipping carriers, customs processing, or events outside our control. Once we transfer products to the carrier, title and risk of loss passes to you.</p>
+<h2>Intellectual property</h2>
+<p>Our Services, including but not limited to all trademarks, brands, text, displays, images, graphics, product reviews, video and audio, and the design, selection and arrangement thereof, are owned by platinumshop, its affiliates or licensors and are protected by U.S. and foreign patent, copyright and other intellectual property laws.</p>
+<p>These Terms permit you to use the Services for your personal, non-commercial use only. You must not reproduce, distribute, modify, create derivative works of, publicly display, publicly perform, republish, download, store or transmit any of the material on our Services without our prior written consent. Except as expressly provided herein, nothing in these Terms grants or shall be construed as granting a license or other rights to you under any patent, trademark, copyright or other intellectual property of platinumshop, Shopify or any third party. Unauthorized use of the Services may be a violation of federal and state intellectual property laws. All rights not expressly granted herein are reserved by platinumshop.</p>
+<p>platinumshop’s names, logos, product and service names, designs and slogans are trademarks of platinumshop or its affiliates or licensors. You must not use such trademarks without the prior written permission of platinumshop. Shopify’s name, logo, product and service names, designs and slogans are trademarks of Shopify. All other names, logos, product and service names, designs and slogans on the Services are the trademarks of their respective owners.</p>
+<h2>Optional tools</h2>
+<p>You may be provided with access to customer tools offered by third parties as part of the Services, which we neither monitor nor have any control nor input over.</p>
+<p>You acknowledge and agree that we provide access to such tools “as is” and “as available” without any warranties, representations or conditions of any kind and without any endorsement. We shall have no liability whatsoever arising from or relating to your use of optional third-party tools.</p>
+<p>Any use by you of the optional tools offered through the site is entirely at your own risk and discretion and you should ensure that you are familiar with and approve of the terms on which tools are provided by the relevant third-party provider(s).</p>
+<p>We may also, in the future, offer new features through the Services (including the release of new tools and resources). Such new features shall also be considered part of the Services and are subject to these Terms of Service.</p>
+<h2>Third-party links</h2>
+<p>The Services may contain materials and hyperlinks to websites provided or operated by third parties (including any embedded third-party functionality). We are not responsible for examining or evaluating the content or accuracy of any third-party materials or websites you choose to access. If you decide to leave the Services to access these materials or third-party sites, you do so at your own risk.</p>
+<p>We are not liable for any harm or damages related to your access of any third-party websites, or your purchase or use of any products, services, resources or content on third-party websites. Please review carefully the third party’s policies and practices and make sure you understand them before you engage in any transaction. Complaints, claims, concerns or questions regarding third-party products and services should be directed to the third party.</p>
+<h2>Relationship with Shopify</h2>
+<p>platinumshop is powered by Shopify, which enables us to provide the Services to you. However, any sales and purchases you make in our store are made directly with platinumshop. By using the Services, you acknowledge and agree that Shopify is not responsible for any aspect of any sales between you and platinumshop, including any injury, damage or loss resulting from purchased products and services. You hereby expressly release Shopify and its affiliates from all claims, damages and liabilities arising from or related to your purchases and transactions with platinumshop.</p>
+<h2>Privacy Policy</h2>
+<p>All personal information we collect through the Services is subject to our Privacy Policy, which can be viewed <a href="{{ root }}policies/privacy-policy">here</a>, and certain personal information is subject to Shopify’s Privacy Policy, which can be viewed <a href="https://www.shopify.com/legal/privacy/app-users" target="_blank" rel="noopener">here</a>. By using the Services, you acknowledge that you have read these privacy policies.</p>
+<p>Because the Services are hosted by Shopify, Shopify collects and processes personal information about your access to and use of the Services in order to provide and improve the Services for you. Information you submit to the Services will be transmitted to and shared with Shopify as well as third parties that may be located in countries other than where you reside, in order to provide services to you. Review our <a href="{{ root }}policies/privacy-policy">privacy policy</a> for more details on how we, Shopify and our partners use your personal information.</p>
+<h2>Feedback</h2>
+<p>If you submit, upload, post, email or otherwise transmit any ideas, suggestions, feedback, reviews, proposals, plans or other content (collectively, “Feedback”), you grant us a perpetual, worldwide, sublicensable, royalty-free license to use, reproduce, modify, publish, distribute and display such Feedback in any medium for any purpose, including for commercial use. We may, for example, use our rights under this license to operate, provide, evaluate, enhance, improve and promote the Services and to perform our obligations and exercise our rights under the Terms of Service.</p>
+<p>You also represent and warrant that: (i) you own or have all necessary rights to all Feedback; (ii) you have disclosed any compensation or incentives received in connection with your submission of Feedback; and (iii) your Feedback will comply with these Terms. We are and shall be under no obligation (1) to maintain your Feedback in confidence; (2) to pay compensation for your Feedback; or (3) to respond to your Feedback.</p>
+<p>We may, but have no obligation to, monitor, edit or remove Feedback that we determine in our sole discretion to be unlawful, offensive, threatening, libelous, defamatory, pornographic, obscene or otherwise objectionable or that violates any party’s intellectual property or these Terms of Service.</p>
+<p>You agree that your Feedback will not violate any right of any third party, including copyright, trademark, privacy, personality or other personal or proprietary right. You further agree that your Feedback will not contain libelous or otherwise unlawful, abusive or obscene material, or contain any computer virus or other malware that could in any way affect the operation of the Services or any related website. You may not use a false email address, pretend to be someone other than yourself, or otherwise mislead us or third parties as to the origin of any Feedback. You are solely responsible for any Feedback you make and its accuracy. We take no responsibility and assume no liability for any Feedback posted by you or any third party.</p>
+<h2>Errors, inaccuracies and omissions</h2>
+<p>Occasionally there may be information on or in the Services that contains typographical errors, inaccuracies or omissions that may relate to product descriptions, pricing, promotions, offers, product shipping charges, transit times and availability. We reserve the right to correct any errors, inaccuracies or omissions, and to change or update information or cancel orders if any information is inaccurate at any time without prior notice (including after you have submitted your order).</p>
+<h2>Prohibited uses</h2>
+<p>You may access and use the Services for lawful purposes only. You may not access or use the Services, directly or indirectly: (a) for any unlawful or malicious purpose; (b) to violate any international, federal, provincial or state regulations, rules, laws or local ordinances; (c) to infringe upon or violate our intellectual property rights or the intellectual property rights of others; (d) to harass, abuse, insult, harm, defame, slander, disparage, intimidate or harm any of our employees or any other person; (e) to transmit false or misleading information; (f) to send, knowingly receive, upload, download, use or re-use any material that does not comply with these Terms; (g) to transmit, or procure the sending of, any advertising or promotional material, including any junk mail, chain letter, spam or any other similar solicitation; (h) to impersonate or attempt to impersonate any other person or entity; or (i) to engage in any other conduct that restricts or inhibits anyone’s use or enjoyment of the Services, or which, as determined by us, may harm platinumshop, Shopify or users of the Services, or expose them to liability.</p>
+<p>In addition, you agree not to: (a) upload or transmit viruses or any other type of malicious code that will or may be used in any way that will affect the functionality or operation of the Services; (b) reproduce, duplicate, copy, scrape, sell, resell or exploit any portion of the Services; (c) collect or track the personal information of others; (d) spam, phish, pharm or pretext on the Services; (e) use any robot, spider, scraping tool, data gathering and extraction tool, automatic device or process, artificial intelligence tool (such as agentic AI) or any automated or manual means to access the Services; or (f) interfere with, circumvent or bypass the security or authorization features, robot exclusion headers or other measures we take to restrict access to the Services. We reserve the right to suspend, disable or terminate your account at any time, without notice, if we determine that you have violated any part of these Terms.</p>
+<h2>Agents</h2>
+<p>14.1 This section (Agent Terms) applies if you use, allow, enable or cause the deployment of an Agent to access, use or interact with the Services. An “agent” means any software or service that takes autonomous or semi-autonomous actions on behalf of, or at the instruction of, any person or entity and that may run on behalf of, or by means of, that person’s device, without direct supervision.</p>
+<p>14.2 No Agent may access, use or interact with the Services unless, at all times, it identifies itself and operates in strict compliance with the requirements of section 14.4 below. In addition, no Agent may access, use or interact with the Services if we have requested that the Agent refrain from accessing, using or interacting with any service.</p>
+<p>14.3 We may set limits, including through technical measures, on the manner and conditions under which an Agent may access, use and interact with the Services.</p>
+<p>14.4 Agents must: (i) in all HTTP/HTTPS requests, identify that the request comes from an Agent and state the Agent’s name by including the following in the request’s user-agent string: “Agent/[agent name]”; (ii) not conceal or obscure the fact that any access, use or interaction comes from an Agent, for example by (a) mimicking human behaviour and interaction patterns, or (b) completing or circumventing CAPTCHAs or measures intended to distinguish computer use from human use; (iii) answer truthfully any question or prompt intended to determine whether interactions come from a human or a computer; (iv) not circumvent or otherwise avoid any measure intended to block, limit, modify or control whether and how Agents access, use or interact with the Services.</p>
+<h2>Termination</h2>
+<p>We may terminate this agreement or your access to the Services (or any part thereof) in our sole discretion at any time without notice, and you will remain liable for all amounts due up to and including the date of termination.</p>
+<p>The following sections will continue to apply following any termination: Intellectual Property, Feedback, Termination, Disclaimer of Warranties, Limitation of Liability, Indemnification, Severability, Waiver; Entire Agreement, Assignment, Governing Law, Privacy Policy, and any other provisions that by their nature should survive termination.</p>
+<h2>Disclaimer of warranties</h2>
+<p>The information presented on or through the Services is made available solely for general information purposes. We do not warrant the accuracy, completeness or usefulness of this information. Any reliance you place on such information is strictly at your own risk. We disclaim all liability and responsibility arising from any reliance placed on such materials by you or any other visitor to the Services, or by anyone who may be informed of any of its contents.</p>
+<p>EXCEPT AS EXPRESSLY STATED BY PLATINUMSHOP, THE SERVICES AND ALL PRODUCTS OFFERED THROUGH THE SERVICES ARE PROVIDED ‘AS IS’ AND ‘AS AVAILABLE’ FOR YOUR USE, WITHOUT ANY REPRESENTATION, WARRANTIES OR CONDITIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ALL IMPLIED WARRANTIES OR CONDITIONS OF MERCHANTABILITY, MERCHANTABLE QUALITY, FITNESS FOR A PARTICULAR PURPOSE, DURABILITY, TITLE AND NON-INFRINGEMENT. WE DO NOT GUARANTEE, REPRESENT OR WARRANT THAT YOUR USE OF THE SERVICES WILL BE UNINTERRUPTED, TIMELY, SECURE OR ERROR-FREE. SOME JURISDICTIONS LIMIT OR DO NOT ALLOW THE DISCLAIMER OF IMPLIED OR OTHER WARRANTIES, SO THE ABOVE DISCLAIMER MAY NOT APPLY TO YOU.</p>
+<h2>Limitation of liability</h2>
+<p>TO THE FULLEST EXTENT PROVIDED BY LAW, IN NO CASE SHALL PLATINUMSHOP, OUR PARTNERS, DIRECTORS, OFFICERS, EMPLOYEES, AFFILIATES, AGENTS, CONTRACTORS, SERVICE PROVIDERS OR LICENSORS, OR THOSE OF SHOPIFY AND ITS AFFILIATES, BE LIABLE FOR ANY INJURY, LOSS, CLAIM, OR ANY DIRECT, INDIRECT, INCIDENTAL, PUNITIVE, SPECIAL OR CONSEQUENTIAL DAMAGES OF ANY KIND, INCLUDING, WITHOUT LIMITATION, LOST PROFITS, LOST REVENUE, LOST SAVINGS, LOSS OF DATA, REPLACEMENT COSTS OR ANY SIMILAR DAMAGES, WHETHER BASED IN CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, ARISING FROM YOUR USE OF ANY OF THE SERVICES OR ANY PRODUCTS PROCURED USING THE SERVICES, OR FOR ANY OTHER CLAIM RELATED IN ANY WAY TO YOUR USE OF THE SERVICES OR ANY PRODUCT, INCLUDING, BUT NOT LIMITED TO, ANY ERRORS OR OMISSIONS IN ANY CONTENT, OR ANY LOSS OR DAMAGE OF ANY KIND INCURRED AS A RESULT OF THE USE OF THE SERVICES OR ANY CONTENT (OR PRODUCT) POSTED, TRANSMITTED OR OTHERWISE MADE AVAILABLE VIA THE SERVICES, EVEN IF ADVISED OF THEIR POSSIBILITY.</p>
+<h2>Indemnification</h2>
+<p>You agree to indemnify, defend and hold harmless platinumshop, Shopify and our affiliates, partners, officers, directors, employees, agents, contractors, licensors and service providers from any losses, damages, liabilities or claims, including reasonable attorneys’ fees, payable to any third party due to or arising out of (1) your breach of these Terms of Service or the documents they incorporate by reference, (2) your violation of any law or the rights of a third party, or (3) your access to and use of the Services.</p>
+<p>We will notify you of any indemnifiable claim, provided that a failure to promptly notify will not relieve you of your obligations unless you are materially prejudiced. We may control the defence and settlement of such claim at your expense, including choice of counsel, but will not settle any claim requiring non-monetary obligations without your consent (not to be unreasonably withheld). You will cooperate in the defence of indemnified claims, including by providing relevant documents.</p>
+<h2>Severability</h2>
+<p>In the event that any provision of these Terms of Service is determined to be unlawful, void or unenforceable, such provision shall nonetheless be enforceable to the fullest extent permitted by applicable law, and the unenforceable portion shall be deemed to be severed from these Terms of Service; such determination shall not affect the validity and enforceability of any other remaining provisions.</p>
+<h2>Waiver; entire agreement</h2>
+<p>The failure of us to exercise or enforce any right or provision of these Terms of Service shall not constitute a waiver of such right or provision.</p>
+<p>These Terms of Service and any policies or operating rules posted by us on this site or in respect to the Service constitute the entire agreement and understanding between you and us and govern your use of the Service, superseding any prior or contemporaneous agreements, communications and proposals, whether oral or written, between you and us (including, but not limited to, any prior versions of the Terms of Service).</p>
+<p>Any ambiguities in the interpretation of these Terms of Service shall not be construed against the drafting party.</p>
+<h2>Assignment</h2>
+<p>You may not delegate, transfer or assign this Agreement or any of your rights or obligations under these Terms without our prior written consent, and any such attempt will be null and void. We may transfer, assign or delegate these Terms and our rights and obligations without consent or notice to you.</p>
+<h2>Governing law</h2>
+<p>These Terms of Service and any separate agreements whereby we provide you Services shall be governed by and construed in accordance with the federal and state or territorial laws of the jurisdiction in which platinumshop is headquartered. You and platinumshop consent to venue and personal jurisdiction in such courts.</p>
+<h2>Headings</h2>
+<p>The headings used in this agreement are included for convenience only and will not limit or otherwise affect these Terms of Service.</p>
+<h2>Changes to the Terms of Service</h2>
+<p>You can review the most current version of the Terms of Service at any time on this page.</p>
+<p>We reserve the right, in our sole discretion, to update, change or replace any part of these Terms of Service by posting updates and changes to our website. It is your responsibility to check our website periodically for changes. We will notify you of any material changes to these Terms in accordance with applicable law, and such changes will be effective as of the date specified in the notice. Your continued use of or access to the Services following the posting of any changes to these Terms of Service constitutes acceptance of those changes.</p>
+<h2>Contact information</h2>
+<p>Questions about the Terms of Service should be sent to us at {{ mail }}.</p>
+<p>Our contact information is posted below:</p>
+<ul>
+<li><strong>Company name:</strong> platinum group</li>
+<li><strong>Email:</strong> {{ mail }}</li>
+<li><strong>Phone:</strong> {{ tel }}</li>
+<li><strong>VAT number:</strong> IT07568700483</li>
+<li><strong>REA number:</strong> VT - 215523</li>
+</ul>
+{%- endcase -%}

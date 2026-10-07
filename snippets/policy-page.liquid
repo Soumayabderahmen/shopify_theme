@@ -29,6 +29,7 @@
   endfor
   assign pp_doc = false
   assign pp_date = ''
+  assign pp_text_key = ''
   if pp_custom == false and pp_policy != nil and pp_policy.body != blank
     assign pp_doc = true
     assign pp_body = pp_policy.body | strip
@@ -38,6 +39,36 @@
       assign pp_body_cut = pp_body.size | minus: 11
       assign pp_body = pp_body | slice: 5, pp_body_cut
     endif
+
+    # Remboursement, mentions légales, conditions : tant que le texte de l'admin est celui d'origine, version découpée
+    # en sections et traduite dans la langue du client (snippets/policy-text-xx.liquid), comme l'expédition. Texte
+    # modifié ou traduit dans l'admin : le texte de Shopify s'affiche tel quel (jamais une ancienne version légale).
+    if request.path contains 'refund-policy' and pp_body contains 'La nostra informativa sui resi entro 30 giorni' and pp_body contains 'Una volta passati più di 15 giorni lavorativi'
+      assign pp_text_key = 'refund'
+    elsif request.path contains 'legal-notice' and pp_body contains 'Ultimo aggiornamento: agosto 2026' and pp_body contains 'Foro di Firenze'
+      assign pp_text_key = 'legal'
+    elsif request.path contains 'terms-of-service' and pp_body contains 'SEZIONE 25 - INFORMAZIONI DI CONTATTO' and pp_body contains 'P.IVA:IT07568700483'
+      assign pp_text_key = 'terms'
+    endif
+  endif
+-%}
+{%- if pp_text_key != '' -%}
+  {%- capture pp_text -%}
+    {%- case request.locale.iso_code -%}
+      {%- when 'it' -%}{%- render 'policy-text-it', policy: pp_text_key, root: pp_root -%}
+      {%- when 'en' -%}{%- render 'policy-text-en', policy: pp_text_key, root: pp_root -%}
+      {%- when 'fr' -%}{%- render 'policy-text-fr', policy: pp_text_key, root: pp_root -%}
+      {%- when 'de' -%}{%- render 'policy-text-de', policy: pp_text_key, root: pp_root -%}
+      {%- when 'es' -%}{%- render 'policy-text-es', policy: pp_text_key, root: pp_root -%}
+      {%- when 'nl' -%}{%- render 'policy-text-nl', policy: pp_text_key, root: pp_root -%}
+      {%- when 'ro' -%}{%- render 'policy-text-ro', policy: pp_text_key, root: pp_root -%}
+    {%- endcase -%}
+  {%- endcapture -%}
+  {%- assign pp_text = pp_text | strip -%}
+  {%- if pp_text != '' -%}{%- assign pp_body = pp_text -%}{%- endif -%}
+{%- endif -%}
+{%- liquid
+  if pp_doc
     assign pp_parts = pp_body | split: '<h2>'
     assign pp_intro = pp_parts | first
     # Date de mise à jour : premier paragraphe court (« Ultimo aggiornamento: … »), affichée sous le titre.
@@ -69,10 +100,17 @@
   endif
 -%}
 <div class="pp">
-  <a class="pp__back" href="{{ routes.root_url }}" data-pp-back>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
-    {{- 'policy_shipping.back' | t -}}
-  </a>
+  <div class="pp__top">
+    <a class="pp__back" href="{{ routes.root_url }}" data-pp-back>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
+      {{- 'policy_shipping.back' | t -}}
+    </a>
+    {%- comment -%} Logo de la boutique à droite du bouton retour (mobile), lien vers l'accueil. {%- endcomment -%}
+    <a class="pp__logo" href="{{ routes.root_url }}" aria-label="{{ pp_name }}">
+      {%- render 'pl-logo', size: 30, class: 'pp__plx' -%}
+      <span>{% if pp_name_tail != '' %}{{ pp_name_head | escape }}<b>{{ pp_name_tail | escape }}</b>{% else %}{{ pp_name }}{% endif %}</span>
+    </a>
+  </div>
 
   {%- if pp_custom -%}
     <article class="pp__card">
@@ -133,7 +171,7 @@
         <p>{{ 'policy_shipping.s9_text' | t }}</p>
         <ul class="pp__contact">
           <li><span>{{ 'policy_shipping.label_email' | t }}</span><a href="mailto:{{ pp_email }}">{{ pp_email }}</a></li>
-          <li><span>{{ 'policy_shipping.label_phone' | t }}</span><a href="tel:+393703723588">+39 370 372 3588</a></li>
+          <li><span>{{ 'policy_shipping.label_phone' | t }}</span><a href="tel:+393314511142">+39 33 1451 1142</a></li>
           <li><span>{{ 'policy_shipping.label_web' | t }}</span><a href="{{ routes.root_url }}">platinumshop.it</a></li>
         </ul>
       </section>
@@ -141,7 +179,6 @@
   {%- elsif pp_doc -%}
     <article class="pp__doc">
       <header class="pp__hero">
-        <span class="pp__brand">{% render 'pl-logo', size: 28, class: 'pp__plx' %}<span>{% if pp_name_tail != '' %}{{ pp_name_head | escape }}<b>{{ pp_name_tail | escape }}</b>{% else %}{{ pp_name }}{% endif %}</span></span>
         <p class="pp__eb">{{ 'policy_page.eyebrow' | t }}</p>
         <h1{% if pp_long_title %} class="is-long"{% endif %}>{{ pp_policy.title | escape }}</h1>
         {%- if pp_date != '' -%}<p class="pp__upd">{{ pp_date | escape }}</p>{%- endif -%}
@@ -228,6 +265,24 @@
     text-decoration: none;
   }
   .pp__back svg { width: 18px; height: 18px; }
+  /* Ligne du haut : retour à gauche, logo de la boutique à droite (mobile seulement). */
+  .pp__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .pp__top .pp__back { margin-bottom: 0; }
+  .pp__logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #16123f;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    text-decoration: none;
+  }
+  .pp__logo b { font-weight: 800; }
+  @media (min-width: 761px) {
+    .pp__logo { display: none; }
+  }
   .pp__card {
     padding: 22px 18px;
     border-radius: 18px;
@@ -316,7 +371,8 @@
   .pp__hero {
     position: relative;
     overflow: hidden;
-    padding: 28px 22px 26px;
+    min-height: 146px;
+    padding: 24px 22px 26px;
     background:
       radial-gradient(90% 70% at 92% 8%, rgb(90 75 240 / 16%) 0%, rgb(90 75 240 / 0%) 60%),
       linear-gradient(180deg, #dfe6ff 0%, #edf1ff 70%, #f6f7fb 100%);
@@ -330,20 +386,10 @@
     height: 1px;
     background: linear-gradient(90deg, transparent, rgb(58 52 210 / 25%), transparent);
   }
-  .pp__brand {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'Sora', system-ui, sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-  }
-  .pp__brand b { font-weight: 800; }
   .pp__plx { flex: none; border-radius: 8px; box-shadow: 0 6px 14px -6px rgb(58 52 210 / 55%); }
   .pp__plx.is-sm { border-radius: 5px; box-shadow: none; }
   .pp .pp__eb {
-    margin: 24px 0 0;
+    margin: 4px 0 0;
     color: #3a34d2;
     font-size: 10.5px;
     font-weight: 800;
@@ -365,7 +411,7 @@
   .pp .pp__upd { max-width: calc(100% - 92px); margin-top: 10px; color: #4a4f6b; font-size: 13.5px; }
   .pp__crest {
     position: absolute;
-    top: 52px;
+    top: 20px;
     right: 14px;
     width: 84px;
     height: 98px;
