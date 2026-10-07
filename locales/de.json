@@ -690,6 +690,10 @@
     "cta": "Schreib uns",
     "tagline": "Platinumshop — Luxus in deiner Reichweite, immer zum besten Preis."
   },
+  "policy_page": {
+    "eyebrow": "Unsere Richtlinien",
+    "toc": "Auf dieser Seite"
+  },
   "policy_shipping": {
     "back": "Zurück",
     "title": "Versandrichtlinie",

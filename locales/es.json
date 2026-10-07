@@ -705,6 +705,10 @@
     "cta": "Escríbenos",
     "tagline": "Platinumshop — El lujo a tu alcance, siempre al mejor precio."
   },
+  "policy_page": {
+    "eyebrow": "Nuestras políticas",
+    "toc": "En esta página"
+  },
   "policy_shipping": {
     "back": "Volver",
     "title": "Política de envíos",

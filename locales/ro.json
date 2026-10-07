@@ -785,6 +785,10 @@
     "cta": "Scrie-ne",
     "tagline": "Platinumshop — Luxul la îndemâna ta, mereu la cel mai bun preț."
   },
+  "policy_page": {
+    "eyebrow": "Politicile noastre",
+    "toc": "Pe această pagină"
+  },
   "policy_shipping": {
     "back": "Înapoi",
     "title": "Politica de livrare",

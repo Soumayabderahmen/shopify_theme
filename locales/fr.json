@@ -777,6 +777,10 @@
     "cta": "Nous écrire",
     "tagline": "Platinumshop — Le luxe à votre portée, toujours au meilleur prix."
   },
+  "policy_page": {
+    "eyebrow": "Nos politiques",
+    "toc": "Sur cette page"
+  },
   "policy_shipping": {
     "back": "Retour",
     "title": "Politique d'expédition",

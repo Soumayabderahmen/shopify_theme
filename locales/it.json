@@ -779,6 +779,10 @@
     "cta": "Scrivici",
     "tagline": "Platinumshop — Il lusso alla tua portata, sempre al miglior prezzo."
   },
+  "policy_page": {
+    "eyebrow": "Le nostre informative",
+    "toc": "In questa pagina"
+  },
   "policy_shipping": {
     "back": "Indietro",
     "title": "Informativa sulle spedizioni",

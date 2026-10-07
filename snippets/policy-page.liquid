@@ -17,6 +17,56 @@
   endif
   assign pp_email = 'contact@platinumshop.it'
   assign pp_email_link = '<a href="mailto:' | append: pp_email | append: '">' | append: pp_email | append: '</a>'
+
+  # Autres politiques : charte du prototype v4.2 (en-tête à halo, écusson PL, cartes numérotées). Le texte reste celui
+  # de Shopify dans la langue du client ; une politique à sections <h2> (confidentialité) est découpée en cartes 01, 02…
+  assign pp_policy = nil
+  for policy in shop.policies
+    if policy.url != blank and request.path contains policy.url
+      assign pp_policy = policy
+      break
+    endif
+  endfor
+  assign pp_doc = false
+  assign pp_date = ''
+  if pp_custom == false and pp_policy != nil and pp_policy.body != blank
+    assign pp_doc = true
+    assign pp_body = pp_policy.body | strip
+    assign pp_body_start = pp_body | slice: 0, 5
+    assign pp_body_end = pp_body | slice: -6, 6
+    if pp_body_start == '<div>' and pp_body_end == '</div>'
+      assign pp_body_cut = pp_body.size | minus: 11
+      assign pp_body = pp_body | slice: 5, pp_body_cut
+    endif
+    assign pp_parts = pp_body | split: '<h2>'
+    assign pp_intro = pp_parts | first
+    # Date de mise à jour : premier paragraphe court (« Ultimo aggiornamento: … »), affichée sous le titre.
+    assign pp_first_p = pp_intro | split: '</p>' | first
+    assign pp_first_text = pp_first_p | strip_html | strip
+    if pp_first_text.size > 0 and pp_first_text.size < 60 and pp_first_text contains '2'
+      assign pp_date = pp_first_text
+      assign pp_first_p = pp_first_p | append: '</p>'
+      assign pp_intro = pp_intro | remove_first: pp_first_p
+    endif
+    assign pp_intro_text = pp_intro | strip_html | strip
+    assign pp_sections = pp_parts.size | minus: 1
+    # Mot très long dans le titre (de « Datenschutzerklärung ») : titre un peu plus petit, sans coupure au milieu.
+    assign pp_long_title = false
+    assign pp_title_words = pp_policy.title | split: ' '
+    for pp_word in pp_title_words
+      if pp_word.size > 14
+        assign pp_long_title = true
+      endif
+    endfor
+  endif
+  assign pp_name = shop.name | escape
+  assign pp_name_tail = ''
+  assign pp_name_end = shop.name | slice: -4, 4 | downcase
+  if pp_name_end == 'shop' and shop.name.size > 4
+    assign pp_name_cut = shop.name.size | minus: 4
+    assign pp_name_head = shop.name | slice: 0, pp_name_cut
+    assign pp_name_tail = shop.name | slice: -4, 4
+  endif
 -%}
 <div class="pp">
   <a class="pp__back" href="{{ routes.root_url }}" data-pp-back>
@@ -88,6 +138,68 @@
         </ul>
       </section>
     </article>
+  {%- elsif pp_doc -%}
+    <article class="pp__doc">
+      <header class="pp__hero">
+        <span class="pp__brand">{% render 'pl-logo', size: 28, class: 'pp__plx' %}<span>{% if pp_name_tail != '' %}{{ pp_name_head | escape }}<b>{{ pp_name_tail | escape }}</b>{% else %}{{ pp_name }}{% endif %}</span></span>
+        <p class="pp__eb">{{ 'policy_page.eyebrow' | t }}</p>
+        <h1{% if pp_long_title %} class="is-long"{% endif %}>{{ pp_policy.title | escape }}</h1>
+        {%- if pp_date != '' -%}<p class="pp__upd">{{ pp_date | escape }}</p>{%- endif -%}
+        <svg class="pp__crest" viewBox="0 0 120 140" aria-hidden="true">
+          <defs>
+            <linearGradient id="pp-shb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#d9e1ff"/></linearGradient>
+            <linearGradient id="pp-shs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9b4fa"/><stop offset="1" stop-color="#5a4bf0"/></linearGradient>
+          </defs>
+          <path d="M60 5 110 23v41c0 35-22 60-50 72C32 124 10 99 10 64V23z" fill="url(#pp-shb)" stroke="url(#pp-shs)" stroke-width="1.6"/>
+          <path d="M60 14 101 29v35c0 29-18 50-41 61C37 114 19 93 19 64V29z" fill="none" stroke="#5a4bf0" stroke-width=".7" opacity=".3"/>
+          {%- comment -%} <svg> imbriqué (x/y) : le thème impose un transform-origin aux SVG, un transform décalerait le logo. {%- endcomment -%}
+          <svg x="37" y="44" width="46.08" height="46.08" viewBox="0 0 64 64">
+            <rect width="64" height="64" rx="16" fill="url(#pl-logo-g)"/>
+            <path fill="#fff" fill-rule="evenodd" d="M12 15h12.5a10 10 0 0 1 0 20H20v14h-8zM20 22v6h4.2a3 3 0 0 0 0-6z"/>
+            <path fill="#fff" d="M36.5 15h8v26H54v8H36.5z"/>
+            <circle cx="51" cy="18.5" r="3.6" fill="#ffb020"/>
+          </svg>
+        </svg>
+      </header>
+
+      <div class="pp__list">
+        {%- if pp_intro_text != '' -%}
+          <section class="pp__c pp__c--intro"><div class="pp__rte">{{ pp_intro }}</div></section>
+        {%- endif -%}
+
+        {%- if pp_sections > 0 -%}
+          {%- comment -%} Sommaire : un lien par section (titres de Shopify, déjà traduits). {%- endcomment -%}
+          <nav class="pp__c pp__toc" aria-labelledby="pp-toc-title">
+            <p class="pp__cap" id="pp-toc-title">{{ 'policy_page.toc' | t }}</p>
+            <ol>
+              {%- for part in pp_parts offset: 1 -%}
+                {%- assign pp_h = part | split: '</h2>' | first | strip_html | strip -%}
+                <li><a href="#pp-s{{ forloop.index }}"><i>{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</i><span>{{ pp_h }}</span></a></li>
+              {%- endfor -%}
+            </ol>
+          </nav>
+
+          {%- for part in pp_parts offset: 1 -%}
+            {%- liquid
+              assign pp_h_html = part | split: '</h2>' | first
+              assign pp_h_close = pp_h_html | append: '</h2>'
+              assign pp_s_body = part | remove_first: pp_h_close
+            -%}
+            <section class="pp__c" id="pp-s{{ forloop.index }}">
+              <header>
+                <span class="pp__num" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</span>
+                <h2>{{ pp_h_html | strip }}</h2>
+              </header>
+              <div class="pp__rte">{{ pp_s_body }}</div>
+            </section>
+          {%- endfor -%}
+        {%- endif -%}
+
+        <p class="pp__sig">{% render 'pl-logo', size: 18, class: 'pp__plx is-sm' %}<span>{{ 'mobile_protect.sign' | t: shop_name: shop.name }}</span></p>
+      </div>
+    </article>
+    {%- comment -%} Ordinateur : mise en page inchangée (charte réservée au mobile). {%- endcomment -%}
+    <div class="pp__card pp__card--shopify pp__desk">{{ content }}</div>
   {%- else -%}
     <div class="pp__card pp__card--shopify">{{ content }}</div>
   {%- endif -%}
@@ -197,6 +309,170 @@
     color: #fff;
     font-weight: 800;
     text-decoration: none;
+  }
+  /* Politiques de Shopify : charte du prototype v4.2 (feuilles « Protections » de la fiche produit). */
+  html:has(.pp__doc) { scroll-behavior: smooth; }
+  .pp__doc { margin: 0 -16px; background: #f6f7fb; border-radius: 22px; overflow: hidden; }
+  .pp__hero {
+    position: relative;
+    overflow: hidden;
+    padding: 28px 22px 26px;
+    background:
+      radial-gradient(90% 70% at 92% 8%, rgb(90 75 240 / 16%) 0%, rgb(90 75 240 / 0%) 60%),
+      linear-gradient(180deg, #dfe6ff 0%, #edf1ff 70%, #f6f7fb 100%);
+  }
+  .pp__hero::after {
+    content: '';
+    position: absolute;
+    right: 22px;
+    bottom: 0;
+    left: 22px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(58 52 210 / 25%), transparent);
+  }
+  .pp__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .pp__brand b { font-weight: 800; }
+  .pp__plx { flex: none; border-radius: 8px; box-shadow: 0 6px 14px -6px rgb(58 52 210 / 55%); }
+  .pp__plx.is-sm { border-radius: 5px; box-shadow: none; }
+  .pp .pp__eb {
+    margin: 24px 0 0;
+    color: #3a34d2;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+  .pp__hero h1 {
+    max-width: calc(100% - 84px);
+    margin-top: 8px;
+    font-size: 26px;
+    letter-spacing: -0.8px;
+    line-height: 1.12;
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+  .pp__hero h1.is-long { font-size: 20px; }
+  .pp .pp__upd { max-width: calc(100% - 92px); margin-top: 10px; color: #4a4f6b; font-size: 13.5px; }
+  .pp__crest {
+    position: absolute;
+    top: 52px;
+    right: 14px;
+    width: 84px;
+    height: 98px;
+    filter: drop-shadow(0 16px 26px rgb(58 52 210 / 22%));
+  }
+  .pp__list { padding: 20px 16px 18px; }
+  .pp__c {
+    padding: 20px 20px 18px;
+    background: #fff;
+    border: 1px solid #e6e8f0;
+    border-radius: 16px;
+    box-shadow: 0 18px 30px -28px rgb(20 17 46 / 45%);
+    scroll-margin-top: 90px;
+    transition: border-color 0.35s, box-shadow 0.35s;
+  }
+  .pp__c + .pp__c { margin-top: 12px; }
+  /* Section ouverte depuis le sommaire : mise en évidence comme les cartes de la fiche. */
+  .pp__c:target { border-color: #3a34d2; box-shadow: 0 0 0 3px rgb(58 52 210 / 14%), 0 18px 30px -28px rgb(20 17 46 / 45%); }
+  .pp__c > header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e6e8f0;
+  }
+  .pp__num {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: #ecebfd;
+    color: #3a34d2;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .pp__c h2 { display: block; margin: 0; font-size: 17px; letter-spacing: -0.2px; line-height: 1.25; }
+  .pp__cap {
+    margin: 0 0 10px !important;
+    color: #8c889c !important;
+    font-size: 10.5px !important;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .pp__toc ol { margin: 0; padding: 0; list-style: none; }
+  .pp__toc a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid #f0f1f6;
+    color: #16123f;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    text-decoration: none;
+  }
+  .pp__toc li:first-child a { border-top: 0; }
+  .pp__toc i {
+    flex: none;
+    width: 24px;
+    color: #3a34d2;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .pp__rte { color: #4a4760; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+  .pp__rte p { color: inherit; font-size: inherit; }
+  .pp__rte p + p, .pp__rte p + ul, .pp__rte ul + p, .pp__rte div + p { margin-top: 10px; }
+  .pp__c--intro .pp__rte { color: #16123f; }
+  .pp__rte strong { color: #16123f; }
+  .pp__rte a { color: #3a34d2; font-weight: 700; text-decoration: none; }
+  .pp__rte ul { margin: 10px 0 0; padding: 0; list-style: none; }
+  .pp__rte li { position: relative; margin: 8px 0; padding-left: 18px; }
+  /* Puces losange bleues. */
+  .pp__rte li::before {
+    content: '';
+    position: absolute;
+    top: 0.62em;
+    left: 2px;
+    width: 5px;
+    height: 5px;
+    background: #3a34d2;
+    transform: rotate(45deg);
+  }
+  .pp__rte > div { margin-top: 12px; padding: 14px; border-radius: 12px; background: #f6f7fb; }
+  .pp .pp__sig {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 22px 0 4px;
+    color: #7a7e94;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  @media (min-width: 761px) {
+    .pp__doc { display: none; }
+  }
+  @media (max-width: 760px) {
+    .pp__desk { display: none; }
   }
   /* Autres politiques (texte de Shopify) : même carte, texte lisible. */
   .pp__card--shopify .shopify-policy__container { max-width: none; margin: 0; padding: 0; }

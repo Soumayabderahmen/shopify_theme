@@ -3474,6 +3474,10 @@
     "cta": "Email us",
     "tagline": "Platinumshop — Luxury within your reach, always at the best price."
   },
+  "policy_page": {
+    "eyebrow": "Our policies",
+    "toc": "On this page"
+  },
   "policy_shipping": {
     "back": "Back",
     "title": "Shipping policy",

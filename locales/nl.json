@@ -708,6 +708,10 @@
     "cta": "Mail ons",
     "tagline": "Platinumshop — Luxe binnen handbereik, altijd voor de beste prijs."
   },
+  "policy_page": {
+    "eyebrow": "Ons beleid",
+    "toc": "Op deze pagina"
+  },
   "policy_shipping": {
     "back": "Terug",
     "title": "Verzendbeleid",
