@@ -1027,7 +1027,8 @@
     if (/specific/.test(t)) return 'spec';
     if (/caratteristic|feature/.test(t)) return 'feat';
     if (/vantagg/.test(t)) return 'adv';
-    if (/panoramic|overview|descri/.test(t)) return 'ov';
+    if (/panoramic|overview/.test(t)) return 'ov';
+    if (/descri/.test(t)) return 'desc';
     return 'sec' + Math.random().toString(36).slice(2, 7);
   };
   // Ligne « size_info: {…} » des descriptions importées : tableau construit par assets/size-info.js (partagé avec le desktop).
@@ -1084,7 +1085,7 @@
         return;
       }
       if (!current) {
-        current = { title: T('description'), nodes: [] };
+        current = { title: T('description'), key: 'desc', nodes: [] };
         sections.push(current);
       }
       current.nodes.push(el);
@@ -1143,7 +1144,10 @@
         paragraphs += node.outerHTML;
       });
       flushParagraphs();
-      tabs.push({ key: key, title: section.title });
+      // Sections reconnues : nom de l'onglet dans la langue du client (« SPECIFICATIONS » -> « Technische Daten ») ;
+      // les autres gardent le titre de la description.
+      var known = { spec: 'desc_tab_spec', feat: 'desc_tab_feat', adv: 'desc_tab_adv', ov: 'desc_tab_ov', desc: 'description', size: 'size_guide' }[key];
+      tabs.push({ key: key, title: known && T(known) !== known ? T(known) : section.title });
       html += '<section class="pdp-m__sec" id="pdp-sec-' + key + '" data-pdp-section="' + key + '" role="tabpanel"' + (tabs.length > 1 ? ' hidden' : '') + '>' + body + '</section>';
     });
 
