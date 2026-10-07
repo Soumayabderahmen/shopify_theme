@@ -147,6 +147,8 @@
       </svg>
     </button>
     <a class="mobile-home-header__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}">
+      {%- comment -%} Monogramme « PL » (snippets/pl-logo.liquid) devant le nom. {%- endcomment -%}
+      <span class="mobile-home-header__pl" aria-hidden="true">{% render 'pl-logo', size: 28 %}</span>
       <svg class="mobile-home-header__logo-text" aria-hidden="true" viewBox="0 0 185 30" focusable="false">
         <defs>
           <linearGradient id="mobile-home-logo-gradient" x1="-185" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse">
