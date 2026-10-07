@@ -155,10 +155,6 @@
         <link rel="mask-icon" href="{{ favicon_url }}" color="#333333">
       {%- endif -%}
       <link rel="apple-touch-icon" href="{{ apple_touch_icon_url }}">
-    {%- else -%}
-      {%- comment -%} Sans favicon choisi dans l'éditeur : monogramme « PL » (assets/pl-favicon.svg, même dessin que snippets/pl-logo.liquid). {%- endcomment -%}
-      <link rel="icon" href="{{ 'pl-favicon.svg' | asset_url }}" type="image/svg+xml">
-      <link rel="mask-icon" href="{{ 'pl-favicon.svg' | asset_url }}" color="#3a34d2">
     {%- endif -%}
     <script>
       document.documentElement.classList.remove('no-js');
