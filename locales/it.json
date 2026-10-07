@@ -702,6 +702,9 @@
     }
   },
   "mobile_protect": {
+    "chip_tracking": "Tracking del pacco via email",
+    "chip_report": "Pacco danneggiato: segnalazione entro 7 giorni",
+    "chip_refund": "Rimborso entro 10 giorni lavorativi",
     "pay_summary": "Pagamento sicuro e crittografato al 100%",
     "pay_h1_v": "SSL",
     "pay_h1_l": "dati crittografati",

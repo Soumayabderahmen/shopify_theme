@@ -376,7 +376,10 @@
     </div>
   </section>
 
-  {%- comment -%} 9. Garanzia Ordine : mêmes garanties que le bandeau du site (snippets/Garanzia .liquid). {%- endcomment -%}
+  {%- comment -%}
+    9. Garantie commande : uniquement des engagements écrits dans les politiques de la boutique (suivi par e-mail,
+    signalement sous 7 jours, remboursement sous 10 jours ouvrés) ; chaque badge ouvre l'onglet de la feuille Protections.
+  {%- endcomment -%}
   <section class="pdp-m__card">
     <div class="pdp-m__ctitle"><h3>{{ 'mobile.pdp.guarantee_title' | t }}</h3></div>
     <div class="pdp-m__gar">
@@ -395,9 +398,9 @@
           endif
         -%}
         <span data-pdp-late="{{ pm_late_text | escape }}" data-eur-cents="500">{{ pm_late_text | replace: '__AMOUNT__', pm_late_amount }}</span></span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/></svg>{{ 'mobile.pdp.damaged_return' | t }}</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>{{ 'mobile.pdp.no_updates' | t }}</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>{{ 'mobile.pdp.no_delivery' | t }}</span>
+      <button type="button" data-pdp-pt-open="ship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>{{ 'mobile_protect.chip_report' | t }}</button>
+      <button type="button" data-pdp-pt-open="ship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>{{ 'mobile_protect.chip_tracking' | t }}</button>
+      <button type="button" data-pdp-pt-open="ret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h4"/></svg>{{ 'mobile_protect.chip_refund' | t }}</button>
     </div>
   </section>
 

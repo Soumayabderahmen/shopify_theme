@@ -631,6 +631,9 @@
     "top_picks": "Topkeuzes"
   },
   "mobile_protect": {
+    "chip_tracking": "Pakket volgen via e-mail",
+    "chip_report": "Beschadigd pakket: melden binnen 7 dagen",
+    "chip_refund": "Terugbetaling binnen 10 werkdagen",
     "pay_summary": "100% veilige, versleutelde betaling",
     "pay_h1_v": "SSL",
     "pay_h1_l": "versleutelde gegevens",

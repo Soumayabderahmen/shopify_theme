@@ -628,6 +628,9 @@
     }
   },
   "mobile_protect": {
+    "chip_tracking": "Seguimiento del paquete por correo",
+    "chip_report": "Paquete dañado: aviso en 7 días",
+    "chip_refund": "Reembolso en 10 días hábiles",
     "pay_summary": "Pago 100 % seguro y cifrado",
     "pay_h1_v": "SSL",
     "pay_h1_l": "datos cifrados",

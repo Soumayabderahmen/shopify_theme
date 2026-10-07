@@ -700,6 +700,9 @@
     }
   },
   "mobile_protect": {
+    "chip_tracking": "Suivi de colis par e-mail",
+    "chip_report": "Colis abîmé : signalement sous 7 jours",
+    "chip_refund": "Remboursement sous 10 jours ouvrés",
     "pay_summary": "Paiement 100 % sécurisé et crypté",
     "pay_h1_v": "SSL",
     "pay_h1_l": "données cryptées",

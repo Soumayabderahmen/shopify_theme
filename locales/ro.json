@@ -708,6 +708,9 @@
     }
   },
   "mobile_protect": {
+    "chip_tracking": "Urmărirea coletului pe e-mail",
+    "chip_report": "Colet deteriorat: semnalare în 7 zile",
+    "chip_refund": "Rambursare în 10 zile lucrătoare",
     "pay_summary": "Plată 100% sigură și criptată",
     "pay_h1_v": "SSL",
     "pay_h1_l": "date criptate",

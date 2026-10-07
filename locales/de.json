@@ -613,6 +613,9 @@
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
   "mobile_protect": {
+    "chip_tracking": "Sendungsverfolgung per E-Mail",
+    "chip_report": "Beschädigtes Paket: Meldung innerhalb von 7 Tagen",
+    "chip_refund": "Erstattung innerhalb von 10 Werktagen",
     "pay_summary": "100 % sichere, verschlüsselte Zahlung",
     "pay_h1_v": "SSL",
     "pay_h1_l": "verschlüsselte Daten",

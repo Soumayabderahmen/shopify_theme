@@ -3397,6 +3397,9 @@
     }
   },
   "mobile_protect": {
+    "chip_tracking": "Parcel tracking by email",
+    "chip_report": "Damaged parcel: report within 7 days",
+    "chip_refund": "Refund within 10 business days",
     "pay_summary": "100% secure, encrypted payment",
     "pay_h1_v": "SSL",
     "pay_h1_l": "encrypted data",
