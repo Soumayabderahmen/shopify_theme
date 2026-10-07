@@ -173,9 +173,7 @@
   {%- elsif pp_doc -%}
     <article class="pp__doc">
       <header class="pp__hero">
-        <a class="pp__hero-back" href="{{ routes.root_url }}" data-pp-back aria-label="{{ 'policy_shipping.back' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></a>
-        <span class="pp__brand">{% render 'pl-logo', size: 28, class: 'pp__plx' %}<span>{% if pp_name_tail != '' %}{{ pp_name_head | escape }}<b>{{ pp_name_tail | escape }}</b>{% else %}{{ pp_name }}{% endif %}</span></span>
-        <p class="pp__eb">{{ 'policy_page.eyebrow' | t }}</p>
+        <a class="pp__hero-back" href="{{ routes.root_url }}" data-pp-back aria-label="{{ 'policy_shipping.back' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></a>        <p class="pp__eb">{{ 'policy_page.eyebrow' | t }}</p>
         <h1{% if pp_long_title %} class="is-long"{% endif %}>{{ pp_policy.title | escape }}</h1>
         {%- if pp_date != '' -%}<p class="pp__upd">{{ pp_date | escape }}</p>{%- endif -%}
         <svg class="pp__crest" viewBox="0 0 120 140" aria-hidden="true">
@@ -279,18 +277,6 @@
     backdrop-filter: blur(8px);
   }
   .pp__hero-back svg { width: 18px; height: 18px; }
-  .pp__brand {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 38px;
-    padding-right: 48px;
-    font-family: 'Sora', system-ui, sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-  }
-  .pp__brand b { font-weight: 800; }
   @media (max-width: 760px) {
     .pp__back--desk { display: none; }
   }
@@ -382,7 +368,7 @@
   .pp__hero {
     position: relative;
     overflow: hidden;
-    min-height: 180px;
+    min-height: 172px;
     padding: 14px 22px 26px;
     background:
       radial-gradient(90% 70% at 92% 8%, rgb(90 75 240 / 16%) 0%, rgb(90 75 240 / 0%) 60%),
@@ -400,7 +386,8 @@
   .pp__plx { flex: none; border-radius: 8px; box-shadow: 0 6px 14px -6px rgb(58 52 210 / 55%); }
   .pp__plx.is-sm { border-radius: 5px; box-shadow: none; }
   .pp .pp__eb {
-    margin: 18px 0 0;
+    margin: 0;
+    padding: 12px 48px 0 0;
     color: #3a34d2;
     font-size: 10.5px;
     font-weight: 800;
@@ -422,7 +409,7 @@
   .pp .pp__upd { max-width: calc(100% - 92px); margin-top: 10px; color: #4a4f6b; font-size: 13.5px; }
   .pp__crest {
     position: absolute;
-    top: 64px;
+    top: 62px;
     right: 14px;
     width: 84px;
     height: 98px;
