@@ -708,6 +708,7 @@
     }
   },
   "mobile_protect": {
+    "chip_prep": "Pregătire în 1–3 zile lucrătoare",
     "chip_tracking": "Urmărirea coletului pe e-mail",
     "chip_report": "Colet deteriorat: semnalare în 7 zile",
     "chip_refund": "Rambursare în 10 zile lucrătoare",

@@ -613,6 +613,7 @@
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
   "mobile_protect": {
+    "chip_prep": "Bearbeitung in 1–3 Werktagen",
     "chip_tracking": "Sendungsverfolgung per E-Mail",
     "chip_report": "Beschädigtes Paket: Meldung innerhalb von 7 Tagen",
     "chip_refund": "Erstattung innerhalb von 10 Werktagen",

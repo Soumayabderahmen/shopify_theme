@@ -628,6 +628,7 @@
     }
   },
   "mobile_protect": {
+    "chip_prep": "Preparación en 1-3 días hábiles",
     "chip_tracking": "Seguimiento del paquete por correo",
     "chip_report": "Paquete dañado: aviso en 7 días",
     "chip_refund": "Reembolso en 10 días hábiles",

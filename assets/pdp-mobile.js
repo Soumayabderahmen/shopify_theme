@@ -1004,13 +1004,6 @@
   var firstVariant = variants.find(function (item) { return String(item.id) === lastVariantId; }) || variants[0];
   if (firstVariant) updateShipping(firstVariant.price);
 
-  // Crédit en cas de retard (5 € de la boutique) : converti au taux de Shopify dans la devise du client (4,75 CHF…).
-  root.querySelectorAll('[data-pdp-late]').forEach(function (late) {
-    var lateRate = Number(window.Shopify && window.Shopify.currency && window.Shopify.currency.rate) || 1;
-    var cents = Math.round(Number(late.getAttribute('data-eur-cents')) * lateRate);
-    late.textContent = late.getAttribute('data-pdp-late').replace('__AMOUNT__', money(cents));
-  });
-
   /* ---------- Fidélité : textes des apps (points Honeypop, crédit boutique) ---------- */
   var rewards = root.querySelector('[data-pdp-rewards]');
   var readRewards = function () {

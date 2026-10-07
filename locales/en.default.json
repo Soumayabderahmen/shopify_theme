@@ -3397,6 +3397,7 @@
     }
   },
   "mobile_protect": {
+    "chip_prep": "Ready to ship in 1–3 business days",
     "chip_tracking": "Parcel tracking by email",
     "chip_report": "Damaged parcel: report within 7 days",
     "chip_refund": "Refund within 10 business days",

@@ -702,6 +702,7 @@
     }
   },
   "mobile_protect": {
+    "chip_prep": "Preparazione in 1-3 giorni lavorativi",
     "chip_tracking": "Tracking del pacco via email",
     "chip_report": "Pacco danneggiato: segnalazione entro 7 giorni",
     "chip_refund": "Rimborso entro 10 giorni lavorativi",

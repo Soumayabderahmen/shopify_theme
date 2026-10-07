@@ -700,6 +700,7 @@
     }
   },
   "mobile_protect": {
+    "chip_prep": "Préparation en 1 à 3 jours ouvrés",
     "chip_tracking": "Suivi de colis par e-mail",
     "chip_report": "Colis abîmé : signalement sous 7 jours",
     "chip_refund": "Remboursement sous 10 jours ouvrés",
