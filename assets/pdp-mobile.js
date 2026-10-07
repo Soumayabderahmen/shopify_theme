@@ -1221,6 +1221,34 @@
   // Vrais onglets : seule la section de l'onglet choisi est affichée (page plus courte ; les sections cachées,
   // et leurs photos, ne sont dessinées / téléchargées qu'à l'ouverture de leur onglet).
   var openDescTab = null;
+  // Texte long (section faite seulement de paragraphes) : coupé après quelques lignes avec un fondu et un bouton
+  // « Lire la suite » / « Afficher moins ». Mesuré à l'ouverture de l'onglet (une section cachée n'a pas de hauteur).
+  var clampDescSection = function (section) {
+    if (section.hasAttribute('data-pdp-clamp')) return;
+    section.setAttribute('data-pdp-clamp', '');
+    var blocks = Array.prototype.slice.call(section.children);
+    if (!blocks.length || !blocks.every(function (block) { return block.classList.contains('pdp-m__txt'); })) return;
+    var box = document.createElement('div');
+    box.className = 'pdp-m__clamp';
+    blocks.forEach(function (block) { box.appendChild(block); });
+    section.appendChild(box);
+    if (box.scrollHeight <= 230) return;
+    box.classList.add('is-clamped');
+    var more = T('read_more');
+    var less = T('show_less');
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'pdp-m__more-txt';
+    button.setAttribute('aria-expanded', 'false');
+    button.innerHTML = '<span>' + more + '</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+    button.addEventListener('click', function () {
+      var open = box.classList.toggle('is-clamped') === false;
+      button.setAttribute('aria-expanded', open ? 'true' : 'false');
+      button.querySelector('span').textContent = open ? less : more;
+      if (!open) section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+    section.appendChild(button);
+  };
   var setupTabs = function () {
     var tabs = Array.prototype.slice.call(descBox.querySelectorAll('[data-pdp-tab]'));
     var sections = Array.prototype.slice.call(descBox.querySelectorAll('[data-pdp-section]'));
@@ -1229,6 +1257,7 @@
     var activate = function (key) {
       sections.forEach(function (section) {
         section.hidden = section.getAttribute('data-pdp-section') !== key;
+        if (!section.hidden) clampDescSection(section);
       });
       tabs.forEach(function (tab) {
         var on = tab.getAttribute('data-pdp-tab') === key;

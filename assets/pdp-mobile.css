@@ -1918,22 +1918,27 @@ body.template-product {
   display: block;
 }
 
-/* 11. Description : onglets collants + sections */
-/* Vrais onglets : une seule section affichée sous la barre (plus besoin de barre collante). */
+/* 11. Description : carte à la charte (onglets en pastilles, texte aéré, « Lire la suite » sur les longs textes) */
+.pdp-m__desc {
+  margin: 12px 12px 0;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgb(22 18 63 / 4%), 0 10px 24px -18px rgb(22 18 63 / 35%);
+}
+
 .pdp-m__tabs {
   position: relative;
   z-index: 1;
-  margin-top: 8px;
   background: #fff;
-  border-bottom: 1px solid var(--pm-line);
   box-shadow: none;
 }
 
 .pdp-m__tabs-in {
   position: relative;
   display: flex;
-  gap: 2px;
-  padding: 0 8px;
+  gap: 6px;
+  padding: 14px 14px 4px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -1944,26 +1949,28 @@ body.template-product {
 
 #root .pdp-m .pdp-m__tab {
   flex: 0 0 auto;
-  padding: 15px 12px 13px;
-  color: var(--pm-mute);
-  font-size: 14px;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 8px 14px !important;
+  color: var(--pm-ink-2);
+  font-size: 13px;
   font-weight: 700;
+  line-height: 1.3;
   white-space: nowrap;
-  transition: color 0.2s;
+  background: #f4f6fa;
+  border-radius: 999px;
+  transition: color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 
 #root .pdp-m .pdp-m__tab[aria-selected='true'] {
-  color: var(--pm-ink);
+  color: var(--pm-blue);
+  background: var(--pm-blue-soft);
+  box-shadow: inset 0 0 0 1px rgb(58 52 210 / 22%);
 }
 
+/* Pastilles : plus de trait sous l'onglet actif. */
 .pdp-m__ind {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  background: var(--pm-blue);
-  border-radius: 3px 3px 0 0;
-  transition: transform 0.35s cubic-bezier(0.3, 1.4, 0.5, 1), width 0.35s cubic-bezier(0.3, 1.4, 0.5, 1);
+  display: none;
 }
 
 .pdp-m__sec {
@@ -1975,6 +1982,7 @@ body.template-product {
 
 .pdp-m__desc .pdp-m__sec {
   margin-top: 0;
+  padding: 14px 16px 18px;
 }
 
 .pdp-m .pdp-m__sec h2 {
@@ -1990,16 +1998,71 @@ body.template-product {
 .pdp-m__txt {
   color: var(--pm-ink-2);
   font-size: 14px;
+  line-height: 1.65;
 }
 
 .pdp-m__txt p {
   margin: 0;
 }
 
+/* Premier paragraphe de la description : accroche un peu plus grande, couleur du titre. */
+.pdp-m__desc .pdp-m__sec > .pdp-m__txt:first-child > p:first-child,
+.pdp-m__desc .pdp-m__clamp > .pdp-m__txt:first-child > p:first-child {
+  color: var(--pm-ink);
+  font-size: 15px;
+  font-weight: 500;
+}
+
 .pdp-m__txt p + p,
 .pdp-m__txt ul + p,
 .pdp-m__txt p + ul {
+  margin-top: 12px;
+}
+
+.pdp-m__clamp {
+  position: relative;
+}
+
+/* Texte coupé : hauteur limitée + fondu blanc en bas. */
+.pdp-m__clamp.is-clamped {
+  max-height: 200px;
+  overflow: hidden;
+}
+
+.pdp-m__clamp.is-clamped::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 72px;
+  background: linear-gradient(rgb(255 255 255 / 0%), #fff);
+  pointer-events: none;
+}
+
+#root .pdp-m .pdp-m__more-txt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: auto !important;
+  min-height: 0 !important;
   margin-top: 10px;
+  padding: 8px 14px !important;
+  color: var(--pm-blue);
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--pm-blue-soft);
+  border-radius: 999px;
+}
+
+.pdp-m__more-txt svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s;
+}
+
+.pdp-m__more-txt[aria-expanded='true'] svg {
+  transform: rotate(180deg);
 }
 
 .pdp-m__txt b,
@@ -2032,7 +2095,7 @@ body.template-product {
   width: 22px;
   height: 22px;
   margin-top: 1px;
-  color: var(--pm-ok);
+  color: var(--pm-blue);
 }
 
 .pdp-m__feat b,
