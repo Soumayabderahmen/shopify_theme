@@ -705,6 +705,32 @@
     "cta": "Escríbenos",
     "tagline": "Platinumshop — El lujo a tu alcance, siempre al mejor precio."
   },
+  "track_page": {
+    "eyebrow": "Pedido y envío",
+    "intro": "Sigue tu paquete desde la preparación hasta la entrega: el número de seguimiento te llega por correo electrónico en cuanto se envía el pedido.",
+    "tool_title": "Seguir tu paquete",
+    "tool_text": "Introduce el número de seguimiento recibido por correo electrónico en nuestra herramienta de seguimiento para ver dónde está tu paquete.",
+    "account_cta": "Mis pedidos",
+    "journey_title": "El recorrido de tu pedido",
+    "j1_title": "Pedido confirmado",
+    "j1_text": "Recibes la confirmación del pedido por correo electrónico.",
+    "j2_title": "En preparación",
+    "j3_title": "Enviado",
+    "j4_title": "En tránsito",
+    "j5_title": "Entregado",
+    "j5_text": "El paquete llega a la dirección indicada.",
+    "faq_title": "Preguntas frecuentes",
+    "q1": "¿Cuándo recibiré el número de seguimiento?",
+    "a1": "Los pedidos se procesan en 1-3 días hábiles: recibirás el número de seguimiento por correo electrónico en cuanto se envíe tu pedido.",
+    "q2": "¿Cuánto tarda la entrega?",
+    "q3": "¿Puedo cambiar la dirección de entrega?",
+    "a3": "Una vez enviado el pedido, ya no es posible modificar la dirección. Si has introducido una dirección incorrecta, contáctanos enseguida, antes del envío.",
+    "q4": "¿El paquete está dañado o no llega?",
+    "q5": "¿Tendré que pagar aranceles o impuestos?",
+    "other_title": "Otras herramientas de seguimiento",
+    "other_text": "¿Ya tienes el número de seguimiento? También puedes seguirlo en estos sitios:",
+    "help_title": "¿Necesitas ayuda?"
+  },
   "policy_page": {
     "eyebrow": "Nuestras políticas",
     "toc": "En esta página"

@@ -1,0 +1,112 @@
+{%- comment -%}
+  Textes du site découpés en sections <h2> pour la mise en page des politiques (snippets/policy-page.liquid), traduits
+  par les clés de langue : politique d'expédition (policy_shipping.*), page « Garantie sur le prix »
+  (price_guarantee_page.*), page « Suivre ma commande » (track_page.*, délais et engagements repris de la politique
+  d'expédition). Params : policy (shipping | price | track), root
+{%- endcomment -%}
+{%- liquid
+  assign mail = '<a href="mailto:contact@platinumshop.it">contact@platinumshop.it</a>'
+  assign tel = '<a href="tel:+393314511142">+39 33 1451 1142</a>'
+  assign track_url = root | append: 'apps/17TRACK'
+-%}
+{%- case policy -%}
+{%- when 'shipping' -%}
+<p>{{ 'policy_shipping.updated' | t }}</p>
+<h2>{{ 'policy_shipping.s1_title' | t }}</h2>
+<p>{{ 'policy_shipping.s1_text' | t }}</p>
+<h2>{{ 'policy_shipping.s2_title' | t }}</h2>
+<ul class="pp__zones">
+<li><span>{{ 'policy_shipping.zone_italy' | t }}</span><b>{{ 'policy_shipping.days' | t: range: '3–7' }}</b></li>
+<li><span>{{ 'policy_shipping.zone_eu' | t }}</span><b>{{ 'policy_shipping.days' | t: range: '7–15' }}</b></li>
+<li><span>{{ 'policy_shipping.zone_world' | t }}</span><b>{{ 'policy_shipping.days' | t: range: '15–30' }}</b></li>
+</ul>
+<p class="pp__note">{{ 'policy_shipping.s2_note' | t }}</p>
+<h2>{{ 'policy_shipping.s3_title' | t }}</h2>
+<p>{{ 'policy_shipping.s3_text' | t }}</p>
+<h2>{{ 'policy_shipping.s4_title' | t }}</h2>
+<p>{{ 'policy_shipping.s4_text_html' | t: email: mail }}</p>
+<a class="pp__cta" href="{{ track_url }}">{{ 'policy_shipping.track_cta' | t }}</a>
+<h2>{{ 'policy_shipping.s5_title' | t }}</h2>
+<p>{{ 'policy_shipping.s5_text' | t }}</p>
+<h2>{{ 'policy_shipping.s6_title' | t }}</h2>
+<p>{{ 'policy_shipping.s6_text' | t }}</p>
+<h2>{{ 'policy_shipping.s7_title' | t }}</h2>
+<p>{{ 'policy_shipping.s7_text' | t }}</p>
+<h2>{{ 'policy_shipping.s8_title' | t }}</h2>
+<p>{{ 'policy_shipping.s8_text_html' | t: email: mail }}</p>
+<h2>{{ 'policy_shipping.s9_title' | t }}</h2>
+<p>{{ 'policy_shipping.s9_text' | t }}</p>
+<ul class="pp__contact">
+<li><span>{{ 'policy_shipping.label_email' | t }}</span>{{ mail }}</li>
+<li><span>{{ 'policy_shipping.label_phone' | t }}</span>{{ tel }}</li>
+<li><span>{{ 'policy_shipping.label_web' | t }}</span><a href="{{ root }}">platinumshop.it</a></li>
+</ul>
+{%- when 'price' -%}
+<p>{{ 'price_guarantee_page.intro_html' | t }}</p>
+<h2>{{ 'price_guarantee_page.how_title' | t }}</h2>
+<ol class="pp__steps">
+<li><span>{{ 'price_guarantee_page.step1' | t }}</span></li>
+<li><span>{{ 'price_guarantee_page.step2' | t }}</span></li>
+<li><span>{{ 'price_guarantee_page.step3' | t }}</span></li>
+<li><span>{{ 'price_guarantee_page.step4' | t }}</span></li>
+</ol>
+<h2>{{ 'price_guarantee_page.cond_title' | t }}</h2>
+<ul>
+<li>{{ 'price_guarantee_page.cond1' | t }}</li>
+<li>{{ 'price_guarantee_page.cond2' | t }}</li>
+<li>{{ 'price_guarantee_page.cond3' | t }}</li>
+<li>{{ 'price_guarantee_page.cond4' | t }}</li>
+</ul>
+<h2>{{ 'price_guarantee_page.contact_title' | t }}</h2>
+<p>{{ 'price_guarantee_page.contact_html' | t: email: mail }}</p>
+<a class="pp__cta" href="mailto:contact@platinumshop.it">{{ 'price_guarantee_page.cta' | t }}</a>
+<p class="pp__note"><em>{{ 'price_guarantee_page.tagline' | t }}</em></p>
+{%- when 'track' -%}
+<p>{{ 'track_page.intro' | t }}</p>
+<h2>{{ 'track_page.tool_title' | t }}</h2>
+<p>{{ 'track_page.tool_text' | t }}</p>
+<a class="pp__cta" href="{{ track_url }}">{{ 'policy_shipping.track_cta' | t }}</a>
+<a class="pp__cta pp__cta--ghost" href="{{ routes.account_url }}">{{ 'track_page.account_cta' | t }}</a>
+<h2>{{ 'track_page.journey_title' | t }}</h2>
+<ol class="pp__steps">
+<li><b>{{ 'track_page.j1_title' | t }}</b><span>{{ 'track_page.j1_text' | t }}</span></li>
+<li><b>{{ 'track_page.j2_title' | t }}</b><span>{{ 'mobile_protect.chip_prep' | t }}</span></li>
+<li><b>{{ 'track_page.j3_title' | t }}</b><span>{{ 'mobile_protect.chip_tracking' | t }}</span></li>
+<li><b>{{ 'track_page.j4_title' | t }}</b><span>{{ 'policy_shipping.zone_italy' | t }} {{ 'policy_shipping.days' | t: range: '3–7' }} · {{ 'policy_shipping.zone_eu' | t }} {{ 'policy_shipping.days' | t: range: '7–15' }} · {{ 'policy_shipping.zone_world' | t }} {{ 'policy_shipping.days' | t: range: '15–30' }}</span></li>
+<li><b>{{ 'track_page.j5_title' | t }}</b><span>{{ 'track_page.j5_text' | t }}</span></li>
+</ol>
+<h2>{{ 'track_page.faq_title' | t }}</h2>
+<div class="pp__faq">
+<p class="pp__q">{{ 'track_page.q1' | t }}</p>
+<p>{{ 'track_page.a1' | t }}</p>
+</div>
+<div class="pp__faq">
+<p class="pp__q">{{ 'track_page.q2' | t }}</p>
+<p>{{ 'policy_shipping.zone_italy' | t }}: {{ 'policy_shipping.days' | t: range: '3–7' }} · {{ 'policy_shipping.zone_eu' | t }}: {{ 'policy_shipping.days' | t: range: '7–15' }} · {{ 'policy_shipping.zone_world' | t }}: {{ 'policy_shipping.days' | t: range: '15–30' }}. {{ 'policy_shipping.s2_note' | t }}</p>
+</div>
+<div class="pp__faq">
+<p class="pp__q">{{ 'track_page.q3' | t }}</p>
+<p>{{ 'track_page.a3' | t }}</p>
+</div>
+<div class="pp__faq">
+<p class="pp__q">{{ 'track_page.q4' | t }}</p>
+<p>{{ 'policy_shipping.s8_text_html' | t: email: mail }}</p>
+</div>
+<div class="pp__faq">
+<p class="pp__q">{{ 'track_page.q5' | t }}</p>
+<p>{{ 'policy_shipping.s6_text' | t }}</p>
+</div>
+<h2>{{ 'track_page.other_title' | t }}</h2>
+<p>{{ 'track_page.other_text' | t }}</p>
+<ul>
+<li><a href="https://www.17track.net" target="_blank" rel="noopener">17TRACK</a></li>
+<li><a href="https://www.aftership.com" target="_blank" rel="noopener">AfterShip</a></li>
+<li><a href="https://parcelsapp.com" target="_blank" rel="noopener">Parcels</a></li>
+</ul>
+<h2>{{ 'track_page.help_title' | t }}</h2>
+<p>{{ 'mobile_protect.support_text_html' | t: email: mail, phone: tel }}</p>
+<ul>
+<li><a href="{{ root }}policies/shipping-policy">{{ 'policy_shipping.title' | t }}</a></li>
+<li><a href="{{ root }}policies/refund-policy">{{ 'protezioni.overview.card_title' | t }}</a></li>
+</ul>
+{%- endcase -%}

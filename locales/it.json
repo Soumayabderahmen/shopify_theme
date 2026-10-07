@@ -779,6 +779,32 @@
     "cta": "Scrivici",
     "tagline": "Platinumshop — Il lusso alla tua portata, sempre al miglior prezzo."
   },
+  "track_page": {
+    "eyebrow": "Ordine e spedizione",
+    "intro": "Segui il tuo pacco dalla preparazione alla consegna: il numero di tracciamento ti arriva via email appena l'ordine viene spedito.",
+    "tool_title": "Traccia il tuo pacco",
+    "tool_text": "Inserisci il numero di tracciamento ricevuto via email nel nostro strumento di tracciamento per vedere dove si trova il tuo pacco.",
+    "account_cta": "I miei ordini",
+    "journey_title": "Il percorso del tuo ordine",
+    "j1_title": "Ordine confermato",
+    "j1_text": "Ricevi la conferma dell'ordine via email.",
+    "j2_title": "In preparazione",
+    "j3_title": "Spedito",
+    "j4_title": "In transito",
+    "j5_title": "Consegnato",
+    "j5_text": "Il pacco arriva all'indirizzo indicato.",
+    "faq_title": "Domande frequenti",
+    "q1": "Quando riceverò il numero di tracciamento?",
+    "a1": "Gli ordini vengono elaborati entro 1-3 giorni lavorativi: riceverai il numero di tracciamento via email non appena il tuo ordine sarà spedito.",
+    "q2": "Quanto tempo impiega la consegna?",
+    "q3": "Posso cambiare l'indirizzo di consegna?",
+    "a3": "Una volta spedito l'ordine non è più possibile modificare l'indirizzo. Se hai inserito un indirizzo errato, contattaci subito, prima della spedizione.",
+    "q4": "Il pacco è danneggiato o non arriva?",
+    "q5": "Dovrò pagare dazi o tasse?",
+    "other_title": "Altri strumenti di tracciamento",
+    "other_text": "Hai già il numero di tracciamento? Puoi seguirlo anche su questi siti:",
+    "help_title": "Hai bisogno di aiuto?"
+  },
   "policy_page": {
     "eyebrow": "Le nostre informative",
     "toc": "In questa pagina"

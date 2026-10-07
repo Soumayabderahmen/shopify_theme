@@ -708,6 +708,32 @@
     "cta": "Mail ons",
     "tagline": "Platinumshop — Luxe binnen handbereik, altijd voor de beste prijs."
   },
+  "track_page": {
+    "eyebrow": "Bestelling en verzending",
+    "intro": "Volg je pakket van voorbereiding tot levering: je trackingnummer ontvang je per e-mail zodra je bestelling is verzonden.",
+    "tool_title": "Volg je pakket",
+    "tool_text": "Voer het trackingnummer dat je per e-mail hebt ontvangen in onze trackingtool in om te zien waar je pakket is.",
+    "account_cta": "Mijn bestellingen",
+    "journey_title": "De route van je bestelling",
+    "j1_title": "Bestelling bevestigd",
+    "j1_text": "Je ontvangt de orderbevestiging per e-mail.",
+    "j2_title": "In voorbereiding",
+    "j3_title": "Verzonden",
+    "j4_title": "Onderweg",
+    "j5_title": "Bezorgd",
+    "j5_text": "Het pakket komt aan op het opgegeven adres.",
+    "faq_title": "Veelgestelde vragen",
+    "q1": "Wanneer ontvang ik het trackingnummer?",
+    "a1": "Bestellingen worden binnen 1-3 werkdagen verwerkt: je ontvangt het trackingnummer per e-mail zodra je bestelling is verzonden.",
+    "q2": "Hoe lang duurt de levering?",
+    "q3": "Kan ik het afleveradres wijzigen?",
+    "a3": "Zodra de bestelling is verzonden, kan het adres niet meer worden gewijzigd. Heb je een verkeerd adres ingevuld? Neem dan direct contact met ons op, vóór de verzending.",
+    "q4": "Pakket beschadigd of komt het niet aan?",
+    "q5": "Moet ik invoerrechten of belastingen betalen?",
+    "other_title": "Andere trackingtools",
+    "other_text": "Heb je je trackingnummer al? Je kunt het ook volgen op deze sites:",
+    "help_title": "Hulp nodig?"
+  },
   "policy_page": {
     "eyebrow": "Ons beleid",
     "toc": "Op deze pagina"

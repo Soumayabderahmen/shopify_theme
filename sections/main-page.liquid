@@ -10,11 +10,23 @@
     assign title_size = title_block.settings.title_size
   endif
 -%}
+{%- liquid
+  # Garantie sur le prix, suivi de commande : sur mobile, mise en page des politiques traduite
+  # (snippets/policy-page.liquid) ; la page d'origine reste pour l'ordinateur.
+  assign pp_page_doc = ''
+  if page.handle == 'garanzia-sul-prezzo' or page.handle == 'traccia-ordine'
+    capture pp_page_doc
+      render 'policy-page', page_handle: page.handle
+    endcapture
+    assign pp_page_doc = pp_page_doc | strip
+  endif
+-%}
+{{- pp_page_doc -}}
 {%- if page.handle == 'wishlist' -%}
   {%- render 'wishlist-page-content' -%}
 {%- else -%}
 <div
-  class="{% if section.settings.text_alignment == 'center' %}text-center{% endif %}{% if section.settings.content_alignment == 'center' %} align-center{% endif %}{% if title_block.settings.title_size == 'size-50' %} size-16 mobile-size-14{% endif %}"
+  class="{% if pp_page_doc != '' %}pp-page-desk {% endif %}{% if section.settings.text_alignment == 'center' %}text-center{% endif %}{% if section.settings.content_alignment == 'center' %} align-center{% endif %}{% if title_block.settings.title_size == 'size-50' %} size-16 mobile-size-14{% endif %}"
   {%- if max_width != 2000 -%}
     style="max-width: {{ max_width }}px;"
   {%- endif -%}

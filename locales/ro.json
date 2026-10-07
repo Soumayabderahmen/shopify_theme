@@ -785,6 +785,32 @@
     "cta": "Scrie-ne",
     "tagline": "Platinumshop — Luxul la îndemâna ta, mereu la cel mai bun preț."
   },
+  "track_page": {
+    "eyebrow": "Comandă și livrare",
+    "intro": "Urmărește coletul de la pregătire până la livrare: numărul de urmărire îți vine pe e-mail imediat ce comanda este expediată.",
+    "tool_title": "Urmărește coletul",
+    "tool_text": "Introdu numărul de urmărire primit pe e-mail în instrumentul nostru de urmărire pentru a vedea unde se află coletul.",
+    "account_cta": "Comenzile mele",
+    "journey_title": "Traseul comenzii tale",
+    "j1_title": "Comandă confirmată",
+    "j1_text": "Primești confirmarea comenzii pe e-mail.",
+    "j2_title": "În pregătire",
+    "j3_title": "Expediată",
+    "j4_title": "În tranzit",
+    "j5_title": "Livrată",
+    "j5_text": "Coletul ajunge la adresa indicată.",
+    "faq_title": "Întrebări frecvente",
+    "q1": "Când voi primi numărul de urmărire?",
+    "a1": "Comenzile sunt procesate în 1-3 zile lucrătoare: vei primi numărul de urmărire pe e-mail imediat ce comanda ta este expediată.",
+    "q2": "Cât durează livrarea?",
+    "q3": "Pot schimba adresa de livrare?",
+    "a3": "După expedierea comenzii, adresa nu mai poate fi modificată. Dacă ai introdus o adresă greșită, contactează-ne imediat, înainte de expediere.",
+    "q4": "Coletul este deteriorat sau nu ajunge?",
+    "q5": "Va trebui să plătesc taxe vamale sau impozite?",
+    "other_title": "Alte instrumente de urmărire",
+    "other_text": "Ai deja numărul de urmărire? Îl poți urmări și pe aceste site-uri:",
+    "help_title": "Ai nevoie de ajutor?"
+  },
   "policy_page": {
     "eyebrow": "Politicile noastre",
     "toc": "Pe această pagină"

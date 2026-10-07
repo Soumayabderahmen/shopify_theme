@@ -690,6 +690,32 @@
     "cta": "Schreib uns",
     "tagline": "Platinumshop — Luxus in deiner Reichweite, immer zum besten Preis."
   },
+  "track_page": {
+    "eyebrow": "Bestellung und Versand",
+    "intro": "Verfolge dein Paket von der Vorbereitung bis zur Zustellung: Die Sendungsnummer erhältst du per E-Mail, sobald deine Bestellung versendet wird.",
+    "tool_title": "Paket verfolgen",
+    "tool_text": "Gib die per E-Mail erhaltene Sendungsnummer in unser Tracking-Tool ein, um zu sehen, wo sich dein Paket befindet.",
+    "account_cta": "Meine Bestellungen",
+    "journey_title": "Der Weg deiner Bestellung",
+    "j1_title": "Bestellung bestätigt",
+    "j1_text": "Du erhältst die Bestellbestätigung per E-Mail.",
+    "j2_title": "In Vorbereitung",
+    "j3_title": "Versendet",
+    "j4_title": "Unterwegs",
+    "j5_title": "Zugestellt",
+    "j5_text": "Das Paket kommt an der angegebenen Adresse an.",
+    "faq_title": "Häufige Fragen",
+    "q1": "Wann erhalte ich die Sendungsnummer?",
+    "a1": "Bestellungen werden innerhalb von 1–3 Werktagen bearbeitet: Die Sendungsnummer erhältst du per E-Mail, sobald deine Bestellung versendet wurde.",
+    "q2": "Wie lange dauert die Lieferung?",
+    "q3": "Kann ich die Lieferadresse ändern?",
+    "a3": "Nach dem Versand kann die Adresse nicht mehr geändert werden. Wenn du eine falsche Adresse angegeben hast, kontaktiere uns sofort, noch vor dem Versand.",
+    "q4": "Paket beschädigt oder nicht angekommen?",
+    "q5": "Muss ich Zölle oder Steuern zahlen?",
+    "other_title": "Weitere Tracking-Tools",
+    "other_text": "Du hast deine Sendungsnummer schon? Du kannst sie auch auf diesen Seiten verfolgen:",
+    "help_title": "Brauchst du Hilfe?"
+  },
   "policy_page": {
     "eyebrow": "Unsere Richtlinien",
     "toc": "Auf dieser Seite"

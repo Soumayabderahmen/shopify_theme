@@ -3474,6 +3474,32 @@
     "cta": "Email us",
     "tagline": "Platinumshop — Luxury within your reach, always at the best price."
   },
+  "track_page": {
+    "eyebrow": "Order and shipping",
+    "intro": "Follow your parcel from preparation to delivery: your tracking number arrives by email as soon as your order ships.",
+    "tool_title": "Track your parcel",
+    "tool_text": "Enter the tracking number you received by email in our tracking tool to see where your parcel is.",
+    "account_cta": "My orders",
+    "journey_title": "Your order’s journey",
+    "j1_title": "Order confirmed",
+    "j1_text": "You receive the order confirmation by email.",
+    "j2_title": "Being prepared",
+    "j3_title": "Shipped",
+    "j4_title": "In transit",
+    "j5_title": "Delivered",
+    "j5_text": "The parcel arrives at the address you entered.",
+    "faq_title": "Frequently asked questions",
+    "q1": "When will I receive the tracking number?",
+    "a1": "Orders are processed within 1-3 business days: you will receive the tracking number by email as soon as your order ships.",
+    "q2": "How long does delivery take?",
+    "q3": "Can I change the delivery address?",
+    "a3": "Once the order has shipped, the address can no longer be changed. If you entered a wrong address, contact us right away, before shipping.",
+    "q4": "Is the parcel damaged or not arriving?",
+    "q5": "Will I have to pay duties or taxes?",
+    "other_title": "Other tracking tools",
+    "other_text": "Already have your tracking number? You can also follow it on these sites:",
+    "help_title": "Need help?"
+  },
   "policy_page": {
     "eyebrow": "Our policies",
     "toc": "On this page"

@@ -777,6 +777,32 @@
     "cta": "Nous écrire",
     "tagline": "Platinumshop — Le luxe à votre portée, toujours au meilleur prix."
   },
+  "track_page": {
+    "eyebrow": "Commande et livraison",
+    "intro": "Suivez votre colis de la préparation à la livraison : le numéro de suivi vous arrive par e-mail dès que la commande est expédiée.",
+    "tool_title": "Suivre votre colis",
+    "tool_text": "Saisissez le numéro de suivi reçu par e-mail dans notre outil de suivi pour savoir où se trouve votre colis.",
+    "account_cta": "Mes commandes",
+    "journey_title": "Le parcours de votre commande",
+    "j1_title": "Commande confirmée",
+    "j1_text": "Vous recevez la confirmation de commande par e-mail.",
+    "j2_title": "En préparation",
+    "j3_title": "Expédiée",
+    "j4_title": "En transit",
+    "j5_title": "Livrée",
+    "j5_text": "Le colis arrive à l’adresse indiquée.",
+    "faq_title": "Questions fréquentes",
+    "q1": "Quand vais-je recevoir le numéro de suivi ?",
+    "a1": "Les commandes sont traitées sous 1 à 3 jours ouvrés : vous recevrez le numéro de suivi par e-mail dès que votre commande sera expédiée.",
+    "q2": "Combien de temps prend la livraison ?",
+    "q3": "Puis-je modifier l’adresse de livraison ?",
+    "a3": "Une fois la commande expédiée, l’adresse ne peut plus être modifiée. Si vous avez saisi une adresse erronée, contactez-nous tout de suite, avant l’expédition.",
+    "q4": "Colis endommagé ou qui n’arrive pas ?",
+    "q5": "Devrai-je payer des droits ou des taxes ?",
+    "other_title": "Autres outils de suivi",
+    "other_text": "Vous avez déjà votre numéro de suivi ? Vous pouvez aussi le suivre sur ces sites :",
+    "help_title": "Besoin d’aide ?"
+  },
   "policy_page": {
     "eyebrow": "Nos politiques",
     "toc": "Sur cette page"
