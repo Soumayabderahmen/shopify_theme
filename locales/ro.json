@@ -707,6 +707,25 @@
       "fastest_delivery": "Livrare rapidă în 2-3 zile lucrătoare"
     }
   },
+  "price_guarantee_page": {
+    "title": "Cumpără cu încredere datorită garanției noastre de preț",
+    "intro_html": "La Platinumshop vrem să cumperi complet liniștit. De aceea îți oferim <strong>garanția de preț</strong>: dacă găsești același produs la un preț mai mic pe alt site în <strong>14 zile</strong> de la cumpărare, îți rambursăm diferența.",
+    "badge": "14 zile",
+    "how_title": "Cum funcționează",
+    "step1": "Cumpără produsul de pe Platinumshop.",
+    "step2": "Dacă găsești același produs (aceeași mărime, culoare și model) la un preț mai mic pe alt site autorizat, contactează-ne în termen de 14 zile.",
+    "step3": "Trimite-ne linkul produsului cu prețul mai mic.",
+    "step4": "Vom verifica oferta și, dacă este validă, îți vom rambursa diferența prin metoda de plată inițială.",
+    "cond_title": "Condiții",
+    "cond1": "Produsul trebuie să fie identic (aceeași mărime, culoare, model și cantitate disponibilă).",
+    "cond2": "Oferta trebuie să provină de la un comerciant autorizat.",
+    "cond3": "Cererea trebuie trimisă în termen de 14 zile de la data cumpărării.",
+    "cond4": "Nu se aplică ofertelor flash, vânzărilor promoționale sau prețurilor de lichidare.",
+    "contact_title": "Contactează-ne",
+    "contact_html": "Pentru a solicita rambursarea diferenței de preț, contactează-ne prin pagina de asistență clienți sau scrie-ne la {{ email }}.",
+    "cta": "Scrie-ne",
+    "tagline": "Platinumshop — Luxul la îndemâna ta, mereu la cel mai bun preț."
+  },
   "policy_shipping": {
     "back": "Înapoi",
     "title": "Politica de livrare",

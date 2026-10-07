@@ -220,6 +220,62 @@
       <span>{{ 'mobile.pdp.price_guarantee_cta' | t }}</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>
     </button>
+    {%- comment -%}
+      Fenêtre de la garantie de prix (assets/pdp-mobile.js). Page « garanzia-sul-prezzo » de la boutique : tant que son
+      texte est celui d'origine, version structurée traduite (clés price_guarantee_page.*) ; sinon le texte de la page.
+    {%- endcomment -%}
+    {%- assign pm_pg_page = pages['garanzia-sul-prezzo'] -%}
+    {%- if pm_pg_page != empty and pm_pg_page.content != blank -%}
+      {%- liquid
+        assign pm_pg_original = false
+        if pm_pg_page.content contains 'Shop with Confidence with Our Price Guarantee' and pm_pg_page.content contains 'within <strong>14 days</strong>'
+          assign pm_pg_original = true
+        endif
+        assign pm_pg_email = 'contact@platinumshop.it'
+        assign pm_pg_email_link = '<a href="mailto:' | append: pm_pg_email | append: '">' | append: pm_pg_email | append: '</a>'
+        assign pm_pg_check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>'
+      -%}
+      <dialog class="pdp-m__pg" data-pdp-pg aria-labelledby="pdp-pg-title">
+        <div class="pdp-m__pg-in">
+          <span class="pdp-m__pg-grip" aria-hidden="true"></span>
+          <button class="pdp-m__pg-x" type="button" data-pdp-pg-close aria-label="{{ 'mobile.pdp.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+          <div class="pdp-m__pg-body">
+            {%- if pm_pg_original -%}
+              <header class="pdp-m__pg-head">
+                <span class="pdp-m__pg-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg></span>
+                <span class="pdp-m__pg-badge">{{ 'price_guarantee_page.badge' | t }}</span>
+                <h2 id="pdp-pg-title">{{ 'price_guarantee_page.title' | t }}</h2>
+                <p>{{ 'price_guarantee_page.intro_html' | t }}</p>
+              </header>
+              <h3>{{ 'price_guarantee_page.how_title' | t }}</h3>
+              <ol class="pdp-m__pg-steps">
+                <li>{{ 'price_guarantee_page.step1' | t }}</li>
+                <li>{{ 'price_guarantee_page.step2' | t }}</li>
+                <li>{{ 'price_guarantee_page.step3' | t }}</li>
+                <li>{{ 'price_guarantee_page.step4' | t }}</li>
+              </ol>
+              <h3>{{ 'price_guarantee_page.cond_title' | t }}</h3>
+              <ul class="pdp-m__pg-cond">
+                <li>{{ pm_pg_check }}<span>{{ 'price_guarantee_page.cond1' | t }}</span></li>
+                <li>{{ pm_pg_check }}<span>{{ 'price_guarantee_page.cond2' | t }}</span></li>
+                <li>{{ pm_pg_check }}<span>{{ 'price_guarantee_page.cond3' | t }}</span></li>
+                <li>{{ pm_pg_check }}<span>{{ 'price_guarantee_page.cond4' | t }}</span></li>
+              </ul>
+              <div class="pdp-m__pg-contact">
+                <h3>{{ 'price_guarantee_page.contact_title' | t }}</h3>
+                <p>{{ 'price_guarantee_page.contact_html' | t: email: pm_pg_email_link }}</p>
+                <a class="pdp-m__pg-mail" href="mailto:{{ pm_pg_email }}">{{ 'price_guarantee_page.cta' | t }}</a>
+              </div>
+              <p class="pdp-m__pg-tag">{{ 'price_guarantee_page.tagline' | t }}</p>
+            {%- else -%}
+              <h2 id="pdp-pg-title">{{ pm_pg_page.title | escape }}</h2>
+              <div class="pdp-m__pg-rte">{{ pm_pg_page.content }}</div>
+            {%- endif -%}
+          </div>
+          <div class="pdp-m__pg-foot"><button type="button" data-pdp-pg-close>{{ 'mobile.pdp.close' | t }}</button></div>
+        </div>
+      </dialog>
+    {%- endif -%}
   </section>
 
   {%- comment -%} 5. Options réelles du produit : un choix ici coche l'option correspondante du formulaire du thème. {%- endcomment -%}

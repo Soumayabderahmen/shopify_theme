@@ -630,6 +630,25 @@
   "border": {
     "top_picks": "Topkeuzes"
   },
+  "price_guarantee_page": {
+    "title": "Koop met vertrouwen dankzij onze prijsgarantie",
+    "intro_html": "Bij Platinumshop willen we dat je met een gerust hart winkelt. Daarom bieden we onze <strong>prijsgarantie</strong>: vind je hetzelfde product binnen <strong>14 dagen</strong> na aankoop goedkoper op een andere website, dan betalen we het verschil terug.",
+    "badge": "14 dagen",
+    "how_title": "Zo werkt het",
+    "step1": "Koop het product bij Platinumshop.",
+    "step2": "Vind je hetzelfde product (zelfde maat, kleur en model) goedkoper op een andere erkende website, neem dan binnen 14 dagen contact met ons op.",
+    "step3": "Stuur ons de link naar het goedkopere product.",
+    "step4": "We controleren het aanbod en betalen, als het geldig is, het verschil terug via je oorspronkelijke betaalmethode.",
+    "cond_title": "Voorwaarden",
+    "cond1": "Het product moet identiek zijn (zelfde maat, kleur, model en beschikbare hoeveelheid).",
+    "cond2": "Het aanbod moet afkomstig zijn van een erkende verkoper.",
+    "cond3": "Het verzoek moet binnen 14 dagen na de aankoopdatum worden ingediend.",
+    "cond4": "Geldt niet voor flitsaanbiedingen, promoties of uitverkoopprijzen.",
+    "contact_title": "Contact",
+    "contact_html": "Wil je het prijsverschil terug? Neem contact met ons op via onze klantenservicepagina of mail naar {{ email }}.",
+    "cta": "Mail ons",
+    "tagline": "Platinumshop — Luxe binnen handbereik, altijd voor de beste prijs."
+  },
   "policy_shipping": {
     "back": "Terug",
     "title": "Verzendbeleid",
@@ -932,7 +951,7 @@
       "next": "Volgende",
       "carousel": "carrousel",
       "free_shipping_from": "Gratis verzending vanaf {{ amount }}",
-      "shipping_details": "Details"
+      "shipping_details": "Meer info"
     },
     "category": {
       "dialog": "Categorieën",

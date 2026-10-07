@@ -554,6 +554,275 @@ body.template-product {
   height: 16px;
 }
 
+/* Fenêtre « Garantie de prix » : feuille du bas (dialog natif), contenu traduit (snippets/pdp-mobile-top.liquid). */
+#root .pdp-m .pdp-m__pg {
+  position: fixed;
+  inset: auto 0 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: 92vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  color: var(--pm-ink);
+  background: #fff;
+  border: 0;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -12px 40px -12px rgb(22 18 63 / 35%);
+  transform: translateY(100%);
+  transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#root .pdp-m .pdp-m__pg.is-open {
+  transform: none;
+}
+
+#root .pdp-m .pdp-m__pg::backdrop {
+  background: rgb(22 18 63 / 45%);
+}
+
+.pdp-m__pg-in {
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+}
+
+.pdp-m__pg-grip {
+  display: block;
+  width: 42px;
+  height: 5px;
+  margin: 10px auto 0;
+  background: #d9dbea;
+  border-radius: 3px;
+}
+
+#root .pdp-m .pdp-m__pg-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--pm-ink);
+  background: #f1f2f7;
+  border: 0;
+  border-radius: 50%;
+}
+
+.pdp-m__pg-x svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pdp-m__pg-body {
+  flex: 1 1 auto;
+  padding: 8px 20px 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.pdp-m__pg-head {
+  padding: 12px 0 6px;
+  text-align: center;
+}
+
+.pdp-m__pg-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  color: #1f8a4c;
+  background: #eaf7ef;
+  border-radius: 18px;
+}
+
+.pdp-m__pg-ico svg {
+  width: 30px;
+  height: 30px;
+}
+
+.pdp-m__pg-badge {
+  display: table;
+  margin: 10px auto 0;
+  padding: 4px 12px;
+  color: #15603a;
+  font-size: 12px;
+  font-weight: 800;
+  background: #d6f1e0;
+  border-radius: 999px;
+}
+
+#root .pdp-m .pdp-m__pg h2 {
+  margin: 10px 0 8px;
+  color: var(--pm-ink);
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-transform: none;
+}
+
+#root .pdp-m .pdp-m__pg h3 {
+  margin: 20px 0 10px;
+  color: var(--pm-ink);
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.pdp-m__pg p {
+  margin: 0;
+  color: #3c4058;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.pdp-m__pg p a {
+  color: var(--pm-blue);
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.pdp-m__pg-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: pg-step;
+}
+
+.pdp-m__pg-steps li {
+  position: relative;
+  padding: 0 0 14px 40px;
+  color: #3c4058;
+  font-size: 14px;
+  line-height: 1.5;
+  counter-increment: pg-step;
+}
+
+.pdp-m__pg-steps li::before {
+  content: counter(pg-step);
+  position: absolute;
+  top: -2px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  background: #1f8a4c;
+  border-radius: 50%;
+}
+
+/* Trait vertical entre les étapes. */
+.pdp-m__pg-steps li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 26px;
+  bottom: 2px;
+  left: 12px;
+  width: 2px;
+  background: #d6f1e0;
+}
+
+.pdp-m__pg-cond {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdp-m__pg-cond li {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  color: #3c4058;
+  font-size: 13.5px;
+  line-height: 1.45;
+  background: #f6f7fb;
+  border-radius: 12px;
+}
+
+.pdp-m__pg-cond li + li {
+  margin-top: 8px;
+}
+
+.pdp-m__pg-cond svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: #1f8a4c;
+}
+
+.pdp-m__pg-contact {
+  margin-top: 20px;
+  padding: 2px 14px 14px;
+  background: #f1f0fe;
+  border-radius: 14px;
+}
+
+.pdp-m__pg-contact h3 {
+  margin-top: 14px !important;
+}
+
+#root .pdp-m .pdp-m__pg-mail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 12px;
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  background: var(--pm-blue);
+  border-radius: 12px;
+}
+
+.pdp-m__pg-tag {
+  margin-top: 16px !important;
+  color: #6b6f86 !important;
+  font-size: 13px !important;
+  font-style: italic;
+  text-align: center;
+}
+
+.pdp-m__pg-rte {
+  color: #3c4058;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.pdp-m__pg-foot {
+  flex: none;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid #eceef5;
+}
+
+/* Les boutons du thème imposent min-height 0 / padding 0 : valeurs forcées ici. */
+#root .pdp-m .pdp-m__pg-foot button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 16px !important;
+  color: var(--pm-ink);
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  background: #f1f2f7;
+  border: 0;
+  border-radius: 14px;
+}
+
 /* 5. Options */
 .pdp-m__opt + .pdp-m__opt {
   margin-top: 18px;

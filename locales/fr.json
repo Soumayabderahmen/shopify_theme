@@ -699,6 +699,25 @@
       "fastest_delivery": "Livraison la plus rapide en 2 à 3 jours ouvrables"
     }
   },
+  "price_guarantee_page": {
+    "title": "Achetez en toute confiance grâce à notre garantie de prix",
+    "intro_html": "Chez Platinumshop, nous voulons que vous achetiez en toute sérénité. C'est pourquoi nous vous offrons notre <strong>garantie de prix</strong> : si vous trouvez le même produit moins cher sur un autre site dans les <strong>14 jours</strong> suivant votre achat, nous vous remboursons la différence.",
+    "badge": "14 jours",
+    "how_title": "Comment ça marche",
+    "step1": "Achetez le produit sur Platinumshop.",
+    "step2": "Si vous trouvez le même produit (même taille, couleur et modèle) moins cher sur un autre site autorisé, contactez-nous dans les 14 jours.",
+    "step3": "Envoyez-nous le lien du produit au prix inférieur.",
+    "step4": "Nous vérifions l'offre et, si elle est valable, nous vous remboursons la différence sur votre moyen de paiement d'origine.",
+    "cond_title": "Conditions",
+    "cond1": "Le produit doit être identique (même taille, couleur, modèle et quantité disponible).",
+    "cond2": "L'offre doit provenir d'un revendeur agréé.",
+    "cond3": "La demande doit être envoyée dans les 14 jours suivant la date d'achat.",
+    "cond4": "Ne s'applique pas aux ventes flash, aux promotions ni aux prix de liquidation.",
+    "contact_title": "Nous contacter",
+    "contact_html": "Pour demander le remboursement de la différence de prix, contactez-nous via notre page de service client ou écrivez à {{ email }}.",
+    "cta": "Nous écrire",
+    "tagline": "Platinumshop — Le luxe à votre portée, toujours au meilleur prix."
+  },
   "policy_shipping": {
     "back": "Retour",
     "title": "Politique d'expédition",

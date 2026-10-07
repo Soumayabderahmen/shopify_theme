@@ -612,6 +612,25 @@
   "form": {
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
+  "price_guarantee_page": {
+    "title": "Sicher einkaufen mit unserer Preisgarantie",
+    "intro_html": "Bei Platinumshop sollst du ganz entspannt einkaufen. Deshalb bieten wir dir unsere <strong>Preisgarantie</strong>: Findest du dasselbe Produkt innerhalb von <strong>14 Tagen</strong> nach dem Kauf auf einer anderen Website günstiger, erstatten wir dir die Differenz.",
+    "badge": "14 Tage",
+    "how_title": "So funktioniert es",
+    "step1": "Kaufe das Produkt bei Platinumshop.",
+    "step2": "Findest du dasselbe Produkt (gleiche Größe, Farbe und gleiches Modell) auf einer anderen autorisierten Website günstiger, kontaktiere uns innerhalb von 14 Tagen.",
+    "step3": "Schick uns den Link zum günstigeren Produkt.",
+    "step4": "Wir prüfen das Angebot und erstatten dir, wenn es gültig ist, die Differenz auf deine ursprüngliche Zahlungsmethode.",
+    "cond_title": "Bedingungen",
+    "cond1": "Das Produkt muss identisch sein (gleiche Größe, Farbe, gleiches Modell und verfügbare Menge).",
+    "cond2": "Das Angebot muss von einem autorisierten Händler stammen.",
+    "cond3": "Die Anfrage muss innerhalb von 14 Tagen nach dem Kaufdatum gestellt werden.",
+    "cond4": "Gilt nicht für Blitzangebote, Werbeaktionen oder Abverkaufspreise.",
+    "contact_title": "Kontakt",
+    "contact_html": "Um die Erstattung der Preisdifferenz anzufordern, kontaktiere uns über unsere Kundenservice-Seite oder schreib eine E-Mail an {{ email }}.",
+    "cta": "Schreib uns",
+    "tagline": "Platinumshop — Luxus in deiner Reichweite, immer zum besten Preis."
+  },
   "policy_shipping": {
     "back": "Zurück",
     "title": "Versandrichtlinie",
@@ -914,7 +933,7 @@
       "next": "Weiter",
       "carousel": "Karussell",
       "free_shipping_from": "Kostenloser Versand ab {{ amount }}",
-      "shipping_details": "Details"
+      "shipping_details": "Infos"
     },
     "category": {
       "dialog": "Kategorien",

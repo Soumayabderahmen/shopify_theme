@@ -701,6 +701,25 @@
       "fastest_delivery": "Consegna più rapida in 2-3 giorni lavorativi"
     }
   },
+  "price_guarantee_page": {
+    "title": "Acquista con fiducia grazie alla nostra Garanzia sul Prezzo",
+    "intro_html": "Su Platinumshop vogliamo che tu acquisti in totale tranquillità. Per questo offriamo la nostra <strong>Garanzia sul Prezzo</strong>: se trovi lo stesso prodotto a un prezzo più basso su un altro sito entro <strong>14 giorni</strong> dall'acquisto, ti rimborsiamo la differenza.",
+    "badge": "14 giorni",
+    "how_title": "Come funziona",
+    "step1": "Acquista il prodotto su Platinumshop.",
+    "step2": "Se trovi lo stesso prodotto (stessa taglia, colore e modello) a un prezzo più basso su un altro sito autorizzato, contattaci entro 14 giorni.",
+    "step3": "Inviaci il link del prodotto con il prezzo più basso.",
+    "step4": "Verificheremo l'offerta e, se valida, ti rimborseremo la differenza sul metodo di pagamento originale.",
+    "cond_title": "Condizioni",
+    "cond1": "Il prodotto deve essere identico (stessa taglia, colore, modello e quantità disponibile).",
+    "cond2": "L'offerta deve provenire da un rivenditore autorizzato.",
+    "cond3": "La richiesta deve essere inviata entro 14 giorni dalla data di acquisto.",
+    "cond4": "Non si applica a offerte lampo, vendite promozionali o prezzi di liquidazione.",
+    "contact_title": "Contattaci",
+    "contact_html": "Per richiedere il rimborso della differenza di prezzo, contattaci tramite la pagina di assistenza clienti o scrivi a {{ email }}.",
+    "cta": "Scrivici",
+    "tagline": "Platinumshop — Il lusso alla tua portata, sempre al miglior prezzo."
+  },
   "policy_shipping": {
     "back": "Indietro",
     "title": "Informativa sulle spedizioni",

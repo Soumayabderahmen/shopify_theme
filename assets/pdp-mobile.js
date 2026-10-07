@@ -923,8 +923,33 @@
       if (terms) terms.click();
     });
   });
+  /* Garantie de prix : fenêtre mobile traduite (snippets/pdp-mobile-top.liquid, data-pdp-pg) ; sans elle, la fenêtre
+     du thème comme avant. Fermeture : bouton, croix, tap sur le fond, touche Échap (dialog natif). */
+  var priceSheet = root.querySelector('[data-pdp-pg]');
+  if (priceSheet) {
+    var closeSheet = function () {
+      priceSheet.classList.remove('is-open');
+      window.setTimeout(function () { if (priceSheet.open) priceSheet.close(); }, 220);
+    };
+    priceSheet.querySelectorAll('[data-pdp-pg-close]').forEach(function (button) {
+      button.addEventListener('click', closeSheet);
+    });
+    priceSheet.addEventListener('click', function (event) {
+      if (event.target === priceSheet) closeSheet();
+    });
+    priceSheet.addEventListener('cancel', function (event) {
+      event.preventDefault();
+      closeSheet();
+    });
+  }
   root.querySelectorAll('[data-pdp-open-price]').forEach(function (button) {
     button.addEventListener('click', function () {
+      if (priceSheet && typeof priceSheet.showModal === 'function') {
+        priceSheet.showModal();
+        priceSheet.querySelector('.pdp-m__pg-body').scrollTop = 0;
+        window.requestAnimationFrame(function () { priceSheet.classList.add('is-open'); });
+        return;
+      }
       var badge = document.querySelector('#main-product .price-match-badge');
       if (badge) badge.click();
     });
