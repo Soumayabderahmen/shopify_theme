@@ -508,8 +508,10 @@
             <h2>🎁 {{ 'mobile.explore.gift_ideas' | t }} <span class="mobile-explore-tag mobile-explore-tag--gift">{{ 'mobile.explore.christmas' | t }}</span></h2>
           </div>
           <div class="mobile-explore-gifts">
+            {%- comment -%} Le filtre de prix compte dans la devise du client (20 CHF, 20 CA$…) : même montant, au format de sa devise. {%- endcomment -%}
+            {%- assign gift_under_amount = 2000 | money_without_trailing_zeros -%}
             <a href="{{ routes.all_products_collection_url }}?filter.v.price.lte=20">
-              <i aria-hidden="true">💝</i><strong>{{ 'mobile.explore.under_20' | t }}</strong><small>{{ 'mobile.explore.small_gifts' | t }}</small>
+              <i aria-hidden="true">💝</i><strong>{{ 'mobile.explore.under_20' | t: amount: gift_under_amount }}</strong><small>{{ 'mobile.explore.small_gifts' | t }}</small>
             </a>
             {%- if gifts_for_him != blank and gifts_for_him.products_count > 0 -%}
               <a href="{{ gifts_for_him.url }}"><i aria-hidden="true">🧔</i><strong>{{ 'mobile.explore.for_him' | t }}</strong><small>{{ gifts_for_him.title | escape }}</small></a>

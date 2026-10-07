@@ -975,7 +975,7 @@
       "halloween_text": "Costume, kigurumi și jachete anime",
       "gift_ideas": "Idei de cadouri",
       "christmas": "Crăciun",
-      "under_20": "Sub 20 €",
+      "under_20": "Sub {{ amount }}",
       "small_gifts": "Cadouri mici",
       "for_him": "Pentru el",
       "for_her": "Pentru ea",

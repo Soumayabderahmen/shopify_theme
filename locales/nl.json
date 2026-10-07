@@ -898,7 +898,7 @@
       "halloween_text": "Kostuums, kigurumi en anime-jassen",
       "gift_ideas": "Cadeau-ideeën",
       "christmas": "Kerst",
-      "under_20": "Onder € 20",
+      "under_20": "Onder {{ amount }}",
       "small_gifts": "Kleine attenties",
       "for_him": "Voor hem",
       "for_her": "Voor haar",

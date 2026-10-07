@@ -969,7 +969,7 @@
       "halloween_text": "Costumi, kigurumi e giacche anime",
       "gift_ideas": "Idee regalo",
       "christmas": "Natale",
-      "under_20": "Sotto 20€",
+      "under_20": "Sotto {{ amount }}",
       "small_gifts": "Piccoli pensieri",
       "for_him": "Per lui",
       "for_her": "Per lei",

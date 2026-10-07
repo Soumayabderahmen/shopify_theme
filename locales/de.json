@@ -880,7 +880,7 @@
       "halloween_text": "Kostüme, Kigurumi und Anime-Jacken",
       "gift_ideas": "Geschenkideen",
       "christmas": "Weihnachten",
-      "under_20": "Unter 20 €",
+      "under_20": "Unter {{ amount }}",
       "small_gifts": "Kleine Aufmerksamkeiten",
       "for_him": "Für ihn",
       "for_her": "Für sie",
