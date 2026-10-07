@@ -1583,14 +1583,37 @@
     }
   };
 
+  // Note des cartes (snippets/product-item.liquid, .alibaba-card__rating--alr) remplie par Ali Reviews : texte de l'app
+  // remplacé par « 4,6 (111 avis) » dans la langue du client (clés reviews_one / reviews_other) ; sans avis : masquée.
+  var formatCardRatings = function () {
+    document.querySelectorAll('.alibaba-card__rating--alr:not([data-pm-rating])').forEach(function (box) {
+      var stars = box.querySelector('.alr-wh-comp-list-star-rating');
+      if (!stars) return; // pas encore rempli par l'app
+      box.setAttribute('data-pm-rating', '');
+      var value = parseFloat(stars.getAttribute('data-star'));
+      var label = box.querySelector('.alr-wh-review-star-rating-number');
+      var count = label ? parseInt((label.textContent.match(/\((\d[\d.,\s]*)/) || [])[1] || '0', 10) : 0;
+      if (!value || !count) {
+        box.classList.add('is-empty');
+        return;
+      }
+      if (label) {
+        var number = value.toLocaleString(document.documentElement.lang || undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        label.textContent = number + ' (' + T(count === 1 ? 'reviews_one' : 'reviews_other', { count: count }) + ')';
+      }
+    });
+  };
+
   // Cartes visibles : préchargées ; nouvelles cartes (défilement infini, filtres) : observées à leur arrivée.
   observeCards();
+  formatCardRatings();
   var observeTimer = null;
   new MutationObserver(function () {
     if (observeTimer) return;
     observeTimer = window.setTimeout(function () {
       observeTimer = null;
       observeCards();
+      formatCardRatings();
     }, 300);
   }).observe(document.body, { childList: true, subtree: true });
 })();

@@ -3817,6 +3817,16 @@
         </div>
       {%- endif -%}
     {%- endif -%}
+    {%- comment -%}
+      Mobile : note réelle des avis Ali Reviews (étoiles + nombre d'avis) quand la fiche n'a pas la métadonnée
+      reviews.rating de Shopify ; le widget « Star rating » de l'app remplit le repère .alireviews-review-star-rating
+      (attribut product-id). Masqué sur ordinateur (mise en page inchangée).
+    {%- endcomment -%}
+    {%- if settings.show_product_rating and show_rating != false and layout != 'list-compact' and upsell != true -%}
+      {%- unless rating_value -%}
+        <div class="alibaba-card__rating--alr alireviews-review-star-rating" product-id="{{ product.id }}"></div>
+      {%- endunless -%}
+    {%- endif -%}
 
     {%- if show_stock -%}
       <div class="alibaba-card__stock">
