@@ -15,11 +15,16 @@
     aria-label="Coupon"
   >
     <div class="coupons-offer__head">
+      {%- comment -%} Textes d'origine traduits dans la langue du client (snippets/editor-text-translate.liquid). {%- endcomment -%}
       {%- if section.settings.title != blank -%}
-        <h2>{{ section.settings.title | escape }}</h2>
+        {%- assign coupons_raw = section.settings.title | escape -%}
+        {%- capture coupons_title -%}{% render 'editor-text-translate', text: coupons_raw %}{%- endcapture -%}
+        <h2>{{ coupons_title }}</h2>
       {%- endif -%}
       {%- if section.settings.text != blank -%}
-        <p>{{ section.settings.text | escape }}</p>
+        {%- assign coupons_raw = section.settings.text | escape -%}
+        {%- capture coupons_text -%}{% render 'editor-text-translate', text: coupons_raw %}{%- endcapture -%}
+        <p>{{ coupons_text }}</p>
       {%- endif -%}
       {%- if section.settings.show_timer -%}
         <div class="coupons-offer__timer" data-coupons-timer role="timer" aria-label="{{ 'mobile.coupons.time_left' | t }}">
@@ -39,7 +44,9 @@
           <strong>{{ block.settings.amount | escape }}</strong>
           <span class="coupons-offer__details">
             {%- if block.settings.condition != blank -%}
-              <small>{{ block.settings.condition | escape }}</small>
+              {%- assign coupons_raw = block.settings.condition | escape -%}
+              {%- capture coupon_condition -%}{% render 'editor-text-translate', text: coupons_raw %}{%- endcapture -%}
+              <small>{{ coupon_condition }}</small>
             {%- endif -%}
             <span class="coupons-offer__code">{{ block.settings.code | strip | escape }}</span>
           </span>

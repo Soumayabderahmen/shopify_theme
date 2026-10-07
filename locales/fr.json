@@ -699,6 +699,16 @@
       "fastest_delivery": "Livraison la plus rapide en 2 à 3 jours ouvrables"
     }
   },
+  "editor_text": {
+    "featured_collection": "Sélection à la une",
+    "coupons_title": "Coupons de la semaine",
+    "coupons_text": "Appliqués au paiement, même avec Klarna en 3 fois",
+    "coupon_whole_order": "sur toute la commande",
+    "free_exchange": "Échange gratuit",
+    "free_exchange_rest": " des produits sous 30 jours",
+    "refund_policy": "Politique de remboursement",
+    "recently_viewed": "Ces produits ont retenu votre attention :"
+  },
   "mobile": {
     "tax": {
       "included": "Taxes incluses",

@@ -1,0 +1,41 @@
+{%- comment -%}
+  Textes saisis dans l'éditeur de thème : Shopify ne les traduit pas avec les fichiers de langue.
+  Tant qu'un champ garde son texte d'origine, ce snippet le remplace par la traduction de la langue du client
+  (clés editor_text.*) ; un texte modifié dans l'éditeur s'affiche tel quel.
+  Usage : {%- capture t_out -%}{% render 'editor-text-translate', text: section.settings.title %}{%- endcapture -%}
+  Params : text (texte ou HTML du réglage)
+{%- endcomment -%}
+{%- liquid
+  assign out = text
+  if out contains 'Featured collection'
+    assign tr = 'editor_text.featured_collection' | t
+    assign out = out | replace: 'Featured collection', tr
+  endif
+  if out contains 'Coupon della settimana'
+    assign tr = 'editor_text.coupons_title' | t
+    assign out = out | replace: 'Coupon della settimana', tr
+  endif
+  if out contains 'Si applicano al checkout, anche con Klarna in 3 rate'
+    assign tr = 'editor_text.coupons_text' | t
+    assign out = out | replace: 'Si applicano al checkout, anche con Klarna in 3 rate', tr
+  endif
+  # Texte brut ou déjà échappé (section Coupon : « l&#39;ordine »).
+  if out == "su tutto l'ordine" or out == 'su tutto l&#39;ordine'
+    assign out = 'editor_text.coupon_whole_order' | t
+  endif
+  if out contains 'Free exchange'
+    assign tr = 'editor_text.free_exchange' | t
+    assign tr_rest = 'editor_text.free_exchange_rest' | t
+    assign tr_title = 'editor_text.refund_policy' | t | escape
+    # Lien vers la politique dans la langue du visiteur (/de/policies/…).
+    assign root_path = routes.root_url | append: '/' | replace: '//', '/'
+    assign policies_href = 'href="' | append: root_path | append: 'policies/'
+    assign title_attr = 'title="' | append: tr_title | append: '"'
+    assign out = out | replace: 'Free exchange', tr | replace: ' of products within 30 days', tr_rest | replace: 'title="Refund Policy"', title_attr | replace: 'href="/policies/', policies_href
+  endif
+  if out contains 'These products had your attention:'
+    assign tr = 'editor_text.recently_viewed' | t
+    assign out = out | replace: 'These products had your attention:', tr
+  endif
+  echo out
+-%}

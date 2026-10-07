@@ -630,6 +630,16 @@
   "border": {
     "top_picks": "Topkeuzes"
   },
+  "editor_text": {
+    "featured_collection": "Uitgelichte collectie",
+    "coupons_title": "Kortingsbonnen van de week",
+    "coupons_text": "Worden toegepast bij het afrekenen, ook met Klarna in 3 termijnen",
+    "coupon_whole_order": "op je hele bestelling",
+    "free_exchange": "Gratis ruilen",
+    "free_exchange_rest": " van producten binnen 30 dagen",
+    "refund_policy": "Terugbetalingsbeleid",
+    "recently_viewed": "Deze producten trokken je aandacht:"
+  },
   "mobile": {
     "tax": {
       "included": "Inclusief belastingen",

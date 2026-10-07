@@ -1022,7 +1022,9 @@
                 {% endif %}
               {% endif %}
               <span>
-                {%- assign usp_text = block.settings.usp | remove: '<p>' | remove: '</p>' | split: '|' -%}
+                {%- comment -%} Texte d'origine traduit dans la langue du client (snippets/editor-text-translate.liquid). {%- endcomment -%}
+                {%- capture usp_translated -%}{% render 'editor-text-translate', text: block.settings.usp %}{%- endcapture -%}
+                {%- assign usp_text = usp_translated | remove: '<p>' | remove: '</p>' | split: '|' -%}
                 {%- assign cycle_group = 'cycle-' | append: forloop.index -%}
                 {%- for text in usp_text -%}
                   {%- capture cycle -%}{% cycle cycle_group: 'odd', 'even' %}{%- endcapture -%}

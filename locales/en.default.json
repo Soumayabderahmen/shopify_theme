@@ -3396,6 +3396,16 @@
       "fastest_delivery": "Fastest delivery in 2-3 business days"
     }
   },
+  "editor_text": {
+    "featured_collection": "Featured collection",
+    "coupons_title": "Coupons of the week",
+    "coupons_text": "Applied at checkout, also with Klarna in 3 instalments",
+    "coupon_whole_order": "on your whole order",
+    "free_exchange": "Free exchange",
+    "free_exchange_rest": " of products within 30 days",
+    "refund_policy": "Refund policy",
+    "recently_viewed": "These products had your attention:"
+  },
   "mobile": {
     "tax": {
       "included": "Taxes included",

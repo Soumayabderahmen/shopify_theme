@@ -627,6 +627,16 @@
       "fastest_delivery": "Entrega más rápida en 2-3 días hábiles"
     }
   },
+  "editor_text": {
+    "featured_collection": "Colección destacada",
+    "coupons_title": "Cupones de la semana",
+    "coupons_text": "Se aplican al finalizar la compra, también con Klarna en 3 plazos",
+    "coupon_whole_order": "en todo el pedido",
+    "free_exchange": "Cambio gratuito",
+    "free_exchange_rest": " de productos en un plazo de 30 días",
+    "refund_policy": "Política de reembolso",
+    "recently_viewed": "Estos productos captaron tu atención:"
+  },
   "mobile": {
     "tax": {
       "included": "Impuestos incluidos",

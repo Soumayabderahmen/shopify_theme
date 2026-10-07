@@ -23,7 +23,7 @@
       "
     >
       {%- if section.settings.title != empty -%}
-        {{ section.settings.title }}
+        {% render 'editor-text-translate', text: section.settings.title %}
       {%- endif -%}
     </div>
   </header>

@@ -142,7 +142,7 @@
   >
     {%- if container_div -%}<div class="{{ title_classes }}">{%- endif -%}
     {%- if section.settings.title != blank -%}
-      {{ section.settings.title }}
+      {% render 'editor-text-translate', text: section.settings.title %}
     {%- endif -%}
     {%- if section.settings.text != empty -%}
       {{ section.settings.text }}
@@ -685,7 +685,7 @@
     {%- if container_div -%}<div class="{{ title_classes }}">{%- endif -%}
     {%- if section.settings.title != blank -%}
       <div class="truncate-single-line">
-        {{ section.settings.title }}
+        {% render 'editor-text-translate', text: section.settings.title %}
       </div>
     {%- endif -%}
     {%- if section.settings.text != empty -%}
@@ -1685,7 +1685,7 @@
   >
     {%- if container_div -%}<div class="{{ title_classes }}">{%- endif -%}
     {%- if section.settings.title != blank -%}
-      {{ section.settings.title }}
+      {% render 'editor-text-translate', text: section.settings.title %}
     {%- endif -%}
     {%- if section.settings.text != empty -%}
       {{ section.settings.text }}

@@ -612,6 +612,16 @@
   "form": {
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
+  "editor_text": {
+    "featured_collection": "Ausgewählte Kollektion",
+    "coupons_title": "Gutscheine der Woche",
+    "coupons_text": "Werden an der Kasse angewendet, auch mit Klarna in 3 Raten",
+    "coupon_whole_order": "auf die gesamte Bestellung",
+    "free_exchange": "Kostenloser Umtausch",
+    "free_exchange_rest": " von Produkten innerhalb von 30 Tagen",
+    "refund_policy": "Rückerstattungsrichtlinie",
+    "recently_viewed": "Diese Produkte haben Sie sich angesehen:"
+  },
   "mobile": {
     "tax": {
       "included": "Inkl. Steuern",
