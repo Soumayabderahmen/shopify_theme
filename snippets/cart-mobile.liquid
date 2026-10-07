@@ -38,6 +38,8 @@
     assign cm_terms = true
   endif
 -%}
+{%- comment -%} Code de la devise après les prix quand « $ » est ambigu (« $94.00 CAD »). {%- endcomment -%}
+{%- capture mm_cur -%}{% render 'mobile-money-suffix' %}{%- endcapture -%}
 <style>.cart-m{display:none}</style>
 <div
   class="cart-m"
@@ -45,7 +47,7 @@
   data-section-id="{{ section.id }}"
   data-threshold="{{ cm_threshold }}"
   data-total="{{ cart.total_price }}"
-  data-money-format="{{ shop.money_format | strip_html | escape }}"
+  data-money-format="{{ shop.money_format | strip_html | append: mm_cur | escape }}"
 >
   <nav class="cm-bc" aria-label="{{ 'mobile.cart.breadcrumb' | t }}">
     <a href="{{ routes.root_url }}">{{ 'mobile.cart.home' | t }}</a>
@@ -80,7 +82,7 @@
             {%- if cm_free -%}
               <b>{{ 'mobile.cart.ship_free' | t }}</b>
             {%- else -%}
-              {%- assign cm_left = cm_threshold | minus: cart.total_price | money -%}
+              {%- assign cm_left = cm_threshold | minus: cart.total_price | money | append: mm_cur -%}
               {{- 'mobile.cart.ship_left_html' | t: amount: cm_left -}}
             {%- endif -%}
           </span>
@@ -144,7 +146,7 @@
                 {%- endif -%}
               {%- endfor -%}
               {%- for discount in line_item.line_level_discount_allocations -%}
-                <div class="cm-v cm-v--disc">{{ discount.discount_application.title }} (-{{ discount.amount | money }})</div>
+                <div class="cm-v cm-v--disc">{{ discount.discount_application.title }} (-{{ discount.amount | money }}{{ mm_cur }})</div>
               {%- endfor -%}
               <div class="cm-ctl">
                 {%- if can_update_quantity -%}
@@ -165,13 +167,13 @@
             </div>
             <div class="cm-p">
               {%- if line_item.original_line_price > line_item.final_line_price -%}
-                <s>{{ line_item.original_line_price | money }}</s>
+                <s>{{ line_item.original_line_price | money }}{{ mm_cur }}</s>
               {%- elsif line_item.variant.compare_at_price > line_item.variant.price -%}
-                <s>{{ line_item.variant.compare_at_price | times: line_item.quantity | money }}</s>
+                <s>{{ line_item.variant.compare_at_price | times: line_item.quantity | money }}{{ mm_cur }}</s>
               {%- endif -%}
-              {{ line_item.final_line_price | money }}
+              {{ line_item.final_line_price | money }}{{ mm_cur }}
               {%- if line_item.quantity > 1 -%}
-                {%- assign cm_unit = line_item.final_price | money -%}
+                {%- assign cm_unit = line_item.final_price | money | append: mm_cur -%}
                 <small>{{ 'mobile.cart.unit_price_html' | t: quantity: line_item.quantity, price: cm_unit }}</small>
               {%- endif -%}
             </div>
@@ -208,7 +210,7 @@
                 {%- assign cm_code_key = '|' | append: application.title | append: '|' -%}
                 {%- assign cm_shown_codes = cm_shown_codes | append: application.title | append: '|' -%}
                 <span class="cm-chip">
-                  <span>{{ application.title }} · -{{ application.total_allocated_amount | money }}</span>
+                  <span>{{ application.title }} · -{{ application.total_allocated_amount | money }}{{ mm_cur }}</span>
                   <button type="button" data-cm-remove-code="{{ application.title | escape }}" aria-label="{{ 'mobile.cart.code_remove' | t }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
                   </button>
@@ -249,16 +251,16 @@
     </section>
 
     <section class="cm-card cm-sum" data-cm-summary>
-      <div class="cm-row"><span>{{ 'mobile.cart.subtotal' | t: count: cart.item_count }}</span><b>{{ cart.items_subtotal_price | money }}</b></div>
+      <div class="cm-row"><span>{{ 'mobile.cart.subtotal' | t: count: cart.item_count }}</span><b>{{ cart.items_subtotal_price | money }}{{ mm_cur }}</b></div>
       {%- if cm_discount > 0 -%}
-        <div class="cm-row is-disc"><span>{{ 'mobile.cart.discount' | t }}</span><b>-{{ cm_discount | money }}</b></div>
+        <div class="cm-row is-disc"><span>{{ 'mobile.cart.discount' | t }}</span><b>-{{ cm_discount | money }}{{ mm_cur }}</b></div>
       {%- endif -%}
       {%- if cart.requires_shipping -%}
         <div class="cm-row{% if cm_free %} is-free{% endif %}" data-cm-ship-row><span>{{ 'mobile.cart.shipping' | t }}</span><b>{% if cm_free %}{{ 'mobile.cart.shipping_free' | t }}{% else %}{{ 'mobile.cart.shipping_checkout' | t }}{% endif %}</b></div>
       {%- endif -%}
       <div class="cm-row is-total">
-        <span>{{ 'mobile.cart.total' | t }}<small>{% if cart.taxes_included %}{{ 'mobile.cart.tax_included' | t }}{% else %}{{ 'mobile.cart.tax_excluded' | t }}{% endif %}</small></span>
-        <b>{{ cart.total_price | money }}</b>
+        <span>{{ 'mobile.cart.total' | t }}<small>{% render 'mobile-tax-note', kind: 'short', vat_key: 'mobile.cart' %}</small></span>
+        <b>{{ cart.total_price | money }}{{ mm_cur }}</b>
       </div>
       {%- comment -%}
         Propre formulaire de paiement : n'envoie pas les anciens champs quantité du panier Xtra (cachés en mobile),
@@ -289,17 +291,7 @@
           {%- endfor -%}
         </ul>
       {%- endif -%}
-      <p class="cm-iva">
-        {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
-          {{ 'cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
-        {%- elsif cart.taxes_included -%}
-          {{ 'cart.taxes_included_but_shipping_at_checkout' | t }}
-        {%- elsif shop.shipping_policy.body != blank -%}
-          {{ 'cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
-        {%- else -%}
-          {{ 'cart.taxes_and_shipping_at_checkout' | t }}
-        {%- endif -%}
-      </p>
+      <p class="cm-iva">{% render 'mobile-tax-note', kind: 'checkout' %}</p>
     </section>
 
     {%- liquid
@@ -329,7 +321,7 @@
     <div class="cm-bar" data-cm-bar>
       <div class="cm-bar__t">
         <small>{{ 'mobile.cart.total_count' | t: count: cart.item_count }}</small>
-        <b>{{ cart.total_price | money }}</b>
+        <b>{{ cart.total_price | money }}{{ mm_cur }}</b>
       </div>
       <button type="button" data-cm-bar-go>{{ 'mobile.cart.checkout' | t }}</button>
     </div>

@@ -20,6 +20,8 @@
     assign cd_ship_percent = cart.total_price | times: 100 | divided_by: cd_threshold
   endif
 -%}
+{%- comment -%} Code de la devise après les prix quand « $ » est ambigu (« $94.00 CAD »). {%- endcomment -%}
+{%- capture mm_cur -%}{% render 'mobile-money-suffix' %}{%- endcapture -%}
 <style>.cd-m{display:none}</style>
 <div
   class="cd-m"
@@ -60,7 +62,7 @@
               {%- if cd_free -%}
                 <b>{{ 'mobile.cart.ship_free' | t }}</b>
               {%- else -%}
-                {%- assign cd_left = cd_threshold | minus: cart.total_price | money -%}
+                {%- assign cd_left = cd_threshold | minus: cart.total_price | money | append: mm_cur -%}
                 {{- 'mobile.cart.ship_left_html' | t: amount: cd_left -}}
               {%- endif -%}
             </span>
@@ -128,8 +130,8 @@
                 {%- endif -%}
               {%- endfor -%}
               <div class="cd-pr{% if cd_old > 0 %} is-sale{% endif %}">
-                <b>{{ line_item.final_line_price | money }}</b>
-                {%- if cd_old > 0 %} <s>{{ cd_old | money }}</s>{% endif -%}
+                <b>{{ line_item.final_line_price | money }}{{ mm_cur }}</b>
+                {%- if cd_old > 0 %} <s>{{ cd_old | money }}{{ mm_cur }}</s>{% endif -%}
               </div>
               <div class="cd-ctl">
                 {%- if can_update_quantity -%}
@@ -206,19 +208,9 @@
     <footer class="cd-f">
       <div class="cd-sum">
         <span>{{ 'mobile.cart.subtotal' | t: count: cart.item_count }}</span>
-        <b>{{ cart.total_price | money }}<small>{% if cart.taxes_included %}{{ 'mobile.cart.tax_included' | t }}{% else %}{{ 'mobile.cart.tax_excluded' | t }}{% endif %}</small></b>
+        <b>{{ cart.total_price | money }}{{ mm_cur }}<small>{% render 'mobile-tax-note', kind: 'short', vat_key: 'mobile.cart' %}</small></b>
       </div>
-      <p class="cd-vat">
-        {%- if cart.taxes_included and shop.shipping_policy.body != blank -%}
-          {{ 'cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url }}
-        {%- elsif cart.taxes_included -%}
-          {{ 'cart.taxes_included_but_shipping_at_checkout' | t }}
-        {%- elsif shop.shipping_policy.body != blank -%}
-          {{ 'cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url }}
-        {%- else -%}
-          {{ 'cart.taxes_and_shipping_at_checkout' | t }}
-        {%- endif -%}
-      </p>
+      <p class="cd-vat">{% render 'mobile-tax-note', kind: 'checkout' %}</p>
       <form class="cd-btns" action="{{ routes.cart_url }}" method="post">
         <a class="cd-sec" href="{{ routes.cart_url }}">{{ 'mobile.drawer.go_cart' | t }}</a>
         <button class="cd-pri" type="submit" name="checkout">{{ 'mobile.cart.checkout' | t }}</button>

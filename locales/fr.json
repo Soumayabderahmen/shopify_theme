@@ -700,6 +700,14 @@
     }
   },
   "mobile": {
+    "tax": {
+      "included": "Taxes incluses",
+      "excluded": "Taxes en sus",
+      "checkout_html": "Taxes et <a href=\"{{ link }}\">frais de livraison</a> calculés à la caisse",
+      "checkout": "Taxes et frais de livraison calculés à la caisse",
+      "included_checkout_html": "Taxes incluses, <a href=\"{{ link }}\">frais de livraison</a> calculés à la caisse",
+      "included_checkout": "Taxes incluses, frais de livraison calculés à la caisse"
+    },
     "home": {
       "see_all": "Voir tout",
       "filter": "Filtrer",
@@ -919,7 +927,7 @@
       "guarantee_title": "Garantie commande",
       "free_returns": "Retours gratuits",
       "price_guarantee": "Garantie de prix",
-      "late_credit": "5,00 € de crédit en cas de retard",
+      "late_credit": "{{ amount }} de crédit en cas de retard",
       "damaged_return": "Retour si endommagé",
       "no_updates": "15 jours sans mise à jour",
       "no_delivery": "30 jours sans livraison",

@@ -194,6 +194,8 @@
   };
   var idInput = currentIdInput();
   var money = function (cents) {
+    // Même format que les prix du Liquid (snippets/mobile-i18n.liquid) : pas de « €46,59 » qui devient « 46,59 € ».
+    if (window.mobileMoney) return window.mobileMoney(cents);
     var currency = (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) || 'EUR';
     return new Intl.NumberFormat(document.documentElement.lang || 'it-IT', { style: 'currency', currency: currency }).format(cents / 100);
   };
@@ -958,6 +960,13 @@
   };
   var firstVariant = variants.find(function (item) { return String(item.id) === lastVariantId; }) || variants[0];
   if (firstVariant) updateShipping(firstVariant.price);
+
+  // Crédit en cas de retard (5 € de la boutique) : converti au taux de Shopify dans la devise du client (4,75 CHF…).
+  root.querySelectorAll('[data-pdp-late]').forEach(function (late) {
+    var lateRate = Number(window.Shopify && window.Shopify.currency && window.Shopify.currency.rate) || 1;
+    var cents = Math.round(Number(late.getAttribute('data-eur-cents')) * lateRate);
+    late.textContent = late.getAttribute('data-pdp-late').replace('__AMOUNT__', money(cents));
+  });
   root.querySelectorAll('[data-pdp-protection]').forEach(function (button) {
     button.addEventListener('click', function () {
       var label = button.getAttribute('data-pdp-protection');

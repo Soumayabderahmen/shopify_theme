@@ -22,7 +22,8 @@
   var sectionElement = function () { return document.getElementById('shopify-section-' + sectionId); };
 
   var money = function (cents) {
-    // Même format que les prix du thème (format monétaire de la boutique), sinon format du navigateur.
+    // Même format que les prix du thème (format monétaire de la boutique, + code si « $ » ambigu), sinon format du navigateur.
+    if (window.mobileMoney) return window.mobileMoney(cents);
     if (window.Shopify && typeof window.Shopify.formatMoney === 'function') return String(window.Shopify.formatMoney(cents)).replace(/<[^>]*>/g, '');
     var currency = (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) || 'EUR';
     return new Intl.NumberFormat(document.documentElement.lang || 'it', { style: 'currency', currency: currency }).format(cents / 100);

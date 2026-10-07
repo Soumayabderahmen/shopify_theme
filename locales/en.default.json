@@ -3397,6 +3397,14 @@
     }
   },
   "mobile": {
+    "tax": {
+      "included": "Taxes included",
+      "excluded": "Taxes not included",
+      "checkout_html": "Taxes and <a href=\"{{ link }}\">shipping</a> calculated at checkout",
+      "checkout": "Taxes and shipping calculated at checkout",
+      "included_checkout_html": "Taxes included, <a href=\"{{ link }}\">shipping</a> calculated at checkout",
+      "included_checkout": "Taxes included, shipping calculated at checkout"
+    },
     "home": {
       "see_all": "See all",
       "filter": "Filter",
@@ -3616,7 +3624,7 @@
       "guarantee_title": "Order guarantee",
       "free_returns": "Free returns",
       "price_guarantee": "Price guarantee",
-      "late_credit": "€5.00 credit for delays",
+      "late_credit": "{{ amount }} credit for delays",
       "damaged_return": "Return if damaged",
       "no_updates": "15 days without updates",
       "no_delivery": "30 days without delivery",

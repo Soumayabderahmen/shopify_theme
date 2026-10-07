@@ -613,6 +613,14 @@
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
   "mobile": {
+    "tax": {
+      "included": "Inkl. Steuern",
+      "excluded": "Zzgl. Steuern",
+      "checkout_html": "Steuern und <a href=\"{{ link }}\">Versand</a> werden an der Kasse berechnet",
+      "checkout": "Steuern und Versand werden an der Kasse berechnet",
+      "included_checkout_html": "Inkl. Steuern, <a href=\"{{ link }}\">Versand</a> wird an der Kasse berechnet",
+      "included_checkout": "Inkl. Steuern, Versand wird an der Kasse berechnet"
+    },
     "home": {
       "see_all": "Alle ansehen",
       "filter": "Filtern",
@@ -832,7 +840,7 @@
       "guarantee_title": "Bestellgarantie",
       "free_returns": "Kostenlose Rücksendung",
       "price_guarantee": "Preisgarantie",
-      "late_credit": "5,00 € Guthaben bei Verspätung",
+      "late_credit": "{{ amount }} Guthaben bei Verspätung",
       "damaged_return": "Rücksendung bei Beschädigung",
       "no_updates": "15 Tage ohne Aktualisierung",
       "no_delivery": "30 Tage ohne Lieferung",

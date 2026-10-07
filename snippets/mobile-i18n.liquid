@@ -179,4 +179,27 @@
     if (vars) Object.keys(vars).forEach(function (name) { text = text.split('{' + name + '}').join(vars[name]); });
     return text;
   };
+
+  /* Prix des scripts mobiles : même format que le filtre Liquid « money » de la devise du client (shop.money_format),
+     + code de la devise quand le symbole « $ » est ambigu (CAD, AUD, MXN… : « $94.00 CAD », règle dans snippets/mobile-money-suffix.liquid). */
+  {%- capture mm_cur -%}{% render 'mobile-money-suffix' %}{%- endcapture %}
+  window.mobileMoneyFormat = {{ shop.money_format | strip_html | append: mm_cur | json }};
+  window.mobileMoney = function (cents) {
+    var number = function (decimals, thousands, decimal) {
+      var fixed = (Number(cents || 0) / 100).toFixed(decimals).split('.');
+      return fixed[0].replace(/\B(?=(\d{3})+(?!\d))/g, thousands) + (fixed[1] ? decimal + fixed[1] : '');
+    };
+    return window.mobileMoneyFormat.replace(/\{\{\s*(\w+)\s*\}\}/, function (match, key) {
+      switch (key) {
+        case 'amount_no_decimals': return number(0, ',', '.');
+        case 'amount_with_comma_separator': return number(2, '.', ',');
+        case 'amount_no_decimals_with_comma_separator': return number(0, '.', ',');
+        case 'amount_with_apostrophe_separator': return number(2, "'", '.');
+        case 'amount_no_decimals_with_space_separator': return number(0, ' ', ',');
+        case 'amount_with_space_separator': return number(2, ' ', ',');
+        case 'amount_with_period_and_space_separator': return number(2, ' ', '.');
+        default: return number(2, ',', '.');
+      }
+    });
+  };
 </script>

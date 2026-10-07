@@ -708,6 +708,14 @@
     }
   },
   "mobile": {
+    "tax": {
+      "included": "Taxe incluse",
+      "excluded": "Taxe neincluse",
+      "checkout_html": "Taxele și <a href=\"{{ link }}\">livrarea</a> se calculează la finalizarea comenzii",
+      "checkout": "Taxele și livrarea se calculează la finalizarea comenzii",
+      "included_checkout_html": "Taxe incluse, <a href=\"{{ link }}\">livrarea</a> se calculează la finalizarea comenzii",
+      "included_checkout": "Taxe incluse, livrarea se calculează la finalizarea comenzii"
+    },
     "home": {
       "see_all": "Vezi tot",
       "filter": "Filtrează",
@@ -927,7 +935,7 @@
       "guarantee_title": "Garanția comenzii",
       "free_returns": "Retur gratuit",
       "price_guarantee": "Garanția prețului",
-      "late_credit": "Credit de 5,00 € pentru întârzieri",
+      "late_credit": "Credit de {{ amount }} pentru întârzieri",
       "damaged_return": "Retur dacă e deteriorat",
       "no_updates": "15 zile fără actualizări",
       "no_delivery": "30 de zile fără livrare",

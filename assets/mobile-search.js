@@ -62,6 +62,7 @@
   }
 
   function money(cents) {
+    if (window.mobileMoney) return window.mobileMoney(cents);
     return moneyFormat.replace(/\{\{\s*(\w+)\s*\}\}/, function (match, key) {
       switch (key) {
         case 'amount_no_decimals': return formatNumber(cents, 0, ',', '.');

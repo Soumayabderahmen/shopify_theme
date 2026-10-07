@@ -1,0 +1,6 @@
+{%- comment -%}
+  Suffixe des prix mobiles : « CAD » (avec espace) quand la devise du client s'écrit « $ » sans être le dollar américain
+  (CAD, AUD, NZD, MXN…), sinon rien. Au Canada « $94.00 » seul fait penser à des dollars US.
+  Usage : {%- capture mm_cur -%}{% render 'mobile-money-suffix' %}{%- endcapture -%} puis {{ prix | money }}{{ mm_cur }}.
+{%- endcomment -%}
+{%- if cart.currency.symbol == '$' and cart.currency.iso_code != 'USD' %} {{ cart.currency.iso_code }}{%- endif -%}

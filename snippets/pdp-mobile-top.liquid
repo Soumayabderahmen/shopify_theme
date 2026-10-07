@@ -48,6 +48,8 @@
     endif
   endfor
 -%}
+{%- comment -%} Code de la devise après les prix quand « $ » est ambigu (« $94.00 CAD »). {%- endcomment -%}
+{%- capture mm_cur -%}{% render 'mobile-money-suffix' %}{%- endcapture -%}
 {%- comment -%} Caché par défaut (desktop) ; assets/pdp-mobile.css, chargé seulement en mobile, l'affiche. {%- endcomment -%}
 <style>.pdp-m{display:none}</style>
 <div class="pdp-m" data-pdp-mobile data-coupon-code="{{ pm_coupon_code }}">
@@ -146,8 +148,8 @@
     <div class="pdp-m__title" role="heading" aria-level="1" data-pdp-title>{{ product.title | escape }}</div>
     <button class="pdp-m__more" type="button" data-pdp-title-more hidden>{{ 'mobile.pdp.show_all' | t }}</button>
     <div class="pdp-m__prow">
-      <span class="pdp-m__price{% if pm_compare > pm_price %} is-sale{% endif %}" data-pdp-price>{{ pm_price | money }}</span>
-      <span class="pdp-m__old" data-pdp-old{% unless pm_compare > pm_price %} hidden{% endunless %}>{{ pm_compare | money }}</span>
+      <span class="pdp-m__price{% if pm_compare > pm_price %} is-sale{% endif %}" data-pdp-price>{{ pm_price | money }}{{ mm_cur }}</span>
+      <span class="pdp-m__old" data-pdp-old{% unless pm_compare > pm_price %} hidden{% endunless %}>{{ pm_compare | money }}{{ mm_cur }}</span>
       {%- liquid
         assign pm_save = 0
         if pm_compare > pm_price
@@ -155,7 +157,7 @@
         endif
       -%}
       <span class="pdp-m__save" data-pdp-save{% unless pm_save > 0 %} hidden{% endunless %}>-{{ pm_save }}%</span>
-      <span class="pdp-m__iva">{% if cart.taxes_included %}{{ 'mobile.pdp.tax_included' | t }}{% else %}{{ 'mobile.pdp.tax_excluded' | t }}{% endif %}</span>
+      <span class="pdp-m__iva">{% render 'mobile-tax-note', kind: 'short', vat_key: 'mobile.pdp' %}</span>
     </div>
     {%- if pm_coupon_code != blank -%}
       <div class="pdp-m__tkt">
@@ -186,7 +188,7 @@
           assign pm_ship_text_free = 'mobile.pdp.free_shipping_order' | t
           assign pm_ship_text_from = ''
           if pm_ship_threshold > 0
-            assign pm_ship_amount = pm_ship_threshold | money_without_trailing_zeros | strip_html
+            assign pm_ship_amount = pm_ship_threshold | money_without_trailing_zeros | strip_html | append: mm_cur
             assign pm_ship_text_from = 'mobile.pdp.free_shipping_from' | t: amount: pm_ship_amount
           endif
         -%}
@@ -196,7 +198,7 @@
           data-base="{{ pm_ship_base }}"
           data-text-free="{{ pm_ship_text_free | escape }}"
           data-text-from="{{ pm_ship_text_from | escape }}"
-          data-money-sample="{{ 123456700 | money_without_trailing_zeros | strip_html | escape }}"
+          data-money-sample="{{ 123456700 | money_without_trailing_zeros | strip_html | append: mm_cur | escape }}"
         >
           <span class="pdp-m__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span>
           <span class="pdp-m__t">
@@ -345,7 +347,7 @@
     </div>
     <button class="pdp-m__cta" type="button" data-pdp-add>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
-      <span data-pdp-cta-text>{{ 'mobile.pdp.add_to_cart' | t }} · {{ pm_price | money }}</span>
+      <span data-pdp-cta-text>{{ 'mobile.pdp.add_to_cart' | t }} · {{ pm_price | money }}{{ mm_cur }}</span>
     </button>
   </section>
 
@@ -378,7 +380,19 @@
     <div class="pdp-m__gar">
       <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>{{ 'mobile.pdp.free_returns' | t }}</span>
       <button type="button" data-pdp-open-price><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg>{{ 'mobile.pdp.price_guarantee' | t }}</button>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/></svg>{{ 'mobile.pdp.late_credit' | t }}</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/></svg>
+        {%- comment -%}
+          Crédit de 5 € de la boutique : en euros tel quel, sinon converti au taux Shopify par assets/pdp-mobile.js
+          (data-pdp-late) dans la devise du client.
+        {%- endcomment -%}
+        {%- liquid
+          assign pm_late_text = 'mobile.pdp.late_credit' | t: amount: '__AMOUNT__'
+          assign pm_late_amount = ''
+          if cart.currency.iso_code == shop.currency
+            assign pm_late_amount = 500 | money
+          endif
+        -%}
+        <span data-pdp-late="{{ pm_late_text | escape }}" data-eur-cents="500">{{ pm_late_text | replace: '__AMOUNT__', pm_late_amount }}</span></span>
       <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/></svg>{{ 'mobile.pdp.damaged_return' | t }}</span>
       <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>{{ 'mobile.pdp.no_updates' | t }}</span>
       <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>{{ 'mobile.pdp.no_delivery' | t }}</span>
@@ -388,7 +402,7 @@
   {%- comment -%} 10. Klarna : 3 rate calculées sur le prix réel de la variante. {%- endcomment -%}
   <div class="pdp-m__kl">
     <i>Klarna</i>
-    <p>{%- assign pm_klarna_amount = pm_price | divided_by: 3 | money -%}
+    <p>{%- assign pm_klarna_amount = pm_price | divided_by: 3 | money | append: mm_cur -%}
     <b data-pdp-klarna>{{ 'mobile.pdp.klarna_installments_html' | t: amount: pm_klarna_amount }}</b><br>{{ 'mobile.pdp.klarna_interest' | t }}</p>
     <a href="https://www.klarna.com/it/" target="_blank" rel="noopener">{{ 'mobile.pdp.learn_more' | t }}</a>
   </div>
@@ -422,7 +436,7 @@
   <div class="pdp-m__buy" data-pdp-buy>
     <button class="pdp-m__vr" type="button" data-pdp-to-options aria-label="{{ 'mobile.pdp.choose_options' | t }}">
       <small><span data-pdp-buy-variant>{{ pm_variant.title }}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></small>
-      <b data-pdp-buy-price>{{ pm_price | money }}</b>
+      <b data-pdp-buy-price>{{ pm_price | money }}{{ mm_cur }}</b>
     </button>
     <button class="pdp-m__go" type="button" data-pdp-add>{{ 'mobile.pdp.add_to_cart' | t }}</button>
   </div>

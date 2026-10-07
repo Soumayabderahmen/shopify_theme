@@ -3642,10 +3642,14 @@
 
       {%- comment -%} Bouton panier (mobile uniquement) : ouvre la modale couleur / taille (snippets/mobile-quick-add.liquid). {%- endcomment -%}
       {%- if product.available -%}
+        {%- liquid
+          assign qa_card_label = 'mobile.js.choose_options_for' | t
+          assign qa_card_label = qa_card_label | replace: '{title}', product.title
+        -%}
         <button
           type="button"
           class="alibaba-card__qa mobile-only{% if bestseller_count > 50 or matched_brand != '' %} is-up{% endif %}"
-          aria-label="Scegli opzioni e aggiungi al carrello"
+          aria-label="{{ qa_card_label | escape }}"
           aria-haspopup="dialog"
           data-quick-add="{{ product.handle }}"
         >

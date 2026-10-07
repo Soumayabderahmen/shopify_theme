@@ -702,6 +702,14 @@
     }
   },
   "mobile": {
+    "tax": {
+      "included": "Tasse incluse",
+      "excluded": "Tasse escluse",
+      "checkout_html": "Tasse e <a href=\"{{ link }}\">spedizione</a> calcolate al momento del pagamento",
+      "checkout": "Tasse e spedizione calcolate al momento del pagamento",
+      "included_checkout_html": "Tasse incluse, <a href=\"{{ link }}\">spedizione</a> calcolata al momento del pagamento",
+      "included_checkout": "Tasse incluse, spedizione calcolata al momento del pagamento"
+    },
     "home": {
       "see_all": "Vedi tutti",
       "filter": "Filtra",
@@ -921,7 +929,7 @@
       "guarantee_title": "Garanzia Ordine",
       "free_returns": "Resi Gratuiti",
       "price_guarantee": "Garanzia sul Prezzo",
-      "late_credit": "5,00€ Credito per Ritardi",
+      "late_credit": "{{ amount }} Credito per Ritardi",
       "damaged_return": "Reso se Danneggiato",
       "no_updates": "15 giorni senza aggiornamenti",
       "no_delivery": "30 giorni senza consegna",

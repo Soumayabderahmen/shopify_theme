@@ -6,6 +6,8 @@
   assign new_label = 'mobile.category.new' | t
 
 -%}
+{%- comment -%} Code de la devise après les prix quand « $ » est ambigu (« $94.00 CAD »). {%- endcomment -%}
+{%- capture mm_cur -%}{% render 'mobile-money-suffix' %}{%- endcapture -%}
 
 {%- if menu != blank -%}
   {%- assign hot_collection = collections['bestsellers'] -%}
@@ -351,7 +353,7 @@
                     <span>-{{ discount_amount }}%</span>
                   </span>
                   <span>{{ explore_product.title | escape }}</span>
-                  <strong>{{ sale_variant.price | money }} <s>{{ sale_variant.compare_at_price | money }}</s></strong>
+                  <strong>{{ sale_variant.price | money }}{{ mm_cur }} <s>{{ sale_variant.compare_at_price | money }}{{ mm_cur }}</s></strong>
                 </a>
               {%- endif -%}
             {%- endfor -%}
@@ -550,8 +552,8 @@
                 </span>
                 <span>{{ explore_product.title | escape }}</span>
                 <strong>
-                  {{ new_variant.price | money }}
-                  {%- if new_variant.compare_at_price > new_variant.price %} <s>{{ new_variant.compare_at_price | money }}</s>{% endif -%}
+                  {{ new_variant.price | money }}{{ mm_cur }}
+                  {%- if new_variant.compare_at_price > new_variant.price %} <s>{{ new_variant.compare_at_price | money }}{{ mm_cur }}</s>{% endif -%}
                 </strong>
               </a>
             {%- endfor -%}
@@ -583,8 +585,8 @@
                   <span class="mobile-explore-top-products__details">
                     <span>{{ explore_product.title | escape }}</span>
                     <strong>
-                      {{ top_variant.price | money }}
-                      {%- if top_variant.compare_at_price > top_variant.price %} <s>{{ top_variant.compare_at_price | money }}</s>{% endif -%}
+                      {{ top_variant.price | money }}{{ mm_cur }}
+                      {%- if top_variant.compare_at_price > top_variant.price %} <s>{{ top_variant.compare_at_price | money }}{{ mm_cur }}</s>{% endif -%}
                     </strong>
                   </span>
                 </a>

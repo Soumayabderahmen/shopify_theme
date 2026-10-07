@@ -1,0 +1,53 @@
+{%- comment -%}
+  Mention des taxes des pages mobiles (fiche produit, tiroir panier, page panier).
+  Canada et États-Unis : pas de TVA mais des taxes de vente (TPS/TVH, sales tax) → clés mobile.tax.* ;
+  ailleurs, les textes « TVA » existants.
+  Params :
+  - kind : 'short' (« TVA incluse » / « Taxes en sus ») ou 'checkout' (« TVA et frais de livraison calculés à la caisse »)
+  - vat_key : préfixe des textes TVA courts ('mobile.pdp' ou 'mobile.cart'), pour kind 'short'
+{%- endcomment -%}
+{%- liquid
+  assign tax_sales_countries = 'CA,US' | split: ','
+  assign tax_sales = false
+  if tax_sales_countries contains localization.country.iso_code
+    assign tax_sales = true
+  endif
+  assign tax_policy = false
+  if shop.shipping_policy.body != blank
+    assign tax_policy = true
+  endif
+
+  if kind == 'short'
+    if tax_sales and cart.taxes_included
+      echo 'mobile.tax.included' | t
+    elsif tax_sales
+      echo 'mobile.tax.excluded' | t
+    elsif cart.taxes_included
+      assign tax_text_key = vat_key | append: '.tax_included'
+      echo tax_text_key | t
+    else
+      assign tax_text_key = vat_key | append: '.tax_excluded'
+      echo tax_text_key | t
+    endif
+  elsif tax_sales
+    if cart.taxes_included and tax_policy
+      echo 'mobile.tax.included_checkout_html' | t: link: shop.shipping_policy.url
+    elsif cart.taxes_included
+      echo 'mobile.tax.included_checkout' | t
+    elsif tax_policy
+      echo 'mobile.tax.checkout_html' | t: link: shop.shipping_policy.url
+    else
+      echo 'mobile.tax.checkout' | t
+    endif
+  else
+    if cart.taxes_included and tax_policy
+      echo 'cart.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url
+    elsif cart.taxes_included
+      echo 'cart.taxes_included_but_shipping_at_checkout' | t
+    elsif tax_policy
+      echo 'cart.taxes_and_shipping_policy_at_checkout_html' | t: link: shop.shipping_policy.url
+    else
+      echo 'cart.taxes_and_shipping_at_checkout' | t
+    endif
+  endif
+-%}

@@ -628,6 +628,14 @@
     }
   },
   "mobile": {
+    "tax": {
+      "included": "Impuestos incluidos",
+      "excluded": "Impuestos no incluidos",
+      "checkout_html": "Impuestos y <a href=\"{{ link }}\">envío</a> calculados al finalizar la compra",
+      "checkout": "Impuestos y envío calculados al finalizar la compra",
+      "included_checkout_html": "Impuestos incluidos, <a href=\"{{ link }}\">envío</a> calculado al finalizar la compra",
+      "included_checkout": "Impuestos incluidos, envío calculado al finalizar la compra"
+    },
     "home": {
       "see_all": "Ver todo",
       "filter": "Filtrar",
@@ -847,7 +855,7 @@
       "guarantee_title": "Garantía del pedido",
       "free_returns": "Devoluciones gratis",
       "price_guarantee": "Garantía de precio",
-      "late_credit": "5,00 € de crédito por retrasos",
+      "late_credit": "{{ amount }} de crédito por retrasos",
       "damaged_return": "Devolución si llega dañado",
       "no_updates": "15 días sin actualizaciones",
       "no_delivery": "30 días sin entrega",

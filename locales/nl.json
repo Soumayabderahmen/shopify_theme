@@ -631,6 +631,14 @@
     "top_picks": "Topkeuzes"
   },
   "mobile": {
+    "tax": {
+      "included": "Inclusief belastingen",
+      "excluded": "Exclusief belastingen",
+      "checkout_html": "Belastingen en <a href=\"{{ link }}\">verzending</a> worden berekend bij het afrekenen",
+      "checkout": "Belastingen en verzending worden berekend bij het afrekenen",
+      "included_checkout_html": "Inclusief belastingen, <a href=\"{{ link }}\">verzending</a> wordt berekend bij het afrekenen",
+      "included_checkout": "Inclusief belastingen, verzending wordt berekend bij het afrekenen"
+    },
     "home": {
       "see_all": "Alles bekijken",
       "filter": "Filteren",
@@ -850,7 +858,7 @@
       "guarantee_title": "Bestelgarantie",
       "free_returns": "Gratis retourneren",
       "price_guarantee": "Prijsgarantie",
-      "late_credit": "€ 5,00 tegoed bij vertraging",
+      "late_credit": "{{ amount }} tegoed bij vertraging",
       "damaged_return": "Retour bij beschadiging",
       "no_updates": "15 dagen zonder updates",
       "no_delivery": "30 dagen zonder levering",
