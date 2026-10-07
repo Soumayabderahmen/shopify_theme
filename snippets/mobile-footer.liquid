@@ -127,7 +127,9 @@
   {%- endif -%}
 
   <section class="nf-help">
-    <p class="nf-help__title" role="heading" aria-level="3">{{ customer_block.settings.title | default: 'Customer service' | strip_html }}</p>
+    {%- assign nf_help_raw = customer_block.settings.title | default: 'Customer service' | strip_html | strip -%}
+    {%- comment -%} Titre d'origine traduit dans la langue du client (snippets/editor-text-translate.liquid). {%- endcomment -%}
+    <p class="nf-help__title" role="heading" aria-level="3">{% render 'editor-text-translate', text: nf_help_raw %}</p>
     <div class="nf-contact">
       {%- if customer_block.settings.show_whatsapp_link -%}
         {%- assign whatsapp_number = settings.whatsapp | default: section_settings.mobile_whatsapp | remove: '+' | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | remove: '.' -%}

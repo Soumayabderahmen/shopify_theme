@@ -923,37 +923,51 @@
       if (terms) terms.click();
     });
   });
-  /* Garantie de prix : fenêtre mobile traduite (snippets/pdp-mobile-top.liquid, data-pdp-pg) ; sans elle, la fenêtre
-     du thème comme avant. Fermeture : bouton, croix, tap sur le fond, touche Échap (dialog natif). */
-  var priceSheet = root.querySelector('[data-pdp-pg]');
-  if (priceSheet) {
-    var closeSheet = function () {
-      priceSheet.classList.remove('is-open');
-      window.setTimeout(function () { if (priceSheet.open) priceSheet.close(); }, 220);
+  /* ---------- Feuille « Protections » (snippets/pdp-mobile-protect.liquid) ----------
+     Paiements, livraison, retours, confidentialité, garantie de prix : un onglet chacun ; chaque bouton de la fiche
+     (data-pdp-pt-open) ouvre la feuille sur son onglet. Fermeture : croix, OK, tap sur le fond, touche Échap. */
+  var protectSheet = root.querySelector('[data-pdp-pt]');
+  if (protectSheet) {
+    var protectBody = protectSheet.querySelector('[data-pdp-pt-body]');
+    var protectTabs = Array.prototype.slice.call(protectSheet.querySelectorAll('[data-pdp-pt-tab]'));
+    var showProtectTab = function (key) {
+      if (!protectSheet.querySelector('[data-pdp-pt-panel="' + key + '"]')) key = 'pay';
+      protectTabs.forEach(function (tab) {
+        var on = tab.getAttribute('data-pdp-pt-tab') === key;
+        tab.setAttribute('aria-selected', on ? 'true' : 'false');
+        if (on) tab.scrollIntoView({ block: 'nearest', inline: 'center' });
+      });
+      protectSheet.querySelectorAll('[data-pdp-pt-panel]').forEach(function (panel) {
+        panel.hidden = panel.getAttribute('data-pdp-pt-panel') !== key;
+      });
+      protectBody.scrollTop = 0;
     };
-    priceSheet.querySelectorAll('[data-pdp-pg-close]').forEach(function (button) {
-      button.addEventListener('click', closeSheet);
+    var closeProtect = function () {
+      protectSheet.classList.remove('is-open');
+      window.setTimeout(function () { if (protectSheet.open) protectSheet.close(); }, 220);
+    };
+    protectTabs.forEach(function (tab) {
+      tab.addEventListener('click', function () { showProtectTab(tab.getAttribute('data-pdp-pt-tab')); });
     });
-    priceSheet.addEventListener('click', function (event) {
-      if (event.target === priceSheet) closeSheet();
+    protectSheet.querySelectorAll('[data-pdp-pt-close]').forEach(function (button) {
+      button.addEventListener('click', closeProtect);
     });
-    priceSheet.addEventListener('cancel', function (event) {
+    protectSheet.addEventListener('click', function (event) {
+      if (event.target === protectSheet) closeProtect();
+    });
+    protectSheet.addEventListener('cancel', function (event) {
       event.preventDefault();
-      closeSheet();
+      closeProtect();
+    });
+    root.querySelectorAll('[data-pdp-pt-open]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        if (typeof protectSheet.showModal !== 'function') return;
+        if (!protectSheet.open) protectSheet.showModal();
+        showProtectTab(button.getAttribute('data-pdp-pt-open'));
+        window.requestAnimationFrame(function () { protectSheet.classList.add('is-open'); });
+      });
     });
   }
-  root.querySelectorAll('[data-pdp-open-price]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      if (priceSheet && typeof priceSheet.showModal === 'function') {
-        priceSheet.showModal();
-        priceSheet.querySelector('.pdp-m__pg-body').scrollTop = 0;
-        window.requestAnimationFrame(function () { priceSheet.classList.add('is-open'); });
-        return;
-      }
-      var badge = document.querySelector('#main-product .price-match-badge');
-      if (badge) badge.click();
-    });
-  });
   /* ---------- Livraison gratuite : seuil des réglages du thème dans la devise du client ----------
      En euros (devise de la boutique) : seuil du Liquid (data-threshold). Autres devises (data-threshold = 0) : Shopify
      compare au seuil converti au taux (vérifié avec ses tarifs : 48 CHF gratuit, 46 CHF payant pour 50 €) ;
@@ -995,18 +1009,6 @@
     var lateRate = Number(window.Shopify && window.Shopify.currency && window.Shopify.currency.rate) || 1;
     var cents = Math.round(Number(late.getAttribute('data-eur-cents')) * lateRate);
     late.textContent = late.getAttribute('data-pdp-late').replace('__AMOUNT__', money(cents));
-  });
-  root.querySelectorAll('[data-pdp-protection]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      var label = button.getAttribute('data-pdp-protection');
-      var block = document.querySelector('#main-product .f8pr-variant-selection');
-      var target = block && Array.prototype.find.call(block.querySelectorAll('*'), function (el) {
-        return el.children.length === 0 && el.textContent.trim() === label;
-      });
-      var trigger = (target && target.closest('[onclick], button, [role="button"], [data-ps-key], .ps-chip, .ps-item')) || target
-        || document.querySelector('#main-product .ps-header');
-      if (trigger) trigger.click();
-    });
   });
 
   /* ---------- Fidélité : textes des apps (points Honeypop, crédit boutique) ---------- */
