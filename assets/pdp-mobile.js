@@ -1063,6 +1063,11 @@
   var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="m8 12.5 3 3 5-6"/></svg>';
   var WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20z"/><path d="M12 10v4.5M12 17.5v.1"/></svg>';
   var photos = [];
+  var escapeHtml = function (value) {
+    return String(value).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  };
   var keyFor = function (title) {
     var t = title.toLowerCase();
     if (/tagli|size/.test(t)) return 'size';
@@ -1148,8 +1153,33 @@
         if (paragraphs) body += '<div class="pdp-m__txt">' + paragraphs + '</div>';
         paragraphs = '';
       };
+      // Lignes « Libellé : valeur » des fiches importées (Decorazione: NONE, Materiale: Cotone…) : tableau à deux
+      // colonnes dès 3 lignes de suite ; moins de 3, elles restent du texte.
+      var pairs = [];
+      var flushPairs = function () {
+        if (pairs.length >= 3) {
+          flushParagraphs();
+          body += '<dl class="pdp-m__spec">' + pairs.map(function (pair) {
+            return '<dt>' + escapeHtml(pair.label) + '</dt><dd>' + escapeHtml(pair.value) + '</dd>';
+          }).join('') + '</dl>';
+        } else {
+          pairs.forEach(function (pair) { paragraphs += pair.html; });
+        }
+        pairs = [];
+      };
       section.nodes.forEach(function (node) {
+        // Styles en ligne du fournisseur (tailles, gras italique, surlignage jaune) : retirés, la charte s'applique.
+        if (node.tagName !== 'TABLE') {
+          node.removeAttribute('style');
+          node.querySelectorAll('[style]').forEach(function (el) { el.removeAttribute('style'); });
+        }
         var text = node.textContent.trim();
+        var pair = node.tagName === 'P' && text.length <= 120 && !node.querySelector('img') ? text.match(/^([^:：\n]{1,45}?)\s*[:：]\s*(\S[\s\S]*)$/) : null;
+        if (pair) {
+          pairs.push({ label: pair[1].trim(), value: pair[2].trim(), html: node.outerHTML });
+          return;
+        }
+        flushPairs();
         if (node.tagName === 'UL' || node.tagName === 'OL') {
           flushParagraphs();
           if (key === 'feat') {
@@ -1185,6 +1215,7 @@
         }
         paragraphs += node.outerHTML;
       });
+      flushPairs();
       flushParagraphs();
       // Sections reconnues : nom de l'onglet dans la langue du client (« SPECIFICATIONS » -> « Technische Daten ») ;
       // les autres gardent le titre de la description.
@@ -1208,11 +1239,6 @@
     }).join('') + '<i class="pdp-m__ind" data-pdp-ind></i></div></nav>';
     descBox.innerHTML = tabsHtml + html;
 
-    // Note finale (paragraphe après les photos dans la description) : en italique sous la dernière section de texte.
-    descBox.querySelectorAll('.pdp-m__sec[data-pdp-section="spec"] .pdp-m__txt').forEach(function (txt) {
-      txt.classList.add('pdp-m__note');
-    });
-
     setupTabs();
     setupSizeTable();
     setupLightbox();
@@ -1221,13 +1247,14 @@
   // Vrais onglets : seule la section de l'onglet choisi est affichée (page plus courte ; les sections cachées,
   // et leurs photos, ne sont dessinées / téléchargées qu'à l'ouverture de leur onglet).
   var openDescTab = null;
-  // Texte long (section faite seulement de paragraphes) : coupé après quelques lignes avec un fondu et un bouton
-  // « Lire la suite » / « Afficher moins ». Mesuré à l'ouverture de l'onglet (une section cachée n'a pas de hauteur).
+  // Texte long (section faite de paragraphes et de tableaux « libellé / valeur ») : coupé après quelques lignes avec un
+  // fondu et un bouton « Lire la suite » / « Afficher moins ». Mesuré à l'ouverture de l'onglet (une section cachée
+  // n'a pas de hauteur).
   var clampDescSection = function (section) {
     if (section.hasAttribute('data-pdp-clamp')) return;
     section.setAttribute('data-pdp-clamp', '');
     var blocks = Array.prototype.slice.call(section.children);
-    if (!blocks.length || !blocks.every(function (block) { return block.classList.contains('pdp-m__txt'); })) return;
+    if (!blocks.length || !blocks.every(function (block) { return block.classList.contains('pdp-m__txt') || block.classList.contains('pdp-m__spec'); })) return;
     var box = document.createElement('div');
     box.className = 'pdp-m__clamp';
     blocks.forEach(function (block) { box.appendChild(block); });

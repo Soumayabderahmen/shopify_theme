@@ -2006,8 +2006,8 @@ body.template-product {
 }
 
 /* Premier paragraphe de la description : accroche un peu plus grande, couleur du titre. */
-.pdp-m__desc .pdp-m__sec > .pdp-m__txt:first-child > p:first-child,
-.pdp-m__desc .pdp-m__clamp > .pdp-m__txt:first-child > p:first-child {
+.pdp-m__desc .pdp-m__sec:not([data-pdp-section='spec']) > .pdp-m__txt:first-child > p:first-child,
+.pdp-m__desc .pdp-m__sec:not([data-pdp-section='spec']) .pdp-m__clamp > .pdp-m__txt:first-child > p:first-child {
   color: var(--pm-ink);
   font-size: 15px;
   font-weight: 500;
@@ -2223,7 +2223,8 @@ dl.pdp-m__spec {
 .pdp-m__spec dt,
 .pdp-m__spec dd {
   margin: 0;
-  padding: 12px;
+  padding: 9px 12px;
+  line-height: 1.35;
   border-top: 1px solid #f0f1f6;
 }
 
@@ -2232,13 +2233,43 @@ dl.pdp-m__spec {
   border-top: 0;
 }
 
+/* Libellé en gris, valeur mise en avant (charte de la feuille Protections). */
 .pdp-m__spec dt {
-  font-weight: 800;
+  color: var(--pm-mute);
+  font-weight: 500;
   background: #f8f9fc;
 }
 
 .pdp-m__spec dd {
+  color: var(--pm-ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* Spécifications : texte du fournisseur (ex. « Taglia Asia », tolérance des mesures) dans un encadré lisible. */
+.pdp-m__desc .pdp-m__sec[data-pdp-section='spec'] .pdp-m__txt {
+  margin-top: 14px;
+  padding: 14px;
   color: var(--pm-ink-2);
+  font-size: 13.5px;
+  font-style: normal;
+  line-height: 1.6;
+  background: #f6f7fb;
+  border-radius: 14px;
+}
+
+.pdp-m__desc .pdp-m__sec[data-pdp-section='spec'] .pdp-m__txt:first-child {
+  margin-top: 0;
+}
+
+.pdp-m__desc .pdp-m__txt span,
+.pdp-m__desc .pdp-m__txt font {
+  font-size: inherit !important;
+  font-style: normal;
+}
+
+.pdp-m__desc .pdp-m__clamp > * + * {
+  margin-top: 14px;
 }
 
 .pdp-m__note {
