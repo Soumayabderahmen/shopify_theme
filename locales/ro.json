@@ -707,6 +707,14 @@
       "fastest_delivery": "Livrare rapidă în 2-3 zile lucrătoare"
     }
   },
+  "mobile_order": {
+    "eyebrow": "Comandă garantată",
+    "desc": "De la cumpărare la rambursare: angajamentele scrise în politicile noastre, pentru fiecare comandă.",
+    "nav_return": "Retur",
+    "nav_price": "Preț",
+    "nav_ship": "Expediere",
+    "nav_track": "Urmărire"
+  },
   "mobile_protect": {
     "eyebrow": "Cumpărături protejate",
     "sign": "Cu grijă, {{ shop_name }}",

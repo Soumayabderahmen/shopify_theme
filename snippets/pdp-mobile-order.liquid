@@ -1,0 +1,171 @@
+{%- comment -%}
+  Feuille « Garantie commande » de la fiche produit mobile, même design que la feuille « Protections » (prototype v4.2,
+  classes pdp-m__pt-*, en-tête snippets/pdp-mobile-sheet-head.liquid). Une carte numérotée par badge de la section 9 de
+  snippets/pdp-mobile-top.liquid (data-pdp-pt-sheet="order" + data-pdp-pt-open="ret|price|prep|report|track|refund").
+  Contenu : uniquement les engagements des politiques de la boutique (retours, expédition) et de la page de garantie de prix.
+{%- endcomment -%}
+{%- liquid
+  assign og_email = 'contact@platinumshop.it'
+  assign og_email_link = '<a href="mailto:' | append: og_email | append: '">' | append: og_email | append: '</a>'
+  assign og_arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M14 7l5 5-5 5"/></svg>'
+  assign og_learn = 'mobile.pdp.learn_more' | t
+
+  # Titre sur deux lignes comme le prototype : dernier mot en bleu (« Garanzia / Ordine »), mot unique (de, nl) en bleu.
+  assign og_title = 'mobile.pdp.guarantee_title' | t
+  assign og_words = og_title | split: ' '
+  assign og_last = og_words | last
+  if og_words.size > 1
+    assign og_cut = og_title.size | minus: og_last.size | minus: 1
+    assign og_first = og_title | slice: 0, og_cut
+    assign og_title_html = og_first | append: '<br><em>' | append: og_last | append: '</em>'
+    assign og_bar_html = og_first | append: ' <em>' | append: og_last | append: '</em>'
+  else
+    assign og_title_html = '<em>' | append: og_title | append: '</em>'
+    assign og_bar_html = og_title_html
+  endif
+
+  assign og_price_page = pages['garanzia-sul-prezzo']
+  assign og_price = false
+  assign og_price_original = false
+  if og_price_page != empty and og_price_page.content != blank
+    assign og_price = true
+    if og_price_page.content contains 'Shop with Confidence with Our Price Guarantee' and og_price_page.content contains 'within <strong>14 days</strong>'
+      assign og_price_original = true
+    endif
+  endif
+
+  assign og_track_page = pages['traccia-ordine']
+-%}
+<dialog class="pdp-m__pt" data-pdp-pt="order" aria-labelledby="pdp-og-title">
+  <div class="pdp-m__pt-in">
+    <button class="pdp-m__pt-x" type="button" data-pdp-pt-close aria-label="{{ 'mobile.pdp.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <p class="pdp-m__pt-top" aria-hidden="true">{{ og_bar_html }}</p>
+
+    <div class="pdp-m__pt-body" data-pdp-pt-body>
+      {%- capture og_nav -%}
+        <button type="button" data-pdp-pt-go="ret">{{ 'mobile_order.nav_return' | t }}</button>
+        {%- if og_price -%}<button type="button" data-pdp-pt-go="price">{{ 'mobile_order.nav_price' | t }}</button>{%- endif -%}
+        <button type="button" data-pdp-pt-go="prep">{{ 'mobile_order.nav_ship' | t }}</button>
+        <button type="button" data-pdp-pt-go="track">{{ 'mobile_order.nav_track' | t }}</button>
+        <button type="button" data-pdp-pt-go="refund">{{ 'protezioni.cards.rimborso' | t }}</button>
+      {%- endcapture -%}
+      {%- liquid
+        assign og_eyebrow = 'mobile_order.eyebrow' | t
+        assign og_desc = 'mobile_order.desc' | t
+        render 'pdp-mobile-sheet-head', id: 'pdp-og', eyebrow: og_eyebrow, title_html: og_title_html, desc: og_desc, nav_label: og_title, nav_html: og_nav
+      -%}
+
+      <div class="pdp-m__pt-list">
+        {%- comment -%} 01 Retour sous 30 jours (politique de retour) {%- endcomment -%}
+        <section class="pdp-m__pt-card" data-pdp-pt-card="ret">
+          <header>
+            <span class="pdp-m__pt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></span>
+            <span><small>01</small><h3>{{ 'mobile_protect.ret_summary' | t }}</h3></span>
+          </header>
+          <p class="pdp-m__pt-lead">{{ 'mobile_protect.ret_steps_title' | t }}</p>
+          <ul>
+            <li>{{ 'mobile_protect.ret_step1_html' | t: email: og_email_link }}</li>
+            <li>{{ 'mobile_protect.ret_step2' | t }}</li>
+            <li>{{ 'mobile_protect.ret_step3' | t }}</li>
+          </ul>
+          {%- if shop.refund_policy.url != blank -%}
+            <a class="pdp-m__pt-more" href="{{ shop.refund_policy.url }}"><span>{{ og_learn }}</span>{{ og_arrow }}</a>
+          {%- endif -%}
+        </section>
+
+        {%- comment -%} 02 Garantie de prix (page « garanzia-sul-prezzo ») {%- endcomment -%}
+        {%- if og_price -%}
+          <section class="pdp-m__pt-card" data-pdp-pt-card="price">
+            <header>
+              <span class="pdp-m__pt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg></span>
+              <span><small>02</small><h3>{% if og_price_original %}{{ 'mobile.pdp.price_guarantee' | t }}{% else %}{{ og_price_page.title | escape }}{% endif %}</h3></span>
+            </header>
+            {%- if og_price_original -%}
+              <p class="pdp-m__pt-lead">{{ 'price_guarantee_page.intro_html' | t }}</p>
+              <ul>
+                <li>{{ 'price_guarantee_page.step2' | t }}</li>
+                <li>{{ 'price_guarantee_page.step3' | t }}</li>
+                <li>{{ 'price_guarantee_page.step4' | t }}</li>
+              </ul>
+              <p class="pdp-m__pt-fine">{{ 'price_guarantee_page.cond4' | t }}</p>
+            {%- else -%}
+              <div class="pdp-m__pt-rte">{{ og_price_page.content }}</div>
+            {%- endif -%}
+            <a class="pdp-m__pt-more" href="{{ og_price_page.url }}"><span>{{ og_learn }}</span>{{ og_arrow }}</a>
+          </section>
+        {%- endif -%}
+
+        {%- comment -%} 03 Préparation en 1-3 jours et délais (politique d'expédition) {%- endcomment -%}
+        <section class="pdp-m__pt-card" data-pdp-pt-card="prep">
+          <header>
+            <span class="pdp-m__pt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/></svg></span>
+            <span><small>{% if og_price %}03{% else %}02{% endif %}</small><h3>{{ 'mobile_protect.chip_prep' | t }}</h3></span>
+          </header>
+          <p class="pdp-m__pt-lead">{{ 'policy_shipping.s1_text' | t }}</p>
+          <ul>
+            <li>{{ 'policy_shipping.zone_italy' | t }} — {{ 'policy_shipping.days' | t: range: '3–7' }}</li>
+            <li>{{ 'policy_shipping.zone_eu' | t }} — {{ 'policy_shipping.days' | t: range: '7–15' }}</li>
+            <li>{{ 'policy_shipping.zone_world' | t }} — {{ 'policy_shipping.days' | t: range: '15–30' }}</li>
+          </ul>
+          <p class="pdp-m__pt-fine">{{ 'policy_shipping.s2_note' | t }}</p>
+          {%- if shop.shipping_policy.url != blank -%}
+            <a class="pdp-m__pt-more" href="{{ shop.shipping_policy.url }}"><span>{{ og_learn }}</span>{{ og_arrow }}</a>
+          {%- endif -%}
+        </section>
+
+        {%- comment -%} 04 Colis endommagé : signalement sous 7 jours (politique d'expédition) {%- endcomment -%}
+        <section class="pdp-m__pt-card" data-pdp-pt-card="report">
+          <header>
+            <span class="pdp-m__pt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span>
+            <span><small>{% if og_price %}04{% else %}03{% endif %}</small><h3>{{ 'mobile_protect.chip_report' | t }}</h3></span>
+          </header>
+          <p class="pdp-m__pt-lead">{{ 'policy_shipping.s8_text_html' | t: email: og_email_link }}</p>
+          <ul>
+            <li>{{ 'mobile_protect.ret_damage' | t }}</li>
+          </ul>
+          <p class="pdp-m__pt-fine">{{ 'policy_shipping.s7_text' | t }}</p>
+          {%- if shop.shipping_policy.url != blank -%}
+            <a class="pdp-m__pt-more" href="{{ shop.shipping_policy.url }}"><span>{{ og_learn }}</span>{{ og_arrow }}</a>
+          {%- endif -%}
+        </section>
+
+        {%- comment -%} 05 Suivi du colis par e-mail (politique d'expédition) {%- endcomment -%}
+        <section class="pdp-m__pt-card" data-pdp-pt-card="track">
+          <header>
+            <span class="pdp-m__pt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span>
+            <span><small>{% if og_price %}05{% else %}04{% endif %}</small><h3>{{ 'mobile_protect.chip_tracking' | t }}</h3></span>
+          </header>
+          <p class="pdp-m__pt-lead">{{ 'policy_shipping.s4_text_html' | t: email: og_email_link }}</p>
+          <ul>
+            <li>{{ 'mobile_protect.ship_carriers' | t }}</li>
+          </ul>
+          <p class="pdp-m__pt-fine">{{ 'mobile_protect.ship_customs' | t }}</p>
+          {%- if og_track_page != empty -%}
+            <a class="pdp-m__pt-more" href="{{ og_track_page.url }}"><span>{{ 'policy_shipping.track_cta' | t }}</span>{{ og_arrow }}</a>
+          {%- endif -%}
+        </section>
+
+        {%- comment -%} 06 Remboursement sous 10 jours ouvrés (politique de retour) {%- endcomment -%}
+        <section class="pdp-m__pt-card" data-pdp-pt-card="refund">
+          <header>
+            <span class="pdp-m__pt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h4"/></svg></span>
+            <span><small>{% if og_price %}06{% else %}05{% endif %}</small><h3>{{ 'mobile_protect.chip_refund' | t }}</h3></span>
+          </header>
+          <p class="pdp-m__pt-lead">{{ 'mobile_protect.ret_step4' | t }}</p>
+          <ul>
+            <li>{{ 'mobile_protect.ret_eu' | t }}</li>
+          </ul>
+          <p class="pdp-m__pt-cap">{{ 'mobile_protect.ret_excl_title' | t }}</p>
+          <p class="pdp-m__pt-fine">{{ 'mobile_protect.ret_excl' | t }}</p>
+          {%- if shop.refund_policy.url != blank -%}
+            <a class="pdp-m__pt-more" href="{{ shop.refund_policy.url }}"><span>{{ og_learn }}</span>{{ og_arrow }}</a>
+          {%- endif -%}
+        </section>
+
+        <p class="pdp-m__pt-sig">{% render 'pl-logo', size: 18, class: 'pdp-m__pt-plx is-sm' %}<span>{{ 'mobile_protect.sign' | t: shop_name: shop.name }}</span></p>
+      </div>
+    </div>
+
+    <div class="pdp-m__pt-foot"><button type="button" data-pdp-pt-close>{{ 'protezioni.ok' | t }}</button></div>
+  </div>
+</dialog>

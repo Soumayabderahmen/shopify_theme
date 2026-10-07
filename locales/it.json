@@ -701,6 +701,14 @@
       "fastest_delivery": "Consegna più rapida in 2-3 giorni lavorativi"
     }
   },
+  "mobile_order": {
+    "eyebrow": "Ordine garantito",
+    "desc": "Dall'acquisto al rimborso: gli impegni scritti nelle nostre politiche, per ogni ordine.",
+    "nav_return": "Reso",
+    "nav_price": "Prezzo",
+    "nav_ship": "Spedizione",
+    "nav_track": "Tracking"
+  },
   "mobile_protect": {
     "eyebrow": "Acquisti protetti",
     "sign": "Con cura, {{ shop_name }}",

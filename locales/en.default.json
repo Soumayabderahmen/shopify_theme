@@ -3396,6 +3396,14 @@
       "fastest_delivery": "Fastest delivery in 2-3 business days"
     }
   },
+  "mobile_order": {
+    "eyebrow": "Guaranteed order",
+    "desc": "From purchase to refund: the commitments written in our policies, for every order.",
+    "nav_return": "Returns",
+    "nav_price": "Price",
+    "nav_ship": "Shipping",
+    "nav_track": "Tracking"
+  },
   "mobile_protect": {
     "eyebrow": "Protected shopping",
     "sign": "With care, {{ shop_name }}",

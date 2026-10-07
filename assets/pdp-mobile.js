@@ -923,69 +923,72 @@
       if (terms) terms.click();
     });
   });
-  /* ---------- Feuille « Protections » (snippets/pdp-mobile-protect.liquid, design du prototype v4.2) ----------
-     Une carte numérotée par engagement ; chaque bouton de la fiche (data-pdp-pt-open) ouvre la feuille en haut puis la
-     fait défiler en douceur jusqu'à sa carte, mise en évidence 1,6 s ; les pastilles de l'en-tête (data-pdp-pt-go) font
-     de même dans la feuille ouverte. Fermeture : croix, OK, tap sur le fond, touche Échap. */
-  var protectSheet = root.querySelector('[data-pdp-pt]');
-  if (protectSheet) {
-    var protectBody = protectSheet.querySelector('[data-pdp-pt-body]');
-    var protectTimers = [];
-    var clearProtectTimers = function () {
-      protectTimers.forEach(window.clearTimeout);
-      protectTimers = [];
-      protectSheet.querySelectorAll('.is-hl').forEach(function (card) { card.classList.remove('is-hl'); });
+  /* ---------- Feuilles « Protections » et « Garantie commande » (snippets/pdp-mobile-protect.liquid,
+     snippets/pdp-mobile-order.liquid, design du prototype v4.2) ----------
+     Une carte numérotée par engagement ; chaque bouton de la fiche (data-pdp-pt-open, feuille choisie par
+     data-pdp-pt-sheet, « protect » par défaut) ouvre sa feuille en haut puis la fait défiler en douceur jusqu'à sa carte,
+     mise en évidence 1,6 s ; les pastilles de l'en-tête (data-pdp-pt-go) font de même dans la feuille ouverte.
+     Fermeture : croix, OK, tap sur le fond, touche Échap. */
+  root.querySelectorAll('[data-pdp-pt]').forEach(function (sheet) {
+    var sheetName = sheet.getAttribute('data-pdp-pt');
+    var body = sheet.querySelector('[data-pdp-pt-body]');
+    var timers = [];
+    var clearTimers = function () {
+      timers.forEach(function (timer) { window.clearTimeout(timer); });
+      timers = [];
+      sheet.querySelectorAll('.is-hl').forEach(function (card) { card.classList.remove('is-hl'); });
     };
-    var showProtectCard = function (key, delay) {
-      clearProtectTimers();
-      var card = protectSheet.querySelector('[data-pdp-pt-card="' + key + '"]');
+    var showCard = function (key, delay) {
+      clearTimers();
+      var card = sheet.querySelector('[data-pdp-pt-card="' + key + '"]');
       if (!card) return;
-      protectTimers.push(window.setTimeout(function () {
-        // Première carte (remboursement) : la feuille reste en haut, avec l'en-tête ; sinon la carte sous la barre (76 px).
+      timers.push(window.setTimeout(function () {
+        // Première carte : la feuille reste en haut, avec l'en-tête ; sinon la carte sous la barre (76 px).
         var first = !(card.previousElementSibling && card.previousElementSibling.hasAttribute('data-pdp-pt-card'));
         var top = first ? 0 : card.offsetTop - 76;
-        if (typeof protectBody.scrollTo === 'function') protectBody.scrollTo({ top: top, behavior: 'smooth' });
-        else protectBody.scrollTop = top;
+        if (typeof body.scrollTo === 'function') body.scrollTo({ top: top, behavior: 'smooth' });
+        else body.scrollTop = top;
         card.classList.add('is-hl');
-        protectTimers.push(window.setTimeout(function () { card.classList.remove('is-hl'); }, 1600));
+        timers.push(window.setTimeout(function () { card.classList.remove('is-hl'); }, 1600));
       }, delay));
     };
-    var closeProtect = function () {
-      clearProtectTimers();
-      protectSheet.classList.remove('is-open');
-      window.setTimeout(function () { if (protectSheet.open) protectSheet.close(); }, 220);
+    var closeSheet = function () {
+      clearTimers();
+      sheet.classList.remove('is-open');
+      window.setTimeout(function () { if (sheet.open) sheet.close(); }, 220);
     };
-    protectSheet.querySelectorAll('[data-pdp-pt-go]').forEach(function (button) {
-      button.addEventListener('click', function () { showProtectCard(button.getAttribute('data-pdp-pt-go'), 0); });
+    sheet.querySelectorAll('[data-pdp-pt-go]').forEach(function (button) {
+      button.addEventListener('click', function () { showCard(button.getAttribute('data-pdp-pt-go'), 0); });
     });
     // Barre de titre flottante : seulement quand le grand titre de l'en-tête est sorti de l'écran.
-    var protectHeroTitle = protectSheet.querySelector('.pdp-m__pt-hd h2');
-    var syncProtectBar = function () {
-      var past = protectHeroTitle && protectBody.scrollTop > protectHeroTitle.offsetTop + protectHeroTitle.offsetHeight - 8;
-      protectSheet.classList.toggle('is-scrolled', Boolean(past));
+    var heroTitle = sheet.querySelector('.pdp-m__pt-hd h2');
+    var syncBar = function () {
+      var past = heroTitle && body.scrollTop > heroTitle.offsetTop + heroTitle.offsetHeight - 8;
+      sheet.classList.toggle('is-scrolled', Boolean(past));
     };
-    protectBody.addEventListener('scroll', syncProtectBar, { passive: true });
-    protectSheet.querySelectorAll('[data-pdp-pt-close]').forEach(function (button) {
-      button.addEventListener('click', closeProtect);
+    body.addEventListener('scroll', syncBar, { passive: true });
+    sheet.querySelectorAll('[data-pdp-pt-close]').forEach(function (button) {
+      button.addEventListener('click', closeSheet);
     });
-    protectSheet.addEventListener('click', function (event) {
-      if (event.target === protectSheet) closeProtect();
+    sheet.addEventListener('click', function (event) {
+      if (event.target === sheet) closeSheet();
     });
-    protectSheet.addEventListener('cancel', function (event) {
+    sheet.addEventListener('cancel', function (event) {
       event.preventDefault();
-      closeProtect();
+      closeSheet();
     });
     root.querySelectorAll('[data-pdp-pt-open]').forEach(function (button) {
+      if ((button.getAttribute('data-pdp-pt-sheet') || 'protect') !== sheetName) return;
       button.addEventListener('click', function () {
-        if (typeof protectSheet.showModal !== 'function') return;
-        if (!protectSheet.open) protectSheet.showModal();
-        protectBody.scrollTop = 0;
-        syncProtectBar();
-        showProtectCard(button.getAttribute('data-pdp-pt-open'), 380);
-        window.requestAnimationFrame(function () { protectSheet.classList.add('is-open'); });
+        if (typeof sheet.showModal !== 'function') return;
+        if (!sheet.open) sheet.showModal();
+        body.scrollTop = 0;
+        syncBar();
+        showCard(button.getAttribute('data-pdp-pt-open'), 380);
+        window.requestAnimationFrame(function () { sheet.classList.add('is-open'); });
       });
     });
-  }
+  });
   /* ---------- Livraison gratuite : seuil des réglages du thème dans la devise du client ----------
      En euros (devise de la boutique) : seuil du Liquid (data-threshold). Autres devises (data-threshold = 0) : Shopify
      compare au seuil converti au taux (vérifié avec ses tarifs : 48 CHF gratuit, 46 CHF payant pour 50 €) ;

@@ -699,6 +699,14 @@
       "fastest_delivery": "Livraison la plus rapide en 2 à 3 jours ouvrables"
     }
   },
+  "mobile_order": {
+    "eyebrow": "Commande garantie",
+    "desc": "De l'achat au remboursement : les engagements écrits dans nos politiques, pour chaque commande.",
+    "nav_return": "Retour",
+    "nav_price": "Prix",
+    "nav_ship": "Expédition",
+    "nav_track": "Suivi"
+  },
   "mobile_protect": {
     "eyebrow": "Achats protégés",
     "sign": "Avec soin, {{ shop_name }}",

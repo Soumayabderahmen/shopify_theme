@@ -612,6 +612,14 @@
   "form": {
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
+  "mobile_order": {
+    "eyebrow": "Garantierte Bestellung",
+    "desc": "Vom Kauf bis zur Erstattung: die Zusagen aus unseren Richtlinien, für jede Bestellung.",
+    "nav_return": "Rückgabe",
+    "nav_price": "Preis",
+    "nav_ship": "Versand",
+    "nav_track": "Sendungsverfolgung"
+  },
   "mobile_protect": {
     "eyebrow": "Geschützt einkaufen",
     "sign": "Mit Sorgfalt, {{ shop_name }}",

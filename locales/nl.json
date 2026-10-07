@@ -630,6 +630,14 @@
   "border": {
     "top_picks": "Topkeuzes"
   },
+  "mobile_order": {
+    "eyebrow": "Gegarandeerde bestelling",
+    "desc": "Van aankoop tot terugbetaling: de toezeggingen uit ons beleid, voor elke bestelling.",
+    "nav_return": "Retour",
+    "nav_price": "Prijs",
+    "nav_ship": "Verzending",
+    "nav_track": "Tracking"
+  },
   "mobile_protect": {
     "eyebrow": "Beschermd winkelen",
     "sign": "Met zorg, {{ shop_name }}",

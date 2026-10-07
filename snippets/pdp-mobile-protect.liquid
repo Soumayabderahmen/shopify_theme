@@ -31,15 +31,6 @@
     assign pt_title_html = pt_bar_html
   endunless
 
-  # Marque « platinum<b>shop</b> » du prototype : la fin « shop » du nom en gras.
-  assign pt_name_head = pt_name
-  assign pt_name_tail = ''
-  assign pt_name_end = shop.name | slice: -4, 4 | downcase
-  if pt_name_end == 'shop' and shop.name.size > 4
-    assign pt_name_cut = shop.name.size | minus: 4
-    assign pt_name_head = shop.name | slice: 0, pt_name_cut
-    assign pt_name_tail = shop.name | slice: -4, 4
-  endif
 
   assign pt_price_page = pages['garanzia-sul-prezzo']
   assign pt_price = false
@@ -51,39 +42,23 @@
     endif
   endif
 -%}
-<dialog class="pdp-m__pt" data-pdp-pt aria-labelledby="pdp-pt-title">
+<dialog class="pdp-m__pt" data-pdp-pt="protect" aria-labelledby="pdp-pt-title">
   <div class="pdp-m__pt-in">
     <button class="pdp-m__pt-x" type="button" data-pdp-pt-close aria-label="{{ 'mobile.pdp.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <p class="pdp-m__pt-top" aria-hidden="true">{{ pt_bar_html }}</p>
 
     <div class="pdp-m__pt-body" data-pdp-pt-body>
-      <header class="pdp-m__pt-hd">
-        <span class="pdp-m__pt-brand">{% render 'pl-logo', size: 28, class: 'pdp-m__pt-plx' %}<span>{% if pt_name_tail != '' %}{{ pt_name_head | escape }}<b>{{ pt_name_tail | escape }}</b>{% else %}{{ pt_name_head }}{% endif %}</span></span>
-        <p class="pdp-m__pt-eb">{{ 'mobile_protect.eyebrow' | t }}</p>
-        <h2 id="pdp-pt-title">{{ pt_title_html }}</h2>
-        <p class="pdp-m__pt-ds">{{ 'protezioni.overview.intro' | t: shop_name: shop.name }}</p>
-        <svg class="pdp-m__pt-cr" viewBox="0 0 120 140" aria-hidden="true">
-          <defs>
-            <linearGradient id="pdp-pt-shb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#d9e1ff"/></linearGradient>
-            <linearGradient id="pdp-pt-shs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9b4fa"/><stop offset="1" stop-color="#5a4bf0"/></linearGradient>
-          </defs>
-          <path d="M60 5 110 23v41c0 35-22 60-50 72C32 124 10 99 10 64V23z" fill="url(#pdp-pt-shb)" stroke="url(#pdp-pt-shs)" stroke-width="1.6"/>
-          <path d="M60 14 101 29v35c0 29-18 50-41 61C37 114 19 93 19 64V29z" fill="none" stroke="#5a4bf0" stroke-width=".7" opacity=".3"/>
-          {%- comment -%} Monogramme en <svg> imbriqué (x/y) plutôt qu'un transform : le thème impose un transform-origin aux SVG, qui décalait le logo. {%- endcomment -%}
-          <svg x="37" y="44" width="46.08" height="46.08" viewBox="0 0 64 64">
-            <rect width="64" height="64" rx="16" fill="url(#pl-logo-g)"/>
-            <path fill="#fff" fill-rule="evenodd" d="M12 15h12.5a10 10 0 0 1 0 20H20v14h-8zM20 22v6h4.2a3 3 0 0 0 0-6z"/>
-            <path fill="#fff" d="M36.5 15h8v26H54v8H36.5z"/>
-            <circle cx="51" cy="18.5" r="3.6" fill="#ffb020"/>
-          </svg>
-        </svg>
-        <nav class="pdp-m__pt-nav" aria-label="{{ 'protezioni.header_title' | t: shop_name: shop.name }}">
-          <button type="button" data-pdp-pt-go="ret">{{ 'protezioni.cards.rimborso' | t }}</button>
-          <button type="button" data-pdp-pt-go="pay">{{ 'protezioni.cards.pagamenti' | t }}</button>
-          <button type="button" data-pdp-pt-go="ship">{{ 'protezioni.cards.consegna' | t }}</button>
-          <button type="button" data-pdp-pt-go="priv">{{ 'protezioni.cards.privacy' | t }}</button>
-        </nav>
-      </header>
+      {%- capture pt_nav -%}
+        <button type="button" data-pdp-pt-go="ret">{{ 'protezioni.cards.rimborso' | t }}</button>
+        <button type="button" data-pdp-pt-go="pay">{{ 'protezioni.cards.pagamenti' | t }}</button>
+        <button type="button" data-pdp-pt-go="ship">{{ 'protezioni.cards.consegna' | t }}</button>
+        <button type="button" data-pdp-pt-go="priv">{{ 'protezioni.cards.privacy' | t }}</button>
+      {%- endcapture -%}
+      {%- liquid
+        assign pt_eyebrow = 'mobile_protect.eyebrow' | t
+        assign pt_desc = 'protezioni.overview.intro' | t: shop_name: shop.name
+        render 'pdp-mobile-sheet-head', id: 'pdp-pt', eyebrow: pt_eyebrow, title_html: pt_title_html, desc: pt_desc, nav_label: pt_title, nav_html: pt_nav
+      -%}
 
       <div class="pdp-m__pt-list">
         {%- comment -%} 01 Garantie de remboursement (politique de retour) {%- endcomment -%}

@@ -627,6 +627,14 @@
       "fastest_delivery": "Entrega más rápida en 2-3 días hábiles"
     }
   },
+  "mobile_order": {
+    "eyebrow": "Pedido garantizado",
+    "desc": "De la compra al reembolso: los compromisos escritos en nuestras políticas, para cada pedido.",
+    "nav_return": "Devolución",
+    "nav_price": "Precio",
+    "nav_ship": "Envío",
+    "nav_track": "Seguimiento"
+  },
   "mobile_protect": {
     "eyebrow": "Compras protegidas",
     "sign": "Con cariño, {{ shop_name }}",
