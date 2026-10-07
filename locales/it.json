@@ -702,6 +702,8 @@
     }
   },
   "mobile_protect": {
+    "eyebrow": "Acquisti protetti",
+    "sign": "Con cura, {{ shop_name }}",
     "support_title": "Assistenza clienti",
     "support_text_html": "Hai una domanda sul tuo ordine? Scrivici a {{ email }} o chiama il {{ phone }}: il nostro team ti aiuta.",
     "chip_prep": "Preparazione in 1-3 giorni lavorativi",

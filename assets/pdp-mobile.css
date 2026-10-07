@@ -554,22 +554,24 @@ body.template-product {
   height: 16px;
 }
 
-/* Feuille « Protections » (snippets/pdp-mobile-protect.liquid), modèle « Protezioni TikTok Shop » : en-tête bleu
-   clair en dégradé, cartes blanches empilées, titres surlignés, liens « En savoir plus », bouton OK gris.
+/* Feuille « Protections » (snippets/pdp-mobile-protect.liquid), design du prototype v4.2 (« version luxe ») :
+   fond ivoire, en-tête à halo bleu avec écusson PL et pastilles, cartes numérotées à puces losange, barre de titre
+   flottante au défilement, croix ronde translucide, bouton OK gris.
    Les boutons du thème imposent min-height / padding 0 : valeurs forcées. */
 #root .pdp-m .pdp-m__pt {
   position: fixed;
   inset: auto 0 0;
   width: 100%;
   max-width: 100%;
-  max-height: 92vh;
+  height: 90vh;
+  max-height: 90vh;
   margin: 0;
   padding: 0;
   overflow: hidden;
   color: #16123f;
-  background: #fff;
+  background: #f6f7fb;
   border: 0;
-  border-radius: 20px 20px 0 0;
+  border-radius: 22px 22px 0 0;
   box-shadow: 0 -12px 40px -12px rgb(22 18 63 / 35%);
   transform: translateY(100%);
   transition: transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -584,207 +586,346 @@ body.template-product {
 }
 
 .pdp-m__pt-in {
+  position: relative;
   display: flex;
   flex-direction: column;
-  max-height: 92vh;
-  background: linear-gradient(180deg, #dceafc 0, #eef4fe 300px, #fff 420px);
-}
-
-.pdp-m__pt-bar {
-  position: relative;
-  flex: none;
-  padding: 16px 56px 10px;
-  text-align: center;
-}
-
-#root .pdp-m .pdp-m__pt-bar-title {
-  margin: 0;
-  opacity: 0;
-  transition: opacity 0.2s;
-  color: #16123f;
-  font-family: 'Sora', system-ui, sans-serif;
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.3;
+  height: 100%;
 }
 
 #root .pdp-m .pdp-m__pt-x {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 40px !important;
-  height: 40px !important;
-  min-height: 40px !important;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: grid !important;
+  place-items: center;
+  width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
   padding: 0 !important;
   color: #16123f;
-  background: transparent;
+  background: rgb(255 255 255 / 70%);
   border: 0;
   border-radius: 50%;
-}
-
-#root .pdp-m .pdp-m__pt.is-scrolled .pdp-m__pt-bar-title {
-  opacity: 1;
+  box-shadow: inset 0 0 0 1px rgb(58 52 210 / 30%);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 .pdp-m__pt-x svg {
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
+}
+
+/* Barre de titre flottante, visible une fois l'en-tête dépassé (assets/pdp-mobile.js : .is-scrolled). */
+#root .pdp-m .pdp-m__pt-top {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  margin: 0;
+  padding: 0 60px;
+  color: #16123f;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  background: linear-gradient(180deg, #e3e9ff, #eef1ff);
+  border-bottom: 1px solid rgb(58 52 210 / 12%);
+  border-radius: 22px 22px 0 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+
+.pdp-m__pt-top em {
+  color: var(--pm-blue);
+  font-style: normal;
+}
+
+#root .pdp-m .pdp-m__pt.is-scrolled .pdp-m__pt-top {
+  opacity: 1;
+  transform: none;
 }
 
 .pdp-m__pt-body {
   position: relative;
   flex: 1 1 auto;
-  padding: 2px 16px 18px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-.pdp-m__pt-hero {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 2px 18px;
+.pdp-m__pt-hd {
+  position: relative;
+  overflow: hidden;
+  padding: 30px 22px 22px;
+  background:
+    radial-gradient(90% 70% at 92% 8%, rgb(90 75 240 / 16%) 0%, rgb(90 75 240 / 0%) 60%),
+    linear-gradient(180deg, #dfe6ff 0%, #edf1ff 70%, #f6f7fb 100%);
 }
 
-.pdp-m__pt-hero-txt {
-  flex: 1 1 auto;
-  min-width: 0;
+.pdp-m__pt-hd::after {
+  content: '';
+  position: absolute;
+  right: 22px;
+  bottom: 0;
+  left: 22px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(58 52 210 / 25%), transparent);
 }
 
 .pdp-m__pt-brand {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 8px;
+  gap: 8px;
+  color: #16123f;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
 }
 
 .pdp-m__pt-brand b {
-  color: #16123f;
-  font-family: 'Sora', system-ui, sans-serif;
-  font-size: 16px;
   font-weight: 800;
 }
 
-#root .pdp-m .pdp-m__pt-hero h2 {
-  margin: 0 0 6px;
+.pdp-m__pt-plx {
+  flex: none;
+  border-radius: 8px;
+  box-shadow: 0 6px 14px -6px rgb(58 52 210 / 55%);
+}
+
+.pdp-m__pt-plx.is-sm {
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+#root .pdp-m .pdp-m__pt-eb {
+  margin: 24px 0 0;
+  color: var(--pm-blue);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+#root .pdp-m .pdp-m__pt-hd h2 {
+  max-width: 64%;
+  margin: 8px 0 0;
   color: #16123f;
   font-family: 'Sora', system-ui, sans-serif;
-  font-size: 23px;
+  font-size: 28px;
   font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 1.1;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+
+.pdp-m__pt-hd h2 em {
+  color: var(--pm-blue);
+  font-style: normal;
+  font-weight: 700;
+}
+
+#root .pdp-m .pdp-m__pt-ds {
+  max-width: 64%;
+  margin: 10px 0 0;
+  color: var(--pm-ink-2);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+/* Écusson à double contour avec le monogramme PL. */
+.pdp-m__pt-cr {
+  position: absolute;
+  top: 62px;
+  right: 18px;
+  width: 104px;
+  height: 122px;
+  filter: drop-shadow(0 16px 26px rgb(58 52 210 / 22%));
+}
+
+.pdp-m__pt-nav {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  margin-top: 22px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pdp-m__pt-nav::-webkit-scrollbar {
+  display: none;
+}
+
+#root .pdp-m .pdp-m__pt-nav button {
+  flex: none;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 7px 11px !important;
+  color: #16123f;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  line-height: 1.3;
+  background: rgb(255 255 255 / 75%);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgb(58 52 210 / 18%);
+  transition: background 0.2s;
+}
+
+#root .pdp-m .pdp-m__pt-nav button:active {
+  color: var(--pm-blue);
+  background: #fff;
+}
+
+.pdp-m__pt-list {
+  padding: 20px 16px 18px;
+}
+
+.pdp-m__pt-card {
+  padding: 20px 20px 18px;
+  color: #4a4760;
+  font-size: 13.5px;
+  line-height: 1.6;
+  background: #fff;
+  border: 1px solid var(--pm-line);
+  border-radius: 16px;
+  box-shadow: 0 18px 30px -28px rgb(20 17 46 / 45%);
+  scroll-margin-top: 76px;
+  transition: border-color 0.35s, box-shadow 0.35s;
+}
+
+.pdp-m__pt-card + .pdp-m__pt-card {
+  margin-top: 12px;
+}
+
+/* Carte mise en évidence à l'ouverture depuis la fiche ou une pastille. */
+.pdp-m__pt-card.is-hl {
+  border-color: var(--pm-blue);
+  box-shadow: 0 0 0 3px rgb(58 52 210 / 14%), 0 18px 30px -28px rgb(20 17 46 / 45%);
+}
+
+.pdp-m__pt-card > header {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--pm-line);
+}
+
+.pdp-m__pt-ic {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: var(--pm-blue);
+  background: var(--pm-blue-soft);
+  border-radius: 14px;
+}
+
+.pdp-m__pt-ic svg {
+  width: 19px;
+  height: 19px;
+}
+
+.pdp-m__pt-card > header small {
+  display: block;
+  color: var(--pm-blue);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.4px;
+  line-height: 1.4;
+}
+
+#root .pdp-m .pdp-m__pt-card h3 {
+  margin: 0;
+  color: #16123f;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
   line-height: 1.2;
   text-transform: none;
 }
 
-.pdp-m__pt-hero p {
-  margin: 0;
-  color: #5b6077;
-  font-size: 14.5px;
-  line-height: 1.5;
-}
-
-/* Bouclier illustré avec le logo PL (comme le bouclier TikTok). */
-.pdp-m__pt-shield {
-  position: relative;
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 96px;
-  height: 110px;
-}
-
-.pdp-m__pt-shield > svg:first-child {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.pdp-m__pt-shield .pl-logo {
-  position: relative;
-  margin-top: -6px;
-  opacity: 0.9;
-}
-
-.pdp-m__pt-card {
-  padding: 18px 18px 16px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 1px 0 rgb(22 18 63 / 4%), 0 6px 20px -10px rgb(22 18 63 / 22%);
-}
-
-.pdp-m__pt-card + .pdp-m__pt-card {
-  margin-top: 14px;
-}
-
-#root .pdp-m .pdp-m__pt-card h3 {
-  margin: 0 0 8px;
-  color: #16123f;
-  font-family: 'Sora', system-ui, sans-serif;
-  font-size: 18px;
-  font-weight: 800;
-  line-height: 1.3;
-  text-transform: none;
-}
-
-/* Titre surligné en bleu clair sur sa moitié basse. */
-.pdp-m__pt-card h3 span {
-  background: linear-gradient(transparent 58%, #d6e6fd 58%);
-}
-
 .pdp-m__pt-card p {
   margin: 0;
-  color: #5b6077;
-  font-size: 14.5px;
-  line-height: 1.5;
+}
+
+.pdp-m__pt-card .pdp-m__pt-lead {
+  color: #16123f;
+  font-size: 14px;
 }
 
 .pdp-m__pt-card ul {
-  margin: 6px 0 0;
+  margin: 10px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .pdp-m__pt-card ul li {
   position: relative;
-  padding: 3px 0 3px 18px;
-  color: #5b6077;
-  font-size: 14.5px;
-  line-height: 1.5;
+  margin: 7px 0;
+  padding-left: 18px;
 }
 
+/* Puces losange bleues. */
 .pdp-m__pt-card ul li::before {
   content: '';
   position: absolute;
-  top: 12px;
-  left: 4px;
+  top: 0.62em;
+  left: 2px;
   width: 5px;
   height: 5px;
-  background: #5b6077;
-  border-radius: 50%;
+  background: var(--pm-blue);
+  transform: rotate(45deg);
 }
 
 .pdp-m__pt-card a {
-  color: #2f6fe0;
+  color: var(--pm-blue);
   font-weight: 700;
+  text-decoration: none;
   word-break: break-word;
 }
 
-.pdp-m__pt-sub {
-  margin-top: 6px !important;
+.pdp-m__pt-card .pdp-m__pt-fine {
+  margin-top: 10px;
+  color: #8c889c;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.pdp-m__pt-card .pdp-m__pt-cap {
+  margin-top: 14px;
+  color: #8c889c;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 #root .pdp-m .pdp-m__pt-card .pdp-m__pt-pay {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 6px;
+  margin: 9px 0 2px;
 }
 
 .pdp-m__pt-card .pdp-m__pt-pay li {
+  margin: 0;
   padding: 0;
 }
 
@@ -801,29 +942,46 @@ body.template-product {
 #root .pdp-m .pdp-m__pt-more {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 10px;
-  color: #2f6fe0;
-  font-size: 15px;
+  gap: 6px;
+  margin-top: 14px;
+  color: var(--pm-blue);
+  font-size: 13.5px;
   font-weight: 700;
   text-decoration: none;
 }
 
 .pdp-m__pt-more svg {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
+  transition: transform 0.2s;
+}
+
+.pdp-m__pt-more:active svg {
+  transform: translateX(3px);
 }
 
 .pdp-m__pt-rte {
-  color: #5b6077;
-  font-size: 14px;
-  line-height: 1.55;
+  color: #4a4760;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+#root .pdp-m .pdp-m__pt-sig {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 22px 0 4px;
+  color: var(--pm-mute);
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
 .pdp-m__pt-foot {
   flex: none;
-  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px));
   background: #fff;
+  border-top: 1px solid var(--pm-line);
 }
 
 #root .pdp-m .pdp-m__pt-foot button {
@@ -835,12 +993,16 @@ body.template-product {
   min-height: 50px !important;
   padding: 0 16px !important;
   color: #16123f;
-  font-size: 16px;
+  font-size: 15.5px;
   font-weight: 700;
   text-align: center;
-  background: #eceef3;
+  background: #eef0f4;
   border: 0;
-  border-radius: 12px;
+  border-radius: 14px;
+}
+
+#root .pdp-m .pdp-m__pt-foot button:active {
+  background: #e2e5ec;
 }
 
 /* 5. Options */

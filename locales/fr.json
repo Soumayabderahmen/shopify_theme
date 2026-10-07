@@ -700,6 +700,8 @@
     }
   },
   "mobile_protect": {
+    "eyebrow": "Achats protégés",
+    "sign": "Avec soin, {{ shop_name }}",
     "support_title": "Assistance client",
     "support_text_html": "Une question sur votre commande ? Écrivez-nous à {{ email }} ou appelez le {{ phone }} : notre équipe vous aide.",
     "chip_prep": "Préparation en 1 à 3 jours ouvrés",

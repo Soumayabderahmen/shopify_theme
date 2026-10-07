@@ -708,6 +708,8 @@
     }
   },
   "mobile_protect": {
+    "eyebrow": "Cumpărături protejate",
+    "sign": "Cu grijă, {{ shop_name }}",
     "support_title": "Asistență clienți",
     "support_text_html": "Ai o întrebare despre comanda ta? Scrie-ne la {{ email }} sau sună la {{ phone }}: echipa noastră te ajută.",
     "chip_prep": "Pregătire în 1–3 zile lucrătoare",

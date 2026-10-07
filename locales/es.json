@@ -628,6 +628,8 @@
     }
   },
   "mobile_protect": {
+    "eyebrow": "Compras protegidas",
+    "sign": "Con cariño, {{ shop_name }}",
     "support_title": "Atención al cliente",
     "support_text_html": "¿Tienes una pregunta sobre tu pedido? Escríbenos a {{ email }} o llama al {{ phone }}: nuestro equipo te ayuda.",
     "chip_prep": "Preparación en 1-3 días hábiles",

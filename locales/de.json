@@ -613,6 +613,8 @@
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
   "mobile_protect": {
+    "eyebrow": "Geschützt einkaufen",
+    "sign": "Mit Sorgfalt, {{ shop_name }}",
     "support_title": "Kundenservice",
     "support_text_html": "Fragen zu deiner Bestellung? Schreib uns an {{ email }} oder ruf {{ phone }} an: Unser Team hilft dir.",
     "chip_prep": "Bearbeitung in 1–3 Werktagen",

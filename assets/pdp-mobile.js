@@ -923,25 +923,43 @@
       if (terms) terms.click();
     });
   });
-  /* ---------- Feuille « Protections » (snippets/pdp-mobile-protect.liquid, modèle « Protezioni TikTok Shop ») ----------
-     Une carte par engagement ; chaque bouton de la fiche (data-pdp-pt-open) ouvre la feuille et la fait défiler jusqu'à
-     sa carte. Fermeture : croix, OK, tap sur le fond, touche Échap. */
+  /* ---------- Feuille « Protections » (snippets/pdp-mobile-protect.liquid, design du prototype v4.2) ----------
+     Une carte numérotée par engagement ; chaque bouton de la fiche (data-pdp-pt-open) ouvre la feuille en haut puis la
+     fait défiler en douceur jusqu'à sa carte, mise en évidence 1,6 s ; les pastilles de l'en-tête (data-pdp-pt-go) font
+     de même dans la feuille ouverte. Fermeture : croix, OK, tap sur le fond, touche Échap. */
   var protectSheet = root.querySelector('[data-pdp-pt]');
   if (protectSheet) {
     var protectBody = protectSheet.querySelector('[data-pdp-pt-body]');
-    var showProtectCard = function (key) {
+    var protectTimers = [];
+    var clearProtectTimers = function () {
+      protectTimers.forEach(window.clearTimeout);
+      protectTimers = [];
+      protectSheet.querySelectorAll('.is-hl').forEach(function (card) { card.classList.remove('is-hl'); });
+    };
+    var showProtectCard = function (key, delay) {
+      clearProtectTimers();
       var card = protectSheet.querySelector('[data-pdp-pt-card="' + key + '"]');
-      // Première carte (retours) : la feuille s'ouvre en haut, avec l'en-tête ; sinon la carte demandée en haut.
-      protectBody.scrollTop = card && card.previousElementSibling && card.previousElementSibling.hasAttribute('data-pdp-pt-card')
-        ? card.offsetTop - 12
-        : 0;
+      if (!card) return;
+      protectTimers.push(window.setTimeout(function () {
+        // Première carte (remboursement) : la feuille reste en haut, avec l'en-tête ; sinon la carte sous la barre (76 px).
+        var first = !(card.previousElementSibling && card.previousElementSibling.hasAttribute('data-pdp-pt-card'));
+        var top = first ? 0 : card.offsetTop - 76;
+        if (typeof protectBody.scrollTo === 'function') protectBody.scrollTo({ top: top, behavior: 'smooth' });
+        else protectBody.scrollTop = top;
+        card.classList.add('is-hl');
+        protectTimers.push(window.setTimeout(function () { card.classList.remove('is-hl'); }, 1600));
+      }, delay));
     };
     var closeProtect = function () {
+      clearProtectTimers();
       protectSheet.classList.remove('is-open');
       window.setTimeout(function () { if (protectSheet.open) protectSheet.close(); }, 220);
     };
-    // Titre de la barre : seulement quand le grand titre de l'en-tête est sorti de l'écran (comme TikTok Shop).
-    var protectHeroTitle = protectSheet.querySelector('.pdp-m__pt-hero h2');
+    protectSheet.querySelectorAll('[data-pdp-pt-go]').forEach(function (button) {
+      button.addEventListener('click', function () { showProtectCard(button.getAttribute('data-pdp-pt-go'), 0); });
+    });
+    // Barre de titre flottante : seulement quand le grand titre de l'en-tête est sorti de l'écran.
+    var protectHeroTitle = protectSheet.querySelector('.pdp-m__pt-hd h2');
     var syncProtectBar = function () {
       var past = protectHeroTitle && protectBody.scrollTop > protectHeroTitle.offsetTop + protectHeroTitle.offsetHeight - 8;
       protectSheet.classList.toggle('is-scrolled', Boolean(past));
@@ -961,8 +979,9 @@
       button.addEventListener('click', function () {
         if (typeof protectSheet.showModal !== 'function') return;
         if (!protectSheet.open) protectSheet.showModal();
-        showProtectCard(button.getAttribute('data-pdp-pt-open'));
+        protectBody.scrollTop = 0;
         syncProtectBar();
+        showProtectCard(button.getAttribute('data-pdp-pt-open'), 380);
         window.requestAnimationFrame(function () { protectSheet.classList.add('is-open'); });
       });
     });
