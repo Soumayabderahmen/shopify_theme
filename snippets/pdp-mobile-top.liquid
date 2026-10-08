@@ -435,10 +435,13 @@
     <div data-pdp-reviews-slot></div>
   </section>
 
-  {%- comment -%} 13. Potrebbe piacerti anche : recommandations Shopify (API), remplies par le script. {%- endcomment -%}
-  <section class="pdp-m__rel" data-pdp-related data-url="{{ routes.product_recommendations_url }}.json?product_id={{ product.id }}&limit=6&intent=related" hidden>
+  {%- comment -%} 13. Potrebbe piacerti anche : recommandations Shopify (API), remplies par le script. « Mostra più prodotti »
+     ajoute 6 produits de plus : les recommandations restantes, puis les recommandations des produits déjà affichés
+     (produits semblables, prix dans la devise du client). {%- endcomment -%}
+  <section class="pdp-m__rel" data-pdp-related data-url="{{ routes.product_recommendations_url }}.json?limit=10&intent=related&product_id=" data-product-id="{{ product.id }}" hidden>
     <h2>{{ 'mobile.pdp.you_may_like' | t }}</h2>
     <div class="pdp-m__rail" data-pdp-rail></div>
+    <button type="button" class="pdp-m__relmore" data-pdp-related-more hidden>{{ 'product.form.show_more' | t }}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
   </section>
 
   {%- comment -%} 14. Barre d'achat fixe (au-dessus de la barre du bas) : cachée quand le gros bouton est visible. {%- endcomment -%}

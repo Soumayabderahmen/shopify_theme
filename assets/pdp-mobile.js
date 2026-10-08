@@ -1489,23 +1489,71 @@
   /* ---------- Potrebbe piacerti anche : recommandations Shopify ---------- */
   var related = root.querySelector('[data-pdp-related]');
   if (related) {
-    var loadRelated = function () {
-      fetch(related.getAttribute('data-url'), { credentials: 'same-origin' })
+    var relatedRail = related.querySelector('[data-pdp-rail]');
+    var relatedMore = related.querySelector('[data-pdp-related-more]');
+    var RELATED_STEP = 6;
+    var relatedPool = [];
+    var relatedSeen = {};
+    relatedSeen[related.getAttribute('data-product-id')] = true;
+    var relatedCard = function (product) {
+      var sale = product.compare_at_price > product.price;
+      var off = sale ? Math.round((product.compare_at_price - product.price) * 100 / product.compare_at_price) : 0;
+      var image = product.featured_image ? product.featured_image + (product.featured_image.indexOf('?') === -1 ? '?' : '&') + 'width=360' : '';
+      var title = String(product.title).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+      return '<a class="pdp-m__rc" href="' + product.url + '"><span class="pdp-m__pp">' + (image ? '<img src="' + image + '" alt="" loading="lazy">' : '') + (sale ? '<i>-' + off + '%</i>' : '') + '</span><p>' + title + '</p><div class="pdp-m__pr' + (sale ? ' is-sale' : '') + '"><b>' + money(product.price) + '</b>' + (sale ? '<s>' + money(product.compare_at_price) + '</s>' : '') + '</div></a>';
+    };
+    var showRelated = function (products) {
+      relatedRail.insertAdjacentHTML('beforeend', products.map(relatedCard).join(''));
+    };
+    // Recommandations d'un produit (sans ceux déjà vus) ; ses produits deviennent à leur tour des sources pour « Mostra
+    // più prodotti » : toujours des produits semblables, jamais de doublon.
+    var relatedSources = [related.getAttribute('data-product-id')];
+    var recommend = function (id) {
+      return fetch(related.getAttribute('data-url') + id, { credentials: 'same-origin' })
         .then(function (response) {
           if (!response.ok) throw new Error('Recommendations ' + response.status);
           return response.json();
         })
         .then(function (data) {
-          var products = (data && data.products) || [];
-          if (!products.length) return;
-          related.querySelector('[data-pdp-rail]').innerHTML = products.map(function (product) {
-            var sale = product.compare_at_price > product.price;
-            var off = sale ? Math.round((product.compare_at_price - product.price) * 100 / product.compare_at_price) : 0;
-            var image = product.featured_image ? product.featured_image + (product.featured_image.indexOf('?') === -1 ? '?' : '&') + 'width=360' : '';
-            var title = String(product.title).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
-            return '<a class="pdp-m__rc" href="' + product.url + '"><span class="pdp-m__pp">' + (image ? '<img src="' + image + '" alt="" loading="lazy">' : '') + (sale ? '<i>-' + off + '%</i>' : '') + '</span><p>' + title + '</p><div class="pdp-m__pr' + (sale ? ' is-sale' : '') + '"><b>' + money(product.price) + '</b>' + (sale ? '<s>' + money(product.compare_at_price) + '</s>' : '') + '</div></a>';
-          }).join('');
+          return ((data && data.products) || []).filter(function (product) {
+            if (relatedSeen[product.id]) return false;
+            relatedSeen[product.id] = true;
+            relatedSources.push(product.id);
+            return true;
+          });
+        });
+    };
+    // Remplit la réserve jusqu'à 6 produits, en passant aux sources suivantes (au plus 4 appels par toucher).
+    var fillPool = function (tries) {
+      if (relatedPool.length >= RELATED_STEP || !relatedSources.length || !tries) return Promise.resolve();
+      return recommend(relatedSources.shift()).then(function (products) {
+        relatedPool = relatedPool.concat(products);
+        return fillPool(tries - 1);
+      });
+    };
+    var updateMore = function () {
+      if (relatedMore) relatedMore.hidden = !relatedPool.length && !relatedSources.length;
+    };
+    if (relatedMore) {
+      relatedMore.addEventListener('click', function () {
+        if (relatedMore.classList.contains('is-loading')) return;
+        relatedMore.classList.add('is-loading');
+        fillPool(4).catch(function (error) {
+          console.warn('[PDP mobile]', error);
+        }).then(function () {
+          showRelated(relatedPool.splice(0, RELATED_STEP));
+          relatedMore.classList.remove('is-loading');
+          updateMore();
+        });
+      });
+    }
+    var loadRelated = function () {
+      fillPool(1)
+        .then(function () {
+          if (!relatedPool.length) return;
+          showRelated(relatedPool.splice(0, RELATED_STEP));
           related.hidden = false;
+          updateMore();
         })
         .catch(function (error) { console.warn('[PDP mobile]', error); });
     };
