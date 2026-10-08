@@ -1138,6 +1138,23 @@
       "view_all": "Vedi tutto",
       "new": "Novità"
     },
+    "home_shein": {
+      "perk_exchange": "Cambio gratuito",
+      "perk_exchange_text": "entro 30 giorni",
+      "perk_klarna": "Paga in 3 rate",
+      "perk_klarna_text": "con Klarna",
+      "perk_cashback": "10% CashBack",
+      "perk_cashback_text": "sul tuo ordine",
+      "top_sales": "Saldi Top",
+      "trends": "Tendenze",
+      "percent_off": "-{{ percent }}% sconto",
+      "for_you": "Per te",
+      "official_brands": "Brand ufficiali",
+      "trend_label": "Tendenze",
+      "rank_html": "<b>#{{ rank }} Più venduto</b> in {{ type }} ›",
+      "sold_recent": "{{ count }} venduti di recente",
+      "save": "Risparmia {{ amount }}"
+    },
     "explore": {
       "open": "Apri Esplora",
       "title": "Esplora",

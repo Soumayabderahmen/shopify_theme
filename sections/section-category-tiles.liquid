@@ -100,12 +100,15 @@
 
 {%- if tiles_markup != blank -%}
   <nav
-    class="category-tiles"
+    class="category-tiles{% if section.settings.layout == 'scroll' %} category-tiles--scroll{% endif %}"
     aria-label="{{ section.settings.label | default: 'Categorie' | escape }}"
     {% if section.settings.source == 'auto' %}data-daily-tiles="{{ tiles_count }}"{% endif %}
   >
     {{- tiles_markup -}}
   </nav>
+  {%- if section.settings.layout == 'scroll' -%}
+    <span class="category-tiles__bar" aria-hidden="true"><i data-tiles-bar></i></span>
+  {%- endif -%}
 {%- endif -%}
 
 <style>
@@ -185,6 +188,73 @@
     transform: scale(0.96);
   }
 
+  /* Disposition « 2 righe scorrevoli » (accueil mobile style SHEIN) : 2 lignes qui défilent sur le côté,
+     5 tuiles visibles, petite barre de progression dessous. */
+  #shopify-section-{{ section.id }} .category-tiles--scroll {
+    grid-template-columns: none;
+    grid-template-rows: repeat(2, auto);
+    grid-auto-flow: column;
+    /* 5 colonnes visibles exactement (4 écarts de 7px) ; les suivantes défilent. */
+    grid-auto-columns: calc((100% - 28px) / 5);
+    gap: 10px 7px;
+    margin: 0;
+    padding: 12px 10px 4px;
+    overflow-x: auto;
+    border-radius: 0;
+    scroll-snap-type: x proximity;
+    /* Sans cette marge d'accroche, la première colonne démarre coupée sous le bord gauche. */
+    scroll-padding-inline: 10px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #shopify-section-{{ section.id }} .category-tiles--scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  #root #shopify-section-{{ section.id }} .category-tiles--scroll .category-tiles__item {
+    gap: 5px;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 11px;
+    scroll-snap-align: start;
+  }
+
+  #shopify-section-{{ section.id }} .category-tiles--scroll .category-tiles__media,
+  #shopify-section-{{ section.id }} .category-tiles--scroll .category-tiles__media img {
+    border-radius: 15px;
+  }
+
+  #shopify-section-{{ section.id }} .category-tiles__bar {
+    position: relative;
+    display: block;
+    width: 36px;
+    height: 3px;
+    margin: 6px auto 0;
+    padding: 0;
+    overflow: hidden;
+    background: #e3e5ee;
+    border-radius: 3px;
+  }
+
+  #shopify-section-{{ section.id }} .category-tiles__bar i {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 45%;
+    background: #16123f;
+    border-radius: 3px;
+  }
+
+  #shopify-section-{{ section.id }}:has(.category-tiles--scroll) {
+    width: 100vw;
+    max-width: 100vw;
+    margin-right: calc(50% - 50vw);
+    margin-left: calc(50% - 50vw);
+    padding-bottom: 8px;
+    background: #fff;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     #shopify-section-{{ section.id }} .category-tiles__media,
     #shopify-section-{{ section.id }} .category-tiles__media img {
@@ -228,10 +298,30 @@
       });
     }
 
+    // Disposition « 2 righe scorrevoli » : la barre suit le défilement des tuiles.
+    function syncTilesBar() {
+      const section = document.getElementById('shopify-section-' + sectionId);
+      const grid = section && section.querySelector('.category-tiles--scroll');
+      const bar = section && section.querySelector('[data-tiles-bar]');
+      if (!grid || !bar) return;
+      const update = () => {
+        const max = grid.scrollWidth - grid.clientWidth;
+        const visible = grid.scrollWidth ? grid.clientWidth / grid.scrollWidth : 1;
+        bar.style.width = (visible * 100) + '%';
+        bar.style.left = max > 0 ? (grid.scrollLeft / max * (1 - visible) * 100) + '%' : '0';
+      };
+      grid.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      // Départ sur la première colonne (les tuiles du jour viennent d'être réordonnées).
+      grid.scrollLeft = 0;
+      update();
+    }
+
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', pickDailyTiles);
+      document.addEventListener('DOMContentLoaded', () => { pickDailyTiles(); syncTilesBar(); });
     } else {
       pickDailyTiles();
+      syncTilesBar();
     }
 
     if (window.Shopify && window.Shopify.designMode) {
@@ -259,11 +349,21 @@
       "default": "auto"
     },
     {
+      "type": "select",
+      "id": "layout",
+      "label": "Disposizione",
+      "options": [
+        { "value": "grid", "label": "Griglia 4 colonne" },
+        { "value": "scroll", "label": "2 righe scorrevoli (stile SHEIN)" }
+      ],
+      "default": "grid"
+    },
+    {
       "type": "range",
       "id": "tiles_count",
       "label": "Numero di categorie",
       "min": 4,
-      "max": 16,
+      "max": 24,
       "step": 4,
       "default": 8
     },

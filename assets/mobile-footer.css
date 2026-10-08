@@ -1,4 +1,6 @@
-/* Footer mobile (prototype) — snippets/mobile-footer.liquid.
+/* Footer mobile — snippets/mobile-footer.liquid. Style SHEIN + footer actuel du site (mêmes fonctions) :
+   newsletter bleu nuit, Assistenza clienti en lignes de liste, accordéons « + », logo animé + Segui su shop,
+   pays / langue en lignes, paiements, barre bleu nuit « Torna in cima ».
    Chargé uniquement en mobile (media="(max-width: 760px)") ; le footer desktop n'est pas modifié. */
 
 /* L'ancien footer et le second formulaire newsletter sont remplacés par le footer mobile. */
@@ -25,42 +27,26 @@
 #root .shopify-section-footer > .nf {
   --nf-ink: #16123f;
   --nf-blue: #3a34d2;
-  --nf-muted: #8f92b3;
-  --nf-soft: #c6c8e2;
+  --nf-muted: #7a7f95;
+  --nf-line: #eceef4;
+  --nf-bg: #f4f5f9;
   position: relative;
   display: block;
   width: auto;
   max-width: none;
   overflow: hidden;
-  margin: 28px -6px 0;
-  padding: 26px 16px 28px;
+  margin: 8px -6px 0;
+  padding: 0;
   border: 0;
-  border-radius: 24px 24px 0 0;
-  background: var(--nf-ink);
-  color: #fff;
+  border-radius: 0;
+  background: #fff;
+  color: var(--nf-ink);
   font-family: 'Figtree', system-ui, sans-serif;
+  line-height: 1.4;
   text-align: left;
 }
 
-#root .shopify-section-footer > .nf::before {
-  content: "";
-  display: block;
-  position: absolute;
-  top: -90px;
-  right: -90px;
-  bottom: auto;
-  left: auto;
-  z-index: 0;
-  width: 260px;
-  height: 260px;
-  margin: 0;
-  border: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(58, 52, 210, 0.55), transparent 70%);
-  box-shadow: none;
-  pointer-events: none;
-}
-
+#root .shopify-section-footer > .nf::before,
 #root .shopify-section-footer > .nf::after {
   content: none;
   display: none;
@@ -113,11 +99,16 @@
   display: none;
 }
 
-.nf svg:not(.nf-pay svg) {
+.nf svg:not(.nf-pay svg, .nf-logo, .nf-solid) {
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.nf .nf-solid {
+  fill: currentColor;
+  stroke: none;
 }
 
 .nf .nf-sr {
@@ -129,21 +120,37 @@
   white-space: nowrap;
 }
 
-/* 1 Newsletter */
+/* Titre de groupe (Assistenza clienti, Metodi di pagamento) : petites capitales grises. */
+.nf .nf-h {
+  margin: 0 0 4px;
+  color: #8a8fa8;
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* 1 Newsletter : bandeau bleu nuit du footer actuel */
+.nf .nf-news {
+  padding: 18px 14px 16px;
+  color: #fff;
+  background: linear-gradient(160deg, #16123f, #231d66);
+}
+
 .nf .nf-news__title {
   margin: 0;
   color: #fff;
   font-family: 'Sora', system-ui, sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.5px;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .nf-news p {
-  margin: 6px 0 14px;
-  color: var(--nf-soft);
-  font-size: 14px;
+  margin: 4px 0 12px;
+  color: rgb(255 255 255 / 75%);
+  font-size: 12.5px;
   line-height: 1.4;
 }
 
@@ -157,21 +164,22 @@
 .nf-news__field {
   display: flex;
   align-items: center;
-  padding: 5px 5px 5px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.08);
+  height: 44px;
+  padding: 0 4px 0 12px;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 10%);
 }
 
 .nf-news__field:focus-within {
   border-color: #fff;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgb(255 255 255 / 14%);
 }
 
 .nf .nf-news__field input {
   flex: 1;
   min-width: 0;
-  height: 42px;
+  height: 100%;
   margin: 0;
   padding: 0;
   border: 0;
@@ -180,11 +188,11 @@
   box-shadow: none;
   color: #fff;
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .nf .nf-news__field input::placeholder {
-  color: #a9accb;
+  color: rgb(255 255 255 / 60%);
   opacity: 1;
 }
 
@@ -194,28 +202,28 @@
   float: none;
   flex: none;
   place-items: center;
-  width: 42px;
+  width: 36px;
   min-width: 0;
-  height: 42px;
+  height: 36px;
   min-height: 0;
   padding: 0;
   text-indent: 0;
-  border-radius: 10px;
+  border-radius: 9px;
   background: #fff;
   color: var(--nf-ink);
 }
 
 .nf-news__field button svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   stroke-width: 2.4;
 }
 
 .nf-news small {
   display: block;
   margin-top: 8px;
-  color: var(--nf-muted);
-  font-size: 11.5px;
+  color: rgb(255 255 255 / 60%);
+  font-size: 11px;
 }
 
 .nf-news .nf-news__status {
@@ -231,85 +239,128 @@
   display: flex;
   gap: 8px;
   margin-top: 8px !important;
-  color: var(--nf-soft);
+  color: rgb(255 255 255 / 75%);
   font-size: 12px;
 }
 
-/* 2 Assistance */
+/* 2 Assistenza clienti : lignes de liste (pastille d'icône, texte, flèche) */
 #root .nf .nf-help {
-  margin-top: 26px;
+  margin: 0;
+  padding: 14px 14px 4px;
 }
 
-.nf .nf-help__title {
-  margin-bottom: 10px;
-  color: var(--nf-muted);
-  font-family: 'Figtree', system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
+.nf .nf-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 54px;
+  margin: 0;
+  padding: 8px 0;
+  color: var(--nf-ink);
+  text-align: left;
+  border-bottom: 1px solid var(--nf-line);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.nf-contact {
+.nf .nf-row:last-child {
+  border-bottom: 0;
+}
+
+.nf .nf-row:active {
+  background: var(--nf-bg);
+}
+
+.nf .nf-row__ic {
   display: grid;
-  gap: 8px;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
 }
 
-.nf-contact a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06);
+.nf .nf-row__ic svg {
+  width: 19px;
+  height: 19px;
+  stroke-width: 2;
 }
 
-.nf-contact a:active {
-  background: rgba(255, 255, 255, 0.12);
+.nf .nf-row__ic--wa {
+  color: #1faa53;
+  background: #e8f8ee;
 }
 
-.nf-contact svg {
-  flex: none;
-  width: 22px;
-  height: 22px;
-  color: #c9ccf7;
-  stroke-width: 1.9;
+.nf .nf-row__ic--mail {
+  color: var(--nf-blue);
+  background: #ecebfd;
 }
 
-.nf-contact .nf-contact__wa svg {
-  color: #4ade80;
+.nf .nf-row__ic--track {
+  color: #ea6a0c;
+  background: #fff1e6;
 }
 
-.nf-contact .nf-fill {
-  fill: currentColor;
-  stroke: none;
+.nf .nf-row__ic--rate {
+  color: #00b67a;
+  background: #e6f7f0;
 }
 
-.nf-contact b {
+.nf .nf-row__ic--loc {
+  color: #4a4f6b;
+  background: #f1f2f6;
+}
+
+.nf .nf-row__tx {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.nf .nf-row__tx b {
   display: block;
-  color: #fff;
-  font-size: 14.5px;
+  overflow: hidden;
+  color: var(--nf-ink);
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.nf-contact small {
+.nf .nf-row__tx small {
   display: block;
-  color: #a9accb;
+  overflow: hidden;
+  color: var(--nf-muted);
   font-size: 12px;
-  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* 3 Avis */
-.nf-rate {
+.nf .nf-row__chev {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  color: #b3b7c8;
+  stroke-width: 2;
+}
+
+/* Note Trustpilot : chiffre + 5 cases vertes (remplies selon la note réelle) */
+.nf .nf-rate__line {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 12px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 14px;
+  gap: 6px;
+  margin-bottom: 2px;
 }
 
-/* Badge Ali Reviews (source de la note réelle) : présent mais invisible sous la carte. */
+.nf .nf-rate__line > b {
+  display: inline;
+  font-family: 'Sora', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+/* Badge Ali Reviews (source de la note réelle) : présent mais invisible sous la ligne. */
 .nf .nf-rate__source {
   position: absolute;
   inset: 0;
@@ -319,158 +370,153 @@
   pointer-events: none;
 }
 
-.nf-rate > b {
-  font-family: 'Sora', system-ui, sans-serif;
-  font-size: 30px;
-  line-height: 1;
-}
-
-.nf-rate > span {
-  flex: 1;
-  text-align: left;
-}
-
-.nf-rate > svg {
-  width: 18px;
-  height: 18px;
-  color: var(--nf-muted);
-  stroke-width: 2;
-}
-
-.nf-stars {
+.nf .nf-stars {
+  --nf-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 15'%3E%3Cpath fill='%23000' d='M0 0h15v15H0z'/%3E%3C/svg%3E");
+  --nf-star-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 15'%3E%3Cpath fill='%23000' d='m7.5 2.6 1.4 3.3 3.6.3-2.7 2.4.8 3.5-3.1-1.9-3.1 1.9.8-3.5-2.7-2.4 3.6-.3z'/%3E%3C/svg%3E");
   position: relative;
-  display: inline-block;
-  color: rgba(255, 255, 255, 0.2);
-  font-size: 17px;
-  font-style: normal;
-  letter-spacing: 2px;
-  line-height: 1;
+  display: block;
+  width: 83px;
+  height: 15px;
+  background: #dcdee8;
+  -webkit-mask: var(--nf-star) 0 0 / 17px 15px repeat-x;
+  mask: var(--nf-star) 0 0 / 17px 15px repeat-x;
 }
 
-.nf-stars::before {
-  content: "★★★★★";
-}
-
-.nf-stars em {
+.nf .nf-stars em {
   position: absolute;
   top: 0;
+  bottom: 0;
   left: 0;
-  overflow: hidden;
-  color: #00b67a;
-  white-space: nowrap;
+  background: #00b67a;
 }
 
-.nf-stars em::before {
-  content: "★★★★★";
+.nf .nf-stars::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  -webkit-mask: var(--nf-star-glyph) 0 0 / 17px 15px repeat-x;
+  mask: var(--nf-star-glyph) 0 0 / 17px 15px repeat-x;
 }
 
-.nf-rate small {
-  display: block;
-  margin-top: 3px;
-  color: #a9accb;
-  font-size: 12px;
-}
-
-/* 4 Liens en accordéons */
-/* #root : les marges du thème écrasaient l'espace autour de la carte de note. */
-#root .nf .nf-rate {
-  margin-top: 12px;
-}
-
+/* 3 Liens : accordéons « + » à la SHEIN */
 #root .nf .nf-links {
-  margin-top: 22px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin: 6px 0 0;
+  border-top: 8px solid var(--nf-bg);
 }
 
-.nf-acc {
+.nf .nf-acc {
   display: block;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid var(--nf-line);
 }
 
-.nf-acc summary,
+.nf .nf-acc summary,
 .nf .nf-acc--link {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 2px;
-  color: #fff;
-  font-size: 15.5px;
-  font-weight: 700;
+  padding: 15px 14px;
+  color: var(--nf-ink);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   list-style: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.nf-acc summary::-webkit-details-marker {
+.nf .nf-acc summary::-webkit-details-marker {
   display: none;
 }
 
-.nf-acc summary svg {
-  width: 18px;
-  height: 18px;
-  color: var(--nf-muted);
-  stroke-width: 1.9;
+.nf .nf-plus {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.nf .nf-plus::before,
+.nf .nf-plus::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 0;
+  width: 14px;
+  height: 2px;
+  background: var(--nf-ink);
+  border-radius: 2px;
   transition: transform 0.25s;
 }
 
-.nf-acc[open] summary svg {
-  transform: rotate(180deg);
+.nf .nf-plus::after {
+  transform: rotate(90deg);
 }
 
-.nf-acc ul {
-  padding: 0 2px 12px;
+.nf .nf-acc[open] .nf-plus::after {
+  transform: rotate(0);
+}
+
+.nf .nf-acc ul {
+  padding: 0 14px 10px;
 }
 
 .nf .nf-acc li a {
   display: block;
-  padding: 8px 0;
-  color: var(--nf-soft);
-  font-size: 14px;
+  padding: 9px 0;
+  color: #4a4f6b;
+  font-size: 13.5px;
 }
 
-/* 5 Bas */
-.nf-bottom {
-  margin-top: 24px;
+/* 4 Logo animé + Segui su shop, pays / langue, paiements */
+.nf .nf-bottom {
+  margin: 0;
 }
 
-/* Petits écrans (320px) : le logo garde sa taille ; "Follow us + Segui su shop" passent à la ligne, à droite. */
-.nf-brand {
+.nf .nf-brand {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px 8px;
+  gap: 10px;
+  padding: 16px 14px;
+  border-bottom: 8px solid var(--nf-bg);
 }
 
-.nf-logo {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  background: linear-gradient(100deg, #fff, #c9ceea 40%, #fff 60%, #aeb4da);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.nf .nf-brand__name {
+  display: block;
+  min-width: 0;
+}
+
+.nf .nf-logo {
+  display: block;
+  width: 140px;
+  height: 23px;
+  overflow: visible;
+}
+
+.nf .nf-logo--text {
+  width: auto;
+  height: auto;
+  color: var(--nf-ink);
   font-family: 'Sora', system-ui, sans-serif;
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.6px;
+  white-space: nowrap;
 }
 
-.nf-logo span {
-  font-weight: 600;
+.nf .nf-follow {
+  display: block;
+  margin-top: 2px;
+  color: var(--nf-muted);
+  font-size: 11.5px;
 }
 
-/* "Follow us" + pilule : un seul bloc, à droite (passe à la ligne entier sur les petits écrans). */
 .nf .nf-social {
   display: flex;
-  align-items: center;
-  gap: 8px;
   margin-left: auto;
-}
-
-.nf-follow {
-  color: var(--nf-muted);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 /* #root : plus fort que "#root button" et ".shopify-section-footer button" (text-indent, largeur 100 %) du thème. */
@@ -484,14 +530,14 @@
   min-width: 0;
   height: auto;
   min-height: 0;
-  padding: 7px 14px;
+  padding: 9px 14px;
   border-radius: 999px;
   background: #5a31f4;
   text-align: center;
   text-indent: 0;
   color: #fff;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -501,8 +547,8 @@
 }
 
 .nf .nf-shop svg {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   stroke-width: 2.2;
 }
 
@@ -517,99 +563,108 @@
   pointer-events: none;
 }
 
-.nf-sel {
-  display: flex;
-  gap: 8px;
-  margin: 16px 0 0;
-}
-
-.nf-sel__item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-width: 0;
-  height: 38px;
+#root .nf .nf-sel {
+  display: block;
   margin: 0;
-  padding: 0 10px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 10px;
-}
-
-.nf-sel__item--country {
-  flex: 1;
+  padding: 6px 14px 0;
 }
 
 .nf .nf-flag {
-  flex: none;
-  width: 18px;
-  height: 12px;
-  border-radius: 2px;
+  display: block;
+  width: 22px;
+  height: 15px;
+  border-radius: 3px;
   object-fit: cover;
 }
 
+/* Le vrai menu déroulant couvre toute la ligne, invisible : un toucher ouvre la liste du téléphone. */
 .nf .nf-sel select {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   width: 100%;
-  min-width: 0;
-  height: auto;
+  height: 100%;
   margin: 0;
-  padding: 0 18px 0 0;
+  padding: 0;
   border: 0;
-  border-radius: 0;
+  opacity: 0;
   appearance: none;
   -webkit-appearance: none;
-  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238F92B3' stroke-width='2.2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right center / 14px;
-  box-shadow: none;
-  color: #fff;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 .nf .nf-sel select option {
   color: #111;
 }
 
-/* Moyens de paiement : même rendu que l'ancien footer (.l4pm) — logos Shopify 38x24, espacés de 10px. */
-.nf-pay {
+.nf .nf-sel .nf-row:has(select:focus-visible) {
+  outline: 2px solid var(--nf-blue);
+  outline-offset: 2px;
+}
+
+.nf .nf-sel .nf-row:last-of-type {
+  border-bottom: 0;
+}
+
+.nf .nf-bottom > .nf-h {
+  margin-top: 14px;
+  padding: 0 14px;
+}
+
+.nf .nf-sel + .nf-h {
+  padding-top: 14px;
+  border-top: 8px solid var(--nf-bg);
+}
+
+/* Moyens de paiement : logos Shopify dans de petites cartes grises */
+.nf .nf-pay {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px !important;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0 14px 14px;
 }
 
 .nf .nf-pay li {
-  display: block;
-  width: 38px;
-  height: 24px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 27px;
+  overflow: hidden;
+  background: #f6f7fb;
+  border: 1px solid var(--nf-line);
+  border-radius: 5px;
 }
 
 .nf .nf-pay svg {
   display: block;
-  width: 38px;
-  height: 24px;
+  width: 36px;
+  height: 23px;
 }
 
-.nf-end {
+/* 5 Barre bleu nuit du footer actuel */
+.nf .nf-end {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  gap: 10px;
+  margin: 0;
+  padding: 14px;
+  background: var(--nf-ink);
 }
 
 .nf .nf-copy {
-  color: var(--nf-muted);
+  color: rgb(255 255 255 / 70%);
   font-size: 12px;
 }
 
 #root .nf .nf-top {
-  display: flex;
+  display: inline-flex;
   float: none;
   flex: none;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   width: auto;
   min-width: 0;
   height: auto;
@@ -618,8 +673,8 @@
   text-indent: 0;
   white-space: nowrap;
   background: none;
-  color: var(--nf-soft);
-  font-size: 12.5px;
+  color: #fff;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -630,7 +685,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nf-acc summary svg {
+  .nf .nf-plus::before,
+  .nf .nf-plus::after {
     transition: none;
   }
 }

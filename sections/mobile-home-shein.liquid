@@ -1,0 +1,293 @@
+{%- comment -%}
+  Page d'accueil MOBILE au style SHEIN (prototype validé « Platinumshop – Home mobile SHEIN »). Mobile uniquement :
+  la section est cachée au-dessus de 760px. Une même section, plusieurs « parties » (réglage part) placées dans
+  templates/index.json entre les sections existantes :
+  - perks : bande avantages sous la bannière (textes de la barre d'annonces) ;
+  - modules : 4 cartes 2×2 (Più venduti, Saldi Top, Nuovi arrivi, Tendenze), vrais produits ;
+  - feed : onglets + fil « Per te » sans fin en 2 colonnes (cartes snippets/mshein-card.liquid) ;
+  - feed_page / sale_page / brand_page / under_page : pages suivantes du fil, demandées par assets/mobile-home-shein.js
+    (templates collection.mshein-feed / mshein-sale / mshein-brand / mshein-under, sans layout).
+  Bannière (sections/section-slideshow.liquid, réglage « mobile_picks ») et en-tête transparent :
+  assets/mobile-temu-header.css. Tuiles et coupon : leurs sections (réglages « Disposizione »).
+{%- endcomment -%}
+{%- liquid
+  assign part = section.settings.part
+  assign best = collections['bestsellers']
+  capture flag
+    render 'country-flag-emoji'
+  endcapture
+  assign sale_collection = collections['in-offerta']
+  if sale_collection != blank and sale_collection.products_count > 0
+    assign sale_url = sale_collection.url
+  else
+    assign sale_url = routes.all_products_collection_url | append: '?view=offerte'
+  endif
+-%}
+
+{%- case part -%}
+  {%- when 'feed_page' -%}
+    {%- comment -%} Page suivante du fil : 10 produits de la collection demandée (tri et filtres de l'adresse gardés). {%- endcomment -%}
+    <ul class="mshein-page" data-mshein-page>
+      {%- paginate collection.products by 10 -%}
+        {%- for product in collection.products -%}
+          {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+        {%- endfor -%}
+        {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
+      {%- endpaginate -%}
+    </ul>
+
+  {%- when 'sale_page' -%}
+    {%- comment -%} « In offerta » sans collection : produits avec un prix barré, lus 48 par 48 (même règle que la page « offerte »). {%- endcomment -%}
+    <ul class="mshein-page" data-mshein-page>
+      {%- paginate collection.products by 48 -%}
+        {%- for product in collection.products -%}
+          {%- assign sale_variant = product.selected_or_first_available_variant -%}
+          {%- unless sale_variant.compare_at_price > sale_variant.price -%}{%- continue -%}{%- endunless -%}
+          {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+        {%- endfor -%}
+        {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
+      {%- endpaginate -%}
+    </ul>
+
+  {%- when 'under_page' -%}
+    {%- comment -%}
+      « Sotto 50 » : le filtre prix de Shopify regarde la variante la moins chère ; la carte montre la variante affichée
+      partout sur le site (selected_or_first_available_variant) : on ne garde que celles à 50 ou moins.
+    {%- endcomment -%}
+    <ul class="mshein-page" data-mshein-page>
+      {%- paginate collection.products by 24 -%}
+        {%- for product in collection.products -%}
+          {%- if product.selected_or_first_available_variant.price > 5000 -%}{%- continue -%}{%- endif -%}
+          {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+        {%- endfor -%}
+        {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
+      {%- endpaginate -%}
+    </ul>
+
+  {%- when 'brand_page' -%}
+    {%- comment -%} « Brand ufficiali » : produits dont le titre cite une marque officielle (règle de snippets/badge--brand-products.liquid). {%- endcomment -%}
+    {%- assign official_brands = 'jordan, nike, adidas, puma, reebok, new balance, onemix, asics' | split: ', ' -%}
+    <ul class="mshein-page" data-mshein-page>
+      {%- paginate collection.products by 24 -%}
+        {%- for product in collection.products -%}
+          {%- assign brand_title = product.title | downcase -%}
+          {%- assign brand_found = false -%}
+          {%- for official_brand in official_brands -%}
+            {%- if brand_title contains official_brand -%}{%- assign brand_found = true -%}{%- break -%}{%- endif -%}
+          {%- endfor -%}
+          {%- unless brand_found -%}{%- continue -%}{%- endunless -%}
+          {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+        {%- endfor -%}
+        {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
+      {%- endpaginate -%}
+    </ul>
+
+  {%- else -%}
+    {{ 'mobile-home-shein.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'mobile-home-shein.js' | asset_url }}" defer></script>
+    <style>
+      @media only screen and (min-width: 761px) {
+        #shopify-section-{{ section.id }} { display: none !important; }
+      }
+    </style>
+
+    {%- case part -%}
+      {%- when 'perks' -%}
+        {%- comment -%} Messages de la barre d'annonces et de la bande « Cambio gratuito » (cachées en haut de l'accueil mobile). {%- endcomment -%}
+        <div class="mshein-perks" data-mshein-home>
+          <div class="mshein-perk">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>
+            <div><b>{{ 'mobile.home_shein.perk_exchange' | t }}</b><small>{{ 'mobile.home_shein.perk_exchange_text' | t }}</small></div>
+          </div>
+          <div class="mshein-perk">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>
+            <div><b>{{ 'mobile.home_shein.perk_klarna' | t }}</b><small>{{ 'mobile.home_shein.perk_klarna_text' | t }}</small></div>
+          </div>
+          <div class="mshein-perk">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5c0-1 1-1.5 2.5-1.5s2.5.6 2.5 1.6c0 2.4-5 1.2-5 3.6 0 1 1 1.8 2.5 1.8s2.5-.6 2.5-1.5"/></svg>
+            <div><b>{{ 'mobile.home_shein.perk_cashback' | t }}</b><small>{{ 'mobile.home_shein.perk_cashback_text' | t }}</small></div>
+          </div>
+        </div>
+
+      {%- when 'modules' -%}
+        {%- liquid
+          # Saldi Top : les 2 plus fortes remises parmi les 50 premiers « Più venduti ».
+          assign top_a = nil
+          assign top_a_pct = 0
+          assign top_b = nil
+          assign top_b_pct = 0
+          for candidate in best.products limit: 50
+            assign candidate_variant = candidate.selected_or_first_available_variant
+            if candidate_variant.compare_at_price > candidate_variant.price
+              assign candidate_pct = candidate_variant.compare_at_price | minus: candidate_variant.price | times: 100.0 | divided_by: candidate_variant.compare_at_price | floor
+              if candidate_pct > top_a_pct
+                assign top_b = top_a
+                assign top_b_pct = top_a_pct
+                assign top_a = candidate
+                assign top_a_pct = candidate_pct
+              elsif candidate_pct > top_b_pct
+                assign top_b = candidate
+                assign top_b_pct = candidate_pct
+              endif
+            endif
+          endfor
+          # Nuovi arrivi : les plus récents (date de publication) parmi les produits chargés de la collection.
+          assign new_collection = collections['new-arrivals']
+          assign newest = new_collection.products | sort: 'published_at' | reverse
+          assign trends = collections['new-trends']
+        -%}
+        <div class="mshein-mods" data-mshein-home>
+          {%- for module_index in (1..4) -%}
+            {%- liquid
+              case module_index
+                when 1
+                  assign module_class = 'best'
+                  assign module_title = 'mobile.explore.best_sellers' | t
+                  assign module_url = best.url
+                  assign module_items = best.products
+                when 2
+                  assign module_class = 'sale'
+                  assign module_title = 'mobile.home_shein.top_sales' | t
+                  assign module_url = sale_url
+                  assign module_items = blank
+                when 3
+                  assign module_class = 'new'
+                  assign module_title = 'mobile.explore.new_arrivals' | t
+                  assign module_url = new_collection.url | append: '?sort_by=created-descending'
+                  assign module_items = newest
+                when 4
+                  assign module_class = 'trend'
+                  assign module_title = 'mobile.home_shein.trends' | t
+                  assign module_url = trends.url
+                  assign module_items = trends.products
+              endcase
+            -%}
+            <a class="mshein-mod mshein-mod--{{ module_class }} reveal" href="{{ module_url }}">
+              {%- liquid
+                # Comme le prototype : « Saldi » + « Top » en rouge, « Nuovi » + « arrivi » en bleu (dernier mot coloré, toutes langues).
+                assign title_rest = module_title
+                assign title_last = ''
+                if module_class == 'sale' or module_class == 'new'
+                  assign title_words = module_title | split: ' '
+                  if title_words.size > 1
+                    assign title_last = title_words | last
+                    assign title_rest_size = title_words.size | minus: 1
+                    assign title_rest = title_words | slice: 0, title_rest_size | join: ' '
+                  endif
+                endif
+              -%}
+              <span class="mshein-mod__hd"><b>{{ title_rest | escape }}{% if title_last != '' %} <em>{{ title_last | escape }}</em>{% endif %}</b><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
+              <span class="mshein-mod__items">
+                {%- liquid
+                  assign module_list = module_items
+                  assign module_limit = 2
+                  if module_class == 'sale'
+                    # Les 2 plus fortes remises, prises directement dans les 50 premiers « Più venduti ».
+                    assign module_list = best.products
+                    assign module_limit = 50
+                    assign sale_ids = top_a.id | append: ',' | append: top_b.id | split: ','
+                  endif
+                -%}
+                {%- for module_product in module_list limit: module_limit -%}
+                  {%- if module_class == 'sale' -%}
+                    {%- assign module_id = module_product.id | append: '' -%}
+                    {%- unless sale_ids contains module_id -%}{%- continue -%}{%- endunless -%}
+                  {%- endif -%}
+                  {%- liquid
+                    assign module_variant = module_product.selected_or_first_available_variant
+                    assign module_image = module_variant.featured_image | default: module_product.featured_image
+                    assign module_pct = 0
+                    if module_variant.compare_at_price > module_variant.price
+                      assign module_pct = module_variant.compare_at_price | minus: module_variant.price | times: 100.0 | divided_by: module_variant.compare_at_price | floor
+                    endif
+                  -%}
+                  <span class="mshein-mod__item">
+                    {%- if module_image != blank -%}
+                      <img src="{{ module_image | image_url: width: 240, height: 320, crop: 'center' }}" alt="{{ module_product.title | escape }}" width="120" height="160" loading="lazy">
+                    {%- endif -%}
+                    <span class="mshein-mod__price{% if module_pct > 0 %} is-sale{% endif %}">{{ module_variant.price | money }}</span>
+                    {%- if module_pct > 0 -%}
+                      <span class="mshein-mod__off">{{ 'mobile.home_shein.percent_off' | t: percent: module_pct }}</span>
+                    {%- elsif module_class == 'new' -%}
+                      <span class="mshein-mod__tag">NEW</span>
+                    {%- elsif module_class == 'trend' -%}
+                      <span class="mshein-mod__tag">TREND</span>
+                    {%- endif -%}
+                  </span>
+                {%- endfor -%}
+              </span>
+            </a>
+          {%- endfor -%}
+        </div>
+
+      {%- when 'feed' -%}
+        {%- liquid
+          # Sources de chaque onglet (pages suivantes chargées par assets/mobile-home-shein.js).
+          assign feed_suffix = '?view=mshein-feed'
+          assign for_you_src = best.url | append: feed_suffix
+          if sale_collection != blank and sale_collection.products_count > 0
+            assign sale_src = sale_collection.url | append: feed_suffix
+          else
+            assign sale_src = routes.all_products_collection_url | append: '?view=mshein-sale&sort_by=best-selling'
+          endif
+          assign brand_src = ''
+          assign brand_handles = 'nike,adidas,reebok,jordan,puma,asics' | split: ','
+          for brand_handle in brand_handles
+            assign brand_collection = collections[brand_handle]
+            if brand_collection != blank and brand_collection.products_count > 0
+              assign brand_src = brand_src | append: brand_collection.url | append: '?view=mshein-brand' | append: ' '
+            endif
+          endfor
+          assign new_src = collections['new-arrivals'].url | append: feed_suffix | append: '&sort_by=created-descending'
+          assign under_amount = 5000 | money_without_trailing_zeros
+          assign under_src = routes.all_products_collection_url | append: '?view=mshein-under&sort_by=best-selling&filter.v.price.lte=50'
+        -%}
+        <div class="mshein-feed" data-mshein-home data-mshein-feed data-brands="{{ 'mobile-brands.json' | asset_url }}">
+          <div class="mshein-feed__tabs" role="tablist" data-mshein-tabs>
+            <button type="button" role="tab" aria-selected="true" class="is-on" data-src="{{ for_you_src | append: '&page=2' }}">✨ {{ 'mobile.home_shein.for_you' | t }}</button>
+            <button type="button" role="tab" aria-selected="false" data-src="{{ sale_src }}">🔥 {{ 'mobile.explore.on_sale' | t }}</button>
+            {%- if brand_src != '' -%}
+              <button type="button" role="tab" aria-selected="false" data-src="{{ brand_src | strip }}">✓ {{ 'mobile.home_shein.official_brands' | t }}</button>
+            {%- endif -%}
+            <button type="button" role="tab" aria-selected="false" data-src="{{ new_src }}">{{ 'mobile.category.new' | t }}</button>
+            <button type="button" role="tab" aria-selected="false" data-src="{{ under_src }}">{{ 'mobile.explore.under_20' | t: amount: under_amount }}</button>
+          </div>
+          {%- comment -%} « Per te » : 10 premiers « Più venduti » écrits ici (affichage immédiat), la suite au défilement. {%- endcomment -%}
+          <ul class="mshein-feed__grid" data-mshein-grid>
+            {%- for product in best.products limit: 10 -%}
+              {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+            {%- endfor -%}
+          </ul>
+          <div class="mshein-feed__sentinel" data-mshein-sentinel></div>
+          <div class="mshein-loader" data-mshein-loader hidden aria-label="{{ 'mobile.js.loading' | t }}"><i></i><i></i><i></i></div>
+        </div>
+    {%- endcase -%}
+{%- endcase -%}
+
+{% schema %}
+{
+  "name": "Home mobile (stile SHEIN)",
+  "tag": "section",
+  "class": "shopify-section-mobile-home-shein",
+  "settings": [
+    {
+      "type": "select",
+      "id": "part",
+      "label": "Parte",
+      "options": [
+        { "value": "perks", "label": "Vantaggi (sotto il banner)" },
+        { "value": "modules", "label": "Schede 2×2" },
+        { "value": "feed", "label": "Per te (lista infinita)" },
+        { "value": "feed_page", "label": "Pagina della lista (interno)" },
+        { "value": "sale_page", "label": "Pagina In offerta (interno)" },
+        { "value": "brand_page", "label": "Pagina Brand ufficiali (interno)" },
+        { "value": "under_page", "label": "Pagina Sotto 50 (interno)" }
+      ],
+      "default": "perks"
+    }
+  ],
+  "presets": [
+    { "name": "Home mobile (stile SHEIN)" }
+  ]
+}
+{% endschema %}

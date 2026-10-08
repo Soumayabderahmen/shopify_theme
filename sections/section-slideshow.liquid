@@ -46,6 +46,7 @@
     data-autoplay="{{ section.settings.autoplay_seconds | times: 1000 }}"
   {% endif %}
   data-active-content="palette-{{ section.blocks[0].settings.color_palette }}"
+  {% if section.settings.mobile_picks %}data-mshein-hero{% endif %}
 >
   {%- for block in section.blocks -%}
     {%- liquid
@@ -108,6 +109,28 @@
           ></a>
         {%- endif -%}
         <span class="img-overlay" style="opacity:{{ block.settings.overlay_opacity | divided_by: 100.0 }}"></span>
+        {%- comment -%}
+          Mobile (réglage « mobile_picks », accueil style SHEIN) : 2 vrais produits de la collection du lien de la
+          diapositive, avec leur prix, en bas à droite.
+        {%- endcomment -%}
+        {%- if section.settings.mobile_picks and block.settings.overlay_url contains '/collections/' -%}
+          {%- assign picks_handle = block.settings.overlay_url | split: '/collections/' | last | split: '?' | first | split: '/' | first -%}
+          {%- assign picks_collection = collections[picks_handle] -%}
+          {%- if picks_collection != blank and picks_collection.products_count > 0 -%}
+            <span class="mshein-picks">
+              {%- for picks_product in picks_collection.products limit: 2 -%}
+                {%- assign picks_variant = picks_product.selected_or_first_available_variant -%}
+                {%- assign picks_image = picks_variant.featured_image | default: picks_product.featured_image -%}
+                <a class="mshein-pick" href="{{ picks_product.url }}">
+                  {%- if picks_image != blank -%}
+                    <img src="{{ picks_image | image_url: width: 160, height: 180, crop: 'center' }}" alt="{{ picks_product.title | escape }}" width="66" height="74" loading="eager" fetchpriority="low">
+                  {%- endif -%}
+                  <b>{{ picks_variant.price | money }}</b>
+                </a>
+              {%- endfor -%}
+            </span>
+          {%- endif -%}
+        {%- endif -%}
         {%- if block.settings.video -%}
           {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
         {%- elsif block.settings.image -%}
@@ -285,6 +308,53 @@
       min-height: calc(100vh - var(--header_height_static));
     }
   }
+
+  {%- if section.settings.mobile_picks %}
+    /* 2 produits par diapositive (mobile) : cartes blanches en bas à droite, au-dessus du lien de la bannière. */
+    #shopify-section-{{ section.id }} .mshein-picks { display: none; }
+    @media only screen and (max-width: 760px) {
+      #shopify-section-{{ section.id }} .mshein-picks {
+        position: absolute;
+        right: 10px;
+        bottom: 16px;
+        /* Au-dessus du lien de la diapositive (.link-overlay, z-index 9) : un toucher ouvre le produit. */
+        z-index: 10;
+        display: flex;
+        gap: 6px;
+      }
+
+      #shopify-section-{{ section.id }} .mshein-pick {
+        display: block;
+        width: 66px;
+        overflow: hidden;
+        color: #16123f;
+        text-decoration: none;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
+      }
+
+      /* #root + !important : les images des diapositives du thème prennent toute la hauteur. */
+      #root #shopify-section-{{ section.id }} .mshein-pick img {
+        position: static !important;
+        display: block;
+        width: 66px !important;
+        height: 74px !important;
+        object-fit: cover;
+      }
+
+      /* text-indent : les liens des diapositives du thème cachent leur texte (-36000px). */
+      #root #shopify-section-{{ section.id }} .mshein-pick b {
+        display: block;
+        padding: 3px 0 4px;
+        text-indent: 0;
+        overflow: hidden;
+        font: 800 10px/1.2 'Sora', system-ui, sans-serif;
+        text-align: center;
+        white-space: nowrap;
+      }
+    }
+  {%- endif %}
 </style>
 
 {% schema %}
@@ -294,6 +364,13 @@
     "groups": ["header", "footer", "custom.overlay"]
   },
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "mobile_picks",
+      "label": "2 prodotti per banner (mobile)",
+      "info": "Mobile: mostra 2 prodotti della collezione del link di ogni slide, con il prezzo (home in stile SHEIN).",
+      "default": false
+    },
     {
       "type": "select",
       "id": "height",

@@ -1144,6 +1144,23 @@
       "view_all": "Vezi tot",
       "new": "Noutăți"
     },
+    "home_shein": {
+      "perk_exchange": "Schimb gratuit",
+      "perk_exchange_text": "în 30 de zile",
+      "perk_klarna": "Plătește în 3 rate",
+      "perk_klarna_text": "cu Klarna",
+      "perk_cashback": "10% CashBack",
+      "perk_cashback_text": "la comanda ta",
+      "top_sales": "Reduceri top",
+      "trends": "Tendințe",
+      "percent_off": "-{{ percent }}% reducere",
+      "for_you": "Pentru tine",
+      "official_brands": "Branduri oficiale",
+      "trend_label": "Tendință",
+      "rank_html": "<b>#{{ rank }} cel mai vândut</b> în {{ type }} ›",
+      "sold_recent": "{{ count }} vândute recent",
+      "save": "Economisește {{ amount }}"
+    },
     "explore": {
       "open": "Deschide Explorează",
       "title": "Explorează",

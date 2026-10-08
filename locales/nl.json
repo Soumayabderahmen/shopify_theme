@@ -1067,6 +1067,23 @@
       "view_all": "Alles bekijken",
       "new": "Nieuw binnen"
     },
+    "home_shein": {
+      "perk_exchange": "Gratis ruilen",
+      "perk_exchange_text": "binnen 30 dagen",
+      "perk_klarna": "Betaal in 3 termijnen",
+      "perk_klarna_text": "met Klarna",
+      "perk_cashback": "10% CashBack",
+      "perk_cashback_text": "op je bestelling",
+      "top_sales": "Topdeals",
+      "trends": "Trends",
+      "percent_off": "-{{ percent }}% korting",
+      "for_you": "Voor jou",
+      "official_brands": "Officiële merken",
+      "trend_label": "Trend",
+      "rank_html": "<b>#{{ rank }} bestseller</b> in {{ type }} ›",
+      "sold_recent": "{{ count }} onlangs verkocht",
+      "save": "Bespaar {{ amount }}"
+    },
     "explore": {
       "open": "Ontdekken openen",
       "title": "Ontdekken",

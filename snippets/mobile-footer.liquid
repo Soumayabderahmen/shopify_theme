@@ -53,7 +53,8 @@
   endfor
 -%}
 
-{%- capture chevron -%}<svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m6 9 6 6 6-6"></path></svg>{%- endcapture -%}
+{%- comment -%} Accordéons : « + » qui devient « − » à l'ouverture (style SHEIN). {%- endcomment -%}
+{%- capture chevron -%}<i class="nf-plus" aria-hidden="true"></i>{%- endcapture -%}
 
 {%- capture help_links -%}
   {%- unless has_submenus -%}
@@ -126,49 +127,55 @@
     </section>
   {%- endif -%}
 
+  {%- comment -%} Assistenza clienti : lignes de liste à la SHEIN (pastille d'icône colorée, flèche à droite). {%- endcomment -%}
+  {%- capture row_chevron -%}<svg class="nf-row__chev" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m9 6 6 6-6 6"></path></svg>{%- endcapture -%}
   <section class="nf-help">
     {%- assign nf_help_raw = customer_block.settings.title | default: 'Customer service' | strip_html | strip -%}
     {%- comment -%} Titre d'origine traduit dans la langue du client (snippets/editor-text-translate.liquid). {%- endcomment -%}
-    <p class="nf-help__title" role="heading" aria-level="3">{% render 'editor-text-translate', text: nf_help_raw %}</p>
-    <div class="nf-contact">
-      {%- if customer_block.settings.show_whatsapp_link -%}
-        {%- assign whatsapp_number = settings.whatsapp | default: section_settings.mobile_whatsapp | remove: '+' | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | remove: '.' -%}
-        <a href="https://wa.me/{{ whatsapp_number }}" class="nf-contact__wa" rel="noopener" target="_blank">
-          <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"></path><path class="nf-fill" d="M8.5 8.8c.2 2.8 3 5.8 6.4 6.5l1.4-1.5-2-1-1 .8c-1-.4-2.4-1.8-2.8-2.8l.8-1-1-2z"></path></svg>
-          <span><b>WhatsApp</b><small>{{ 'mobile.footer.ask' | t }}</small></span>
-        </a>
-      {%- endif -%}
-      {%- if customer_block.settings.show_mail_link and shop.email != blank -%}
-        <a href="mailto:{{ shop.email }}">
-          <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><rect x="2.5" y="5" width="19" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
-          <span><b>Email</b><small>{{ shop.email }}</small></span>
-        </a>
-      {%- endif -%}
-      {%- if customer_block.settings.show_phone_link and shop.phone != blank -%}
-        <a href="tel:{{ shop.phone }}">
-          <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg>
-          <span><b>{{ 'mobile.footer.phone' | t }}</b><small>{{ shop.phone }}</small></span>
-        </a>
-      {%- endif -%}
-      <a href="{{ tracking_url }}">
-        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"></path><circle cx="5.5" cy="18" r="2"></circle><circle cx="17.5" cy="18" r="2"></circle></svg>
-        <span><b>{{ tracking_title | escape }}</b><small>{{ 'mobile.footer.track_order' | t }}</small></span>
+    <p class="nf-h" role="heading" aria-level="3">{% render 'editor-text-translate', text: nf_help_raw %}</p>
+    {%- if customer_block.settings.show_whatsapp_link -%}
+      {%- assign whatsapp_number = settings.whatsapp | default: section_settings.mobile_whatsapp | remove: '+' | remove: ' ' | remove: '-' | remove: '(' | remove: ')' | remove: '.' -%}
+      <a href="https://wa.me/{{ whatsapp_number }}" class="nf-row" rel="noopener" target="_blank">
+        <span class="nf-row__ic nf-row__ic--wa"><svg class="nf-solid" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.2c0-.1-.2-.2-.4-.3Z"></path></svg></span>
+        <span class="nf-row__tx"><b>WhatsApp</b><small>{{ 'mobile.footer.ask' | t }}</small></span>
+        {{ row_chevron }}
       </a>
-    </div>
-  </section>
-
-  {%- if trustpilot_url != blank -%}
-    <a class="nf-rate" href="{{ trustpilot_url }}" rel="noopener" target="_blank" data-mobile-footer-rating="{{ rating }}">
-      <b data-mobile-footer-rating-value>{{ rating }}</b>
-      <span>
-        {%- assign rating_percent = rating | times: 20 -%}
-        <i class="nf-stars" aria-label="{{ 'mobile.footer.rating_out_of' | t: rating: rating }}"><em style="width: {{ rating_percent }}%;"></em></i>
-        <small>{{ 'mobile.footer.trustpilot' | t }}</small>
-      </span>
-      <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m9 6 6 6-6 6"></path></svg>
-      <span class="nf-rate__source" data-mobile-footer-rating-source aria-hidden="true"></span>
+    {%- endif -%}
+    {%- if customer_block.settings.show_mail_link and shop.email != blank -%}
+      <a href="mailto:{{ shop.email }}" class="nf-row">
+        <span class="nf-row__ic nf-row__ic--mail"><svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="m4 7 8 6 8-6"></path></svg></span>
+        <span class="nf-row__tx"><b>Email</b><small>{{ shop.email }}</small></span>
+        {{ row_chevron }}
+      </a>
+    {%- endif -%}
+    {%- if customer_block.settings.show_phone_link and shop.phone != blank -%}
+      <a href="tel:{{ shop.phone }}" class="nf-row">
+        <span class="nf-row__ic nf-row__ic--mail"><svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"></path></svg></span>
+        <span class="nf-row__tx"><b>{{ 'mobile.footer.phone' | t }}</b><small>{{ shop.phone }}</small></span>
+        {{ row_chevron }}
+      </a>
+    {%- endif -%}
+    <a href="{{ tracking_url }}" class="nf-row">
+      <span class="nf-row__ic nf-row__ic--track"><svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"></path><circle cx="7" cy="17.5" r="1.8"></circle><circle cx="17" cy="17.5" r="1.8"></circle></svg></span>
+      <span class="nf-row__tx"><b>{{ tracking_title | escape }}</b><small>{{ 'mobile.footer.track_order' | t }}</small></span>
+      {{ row_chevron }}
     </a>
-  {%- endif -%}
+    {%- if trustpilot_url != blank -%}
+      <a class="nf-row nf-rate" href="{{ trustpilot_url }}" rel="noopener" target="_blank" data-mobile-footer-rating="{{ rating }}">
+        <span class="nf-row__ic nf-row__ic--rate"><svg class="nf-solid" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6-6.3 4.6 2.3-7.1-6-4.5h7.6z"></path></svg></span>
+        <span class="nf-row__tx">
+          {%- assign rating_percent = rating | times: 20 -%}
+          <span class="nf-rate__line">
+            <b data-mobile-footer-rating-value>{{ rating }}</b>
+            <i class="nf-stars" aria-label="{{ 'mobile.footer.rating_out_of' | t: rating: rating }}"><em style="width: {{ rating_percent }}%;"></em></i>
+          </span>
+          <small>{{ 'mobile.footer.trustpilot' | t }}</small>
+        </span>
+        {{ row_chevron }}
+        <span class="nf-rate__source" data-mobile-footer-rating-source aria-hidden="true"></span>
+      </a>
+    {%- endif -%}
+  </section>
 
   <nav class="nf-links" aria-label="{{ 'mobile.footer.information' | t }}">
     {%- if has_submenus -%}
@@ -218,12 +225,21 @@
   <div class="nf-bottom">
     <div class="nf-brand">
       {%- assign shop_name_lower = shop.name | downcase -%}
-      <span class="nf-logo">
-        {%- if shop_name_lower == 'platinumshop' -%}Platinum<span>shop</span>{%- else -%}{{ shop.name | escape }}{%- endif -%}
+      {%- assign show_follow = false -%}
+      {%- if shop.features.follow_on_shop? and section_settings.enable_follow_on_shop -%}{%- assign show_follow = true -%}{%- endif -%}
+      <span class="nf-brand__name">
+        {%- comment -%} Même logo animé que l'en-tête mobile (dégradé #mobile-home-logo-gradient de sections/header.liquid). {%- endcomment -%}
+        {%- if shop_name_lower == 'platinumshop' -%}
+          <svg class="nf-logo" role="img" aria-label="{{ shop.name | escape }}" viewBox="0 0 185 30" focusable="false">
+            <text x="0" y="23" fill="url(#mobile-home-logo-gradient) #16123f" font-family="Sora, sans-serif" font-size="23" letter-spacing="-0.6"><tspan font-weight="800">Platinum</tspan><tspan font-weight="500">shop</tspan></text>
+          </svg>
+        {%- else -%}
+          <span class="nf-logo nf-logo--text">{{ shop.name | escape }}</span>
+        {%- endif -%}
+        {%- if show_follow -%}<small class="nf-follow">{{ newsletter_block.settings.title | default: 'Follow us' | escape }}</small>{%- endif -%}
       </span>
-      {%- if shop.features.follow_on_shop? and section_settings.enable_follow_on_shop -%}
+      {%- if show_follow -%}
         <span class="nf-social">
-        <span class="nf-follow">{{ newsletter_block.settings.title | default: 'Follow us' | escape }}</span>
         <button type="button" class="nf-shop" data-mobile-footer-follow>
           <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
           <span>{{ 'mobile.footer.follow_on' | t }} <b>shop</b></span>
@@ -242,12 +258,17 @@
     {%- assign show_language = false -%}
     {%- if section_settings.enable_language_selector and localization.available_languages.size > 1 -%}{%- assign show_language = true -%}{%- endif -%}
     {%- if show_country or show_language -%}
+      {%- comment -%}
+        Lignes « Paese e valuta » / « Lingua » à la SHEIN : le vrai menu déroulant couvre toute la ligne (invisible),
+        un toucher ouvre la liste du téléphone et le choix envoie le formulaire Shopify.
+      {%- endcomment -%}
       {%- form 'localization', id: 'mobile-footer-localization', class: 'nf-sel' -%}
         {%- if show_country -%}
-          <label class="nf-sel__item nf-sel__item--country">
-            <span class="nf-sr">{{ 'mobile.footer.country_currency' | t }}</span>
-            {{ localization.country | image_url: width: 36 | image_tag: class: 'nf-flag', alt: '', loading: 'lazy', width: 18, height: 12 }}
-            <select name="country_code" data-mobile-footer-autosubmit>
+          <label class="nf-row nf-sel__item">
+            <span class="nf-row__ic nf-row__ic--loc">{{ localization.country | image_url: width: 48 | image_tag: class: 'nf-flag', alt: '', loading: 'lazy', width: 22, height: 15 }}</span>
+            <span class="nf-row__tx"><small>{{ 'mobile.footer.country_currency' | t }}</small><b>{{ localization.country.name }} ({{ localization.country.currency.iso_code }})</b></span>
+            {{ row_chevron }}
+            <select name="country_code" aria-label="{{ 'mobile.footer.country_currency' | t }}" data-mobile-footer-autosubmit>
               {%- for country in localization.available_countries -%}
                 <option value="{{ country.iso_code }}"{% if country.iso_code == localization.country.iso_code %} selected{% endif %}>
                   {{- country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})
@@ -257,9 +278,11 @@
           </label>
         {%- endif -%}
         {%- if show_language -%}
-          <label class="nf-sel__item">
-            <span class="nf-sr">{{ 'mobile.footer.language' | t }}</span>
-            <select name="language_code" data-mobile-footer-autosubmit>
+          <label class="nf-row nf-sel__item">
+            <span class="nf-row__ic nf-row__ic--loc"><svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg></span>
+            <span class="nf-row__tx"><small>{{ 'mobile.footer.language' | t }}</small><b>{{ localization.language.endonym_name | capitalize }}</b></span>
+            {{ row_chevron }}
+            <select name="language_code" aria-label="{{ 'mobile.footer.language' | t }}" data-mobile-footer-autosubmit>
               {%- for language in localization.available_languages -%}
                 <option value="{{ language.iso_code }}"{% if language.iso_code == localization.language.iso_code %} selected{% endif %}>
                   {{- language.endonym_name | capitalize -}}
@@ -273,6 +296,7 @@
     {%- endif -%}
 
     {%- if section_settings.show_payment_methods and shop.enabled_payment_types.size > 0 -%}
+      <p class="nf-h" role="heading" aria-level="3">{{ 'mobile.footer.payment_methods' | t }}</p>
       <ul class="nf-pay" aria-label="{{ 'mobile.footer.payment_methods' | t }}">
         {%- for payment_method in shop.enabled_payment_types -%}
           {%- comment -%} IDs préfixés : les mêmes SVG existent dans l'ancien footer (masqué), sinon les dégradés ne s'affichent pas. {%- endcomment -%}
@@ -285,8 +309,8 @@
     <div class="nf-end">
       <p class="nf-copy">&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}</p>
       <button type="button" class="nf-top" data-mobile-footer-top>
-        Torna in cima
-        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M12 19V5M6 11l6-6 6 6"></path></svg>
+        {{ 'general.accessibility.back_to_top' | t }}
+        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m6 14 6-6 6 6"></path></svg>
       </button>
     </div>
   </div>

@@ -30,20 +30,22 @@
         "show_timer": true,
         "countdown_period": "week",
         "end_date": "",
-        "mobile_only": true
+        "mobile_only": true,
+        "layout": "slim"
       }
     },
     "section_category_tiles_home": {
       "type": "section-category-tiles",
       "settings": {
         "source": "auto",
-        "tiles_count": 8,
+        "tiles_count": 20,
         "exclude_menu": "main-menu",
         "exclude_handles": "all\nbestsellers\nnew-arrivals\nproducts_recenti_reviews\nseo-pro-5-off\nglobofilter-best-selling-products-index",
         "min_products": 6,
         "labels": "abbigliamento-cinese: Stile Cinese\nbambini-ragazza: Bambina\ngiacche-ragazza-luxury: Giacche Lux\ngioielli-hip-hop: Hip Hop\nfelpe-novita: Hoodie\nnews-arrival: Sotto 100\nscarpe_all_collection: Scarpe\nscarpe_uomo: Scarpe Uomo\nsept-discount: Offerte\ntecnologie: Tecnologia",
         "label": "Categorie",
-        "mobile_only": true
+        "mobile_only": true,
+        "layout": "scroll"
       }
     },
     "section_flash_deals_home": {
@@ -229,10 +231,11 @@
         "autoplay": true,
         "autoplay_seconds": 6,
         "enable_controls": false,
-        "height_mobile": "1/1",
+        "height_mobile": "adapt",
         "spacing_desktop": 50,
         "spacing_mobile": 10,
-        "fix_zindex": 0
+        "fix_zindex": 0,
+        "mobile_picks": true
       }
     },
     "78836e0a-6131-4f01-afff-dbdd186d0914": {
@@ -325,14 +328,35 @@
         "spacing_mobile": 30,
         "fix_zindex": 0
       }
+    },
+    "mshein_perks": {
+      "type": "mobile-home-shein",
+      "settings": {
+        "part": "perks"
+      }
+    },
+    "mshein_modules": {
+      "type": "mobile-home-shein",
+      "settings": {
+        "part": "modules"
+      }
+    },
+    "mshein_feed": {
+      "type": "mobile-home-shein",
+      "settings": {
+        "part": "feed"
+      }
     }
   },
   "order": [
     "section_slideshow_XNiKWa",
-    "section_coupons_home",
+    "mshein_perks",
     "section_category_tiles_home",
+    "section_coupons_home",
+    "mshein_modules",
     "section_flash_deals_home",
     "78836e0a-6131-4f01-afff-dbdd186d0914",
+    "mshein_feed",
     "section_featured_collection_ekApHt",
     "165346832322a4db6f"
   ]

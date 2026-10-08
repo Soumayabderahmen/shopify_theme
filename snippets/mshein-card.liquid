@@ -1,0 +1,205 @@
+{%- comment -%}
+  Carte produit de la page d'accueil mobile au style SHEIN (sections/mobile-home-shein.liquid).
+  Vraies données et mêmes règles que les cartes du site :
+  - « Vendita » : prix barré (même variante que snippets/product-item.liquid : selected_or_first_available_variant) ;
+  - « New Arrivals » : tag new-arrival (règle de l'app d'étiquettes du site) ;
+  - « Verified [marque] », Official Store · Star seller · Brand Official : marques de snippets/badge--brand-products.liquid ;
+  - BESTSELLER : 5 premiers produits de « Più venduti » ; « #N Più venduto in [type] » : rang du type dans les 50 premiers ;
+  - étoiles : avis (métachamps syncer.reviews / reviews.rating, comme snippets/pdp-mobile-top.liquid) ;
+  - « N venduti di recente » : métachamp custom.bestseller_current_month (sinon bestseller_count) ;
+  - « Sped. gratuita » au-dessus de 50 (même seuil que product-item), « Reso facile », « Risparmia » ;
+  - le nom de la marque (« 🏬 Marque › ») est ajouté par assets/mobile-home-shein.js (liste assets/mobile-brands.json).
+  Le cœur et le panier utilisent les scripts existants (classe .alibaba-card__wishlist, attribut data-quick-add).
+  Params : product, best (collection « Più venduti »), flag (emoji du pays, snippets/country-flag-emoji.liquid)
+{%- endcomment -%}
+{%- liquid
+  assign card_variant = product.selected_or_first_available_variant
+  assign card_on_sale = false
+  assign card_pct = 0
+  if card_variant.compare_at_price > card_variant.price
+    assign card_on_sale = true
+    assign card_saved = card_variant.compare_at_price | minus: card_variant.price
+    assign card_pct = card_saved | times: 100.0 | divided_by: card_variant.compare_at_price | floor
+    assign card_saved_money = card_saved | money_without_trailing_zeros
+  endif
+
+  assign card_image = card_variant.featured_image | default: product.featured_image
+  assign card_ratio = 1
+  if card_image.aspect_ratio > 0
+    assign card_ratio = 1.0 | divided_by: card_image.aspect_ratio
+    if card_ratio < 1
+      assign card_ratio = 1
+    elsif card_ratio > 1.4
+      assign card_ratio = 1.4
+    endif
+  endif
+
+  # Marques officielles : même liste et même ordre que snippets/badge--brand-products.liquid.
+  assign card_brand = ''
+  assign card_title_lower = product.title | downcase
+  assign card_official_brands = 'jordan, nike, adidas, puma, reebok, new balance, onemix, asics' | split: ', '
+  for official_brand in card_official_brands
+    if card_title_lower contains official_brand
+      assign card_brand = official_brand | capitalize
+      break
+    endif
+  endfor
+
+  # Rangs réels dans « Più venduti » : 5 premiers = BESTSELLER ; rang dans le type de produit (50 premiers).
+  assign card_best = false
+  assign card_type_rank = 0
+  assign card_type_count = 0
+  for best_product in best.products limit: 50
+    if product.type != blank and best_product.type == product.type
+      assign card_type_count = card_type_count | plus: 1
+    endif
+    if best_product.id == product.id
+      if forloop.index <= 5
+        assign card_best = true
+      endif
+      if product.type != blank
+        assign card_type_rank = card_type_count
+      endif
+      break
+    endif
+  endfor
+
+  assign card_trend = false
+  for card_collection in product.collections
+    if card_collection.handle == 'new-trends'
+      assign card_trend = true
+      break
+    endif
+  endfor
+
+  assign card_rating = 0
+  assign card_rating_count = 0
+  if product.metafields.syncer.reviews
+    assign card_rating = product.metafields.syncer.reviews.value.cumulative_rating
+    assign card_rating_count = product.metafields.syncer.reviews.value.total_reviews
+  elsif product.metafields.reviews.rating
+    assign card_rating = product.metafields.reviews.rating.value.rating
+    assign card_rating_count = product.metafields.reviews.rating_count
+  endif
+  assign card_rating_count = card_rating_count | plus: 0
+  assign card_stars = card_rating | round | plus: 0
+
+  assign card_sold = product.metafields.custom.bestseller_current_month.value | default: product.metafields.custom.bestseller_count.value | default: 0 | plus: 0
+  if card_sold >= 1000
+    assign card_sold_text = card_sold | divided_by: 100 | divided_by: 10.0 | append: 'K+'
+  else
+    assign card_sold_text = card_sold
+  endif
+
+  assign card_new = false
+  if product.tags contains 'new-arrival'
+    assign card_new = true
+  endif
+-%}
+<li class="mshein-card reveal" data-mshein-title="{{ product.title | escape }}">
+  <div class="mshein-card__img alibaba-card__picture{% if card_brand != '' or card_best %} has-strip{% endif %}" style="aspect-ratio: 1 / {{ card_ratio }};">
+    <a class="mshein-card__link" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
+      {%- if card_image != blank -%}
+        <img
+          src="{{ card_image | image_url: width: 360 }}"
+          srcset="{{ card_image | image_url: width: 220 }} 220w, {{ card_image | image_url: width: 360 }} 360w, {{ card_image | image_url: width: 540 }} 540w"
+          sizes="50vw"
+          alt="{{ card_image.alt | default: product.title | escape }}"
+          width="360"
+          height="{{ 360 | times: card_ratio | round }}"
+          loading="lazy"
+          decoding="async"
+        >
+      {%- endif -%}
+    </a>
+    {%- if card_on_sale or card_new -%}
+      <span class="mshein-tags">
+        {%- if card_on_sale %}<span class="mshein-tag-sale">{{ 'product.sale_tag' | t }}</span>{% endif -%}
+        {%- if card_new %}<span class="mshein-tag-new">New Arrivals</span>{% endif -%}
+      </span>
+    {%- endif -%}
+    <button
+      type="button"
+      class="mshein-card__fav alibaba-card__wishlist"
+      aria-label="Wishlist"
+      aria-pressed="false"
+      data-product-id="{{ product.id }}"
+      data-variant-id="{{ card_variant.id }}"
+      data-variant-title="{{ card_variant.title | escape }}"
+      data-price-cents="{{ card_variant.price }}"
+      data-compare-at-price-cents="{{ card_variant.compare_at_price }}"
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z"/></svg>
+    </button>
+    {%- if card_brand != '' -%}
+      <div class="mshein-strip"><span class="mshein-strip__ver mshein-strip__ver--{{ card_brand | handleize }}"><i aria-hidden="true">✓</i>Verified {{ card_brand }}</span></div>
+    {%- elsif card_best -%}
+      <div class="mshein-strip mshein-strip--best"><span class="mshein-strip__best">BESTSELLER</span></div>
+    {%- endif -%}
+    {%- if product.available -%}
+      {%- assign card_qa_label = 'mobile.js.choose_options_for' | t | replace: '{title}', product.title -%}
+      <button type="button" class="mshein-card__add" data-quick-add="{{ product.handle }}" aria-label="{{ card_qa_label | escape }}" aria-haspopup="dialog">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 4h2.2l2.1 10.2a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.2L20.5 8H6.1"/><circle cx="9.5" cy="19.3" r="1.3"/><circle cx="17" cy="19.3" r="1.3"/></svg>
+      </button>
+    {%- endif -%}
+  </div>
+
+  <div class="mshein-card__body">
+    <h3 class="mshein-card__title alibaba-card__title">
+      {%- comment -%} Étiquettes hors du lien : favoris et ajout rapide lisent le titre dans le lien. {%- endcomment -%}
+      {%- if card_brand == '' and card_trend -%}<span class="mshein-lbl mshein-lbl--trend">{{ 'mobile.home_shein.trend_label' | t }}</span>{%- endif -%}
+      <span data-mshein-store></span>
+      <a href="{{ product.url }}">{{- product.title | escape -}}</a>
+    </h3>
+    {%- if card_type_rank > 0 and card_type_rank <= 5 -%}
+      <p class="mshein-card__rank">{{ 'mobile.home_shein.rank_html' | t: rank: card_type_rank, type: product.type }}</p>
+    {%- endif -%}
+    {%- if card_rating_count > 0 -%}
+      <p class="mshein-card__stars" aria-label="{{ 'mobile.footer.rating_out_of' | t: rating: card_rating }}">
+        <i aria-hidden="true">{%- for i in (1..5) -%}{%- if i <= card_stars -%}★{%- else -%}☆{%- endif -%}{%- endfor -%}</i>
+        <em>({% if card_rating_count >= 100 %}100+{% else %}{{ card_rating_count }}{% endif %})</em>
+      </p>
+    {%- endif -%}
+    {%- if card_sold > 0 -%}
+      <p class="mshein-card__sold">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 17.5 9.5 11l4 4L21 7.5V12h2V4h-8v2h4.6L13.5 12.1l-4-4L1.6 16Z"/></svg>
+        {{- 'mobile.home_shein.sold_recent' | t: count: card_sold_text -}}
+      </p>
+    {%- endif -%}
+    <p class="mshein-card__price{% if card_on_sale %} is-sale{% endif %}">
+      <span class="alibaba-card__price-main">{{ card_variant.price | money }}</span>
+      {%- if card_on_sale -%}
+        <span class="mshein-card__pct">-{{ card_pct }}%</span><s class="old-price">{{ card_variant.compare_at_price | money }}</s>
+      {%- endif -%}
+    </p>
+    <div class="mshein-chips">
+      {%- capture card_return -%}<span class="mshein-chip mshein-chip--ret">↩ {{ 't.Reso_facile' | t }}</span>{%- endcapture -%}
+      {%- if card_variant.price > 5000 -%}
+        {%- capture card_ship -%}<span class="mshein-chip mshein-chip--ship">{{ flag }} {{ 't.shipping_free' | t }}</span>{%- endcapture -%}
+        <span class="mshein-rot mshein-rot--2"><span class="mshein-rot__track">{{ card_ship }}{{ card_return }}<span aria-hidden="true">{{ card_ship }}</span></span></span>
+      {%- else -%}
+        <span class="mshein-rot"><span class="mshein-rot__track">{{ card_return }}</span></span>
+      {%- endif -%}
+      {%- if card_on_sale -%}
+        <span class="mshein-chip mshein-chip--save">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+          {{- 'mobile.home_shein.save' | t: amount: card_saved_money -}}
+        </span>
+      {%- endif -%}
+    </div>
+    {%- if card_brand != '' -%}
+      {%- capture card_brand_group -%}
+        <span class="mshein-bb mshein-bb--store">Official Store: {{ card_brand }}</span>
+        <span class="mshein-bb mshein-bb--star"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="#FFD700" d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6-6.3 4.6 2.3-7.1-6-4.5h7.6z"/></svg>Star seller</span>
+        <span class="mshein-bb mshein-bb--brand"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Brand Official</span>
+      {%- endcapture -%}
+      <div class="mshein-brandbar">
+        <div class="mshein-brandbar__track">
+          <span class="mshein-brandbar__group">{{ card_brand_group }}</span>
+          <span class="mshein-brandbar__group" aria-hidden="true">{{ card_brand_group }}</span>
+          <span class="mshein-brandbar__group" aria-hidden="true">{{ card_brand_group }}</span>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</li>

@@ -3833,6 +3833,23 @@
       "view_all": "View all",
       "new": "New arrivals"
     },
+    "home_shein": {
+      "perk_exchange": "Free exchange",
+      "perk_exchange_text": "within 30 days",
+      "perk_klarna": "Pay in 3",
+      "perk_klarna_text": "with Klarna",
+      "perk_cashback": "10% CashBack",
+      "perk_cashback_text": "on your order",
+      "top_sales": "Top Deals",
+      "trends": "Trending",
+      "percent_off": "-{{ percent }}% off",
+      "for_you": "For you",
+      "official_brands": "Official brands",
+      "trend_label": "Trending",
+      "rank_html": "<b>#{{ rank }} Best seller</b> in {{ type }} ›",
+      "sold_recent": "{{ count }} sold recently",
+      "save": "Save {{ amount }}"
+    },
     "explore": {
       "open": "Open Explore",
       "title": "Explore",
