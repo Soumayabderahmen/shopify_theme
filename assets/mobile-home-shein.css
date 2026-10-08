@@ -778,11 +778,32 @@
     transform: none;
   }
 
+  /* Tuiles de catégories (visibles dès l'ouverture) : même apparition, colonne par colonne, sans script. */
+  .mshein-js .category-tiles--scroll .category-tiles__item {
+    animation: mshein-tile-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .mshein-js .category-tiles--scroll .category-tiles__item:nth-child(n + 3) { animation-delay: 60ms; }
+  .mshein-js .category-tiles--scroll .category-tiles__item:nth-child(n + 5) { animation-delay: 120ms; }
+  .mshein-js .category-tiles--scroll .category-tiles__item:nth-child(n + 7) { animation-delay: 180ms; }
+  .mshein-js .category-tiles--scroll .category-tiles__item:nth-child(n + 9) { animation-delay: 240ms; }
+
+  @keyframes mshein-tile-in {
+    from {
+      opacity: 0;
+      transform: translateY(22px) scale(0.97);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .mshein-js .reveal {
       opacity: 1;
       transform: none;
       transition: none;
+    }
+
+    .mshein-js .category-tiles--scroll .category-tiles__item {
+      animation: none;
     }
 
     .mshein-rot--2 .mshein-rot__track,

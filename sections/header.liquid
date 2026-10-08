@@ -248,6 +248,25 @@
       </button>
       <button type="submit">{{ 'search.search_form.submit' | t }}</button>
     </form>
+    {%- if template.name == 'index' -%}
+      {%- comment -%}
+        Accueil mobile style SHEIN : première « Di tendenza » déjà écrite dans la barre (pas de changement de texte
+        au chargement) ; assets/mobile-home-shein.js la fait ensuite défiler avec les suivantes.
+      {%- endcomment -%}
+      {%- liquid
+        assign home_trend = ''
+        assign home_trend_lines = section.settings.mobile_trending_searches | newline_to_br | replace: '<br />', '<br>' | split: '<br>'
+        for home_trend_line in home_trend_lines
+          assign home_trend = home_trend_line | strip_newlines | strip
+          if home_trend != blank
+            break
+          endif
+        endfor
+      -%}
+      {%- if home_trend != blank -%}
+        <span class="mshein-search-ph" aria-hidden="true" data-mshein-search-ph><span>{{ home_trend | capitalize | escape }}</span></span>
+      {%- endif -%}
+    {%- endif -%}
   </div>
   {%- comment -%} Les "ricerche di tendenza" sont maintenant dans le panneau de recherche (snippets/mobile-search.liquid). {%- endcomment -%}
 

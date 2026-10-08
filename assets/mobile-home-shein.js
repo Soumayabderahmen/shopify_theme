@@ -72,13 +72,17 @@
     return text.charAt(0).toUpperCase() + text.slice(1);
   }).filter(Boolean);
   if (searchBox && trendWords.length) {
-    var placeholder = document.createElement('span');
-    placeholder.className = 'mshein-search-ph';
-    placeholder.setAttribute('aria-hidden', 'true');
-    var placeholderText = document.createElement('span');
+    // Première tendance déjà écrite par sections/header.liquid ; sinon créée ici.
+    var placeholder = searchBox.querySelector('[data-mshein-search-ph]');
+    if (!placeholder) {
+      placeholder = document.createElement('span');
+      placeholder.className = 'mshein-search-ph';
+      placeholder.setAttribute('aria-hidden', 'true');
+      placeholder.appendChild(document.createElement('span'));
+      searchBox.appendChild(placeholder);
+    }
+    var placeholderText = placeholder.firstElementChild;
     placeholderText.textContent = trendWords[0];
-    placeholder.appendChild(placeholderText);
-    searchBox.appendChild(placeholder);
     if (!reduceMotion && trendWords.length > 1) {
       var wordIndex = 0;
       window.setInterval(function () {
@@ -118,10 +122,7 @@
       else element.classList.add('is-in');
     });
   };
-  // Tuiles de catégories : même apparition.
-  document.querySelectorAll('.category-tiles--scroll .category-tiles__item').forEach(function (tile) {
-    tile.classList.add('reveal');
-  });
+  // Tuiles de catégories : apparition en CSS seul (assets/mobile-home-shein.css), prête dès le premier affichage.
   watchReveal(document);
 
   /* ---------- Fil « Per te » ---------- */

@@ -66,6 +66,10 @@
     {{ 'screen.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
     {{ 'theme-xtra.css' | asset_url | stylesheet_tag: media: 'screen' }}
     {{ 'mobile-temu-header.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
+    {%- if template.name == 'index' -%}
+      {%- comment -%} Accueil mobile style SHEIN : styles chargés en tête, pas d'ancien design avant le nouveau. {%- endcomment -%}
+      <link rel="stylesheet" href="{{ 'mobile-home-shein.css' | asset_url }}" media="(max-width: 760px)">
+    {%- endif -%}
     {%- comment -%} Barre du bas mobile : style chargé en tête de page pour qu'elle s'affiche finie dès la première image (mobile uniquement). {%- endcomment -%}
     <link rel="stylesheet" href="{{ 'mobile-bottom-nav.css' | asset_url }}" media="(max-width: 760px)">
     {%- comment -%} Tiroir panier mobile au design du prototype (snippets/cart-drawer-mobile.liquid). {%- endcomment -%}
@@ -306,7 +310,28 @@
     }
   </script>
 </head>
-  <body class="template-{{ template.name | handle }}">
+  {%- comment -%}
+    Accueil mobile style SHEIN : classe posée dès le début de la page pour que l'en-tête, la bannière et les
+    cartes s'affichent directement au nouveau design (sans attendre les sections plus bas). Les animations
+    d'apparition sont prêtes avant le premier affichage (mobile, mouvements autorisés).
+  {%- endcomment -%}
+  <body class="template-{{ template.name | handle }}{% if template.name == 'index' %} mshein-home{% endif %}">
+    {%- if template.name == 'index' -%}
+      <script>
+        (function () {
+          if (window.matchMedia('(max-width: 760px)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('mshein-js');
+          }
+          // Sections style SHEIN retirées de l'accueil : retour à l'en-tête normal.
+          document.addEventListener('DOMContentLoaded', function () {
+            if (!document.querySelector('[data-mshein-home]')) {
+              document.body.classList.remove('mshein-home');
+              document.documentElement.classList.remove('mshein-js');
+            }
+          });
+        })();
+      </script>
+    {%- endif -%}
     {%- comment -%}
       Styles des cartes produit et du badge de marque : un seul fichier pour toute la page (avant : copié dans
       chaque carte). En début de <body>, comme avant après les CSS de l'en-tête, pour garder le même ordre.
