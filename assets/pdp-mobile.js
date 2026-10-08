@@ -353,15 +353,37 @@
       var name = block.querySelector('[data-pdp-option-name]');
       // Couleurs : nom affiché sans le code fournisseur répété (setupColors) ; sinon la valeur telle quelle.
       if (name && value) name.textContent = (block.pdpNames && block.pdpNames[value]) || value;
-      block.querySelectorAll('[data-value]').forEach(function (button) {
-        button.setAttribute('aria-checked', button.getAttribute('data-value') === value ? 'true' : 'false');
-        // Épuisé avec les autres options choisies : barré (comme le prototype).
+      var buttons = Array.prototype.slice.call(block.querySelectorAll('[data-value]'));
+      var matches = buttons.map(function (button) {
         var combination = selected.slice();
         combination[index] = button.getAttribute('data-value');
-        var match = variants.find(function (variant) {
+        return variants.find(function (variant) {
           return variant.options && variant.options.every(function (optionValue, i) { return optionValue === combination[i]; });
         });
+      });
+      // Prix de chaque valeur (avec les autres options choisies), seulement quand il change d'une valeur à l'autre :
+      // le client voit avant de toucher que la taille 44 coûte plus que la 38. Le moins cher en vert.
+      var prices = matches.filter(Boolean).map(function (match) { return match.price; });
+      var varies = prices.some(function (price) { return price !== prices[0]; });
+      var lowest = varies ? Math.min.apply(null, prices) : null;
+      block.classList.toggle('has-prices', varies);
+      buttons.forEach(function (button, i) {
+        var match = matches[i];
+        button.setAttribute('aria-checked', button.getAttribute('data-value') === value ? 'true' : 'false');
+        // Épuisé avec les autres options choisies : barré (comme le prototype).
         button.classList.toggle('is-unavailable', !match || !match.available);
+        var tag = button.querySelector('.pdp-m__vp');
+        if (!varies || !match) {
+          if (tag) tag.remove();
+          return;
+        }
+        if (!tag) {
+          tag = document.createElement('span');
+          tag.className = 'pdp-m__vp';
+          button.appendChild(tag);
+        }
+        tag.textContent = money(match.price);
+        tag.classList.toggle('is-low', match.price === lowest);
       });
     });
     if (sizeUi) paintSize();
