@@ -1,0 +1,20 @@
+{%- comment -%}
+  Panneau « Categoria » du mobile, demandé par assets/mobile-temu-header.js à sa première ouverture
+  (/?section_id=mobile-category-panel) au lieu d'être écrit dans chaque page par le header.
+  Menu : celui du header (Thème > Header > Menu, « main-menu » dans ce thème) ; à changer ici aussi s'il change.
+{%- endcomment -%}
+{%- render 'mobile-category-browser', menu: section.settings.menu, part: 'panel' -%}
+
+{% schema %}
+{
+  "name": "Mobile category panel",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    }
+  ]
+}
+{% endschema %}

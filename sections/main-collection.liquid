@@ -262,8 +262,9 @@
           {%- if collection.products.size > 0 -%}
             {%- comment -%}
               « Seulement les promotions » (modèle templates/collection.offerte.json, lien « Vedi tutte » de « In offerta »
-              du menu ☰ mobile) : environ la moitié des produits est en promotion, donc pages de 96 produits pour en
-              montrer une quarantaine à chaque fois.
+              du menu ☰ mobile) : pages de 96 produits, dont 20 à 45 en promotion selon le tri. Avec 48, la première page
+              (tri alphabétique) n'en montrait que 5. Shopify (ShopifyAnalytics) et l'app SEO (JSON-LD) écrivent chaque
+              produit chargé dans la page : environ 8 Ko par produit, le prix du filtrage fait par le thème.
             {%- endcomment -%}
             {%- liquid
               assign collection_page_size = section.settings.pagination_qty
@@ -299,18 +300,22 @@
                     endfor
                   endif
                 -%}
+                {%- assign shown_product_count = 0 -%}
                 {%- for product in collection.products -%}
                   {%- if template.suffix == 'offerte' -%}
                     {%- assign sale_check_variant = product.selected_or_first_available_variant -%}
                     {%- unless sale_check_variant.compare_at_price > sale_check_variant.price -%}{%- continue -%}{%- endunless -%}
                   {%- endif -%}
+                  {%- comment -%} Rang de la carte affichée (sur la page « offerte », des produits sont sautés : forloop.index
+                    ne correspond plus à la position et la 2e photo de la première ligne partait en « lazy »). {%- endcomment -%}
+                  {%- assign shown_product_count = shown_product_count | plus: 1 -%}
                   {%- liquid
                     capture placeholder_int
                       cycle 1, 2, 3, 4, 5, 6
                     endcapture
-                    if forloop.first or largest_product_img == product
+                    if shown_product_count == 1 or largest_product_img == product
                       assign no_lazyload = true
-                    elsif section.settings.products_per_row_mobile == '2' and forloop.index == 2
+                    elsif section.settings.products_per_row_mobile == '2' and shown_product_count == 2
                       assign no_lazyload = true
                     else
                       assign no_lazyload = false

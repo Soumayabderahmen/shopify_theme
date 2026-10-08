@@ -273,7 +273,9 @@
   })();
 </script>
 
-{%- render 'mobile-category-browser', menu: mobile_category_menu, disable_cart: section.settings.disable_online_store -%}
+{%- comment -%} part: 'shell' : le panneau Categoria est un cadre vide, rempli à sa première ouverture
+  (sections/mobile-category-panel.liquid) ; le tiroir ☰ reste écrit dans la page. {%- endcomment -%}
+{%- render 'mobile-category-browser', menu: mobile_category_menu, disable_cart: section.settings.disable_online_store, part: 'shell' -%}
 {%- render 'mobile-wishlist-drawer' -%}
 {%- render 'mobile-quick-add' -%}
 {%- render 'mobile-search', trends: section.settings.mobile_trending_searches, disable_cart: section.settings.disable_online_store -%}

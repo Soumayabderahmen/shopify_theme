@@ -1683,8 +1683,14 @@ function initMobileTemuHeader() {
     sizeCategoryBrowser();
     void categoryBrowser.offsetWidth;
     categoryBrowser.classList.add('is-open');
-    loadPanelImages(categoryBrowser.querySelector('.mobile-category-browser__panel.is-active'));
-    loadCategoryProducts(categoryBrowser.querySelector('.mobile-category-browser__panel.is-active'));
+    // Panneau pas encore chargé : « Caricamento… » pendant le téléchargement, puis le premier rayon.
+    loadCategoryPanel().then(function () {
+      if (categoryBrowser.hidden) return;
+      loadPanelImages(categoryBrowser.querySelector('.mobile-category-browser__panel.is-active'));
+      loadCategoryProducts(categoryBrowser.querySelector('.mobile-category-browser__panel.is-active'));
+    }).catch(function (error) {
+      console.error('Unable to load the category panel.', error);
+    });
   };
   var closeCategoryBrowser = function (animated) {
     if (!categoryBrowser || categoryBrowser.hidden) return;
@@ -2345,7 +2351,7 @@ function initMobileTemuHeader() {
   // In evidenza -> panneau « Nuovi arrivi » existant ; autres rayons -> panneau créé au premier toucher avec la
   // collection du rayon triée par date d'ajout (vraies données Shopify, suite chargée au défilement).
   // Nouveau toucher sur « Novità » ou sur un rayon à gauche : retour à la liste du rayon.
-  var newToggle = categoryBrowser.querySelector('[data-category-new-toggle]');
+  var newToggle = null;
   var baseCategoryPanelId = 'mobile-category-panel-featured';
   var setNewToggle = function (active) {
     if (!newToggle) return;
@@ -2394,17 +2400,6 @@ function initMobileTemuHeader() {
     setNewToggle(false);
     if (newToggle) newToggle.hidden = !newPanelFor(baseCategoryPanelId);
   };
-  if (newToggle) {
-    newToggle.addEventListener('click', function (event) {
-      var basePanel = document.getElementById(baseCategoryPanelId);
-      var newPanel = newPanelFor(baseCategoryPanelId);
-      if (!basePanel || !newPanel) return;
-      event.preventDefault();
-      var showNew = newToggle.getAttribute('aria-pressed') !== 'true';
-      setNewToggle(showNew);
-      showCategoryPanel(showNew ? newPanel : basePanel);
-    });
-  }
 
   var loadPanelImages = function (panel, limit, priority) {
     if (!panel) return;
@@ -2455,7 +2450,8 @@ function initMobileTemuHeader() {
     return new URL(url, window.location.href).href;
   };
 
-  var readCategoryCache = function (url) {
+  // marker : texte qui doit être dans la réponse gardée (liste de produits, ou panneau Categoria entier).
+  var readCategoryCache = function (url, marker) {
     return openCategoryCache().then(function (database) {
       if (!database) return null;
       return new Promise(function (resolve, reject) {
@@ -2465,7 +2461,7 @@ function initMobileTemuHeader() {
           var entry = request.result;
           if (!entry || entry.expiresAt <= Date.now()
             || typeof entry.html !== 'string'
-            || entry.html.indexOf('data-mobile-category-products') === -1) {
+            || entry.html.indexOf(marker || 'data-mobile-category-products') === -1) {
             if (entry) {
               var cleanup = database.transaction('responses', 'readwrite');
               cleanup.objectStore('responses').delete(categoryCacheKey(url));
@@ -2484,7 +2480,7 @@ function initMobileTemuHeader() {
     });
   };
 
-  var writeCategoryCache = function (url, html) {
+  var writeCategoryCache = function (url, html, ttl) {
     return openCategoryCache().then(function (database) {
       if (!database) return;
       return new Promise(function (resolve, reject) {
@@ -2494,7 +2490,7 @@ function initMobileTemuHeader() {
           key: categoryCacheKey(url),
           html: html,
           cachedAt: Date.now(),
-          expiresAt: Date.now() + categoryCacheTtl
+          expiresAt: Date.now() + (ttl || categoryCacheTtl)
         });
         var entries = [];
         var cursorRequest = store.openCursor();
@@ -2720,6 +2716,53 @@ function initMobileTemuHeader() {
     categoryBrowser.style.height = Math.max(200, viewportHeight - top - bottomNavigationHeight) + 'px';
   };
 
+  // Panneau « Categoria » : le header n'écrit qu'un cadre vide (data-category-src) ; le panneau est téléchargé
+  // à la première ouverture (ou dès que le doigt touche le bouton), puis gardé 12 h dans le navigateur
+  // (IndexedDB, par langue) : les pages suivantes l'affichent sans le retélécharger. Il n'a pas de prix.
+  var categoryPanelSource = categoryBrowser.getAttribute('data-category-src');
+  var categoryPanelRequest = null;
+  var CATEGORY_PANEL_MARKER = 'mobile-category-browser__body';
+  var loadCategoryPanel = function () {
+    if (categoryBrowser.getAttribute('data-category-loaded') === 'true') return Promise.resolve();
+    if (categoryPanelRequest) return categoryPanelRequest;
+    if (!categoryPanelSource) return Promise.reject(new Error('Missing category panel source.'));
+    categoryPanelRequest = readCategoryCache(categoryPanelSource, CATEGORY_PANEL_MARKER).then(function (cachedHtml) {
+      if (cachedHtml !== null) return cachedHtml;
+      return fetch(categoryPanelSource, { credentials: 'same-origin' }).then(function (response) {
+        if (!response.ok) throw new Error('Category panel request failed: ' + response.status);
+        return response.text();
+      }).then(function (html) {
+        if (html.indexOf(CATEGORY_PANEL_MARKER) === -1) throw new Error('Category panel markup missing');
+        writeCategoryCache(categoryPanelSource, html, 12 * 60 * 60 * 1000);
+        return html;
+      });
+    }).then(function (html) {
+      if (categoryBrowser.getAttribute('data-category-loaded') === 'true') return;
+      var source = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-mobile-category-browser]');
+      if (!source) throw new Error('Category panel markup missing');
+      categoryBrowser.replaceChildren.apply(categoryBrowser, Array.prototype.slice.call(source.childNodes));
+      categoryBrowser.setAttribute('data-category-loaded', 'true');
+      initCategoryPanel();
+    });
+    categoryPanelRequest.catch(function () { categoryPanelRequest = null; });
+    return categoryPanelRequest;
+  };
+
+  // Branchements du contenu du panneau (après son chargement, ou tout de suite s'il est déjà dans la page).
+  var initCategoryPanel = function () {
+  newToggle = categoryBrowser.querySelector('[data-category-new-toggle]');
+  if (newToggle) {
+    newToggle.addEventListener('click', function (event) {
+      var basePanel = document.getElementById(baseCategoryPanelId);
+      var newPanel = newPanelFor(baseCategoryPanelId);
+      if (!basePanel || !newPanel) return;
+      event.preventDefault();
+      var showNew = newToggle.getAttribute('aria-pressed') !== 'true';
+      setNewToggle(showNew);
+      showCategoryPanel(showNew ? newPanel : basePanel);
+    });
+  }
+
   categoryBrowser.querySelectorAll('[data-category-tab]').forEach(function (tab) {
     tab.addEventListener('click', function (event) {
       event.preventDefault();
@@ -2764,6 +2807,8 @@ function initMobileTemuHeader() {
   });
 
   updateFeaturedOnlyTab(categoryBrowser.querySelector('[data-category-tab].is-active'));
+  };
+  if (categoryBrowser.getAttribute('data-category-loaded') === 'true') initCategoryPanel();
 
   // Préchargement du menu "Categoria" (mobile) : les produits du premier onglet sont téléchargés en
   // arrière-plan, quand le navigateur est libre, puis dès qu'on touche le bouton ; à l'ouverture le
@@ -2791,8 +2836,12 @@ function initMobileTemuHeader() {
   if (document.readyState === 'complete') scheduleCategoryPrefetch();
   else window.addEventListener('load', scheduleCategoryPrefetch, { once: true });
 
+  // Doigt posé sur « Categoria » : le panneau (s'il manque) puis les produits du premier rayon partent tout de suite.
   document.addEventListener('pointerdown', function (event) {
-    if (event.target instanceof Element && event.target.closest('[data-mobile-categories-trigger]')) prefetchCategoryPanel();
+    if (!(event.target instanceof Element) || !event.target.closest('[data-mobile-categories-trigger]')) return;
+    loadCategoryPanel().then(prefetchCategoryPanel).catch(function (error) {
+      console.warn('[Mobile category panel]', error);
+    });
   }, { capture: true, passive: true });
 
   // Rayon de gauche (Donna, Uomo…) : téléchargement lancé dès que le doigt touche l'onglet, avant la fin du tap.

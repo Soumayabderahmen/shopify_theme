@@ -40,7 +40,19 @@
     Panneau Categoria (prototype « chiara-liens ») : il s'ouvre juste sous le vrai header du site (☰, logo, ♡,
     panier, recherche, liens du menu), qui reste visible au-dessus ; le panneau n'a donc pas son propre en-tête.
     Liste des rayons à gauche, produits réels à droite. Mobile uniquement (assets/mobile-temu-header.css/.js).
+    part: 'shell' (header) : cadre vide avec « Caricamento… », rempli à la première ouverture par le script depuis
+    sections/mobile-category-panel.liquid (part: 'panel', sans le tiroir ☰) ; sans part : tout est écrit.
   {%- endcomment -%}
+  {%- if part == 'shell' -%}
+    <section class="mobile-category-browser" data-mobile-category-browser hidden aria-hidden="true" data-category-loaded="false" data-category-src="{% if routes.root_url == '/' %}/{% else %}{{ routes.root_url }}{% endif %}?section_id=mobile-category-panel" role="dialog" aria-modal="true" aria-label="{{ 'mobile.category.dialog' | t }}" tabindex="-1">
+      <div class="mobile-category-loading" role="status" aria-live="polite">
+        <span class="mobile-category-loading__message">{{ 'mobile.js.loading' | t }}</span>
+        <div class="mobile-category-loading__skeletons" aria-hidden="true">
+          {%- for i in (1..6) -%}<span class="mobile-category-loading__card"><span class="mobile-category-loading__image"></span><span class="mobile-category-loading__title"></span></span>{%- endfor -%}
+        </div>
+      </div>
+    </section>
+  {%- else -%}
   <section class="mobile-category-browser" data-mobile-category-browser hidden aria-hidden="true" data-category-loaded="true" role="dialog" aria-modal="true" aria-label="{{ 'mobile.category.dialog' | t }}" tabindex="-1">
     <svg class="mobile-category-browser__defs" aria-hidden="true" focusable="false" width="0" height="0">
       <defs>
@@ -222,7 +234,9 @@
     </div>
     </div>
   </section>
+  {%- endif -%}
 
+  {%- unless part == 'panel' -%}
   <dialog
     id="mobile-explore-drawer"
     class="mobile-explore-drawer"
@@ -702,4 +716,5 @@
       </dialog>
     {%- endif -%}
   </dialog>
+  {%- endunless -%}
 {%- endif -%}
