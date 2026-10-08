@@ -3891,6 +3891,15 @@
     {%- endif -%}
 
     {% render 'badge--discount-products', product: product %}
+    {%- comment -%} Mobile : pastille « ⚡ Économisez … » (même design que le badge du site) au-dessus du prix de toutes les
+       cartes en promotion ; cachée sur desktop (assets/product-card.css). {%- endcomment -%}
+    {%- if upsell == false and show_price and current_variant.compare_at_price > current_variant.price -%}
+      {%- liquid
+        assign apc_save_money = current_variant.compare_at_price | minus: current_variant.price | money | strip_html
+        assign apc_save_text = 'mobile.js.drawer_save' | t | replace: '{amount}', apc_save_money
+      -%}
+      <span class="apc-save"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L4.09 12.11a1.5 1.5 0 0 0 1.14 2.45h4.77l-2.09 7.54a1.5 1.5 0 0 0 2.63 1.28l8.91-10.11a1.5 1.5 0 0 0-1.14-2.45h-4.77l2.09-7.54A1.5 1.5 0 0 0 13 2Z"/></svg><span>{{ apc_save_text }}</span></span>
+    {%- endif -%}
     {%- if upsell == false and show_price -%}
       <div class="alibaba-card__price-wrapper">
         <p class="price s1pr alibaba-card__price-main">

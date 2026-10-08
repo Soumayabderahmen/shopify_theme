@@ -1431,3 +1431,74 @@
     background: #000 !important;
   }
 }
+
+/* Pastille « ⚡ Économisez … » des cartes en promotion (snippets/product-item.liquid) : mobile seulement, même design
+   que le badge remise du site (dégradé rose-rouge, texte blanc, éclair). Au-dessus du prix : les lignes de la grille
+   des cartes (assets/mobile-temu-header.css) descendent d'un cran, l'ancien texte rouge « Économisez … » est masqué. */
+.apc-save {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  #root li.alibaba-product-card .apc-save {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 4px;
+    max-width: 100%;
+    height: 21px;
+    margin: 0 0 4px;
+    padding: 0 7px;
+    overflow: hidden;
+    color: #fff;
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    background: linear-gradient(135deg, #e11d48, #be123c);
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgb(225 29 72 / 25%);
+  }
+
+  #root li.alibaba-product-card .apc-save svg {
+    position: static !important;
+    flex: none;
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  #root li.alibaba-product-card .apc-save span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #root li.alibaba-product-card:has(.apc-save) .pill-badge-savings {
+    display: none !important;
+  }
+
+  #root :is(article[id*="section_featured_collection"], #collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card.alibaba-product-card:has(.apc-save) .apc-save {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    order: 2 !important;
+  }
+
+  #root :is(article[id*="section_featured_collection"], #collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card.alibaba-product-card:has(.apc-save) .alibaba-card__price-main {
+    grid-row: 3 !important;
+    order: 3 !important;
+  }
+
+  #root :is(article[id*="section_featured_collection"], #collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card.alibaba-product-card:has(.apc-save) :is(.pill-badge-savings, .alibaba-card__moq) {
+    grid-row: 4 !important;
+    order: 4 !important;
+  }
+
+  #root :is(article[id*="section_featured_collection"], #collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card.alibaba-product-card:has(.apc-save) :is(.alibaba-card__trust, .alibaba-card__badges-row) {
+    grid-row: 5 !important;
+    order: 5 !important;
+  }
+
+  #root :is(article[id*="section_featured_collection"], #collection.l4cl:not(.list), .product-recommendations .l4cl, article[id*="section_featured_products"] .l4cl:not(.list), article[id*="recently_viewed"] .l4cl, .brand-products-grid) li.alibaba-product-card.alibaba-product-card:has(.apc-save) .badge-scroll-wrapper {
+    grid-row: 6 !important;
+  }
+}
