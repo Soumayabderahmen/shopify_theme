@@ -1502,8 +1502,8 @@
       var title = String(product.title).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
       return '<a class="pdp-m__rc" href="' + product.url + '"><span class="pdp-m__pp">' + (image ? '<img src="' + image + '" alt="" loading="lazy">' : '') + (sale ? '<i>-' + off + '%</i>' : '') + '</span><p>' + title + '</p><div class="pdp-m__pr' + (sale ? ' is-sale' : '') + '"><b>' + money(product.price) + '</b>' + (sale ? '<s>' + money(product.compare_at_price) + '</s>' : '') + '</div></a>';
     };
-    var showRelated = function (products) {
-      relatedRail.insertAdjacentHTML('beforeend', products.map(relatedCard).join(''));
+    var showRelated = function (products, target) {
+      (target || relatedRail).insertAdjacentHTML('beforeend', products.map(relatedCard).join(''));
     };
     // Recommandations d'un produit (sans ceux déjà vus) ; ses produits deviennent à leur tour des sources pour « Mostra
     // più prodotti » : toujours des produits semblables, jamais de doublon.
@@ -1531,20 +1531,54 @@
         return fillPool(tries - 1);
       });
     };
-    var updateMore = function () {
-      if (relatedMore) relatedMore.hidden = !relatedPool.length && !relatedSources.length;
+    var relatedDone = function () {
+      return !relatedPool.length && !relatedSources.length;
     };
-    if (relatedMore) {
-      relatedMore.addEventListener('click', function () {
-        if (relatedMore.classList.contains('is-loading')) return;
-        relatedMore.classList.add('is-loading');
+    var updateMore = function () {
+      if (relatedMore) relatedMore.hidden = relatedDone();
+    };
+    // « Mostra più prodotti » : fenêtre (comme « Protections ») avec les produits semblables suivants ; 6 de plus
+    // quand on arrive en bas de la liste.
+    var relatedSheet = related.querySelector('[data-pdp-related-sheet]');
+    if (relatedMore && relatedSheet && typeof relatedSheet.showModal === 'function') {
+      var sheetGrid = relatedSheet.querySelector('[data-pdp-related-grid]');
+      var sheetBody = relatedSheet.querySelector('[data-pdp-related-body]');
+      var sheetEnd = relatedSheet.querySelector('[data-pdp-related-end]');
+      var sheetLoading = false;
+      var loadSheet = function () {
+        if (sheetLoading || relatedDone()) return;
+        sheetLoading = true;
         fillPool(4).catch(function (error) {
           console.warn('[PDP mobile]', error);
         }).then(function () {
-          showRelated(relatedPool.splice(0, RELATED_STEP));
-          relatedMore.classList.remove('is-loading');
-          updateMore();
+          showRelated(relatedPool.splice(0, RELATED_STEP), sheetGrid);
+          sheetLoading = false;
+          sheetEnd.hidden = relatedDone();
+          // Liste encore plus courte que la fenêtre : on continue tout de suite.
+          if (!relatedDone() && sheetBody.scrollHeight <= sheetBody.clientHeight + 200) loadSheet();
         });
+      };
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (entries) {
+          if (entries[0].isIntersecting && relatedSheet.open) loadSheet();
+        }, { root: sheetBody, rootMargin: '0px 0px 300px' }).observe(sheetEnd);
+      }
+      var closeRelated = function () {
+        relatedSheet.classList.remove('is-open');
+        window.setTimeout(function () { if (relatedSheet.open) relatedSheet.close(); }, 220);
+      };
+      relatedSheet.querySelector('[data-pdp-related-close]').addEventListener('click', closeRelated);
+      relatedSheet.addEventListener('click', function (event) {
+        if (event.target === relatedSheet) closeRelated();
+      });
+      relatedSheet.addEventListener('cancel', function (event) {
+        event.preventDefault();
+        closeRelated();
+      });
+      relatedMore.addEventListener('click', function () {
+        if (!relatedSheet.open) relatedSheet.showModal();
+        window.requestAnimationFrame(function () { relatedSheet.classList.add('is-open'); });
+        if (!sheetGrid.children.length) loadSheet();
       });
     }
     var loadRelated = function () {

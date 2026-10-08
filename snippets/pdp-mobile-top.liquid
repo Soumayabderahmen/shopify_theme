@@ -441,7 +441,20 @@
   <section class="pdp-m__rel" data-pdp-related data-url="{{ routes.product_recommendations_url }}.json?limit=10&intent=related&product_id=" data-product-id="{{ product.id }}" hidden>
     <h2>{{ 'mobile.pdp.you_may_like' | t }}</h2>
     <div class="pdp-m__rail" data-pdp-rail></div>
-    <button type="button" class="pdp-m__relmore" data-pdp-related-more hidden>{{ 'product.form.show_more' | t }}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    <button type="button" class="pdp-m__relmore" data-pdp-related-more aria-haspopup="dialog" hidden>{{ 'product.form.show_more' | t }}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+    {%- comment -%} Fenêtre « Mostra più prodotti » : produits semblables, 6 de plus à chaque fin de liste (assets/pdp-mobile.js). {%- endcomment -%}
+    <dialog class="pdp-m__pt pdp-m__rsh" data-pdp-related-sheet aria-labelledby="pdp-rsh-title">
+      <div class="pdp-m__pt-in">
+        <div class="pdp-m__rsh-hd">
+          <h2 id="pdp-rsh-title">{{ 'mobile.pdp.you_may_like' | t }}</h2>
+          <button class="pdp-m__pt-x" type="button" data-pdp-related-close aria-label="{{ 'mobile.pdp.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+        <div class="pdp-m__pt-body" data-pdp-related-body>
+          <div class="pdp-m__rail pdp-m__rsh-grid" data-pdp-related-grid></div>
+          <div class="pdp-m__rsh-end" data-pdp-related-end aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </dialog>
   </section>
 
   {%- comment -%} 14. Barre d'achat fixe (au-dessus de la barre du bas) : cachée quand le gros bouton est visible. {%- endcomment -%}
