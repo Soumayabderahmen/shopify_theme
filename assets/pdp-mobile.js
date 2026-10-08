@@ -959,15 +959,8 @@
     window.setInterval(tickShip, 1000);
   }
 
-  /* ---------- Fenêtres réelles du site : Termini, garantie sur le prix, Protezioni ---------- */
-  root.querySelectorAll('[data-pdp-open-terms]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      var terms = document.getElementById('ve-open-terms');
-      if (terms) terms.click();
-    });
-  });
-  /* ---------- Feuilles « Protections » et « Garantie commande » (snippets/pdp-mobile-protect.liquid,
-     snippets/pdp-mobile-order.liquid, design du prototype v4.2) ----------
+  /* ---------- Feuilles « Protections », « Garantie commande » et « Conditions du coupon » (snippets/pdp-mobile-protect.liquid,
+     snippets/pdp-mobile-order.liquid, snippets/pdp-mobile-terms.liquid, design du prototype v4.2) ----------
      Une carte numérotée par engagement ; chaque bouton de la fiche (data-pdp-pt-open, feuille choisie par
      data-pdp-pt-sheet, « protect » par défaut) ouvre sa feuille en haut puis la fait défiler en douceur jusqu'à sa carte,
      mise en évidence 1,6 s ; les pastilles de l'en-tête (data-pdp-pt-go) font de même dans la feuille ouverte.

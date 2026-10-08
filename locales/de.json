@@ -612,6 +612,22 @@
   "form": {
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
+  "mobile_terms": {
+    "eyebrow": "platinumshop-Gutschein",
+    "desc": "Alles zum Gutschein dieser Seite: Rabatt, Einlösung und Rechte der Kunden.",
+    "nav_coupon": "Gutschein",
+    "nav_eu": "EU",
+    "nav_world": "Außerhalb EU",
+    "nav_help": "Hilfe",
+    "value": "Rabatt: {{ percent }} % auf die Summe der Artikel der Bestellung.",
+    "no_limits": "Kein Mindestbestellwert und keine Rabattobergrenze.",
+    "how_html": "Code {{ code }}: Tippe auf „{{ claim }}“, er wird in den Warenkorb übernommen und beim Bezahlen angewendet.",
+    "excluded": "Versandkosten, Zölle und Steuern werden nicht rabattiert.",
+    "omnibus": "Preistransparenz (EU-Richtlinie 2019/2161 „Omnibus“): Jeder frühere Preis bezieht sich auf den niedrigsten Preis der letzten 30 Tage.",
+    "refund_paid": "Bei einer Rücksendung entspricht die Erstattung dem tatsächlich bezahlten Betrag, Rabatt inbegriffen.",
+    "world_products": "Der Rabatt gilt nur für den Warenwert, ohne internationale Versand- und Verzollungskosten.",
+    "help_html": "Fragen oder Probleme mit dem Rabattcode? Unser Team hilft dir gern: {{ email }}"
+  },
   "mobile_order": {
     "eyebrow": "Garantierte Bestellung",
     "desc": "Vom Kauf bis zur Erstattung: die Zusagen aus unseren Richtlinien, für jede Bestellung.",

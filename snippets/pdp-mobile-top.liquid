@@ -175,7 +175,7 @@
         <li>
           <span class="pdp-m__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 4v0a2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 0 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg></span>
           <span class="pdp-m__t"><b>{{ 'mobile.pdp.coupon_title' | t: percent: pm_coupon_percent }}</b><small>{{ 'mobile.pdp.coupon_long' | t: percent: pm_coupon_percent, code: pm_coupon_code }}</small></span>
-          <button class="pdp-m__mini" type="button" data-pdp-open-terms>{{ 'mobile.pdp.terms' | t }}</button>
+          <button class="pdp-m__mini" type="button" data-pdp-pt-sheet="terms" data-pdp-pt-open="coupon">{{ 'mobile.pdp.terms' | t }}</button>
         </li>
       {%- endif -%}
       {%- comment -%}
@@ -224,6 +224,10 @@
     {%- render 'pdp-mobile-protect' -%}
     {%- comment -%} Fenêtre « Garantie commande » (section 9), même design. {%- endcomment -%}
     {%- render 'pdp-mobile-order' -%}
+    {%- comment -%} Fenêtre « Conditions du coupon » (bouton « Termini » ci-dessus), même design. {%- endcomment -%}
+    {%- if pm_coupon_code != blank -%}
+      {%- render 'pdp-mobile-terms', code: pm_coupon_code, percent: pm_coupon_percent -%}
+    {%- endif -%}
   </section>
 
   {%- comment -%} 5. Options réelles du produit : un choix ici coche l'option correspondante du formulaire du thème. {%- endcomment -%}

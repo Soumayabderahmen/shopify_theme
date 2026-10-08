@@ -630,6 +630,22 @@
   "border": {
     "top_picks": "Topkeuzes"
   },
+  "mobile_terms": {
+    "eyebrow": "platinumshop-coupon",
+    "desc": "Alles over de coupon op deze pagina: korting, gebruik en rechten van klanten.",
+    "nav_coupon": "Coupon",
+    "nav_eu": "EU",
+    "nav_world": "Buiten de EU",
+    "nav_help": "Hulp",
+    "value": "Korting: {{ percent }}% op het totaal van de producten in je bestelling.",
+    "no_limits": "Geen minimumbedrag en geen maximale korting.",
+    "how_html": "Code {{ code }}: tik op “{{ claim }}”, hij wordt aan je winkelwagen toegevoegd en bij het afrekenen toegepast.",
+    "excluded": "Verzendkosten, invoerrechten en belastingen worden niet afgeprijsd.",
+    "omnibus": "Prijstransparantie (EU-richtlijn 2019/2161 “Omnibus”): elke eerdere prijs verwijst naar de laagste prijs van de afgelopen 30 dagen.",
+    "refund_paid": "Bij een retour komt de terugbetaling overeen met het werkelijk betaalde bedrag, inclusief korting.",
+    "world_products": "De korting geldt alleen voor de waarde van de producten, exclusief internationale verzend- en inklaringskosten.",
+    "help_html": "Vragen of problemen met de kortingscode? Ons team helpt je graag: {{ email }}"
+  },
   "mobile_order": {
     "eyebrow": "Gegarandeerde bestelling",
     "desc": "Van aankoop tot terugbetaling: de toezeggingen uit ons beleid, voor elke bestelling.",

@@ -3396,6 +3396,22 @@
       "fastest_delivery": "Fastest delivery in 2-3 business days"
     }
   },
+  "mobile_terms": {
+    "eyebrow": "platinumshop coupon",
+    "desc": "Everything about the coupon on this page: discount, how to use it and customer rights.",
+    "nav_coupon": "Coupon",
+    "nav_eu": "EU",
+    "nav_world": "Outside EU",
+    "nav_help": "Support",
+    "value": "Discount: {{ percent }}% off the total of the products in your order.",
+    "no_limits": "No minimum spend and no maximum discount.",
+    "how_html": "Code {{ code }}: tap “{{ claim }}”, it is added to your cart and applied at checkout.",
+    "excluded": "Shipping costs, duties and taxes are not discounted.",
+    "omnibus": "Price transparency (EU Directive 2019/2161 “Omnibus”): every previous price refers to the lowest price of the last 30 days.",
+    "refund_paid": "If you return an item, the refund matches the amount actually paid, discount included.",
+    "world_products": "The discount applies only to the value of the products, excluding international shipping and customs clearance costs.",
+    "help_html": "Questions or trouble with the discount code? Our team is here to help: {{ email }}"
+  },
   "mobile_order": {
     "eyebrow": "Guaranteed order",
     "desc": "From purchase to refund: the commitments written in our policies, for every order.",

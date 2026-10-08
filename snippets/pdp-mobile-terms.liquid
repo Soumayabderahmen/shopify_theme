@@ -1,0 +1,110 @@
+{%- comment -%}
+  Feuille « Conditions du coupon » de la fiche produit mobile, même design que « Protections » et « Garantie commande »
+  (prototype v4.2, classes pdp-m__pt-*, en-tête snippets/pdp-mobile-sheet-head.liquid), ouverte par « Conditions » de la
+  carte des avantages (data-pdp-pt-sheet="terms"). Remplace sur mobile l'ancien tiroir de snippets/copons.liquid, dont
+  les montants (minimum 40 €, plafond 12 €) ne correspondaient pas à la réduction Shopify : code et % des réglages du
+  thème « Coupon (mobile) », réduction sur toute la commande, sans minimum ni plafond (vérifié sur le panier).
+  Params : code, percent.
+{%- endcomment -%}
+{%- liquid
+  assign tm_email = 'contact@platinumshop.it'
+  assign tm_email_link = '<a href="mailto:' | append: tm_email | append: '">' | append: tm_email | append: '</a>'
+  assign tm_arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M14 7l5 5-5 5"/></svg>'
+  assign tm_code_html = '<b>' | append: code | append: '</b>'
+  assign tm_claim = 'mobile.pdp.claim' | t
+
+  # Titre sur deux lignes comme les autres feuilles : dernier mot en bleu.
+  assign tm_title = 'vantaggi.terms_modal_title' | t
+  assign tm_words = tm_title | split: ' '
+  assign tm_last = tm_words | last
+  if tm_words.size > 1
+    assign tm_cut = tm_title.size | minus: tm_last.size | minus: 1
+    assign tm_first = tm_title | slice: 0, tm_cut
+    assign tm_title_html = tm_first | append: '<br><em>' | append: tm_last | append: '</em>'
+    assign tm_bar_html = tm_first | append: ' <em>' | append: tm_last | append: '</em>'
+  else
+    assign tm_title_html = '<em>' | append: tm_title | append: '</em>'
+    assign tm_bar_html = tm_title_html
+  endif
+-%}
+<dialog class="pdp-m__pt" data-pdp-pt="terms" aria-labelledby="pdp-tm-title">
+  <div class="pdp-m__pt-in">
+    <button class="pdp-m__pt-x" type="button" data-pdp-pt-close aria-label="{{ 'mobile.pdp.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <p class="pdp-m__pt-top" aria-hidden="true">{{ tm_bar_html }}</p>
+
+    <div class="pdp-m__pt-body" data-pdp-pt-body>
+      {%- capture tm_nav -%}
+        <button type="button" data-pdp-pt-go="coupon">{{ 'mobile_terms.nav_coupon' | t }}</button>
+        <button type="button" data-pdp-pt-go="eu">{{ 'mobile_terms.nav_eu' | t }}</button>
+        <button type="button" data-pdp-pt-go="world">{{ 'mobile_terms.nav_world' | t }}</button>
+        <button type="button" data-pdp-pt-go="help">{{ 'mobile_terms.nav_help' | t }}</button>
+      {%- endcapture -%}
+      {%- liquid
+        assign tm_eyebrow = 'mobile_terms.eyebrow' | t
+        assign tm_desc = 'mobile_terms.desc' | t
+        render 'pdp-mobile-sheet-head', id: 'pdp-tm', eyebrow: tm_eyebrow, title_html: tm_title_html, desc: tm_desc, nav_label: tm_title, nav_html: tm_nav
+      -%}
+
+      <div class="pdp-m__pt-list">
+        {%- comment -%} 01 Détails du coupon {%- endcomment -%}
+        <section class="pdp-m__pt-card" data-pdp-pt-card="coupon">
+          <header>
+            <span class="pdp-m__pt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 4v0a2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 0 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg></span>
+            <span><small>01</small><h3>{{ 'vantaggi.promo_details_title' | t }}</h3></span>
+          </header>
+          <p class="pdp-m__pt-lead">{{ 'mobile.pdp.coupon_long' | t: percent: percent, code: code }}</p>
+          <ul>
+            <li>{{ 'mobile_terms.value' | t: percent: percent }}</li>
+            <li>{{ 'mobile_terms.no_limits' | t }}</li>
+            <li>{{ 'mobile_terms.how_html' | t: code: tm_code_html, claim: tm_claim }}</li>
+          </ul>
+          <p class="pdp-m__pt-fine">{{ 'mobile_terms.excluded' | t }}</p>
+        </section>
+
+        {%- comment -%} 02 Clients de l'Union européenne {%- endcomment -%}
+        <section class="pdp-m__pt-card" data-pdp-pt-card="eu">
+          <header>
+            <span class="pdp-m__pt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 5.5v.01M15.3 6.4v.01M17.6 8.7v.01M18.5 12v.01M17.6 15.3v.01M15.3 17.6v.01M12 18.5v.01M8.7 17.6v.01M6.4 15.3v.01M5.5 12v.01M6.4 8.7v.01M8.7 6.4v.01"/></svg></span>
+            <span><small>02</small><h3>{{ 'vantaggi.eu_clients_title' | t }}</h3></span>
+          </header>
+          <ul>
+            <li>{{ 'mobile_terms.omnibus' | t }}</li>
+            <li>{{ 'mobile_protect.ret_eu' | t }}</li>
+          </ul>
+          <p class="pdp-m__pt-fine">{{ 'mobile_terms.refund_paid' | t }}</p>
+          {%- if shop.refund_policy.url != blank -%}
+            <a class="pdp-m__pt-more" href="{{ shop.refund_policy.url }}"><span>{{ 'mobile.pdp.learn_more' | t }}</span>{{ tm_arrow }}</a>
+          {%- endif -%}
+        </section>
+
+        {%- comment -%} 03 Clients hors Union européenne {%- endcomment -%}
+        <section class="pdp-m__pt-card" data-pdp-pt-card="world">
+          <header>
+            <span class="pdp-m__pt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg></span>
+            <span><small>03</small><h3>{{ 'vantaggi.extra_eu_clients_title' | t }}</h3></span>
+          </header>
+          <ul>
+            <li>{{ 'mobile_terms.world_products' | t }}</li>
+            <li>{{ 'mobile_protect.ship_customs' | t }}</li>
+          </ul>
+          {%- if shop.shipping_policy.url != blank -%}
+            <a class="pdp-m__pt-more" href="{{ shop.shipping_policy.url }}"><span>{{ 'mobile.pdp.learn_more' | t }}</span>{{ tm_arrow }}</a>
+          {%- endif -%}
+        </section>
+
+        {%- comment -%} 04 Assistance {%- endcomment -%}
+        <section class="pdp-m__pt-card" data-pdp-pt-card="help">
+          <header>
+            <span class="pdp-m__pt-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg></span>
+            <span><small>04</small><h3>{{ 'vantaggi.support_title' | t }}</h3></span>
+          </header>
+          <p class="pdp-m__pt-lead">{{ 'mobile_terms.help_html' | t: email: tm_email_link }}</p>
+        </section>
+
+        <p class="pdp-m__pt-sig">{% render 'pl-logo', size: 18, class: 'pdp-m__pt-plx is-sm' %}<span>{{ 'mobile_protect.sign' | t: shop_name: shop.name }}</span></p>
+      </div>
+    </div>
+
+    <div class="pdp-m__pt-foot"><button type="button" data-pdp-pt-close>{{ 'protezioni.ok' | t }}</button></div>
+  </div>
+</dialog>

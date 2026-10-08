@@ -627,6 +627,22 @@
       "fastest_delivery": "Entrega más rápida en 2-3 días hábiles"
     }
   },
+  "mobile_terms": {
+    "eyebrow": "Cupón platinumshop",
+    "desc": "Todo sobre el cupón de esta página: descuento, cómo usarlo y derechos de los clientes.",
+    "nav_coupon": "Cupón",
+    "nav_eu": "UE",
+    "nav_world": "Fuera de la UE",
+    "nav_help": "Asistencia",
+    "value": "Descuento: {{ percent }} % sobre el total de los productos del pedido.",
+    "no_limits": "Sin compra mínima y sin límite de descuento.",
+    "how_html": "Código {{ code }}: toca «{{ claim }}», se añade al carrito y se aplica al pagar.",
+    "excluded": "Los gastos de envío, aranceles e impuestos no tienen descuento.",
+    "omnibus": "Transparencia de precios (Directiva UE 2019/2161 «Omnibus»): cada precio anterior corresponde al precio más bajo de los últimos 30 días.",
+    "refund_paid": "En caso de devolución, el reembolso corresponde al importe realmente pagado, descuento incluido.",
+    "world_products": "El descuento se aplica solo al valor de los productos, sin incluir los gastos de envío internacional ni de despacho de aduanas.",
+    "help_html": "¿Preguntas o problemas con el código de descuento? Nuestro equipo está a tu disposición: {{ email }}"
+  },
   "mobile_order": {
     "eyebrow": "Pedido garantizado",
     "desc": "De la compra al reembolso: los compromisos escritos en nuestras políticas, para cada pedido.",

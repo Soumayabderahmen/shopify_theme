@@ -707,6 +707,22 @@
       "fastest_delivery": "Livrare rapidă în 2-3 zile lucrătoare"
     }
   },
+  "mobile_terms": {
+    "eyebrow": "Cupon platinumshop",
+    "desc": "Totul despre cuponul de pe această pagină: reducere, utilizare și drepturile clienților.",
+    "nav_coupon": "Cupon",
+    "nav_eu": "UE",
+    "nav_world": "În afara UE",
+    "nav_help": "Asistență",
+    "value": "Reducere: {{ percent }}% din totalul produselor din comandă.",
+    "no_limits": "Fără sumă minimă și fără plafon de reducere.",
+    "how_html": "Codul {{ code }}: atinge „{{ claim }}”, este adăugat în coș și aplicat la plată.",
+    "excluded": "Costurile de livrare, taxele vamale și impozitele nu sunt reduse.",
+    "omnibus": "Transparența prețurilor (Directiva UE 2019/2161 „Omnibus”): fiecare preț anterior se referă la cel mai mic preț din ultimele 30 de zile.",
+    "refund_paid": "În caz de retur, rambursarea corespunde sumei plătite efectiv, inclusiv reducerea.",
+    "world_products": "Reducerea se aplică doar valorii produselor, fără costurile de expediere internațională și de vămuire.",
+    "help_html": "Întrebări sau probleme cu codul de reducere? Echipa noastră te ajută: {{ email }}"
+  },
   "mobile_order": {
     "eyebrow": "Comandă garantată",
     "desc": "De la cumpărare la rambursare: angajamentele scrise în politicile noastre, pentru fiecare comandă.",
