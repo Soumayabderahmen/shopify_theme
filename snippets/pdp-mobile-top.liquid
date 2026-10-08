@@ -436,7 +436,7 @@
   </section>
 
   {%- comment -%} 13. Potrebbe piacerti anche : recommandations Shopify (API), remplies par le script. {%- endcomment -%}
-  <section class="pdp-m__rel" data-pdp-related data-url="{{ routes.product_recommendations_url }}.json?product_id={{ product.id }}&limit=8&intent=related" hidden>
+  <section class="pdp-m__rel" data-pdp-related data-url="{{ routes.product_recommendations_url }}.json?product_id={{ product.id }}&limit=6&intent=related" hidden>
     <h2>{{ 'mobile.pdp.you_may_like' | t }}</h2>
     <div class="pdp-m__rail" data-pdp-rail></div>
   </section>

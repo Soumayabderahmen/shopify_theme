@@ -2423,11 +2423,11 @@ dl.pdp-m__spec {
   font-weight: 700;
 }
 
-/* Grille de 2 colonnes (au lieu d'une rangée défilante). */
+/* Grille compacte de 3 colonnes (au lieu d'une rangée défilante) : 6 produits sur 2 rangées. */
 .pdp-m__rail {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 8px;
   padding: 0 16px 4px;
 }
 
@@ -2512,6 +2512,30 @@ dl.pdp-m__spec {
   font-family: 'Figtree', sans-serif;
   font-size: 11.5px;
   font-weight: 500;
+}
+
+/* Cartes compactes de la grille : titre sur une ligne, prix seul (la réduction est déjà sur la photo). */
+.pdp-m__rail .pdp-m__rc p {
+  min-height: 0;
+  padding: 6px 7px 0;
+  font-size: 11.5px;
+  -webkit-line-clamp: 1;
+}
+
+.pdp-m__rail .pdp-m__pr {
+  padding: 2px 7px 8px;
+  font-size: 13px;
+}
+
+.pdp-m__rail .pdp-m__pr s {
+  display: none;
+}
+
+.pdp-m__rail .pdp-m__pp i {
+  top: 5px;
+  left: 5px;
+  padding: 1px 5px;
+  font-size: 10px;
 }
 
 /* 14. Barre d'achat fixe */
