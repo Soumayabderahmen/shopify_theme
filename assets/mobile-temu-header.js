@@ -2097,20 +2097,22 @@ function initMobileTemuHeader() {
       console.error('Unable to prepare recently viewed products.', error);
     });
   };
-  // « Nuovi arrivi » : les 3 premières photos (celles visibles sans faire défiler) sont téléchargées au repos ;
-  // en « lazy » elles n'arrivaient qu'une fois le tiroir ouvert et la rangée à l'écran.
-  var warmExploreNewArrivals = function () {
+  // « In offerta » et « Nuovi arrivi » : les 3 premières photos de chaque rangée (celles visibles sans faire défiler)
+  // sont téléchargées au repos ; en « lazy » elles n'arrivaient qu'une fois le tiroir ouvert et la rangée à l'écran.
+  var warmExploreRails = function () {
     if (!exploreDrawer) return;
-    exploreDrawer.querySelectorAll('[data-mobile-explore-new] img[loading="lazy"]').forEach(function (image, index) {
-      if (index > 2) return;
-      image.fetchPriority = 'low';
-      image.loading = 'eager';
+    exploreDrawer.querySelectorAll('[data-mobile-explore-warm]').forEach(function (rail) {
+      rail.querySelectorAll('img[loading="lazy"]').forEach(function (image, index) {
+        if (index > 2) return;
+        image.fetchPriority = 'low';
+        image.loading = 'eager';
+      });
     });
   };
   if (isMobile && exploreDrawer) {
     var warmExploreDrawer = function () {
       warmRecentExploreProducts();
-      warmExploreNewArrivals();
+      warmExploreRails();
     };
     var scheduleExploreWarmUp = function () {
       if ('requestIdleCallback' in window) window.requestIdleCallback(warmExploreDrawer, { timeout: 3000 });

@@ -333,10 +333,10 @@
       <section class="mobile-explore-section">
         <div class="mobile-explore-section__title">
           <h2>🔥 {{ 'mobile.explore.on_sale' | t }}</h2>
-          <a href="{% if sale_collection.handle == 'in-offerta' %}{{ sale_collection.url }}{% else %}{{ routes.all_products_collection_url }}{% endif %}">{{ 'mobile.explore.see_all_f' | t }}</a>
+          <a href="{% if sale_collection.handle == 'in-offerta' %}{{ sale_collection.url }}{% else %}{{ routes.all_products_collection_url }}?view=offerte{% endif %}">{{ 'mobile.explore.see_all_f' | t }}</a>
         </div>
         {%- if sale_product_count > 0 -%}
-          <div class="mobile-explore-rail mobile-explore-rail--products">
+          <div class="mobile-explore-rail mobile-explore-rail--products" data-mobile-explore-warm>
             {%- assign displayed_sale_products = 0 -%}
             {%- for explore_product in sale_collection.products -%}
               {%- assign sale_variant = explore_product.selected_or_first_available_variant -%}
@@ -560,7 +560,7 @@
             <h2>{{ 'mobile.explore.new_arrivals' | t }} <span class="mobile-explore-tag">NEW</span></h2>
             <a href="{{ new_collection.url }}?sort_by=created-descending">{{ 'mobile.explore.see_all' | t }}</a>
           </div>
-          <div class="mobile-explore-rail mobile-explore-rail--products" data-mobile-explore-new>
+          <div class="mobile-explore-rail mobile-explore-rail--products" data-mobile-explore-warm>
             {%- for explore_product in new_collection.products limit: 8 -%}
               {%- assign new_variant = explore_product.selected_or_first_available_variant -%}
               <a class="mobile-explore-product{% if new_variant.compare_at_price > new_variant.price %} mobile-explore-product--sale{% endif %}" href="{{ explore_product.url }}">

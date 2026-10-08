@@ -6,8 +6,18 @@
   (cartes produit + chargement automatique, assets/mobile-auto-load.js).
   Affiché seulement en mobile (assets/collection-mobile.css) ; script : assets/collection-mobile.js.
   Params : section, menu (linklist des sous-collections)
+  Modèle « offerte » (page « In offerta », templates/collection.offerte.json) : titre « In offerta », sans nombre de produits ni filtres
+  (leurs compteurs compteraient toute la collection, pas seulement les promotions) ; le tri reste.
 {%- endcomment -%}
 {%- liquid
+  assign clm_title = collection.title
+  assign clm_total = collection.products_count
+  assign clm_filters = collection.filters
+  if template.suffix == 'offerte'
+    assign clm_title = 'mobile.explore.on_sale' | t
+    assign clm_total = 0
+    assign clm_filters = empty
+  endif
   assign clm_sort = collection.sort_by | default: collection.default_sort_by
   assign clm_sort_label = ''
   for option in collection.sort_options
@@ -56,21 +66,23 @@
   endfor
 -%}
 <style>.clm{display:none}</style>
-<div class="clm" data-collection-mobile data-total="{{ collection.products_count }}">
+<div class="clm" data-collection-mobile data-total="{{ clm_total }}">
   <nav class="clm-bc" aria-label="{{ 'mobile.cart.breadcrumb' | t }}">
     <a href="{{ routes.root_url }}">{{ 'mobile.cart.home' | t }}</a>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-    <span aria-current="page">{{ collection.title }}</span>
+    <span aria-current="page">{{ clm_title }}</span>
   </nav>
   <div class="clm-title">
-    <h1>{{ collection.title }}</h1>
-    <p>
-      {%- if collection.products_count == 1 -%}
-        {{ 'mobile.collection.count_one' | t }}
-      {%- else -%}
-        {{ 'mobile.collection.count_other_html' | t: count: collection.products_count }}
-      {%- endif -%}
-    </p>
+    <h1>{{ clm_title }}</h1>
+    {%- if clm_total > 0 -%}
+      <p>
+        {%- if clm_total == 1 -%}
+          {{ 'mobile.collection.count_one' | t }}
+        {%- else -%}
+          {{ 'mobile.collection.count_other_html' | t: count: clm_total }}
+        {%- endif -%}
+      </p>
+    {%- endif -%}
   </div>
 
   {%- if clm_parent != nil and clm_parent.links.size > 0 -%}
@@ -83,7 +95,7 @@
   {%- endif -%}
 
   <div class="clm-tb" data-clm-toolbar>
-    {%- if collection.filters.size > 0 -%}
+    {%- if clm_filters.size > 0 -%}
       <button class="clm-f{% if clm_active_count > 0 %} is-on{% endif %}" type="button" data-clm-open="filters" aria-haspopup="dialog">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></svg>
         {{- 'mobile.collection.filters' | t -}}
@@ -103,7 +115,7 @@
       Raccourcis (prototype « Filtri v2 ») : « Disponibili » s'applique d'un toucher ; les autres ouvrent la feuille
       directement sur leur filtre. Vrais filtres de la collection, dans l'ordre de Search & Discovery.
     {%- endcomment -%}
-    {%- if collection.filters.size > 0 -%}
+    {%- if clm_filters.size > 0 -%}
       <div class="clm-qf" aria-label="{{ 'mobile.collection.quick_filters' | t }}">
         {%- for filter in collection.filters -%}
           {%- if filter.param_name == 'filter.v.availability' -%}
@@ -174,7 +186,7 @@
     pastilles pour les couleurs). Le bouton « Mostra N prodotti » est recalculé par Shopify à chaque changement
     (assets/collection-mobile.js) ; la validation recharge la page filtrée.
   {%- endcomment -%}
-  {%- if collection.filters.size > 0 -%}
+  {%- if clm_filters.size > 0 -%}
     <section class="clm-sheet clm-fsheet" data-clm-sheet="filters" role="dialog" aria-modal="true" aria-label="{{ 'mobile.collection.filters' | t }}" aria-hidden="true">
       <span class="clm-grab" aria-hidden="true"></span>
       <div class="clm-sh">

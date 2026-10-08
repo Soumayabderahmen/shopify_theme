@@ -1,0 +1,82 @@
+{
+  "sections": {
+    "breadcrumbs": {
+      "type": "breadcrumbs",
+      "settings": {
+        "hide_mobile": false
+      }
+    },
+    "main-collection": {
+      "type": "main-collection",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {
+            "title_size": "h5",
+            "text_alignment": "center",
+            "title": ""
+          }
+        },
+        "sorting": {
+          "type": "sorting",
+          "settings": {}
+        },
+        "product_grid": {
+          "type": "product_grid",
+          "settings": {}
+        },
+        "423fb7f6-2c97-4420-8211-d45378349d2a": {
+          "type": "description",
+          "settings": {
+            "text_alignment": "left",
+            "enable_read_more": false,
+            "text": ""
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "sorting",
+        "product_grid",
+        "423fb7f6-2c97-4420-8211-d45378349d2a"
+      ],
+      "settings": {
+        "width": "wide",
+        "pagination_qty": 24,
+        "pagination_type": "button",
+        "show_amount_of_products_in_collection": false,
+        "show_collection_image": false,
+        "enable_grid_list_toggle": true,
+        "productview_type": "grid",
+        "products_per_row": 4,
+        "enable_secondary_products_per_row": false,
+        "secondary_products_per_row": 4,
+        "default_grid": "primary",
+        "enable_filters": false,
+        "enable_menu": true,
+        "enable_collections": true,
+        "filters_menu_alignment": "left",
+        "filter_menu": "main-menu",
+        "collections_menu": [],
+        "filter_sticky": false,
+        "filters_show_more_limit": 7,
+        "image_swatches_size": "xs",
+        "image_swatches_fill_images": false,
+        "image_swatches_show_in_circle": true,
+        "enable_quick_buy_desktop": false,
+        "enable_quick_buy_mobile": false,
+        "enable_quick_buy_drawer": true,
+        "enable_quick_buy_qty_selector": true,
+        "enable_color_picker": false,
+        "enable_quick_buy_compact": false,
+        "enable_secondary_products_per_row_mobile": true,
+        "products_per_row_mobile": "2",
+        "filter_mobile_sticky": false
+      }
+    }
+  },
+  "order": [
+    "breadcrumbs",
+    "main-collection"
+  ]
+}

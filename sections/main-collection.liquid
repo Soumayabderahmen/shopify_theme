@@ -260,7 +260,18 @@
           -%}
         {%- when 'product_grid'-%}
           {%- if collection.products.size > 0 -%}
-            {%- paginate collection.products by section.settings.pagination_qty -%}
+            {%- comment -%}
+              « Seulement les promotions » (modèle templates/collection.offerte.json, lien « Vedi tutte » de « In offerta »
+              du menu ☰ mobile) : environ la moitié des produits est en promotion, donc pages de 96 produits pour en
+              montrer une quarantaine à chaque fois.
+            {%- endcomment -%}
+            {%- liquid
+              assign collection_page_size = section.settings.pagination_qty
+              if template.suffix == 'offerte'
+                assign collection_page_size = 96
+              endif
+            -%}
+            {%- paginate collection.products by collection_page_size -%}
               {%- if section.settings.pagination_type == 'button' and paginate.previous %}
                 {% render 'pagination',
                   paginate: paginate,
@@ -289,6 +300,10 @@
                   endif
                 -%}
                 {%- for product in collection.products -%}
+                  {%- if template.suffix == 'offerte' -%}
+                    {%- assign sale_check_variant = product.selected_or_first_available_variant -%}
+                    {%- unless sale_check_variant.compare_at_price > sale_check_variant.price -%}{%- continue -%}{%- endunless -%}
+                  {%- endif -%}
                   {%- liquid
                     capture placeholder_int
                       cycle 1, 2, 3, 4, 5, 6
