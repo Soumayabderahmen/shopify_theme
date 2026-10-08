@@ -343,6 +343,35 @@
       return checked ? radioValue(checked) : null;
     });
   };
+  // Prix de la combinaison choisie, en bas à droite de la carte des options : il suit chaque toucher sur une taille ou
+  // une couleur (le prix change selon la variante), avec l'ancien prix barré en promotion.
+  var optionPrice = null;
+  var paintOptionPrice = function (selected) {
+    var match = variants.find(function (variant) {
+      return variant.options && variant.options.every(function (optionValue, i) { return optionValue === selected[i]; });
+    });
+    if (!match) return;
+    if (!optionPrice) {
+      optionPrice = document.createElement('div');
+      optionPrice.className = 'pdp-m__optp';
+      optionPrice.setAttribute('aria-live', 'polite');
+      optionPrice.innerHTML = '<s></s><b></b>';
+      optionsCard.appendChild(optionPrice);
+    }
+    var key = match.id + ':' + match.price;
+    if (optionPrice.getAttribute('data-key') === key) return;
+    var changed = optionPrice.hasAttribute('data-key');
+    optionPrice.setAttribute('data-key', key);
+    var sale = match.compare > match.price;
+    optionPrice.querySelector('b').textContent = money(match.price);
+    optionPrice.querySelector('s').textContent = sale ? money(match.compare) : '';
+    optionPrice.classList.toggle('is-sale', sale);
+    if (changed) {
+      optionPrice.classList.remove('is-new');
+      void optionPrice.offsetWidth;
+      optionPrice.classList.add('is-new');
+    }
+  };
   var syncOptions = function () {
     if (!optionsCard) return;
     // Choix en cours d'application par le thème : on affiche le choix du client.
@@ -361,31 +390,14 @@
           return variant.options && variant.options.every(function (optionValue, i) { return optionValue === combination[i]; });
         });
       });
-      // Prix de chaque valeur (avec les autres options choisies), seulement quand il change d'une valeur à l'autre :
-      // le client voit avant de toucher que la taille 44 coûte plus que la 38. Le moins cher en vert.
-      var prices = matches.filter(Boolean).map(function (match) { return match.price; });
-      var varies = prices.some(function (price) { return price !== prices[0]; });
-      var lowest = varies ? Math.min.apply(null, prices) : null;
-      block.classList.toggle('has-prices', varies);
       buttons.forEach(function (button, i) {
         var match = matches[i];
         button.setAttribute('aria-checked', button.getAttribute('data-value') === value ? 'true' : 'false');
         // Épuisé avec les autres options choisies : barré (comme le prototype).
         button.classList.toggle('is-unavailable', !match || !match.available);
-        var tag = button.querySelector('.pdp-m__vp');
-        if (!varies || !match) {
-          if (tag) tag.remove();
-          return;
-        }
-        if (!tag) {
-          tag = document.createElement('span');
-          tag.className = 'pdp-m__vp';
-          button.appendChild(tag);
-        }
-        tag.textContent = money(match.price);
-        tag.classList.toggle('is-low', match.price === lowest);
       });
     });
+    paintOptionPrice(selected);
     if (sizeUi) paintSize();
   };
   /* ---------- Taille (prototype « taille v2 ») : "36 weight 82-90kg" -> gros « 36 » + petit « 82–90 kg », tailles

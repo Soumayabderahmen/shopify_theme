@@ -1337,67 +1337,47 @@ body.template-product {
   color: #cdd0db;
 }
 
-/* Prix par valeur d'option (assets/pdp-mobile.js, seulement quand le prix change selon la valeur) : petite ligne sous la
-   taille / la couleur, le moins cher en vert. */
-.pdp-m__vp {
-  display: block;
-  max-width: 100%;
-  overflow: hidden;
-  color: var(--pm-ink-2);
-  font-size: 10.5px;
-  font-weight: 700;
-  line-height: 1.15;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  text-decoration: none;
-  letter-spacing: -0.2px;
+/* Prix de la combinaison choisie (assets/pdp-mobile.js) : en bas à droite de la carte des options, il change à chaque
+   toucher sur une taille ou une couleur ; ancien prix barré en promotion. */
+.pdp-m__optp {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #e3e5ee;
 }
 
-.pdp-m__vp.is-low {
-  color: var(--pm-ok);
+.pdp-m__optp s {
+  color: #9a9db0;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.pdp-m__swb .pdp-m__vp {
-  margin-top: 1px;
+.pdp-m__optp s:empty {
+  display: none;
 }
 
-#root .pdp-m .has-prices .pdp-m__szb {
-  height: auto;
-  min-height: 44px;
-  padding-top: 5px;
-  padding-bottom: 5px;
+.pdp-m__optp b {
+  color: var(--pm-ink);
+  font-family: 'Sora', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
 }
 
-#root .pdp-m .has-prices .pdp-m__sz--grid .pdp-m__szb {
-  min-height: 58px;
+.pdp-m__optp.is-sale b {
+  color: #e0262b;
 }
 
-#root .pdp-m .has-prices .pdp-m__sz--noted .pdp-m__szb,
-#root .pdp-m .has-prices .pdp-m__sz--shoe .pdp-m__szb {
-  min-height: 72px;
+.pdp-m__optp.is-new b {
+  animation: pdp-m-optp 0.45s ease;
 }
 
-#root .pdp-m .has-prices .pdp-m__sz:not(.pdp-m__sz--grid) .pdp-m__szb {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-#root .pdp-m .has-prices .pdp-m__chip {
-  flex-direction: row;
-}
-
-.pdp-m__chip .pdp-m__vp {
-  display: inline;
-}
-
-.pdp-m__szb[aria-checked='true'] .pdp-m__vp {
-  color: #fff;
-}
-
-.pdp-m__szb.is-unavailable .pdp-m__vp {
-  color: #cdd0db;
+@keyframes pdp-m-optp {
+  0% { opacity: 0.2; transform: translateY(4px); }
+  100% { opacity: 1; transform: none; }
 }
 
 /* Pointures (prototype « pointures ») : grille de 5, pointure EU en gros, longueur du pied en petit. */
