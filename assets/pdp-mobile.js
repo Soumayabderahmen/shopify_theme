@@ -1268,11 +1268,13 @@
     });
 
     // Dernier paragraphe d'information (après les photos) : petite note en italique.
+    // Photos du fournisseur (alicdn) : refusées quand la page qui les demande est indiquée (anti-hotlink),
+    // d'où referrerpolicy="no-referrer" ici et dans la visionneuse.
     if (photos.length) {
       var shown = photos.slice(0, 6);
       html += '<section class="pdp-m__sec" id="pdp-sec-photo" data-pdp-section="photo" role="tabpanel"' + (tabs.length ? ' hidden' : '') + '><div class="pdp-m__media">' + shown.map(function (src, i) {
         var more = i === 5 && photos.length > 6 ? '<span class="pdp-m__more2">+' + (photos.length - 6) + '</span>' : '';
-        return '<button type="button" data-pdp-photo="' + i + '" aria-label="' + T('photo_n', { number: i + 1 }) + '"><img src="' + src + '" alt="" loading="lazy">' + more + '</button>';
+        return '<button type="button" data-pdp-photo="' + i + '" aria-label="' + T('photo_n', { number: i + 1 }) + '"><img src="' + src + '" alt="" loading="lazy" referrerpolicy="no-referrer">' + more + '</button>';
       }).join('') + '</div></section>';
       tabs.push({ key: 'photo', title: T('photos') });
     }
@@ -1418,7 +1420,7 @@
     var count = box && box.querySelector('[data-pdp-lb-count]');
     if (!box || !photos.length) return;
     document.body.appendChild(box);
-    track.innerHTML = photos.map(function (src) { return '<div><img src="' + src + '" alt="" loading="lazy"></div>'; }).join('');
+    track.innerHTML = photos.map(function (src) { return '<div><img src="' + src + '" alt="" loading="lazy" referrerpolicy="no-referrer"></div>'; }).join('');
     var index = 0;
     var show = function (i, smooth) {
       index = Math.max(0, Math.min(photos.length - 1, i));
