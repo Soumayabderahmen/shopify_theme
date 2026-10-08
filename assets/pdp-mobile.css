@@ -1343,15 +1343,19 @@ body.template-product {
   display: flex;
   align-items: baseline;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px dashed #e3e5ee;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+/* À côté du bouton « China Mainland », poussé à droite. */
+.pdp-m__optp.is-inline {
+  align-self: center;
+  margin: 0 0 0 auto;
 }
 
 .pdp-m__optp s {
   color: #9a9db0;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
 }
 
@@ -1362,7 +1366,7 @@ body.template-product {
 .pdp-m__optp b {
   color: var(--pm-ink);
   font-family: 'Sora', sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
   line-height: 1.1;
 }

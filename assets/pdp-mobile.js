@@ -356,7 +356,16 @@
       optionPrice.className = 'pdp-m__optp';
       optionPrice.setAttribute('aria-live', 'polite');
       optionPrice.innerHTML = '<s></s><b></b>';
-      optionsCard.appendChild(optionPrice);
+      // À droite des boutons de la dernière option quand c'est une rangée simple (« Spedizioni da » : China Mainland) ;
+      // sous la carte, à droite, après une grille de tailles ou des couleurs.
+      var rows = optionsCard.querySelectorAll('[data-option-index]');
+      var row = rows.length ? rows[rows.length - 1].querySelector('.pdp-m__sz:not(.pdp-m__sz--grid)') : null;
+      if (row) {
+        optionPrice.classList.add('is-inline');
+        row.appendChild(optionPrice);
+      } else {
+        optionsCard.appendChild(optionPrice);
+      }
     }
     var key = match.id + ':' + match.price;
     if (optionPrice.getAttribute('data-key') === key) return;
