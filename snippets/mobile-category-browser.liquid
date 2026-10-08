@@ -554,7 +554,7 @@
         <section class="mobile-explore-section">
           <div class="mobile-explore-section__title">
             <h2>{{ 'mobile.explore.new_arrivals' | t }} <span class="mobile-explore-tag">NEW</span></h2>
-            <a href="{{ new_collection.url }}">{{ 'mobile.explore.see_all' | t }}</a>
+            <a href="{{ new_collection.url }}?sort_by=created-descending">{{ 'mobile.explore.see_all' | t }}</a>
           </div>
           <div class="mobile-explore-rail mobile-explore-rail--products">
             {%- for explore_product in new_collection.products limit: 8 -%}
@@ -590,7 +590,7 @@
         <section class="mobile-explore-section mobile-explore-section--top">
           <div class="mobile-explore-section__title">
             <h2>🏆 {{ 'mobile.explore.best_sellers' | t }}</h2>
-            <a href="{{ hot_collection.url }}">{{ 'mobile.explore.see_all' | t }}</a>
+            <a href="{{ hot_collection.url }}?sort_by=best-selling">{{ 'mobile.explore.see_all' | t }}</a>
           </div>
           <ol class="mobile-explore-top-products">
             {%- for explore_product in hot_collection.products limit: 3 -%}
