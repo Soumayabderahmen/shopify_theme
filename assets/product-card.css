@@ -1367,3 +1367,35 @@
     color: #fff;
   }
 }
+
+/* Reebok (mobile) : même rotation, design propre à la marque — face « Produit le plus vendu » bleu marine avec liseré
+   rouge et logo « Vector » rouge, face « Verified Reebok » rouge à texte blanc. */
+@media (max-width: 760px) {
+  #root .alibaba-top-selling-ribbon--brand-reebok :is(.apc-flip__face--front:not(.apc-flip__face--verified), .apc-flip__face--bestseller) {
+    color: #fff;
+    background: linear-gradient(135deg, #14213d, #1f3460);
+    box-shadow: inset 0 -3px 0 #e41d1b;
+    letter-spacing: 0.4px;
+  }
+
+  #root .alibaba-top-selling-ribbon--brand-reebok :is(.apc-flip__face--top:not(.apc-flip__face--bestseller), .apc-flip__face--verified) {
+    color: #fff;
+    background: linear-gradient(135deg, #e41d1b, #b3121a);
+    box-shadow: inset 0 -3px 0 #14213d;
+    letter-spacing: 0.4px;
+  }
+
+  #root .alibaba-top-selling-ribbon--brand-reebok .alibaba-verified-badge__icon {
+    color: #e41d1b;
+    background: #fff;
+  }
+
+  #root .alibaba-top-selling-ribbon--brand-reebok .apc-brand-icon--reebok {
+    color: #e41d1b;
+  }
+
+  /* Fond du ruban (visible pendant la rotation) : bleu marine au lieu du violet des grilles mobiles. */
+  #root :is(#content, #collection) li.alibaba-product-card .alibaba-top-selling-ribbon.alibaba-top-selling-ribbon--brand-reebok.alibaba-top-selling-ribbon--brand-reebok.alibaba-top-selling-ribbon--brand-reebok {
+    background: #14213d !important;
+  }
+}
