@@ -3591,16 +3591,23 @@
     Plus de 50 ventes : tourne partout (comme avant). 50 ou moins : tourne sur mobile ; ordinateur = badge Verified fixe
     comme avant (face avant Verified, classe --verified-cube).
   {%- endcomment -%}
-  {%- comment -%} Icône de la face « Produit le plus vendu » : logo trois bandes pour Adidas (design propre, assets/product-card.css), ★ sinon. {%- endcomment -%}
-  {%- if matched_brand == "Adidas" -%}
+  {%- comment -%} Marque du ruban : Jordan pour les « Nike Air Jordan… » (la détection ci-dessus trouve Nike en premier). {%- endcomment -%}
+  {%- assign ribbon_brand = matched_brand -%}
+  {%- if product_title_lower contains "jordan" or product_vendor_lower contains "jordan" -%}
+    {%- assign ribbon_brand = "Jordan" -%}
+  {%- endif -%}
+  {%- comment -%} Icône de la face « Produit le plus vendu » : logo de marque pour Adidas, Jordan et Reebok (design propre, assets/product-card.css), ★ sinon. {%- endcomment -%}
+  {%- if ribbon_brand == "Adidas" -%}
     {%- capture brand_bestseller_icon -%}<span class="apc-brand-icon apc-brand-icon--adidas" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M1.5 20.5 4.4 15.6l2.8 1.6-1.9 3.3zM7.6 20.5l5.1-8.8 2.8 1.6-4.2 7.2zM13.7 20.5 21 7.9l2.8 1.6-6.3 11z"/></svg></span>{%- endcapture -%}
-  {%- elsif matched_brand == "Reebok" -%}
+  {%- elsif ribbon_brand == "Jordan" -%}
+    {%- capture brand_bestseller_icon -%}<span class="apc-brand-icon apc-brand-icon--jordan" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><circle cx="13.6" cy="2.6" r="2"/><path d="M12.4 5.4c1.6-.2 2.6.8 2.3 2.4l-.6 3.2 3.6 1.9 3.2-3.1 1.4 1.3-3.9 4.4-3.9-1.6-1.4 3.4 2.3 2.4-.8 4.3h-1.9l.4-3.4-3-2.4-3.6 5.3H4.1l4.6-7 .9-5.5-2.6 1.9-3.3-.6.3-1.8 2.5.3 3.8-3.2c.7-.6 1.4-1 2.1-1.2z"/></svg></span>{%- endcapture -%}
+  {%- elsif ribbon_brand == "Reebok" -%}
     {%- capture brand_bestseller_icon -%}<span class="apc-brand-icon apc-brand-icon--reebok" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M1 17.5c7.2-.4 13.6-3.6 22-12.5-3.4 6.3-7.6 10.4-12.3 12.7l3.3 3.3H7.6l-1.8-2.4c-1.5.2-3.1.2-4.8-1.1z"/><path d="M3.2 13.6c3.6-.6 7-2.4 10.4-5.6-2 3-4.4 5-7 6.1z" opacity=".7"/></svg></span>{%- endcapture -%}
   {%- else -%}
     {%- capture brand_bestseller_icon -%}<span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>{%- endcapture -%}
   {%- endif -%}
   {%- if bestseller_count > 50 -%}
-    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--animated alibaba-top-selling-ribbon--brand-{{ matched_brand | handleize }}" role="status" aria-label="{{ top_selling_text }}">
+    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--animated alibaba-top-selling-ribbon--brand-{{ ribbon_brand | handleize }}" role="status" aria-label="{{ top_selling_text }}">
       <div class="apc-flip-scene">
         <div class="apc-flip">
           <!-- Faccia Frontale: Bestseller -->
@@ -3611,18 +3618,18 @@
           <!-- Faccia Posteriore: Verified Brand -->
           <div class="apc-flip__face apc-flip__face--top">
             <span class="alibaba-verified-badge__icon">✓</span>
-            <span class="alibaba-verified-badge__text">Verified {{ matched_brand }}</span>
+            <span class="alibaba-verified-badge__text">Verified {{ ribbon_brand }}</span>
           </div>
         </div>
       </div>
     </div>
   {%- else -%}
-    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--verified-only alibaba-top-selling-ribbon--verified-cube alibaba-top-selling-ribbon--brand-{{ matched_brand | handleize }}" role="status" aria-label="Verified {{ matched_brand }}">
+    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--verified-only alibaba-top-selling-ribbon--verified-cube alibaba-top-selling-ribbon--brand-{{ ribbon_brand | handleize }}" role="status" aria-label="Verified {{ ribbon_brand }}">
       <div class="apc-flip-scene">
         <div class="apc-flip">
           <div class="apc-flip__face apc-flip__face--front apc-flip__face--verified">
             <span class="alibaba-verified-badge__icon">✓</span>
-            <span class="alibaba-verified-badge__text">Verified {{ matched_brand }}</span>
+            <span class="alibaba-verified-badge__text">Verified {{ ribbon_brand }}</span>
           </div>
           <div class="apc-flip__face apc-flip__face--top apc-flip__face--bestseller">
             {{ brand_bestseller_icon }}
