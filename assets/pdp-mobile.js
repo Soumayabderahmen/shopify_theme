@@ -1453,7 +1453,13 @@
   var reviewsSlot = root.querySelector('[data-pdp-reviews-slot]');
   var reviewsBlock = document.querySelector('.shopify-app-block[id*="ali_reviews_widget_box"]');
   if (reviewsSlot && reviewsBlock) {
+    var reviewsHome = reviewsBlock.closest('.shopify-section');
     reviewsSlot.appendChild(reviewsBlock);
+    // Section de l'app (bloc « _blocks » de templates/product.json) vide une fois le bloc déplacé : sa boîte
+    // (20 px de marge intérieure + 30 px en dessous) laissait un grand vide avant le pied de page.
+    if (reviewsHome && !reviewsHome.contains(root) && !reviewsHome.innerText.trim() && !reviewsHome.querySelector('img, iframe, video, .shopify-app-block')) {
+      reviewsHome.hidden = true;
+    }
     var fallback = root.querySelector('[data-pdp-reviews-fallback]');
     if (fallback) fallback.hidden = true;
     // Note et nombre d'avis de l'app, repris dans la carte prix (« ★ 4,6 · 111 recensioni »).

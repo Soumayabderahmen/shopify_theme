@@ -420,6 +420,11 @@
   display: none !important;
 }
 
+/* Pas de marge sous la fiche : « Potrebbe piacerti anche » a déjà son espace, le pied de page suit directement. */
+#root .shopify-section[id$="__main-product"] {
+  margin-bottom: 0 !important;
+}
+
 /* Place pour la barre d'achat fixe au-dessus de la barre du bas. */
 body.template-product {
   padding-bottom: calc(66px + 72px + env(safe-area-inset-bottom, 0px)) !important;
