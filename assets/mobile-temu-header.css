@@ -1464,7 +1464,7 @@
     font-weight: 700;
   }
 
-  .mobile-brands-sheet__head h2 span:not(:empty) {
+  .mobile-brands-sheet__head [data-mobile-brands-count]:not(:empty) {
     padding: 2px 8px;
     color: #3a34d2;
     font-family: 'Figtree', system-ui, sans-serif;
@@ -1547,6 +1547,14 @@
 
   .mobile-brands-sheet__grid > [hidden] {
     display: none;
+  }
+
+  /* Collections de la saison : 2 colonnes de grandes cartes (comme la rangée). */
+  .mobile-brands-sheet__grid.mobile-season-sheet__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* max-content : sinon les lignes se tassent à la hauteur de la feuille (cartes écrasées). */
+    grid-auto-rows: max-content;
+    gap: 10px;
   }
 
   .mobile-brands-sheet__empty {

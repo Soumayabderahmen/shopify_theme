@@ -256,18 +256,22 @@
           assign current_season = 'mobile.explore.winter' | t
           assign season_class = 'inverno'
           assign seasonal_handles = 'piumini,sweatshirt,casa-giardino' | split: ','
+          assign season_sheet_handles = 'piumini,sweatshirt,casa-giardino,pelle-e-pellicce,womens-boots,felpe_donna,felpe-novita,giacche_donna,giacche_smart,giacche-ragazza-luxury,jogger-pantaloni-donna,leggings_donna,leggings-uomo,calze' | split: ','
         elsif current_month <= 5
           assign current_season = 'mobile.explore.spring' | t
           assign season_class = 'primavera'
           assign seasonal_handles = 'new-trends,mocassini,abbigliamento-cinese-2026' | split: ','
+          assign season_sheet_handles = 'new-trends,mocassini,abbigliamento-cinese-2026,giacche_smart,gonne,abiti-corti,magliette,t-shirt-carino,casual-sneakers-sneakers-casual,platform-sneakers-sneakers-con-zeppa,borse-tote,crossbody-bags-borse-a-tracolla,sport,bici-monopattini' | split: ','
         elsif current_month <= 8
           assign current_season = 'mobile.explore.summer' | t
           assign season_class = 'estate'
           assign seasonal_handles = 'mare-spiaggia,set-uomo-estate,borse-da-spiaggia,casa-giardino' | split: ','
+          assign season_sheet_handles = 'mare-spiaggia,set-uomo-estate,borse-da-spiaggia,casa-giardino,abbigliamento-estate-2025-bikini-costumi,abbigliamento-mare-donna-elegante,ciabatte-summer,sandali-premium,tacco-a-zeppa,pantaloncini_donna,abiti-corti,asciugamani-summer,ombrelloni-mare,accessori-spiaggia-bambini,ventilatori' | split: ','
         else
           assign current_season = 'mobile.explore.autumn' | t
           assign season_class = 'autunno'
           assign seasonal_handles = 'piumini,sweatshirt,new-trends,casa-giardino' | split: ','
+          assign season_sheet_handles = 'piumini,sweatshirt,new-trends,casa-giardino,felpe_donna,felpe-novita,giacche_donna,giacche_smart,giacche-ragazza-luxury,pelle-e-pellicce,womens-boots,mocassini,jogger-pantaloni-donna,leggings_donna,leggings-uomo,calze' | split: ','
         endif
         assign seasonal_collection_count = 0
         for seasonal_handle in seasonal_handles
@@ -281,7 +285,7 @@
         <section class="mobile-explore-section">
           <div class="mobile-explore-section__title">
             <h2>{{ 'mobile.explore.collections' | t }} <span class="mobile-explore-tag mobile-explore-tag--season mobile-explore-tag--season-{{ season_class }}">{{ current_season | escape }}</span></h2>
-            <a href="{{ routes.all_products_collection_url }}">{{ 'mobile.explore.see_all_f' | t }}</a>
+            <button type="button" class="mobile-explore-section__more" aria-haspopup="dialog" data-mobile-season-open>{{ 'mobile.explore.see_all_f' | t }}</button>
           </div>
           <div class="mobile-explore-rail mobile-explore-rail--collections">
             {%- for seasonal_handle in seasonal_handles -%}
@@ -556,7 +560,7 @@
             <h2>{{ 'mobile.explore.new_arrivals' | t }} <span class="mobile-explore-tag">NEW</span></h2>
             <a href="{{ new_collection.url }}?sort_by=created-descending">{{ 'mobile.explore.see_all' | t }}</a>
           </div>
-          <div class="mobile-explore-rail mobile-explore-rail--products">
+          <div class="mobile-explore-rail mobile-explore-rail--products" data-mobile-explore-new>
             {%- for explore_product in new_collection.products limit: 8 -%}
               {%- assign new_variant = explore_product.selected_or_first_available_variant -%}
               <a class="mobile-explore-product{% if new_variant.compare_at_price > new_variant.price %} mobile-explore-product--sale{% endif %}" href="{{ explore_product.url }}">
@@ -627,6 +631,7 @@
     <dialog
       class="mobile-brands-sheet"
       aria-labelledby="mobile-brands-sheet-title"
+      data-mobile-explore-sheet
       data-mobile-brands-sheet
       data-brands-url="{{ 'mobile-brands.json' | asset_url }}"
     >
@@ -643,5 +648,58 @@
       <div class="mobile-brands-sheet__grid" data-mobile-brands-grid></div>
       <p class="mobile-brands-sheet__empty" data-mobile-brands-empty hidden>{{ 'mobile.explore.no_brands' | t }}</p>
     </dialog>
+
+    {%- comment -%}
+      « Vedi tutte » des collections de saison : toutes les vraies collections de la saison en cours
+      (season_sheet_handles, choisies plus haut avec la saison), avec la photo de la collection ou de son premier produit.
+    {%- endcomment -%}
+    {%- if seasonal_collection_count > 0 -%}
+      <dialog
+        class="mobile-brands-sheet mobile-season-sheet"
+        aria-labelledby="mobile-season-sheet-title"
+        data-mobile-explore-sheet
+        data-mobile-season-sheet
+      >
+        <div class="mobile-brands-sheet__head">
+          <h2 id="mobile-season-sheet-title">{{ 'mobile.explore.collections' | t }} <span class="mobile-explore-tag mobile-explore-tag--season mobile-explore-tag--season-{{ season_class }}">{{ current_season | escape }}</span></h2>
+          <button type="button" class="mobile-brands-sheet__close" aria-label="{{ 'mobile.common.close' | t }}" data-mobile-brands-close>
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+          </button>
+        </div>
+        <div class="mobile-brands-sheet__grid mobile-season-sheet__grid">
+          {%- for season_handle in season_sheet_handles -%}
+            {%- liquid
+              assign season_collection = collections[season_handle]
+              assign season_image = blank
+              if season_collection != blank and season_collection.products_count > 0
+                assign season_image = season_collection.featured_image
+                if season_image == blank
+                  assign season_image = season_collection.image
+                endif
+                if season_image == blank
+                  assign season_image = season_collection.products.first.featured_image
+                endif
+              endif
+            -%}
+            {%- if season_collection != blank and season_collection.products_count > 0 -%}
+              <a class="mobile-explore-collection" href="{{ season_collection.url }}">
+                {%- if season_image != blank -%}
+                  <img
+                    src="{{ season_image | image_url: width: 400, height: 534, crop: 'center' }}"
+                    alt="{{ season_image.alt | default: season_collection.title | escape }}"
+                    width="200"
+                    height="267"
+                    loading="lazy"
+                  >
+                {%- else -%}
+                  <span class="mobile-explore-collection__placeholder" aria-hidden="true">{{ season_collection.title | slice: 0, 1 | upcase }}</span>
+                {%- endif -%}
+                <span class="mobile-explore-collection__caption"><strong>{{ season_collection.title | escape }}</strong></span>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </dialog>
+    {%- endif -%}
   </dialog>
 {%- endif -%}

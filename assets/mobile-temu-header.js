@@ -1760,7 +1760,6 @@ function initMobileTemuHeader() {
   var brandsFilter = brandsSheet && brandsSheet.querySelector('[data-mobile-brands-filter]');
   var brandsEmpty = brandsSheet && brandsSheet.querySelector('[data-mobile-brands-empty]');
   var brandsSheetLoaded = false;
-  var brandsSheetCloseTimer = null;
   var normalizeBrandName = function (value) {
     return String(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
   };
@@ -1827,22 +1826,28 @@ function initMobileTemuHeader() {
         console.error('Unable to load the brand list.', error);
       });
   };
-  var openBrandsSheet = function () {
-    if (!brandsSheet) return;
-    window.clearTimeout(brandsSheetCloseTimer);
-    brandsSheet.classList.remove('is-closing');
-    if (!brandsSheet.open) brandsSheet.showModal();
-    fillBrandsSheet();
+  // Fenêtres du tiroir (« Toutes les marques », « Collezioni <saison> ») : même ouverture / fermeture.
+  var seasonSheet = exploreDrawer && exploreDrawer.querySelector('[data-mobile-season-sheet]');
+  var openExploreSheet = function (sheet) {
+    if (!sheet) return;
+    window.clearTimeout(sheet.closeTimer);
+    sheet.classList.remove('is-closing');
+    if (!sheet.open) sheet.showModal();
   };
-  var closeBrandsSheet = function () {
-    if (!brandsSheet || !brandsSheet.open || brandsSheet.classList.contains('is-closing')) return;
-    brandsSheet.classList.add('is-closing');
+  var closeExploreSheet = function (sheet) {
+    if (!sheet || !sheet.open || sheet.classList.contains('is-closing')) return;
+    sheet.classList.add('is-closing');
     var finish = function () {
-      brandsSheet.classList.remove('is-closing');
-      if (brandsSheet.open) brandsSheet.close();
+      sheet.classList.remove('is-closing');
+      if (sheet.open) sheet.close();
     };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) finish();
-    else brandsSheetCloseTimer = window.setTimeout(finish, 240);
+    else sheet.closeTimer = window.setTimeout(finish, 240);
+  };
+  var openBrandsSheet = function () {
+    if (!brandsSheet) return;
+    openExploreSheet(brandsSheet);
+    fillBrandsSheet();
   };
   if (brandsFilter) brandsFilter.addEventListener('input', filterBrandsSheet);
   var recentProductsSection = exploreDrawer && exploreDrawer.querySelector('[data-mobile-explore-recent]');
@@ -2092,13 +2097,27 @@ function initMobileTemuHeader() {
       console.error('Unable to prepare recently viewed products.', error);
     });
   };
-  if (isMobile && recentProductsSection) {
-    var scheduleRecentWarmUp = function () {
-      if ('requestIdleCallback' in window) window.requestIdleCallback(warmRecentExploreProducts, { timeout: 3000 });
-      else window.setTimeout(warmRecentExploreProducts, 1500);
+  // « Nuovi arrivi » : les 3 premières photos (celles visibles sans faire défiler) sont téléchargées au repos ;
+  // en « lazy » elles n'arrivaient qu'une fois le tiroir ouvert et la rangée à l'écran.
+  var warmExploreNewArrivals = function () {
+    if (!exploreDrawer) return;
+    exploreDrawer.querySelectorAll('[data-mobile-explore-new] img[loading="lazy"]').forEach(function (image, index) {
+      if (index > 2) return;
+      image.fetchPriority = 'low';
+      image.loading = 'eager';
+    });
+  };
+  if (isMobile && exploreDrawer) {
+    var warmExploreDrawer = function () {
+      warmRecentExploreProducts();
+      warmExploreNewArrivals();
     };
-    if (document.readyState === 'complete') scheduleRecentWarmUp();
-    else window.addEventListener('load', scheduleRecentWarmUp, { once: true });
+    var scheduleExploreWarmUp = function () {
+      if ('requestIdleCallback' in window) window.requestIdleCallback(warmExploreDrawer, { timeout: 3000 });
+      else window.setTimeout(warmExploreDrawer, 1500);
+    };
+    if (document.readyState === 'complete') scheduleExploreWarmUp();
+    else window.addEventListener('load', scheduleExploreWarmUp, { once: true });
   }
   var clearRecentExploreProducts = function () {
     try {
@@ -2151,11 +2170,12 @@ function initMobileTemuHeader() {
       return;
     }
     if (!document.body.classList.contains('mobile-explore-open') || !exploreDrawer) return;
-    // Fenêtre « Toutes les marques » ouverte : Échap la ferme (pas le tiroir), le navigateur garde le focus dedans.
-    if (brandsSheet && brandsSheet.open) {
+    // Fenêtre du tiroir ouverte : Échap la ferme (pas le tiroir), le navigateur garde le focus dedans.
+    var openSheet = exploreDrawer.querySelector('[data-mobile-explore-sheet][open]');
+    if (openSheet) {
       if (event.key === 'Escape') {
         event.preventDefault();
-        closeBrandsSheet();
+        closeExploreSheet(openSheet);
       }
       return;
     }
@@ -2206,9 +2226,15 @@ function initMobileTemuHeader() {
       openBrandsSheet();
       return;
     }
-    if (brandsSheet && (target === brandsSheet || target.closest('[data-mobile-brands-close]'))) {
+    if (target.closest('[data-mobile-season-open]')) {
       event.preventDefault();
-      closeBrandsSheet();
+      openExploreSheet(seasonSheet);
+      return;
+    }
+    // Fond de la fenêtre (à côté de la feuille) ou bouton ✕.
+    if (target.matches('[data-mobile-explore-sheet]') || target.closest('[data-mobile-brands-close]')) {
+      event.preventDefault();
+      closeExploreSheet(target.closest('[data-mobile-explore-sheet]'));
       return;
     }
     if (target.closest('[data-mobile-explore-recent-clear]')) {
