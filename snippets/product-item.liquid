@@ -3587,16 +3587,20 @@
 
   {%- if matched_brand != "" -%}
     <!-- bestseller_count > 50 + BRAND: Cubo 3D Animato -->
+    {%- comment -%}
+      Cube animé (classes apc-flip*, assets/product-card.css) : les styles mobiles des grilles figent les .alibaba-cube
+      (transform / animation none !important) ; des classes propres le laissent tourner partout.
+    {%- endcomment -%}
     <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--animated" role="status" aria-label="{{ top_selling_text }}">
-      <div class="alibaba-cube-scene">
-        <div class="alibaba-cube">
+      <div class="apc-flip-scene">
+        <div class="apc-flip">
           <!-- Faccia Frontale: Bestseller -->
-          <div class="alibaba-cube__face alibaba-cube__face--front">
+          <div class="apc-flip__face apc-flip__face--front">
             <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
             <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
           </div>
           <!-- Faccia Posteriore: Verified Brand -->
-          <div class="alibaba-cube__face alibaba-cube__face--top">
+          <div class="apc-flip__face apc-flip__face--top">
             <span class="alibaba-verified-badge__icon">✓</span>
             <span class="alibaba-verified-badge__text">Verified {{ matched_brand }}</span>
           </div>
@@ -3604,11 +3608,23 @@
       </div>
     </div>
   {%- else -%}
-    <!-- bestseller_count > 50 senza Brand: Solo Ribbon Bestseller -->
-    <div class="alibaba-top-selling-ribbon" role="status" aria-label="{{ top_selling_text }}">
-      <div class="alibaba-top-selling-ribbon__main">
-        <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
-        <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
+    {%- comment -%}
+      bestseller_count > 50 sans marque : même cube animé que les marques (mobile), seconde face = ventes réelles
+      (métadonnée custom.bestseller_count, « 120 vendus »). Ordinateur : ruban fixe comme avant (assets/product-card.css).
+    {%- endcomment -%}
+    {%- assign sold_short_text = 'mobile.home.sold_count' | t: count: bestseller_count -%}
+    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--sold-cube" role="status" aria-label="{{ top_selling_text }}">
+      <div class="apc-flip-scene">
+        <div class="apc-flip">
+          <div class="apc-flip__face apc-flip__face--front">
+            <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
+            <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
+          </div>
+          <div class="apc-flip__face apc-flip__face--top apc-flip__face--sold">
+            <span class="alibaba-sold-badge__icon" aria-hidden="true">🔥</span>
+            <span class="alibaba-top-selling-ribbon__text">{{ sold_short_text }}</span>
+          </div>
+        </div>
       </div>
     </div>
   {%- endif -%}

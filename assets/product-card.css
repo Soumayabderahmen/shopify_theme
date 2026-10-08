@@ -1209,3 +1209,111 @@
       transform: translateX(-100%);
     }
   }
+
+/* Ruban animé des cartes (snippets/product-item.liquid) : cube qui alterne « Produit le plus vendu » et
+   « Verified [marque] » ou, sans marque, les ventes réelles (« 469 vendus »). Classes apc-flip* propres : les styles
+   mobiles des grilles figent les .alibaba-cube. Ordinateur : cube de marque inchangé, ruban sans marque fixe. */
+.apc-flip-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 400px;
+}
+
+.apc-flip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: rotateCubeX 6s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+.apc-flip__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  backface-visibility: hidden;
+  box-sizing: border-box;
+}
+
+.apc-flip__face--front {
+  transform: translateZ(14px);
+  background: linear-gradient(135deg, #4567f0, #5b21b6);
+}
+
+.apc-flip__face--top {
+  transform: rotateX(90deg) translateZ(14px);
+  background: linear-gradient(135deg, #96052e, #de2e69);
+}
+
+.apc-flip__face--sold {
+  background: linear-gradient(135deg, #c2410c, #ea580c);
+}
+
+.alibaba-sold-badge__icon {
+  font-size: 11px;
+  line-height: 1;
+}
+
+@media screen and (max-width: 749px) {
+  .apc-flip__face--front {
+    transform: translateZ(12px);
+  }
+
+  .apc-flip__face--top {
+    transform: rotateX(90deg) translateZ(12px);
+  }
+}
+
+/* Mobile : dans les grilles, le ruban a une hauteur auto (padding 7px) ; la scène prend la hauteur d'une ligne et
+   les faces recouvrent tout le ruban. */
+@media (max-width: 760px) {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube) {
+    overflow: hidden;
+  }
+
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube) .apc-flip-scene {
+    flex: 1 1 auto;
+    height: 14px;
+  }
+
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube) .apc-flip__face {
+    inset: -7px -4px;
+    gap: 5px;
+    padding: 0 4px;
+  }
+
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube) .apc-flip__face--front {
+    transform: translateZ(14px);
+  }
+
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube) .apc-flip__face--top {
+    transform: rotateX(90deg) translateZ(14px);
+  }
+}
+
+@media (min-width: 761px) {
+  .alibaba-top-selling-ribbon--sold-cube .apc-flip {
+    animation: none;
+  }
+
+  .alibaba-top-selling-ribbon--sold-cube .apc-flip__face--front {
+    transform: none;
+    gap: 5px;
+    background: linear-gradient(135deg, #6d28d9, #5b21b6);
+  }
+
+  .alibaba-top-selling-ribbon--sold-cube .apc-flip__face--sold {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apc-flip {
+    animation: none;
+  }
+}
