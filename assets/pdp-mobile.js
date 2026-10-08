@@ -1503,7 +1503,7 @@
             var off = sale ? Math.round((product.compare_at_price - product.price) * 100 / product.compare_at_price) : 0;
             var image = product.featured_image ? product.featured_image + (product.featured_image.indexOf('?') === -1 ? '?' : '&') + 'width=360' : '';
             var title = String(product.title).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
-            return '<a class="pdp-m__rc" href="' + product.url + '"><span class="pdp-m__pp">' + (image ? '<img src="' + image + '" alt="" loading="lazy">' : '') + (sale ? '<i>-' + off + '%</i>' : '') + '</span><p>' + title + '</p><div class="pdp-m__pr' + (sale ? ' is-sale' : '') + '">' + money(product.price) + (sale ? '<s>' + money(product.compare_at_price) + '</s>' : '') + '</div></a>';
+            return '<a class="pdp-m__rc" href="' + product.url + '"><span class="pdp-m__pp">' + (image ? '<img src="' + image + '" alt="" loading="lazy">' : '') + (sale ? '<i>-' + off + '%</i>' : '') + '</span><p>' + title + '</p><div class="pdp-m__pr' + (sale ? ' is-sale' : '') + '"><b>' + money(product.price) + '</b>' + (sale ? '<s>' + money(product.compare_at_price) + '</s>' : '') + '</div></a>';
           }).join('');
           related.hidden = false;
         })

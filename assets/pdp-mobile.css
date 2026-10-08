@@ -2423,15 +2423,12 @@ dl.pdp-m__spec {
   font-weight: 700;
 }
 
+/* Grille de 2 colonnes (au lieu d'une rangée défilante). */
 .pdp-m__rail {
   display: grid;
-  grid-auto-columns: 44%;
-  grid-auto-flow: column;
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 10px;
   padding: 0 16px 4px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
 }
 
 .pdp-m__rail::-webkit-scrollbar {
@@ -2450,6 +2447,8 @@ dl.pdp-m__spec {
 
 .pdp-m__pp {
   position: relative;
+  display: block;
+  overflow: hidden;
   aspect-ratio: 1;
   background: #f1f2f7;
 }
@@ -2488,10 +2487,19 @@ dl.pdp-m__spec {
 }
 
 .pdp-m__pr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 5px;
   padding: 5px 10px 11px;
   font-family: 'Sora', sans-serif;
   font-size: 15px;
   font-weight: 800;
+}
+
+.pdp-m__pr b {
+  font-weight: inherit;
+  white-space: nowrap;
 }
 
 .pdp-m__pr.is-sale {
@@ -2499,7 +2507,7 @@ dl.pdp-m__spec {
 }
 
 .pdp-m__pr s {
-  margin-left: 4px;
+  white-space: nowrap;
   color: var(--pm-mute);
   font-family: 'Figtree', sans-serif;
   font-size: 11.5px;
