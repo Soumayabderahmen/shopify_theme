@@ -7,10 +7,12 @@
   class="no-js{% if request.design_mode %} theme-editor{% endif %}{% unless settings.enable_hyphens %} no-hyph{% endunless %}"
 >
   <head>
+   {%- include 'tapita-seo-schema' -%}   
+
     <!-- Added by AVADA SEO Suite -->
     {% include 'avada-seo' %}
     <!-- /Added by AVADA SEO Suite -->
-    {%- if content_for_header contains 'tapita-seo-script-tags' -%}{%- include 'tapita-seo-schema' -%}{%- endif -%}
+    
     <link rel="stylesheet" href="{{ 'drawer1product-style.css' | asset_url }}" media="print" onload="this.media='all'">
     <noscript>{{ 'drawer1product-style.css' | asset_url | stylesheet_tag }}</noscript>
     <link rel="stylesheet" href="{{ 'producttext-style.css' | asset_url }}" media="print" onload="this.media='all'">

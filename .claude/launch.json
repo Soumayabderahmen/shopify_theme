@@ -15,6 +15,12 @@
       "port": 8765
     },
     {
+      "name": "scratch-video",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8766", "--bind", "127.0.0.1", "--directory", "C:\\Users\\TROOPY\\AppData\\Local\\Temp\\claude\\C--Users-TROOPY-Documents-shopify-copie-samsouma\\b9a8d92d-b340-4bb3-b548-4fca517d3dec\\scratchpad\\video"],
+      "port": 8766
+    },
+    {
       "name": "shopify-theme-dev-attach",
       "port": 9292,
       "url": "http://127.0.0.1:9292"

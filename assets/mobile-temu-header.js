@@ -287,7 +287,7 @@ function initMobileTemuHeader() {
   function readWishlistCardPrice(priceElement) {
     if (!priceElement) return 0;
     var cleanPrice = priceElement.cloneNode(true);
-    cleanPrice.querySelectorAll('.old-price, .alibaba-card__discount-badge, .small, .price-varies').forEach(function (element) {
+    cleanPrice.querySelectorAll('.old-price, .alibaba-card__discount-badge, .small, .price-varies, .apc-price-desktop').forEach(function (element) {
       element.remove();
     });
     var text = cleanPrice.textContent.replace(/\s+/g, ' ').trim();
@@ -762,7 +762,12 @@ function initMobileTemuHeader() {
         title: titleLink.textContent.trim(),
         url: productUrl,
         image: image ? image.currentSrc || image.src : '',
-        price: price ? price.textContent.replace(/\s+/g, ' ').trim() : '',
+        price: price ? (function () {
+          // Prix vu en mobile seulement (le prix desktop de la carte, caché ici, n'est pas gardé).
+          var shown = price.cloneNode(true);
+          shown.querySelectorAll('.apc-price-desktop').forEach(function (element) { element.remove(); });
+          return shown.textContent.replace(/\s+/g, ' ').trim();
+        })() : '',
         priceCents: Number(button.dataset.priceCents) || 0,
         compareAtPrice: compareAt ? compareAt.textContent.replace(/\s+/g, ' ').trim() : '',
         compareAtPriceCents: Number(button.dataset.compareAtPriceCents) || 0,

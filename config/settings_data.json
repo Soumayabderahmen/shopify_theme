@@ -161,11 +161,6 @@
           "default_country": "+1"
         }
       },
-      "855628211100114053": {
-        "type": "shopify://apps/klaviyo-email-marketing-sms/blocks/klaviyo-onsite-embed/2632fe16-c075-4321-a88b-50b567f42507",
-        "disabled": true,
-        "settings": {}
-      },
       "2950567246721570496": {
         "type": "shopify://apps/tabs-studio/blocks/global_embed_block/19980fb9-f2ca-4ada-ad36-c0364c3318b8",
         "disabled": true,
@@ -250,11 +245,6 @@
       "16156609502398088594": {
         "type": "shopify://apps/omega-facebook-pixel/blocks/app-embed-block/ecdcc423-3dbd-480c-85e8-fdb9789cf058",
         "disabled": false,
-        "settings": {}
-      },
-      "9634136599641203104": {
-        "type": "shopify://apps/pushengage/blocks/pushengage-variables/58488a3f-1f2b-4955-b787-1746566f2334",
-        "disabled": true,
         "settings": {}
       },
       "4918592460924562117": {
@@ -381,6 +371,26 @@
           "agent_border_radius": 16
         }
       },
+      "11188662030278451709": {
+        "type": "shopify://apps/pushbot/blocks/pushbot-sdk-embed/14d8aa7e-a16e-43d4-a2a0-80fade091ca1",
+        "disabled": true,
+        "settings": {}
+      },
+      "9670189827046205946": {
+        "type": "shopify://apps/hextom-translate-and-currency/blocks/app-block/b927a799-be04-4b97-9efb-5c8f0290a68e",
+        "disabled": true,
+        "settings": {}
+      },
+      "9799509866644944741": {
+        "type": "shopify://apps/firepush-sms-push/blocks/firepush-embed/69d6c7f1-669a-4101-81d1-6abc06d08bed",
+        "disabled": true,
+        "settings": {}
+      },
+      "855628211100114053": {
+        "type": "shopify://apps/klaviyo-email-marketing-sms/blocks/klaviyo-onsite-embed/2632fe16-c075-4321-a88b-50b567f42507",
+        "disabled": false,
+        "settings": {}
+      },
       "6159598353363395418": {
         "type": "shopify://apps/google-youtube/blocks/store_widget/14ec7bd0-ac77-49a9-9417-90752398bdff",
         "disabled": true,
@@ -392,19 +402,9 @@
           "mobile_bottom_margin": 46
         }
       },
-      "11188662030278451709": {
-        "type": "shopify://apps/pushbot/blocks/pushbot-sdk-embed/14d8aa7e-a16e-43d4-a2a0-80fade091ca1",
-        "disabled": true,
-        "settings": {}
-      },
-      "9799509866644944741": {
-        "type": "shopify://apps/firepush-sms-push/blocks/firepush-embed/69d6c7f1-669a-4101-81d1-6abc06d08bed",
+      "11556762269829088362": {
+        "type": "shopify://apps/indexgpt/blocks/schema_markup/019ff2af-aa2f-763f-82f0-dea6ed984c56",
         "disabled": false,
-        "settings": {}
-      },
-      "9670189827046205946": {
-        "type": "shopify://apps/hextom-translate-and-currency/blocks/app-block/b927a799-be04-4b97-9efb-5c8f0290a68e",
-        "disabled": true,
         "settings": {}
       }
     },

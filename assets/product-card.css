@@ -1432,6 +1432,22 @@
   }
 }
 
+/* Prix de la carte (snippets/product-item.liquid) : desktop = prix le plus bas du produit, mobile = prix de la même
+   variante que le prix barré, le −% et « Économisez » (les deux spans n'existent que si ces prix diffèrent). */
+.apc-price-mobile {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .apc-price-desktop {
+    display: none;
+  }
+
+  .apc-price-mobile {
+    display: inline;
+  }
+}
+
 /* Pastille « ⚡ Économisez … » des cartes en promotion (snippets/product-item.liquid) : mobile seulement, même design
    que le badge remise du site (dégradé rose-rouge, texte blanc, éclair). Au-dessus du prix : les lignes de la grille
    des cartes (assets/mobile-temu-header.css) descendent d'un cran, l'ancien texte rouge « Économisez … » est masqué. */

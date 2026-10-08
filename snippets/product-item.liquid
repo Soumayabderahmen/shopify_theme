@@ -3901,6 +3901,16 @@
       -%}
       <span class="apc-save"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L4.09 12.11a1.5 1.5 0 0 0 1.14 2.45h4.77l-2.09 7.54a1.5 1.5 0 0 0 2.63 1.28l8.91-10.11a1.5 1.5 0 0 0-1.14-2.45h-4.77l2.09-7.54A1.5 1.5 0 0 0 13 2Z"/></svg><span>{{ apc_save_text }}</span></span>
     {%- endif -%}
+    {%- liquid
+      # Mobile : prix de la même variante que le prix barré, le −% et « Risparmi » (current_variant), pour que les
+      # chiffres de la carte soient tous vrais et cohérents. Desktop inchangé : prix le plus bas (product.price).
+      # Les deux spans ne sont écrits que si ces prix diffèrent ; affichage géré dans assets/product-card.css.
+      assign apc_price_display = price
+      if layout != 'list-compact' and product.price != current_variant.price
+        assign apc_price_mobile = current_variant.price | money
+        assign apc_price_display = '<span class="apc-price-desktop">' | append: price | append: '</span><span class="apc-price-mobile">' | append: apc_price_mobile | append: '</span>'
+      endif
+    -%}
     {%- if upsell == false and show_price -%}
       <div class="alibaba-card__price-wrapper">
         <p class="price s1pr alibaba-card__price-main">
@@ -3915,7 +3925,7 @@
             {%- if current_variant.compare_at_price > current_variant.price -%}
               <span class="old-price">{{ current_variant.compare_at_price | money }}</span><span class="alibaba-card__price-gap">&nbsp;</span>
             {%- endif -%}
-            {{ price }}
+            {{ apc_price_display }}
             {%- if discount_percent > 0 -%}
               <span class="alibaba-card__discount-badge">-{{ discount_percent }}%</span>
             {%- endif -%}
