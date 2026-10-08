@@ -1593,16 +1593,10 @@
         })
         .catch(function (error) { console.warn('[PDP mobile]', error); });
     };
-    if ('IntersectionObserver' in window) {
-      var relatedObserver = new IntersectionObserver(function (entries) {
-        if (!entries[0].isIntersecting) return;
-        relatedObserver.disconnect();
-        loadRelated();
-      }, { rootMargin: '600px 0px' });
-      relatedObserver.observe(document.getElementById('pdp-reviews') || related);
-    } else {
-      loadRelated();
-    }
+    // Demandés 0,5 s après la mise en place de la fiche (pas à l'événement « load », qui attend toutes les apps,
+    // ~9 s) : la réponse de Shopify prend ~1 s, ils sont prêts avant que le client arrive en bas, au lieu
+    // d'attendre qu'il s'approche des avis.
+    window.setTimeout(loadRelated, 500);
   }
 
   /* ---------- Barre d'achat fixe : variante + prix ; cachée quand le gros bouton est visible ---------- */
