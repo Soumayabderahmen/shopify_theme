@@ -1,7 +1,7 @@
  
 
 {% comment %} 
-{% assign target_brands = "nike, adidas, puma, reebok, new balance, onemix, jordan, asics" | split: ", " %}
+{% assign target_brands = "jordan, nike, adidas, puma, reebok, new balance, onemix, asics" | split: ", " %}
 {% assign product_title_lower = product.title | downcase %}
 {% assign matched_brand = "" %}
 
@@ -448,7 +448,7 @@
 
 
   
-{% comment %} {% assign target_brands = "nike, adidas, puma, reebok, new balance, onemix, jordan, asics" | split: ", " %}
+{% comment %} {% assign target_brands = "jordan, nike, adidas, puma, reebok, new balance, onemix, asics" | split: ", " %}
 {% assign product_title_lower = product.title | downcase %}
 {% assign matched_brand = "" %}
 
@@ -900,7 +900,7 @@
 
  
 {% comment %} 
-{% assign target_brands = "nike, adidas, puma, reebok, new balance, onemix, jordan, asics" | split: ", " %}
+{% assign target_brands = "jordan, nike, adidas, puma, reebok, new balance, onemix, asics" | split: ", " %}
 {% assign product_title_lower = product.title | downcase %}
 {% assign matched_brand = "" %}
 
@@ -1376,7 +1376,7 @@
 
 
 
-{% assign target_brands = "nike, adidas, puma, reebok, new balance, onemix, jordan, asics" | split: ", " %}
+{% assign target_brands = "jordan, nike, adidas, puma, reebok, new balance, onemix, asics" | split: ", " %}
 {% assign product_title_lower = product.title | downcase %}
 {% assign matched_brand = "" %}
 
@@ -1574,15 +1574,18 @@
   {% assign brand_lower = matched_brand | downcase %}
   {% assign current_product_id = product.id %}
   {% assign product_count = 0 %}
+  {%- assign shown_ids = ',' -%}
 
   {% for coll in product.collections %}
     {% for brand_product in coll.products %}
       {% assign b_title = brand_product.title | downcase %}
       {% assign b_vendor = brand_product.vendor | downcase %}
+      {%- assign b_id_key = ',' | append: brand_product.id | append: ',' -%}
 
       {% if b_title contains brand_lower or b_vendor contains brand_lower %}
-        {% unless brand_product.id == current_product_id %}
+        {% unless brand_product.id == current_product_id or shown_ids contains b_id_key %}
           {% assign product_count = product_count | plus: 1 %}
+          {%- assign shown_ids = shown_ids | append: brand_product.id | append: ',' -%}
           {% capture placeholder_int %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
 
           {%- comment -%}
@@ -1608,6 +1611,39 @@
     {% endfor %}
     {% if product_count >= 8 %}{% break %}{% endif %}
   {% endfor %}
+
+  {%- comment -%}
+    Jordan n'a pas de collection : ses produits (« Nike Air Jordan… ») sont dans la collection « nike », dont les 50
+    premiers produits lus ci-dessus n'en contiennent pas toujours. Complément : produits Jordan de « nike » (250).
+  {%- endcomment -%}
+  {%- if product_count < 8 and brand_lower == 'jordan' and collections.nike.products_count > 0 -%}
+    {%- paginate collections.nike.products by 250 -%}
+      {%- for brand_product in collections.nike.products -%}
+        {%- assign b_title = brand_product.title | downcase -%}
+        {%- assign b_id_key = ',' | append: brand_product.id | append: ',' -%}
+        {%- if b_title contains 'jordan' -%}
+          {%- unless brand_product.id == current_product_id or shown_ids contains b_id_key -%}
+            {%- assign product_count = product_count | plus: 1 -%}
+            {%- assign shown_ids = shown_ids | append: brand_product.id | append: ',' -%}
+            {%- capture placeholder_int %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture -%}
+            {%- render 'product-item',
+              product: brand_product,
+              placeholder_int: placeholder_int,
+              enable_quick_buy_desktop: section.settings.enable_quick_buy_desktop,
+              enable_quick_buy_mobile: section.settings.enable_quick_buy_mobile,
+              enable_quick_buy_qty_selector: section.settings.enable_quick_buy_qty_selector,
+              quick_buy_compact: section.settings.enable_quick_buy_compact,
+              enable_quick_buy_drawer: section.settings.enable_quick_buy_drawer,
+              sizes: image_sizes,
+              enable_color_picker: section.settings.enable_color_picker,
+              no_lazyload: true
+            -%}
+            {%- if product_count >= 8 %}{% break %}{% endif -%}
+          {%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endpaginate -%}
+  {%- endif -%}
 </ul>
         </div>
 
