@@ -1889,23 +1889,16 @@ function initMobileTemuHeader() {
     }
   };
   addCurrentProductToRecentList();
-  var renderRecentExploreProducts = function () {
-    if (!recentProductsSection || !recentProductsRail || recentProductsLoaded) return;
-    var recentProducts;
-    try {
-      recentProducts = JSON.parse(window.localStorage.getItem('recentlyViewedProduct') || '[]');
-      if (!Array.isArray(recentProducts)) {
-        throw new Error('The recently viewed product data is not a list.');
-      }
-    } catch (error) {
-      console.error('Unable to read recently viewed products.', error);
-      recentProductsSection.hidden = true;
-      recentProductsLoaded = true;
-      return;
+  // Chaque produit vu est gardé en résumé (titre, photo, prix) dans le navigateur : la rangée s'affiche dès
+  // l'ouverture du tiroir. Les résumés de plus de 10 minutes sont relus (prix à jour) quand la page est au repos.
+  var RECENT_CACHE_KEY = 'mobileRecentProductCache';
+  var RECENT_CACHE_MAX_AGE = 10 * 60 * 1000;
+  var readRecentProducts = function () {
+    var recentProducts = JSON.parse(window.localStorage.getItem('recentlyViewedProduct') || '[]');
+    if (!Array.isArray(recentProducts)) {
+      throw new Error('The recently viewed product data is not a list.');
     }
-    recentProductsRail.replaceChildren();
-    recentProductsSection.hidden = true;
-    var validProducts = recentProducts.slice().reverse().filter(function (item) {
+    return recentProducts.slice().reverse().filter(function (item) {
       if (!item || typeof item.productUrl !== 'string' || !item.productId) return false;
       try {
         return new URL(item.productUrl, window.location.href).origin === window.location.origin;
@@ -1914,12 +1907,29 @@ function initMobileTemuHeader() {
         return false;
       }
     }).slice(0, 8);
-    if (!validProducts.length) {
-      recentProductsLoaded = true;
-      return;
+  };
+  var readRecentCache = function () {
+    try {
+      var cache = JSON.parse(window.localStorage.getItem(RECENT_CACHE_KEY) || '{}');
+      return cache && typeof cache === 'object' && !Array.isArray(cache) ? cache : {};
+    } catch (error) {
+      console.error('Unable to read the recently viewed product cache.', error);
+      return {};
     }
-
-    Promise.allSettled(validProducts.map(function (item) {
+  };
+  // Le titre dépend de la langue et le prix de la devise : un résumé par langue et devise.
+  var recentCacheKey = function (item) {
+    return (document.documentElement.lang || '') + '|' + exploreDrawer.getAttribute('data-currency') + '|' + item.productId;
+  };
+  var isRecentEntryStale = function (entry) {
+    return !entry || typeof entry.s !== 'number' || Date.now() - entry.s > RECENT_CACHE_MAX_AGE;
+  };
+  var sizedRecentImage = function (src) {
+    if (!src) return '';
+    return src + (src.indexOf('?') === -1 ? '?' : '&') + 'width=320';
+  };
+  var fetchRecentProducts = function (items) {
+    return Promise.allSettled(items.map(function (item) {
       var productUrl = new URL(item.productUrl, window.location.href);
       productUrl.pathname = localizedPath(productUrl.pathname);
       productUrl.search = '';
@@ -1930,64 +1940,170 @@ function initMobileTemuHeader() {
         return response.json();
       });
     })).then(function (results) {
+      var cache = readRecentCache();
       results.forEach(function (result, index) {
+        var key = recentCacheKey(items[index]);
         if (result.status === 'rejected') {
           console.error('Unable to load a recently viewed product.', result.reason);
+          delete cache[key];
           return;
         }
         var product = result.value;
         var variant = getExploreDisplayVariant(product);
-        var onSale = !!variant
-          && typeof variant.compare_at_price === 'number'
-          && variant.compare_at_price > variant.price;
-        var card = document.createElement('a');
-        card.className = onSale ? 'mobile-explore-product mobile-explore-product--sale' : 'mobile-explore-product';
-        card.href = safeProductUrl(validProducts[index].productUrl);
-        var imageWrap = document.createElement('span');
-        imageWrap.className = 'mobile-explore-product__image';
-        if (product.featured_image) {
-          var image = document.createElement('img');
-          image.src = product.featured_image;
-          image.alt = product.title || '';
-          image.loading = 'lazy';
-          imageWrap.appendChild(image);
-        }
-        if (onSale) {
-          var discountAmount = Math.floor(
-            ((variant.compare_at_price - variant.price) / variant.compare_at_price) * 100
-          );
-          var badge = document.createElement('span');
-          badge.textContent = '-' + discountAmount + '%';
-          imageWrap.appendChild(badge);
-        }
-        card.appendChild(imageWrap);
-        var title = document.createElement('span');
-        title.textContent = product.title;
-        card.appendChild(title);
-        if (variant) {
-          var price = document.createElement('strong');
-          price.textContent = formatExplorePrice(variant.price);
-          if (onSale) {
-            var comparePrice = document.createElement('s');
-            comparePrice.textContent = formatExplorePrice(variant.compare_at_price);
-            price.appendChild(document.createTextNode(' '));
-            price.appendChild(comparePrice);
-          }
-          card.appendChild(price);
-        }
-        recentProductsRail.appendChild(card);
+        cache[key] = {
+          t: product.title,
+          i: sizedRecentImage(product.featured_image),
+          p: variant ? variant.price : null,
+          c: variant ? variant.compare_at_price : null,
+          s: Date.now()
+        };
       });
-      recentProductsSection.hidden = recentProductsRail.childElementCount === 0;
-      recentProductsLoaded = true;
-    }).catch(function (error) {
-      console.error('Unable to render recently viewed products.', error);
-      recentProductsSection.hidden = true;
-      recentProductsLoaded = true;
+      // Seuls les produits encore dans la liste des vus récemment sont gardés.
+      var keptIds = {};
+      JSON.parse(window.localStorage.getItem('recentlyViewedProduct') || '[]').forEach(function (item) {
+        if (item && item.productId) keptIds[String(item.productId)] = true;
+      });
+      Object.keys(cache).forEach(function (key) {
+        if (!keptIds[key.split('|').pop()]) delete cache[key];
+      });
+      window.localStorage.setItem(RECENT_CACHE_KEY, JSON.stringify(cache));
+      return cache;
     });
   };
+  // Ce que la rangée affiche (pour ne pas la redessiner quand rien n'a changé).
+  var recentSignature = function (items, cache) {
+    return JSON.stringify(items.map(function (item) {
+      var entry = cache[recentCacheKey(item)];
+      return entry && entry.t ? [item.productId, entry.t, entry.i, entry.p, entry.c] : null;
+    }));
+  };
+  var renderRecentRail = function (items, cache) {
+    var fragment = document.createDocumentFragment();
+    var count = 0;
+    items.forEach(function (item, index) {
+      var entry = cache[recentCacheKey(item)];
+      if (!entry || !entry.t) return;
+      count += 1;
+      var onSale = typeof entry.p === 'number' && typeof entry.c === 'number' && entry.c > entry.p;
+      var card = document.createElement('a');
+      card.className = onSale ? 'mobile-explore-product mobile-explore-product--sale' : 'mobile-explore-product';
+      card.href = safeProductUrl(item.productUrl);
+      var imageWrap = document.createElement('span');
+      imageWrap.className = 'mobile-explore-product__image';
+      if (entry.i) {
+        var image = document.createElement('img');
+        image.src = entry.i;
+        image.alt = entry.t;
+        image.width = 160;
+        image.height = 160;
+        image.decoding = 'async';
+        if (index > 2) image.loading = 'lazy';
+        imageWrap.appendChild(image);
+      }
+      if (onSale) {
+        var badge = document.createElement('span');
+        badge.textContent = '-' + Math.floor(((entry.c - entry.p) / entry.c) * 100) + '%';
+        imageWrap.appendChild(badge);
+      }
+      card.appendChild(imageWrap);
+      var title = document.createElement('span');
+      title.textContent = entry.t;
+      card.appendChild(title);
+      if (typeof entry.p === 'number') {
+        var price = document.createElement('strong');
+        price.textContent = formatExplorePrice(entry.p);
+        if (onSale) {
+          var comparePrice = document.createElement('s');
+          comparePrice.textContent = formatExplorePrice(entry.c);
+          price.appendChild(document.createTextNode(' '));
+          price.appendChild(comparePrice);
+        }
+        card.appendChild(price);
+      }
+      fragment.appendChild(card);
+    });
+    recentProductsRail.replaceChildren(fragment);
+    recentProductsSection.hidden = !count;
+  };
+  var recentRefresh = null;
+  // Relit les produits sans résumé ou au résumé trop ancien (une seule lecture à la fois).
+  var refreshRecentProducts = function (items) {
+    if (recentRefresh) return recentRefresh;
+    var cache = readRecentCache();
+    var stale = items.filter(function (item) {
+      return isRecentEntryStale(cache[recentCacheKey(item)]);
+    });
+    if (!stale.length) return Promise.resolve(cache);
+    recentRefresh = fetchRecentProducts(stale).then(function (freshCache) {
+      recentRefresh = null;
+      return freshCache;
+    }, function (error) {
+      recentRefresh = null;
+      throw error;
+    });
+    return recentRefresh;
+  };
+  var renderRecentExploreProducts = function () {
+    if (!recentProductsSection || !recentProductsRail || recentProductsLoaded) return;
+    recentProductsLoaded = true;
+    var items;
+    try {
+      items = readRecentProducts();
+    } catch (error) {
+      console.error('Unable to read recently viewed products.', error);
+      recentProductsSection.hidden = true;
+      return;
+    }
+    if (!items.length) {
+      recentProductsSection.hidden = true;
+      return;
+    }
+    var shownCache = readRecentCache();
+    renderRecentRail(items, shownCache);
+    var shown = recentSignature(items, shownCache);
+    refreshRecentProducts(items).then(function (cache) {
+      if (!exploreDrawer.open) {
+        recentProductsLoaded = false;
+        return;
+      }
+      // Redessinée seulement si un titre, une photo ou un prix a changé (pas de clignotement des photos).
+      if (recentSignature(items, cache) !== shown) renderRecentRail(items, cache);
+    }).catch(function (error) {
+      console.error('Unable to render recently viewed products.', error);
+    });
+  };
+  // Page au repos : préparer les résumés (et les 3 premières photos) avant que le tiroir ne s'ouvre.
+  var warmRecentExploreProducts = function () {
+    if (!recentProductsSection || !recentProductsRail) return;
+    var items;
+    try {
+      items = readRecentProducts();
+    } catch (error) {
+      console.error('Unable to read recently viewed products.', error);
+      return;
+    }
+    if (!items.length) return;
+    refreshRecentProducts(items).then(function (cache) {
+      items.slice(0, 3).forEach(function (item) {
+        var entry = cache[recentCacheKey(item)];
+        if (entry && entry.i) new Image().src = entry.i;
+      });
+    }).catch(function (error) {
+      console.error('Unable to prepare recently viewed products.', error);
+    });
+  };
+  if (isMobile && recentProductsSection) {
+    var scheduleRecentWarmUp = function () {
+      if ('requestIdleCallback' in window) window.requestIdleCallback(warmRecentExploreProducts, { timeout: 3000 });
+      else window.setTimeout(warmRecentExploreProducts, 1500);
+    };
+    if (document.readyState === 'complete') scheduleRecentWarmUp();
+    else window.addEventListener('load', scheduleRecentWarmUp, { once: true });
+  }
   var clearRecentExploreProducts = function () {
     try {
       window.localStorage.removeItem('recentlyViewedProduct');
+      window.localStorage.removeItem(RECENT_CACHE_KEY);
       recentProductsRail.replaceChildren();
       recentProductsSection.hidden = true;
       recentProductsLoaded = true;
