@@ -3591,13 +3591,19 @@
     Plus de 50 ventes : tourne partout (comme avant). 50 ou moins : tourne sur mobile ; ordinateur = badge Verified fixe
     comme avant (face avant Verified, classe --verified-cube).
   {%- endcomment -%}
+  {%- comment -%} Icône de la face « Produit le plus vendu » : logo trois bandes pour Adidas (design propre, assets/product-card.css), ★ sinon. {%- endcomment -%}
+  {%- if matched_brand == "Adidas" -%}
+    {%- capture brand_bestseller_icon -%}<span class="apc-brand-icon apc-brand-icon--adidas" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M1.5 20.5 4.4 15.6l2.8 1.6-1.9 3.3zM7.6 20.5l5.1-8.8 2.8 1.6-4.2 7.2zM13.7 20.5 21 7.9l2.8 1.6-6.3 11z"/></svg></span>{%- endcapture -%}
+  {%- else -%}
+    {%- capture brand_bestseller_icon -%}<span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>{%- endcapture -%}
+  {%- endif -%}
   {%- if bestseller_count > 50 -%}
-    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--animated" role="status" aria-label="{{ top_selling_text }}">
+    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--animated alibaba-top-selling-ribbon--brand-{{ matched_brand | handleize }}" role="status" aria-label="{{ top_selling_text }}">
       <div class="apc-flip-scene">
         <div class="apc-flip">
           <!-- Faccia Frontale: Bestseller -->
           <div class="apc-flip__face apc-flip__face--front">
-            <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
+            {{ brand_bestseller_icon }}
             <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
           </div>
           <!-- Faccia Posteriore: Verified Brand -->
@@ -3609,7 +3615,7 @@
       </div>
     </div>
   {%- else -%}
-    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--verified-only alibaba-top-selling-ribbon--verified-cube" role="status" aria-label="Verified {{ matched_brand }}">
+    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--verified-only alibaba-top-selling-ribbon--verified-cube alibaba-top-selling-ribbon--brand-{{ matched_brand | handleize }}" role="status" aria-label="Verified {{ matched_brand }}">
       <div class="apc-flip-scene">
         <div class="apc-flip">
           <div class="apc-flip__face apc-flip__face--front apc-flip__face--verified">
@@ -3617,7 +3623,7 @@
             <span class="alibaba-verified-badge__text">Verified {{ matched_brand }}</span>
           </div>
           <div class="apc-flip__face apc-flip__face--top apc-flip__face--bestseller">
-            <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
+            {{ brand_bestseller_icon }}
             <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
           </div>
         </div>
