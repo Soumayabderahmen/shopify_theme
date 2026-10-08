@@ -3631,11 +3631,31 @@
 
 {%- elsif matched_brand != "" -%}
 
-  <!-- bestseller_count <= 50 + BRAND: Solo Badge Verified {{ matched_brand }} -->
-  <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--verified-only" role="status" aria-label="Verified {{ matched_brand }}">
-    <div class="alibaba-verified-standalone">
-      <span class="alibaba-verified-badge__icon">✓</span>
-      <span class="alibaba-verified-badge__text">Verified {{ matched_brand }}</span>
+  {%- comment -%}
+    bestseller_count <= 50 + marque : sur mobile, cube qui alterne « Verified [marque] » et les ventes réelles
+    (« 12 vendus ») ou, sans ventes enregistrées, « Boutique officielle [marque] ». Ordinateur : badge Verified fixe.
+  {%- endcomment -%}
+  {%- if bestseller_count > 0 -%}
+    {%- assign brand_second_text = 'mobile.home.sold_count' | t: count: bestseller_count -%}
+    {%- assign brand_second_class = 'apc-flip__face--sold' -%}
+    {%- assign brand_second_icon = '🔥' -%}
+  {%- else -%}
+    {%- assign brand_second_text = 'mobile.home.official_store' | t: brand: matched_brand -%}
+    {%- assign brand_second_class = 'apc-flip__face--store' -%}
+    {%- assign brand_second_icon = '★' -%}
+  {%- endif -%}
+  <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--verified-only alibaba-top-selling-ribbon--verified-cube" role="status" aria-label="Verified {{ matched_brand }}">
+    <div class="apc-flip-scene">
+      <div class="apc-flip">
+        <div class="apc-flip__face apc-flip__face--front apc-flip__face--verified">
+          <span class="alibaba-verified-badge__icon">✓</span>
+          <span class="alibaba-verified-badge__text">Verified {{ matched_brand }}</span>
+        </div>
+        <div class="apc-flip__face apc-flip__face--top {{ brand_second_class }}">
+          <span class="alibaba-sold-badge__icon" aria-hidden="true">{{ brand_second_icon }}</span>
+          <span class="alibaba-top-selling-ribbon__text">{{ brand_second_text }}</span>
+        </div>
+      </div>
     </div>
   </div>
 

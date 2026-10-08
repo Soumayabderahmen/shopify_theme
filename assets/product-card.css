@@ -1254,6 +1254,14 @@
   background: linear-gradient(135deg, #c2410c, #ea580c);
 }
 
+.apc-flip__face--verified {
+  background: linear-gradient(135deg, #96052e, #de2e69);
+}
+
+.apc-flip__face--store {
+  background: linear-gradient(135deg, #3b2314, #6b4226);
+}
+
 .alibaba-sold-badge__icon {
   font-size: 11px;
   line-height: 1;
@@ -1272,31 +1280,45 @@
 /* Mobile : dans les grilles, le ruban a une hauteur auto (padding 7px) ; la scène prend la hauteur d'une ligne et
    les faces recouvrent tout le ruban. */
 @media (max-width: 760px) {
-  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube) {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube, .alibaba-top-selling-ribbon--verified-cube) {
     overflow: hidden;
   }
 
-  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube) .apc-flip-scene {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube, .alibaba-top-selling-ribbon--verified-cube) .apc-flip-scene {
     flex: 1 1 auto;
     height: 14px;
   }
 
-  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube) .apc-flip__face {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube, .alibaba-top-selling-ribbon--verified-cube) .apc-flip__face {
     inset: -7px -4px;
     gap: 5px;
     padding: 0 4px;
   }
 
-  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube) .apc-flip__face--front {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube, .alibaba-top-selling-ribbon--verified-cube) .apc-flip__face--front {
     transform: translateZ(14px);
   }
 
-  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube) .apc-flip__face--top {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube, .alibaba-top-selling-ribbon--verified-cube) .apc-flip__face--top {
     transform: rotateX(90deg) translateZ(14px);
   }
 }
 
 @media (min-width: 761px) {
+  /* Ordinateur : badge Verified fixe comme avant (couleur du badge seul). */
+  .alibaba-top-selling-ribbon--verified-cube .apc-flip {
+    animation: none;
+  }
+
+  .alibaba-top-selling-ribbon--verified-cube .apc-flip__face--front {
+    transform: none;
+    background: linear-gradient(135deg, #332dec, #332dec);
+  }
+
+  .alibaba-top-selling-ribbon--verified-cube .apc-flip__face--top {
+    display: none;
+  }
+
   .alibaba-top-selling-ribbon--sold-cube .apc-flip {
     animation: none;
   }

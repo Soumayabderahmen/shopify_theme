@@ -888,7 +888,8 @@
       "free_shipping": "Livrare gratuită",
       "filter_empty": "Niciun produs pentru acest filtru.",
       "sold_percent": "{{ percent }}% vândut",
-      "sold_count": "{{ count }} vândute"
+      "sold_count": "{{ count }} vândute",
+      "official_store": "Magazin oficial {{ brand }}"
     },
     "js": {
       "show_all": "Arată tot",

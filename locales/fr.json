@@ -880,7 +880,8 @@
       "free_shipping": "Livraison gratuite",
       "filter_empty": "Aucun produit pour ce filtre.",
       "sold_percent": "{{ percent }} % vendu",
-      "sold_count": "{{ count }} vendus"
+      "sold_count": "{{ count }} vendus",
+      "official_store": "Boutique officielle {{ brand }}"
     },
     "js": {
       "show_all": "Afficher tout",
