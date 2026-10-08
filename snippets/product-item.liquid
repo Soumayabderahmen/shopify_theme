@@ -3583,14 +3583,15 @@
 {%- comment -%}
   2. Logica di Rendering
 {%- endcomment -%}
-{%- if bestseller_count > 50 -%}
+{%- if matched_brand != "" -%}
 
-  {%- if matched_brand != "" -%}
-    <!-- bestseller_count > 50 + BRAND: Cubo 3D Animato -->
-    {%- comment -%}
-      Cube animé (classes apc-flip*, assets/product-card.css) : les styles mobiles des grilles figent les .alibaba-cube
-      (transform / animation none !important) ; des classes propres le laissent tourner partout.
-    {%- endcomment -%}
+  {%- comment -%}
+    Produit de marque : cube animé (classes apc-flip*, assets/product-card.css ; les styles mobiles des grilles figent
+    les .alibaba-cube) qui alterne « Produit le plus vendu » et « Verified [marque] ».
+    Plus de 50 ventes : tourne partout (comme avant). 50 ou moins : tourne sur mobile ; ordinateur = badge Verified fixe
+    comme avant (face avant Verified, classe --verified-cube).
+  {%- endcomment -%}
+  {%- if bestseller_count > 50 -%}
     <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--animated" role="status" aria-label="{{ top_selling_text }}">
       <div class="apc-flip-scene">
         <div class="apc-flip">
@@ -3608,54 +3609,29 @@
       </div>
     </div>
   {%- else -%}
-    {%- comment -%}
-      bestseller_count > 50 sans marque : même cube animé que les marques (mobile), seconde face = ventes réelles
-      (métadonnée custom.bestseller_count, « 120 vendus »). Ordinateur : ruban fixe comme avant (assets/product-card.css).
-    {%- endcomment -%}
-    {%- assign sold_short_text = 'mobile.home.sold_count' | t: count: bestseller_count -%}
-    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--sold-cube" role="status" aria-label="{{ top_selling_text }}">
+    <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--verified-only alibaba-top-selling-ribbon--verified-cube" role="status" aria-label="Verified {{ matched_brand }}">
       <div class="apc-flip-scene">
         <div class="apc-flip">
-          <div class="apc-flip__face apc-flip__face--front">
+          <div class="apc-flip__face apc-flip__face--front apc-flip__face--verified">
+            <span class="alibaba-verified-badge__icon">✓</span>
+            <span class="alibaba-verified-badge__text">Verified {{ matched_brand }}</span>
+          </div>
+          <div class="apc-flip__face apc-flip__face--top apc-flip__face--bestseller">
             <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
             <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
-          </div>
-          <div class="apc-flip__face apc-flip__face--top apc-flip__face--sold">
-            <span class="alibaba-sold-badge__icon" aria-hidden="true">🔥</span>
-            <span class="alibaba-top-selling-ribbon__text">{{ sold_short_text }}</span>
           </div>
         </div>
       </div>
     </div>
   {%- endif -%}
 
-{%- elsif matched_brand != "" -%}
+{%- elsif bestseller_count > 50 -%}
 
-  {%- comment -%}
-    bestseller_count <= 50 + marque : sur mobile, cube qui alterne « Verified [marque] » et les ventes réelles
-    (« 12 vendus ») ou, sans ventes enregistrées, « Boutique officielle [marque] ». Ordinateur : badge Verified fixe.
-  {%- endcomment -%}
-  {%- if bestseller_count > 0 -%}
-    {%- assign brand_second_text = 'mobile.home.sold_count' | t: count: bestseller_count -%}
-    {%- assign brand_second_class = 'apc-flip__face--sold' -%}
-    {%- assign brand_second_icon = '🔥' -%}
-  {%- else -%}
-    {%- assign brand_second_text = 'mobile.home.official_store' | t: brand: matched_brand -%}
-    {%- assign brand_second_class = 'apc-flip__face--store' -%}
-    {%- assign brand_second_icon = '★' -%}
-  {%- endif -%}
-  <div class="alibaba-top-selling-ribbon alibaba-top-selling-ribbon--verified-only alibaba-top-selling-ribbon--verified-cube" role="status" aria-label="Verified {{ matched_brand }}">
-    <div class="apc-flip-scene">
-      <div class="apc-flip">
-        <div class="apc-flip__face apc-flip__face--front apc-flip__face--verified">
-          <span class="alibaba-verified-badge__icon">✓</span>
-          <span class="alibaba-verified-badge__text">Verified {{ matched_brand }}</span>
-        </div>
-        <div class="apc-flip__face apc-flip__face--top {{ brand_second_class }}">
-          <span class="alibaba-sold-badge__icon" aria-hidden="true">{{ brand_second_icon }}</span>
-          <span class="alibaba-top-selling-ribbon__text">{{ brand_second_text }}</span>
-        </div>
-      </div>
+  <!-- bestseller_count > 50 senza Brand: Solo Ribbon Bestseller -->
+  <div class="alibaba-top-selling-ribbon" role="status" aria-label="{{ top_selling_text }}">
+    <div class="alibaba-top-selling-ribbon__main">
+      <span class="alibaba-top-selling-ribbon__star" aria-hidden="true">★</span>
+      <span class="alibaba-top-selling-ribbon__text">{{ top_selling_text }}</span>
     </div>
   </div>
 

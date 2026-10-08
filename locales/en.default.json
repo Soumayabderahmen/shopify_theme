@@ -3577,8 +3577,7 @@
       "free_shipping": "Free shipping",
       "filter_empty": "No products for this filter.",
       "sold_percent": "{{ percent }}% sold",
-      "sold_count": "{{ count }} sold",
-      "official_store": "Official {{ brand }} store"
+      "sold_count": "{{ count }} sold"
     },
     "js": {
       "show_all": "Show all",

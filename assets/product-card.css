@@ -1210,9 +1210,9 @@
     }
   }
 
-/* Ruban animé des cartes (snippets/product-item.liquid) : cube qui alterne « Produit le plus vendu » et
-   « Verified [marque] » ou, sans marque, les ventes réelles (« 469 vendus »). Classes apc-flip* propres : les styles
-   mobiles des grilles figent les .alibaba-cube. Ordinateur : cube de marque inchangé, ruban sans marque fixe. */
+/* Ruban animé des produits de marque (snippets/product-item.liquid) : cube qui alterne « Produit le plus vendu » et
+   « Verified [marque] ». Classes apc-flip* propres : les styles mobiles des grilles figent les .alibaba-cube.
+   Ordinateur : cube des marques à plus de 50 ventes inchangé ; les autres gardent le badge Verified fixe. */
 .apc-flip-scene {
   position: relative;
   width: 100%;
@@ -1250,21 +1250,12 @@
   background: linear-gradient(135deg, #96052e, #de2e69);
 }
 
-.apc-flip__face--sold {
-  background: linear-gradient(135deg, #c2410c, #ea580c);
-}
-
 .apc-flip__face--verified {
   background: linear-gradient(135deg, #96052e, #de2e69);
 }
 
-.apc-flip__face--store {
-  background: linear-gradient(135deg, #3b2314, #6b4226);
-}
-
-.alibaba-sold-badge__icon {
-  font-size: 11px;
-  line-height: 1;
+.apc-flip__face--bestseller {
+  background: linear-gradient(135deg, #4567f0, #5b21b6);
 }
 
 @media screen and (max-width: 749px) {
@@ -1280,32 +1271,32 @@
 /* Mobile : dans les grilles, le ruban a une hauteur auto (padding 7px) ; la scène prend la hauteur d'une ligne et
    les faces recouvrent tout le ruban. */
 @media (max-width: 760px) {
-  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube, .alibaba-top-selling-ribbon--verified-cube) {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--verified-cube) {
     overflow: hidden;
   }
 
-  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube, .alibaba-top-selling-ribbon--verified-cube) .apc-flip-scene {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--verified-cube) .apc-flip-scene {
     flex: 1 1 auto;
     height: 14px;
   }
 
-  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube, .alibaba-top-selling-ribbon--verified-cube) .apc-flip__face {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--verified-cube) .apc-flip__face {
     inset: -7px -4px;
     gap: 5px;
     padding: 0 4px;
   }
 
-  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube, .alibaba-top-selling-ribbon--verified-cube) .apc-flip__face--front {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--verified-cube) .apc-flip__face--front {
     transform: translateZ(14px);
   }
 
-  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--sold-cube, .alibaba-top-selling-ribbon--verified-cube) .apc-flip__face--top {
+  #root li.alibaba-product-card .alibaba-top-selling-ribbon:is(.alibaba-top-selling-ribbon--animated, .alibaba-top-selling-ribbon--verified-cube) .apc-flip__face--top {
     transform: rotateX(90deg) translateZ(14px);
   }
 }
 
+/* Ordinateur : badge Verified fixe comme avant (couleur du badge seul) pour les marques à 50 ventes ou moins. */
 @media (min-width: 761px) {
-  /* Ordinateur : badge Verified fixe comme avant (couleur du badge seul). */
   .alibaba-top-selling-ribbon--verified-cube .apc-flip {
     animation: none;
   }
@@ -1316,20 +1307,6 @@
   }
 
   .alibaba-top-selling-ribbon--verified-cube .apc-flip__face--top {
-    display: none;
-  }
-
-  .alibaba-top-selling-ribbon--sold-cube .apc-flip {
-    animation: none;
-  }
-
-  .alibaba-top-selling-ribbon--sold-cube .apc-flip__face--front {
-    transform: none;
-    gap: 5px;
-    background: linear-gradient(135deg, #6d28d9, #5b21b6);
-  }
-
-  .alibaba-top-selling-ribbon--sold-cube .apc-flip__face--sold {
     display: none;
   }
 }

@@ -882,8 +882,7 @@
       "free_shipping": "Spedizione gratis",
       "filter_empty": "Nessun prodotto per questo filtro.",
       "sold_percent": "{{ percent }}% venduto",
-      "sold_count": "{{ count }} venduti",
-      "official_store": "Store ufficiale {{ brand }}"
+      "sold_count": "{{ count }} venduti"
     },
     "js": {
       "show_all": "Mostra tutto",
