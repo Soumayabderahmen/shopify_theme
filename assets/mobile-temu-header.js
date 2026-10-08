@@ -1752,21 +1752,42 @@ function initMobileTemuHeader() {
     var closeButton = exploreDrawer.querySelector('.mobile-explore-drawer__close');
     if (closeButton) closeButton.focus();
     renderRecentExploreProducts();
-    loadAllExploreBrands();
   };
-  // « Shop per brand » : les 40 premières marques sont dans la page ; toutes les autres (assets/mobile-brands.json,
-  // relevé réel du catalogue) sont ajoutées à la suite à la première ouverture du tiroir.
-  var exploreBrandsLoaded = false;
-  var loadAllExploreBrands = function () {
-    var row = exploreDrawer && exploreDrawer.querySelector('[data-mobile-brands]');
-    if (!row || exploreBrandsLoaded) return;
-    exploreBrandsLoaded = true;
+  // « Shop per brand » : 20 marques dans la rangée ; « Voir plus » ouvre la fenêtre de toutes les marques
+  // (assets/mobile-brands.json, relevé réel du catalogue), remplie à sa première ouverture.
+  var brandsSheet = exploreDrawer && exploreDrawer.querySelector('[data-mobile-brands-sheet]');
+  var brandsGrid = brandsSheet && brandsSheet.querySelector('[data-mobile-brands-grid]');
+  var brandsFilter = brandsSheet && brandsSheet.querySelector('[data-mobile-brands-filter]');
+  var brandsEmpty = brandsSheet && brandsSheet.querySelector('[data-mobile-brands-empty]');
+  var brandsSheetLoaded = false;
+  var brandsSheetCloseTimer = null;
+  var normalizeBrandName = function (value) {
+    return String(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  };
+  var filterBrandsSheet = function () {
+    if (!brandsGrid) return;
+    var query = normalizeBrandName(brandsFilter ? brandsFilter.value : '');
+    var visible = 0;
+    brandsGrid.querySelectorAll('.mobile-explore-brand').forEach(function (tile) {
+      var match = !query || tile.getAttribute('data-brand-name').indexOf(query) !== -1;
+      tile.hidden = !match;
+      if (match) visible += 1;
+    });
+    if (brandsEmpty) brandsEmpty.hidden = visible > 0 || !brandsSheetLoaded || !brandsGrid.children.length;
+  };
+  var fillBrandsSheet = function () {
+    if (brandsSheetLoaded || !brandsGrid) return;
+    brandsSheetLoaded = true;
+    // Les marques déjà dans la rangée gardent leur lien et leur photo (Nike, Adidas… vont vers leur collection).
     var shown = {};
-    row.querySelectorAll('.mobile-explore-brand strong').forEach(function (label) {
-      shown[label.textContent.trim().toLowerCase()] = true;
+    exploreDrawer.querySelectorAll('.mobile-explore-brands a.mobile-explore-brand').forEach(function (tile) {
+      var label = tile.querySelector('strong');
+      var image = tile.querySelector('img');
+      if (!label) return;
+      shown[label.textContent.trim().toLowerCase()] = { href: tile.getAttribute('href'), image: image ? image.getAttribute('src') : '' };
     });
     var root = window.Shopify && window.Shopify.routes && window.Shopify.routes.root ? window.Shopify.routes.root : '/';
-    fetch(row.getAttribute('data-mobile-brands'), { credentials: 'same-origin' })
+    fetch(brandsSheet.getAttribute('data-brands-url'), { credentials: 'same-origin' })
       .then(function (response) {
         if (!response.ok) throw new Error('Brand list request failed: ' + response.status);
         return response.json();
@@ -1774,13 +1795,16 @@ function initMobileTemuHeader() {
       .then(function (data) {
         var fragment = document.createDocumentFragment();
         data.brands.forEach(function (brand) {
-          if (shown[String(brand[0]).toLowerCase()]) return;
+          var known = shown[String(brand[0]).toLowerCase()];
           var link = document.createElement('a');
           link.className = 'mobile-explore-brand';
-          link.href = root + 'search?q=' + encodeURIComponent(brand[1]) + '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type';
-          if (brand[3]) {
+          link.setAttribute('data-brand-name', normalizeBrandName(brand[0]));
+          link.href = known ? known.href : root + 'search?q=' + encodeURIComponent(brand[1]) + '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type';
+          var imageUrl = known ? known.image
+            : (brand[3] ? (/^https?:/.test(brand[3]) ? brand[3] : data.cdn + brand[3]) + '&width=240&height=148&crop=center' : '');
+          if (imageUrl) {
             var image = document.createElement('img');
-            image.src = (/^https?:/.test(brand[3]) ? brand[3] : data.cdn + brand[3]) + '&width=240&height=148&crop=center';
+            image.src = imageUrl;
             image.alt = '';
             image.width = 120;
             image.height = 74;
@@ -1793,13 +1817,34 @@ function initMobileTemuHeader() {
           link.appendChild(label);
           fragment.appendChild(link);
         });
-        row.appendChild(fragment);
+        brandsGrid.appendChild(fragment);
+        var count = brandsSheet.querySelector('[data-mobile-brands-count]');
+        if (count) count.textContent = data.brands.length;
+        filterBrandsSheet();
       })
       .catch(function (error) {
-        exploreBrandsLoaded = false;
+        brandsSheetLoaded = false;
         console.error('Unable to load the brand list.', error);
       });
   };
+  var openBrandsSheet = function () {
+    if (!brandsSheet) return;
+    window.clearTimeout(brandsSheetCloseTimer);
+    brandsSheet.classList.remove('is-closing');
+    if (!brandsSheet.open) brandsSheet.showModal();
+    fillBrandsSheet();
+  };
+  var closeBrandsSheet = function () {
+    if (!brandsSheet || !brandsSheet.open || brandsSheet.classList.contains('is-closing')) return;
+    brandsSheet.classList.add('is-closing');
+    var finish = function () {
+      brandsSheet.classList.remove('is-closing');
+      if (brandsSheet.open) brandsSheet.close();
+    };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) finish();
+    else brandsSheetCloseTimer = window.setTimeout(finish, 240);
+  };
+  if (brandsFilter) brandsFilter.addEventListener('input', filterBrandsSheet);
   var recentProductsSection = exploreDrawer && exploreDrawer.querySelector('[data-mobile-explore-recent]');
   var recentProductsRail = exploreDrawer && exploreDrawer.querySelector('[data-mobile-explore-recent-products]');
   var recentProductsLoaded = false;
@@ -1990,6 +2035,14 @@ function initMobileTemuHeader() {
       return;
     }
     if (!document.body.classList.contains('mobile-explore-open') || !exploreDrawer) return;
+    // Fenêtre « Toutes les marques » ouverte : Échap la ferme (pas le tiroir), le navigateur garde le focus dedans.
+    if (brandsSheet && brandsSheet.open) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeBrandsSheet();
+      }
+      return;
+    }
     if (event.key === 'Escape') {
       event.preventDefault();
       closeExploreDrawer(true);
@@ -2030,6 +2083,16 @@ function initMobileTemuHeader() {
     if (target.closest('[data-mobile-explore-close]')) {
       event.preventDefault();
       closeExploreDrawer(true);
+      return;
+    }
+    if (target.closest('[data-mobile-brands-open]')) {
+      event.preventDefault();
+      openBrandsSheet();
+      return;
+    }
+    if (brandsSheet && (target === brandsSheet || target.closest('[data-mobile-brands-close]'))) {
+      event.preventDefault();
+      closeBrandsSheet();
       return;
     }
     if (target.closest('[data-mobile-explore-recent-clear]')) {

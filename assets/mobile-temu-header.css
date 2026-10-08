@@ -1250,8 +1250,7 @@
     border-radius: 999px;
   }
 
-  /* Toutes les marques (40 dans la page + les suivantes chargées à l'ouverture) : la 4e dépasse à droite
-     pour montrer qu'on peut faire défiler. */
+  /* 20 marques + la tuile « Voir plus » : la 4e dépasse à droite pour montrer qu'on peut faire défiler. */
   .mobile-explore-brands {
     display: grid;
     grid-auto-columns: 28%;
@@ -1358,6 +1357,203 @@
     padding: 4px;
     font-family: 'Sora', system-ui, sans-serif;
     font-size: 12px;
+    text-align: center;
+  }
+
+  /* « Voir plus » : dans le titre (comme « Vedi tutte ») et en dernière tuile de la rangée. */
+  .mobile-explore-section__title > .mobile-explore-section__more {
+    padding: 0;
+    color: #3a34d2 !important;
+    font-size: 12.5px !important;
+    background: none;
+    border: 0;
+  }
+
+  .mobile-explore-brand--more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 100%;
+    padding: 0 6px;
+    color: #3a34d2 !important;
+    background: #ecebfd;
+    border: 1px dashed #b9b6f3;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .mobile-explore-brand--more::after {
+    content: none;
+  }
+
+  .mobile-explore-brand--more svg {
+    flex: 0 0 auto;
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Fenêtre « Toutes les marques » : feuille qui monte du bas, au-dessus du tiroir ☰. */
+  dialog.mobile-brands-sheet {
+    position: fixed;
+    inset: auto 0 0;
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    height: 88vh;
+    height: 88dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    color: #16123f;
+    font-family: 'Figtree', system-ui, sans-serif;
+    background: #fff;
+    border: 0;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -8px 30px rgb(22 18 63 / 18%);
+    overscroll-behavior: contain;
+  }
+
+  dialog.mobile-brands-sheet[open] {
+    display: flex;
+    animation: mobile-brands-sheet-in 280ms cubic-bezier(.22, 1, .36, 1);
+  }
+
+  dialog.mobile-brands-sheet.is-closing {
+    transform: translateY(100%);
+    transition: transform 240ms ease;
+  }
+
+  dialog.mobile-brands-sheet::backdrop {
+    background: rgb(0 0 0 / 45%);
+  }
+
+  @keyframes mobile-brands-sheet-in {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    dialog.mobile-brands-sheet[open] {
+      animation: none;
+    }
+  }
+
+  .mobile-brands-sheet__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px 14px 10px;
+  }
+
+  .mobile-brands-sheet__head h2 {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    font-family: 'Sora', system-ui, sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .mobile-brands-sheet__head h2 span:not(:empty) {
+    padding: 2px 8px;
+    color: #3a34d2;
+    font-family: 'Figtree', system-ui, sans-serif;
+    font-size: 11px;
+    background: #ecebfd;
+    border-radius: 999px;
+  }
+
+  .mobile-brands-sheet__close {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: #16123f;
+    background: #f1f2f6;
+    border: 0;
+    border-radius: 50%;
+  }
+
+  .mobile-brands-sheet__close svg,
+  .mobile-brands-sheet__search svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+
+  .mobile-brands-sheet__search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 14px 12px;
+    padding: 0 12px;
+    color: #7a7f95;
+    background: #f4f5f9;
+    border: 1px solid #e6e8f2;
+    border-radius: 999px;
+  }
+
+  .mobile-brands-sheet__search input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    color: #16123f;
+    font: inherit;
+    font-size: 16px;
+    background: none;
+    border: 0;
+    outline: none;
+    box-shadow: none;
+  }
+
+  .mobile-brands-sheet__grid {
+    display: grid;
+    flex: 0 1 auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 74px;
+    align-content: start;
+    gap: 8px;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 14px calc(16px + env(safe-area-inset-bottom));
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Pendant le chargement de la liste : tuiles grises. */
+  .mobile-brands-sheet__grid:empty::before {
+    grid-column: 1 / -1;
+    grid-row: span 3;
+    background: #eef0f4;
+    border-radius: 12px;
+    content: '';
+  }
+
+  .mobile-brands-sheet__grid > [hidden] {
+    display: none;
+  }
+
+  .mobile-brands-sheet__empty {
+    margin: 0;
+    padding: 24px 14px;
+    color: #7a7f95;
+    font-size: 14px;
     text-align: center;
   }
 

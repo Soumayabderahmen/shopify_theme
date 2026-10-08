@@ -364,8 +364,8 @@
       {%- comment -%}
         Marques de la boutique (rangée défilante à gauche / à droite) : toutes celles citées dans le titre d'au moins un
         produit (relevé sur les ~10 000 produits du catalogue, 424 marques), triées par nombre de produits.
-        Les 40 premières sont écrites ici ; toutes sont dans assets/mobile-brands.json, et les suivantes sont ajoutées par
-        assets/mobile-temu-header.js à l'ouverture du tiroir (page plus légère, fichier gardé en cache par le navigateur).
+        Les 20 premières sont dans la rangée ; « Voir plus » ouvre la fenêtre de toutes les marques, remplie par
+        assets/mobile-temu-header.js depuis assets/mobile-brands.json à sa première ouverture (page plus légère).
         Format : Nom|recherche|collection(s)|photo d'un vrai produit de la marque (image du CDN Shopify).
         Avec une collection (nike, adidas, reebok/rebok, trendsi) : lien et photo de la collection ;
         sinon : recherche limitée au titre / fabricant / type (pas aux descriptions) et la photo du produit.
@@ -392,31 +392,15 @@
         Xtep|Xtep||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sfb6b6f82cd2149398ec16f0d84729e37P.webp?v=1787106229;
         Liyke|Liyke||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sb448ffb35ef64938aaa2fcd0f7f3521dK.webp?v=1778891350;
         Tous|Tous||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E84fa3a6652534ff8a638cd4c4023f5d19.webp?v=1786930592;
-        Lige|Lige||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8738fe98c50142dd8c1dd35ab4d74fe9u.webp?v=1779602758;
-        Refresh|Refresh||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Se7f21c4df18c4bf5a90b20f0a3d887053.webp?v=1790629467;
-        Honda|Honda||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S4b8917d4a2424288a15c2837c1d3dd0bC.webp?v=1779561246;
-        Todimart|Todimart||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S95bd75caba4f44f899b6244a07cdbbc4K.webp?v=1783790442;
-        Soraia|Soraia||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/A01f2b5922da844e983613f932bee70eab.webp?v=1779584157;
-        Yamaha|Yamaha||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sf870318baa8d4cb598209e1b477e3a92W.webp?v=1779578637;
-        Carmela|Carmela||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E4107517d6556449a9793c09e4172a00dm.webp?v=1790629491;
-        Tamaris|Tamaris||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E263015d82021436a9ae3f038c86205d9F.webp?v=1790629492;
-        Pikolinos|Pikolinos||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E132933c6ac0c4e00b2487541a2a3e490a.webp?v=1790629718;
-        Urlife|Urlife||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Ae1246dd6afad480ea0da381c9c701f54u.webp?v=1784399517;
-        iScooter|iScooter||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S3bbd0496b48449a7a5f4276c31a64f922.webp?v=1783790408;
-        Feandrea|Feandrea||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E6fec1615f1514ec1841738083d13af3cx.webp?v=1774385078;
-        Li-Ning|Li-Ning||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S286765ba46c04f1da237d3b5d3eafabbx.webp?v=1779582857;
-        Kukirin|Kukirin||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sab6717ad9362405396a87f00adfd39406.webp?v=1783791702;
-        Huitan|Huitan||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/H9f6e709a02ef4ccca914ef9ed994bf25Y.webp?v=1779588769;
-        PawHut|PawHut||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S81de9f1ee8c14c8083a54165ef5b944ep.webp?v=1774385086;
-        Corina|Corina||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Eeb132dac514f46179067f25137524e65U.webp?v=1790629433;
-        Naruto|Naruto||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sc82ebca5fc7646f4a7f033cefb7eb217y.webp?v=1788913139;
-        Pasarela|Pasarela||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E23babeb77e1e4b169daaf7c0dca4f8b8B_2bd1381c-f11b-40a6-a90b-ac86887e59b3.webp?v=1790629830;
-        Curren|Curren||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S956b65c5341c4374b2aaf9c48c900e4er.webp?v=1779607865
+        Lige|Lige||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8738fe98c50142dd8c1dd35ab4d74fe9u.webp?v=1779602758
       {%- endcapture -%}
       {%- assign brand_entries = brand_list | split: ';' -%}
       <section class="mobile-explore-section">
-        <div class="mobile-explore-section__title"><h2>{{ 'mobile.explore.brands' | t }}</h2></div>
-        <div class="mobile-explore-brands" aria-label="{{ 'mobile.explore.scroll_brands' | t }}" data-mobile-brands="{{ 'mobile-brands.json' | asset_url }}">
+        <div class="mobile-explore-section__title">
+          <h2>{{ 'mobile.explore.brands' | t }}</h2>
+          <button type="button" class="mobile-explore-section__more" aria-haspopup="dialog" data-mobile-brands-open>{{ 'mobile.explore.see_more_brands' | t }}</button>
+        </div>
+        <div class="mobile-explore-brands" aria-label="{{ 'mobile.explore.scroll_brands' | t }}">
           {%- for brand_entry in brand_entries -%}
             {%- liquid
                 assign brand_parts = brand_entry | strip | split: '|'
@@ -464,6 +448,10 @@
               <strong>{{ brand_label | escape }}</strong>
             </a>
           {%- endfor -%}
+          <button type="button" class="mobile-explore-brand mobile-explore-brand--more" aria-haspopup="dialog" data-mobile-brands-open>
+            <strong>{{ 'mobile.explore.see_more_brands' | t }}</strong>
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m9 6 6 6-6 6"></path></svg>
+          </button>
         </div>
       </section>
 
@@ -635,5 +623,25 @@
 
       <a class="mobile-explore-all-products" href="{{ routes.all_products_collection_url }}">{{ 'mobile.explore.all_products' | t }} <span aria-hidden="true">→</span></a>
     </div>
+
+    <dialog
+      class="mobile-brands-sheet"
+      aria-labelledby="mobile-brands-sheet-title"
+      data-mobile-brands-sheet
+      data-brands-url="{{ 'mobile-brands.json' | asset_url }}"
+    >
+      <div class="mobile-brands-sheet__head">
+        <h2 id="mobile-brands-sheet-title">{{ 'mobile.explore.all_brands' | t }} <span data-mobile-brands-count></span></h2>
+        <button type="button" class="mobile-brands-sheet__close" aria-label="{{ 'mobile.common.close' | t }}" data-mobile-brands-close>
+          <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <label class="mobile-brands-sheet__search">
+        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        <input type="search" placeholder="{{ 'mobile.explore.search_brands' | t }}" aria-label="{{ 'mobile.explore.search_brands' | t }}" autocomplete="off" enterkeyhint="search" data-mobile-brands-filter>
+      </label>
+      <div class="mobile-brands-sheet__grid" data-mobile-brands-grid></div>
+      <p class="mobile-brands-sheet__empty" data-mobile-brands-empty hidden>{{ 'mobile.explore.no_brands' | t }}</p>
+    </dialog>
   </dialog>
 {%- endif -%}
