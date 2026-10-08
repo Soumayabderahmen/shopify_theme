@@ -388,6 +388,9 @@
 #root #main-product form[action*="/cart/add"] .submit,
 #root #main-product .shopify-block[id*="klarna"],
 #root #main-product .f8pr-shipping-timer,
+/* Bandeau de marque recréé par le thème quand il refait son formulaire : celui du haut (sous les vignettes) suffit. */
+#root #main-product .f8pr .badge-scroll-wrapper,
+#root #main-product .f8pr .brand-badges-container,
 #root #main-product .og-bar,
 #root #main-product .module-spacer,
 #root #main-product > footer.m6tb,
