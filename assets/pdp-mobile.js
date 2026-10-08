@@ -1497,11 +1497,16 @@
     var relatedSeen = {};
     relatedSeen[related.getAttribute('data-product-id')] = true;
     var relatedCard = function (product) {
-      var sale = product.compare_at_price > product.price;
-      var off = sale ? Math.round((product.compare_at_price - product.price) * 100 / product.compare_at_price) : 0;
+      // Prix, prix barré et −% de la même variante (1re disponible, comme les cartes produit).
+      var variants = product.variants || [];
+      var shown = variants.find(function (variant) { return variant.available; }) || variants[0] || product;
+      var price = shown.price;
+      var compareAt = shown.compare_at_price || 0;
+      var sale = compareAt > price;
+      var off = sale ? Math.floor((compareAt - price) * 100 / compareAt) : 0;
       var image = product.featured_image ? product.featured_image + (product.featured_image.indexOf('?') === -1 ? '?' : '&') + 'width=360' : '';
       var title = String(product.title).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
-      return '<a class="pdp-m__rc" href="' + product.url + '"><span class="pdp-m__pp">' + (image ? '<img src="' + image + '" alt="" loading="lazy">' : '') + (sale ? '<i>-' + off + '%</i>' : '') + '</span><p>' + title + '</p><div class="pdp-m__pr' + (sale ? ' is-sale' : '') + '"><b>' + money(product.price) + '</b>' + (sale ? '<s>' + money(product.compare_at_price) + '</s>' : '') + '</div></a>';
+      return '<a class="pdp-m__rc" href="' + product.url + '"><span class="pdp-m__pp">' + (image ? '<img src="' + image + '" alt="" loading="lazy">' : '') + (sale ? '<i>-' + off + '%</i>' : '') + '</span><p>' + title + '</p><div class="pdp-m__pr' + (sale ? ' is-sale' : '') + '"><b>' + money(price) + '</b>' + (sale ? '<s>' + money(compareAt) + '</s>' : '') + '</div></a>';
     };
     var showRelated = function (products, target) {
       (target || relatedRail).insertAdjacentHTML('beforeend', products.map(relatedCard).join(''));

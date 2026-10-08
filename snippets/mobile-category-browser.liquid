@@ -338,7 +338,7 @@
               {%- assign sale_variant = explore_product.selected_or_first_available_variant -%}
               {%- if sale_variant.compare_at_price > sale_variant.price and displayed_sale_products < 8 -%}
                 {%- assign displayed_sale_products = displayed_sale_products | plus: 1 -%}
-                {%- assign discount_amount = sale_variant.compare_at_price | minus: sale_variant.price | times: 100.0 | divided_by: sale_variant.compare_at_price | round -%}
+                {%- assign discount_amount = sale_variant.compare_at_price | minus: sale_variant.price | times: 100.0 | divided_by: sale_variant.compare_at_price | floor -%}
                 <a class="mobile-explore-product mobile-explore-product--sale" href="{{ explore_product.url }}">
                   <span class="mobile-explore-product__image">
                     {%- if explore_product.featured_image != blank -%}
@@ -362,22 +362,54 @@
       </section>
 
       {%- comment -%}
-        Marques de la boutique (rangée défilante à gauche / à droite), triées par nombre de produits.
-        Format : Nom|recherche|collection(s)|produit pour la photo.
-        Avec une collection (nike, adidas, rebok) : lien et photo de la collection ;
-        sinon : recherche limitée au titre / fabricant / type (pas aux descriptions) et photo d'un vrai produit de la marque.
+        Marques de la boutique (rangée défilante à gauche / à droite) : toutes celles dont au moins 5 produits citent le nom
+        dans leur titre (relevé sur les ~10 000 produits du catalogue), triées par nombre de produits.
+        Format : Nom|recherche|collection(s)|photo d'un vrai produit de la marque (image du CDN Shopify).
+        Avec une collection (nike, adidas, reebok/rebok, trendsi) : lien et photo de la collection ;
+        sinon : recherche limitée au titre / fabricant / type (pas aux descriptions) et la photo du produit.
+        La photo est donnée par son adresse : Liquid ne peut charger que 20 produits par page avec all_products.
       {%- endcomment -%}
       {%- capture brand_list -%}
-        Nike|Nike|nike|;
-        Adidas|Adidas|adidas|;
-        Pagani Design|Pagani||pagani-design-nuovo-orologio-da-polso-al-quarzo-da-uomo-con-quadrante-in-meteorite-vetro-zaffiro-cronografo-impermeabile-100m-in-acciaio-inossidabile;
-        Onemix|Onemix||onemix-2026-o-resilio-scarpe-da-corsa-per-uomo-traspiranti-leggere-sneakers-per-palestra-e-sport-allaperto;
-        Zadorin|Zadorin||zadorin-fashion-oversized-turn-down-collar-fluffy-faux-fur-coat-woman-vintage-faux-fur-jacket-coats-winter-clothes-woman-2025;
-        Jordan|Jordan||scarpe-da-basket-nike-originali-jordan-mvp-678-da-uomo-resistenti-e-pratiche-dz4475-100;
-        Skechers|Skechers||skechers-easy-going-flat-ankle-boots-high-zip-2-women-brown;
-        Reebok|Reebok|reebok,rebok|;
-        Olevs|Olevs||olevs-5885-orologio-da-uomo-orologio-al-quarzo-impermeabile-di-marca-originale-cinturino-in-acciaio-inossidabile-data-automatica-orologi-da-regalo-da-uomo-per-uomo-1;
-        Poedagar|Poedagar||poedagar-orologio-da-polso-al-quarzo-da-uomo-di-lusso-impermeabile-luminoso-data-settimana-orologio-da-uomo-orologi-da-uomo-daffari-in-acciaio-inossidabile-1
+        Nike|Nike|nike|https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sb70be1c4675c411bb5f5eb44cce373875.webp?v=1786840825;
+        Adidas|Adidas|adidas|https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S385b642ea3984363b88108d8ae61ad8eU.webp?v=1787112755;
+        Pagani Design|Pagani||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/A54bd53957dc74522bc40b0eff331b10fY.webp?v=1782175734;
+        Trendsi|Trendsi|trendsi|;
+        Onemix|Onemix||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Scd1399d5452a4f2fabb266aca90f51bax.webp?v=1775255144;
+        Zadorin|Zadorin||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Hb4c14614d9f647d6b2b1ad7df257607bg.webp?v=1789457707;
+        Jordan|Jordan||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S954055489f0e4eaaaf44bbbe02f09dfeC.webp?v=1779610885;
+        Skechers|Skechers||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E7a2fe74b7fe1481f82e37ee17f3b835fi.webp?v=1779582829;
+        Reebok|Reebok|reebok,rebok|https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sb5823f6e365246d0a1b0fc1c62f331b3I.webp?v=1788907516;
+        Olevs|Olevs||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S3f0b479cc5d14979a53c831740d15e9eS.webp?v=1779603187;
+        Poedagar|Poedagar||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S5be2703ed0c74e5e884997507042fbb3Q.webp?v=1779607464;
+        Xti|Xti||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E5873467178854783a86ec3a9017fd10bn.webp?v=1790629831;
+        Joma|Joma||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Ebaf07cbb9a034b1b9452befdd37fc485F.webp?v=1779582603;
+        Addiesdive|Addiesdive||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sc85d5cdbc07143efa5d6c066686afbb5V.webp?v=1790623719;
+        Mustang|Mustang||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E5d7838df24f24244a3e0621103d8028c1.webp?v=1790629695;
+        AddiesKin|AddiesKin||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Ad2f0fbffb92a4363a1a37c86fc89d66em.webp?v=1790623676;
+        Xtep|Xtep||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S9338a7907ec2475ab7e677a111461d42c.webp?v=1779583188;
+        Liyke|Liyke||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Se37d913b6f1e4902a319bd8170151161D.webp?v=1779577563;
+        Lige|Lige||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8738fe98c50142dd8c1dd35ab4d74fe9u.webp?v=1779602758;
+        Refresh|Refresh||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Ef0c3cea7c9254572bfc040316c8d3dcdA.webp?v=1779584043;
+        Honda|Honda||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S4b8917d4a2424288a15c2837c1d3dd0bC.webp?v=1779561246;
+        Soraia|Soraia||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Adf18e9c0a6a14cfa8a8968ce6e177c26Z.webp?v=1779582800;
+        Carmela|Carmela||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E6b00e12e442a4d2e9e8011ae9bcc8dd5w.webp?v=1790629650;
+        Tamaris|Tamaris||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Ed35268b3d8c14a9c9de4214322216185R.webp?v=1790629662;
+        Pikolinos|Pikolinos||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Eedc8fb808c244a5982ead3795e6a8199m.webp?v=1790629870;
+        Feandrea|Feandrea||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E2b31cfe759414e118cb6e9329776d413Q.webp?v=1774466935;
+        Li-Ning|Li-Ning||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8378b8464cb94ed7beec05f02839b2ffv.webp?v=1779582943;
+        Huitan|Huitan||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sdb11372887d14b5fb233833e7befa9ecg.webp?v=1779595035;
+        PawHut|PawHut||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S7cd08fbbe2244a39ba18ac0b9709c670T.webp?v=1774385085;
+        Corina|Corina||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Ef98bd78ec6544039975a022ceac8bbe6e.webp?v=1790629436;
+        Curren|Curren||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S15f0aef67a744f229e3f34e24878d141P.webp?v=1779604209;
+        Luxusteel|Luxusteel||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S71318d54909d4f3eadc3d41a75216e21W.webp?v=1779602206;
+        Zenana|Zenana||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/2c3f2279-e103-4197-b4dd-6c7d33dc88f4-Max-Origin.webp?v=1788908320;
+        Guess|Guess||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Ea7749b0683be4138afbdc755a0fa52615.webp?v=1786925577;
+        Disney|Disney||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S4d9cedf9ad2e418cbae62161a486fe19N.webp?v=1779594935;
+        Michael Kors|Michael Kors||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Ef9d9c4f11f55472e888772291fdd4141h.webp?v=1779582737;
+        Naviforce|Naviforce||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S2d1be3a2cd28463d90faa6fcf01a2f06d.webp?v=1779603984;
+        Wonders|Wonders||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E152a49bed1dd44f1b532a64195175eb1e.webp?v=1790629486;
+        Hispanitas|Hispanitas||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E4287edfeee3a479bac9ec9c0d9d8a5fcF.webp?v=1790629679;
+        Songmics|Songmics||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E8d8b58d6c23d4a958f2a57f1728439d6T.webp?v=1774385078
       {%- endcapture -%}
       {%- assign brand_entries = brand_list | split: ';' -%}
       <section class="mobile-explore-section">
@@ -405,8 +437,9 @@
                     assign brand_image = brand_collection.products.first.featured_image
                   endif
                 endif
+                assign brand_image_url = blank
                 if brand_image == blank and brand_parts[3] != blank
-                  assign brand_image = all_products[brand_parts[3]].featured_image
+                  assign brand_image_url = brand_parts[3] | strip | append: '&width=240&height=148&crop=center'
                 endif
                 assign brand_query = brand_query | url_encode
                 assign brand_url = routes.search_url | append: '?q=' | append: brand_query | append: '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type'
@@ -423,6 +456,8 @@
                   height="74"
                   loading="lazy"
                 >
+              {%- elsif brand_image_url != blank -%}
+                <img src="{{ brand_image_url }}" alt="" width="120" height="74" loading="lazy" onerror="this.remove()">
               {%- endif -%}
               <strong>{{ brand_label | escape }}</strong>
             </a>
@@ -546,7 +581,7 @@
                     >
                   {%- endif -%}
                   {%- if new_variant.compare_at_price > new_variant.price -%}
-                    {%- assign new_discount_amount = new_variant.compare_at_price | minus: new_variant.price | times: 100.0 | divided_by: new_variant.compare_at_price | round -%}
+                    {%- assign new_discount_amount = new_variant.compare_at_price | minus: new_variant.price | times: 100.0 | divided_by: new_variant.compare_at_price | floor -%}
                     <span>-{{ new_discount_amount }}%</span>
                   {%- endif -%}
                 </span>

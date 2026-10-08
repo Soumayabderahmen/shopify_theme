@@ -485,6 +485,10 @@
 
   function initialSelection(product, variantId, colorIndex) {
     if (!hasOptions(product)) return product.options.map(function (option) { return option.values[0].name; });
+    // Variante de la carte (ou de la carte « Completa il look ») en stock : toutes ses options cochées, pour afficher
+    // exactement le prix, le prix barré, le −% et « Risparmi » vus sur la carte. Le client peut ensuite en changer.
+    var fromCard = variantId && product.variants.find(function (variant) { return String(variant.id) === String(variantId) && variant.available; });
+    if (fromCard) return fromCard.options.slice();
     var selected = product.options.map(function () { return null; });
     var start = product.variants.find(function (variant) { return String(variant.id) === String(variantId) && variant.available; })
       || product.variants.find(function (variant) { return variant.available; })
@@ -805,7 +809,7 @@
     // Prix d'abord (rouge si soldé) + "Risparmi €x".
     variant = priceVariant();
     var onSale = variant.compareAtPrice > variant.price;
-    var percent = onSale ? Math.round((variant.compareAtPrice - variant.price) / variant.compareAtPrice * 100) : 0;
+    var percent = onSale ? Math.floor((variant.compareAtPrice - variant.price) / variant.compareAtPrice * 100) : 0;
     setHTML(el.price, '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(variant.price)) + '</b>'
       + (onSale ? '<s>' + escapeHtml(money(variant.compareAtPrice)) + '</s><span class="pct">-' + percent + '%</span>' : ''));
     el.save.hidden = !onSale;
@@ -864,12 +868,19 @@
   }
 
   function recCard(item) {
-    var onSale = item.compare_at_price > item.price;
-    var percent = onSale ? Math.round((item.compare_at_price - item.price) / item.compare_at_price * 100) : 0;
-    return '<button type="button" class="qa-rc" data-qa-similar="' + escapeHtml(item.handle) + '" aria-label="' + escapeHtml(T('choose_options_for', { title: item.title })) + '">'
+    // Prix, prix barré et −% de la même variante (1re disponible, comme les cartes produit) : le prix mini et le
+    // prix barré mini du produit peuvent venir de deux variantes différentes.
+    var variants = item.variants || [];
+    var shown = variants.find(function (variant) { return variant.available; }) || variants[0] || item;
+    var price = shown.price;
+    var compareAt = shown.compare_at_price || 0;
+    var onSale = compareAt > price;
+    var percent = onSale ? Math.floor((compareAt - price) / compareAt * 100) : 0;
+    return '<button type="button" class="qa-rc" data-qa-similar="' + escapeHtml(item.handle) + '"'
+      + (shown !== item && shown.id ? ' data-qa-variant="' + escapeHtml(String(shown.id)) + '"' : '') + ' aria-label="' + escapeHtml(T('choose_options_for', { title: item.title })) + '">'
       + '<span class="ph"><img src="' + escapeHtml(sizedImage(item.featured_image, 240)) + '" alt="" loading="lazy" width="118" height="118">'
       + (percent ? '<i class="off">-' + percent + '%</i>' : '') + '<span class="pl">' + PLUS_ICON + '</span></span>'
-      + '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(item.price)) + '</b>'
+      + '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(price)) + '</b>'
       + '<small>' + escapeHtml(item.title) + '</small></button>';
   }
 
@@ -1068,7 +1079,7 @@
     if (!el.fav.hidden) el.fav.setAttribute('aria-pressed', String(window.mobileWishlist.has(productId)));
     setHTML(el.price, price
       ? '<b class="' + (onSale ? 'sale' : '') + '">' + escapeHtml(money(price)) + '</b>'
-        + (onSale ? '<s>' + escapeHtml(money(compare)) + '</s><span class="pct">-' + Math.round((compare - price) / compare * 100) + '%</span>' : '')
+        + (onSale ? '<s>' + escapeHtml(money(compare)) + '</s><span class="pct">-' + Math.floor((compare - price) / compare * 100) + '%</span>' : '')
       : '');
     el.save.hidden = !onSale;
     el.save.textContent = onSale ? T('drawer_save', { amount: money(compare - price) }) : '';
@@ -1090,7 +1101,7 @@
   }
 
   // Ouverture pour un produit (handle) : depuis une carte, ou depuis la wishlist (window.mobileQuickAdd.open).
-  // variantId : variante dont la couleur est pré-cochée ; la taille reste au choix du client.
+  // variantId : variante de la carte, cochée à l'ouverture (couleur et taille) ; le client peut en changer.
   function openProduct(handle, variantId, preview) {
     var token = {};
     openRequest = token;
@@ -1499,7 +1510,7 @@
     var similar = event.target.closest('[data-qa-similar]');
     if (similar) {
       // Depuis la confirmation, le produit ajouté n'a pas besoin d'un retour.
-      swapTo(similar.dataset.qaSimilar, null, el.done.hidden);
+      swapTo(similar.dataset.qaSimilar, similar.dataset.qaVariant || null, el.done.hidden);
       return;
     }
     if (event.target.closest('[data-qa-add]')) addToCart();

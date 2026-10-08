@@ -371,7 +371,7 @@ function initMobileTemuHeader() {
     var priceCents = Number(item.priceCents) || 0;
     var compareAtCents = Number(item.compareAtPriceCents) || 0;
     var discount = compareAtCents > priceCents
-      ? Math.round((compareAtCents - priceCents) / compareAtCents * 100)
+      ? Math.floor((compareAtCents - priceCents) / compareAtCents * 100)
       : 0;
     article.className = 'wishlist-mobile-card';
     article.dataset.productId = item.id;
@@ -772,7 +772,7 @@ function initMobileTemuHeader() {
         compareAtPrice: compareAt ? compareAt.textContent.replace(/\s+/g, ' ').trim() : '',
         compareAtPriceCents: Number(button.dataset.compareAtPriceCents) || 0,
         discountPercent: Number(button.dataset.compareAtPriceCents) > Number(button.dataset.priceCents)
-          ? Math.round((Number(button.dataset.compareAtPriceCents) - Number(button.dataset.priceCents))
+          ? Math.floor((Number(button.dataset.compareAtPriceCents) - Number(button.dataset.priceCents))
             / Number(button.dataset.compareAtPriceCents) * 100)
           : 0,
         variantTitle: button.dataset.variantTitle && button.dataset.variantTitle !== 'Default Title'
@@ -814,7 +814,7 @@ function initMobileTemuHeader() {
           compareAtPrice: product.compareAtPrice || '',
           compareAtPriceCents: Number(product.compareAtPriceCents) || 0,
           discountPercent: Number(product.compareAtPriceCents) > Number(product.priceCents)
-            ? Math.round((Number(product.compareAtPriceCents) - Number(product.priceCents)) / Number(product.compareAtPriceCents) * 100)
+            ? Math.floor((Number(product.compareAtPriceCents) - Number(product.priceCents)) / Number(product.compareAtPriceCents) * 100)
             : 0,
           variantTitle: product.variantTitle && product.variantTitle !== 'Default Title' ? product.variantTitle : '',
           badge: ''
@@ -1043,7 +1043,7 @@ function initMobileTemuHeader() {
       price.appendChild(wishlistDrawerElement(
         'span',
         'mobile-wishlist-drawer__pct',
-        '-' + Math.round((state.compareAtCents - state.priceCents) / state.compareAtCents * 100) + '%'
+        '-' + Math.floor((state.compareAtCents - state.priceCents) / state.compareAtCents * 100) + '%'
       ));
     }
 
@@ -1311,7 +1311,7 @@ function initMobileTemuHeader() {
       priceCents: priceCents,
       compareAtPrice: compareAtCents > priceCents ? formatWishlistMoney(compareAtCents) : '',
       compareAtPriceCents: compareAtCents,
-      discountPercent: compareAtCents > priceCents ? Math.round((compareAtCents - priceCents) / compareAtCents * 100) : 0,
+      discountPercent: compareAtCents > priceCents ? Math.floor((compareAtCents - priceCents) / compareAtCents * 100) : 0,
       variantTitle: variant && variant.title !== 'Default Title' ? variant.title : '',
       badge: ''
     }]));
@@ -1861,7 +1861,7 @@ function initMobileTemuHeader() {
           imageWrap.appendChild(image);
         }
         if (onSale) {
-          var discountAmount = Math.round(
+          var discountAmount = Math.floor(
             ((variant.compare_at_price - variant.price) / variant.compare_at_price) * 100
           );
           var badge = document.createElement('span');
