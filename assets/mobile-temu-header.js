@@ -1752,6 +1752,53 @@ function initMobileTemuHeader() {
     var closeButton = exploreDrawer.querySelector('.mobile-explore-drawer__close');
     if (closeButton) closeButton.focus();
     renderRecentExploreProducts();
+    loadAllExploreBrands();
+  };
+  // « Shop per brand » : les 40 premières marques sont dans la page ; toutes les autres (assets/mobile-brands.json,
+  // relevé réel du catalogue) sont ajoutées à la suite à la première ouverture du tiroir.
+  var exploreBrandsLoaded = false;
+  var loadAllExploreBrands = function () {
+    var row = exploreDrawer && exploreDrawer.querySelector('[data-mobile-brands]');
+    if (!row || exploreBrandsLoaded) return;
+    exploreBrandsLoaded = true;
+    var shown = {};
+    row.querySelectorAll('.mobile-explore-brand strong').forEach(function (label) {
+      shown[label.textContent.trim().toLowerCase()] = true;
+    });
+    var root = window.Shopify && window.Shopify.routes && window.Shopify.routes.root ? window.Shopify.routes.root : '/';
+    fetch(row.getAttribute('data-mobile-brands'), { credentials: 'same-origin' })
+      .then(function (response) {
+        if (!response.ok) throw new Error('Brand list request failed: ' + response.status);
+        return response.json();
+      })
+      .then(function (data) {
+        var fragment = document.createDocumentFragment();
+        data.brands.forEach(function (brand) {
+          if (shown[String(brand[0]).toLowerCase()]) return;
+          var link = document.createElement('a');
+          link.className = 'mobile-explore-brand';
+          link.href = root + 'search?q=' + encodeURIComponent(brand[1]) + '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type';
+          if (brand[3]) {
+            var image = document.createElement('img');
+            image.src = (/^https?:/.test(brand[3]) ? brand[3] : data.cdn + brand[3]) + '&width=240&height=148&crop=center';
+            image.alt = '';
+            image.width = 120;
+            image.height = 74;
+            image.loading = 'lazy';
+            image.addEventListener('error', function () { image.remove(); });
+            link.appendChild(image);
+          }
+          var label = document.createElement('strong');
+          label.textContent = brand[0];
+          link.appendChild(label);
+          fragment.appendChild(link);
+        });
+        row.appendChild(fragment);
+      })
+      .catch(function (error) {
+        exploreBrandsLoaded = false;
+        console.error('Unable to load the brand list.', error);
+      });
   };
   var recentProductsSection = exploreDrawer && exploreDrawer.querySelector('[data-mobile-explore-recent]');
   var recentProductsRail = exploreDrawer && exploreDrawer.querySelector('[data-mobile-explore-recent-products]');

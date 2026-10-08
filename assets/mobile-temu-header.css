@@ -1250,7 +1250,8 @@
     border-radius: 999px;
   }
 
-  /* 10 marques : la 4e dépasse à droite pour montrer qu'on peut faire défiler. */
+  /* Toutes les marques (40 dans la page + les suivantes chargées à l'ouverture) : la 4e dépasse à droite
+     pour montrer qu'on peut faire défiler. */
   .mobile-explore-brands {
     display: grid;
     grid-auto-columns: 28%;
