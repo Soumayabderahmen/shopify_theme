@@ -3053,6 +3053,17 @@
   if bestseller_count > 20 and reorder_rate > 0
     assign show_reorder_badge = true
   endif
+
+  # Mobile : carte au style SHEIN de l'accueil (snippets/mshein-card.liquid) dans les cartes de grille ; la carte du
+  # thème reste pour l'ordinateur (affichage géré par assets/mshein-card.css et assets/product-card.css).
+  # Pas pour les listes, points d'image, suggestions du panier, cases à cocher (upsell) ni la page Wishlist
+  # (templates/product.wishlist-card.liquid : carte habillée par assets/mobile-temu-header.js, mode modifier).
+  assign mshein_mobile = false
+  if product != blank and cart_upsell_card == false and upsell == false and template.suffix != 'wishlist-card'
+    if layout == blank or layout == 'grid'
+      assign mshein_mobile = true
+    endif
+  endif
 -%}
 
 {%- capture price_element -%}
@@ -3196,6 +3207,7 @@
       {% if product == blank %}placeholder-product{% endif %}
       {% if upsell and index > visible_products %}hidden{% endif %}
     {% endif %}
+    {% if mshein_mobile %}has-mshein{% endif %}
   "
   {% if layout == 'list-compact' %}
     data-product-id="{{ product.id }}"
@@ -3208,6 +3220,9 @@
   {% endunless %}
   style="{{ extra_style }} --anim-delay: {{ anim_delay }};"
 >
+  {%- if mshein_mobile -%}
+    {%- render 'mshein-card', product: product, best: collections['bestsellers'], flag: flag_emoji, container: 'div', uniform: true -%}
+  {%- endif -%}
   {% if extra_style contains '--vertical' %}
     <div {{ shopify_attributes }} class="{% if extra_class %}{{ extra_class }}{% endif %}">
   {% endif %}

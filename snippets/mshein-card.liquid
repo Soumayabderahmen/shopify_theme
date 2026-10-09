@@ -8,11 +8,14 @@
   - étoiles : avis (métachamps syncer.reviews / reviews.rating, comme snippets/pdp-mobile-top.liquid) ;
   - « N venduti di recente » : métachamp custom.bestseller_current_month (sinon bestseller_count) ;
   - « Sped. gratuita » au-dessus de 50 (même seuil que product-item), « Reso facile », « Risparmia » ;
-  - le nom de la marque (« 🏬 Marque › ») est ajouté par assets/mobile-home-shein.js (liste assets/mobile-brands.json).
+  - le nom de la marque (« 🏬 Marque › ») est ajouté par assets/mshein-card.js (liste assets/mobile-brands.json).
   Le cœur et le panier utilisent les scripts existants (classe .alibaba-card__wishlist, attribut data-quick-add).
-  Params : product, best (collection « Più venduti »), flag (emoji du pays, snippets/country-flag-emoji.liquid)
+  Params : product, best (collection « Più venduti »), flag (emoji du pays, snippets/country-flag-emoji.liquid),
+  container (facultatif : 'div' pour la carte mobile placée dans les cartes du site, snippets/product-item.liquid),
+  uniform (facultatif : photo au format 3:4 pour toutes les cartes, lignes alignées dans les grilles du site).
 {%- endcomment -%}
 {%- liquid
+  assign card_tag = container | default: 'li'
   assign card_variant = product.selected_or_first_available_variant
   assign card_on_sale = false
   assign card_pct = 0
@@ -22,7 +25,9 @@
     assign card_pct = card_saved | times: 100.0 | divided_by: card_variant.compare_at_price | floor
     # strip_html : le format monétaire de certaines devises contient <span class=money> (app de devises),
     # qu'une traduction affiche en texte (« Risparmia <span class=money>€17,43 »).
-    assign card_saved_money = card_saved | money_without_trailing_zeros | strip_html
+    # Arrondi à l'unité (« Risparmia €17 », comme SHEIN) : tient à côté de « Sped. gratuita » même sur 360px.
+    assign card_saved_rounded = card_saved | plus: 50 | divided_by: 100 | times: 100
+    assign card_saved_money = card_saved_rounded | money_without_trailing_zeros | strip_html
   endif
 
   assign card_image = card_variant.featured_image | default: product.featured_image
@@ -34,6 +39,9 @@
     elsif card_ratio > 1.4
       assign card_ratio = 1.4
     endif
+  endif
+  if uniform
+    assign card_ratio = 1.3333
   endif
 
   # Marques officielles : même liste et même ordre que snippets/badge--brand-products.liquid.
@@ -98,8 +106,13 @@
     assign card_new = true
   endif
 -%}
-<li class="mshein-card reveal" data-mshein-title="{{ product.title | escape }}">
-  <div class="mshein-card__img alibaba-card__picture{% if card_brand != '' or card_best %} has-strip{% endif %}" style="aspect-ratio: 1 / {{ card_ratio }};">
+<{{ card_tag }} class="mshein-card{% if card_tag == 'li' %} reveal{% else %} mshein-card--embed{% endif %}" data-mshein-title="{{ product.title | escape }}">
+  {%- comment -%}
+    Classes du thème (alibaba-card__picture / __title / __price-main) : lues par les favoris et l'ajout rapide. Dans les
+    cartes du site (container 'div'), la carte du thème voisine les porte déjà : pas ici, sinon les styles des grilles
+    du thème s'appliquent à cette carte.
+  {%- endcomment -%}
+  <div class="mshein-card__img{% if card_tag == 'li' %} alibaba-card__picture{% endif %}{% if card_brand != '' or card_best %} has-strip{% endif %}" style="aspect-ratio: 1 / {{ card_ratio }};">
     <a class="mshein-card__link" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
       {%- if card_image != blank -%}
         <img
@@ -147,7 +160,7 @@
   </div>
 
   <div class="mshein-card__body">
-    <h3 class="mshein-card__title alibaba-card__title">
+    <h3 class="mshein-card__title{% if card_tag == 'li' %} alibaba-card__title{% endif %}">
       {%- comment -%} Étiquettes hors du lien : favoris et ajout rapide lisent le titre dans le lien. {%- endcomment -%}
       {%- if card_brand == '' and card_trend -%}<span class="mshein-lbl mshein-lbl--trend">{{ 'mobile.home_shein.trend_label' | t }}</span>{%- endif -%}
       <span data-mshein-store></span>
@@ -169,7 +182,7 @@
       </p>
     {%- endif -%}
     <p class="mshein-card__price{% if card_on_sale %} is-sale{% endif %}">
-      <span class="alibaba-card__price-main">{{ card_variant.price | money }}</span>
+      <span class="mshein-card__now{% if card_tag == 'li' %} alibaba-card__price-main{% endif %}">{{ card_variant.price | money }}</span>
       {%- if card_on_sale -%}
         <span class="mshein-card__pct">-{{ card_pct }}%</span><s class="old-price">{{ card_variant.compare_at_price | money }}</s>
       {%- endif -%}
@@ -204,4 +217,4 @@
       </div>
     {%- endif -%}
   </div>
-</li>
+</{{ card_tag }}>

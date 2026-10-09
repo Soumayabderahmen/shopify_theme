@@ -66,6 +66,12 @@
     {{ 'screen.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
     {{ 'theme-xtra.css' | asset_url | stylesheet_tag: media: 'screen' }}
     {{ 'mobile-temu-header.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
+    {%- comment -%}
+      Carte produit au style SHEIN (snippets/mshein-card.liquid) sur toutes les pages en mobile : styles en tête de page
+      (cartes affichées finies), script commun (cœur, nom de la marque, toucher sur toute la carte).
+    {%- endcomment -%}
+    <link rel="stylesheet" href="{{ 'mshein-card.css' | asset_url }}" media="(max-width: 760px)">
+    <script src="{{ 'mshein-card.js' | asset_url }}" defer data-brands="{{ 'mobile-brands.json' | asset_url }}"></script>
     {%- if template.name == 'index' -%}
       {%- comment -%} Accueil mobile style SHEIN : styles chargés en tête, pas d'ancien design avant le nouveau. {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'mobile-home-shein.css' | asset_url }}" media="(max-width: 760px)">

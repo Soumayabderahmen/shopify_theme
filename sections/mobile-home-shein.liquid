@@ -243,7 +243,7 @@
           assign under_amount = 5000 | money_without_trailing_zeros | strip_html
           assign under_src = routes.all_products_collection_url | append: '?view=mshein-under&sort_by=best-selling&filter.v.price.lte=50'
         -%}
-        <div class="mshein-feed" data-mshein-home data-mshein-feed data-brands="{{ 'mobile-brands.json' | asset_url }}">
+        <div class="mshein-feed" data-mshein-home data-mshein-feed>
           <div class="mshein-feed__tabs" role="tablist" data-mshein-tabs>
             <button type="button" role="tab" aria-selected="true" class="is-on" data-src="{{ for_you_src | append: '&page=2' }}">✨ {{ 'mobile.home_shein.for_you' | t }}</button>
             <button type="button" role="tab" aria-selected="false" data-src="{{ sale_src }}">🔥 {{ 'mobile.explore.on_sale' | t }}</button>

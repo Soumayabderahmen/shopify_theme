@@ -1523,3 +1523,11 @@
     grid-row: 6 !important;
   }
 }
+
+/* Carte mobile au style SHEIN (snippets/mshein-card.liquid, ajoutée par snippets/product-item.liquid) : jamais sur
+   ordinateur, la carte du thème reste seule. Styles mobiles : assets/mshein-card.css. */
+@media only screen and (min-width: 761px) {
+  .alibaba-product-card > .mshein-card--embed {
+    display: none !important;
+  }
+}

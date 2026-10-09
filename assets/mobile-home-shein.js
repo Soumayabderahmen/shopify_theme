@@ -2,7 +2,7 @@
    - bannière sous l'en-tête transparent : hauteur de l'en-tête et image floutée de la diapositive affichée ;
    - apparition des cartes / modules / tuiles au défilement ;
    - fil « Per te » : 2 colonnes décalées, onglets, pages suivantes chargées au défilement (3 points du site) ;
-   - cœur des cartes chargées : état des favoris (window.mobileWishlist) ; nom de la marque (assets/mobile-brands.json).
+   - cartes : cœur, nom de la marque et toucher sur toute la carte dans assets/mshein-card.js (commun au site).
    Mobile uniquement (≤ 760px). */
 (function () {
   'use strict';
@@ -143,84 +143,20 @@
     columnsWrap.appendChild(column);
     return column;
   });
+  // Cœur, nom de la marque et toucher sur toute la carte : assets/mshein-card.js (commun à toutes les cartes).
   var addCards = function (cards) {
     Array.prototype.forEach.call(cards, function (card) {
       var target = columns[0].offsetHeight <= columns[1].offsetHeight ? columns[0] : columns[1];
       target.appendChild(card);
     });
-    decorateCards(columnsWrap);
+    if (window.msheinCards) window.msheinCards.decorate(columnsWrap);
     watchReveal(columnsWrap);
-  };
-
-  // Cœur : état réel des favoris pour les cartes ajoutées (le clic est géré par assets/mobile-temu-header.js).
-  var syncFavorites = function (root) {
-    if (!window.mobileWishlist || typeof window.mobileWishlist.has !== 'function') return;
-    root.querySelectorAll('.mshein-card__fav[data-product-id]').forEach(function (button) {
-      button.setAttribute('aria-pressed', String(Boolean(window.mobileWishlist.has(button.getAttribute('data-product-id')))));
-    });
-  };
-
-  // Nom de la marque devant le titre (« 🏬 Marque › »), relevé des titres du catalogue (assets/mobile-brands.json).
-  var brandMatchers = null;
-  var brandRequest = null;
-  var loadBrands = function () {
-    if (brandRequest) return brandRequest;
-    var url = feed.getAttribute('data-brands');
-    brandRequest = !url ? Promise.resolve([]) : fetch(url, { credentials: 'same-origin' })
-      .then(function (response) {
-        if (!response.ok) throw new Error('Brand list request failed: ' + response.status);
-        return response.json();
-      })
-      .then(function (data) {
-        brandMatchers = (data.brands || []).map(function (brand) {
-          var name = String(brand[0]);
-          var escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          return { name: name, test: new RegExp('(^|[^\\p{L}\\d])' + escaped + '(?=$|[^\\p{L}\\d])', 'iu') };
-        });
-        return brandMatchers;
-      })
-      .catch(function (error) {
-        console.error('Unable to load the brand list.', error);
-        brandMatchers = [];
-        return brandMatchers;
-      });
-    return brandRequest;
-  };
-  var decorateCards = function (root) {
-    syncFavorites(root);
-    loadBrands().then(function (matchers) {
-      root.querySelectorAll('.mshein-card:not([data-mshein-brand-done])').forEach(function (card) {
-        card.setAttribute('data-mshein-brand-done', '');
-        // Marques officielles : déjà « Official Store » dans la bande, pas de doublon.
-        if (card.querySelector('.mshein-brandbar')) return;
-        var slot = card.querySelector('[data-mshein-store]');
-        var title = card.getAttribute('data-mshein-title') || '';
-        if (!slot) return;
-        for (var index = 0; index < matchers.length; index += 1) {
-          if (matchers[index].test.test(title)) {
-            var label = document.createElement('span');
-            label.className = 'mshein-lbl mshein-lbl--store';
-            label.textContent = '🏬 ' + matchers[index].name + ' ›';
-            slot.replaceWith(label);
-            return;
-          }
-        }
-      });
-    });
   };
 
   // Cartes écrites dans la page (10 premiers « Più venduti ») vers les colonnes.
   var firstCards = Array.prototype.slice.call(grid.children);
   grid.replaceWith(columnsWrap);
   addCards(firstCards);
-
-  // Toucher n'importe où sur la carte (hors cœur / panier) : fiche produit, comme SHEIN.
-  columnsWrap.addEventListener('click', function (event) {
-    if (event.defaultPrevented || event.target.closest('a, button')) return;
-    var card = event.target.closest('.mshein-card');
-    var link = card && card.querySelector('.mshein-card__title a[href]');
-    if (link) link.click();
-  });
 
   // Pages suivantes : adresse de l'onglet, puis lien « page suivante » de chaque page ; plusieurs collections à la suite
   // (Brand ufficiali : Nike, puis Adidas…).
