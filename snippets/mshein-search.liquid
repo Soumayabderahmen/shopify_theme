@@ -4,7 +4,7 @@
   et tris de la recherche Shopify ; 20 produits, la suite au défilement (templates/search.mshein-search-page.json).
   Tri, filtres et colonnes sans rechargement (assets/mobile-home-tabs.js, window.msheinResults, modèle
   search.mshein-search). Seuls les produits sont montrés (pas les pages ni les articles).
-  Params : best (collection « Più venduti »), flag
+  Params : best (collection « Più venduti »), best_ids (ses 50 premiers identifiants), flag
 {%- endcomment -%}
 {%- liquid
   assign search_next = ''
@@ -16,7 +16,7 @@
           continue
         endif
         assign search_shown = search_shown | plus: 1
-        render 'mshein-card', product: item, best: best, flag: flag
+        render 'mshein-card', product: item, best: best, best_ids: best_ids, flag: flag
       endfor
       if paginate.next
         # Bloc redemandé après un tri / filtre (?view=mshein-search) : même adresse, modèle de la page suivante.

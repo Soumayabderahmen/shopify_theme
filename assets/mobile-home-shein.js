@@ -148,13 +148,27 @@
     });
     var oneColumn = false;
     var cardIndex = 0;
+    // Hauteur de chaque colonne en « largeurs de carte », calculée sans mesurer la page (avant : offsetHeight après
+    // chaque carte = mise en page de toute la page 20 fois, ~0,7 s à chaque onglet de rayon).
+    var columnHeights = [0, 0];
+    var estimateHeight = function (card) {
+      var media = card.querySelector('.mshein-card__img');
+      var ratio = media && /aspect-ratio:\s*1\s*\/\s*([\d.]+)/.exec(media.getAttribute('style') || '');
+      // Photo (1 / ratio) + nom, prix et pastilles, + chaque ligne en plus (rang, étoiles, vendus, marque).
+      var height = (ratio ? parseFloat(ratio[1]) : 1.2) + 0.62;
+      ['.mshein-card__rank', '.mshein-card__stars', '.mshein-card__sold', '.mshein-brandbar'].forEach(function (selector) {
+        if (card.querySelector(selector)) height += 0.09;
+      });
+      return height;
+    };
     // Cœur, nom de la marque et toucher sur toute la carte : assets/mshein-card.js (commun à toutes les cartes).
     var addCards = function (cards) {
       Array.prototype.forEach.call(cards, function (card) {
         // Ordre d'arrivée gardé (passage en 1 colonne : même ordre que la liste du site).
         if (!card.hasAttribute('data-mshein-index')) card.setAttribute('data-mshein-index', String(cardIndex++));
-        var target = oneColumn || columns[0].offsetHeight <= columns[1].offsetHeight ? columns[0] : columns[1];
-        target.appendChild(card);
+        var index = oneColumn || columnHeights[0] <= columnHeights[1] ? 0 : 1;
+        columnHeights[index] += estimateHeight(card);
+        columns[index].appendChild(card);
       });
       if (window.msheinCards) window.msheinCards.decorate(columnsWrap);
       watchReveal(columnsWrap);
@@ -220,6 +234,7 @@
         showLoader(false);
         if (!keepCards) {
           columns.forEach(function (column) { column.replaceChildren(); });
+          columnHeights = [0, 0];
           cardIndex = 0;
         }
         queue = String(source || '').split(/\s+/).filter(Boolean);
@@ -233,6 +248,7 @@
         oneColumn = one;
         columnsWrap.classList.toggle('is-one', one);
         columns.forEach(function (column) { column.replaceChildren(); });
+        columnHeights = [0, 0];
         addCards(cards);
       },
       destroy: function () {

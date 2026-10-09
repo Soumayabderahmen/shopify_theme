@@ -438,19 +438,8 @@
     border-radius: 14px;
   }
 
-  /* Changement d'onglet : en-tête et bannière tout de suite, puis les autres blocs (avantages, catégories, coupon,
-     cartes, produits) l'un après l'autre, vite, du côté de l'onglet choisi. Retard et côté : assets/mobile-home-tabs.js. */
-  .mshein-is-entering {
-    animation: mshein-dept-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: var(--mshein-enter-delay, 0s);
-  }
-
-  @keyframes mshein-dept-in {
-    from {
-      opacity: 0;
-      transform: translate3d(var(--mshein-enter-x, 0px), 10px, 0);
-    }
-  }
+  /* Changement d'onglet : en-tête et bannière tout de suite, puis les autres blocs en cascade rapide
+     (animations du navigateur, assets/mobile-home-tabs.js : enter). */
 
   /* Onglet pas encore reçu : la forme de la page (bannière, vignettes, produits) s'affiche tout de suite, en gris animé. */
   .mshein-dskel i {
@@ -1207,7 +1196,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .mshein-is-entering,
     .mshein-dskel i {
       animation: none;
     }

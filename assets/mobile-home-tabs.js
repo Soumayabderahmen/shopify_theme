@@ -289,6 +289,15 @@
     products: makeSlot(home.feed, 'products')
   };
 
+  // Adresse (#donna…) et position gardée : fonctions d'origine du navigateur. Une app installée les remplace par une
+  // version qui prévient d'autres scripts à chaque appel (~33 ms au lieu de ~1 ms, 2 à 3 fois par toucher d'onglet).
+  var historyCall = function (method) {
+    var original = History.prototype[method];
+    var usable = typeof original === 'function' && /\[native code\]/.test(Function.prototype.toString.call(original));
+    return function () { return (usable ? original : history[method]).apply(history, arguments); };
+  };
+  var pushState = historyCall('pushState');
+  var replaceState = historyCall('replaceState');
   var page = document.getElementById('content') || home.feed.parentNode;
   var current = baseIndex;
   var startDone = false;
@@ -317,48 +326,63 @@
     return cache[tab.path];
   };
   // Rayons voisins préparés quand le téléphone est libre : glisser vers eux les affiche aussitôt.
-  var prefetchAround = function (index) {
-    var run = function () {
-      [index + 1, index - 1].forEach(function (near) {
-        if (near >= 0 && near < tabs.length) fetchDept(tabs[near]).catch(function () {});
-      });
-    };
-    if (window.requestIdleCallback) window.requestIdleCallback(run, { timeout: 2500 });
+  var whenIdle = function (run, timeout) {
+    if (window.requestIdleCallback) window.requestIdleCallback(run, { timeout: timeout });
     else window.setTimeout(run, 600);
+  };
+  // Puis tous les autres rayons, un par un, quand le téléphone est libre : chaque onglet s'ouvre ensuite tout de suite.
+  // Pas en mode économie de données ni en connexion lente (seulement les voisins et le rayon touché).
+  var connection = navigator.connection || {};
+  var prefetchAllowed = !connection.saveData && !/(^|-)2g$/.test(connection.effectiveType || '');
+  var prefetchAllStarted = false;
+  var prefetchAll = function () {
+    if (prefetchAllStarted || !prefetchAllowed) return;
+    prefetchAllStarted = true;
+    var next = 0;
+    var step = function () {
+      while (next < tabs.length && cache[tabs[next].path]) next += 1;
+      if (next >= tabs.length) return;
+      var tab = tabs[next];
+      next += 1;
+      fetchDept(tab).catch(function () {}).then(function () { whenIdle(step, 4000); });
+    };
+    whenIdle(step, 4000);
+  };
+  var prefetchAround = function (index) {
+    whenIdle(function () {
+      var nearby = [index + 1, index - 1].filter(function (near) { return near >= 0 && near < tabs.length; })
+        .map(function (near) { return fetchDept(tabs[near]).catch(function () {}); });
+      Promise.all(nearby).then(prefetchAll);
+    }, 2500);
   };
   // Blocs visibles de la page, du haut jusqu'aux produits (avantages et coupon compris) : ordre de la cascade.
   var pageBlocks = function (last) {
     var blocks = [];
+    // Sans mesurer la page (une mesure ici = toute la page recalculée) : les blocs cachés en mobile ne s'animent pas.
     for (var node = slots.hero.parentNode.firstElementChild; node; node = node.nextElementSibling) {
-      if (!node.hidden && node.offsetHeight) blocks.push(node);
+      if (!node.hidden) blocks.push(node);
       if (node === last) break;
     }
     return blocks;
   };
   // En-tête et bannière (1er bloc) affichés tout de suite, puis les autres blocs l'un après l'autre, rapidement,
-  // venant du côté de l'onglet choisi (dir 1 : droite).
+  // venant du côté de l'onglet choisi (dir 1 : droite). Animations du navigateur (element.animate) : aucune mesure de
+  // la page (avant : une par bloc, ~0,2 s à chaque onglet).
+  var running = [];
   var enter = function (elements, dir) {
-    if (reduceMotion) return;
+    running.forEach(function (animation) { animation.cancel(); });
+    running = [];
+    if (reduceMotion || !Element.prototype.animate) return;
     var shown = 0;
     elements.forEach(function (element) {
       if (!element || element.hidden) return;
-      element.classList.remove('mshein-is-entering');
-      if (!shown) {
-        shown += 1;
-        return;
+      if (shown) {
+        running.push(element.animate([
+          { opacity: 0, transform: 'translate3d(' + (dir || 0) * 32 + 'px, 10px, 0)' },
+          { opacity: 1, transform: 'none' }
+        ], { duration: 300, delay: 40 + (shown - 1) * 50, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' }));
       }
-      element.style.setProperty('--mshein-enter-delay', 0.04 + (shown - 1) * 0.05 + 's');
-      element.style.setProperty('--mshein-enter-x', (dir || 0) * 32 + 'px');
       shown += 1;
-      void element.offsetWidth;
-      element.classList.add('mshein-is-entering');
-      element.addEventListener('animationend', function done(event) {
-        if (event.target !== element) return;
-        element.classList.remove('mshein-is-entering');
-        element.style.removeProperty('--mshein-enter-delay');
-        element.style.removeProperty('--mshein-enter-x');
-        element.removeEventListener('animationend', done);
-      });
     });
   };
   // Onglet ouvert au milieu de la barre.
@@ -434,11 +458,12 @@
     var isAll = dept.hasAttribute('data-all');
     // « Tutti i Prodotti » : les tuiles de l'accueil restent (ses icônes), comme le prototype.
     setHomeVisible(false, isAll);
-    slots.hero.innerHTML = part('hero');
-    slots.cats.innerHTML = part('cats');
-    slots.mods.innerHTML = part('mods');
-    slots.products.innerHTML = part('products');
-    Object.keys(slots).forEach(function (name) { slots[name].hidden = !slots[name].innerHTML.trim(); });
+    // Partie vide (ex. pas de sous-catégories) : emplacement caché (vérifié sur le texte reçu, sans relire la page).
+    Object.keys(slots).forEach(function (name) {
+      var html = part(name);
+      slots[name].innerHTML = html;
+      slots[name].hidden = !html.trim();
+    });
     slots.hero.setAttribute('data-mshein-hero-active', '');
     window.msheinMasonry.watchReveal(slots.cats);
     window.msheinMasonry.watchReveal(slots.mods);
@@ -462,14 +487,14 @@
   // index : baseIndex = page de base (accueil -1, ou la page collection), sinon l'onglet.
   // fromHistory : lien direct, ou Retour / Avanti du navigateur.
   var showTab = function (index, fromHistory, y) {
-    if (!fromHistory) history.replaceState(Object.assign({}, history.state, { mshTab: current, mshY: window.scrollY }), '', window.location.href);
+    if (!fromHistory) replaceState(Object.assign({}, history.state, { mshTab: current, mshY: window.scrollY }), '', window.location.href);
     // Sens de l'arrivée : l'onglet de droite arrive par la droite (rien au premier affichage).
     var dir = startDone ? (index > current ? 1 : -1) : 0;
     current = index;
     var token = ++requestToken;
     markTabs(index, !fromHistory);
     if (!fromHistory) {
-      history.pushState({ mshTab: index, mshY: 0 }, '', isBase(index) ? baseUrl : '#' + tabs[index].slug);
+      pushState({ mshTab: index, mshY: 0 }, '', isBase(index) ? baseUrl : '#' + tabs[index].slug);
     }
     if (isBase(index)) {
       clearSlots();
@@ -503,15 +528,18 @@
     });
   };
 
-  // Toucher un onglet (avant le script du header, qui ajouterait sa barre de chargement de page).
-  window.addEventListener('click', function (event) {
+  // Onglet touché : son rayon, ou retour en haut si c'est déjà l'onglet ouvert.
+  var openTab = function (index) {
+    if (index === current) window.scrollTo({ top: 0, behavior: 'smooth' });
+    else showTab(index);
+  };
+  // Clic sur un onglet, le logo ou « Home » : changement sans rechargement (souris, clavier ; au doigt : touchend plus bas).
+  var handleClick = function (event) {
     if (!mobile.matches || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     var link = event.target.closest && event.target.closest('a[data-mshein-tab]');
     if (link && nav.contains(link)) {
       event.preventDefault();
-      var index = Number(link.getAttribute('data-mshein-tab'));
-      if (index === current) window.scrollTo({ top: 0, behavior: 'smooth' });
-      else showTab(index);
+      openTab(Number(link.getAttribute('data-mshein-tab')));
       return;
     }
     // Accueil : logo ou « Home » de la barre du bas.
@@ -526,12 +554,35 @@
         else window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
-  }, true);
+  };
+  window.addEventListener('click', handleClick, true);
   // Préchargement au premier contact du doigt : la page du rayon est souvent prête au relâchement.
   nav.addEventListener('pointerdown', function (event) {
     var link = event.target.closest('a[data-mshein-tab]');
     if (link) fetchDept(tabs[Number(link.getAttribute('data-mshein-tab'))]).catch(function () {});
   }, { passive: true });
+
+  // Téléphone : l'onglet s'ouvre dès que le doigt se lève (comme une app), sans attendre le « clic » qui suit ; ce clic
+  // est annulé, donc les scripts de statistiques ne l'analysent plus (0,2 à 1,2 s de blocage à chaque toucher).
+  // Le doigt qui fait défiler la barre d'onglets (il bouge) ne change pas d'onglet.
+  var tap = null;
+  nav.addEventListener('touchstart', function (event) {
+    var link = event.touches.length === 1 && event.target.closest('a[data-mshein-tab]');
+    tap = link ? { link: link, x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
+  }, { passive: true });
+  nav.addEventListener('touchmove', function (event) {
+    if (tap && (Math.abs(event.touches[0].clientX - tap.x) > 10 || Math.abs(event.touches[0].clientY - tap.y) > 10)) tap = null;
+  }, { passive: true });
+  nav.addEventListener('touchend', function (event) {
+    var touched = tap;
+    tap = null;
+    if (!touched || !mobile.matches || !event.cancelable) return;
+    event.preventDefault();
+    // Toucher traité : il ne remonte pas jusqu'aux scripts de statistiques (qui l'analysent aussi, ~0,1 s).
+    event.stopImmediatePropagation();
+    openTab(Number(touched.link.getAttribute('data-mshein-tab')));
+  }, { passive: false });
+  nav.addEventListener('touchcancel', function () { tap = null; }, { passive: true });
 
   /* ---------- Glisser le doigt : rayon voisin (accueil ← Tutti i Prodotti → Donna → …) ---------- */
   // Pas de changement d'onglet depuis une bande qui défile déjà de côté (bannière, puces, vignettes…) ni un champ.
@@ -613,7 +664,7 @@
   });
   // Départ vers une autre page : position gardée pour le retour.
   window.addEventListener('pagehide', function () {
-    history.replaceState(Object.assign({}, history.state, { mshTab: current, mshY: window.scrollY }), '', window.location.href);
+    replaceState(Object.assign({}, history.state, { mshTab: current, mshY: window.scrollY }), '', window.location.href);
   });
 
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -623,7 +674,7 @@
   if (startIndex >= tabs.length || startIndex < minIndex) startIndex = baseIndex;
   if (!isBase(startIndex)) showTab(startIndex, true, startState && startState.mshY);
   else if (startState && startState.mshY) restoreScroll(startState.mshY, baseProducts);
-  history.replaceState(Object.assign({}, history.state, { mshTab: current, mshY: startState && startState.mshY || 0 }), '', window.location.href);
+  replaceState(Object.assign({}, history.state, { mshTab: current, mshY: startState && startState.mshY || 0 }), '', window.location.href);
   markTabs(current, false);
   if (isBase(current)) prefetchAround(current);
   startDone = true;

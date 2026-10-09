@@ -12,7 +12,8 @@
   - « Sped. gratuita » au-dessus de 50 (même seuil que product-item), « Reso facile », « Risparmia » ;
   - le nom de la marque (« 🏬 Marque › ») est ajouté par assets/mshein-card.js (liste assets/mobile-brands.json).
   Le cœur et le panier utilisent les scripts existants (classe .alibaba-card__wishlist, attribut data-quick-add).
-  Params : product, best (collection « Più venduti »), flag (emoji du pays, snippets/country-flag-emoji.liquid),
+  Params : product, best (collection « Più venduti »), best_ids (facultatif : identifiants des 50 premiers « Più venduti »
+  séparés par des virgules, calculés une fois par la page), flag (emoji du pays, snippets/country-flag-emoji.liquid),
   container (facultatif : 'div' pour la carte mobile placée dans les cartes du site, snippets/product-item.liquid),
   uniform (facultatif : photo au format 3:4 pour toutes les cartes, lignes alignées dans les grilles du site).
 {%- endcomment -%}
@@ -58,23 +59,33 @@
   endfor
 
   # Rangs réels dans « Più venduti » : 5 premiers = BESTSELLER ; rang dans le type de produit (50 premiers).
+  # Rapide : les identifiants des 50 premiers (best_ids, calculés une fois par la page, sinon ici) disent d'abord si le
+  # produit en fait partie ; la boucle des rangs ne tourne que pour ceux-là (avant : 50 tours pour chaque carte).
   assign card_best = false
   assign card_type_rank = 0
   assign card_type_count = 0
-  for best_product in best.products limit: 50
-    if product.type != blank and best_product.type == product.type
-      assign card_type_count = card_type_count | plus: 1
-    endif
-    if best_product.id == product.id
-      if forloop.index <= 5
-        assign card_best = true
+  assign card_best_ids = best_ids
+  if card_best_ids == blank
+    assign card_best_ids = best.products | map: 'id' | join: ','
+  endif
+  assign card_best_ids = ',' | append: card_best_ids | append: ','
+  assign card_id_key = ',' | append: product.id | append: ','
+  if card_best_ids contains card_id_key
+    for best_product in best.products limit: 50
+      if product.type != blank and best_product.type == product.type
+        assign card_type_count = card_type_count | plus: 1
       endif
-      if product.type != blank
-        assign card_type_rank = card_type_count
+      if best_product.id == product.id
+        if forloop.index <= 5
+          assign card_best = true
+        endif
+        if product.type != blank
+          assign card_type_rank = card_type_count
+        endif
+        break
       endif
-      break
-    endif
-  endfor
+    endfor
+  endif
 
   assign card_trend = false
   for card_collection in product.collections

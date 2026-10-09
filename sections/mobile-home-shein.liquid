@@ -18,6 +18,8 @@
 {%- liquid
   assign part = section.settings.part
   assign best = collections['bestsellers']
+  # Identifiants des 50 premiers « Più venduti », calculés une fois pour toutes les cartes de la page (rangs rapides).
+  assign best_ids = best.products | map: 'id' | join: ','
   capture flag
     render 'country-flag-emoji'
   endcapture
@@ -35,7 +37,7 @@
     <ul class="mshein-page" data-mshein-page>
       {%- paginate collection.products by 10 -%}
         {%- for product in collection.products -%}
-          {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+          {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
         {%- endfor -%}
         {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
       {%- endpaginate -%}
@@ -48,7 +50,7 @@
         {%- for product in collection.products -%}
           {%- assign sale_variant = product.selected_or_first_available_variant -%}
           {%- unless sale_variant.compare_at_price > sale_variant.price -%}{%- continue -%}{%- endunless -%}
-          {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+          {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
         {%- endfor -%}
         {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
       {%- endpaginate -%}
@@ -63,7 +65,7 @@
       {%- paginate collection.products by 24 -%}
         {%- for product in collection.products -%}
           {%- if product.selected_or_first_available_variant.price > 5000 -%}{%- continue -%}{%- endif -%}
-          {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+          {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
         {%- endfor -%}
         {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
       {%- endpaginate -%}
@@ -71,7 +73,7 @@
 
   {%- when 'search_results' -%}
     {%- comment -%} Recherche : bloc des résultats seul, redemandé à chaque tri / filtre (sans layout). {%- endcomment -%}
-    {%- render 'mshein-search', best: best, flag: flag -%}
+    {%- render 'mshein-search', best: best, best_ids: best_ids, flag: flag -%}
 
   {%- when 'search_page' -%}
     {%- comment -%} Recherche : page suivante des produits (mots, tri et filtres de l'adresse gardés). {%- endcomment -%}
@@ -79,7 +81,7 @@
       {%- paginate search.results by 20 -%}
         {%- for item in search.results -%}
           {%- if item.object_type != 'product' -%}{%- continue -%}{%- endif -%}
-          {%- render 'mshein-card', product: item, best: best, flag: flag -%}
+          {%- render 'mshein-card', product: item, best: best, best_ids: best_ids, flag: flag -%}
         {%- endfor -%}
         {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
       {%- endpaginate -%}
@@ -90,7 +92,7 @@
     <ul class="mshein-page" data-mshein-page>
       {%- paginate collection.products by 20 -%}
         {%- for product in collection.products -%}
-          {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+          {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
         {%- endfor -%}
         {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
       {%- endpaginate -%}
@@ -103,7 +105,7 @@
       capture dept_cards
         paginate collection.products by 20
           for product in collection.products
-            render 'mshein-card', product: product, best: best, flag: flag
+            render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag
           endfor
           if paginate.next
             assign dept_next = paginate.next.url | replace: 'view=mshein-dept', 'view=mshein-dept-page'
@@ -125,7 +127,7 @@
             {%- if brand_title contains official_brand -%}{%- assign brand_found = true -%}{%- break -%}{%- endif -%}
           {%- endfor -%}
           {%- unless brand_found -%}{%- continue -%}{%- endunless -%}
-          {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+          {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
         {%- endfor -%}
         {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
       {%- endpaginate -%}
@@ -147,7 +149,7 @@
       {%- when 'search' -%}
         {%- comment -%} Page de recherche mobile au design des rayons (snippets/mshein-search.liquid). {%- endcomment -%}
         <script src="{{ 'mobile-home-tabs.js' | asset_url }}" defer></script>
-        {%- render 'mshein-search', best: best, flag: flag -%}
+        {%- render 'mshein-search', best: best, best_ids: best_ids, flag: flag -%}
 
       {%- when 'collection' -%}
         {%- comment -%}
@@ -160,7 +162,7 @@
           capture coll_cards
             paginate collection.products by 20
               for product in collection.products
-                render 'mshein-card', product: product, best: best, flag: flag
+                render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag
               endfor
               if paginate.next
                 assign coll_next = paginate.next.url
@@ -330,7 +332,7 @@
           {%- comment -%} « Per te » : 10 premiers « Più venduti » écrits ici (affichage immédiat), la suite au défilement. {%- endcomment -%}
           <ul class="mshein-feed__grid" data-mshein-grid>
             {%- for product in best.products limit: 10 -%}
-              {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+              {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
             {%- endfor -%}
           </ul>
           <div class="mshein-feed__sentinel" data-mshein-sentinel></div>
