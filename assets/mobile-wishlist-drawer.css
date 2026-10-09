@@ -1,9 +1,10 @@
 /* Panneau "My Wishlist" mobile — ouvert depuis le cœur du header (snippets/mobile-wishlist-drawer.liquid).
+   Au design du prototype de l'accueil : bleu nuit (plus de violet), Figtree, fond gris clair et cartes blanches.
    Chargé uniquement en mobile (media="(max-width: 760px)"). */
 .mobile-wishlist-drawer {
   --wd-ink: #16123f;
   --wd-ink-2: #4a4f6b;
-  --wd-blue: #3a34d2;
+  --wd-blue: #16123f;
   --wd-deal: #e53935;
   --wd-orange: #ff6a00;
   --wd-ok: #1f8a4c;
@@ -130,16 +131,17 @@ html.mobile-wishlist-open {
   justify-content: space-between;
   gap: 10px;
   padding: calc(18px + env(safe-area-inset-top, 0px)) 16px 12px;
-  border-bottom: 1px solid var(--wd-line);
+  border-bottom: 1px solid #eceef4;
+  background: #fff;
 }
 
 .mobile-wishlist-drawer__head h2 {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Sora', system-ui, sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 21px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.4px;
 }
@@ -185,7 +187,8 @@ html.mobile-wishlist-open {
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 12px 14px 16px;
+  padding: 10px 10px 16px;
+  background: #f4f5f9;
 }
 
 .mobile-wishlist-drawer__drop {
@@ -224,7 +227,7 @@ html.mobile-wishlist-open {
   max-height: 220px;
   overflow: hidden;
   padding: 10px !important;
-  border: 1px solid var(--wd-line);
+  border: 0;
   border-radius: 14px;
   background: #fff;
   transition: opacity 0.22s, transform 0.22s, max-height 0.25s;
@@ -251,7 +254,7 @@ html.mobile-wishlist-open {
   height: 88px;
   overflow: hidden;
   border-radius: 10px;
-  background: #f4f4f4;
+  background: #f1f2f6;
 }
 
 .mobile-wishlist-drawer__thumb img {
@@ -352,8 +355,8 @@ html.mobile-wishlist-open {
 .mobile-wishlist-drawer .mobile-wishlist-drawer__add {
   flex: 1;
   gap: 6px;
-  height: 34px;
-  border-radius: 9px;
+  height: 36px;
+  border-radius: 10px;
   background: var(--wd-ink);
   color: #fff;
   font-size: 12.5px;
@@ -380,10 +383,11 @@ html.mobile-wishlist-open {
 
 .mobile-wishlist-drawer .mobile-wishlist-drawer__trash {
   flex: none;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--wd-line);
-  border-radius: 9px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  background: #f1f2f6;
   color: var(--wd-ink-2);
 }
 
@@ -408,7 +412,7 @@ html.mobile-wishlist-open {
 }
 
 .mobile-wishlist-drawer__empty h3 {
-  font-family: 'Sora', system-ui, sans-serif;
+  font-family: 'Figtree', system-ui, sans-serif;
   font-size: 18px;
   font-weight: 700;
 }
@@ -423,9 +427,9 @@ html.mobile-wishlist-open {
 .mobile-wishlist-drawer .mobile-wishlist-drawer__cta {
   display: inline-flex;
   align-items: center;
-  height: 42px;
-  padding: 0 20px;
-  border-radius: 999px;
+  height: 44px;
+  padding: 0 22px;
+  border-radius: 12px;
   background: var(--wd-blue);
   color: #fff;
   font-size: 14px;
@@ -434,13 +438,16 @@ html.mobile-wishlist-open {
 
 /* Suggestions */
 .mobile-wishlist-drawer__reco {
-  margin-top: 18px;
+  margin-top: 10px;
+  padding: 12px 0 12px 12px;
+  border-radius: 14px;
+  background: #fff;
 }
 
 .mobile-wishlist-drawer__reco h4 {
   margin-bottom: 8px !important;
   font-family: 'Figtree', system-ui, sans-serif;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 800;
 }
 
@@ -465,10 +472,10 @@ html.mobile-wishlist-open {
 .mobile-wishlist-drawer__mini-media {
   position: relative;
   display: block;
-  aspect-ratio: 1;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   border-radius: 10px;
-  background: #f4f4f4;
+  background: #f1f2f6;
 }
 
 .mobile-wishlist-drawer__mini-media img {
@@ -502,8 +509,8 @@ html.mobile-wishlist-open {
 
 .mobile-wishlist-drawer__mini b {
   display: block;
-  margin-top: 4px;
-  font-size: 12.5px;
+  margin-top: 5px;
+  font-size: 13.5px;
   font-weight: 800;
 }
 
@@ -511,8 +518,9 @@ html.mobile-wishlist-open {
 .mobile-wishlist-drawer__foot {
   flex: none;
   padding: 12px 14px 0;
-  border-top: 1px solid var(--wd-line);
+  border-top: 1px solid #eceef4;
   background: #fff;
+  box-shadow: 0 -10px 24px -18px rgba(22, 18, 63, 0.45);
 }
 
 .mobile-wishlist-drawer__total {

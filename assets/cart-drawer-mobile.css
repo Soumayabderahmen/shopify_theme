@@ -1,6 +1,7 @@
 /* Tiroir panier MOBILE (prototype « platinumshop-cart-drawer ») — snippets/cart-drawer-mobile.liquid, assets/cart-drawer-mobile.js.
    Chargé en mobile seulement (media="(max-width: 760px)" dans layout/theme.liquid) : le desktop garde le tiroir Xtra.
-   Le tiroir lui-même (#cart, ouverture / fermeture / fond assombri) reste celui du thème ; seul son contenu change. */
+   Le tiroir lui-même (#cart, ouverture / fermeture / fond assombri) reste celui du thème ; seul son contenu change.
+   Au design du prototype de l'accueil : bleu nuit (plus de violet), Figtree, en-tête blanc, fond gris clair et cartes blanches. */
 
 #root #cart.m6pn {
   display: flex;
@@ -33,8 +34,8 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   --cd-ink: #16123f;
   --cd-ink-2: #4a4f6b;
   --cd-mute: #7a7e94;
-  --cd-blue: #3a34d2;
-  --cd-blue-soft: #ecebfd;
+  --cd-blue: #16123f;
+  --cd-blue-soft: #eef0f6;
   --cd-deal: #e4323c;
   --cd-ok: #1f8a4c;
   --cd-line: #e6e8f0;
@@ -99,8 +100,8 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   align-items: center;
   justify-content: space-between;
   padding: calc(14px + env(safe-area-inset-top, 0px)) 14px 12px 18px;
-  border-bottom: 3px solid var(--cd-blue);
-  background: linear-gradient(180deg, #fdfdff 0%, #e7e8f6 100%);
+  border-bottom: 1px solid #eceef4;
+  background: #fff;
 }
 
 #root .cd-m .cd-h h2 {
@@ -108,7 +109,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   align-items: center;
   gap: 10px;
   margin: 0;
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 21px;
   font-weight: 800;
   letter-spacing: -0.5px;
@@ -135,8 +136,8 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 2px 8px -3px rgba(22, 18, 63, 0.35);
+  background: #f1f2f6;
+  box-shadow: none;
 }
 
 .cd-m .cd-x svg {
@@ -148,10 +149,10 @@ html.m6pn-open:has(#cart.toggle) #root::after {
 .cd-m .cd-b {
   flex: 1;
   min-height: 0;
-  padding: 6px 16px 22px;
+  padding: 4px 10px 22px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: #fff;
+  background: #f4f5f9;
 }
 
 #root .cd-m .cd-back {
@@ -179,8 +180,8 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   display: grid;
   gap: 9px;
   padding: 12px 14px;
-  border-radius: 16px;
-  background: var(--cd-blue-soft);
+  border-radius: 14px;
+  background: #fff;
 }
 
 .cd-m .cd-ship.is-ok {
@@ -207,7 +208,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: #fff;
+  background: #eef0f6;
   color: var(--cd-blue);
 }
 
@@ -231,7 +232,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   display: block;
   height: 100%;
   border-radius: 7px;
-  background: linear-gradient(90deg, #4a44e6, #8a84ff);
+  background: linear-gradient(90deg, #16123f, #4a4f9b);
   transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -241,8 +242,10 @@ html.m6pn-open:has(#cart.toggle) #root::after {
 
 /* Lignes */
 #root .cd-m .cd-lines {
-  margin: 4px 0 0;
-  padding: 0;
+  margin: 8px 0 0;
+  padding: 0 12px;
+  border-radius: 14px;
+  background: #fff;
   list-style: none;
 }
 
@@ -251,7 +254,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   grid-template-columns: 72px minmax(0, 1fr);
   gap: 12px;
   margin: 0;
-  padding: 16px 0;
+  padding: 14px 0;
   transition: opacity 0.22s, transform 0.22s;
 }
 
@@ -316,7 +319,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
 }
 
 .cd-m .cd-pr b {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 16px;
   font-weight: 800;
 }
@@ -398,11 +401,11 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 6px;
+  margin-top: 8px;
   padding: 12px 14px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #fbd3f4, #f4b7ec);
-  color: #3a1636;
+  border-radius: 14px;
+  background: #fff8ec;
+  color: #3a2a12;
 }
 
 .cd-m .cd-pts__w {
@@ -412,8 +415,8 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   width: 40px;
   height: 40px;
   border-radius: 13px;
-  background: rgba(255, 255, 255, 0.7);
-  color: #c2187a;
+  background: #fff;
+  color: #f97316;
 }
 
 .cd-m .cd-pts__w svg {
@@ -423,7 +426,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
 
 .cd-m .cd-pts b {
   display: block;
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 14px;
 }
 
@@ -439,16 +442,16 @@ html.m6pn-open:has(#cart.toggle) #root::after {
 
 /* Suggestions du thème (« Potrebbe piacerti anche ») en rail horizontal */
 .cd-m .cd-rel {
-  margin: 22px -16px 0;
+  margin: 16px -10px 0;
 }
 
 #root .cd-m .cd-rel h3 {
   margin: 0 0 12px;
   padding: 0 16px;
-  font-family: 'Sora', sans-serif;
-  font-size: 17px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 15px;
   font-weight: 800;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.1px;
 }
 
 .cd-m .cd-rail {
@@ -471,9 +474,9 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 14px;
   background: #fff;
-  box-shadow: inset 0 0 0 1px var(--cd-line);
+  box-shadow: none;
   scroll-snap-align: start;
 }
 
@@ -501,7 +504,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   justify-content: center;
   gap: 5px;
   padding: 6px 4px;
-  background: linear-gradient(90deg, #7b2fe0, #5b21c8);
+  background: #16123f;
   color: #fff;
   font-size: 10px;
   font-weight: 800;
@@ -578,7 +581,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
 }
 
 .cd-m .cd-rc__pr b {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 17px;
   font-weight: 800;
 }
@@ -647,9 +650,10 @@ html.m6pn-open:has(#cart.toggle) #root::after {
 
 /* Paiement sécurisé + moyens de paiement */
 .cd-m .cd-trust {
-  margin-top: 22px;
-  padding-top: 16px;
-  border-top: 1px solid var(--cd-line);
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fff;
 }
 
 .cd-m .cd-trust__t {
@@ -709,7 +713,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
 
 #root .cd-m .cd-empty h3 {
   margin: 0;
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 18px;
 }
 
@@ -744,7 +748,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
 }
 
 .cd-m .cd-sum b {
-  font-family: 'Sora', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.6px;
@@ -785,7 +789,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   align-items: center;
   justify-content: center;
   height: 50px;
-  border-radius: 14px;
+  border-radius: 12px;
   font-size: 14.5px;
   font-weight: 800;
   text-align: center;
@@ -797,9 +801,9 @@ html.m6pn-open:has(#cart.toggle) #root::after {
 }
 
 #root .cd-m .cd-pri {
-  background: linear-gradient(180deg, #4a44e6, #3a34d2);
+  background: #16123f;
   color: #fff;
-  box-shadow: 0 10px 18px -12px rgba(58, 52, 210, 0.9);
+  box-shadow: 0 10px 18px -12px rgba(22, 18, 63, 0.8);
 }
 
 /* Message (article supprimé + Annulla) */

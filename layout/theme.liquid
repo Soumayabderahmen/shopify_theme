@@ -78,11 +78,13 @@
       if template.name == 'collection' and template.suffix == blank
         assign mshein_coll = true
       endif
-      # Autres modèles de collection, fiches produit, panier et suivi de commande (app 17TRACK, /apps/17TRACK dans
-      # toutes les langues) : nouvel en-tête blanc collé en haut (onglets vers l'accueil #rayon).
+      # Autres modèles de collection, fiches produit, panier, pages du site (wishlist, Contatti…) et suivi de commande
+      # (app 17TRACK, /apps/17TRACK dans toutes les langues) : nouvel en-tête blanc collé en haut (onglets vers l'accueil #rayon).
       assign mshein_plain_head = false
       assign request_path_lower = request.path | downcase
       if template.name == 'product' or template.name == 'cart'
+        assign mshein_plain_head = true
+      elsif template.name == 'page'
         assign mshein_plain_head = true
       elsif request_path_lower contains '/apps/17track'
         assign mshein_plain_head = true

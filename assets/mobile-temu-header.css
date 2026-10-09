@@ -5155,3 +5155,182 @@
     border-radius: 12px;
   }
 }
+
+/* Pages du site en mobile (Contatti, FAQ… : template « page », body.mshein-head) au style des autres pages :
+   fond gris clair, blocs en cartes blanches arrondies, Figtree, bleu nuit ; FAQ, formulaire de contact (champs
+   arrondis, bouton bleu nuit), infos du service client et carte ; menu des pages caché (déjà dans le header).
+   Mêmes contenus et liens ; l'ordinateur ne change pas. */
+@media only screen and (max-width: 760px) {
+  body.mshein-head.template-page #content:has(.shopify-section-contact-form, .shopify-section-faq) {
+    background: #f4f5f9;
+  }
+
+  body.mshein-head.template-page :is(.shopify-section-faq, .shopify-section-contact-form, .shopify-section-google-maps, [id$="__page-service-info-blocks"]) {
+    font-family: 'Figtree', system-ui, sans-serif;
+    color: #16123f;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body.mshein-head.template-page :is(.shopify-section-faq, .shopify-section-contact-form, .shopify-section-google-maps, [id$="__page-service-info-blocks"]) :is(h2, legend, label, summary, button, input, textarea) {
+    font-family: 'Figtree', system-ui, sans-serif !important;
+  }
+
+  /* Menu des pages sous l'en-tête (rayons, Contatti, Traccia ordine…) : caché en mobile, les mêmes liens sont déjà
+     dans les onglets du header. */
+  body.mshein-head.template-page .shopify-section-page-service-menu {
+    display: none !important;
+  }
+
+  /* Pas de grand vide sous la dernière question (marge du thème). */
+  body.mshein-head.template-page .shopify-section-faq .accordion-a {
+    margin-bottom: 0 !important;
+  }
+
+  /* Blocs : cartes blanches arrondies. */
+  body.mshein-head.template-page :is(.shopify-section-faq > article, .shopify-section-contact-form > form, .shopify-section-google-maps > figure),
+  body.mshein-head.template-page [id$="__page-service-info-blocks"] > .m6bx {
+    margin: 10px 0 0 !important;
+    padding: 16px 14px !important;
+    color: #16123f !important;
+    background: #fff !important;
+    border: 0 !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+  }
+
+  body.mshein-head.template-page [id$="__page-service-info-blocks"] > .m6bx::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  body.mshein-head.template-page .shopify-section-google-maps > figure {
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  body.mshein-head.template-page .shopify-section-google-maps iframe {
+    display: block;
+    height: 240px;
+  }
+
+  body.mshein-head.template-page :is(.shopify-section-faq, .shopify-section-contact-form, [id$="__page-service-info-blocks"]) h2 {
+    margin: 0 0 10px !important;
+    color: #111 !important;
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.2px;
+  }
+
+  /* FAQ : questions en gras, séparées par un filet gris, « + » bleu nuit. */
+  body.mshein-head.template-page .shopify-section-faq .accordion-a details {
+    margin: 0;
+    border-top: 1px solid #eceef4;
+    border-bottom: 0;
+  }
+
+  body.mshein-head.template-page .shopify-section-faq .accordion-a details:last-child {
+    border-bottom: 0;
+  }
+
+  body.mshein-head.template-page .shopify-section-faq summary {
+    padding: 13px 28px 13px 0 !important;
+    color: #16123f !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
+
+  body.mshein-head.template-page .shopify-section-faq summary::before,
+  body.mshein-head.template-page .shopify-section-faq summary::after {
+    color: #16123f !important;
+  }
+
+  body.mshein-head.template-page .shopify-section-faq details > div {
+    padding: 0 0 12px !important;
+    color: #4a4f6b;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Formulaire : libellés en gras, champs arrondis, bouton bleu nuit pleine largeur. */
+  body.mshein-head.template-page .shopify-section-contact-form legend {
+    display: none;
+  }
+
+  body.mshein-head.template-page .shopify-section-contact-form fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  body.mshein-head.template-page .shopify-section-contact-form label {
+    color: #16123f !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+
+  body.mshein-head.template-page .shopify-section-contact-form :is(input[type="email"], input[type="text"], input[type="tel"], textarea) {
+    min-height: 46px;
+    padding: 12px 14px !important;
+    color: #16123f !important;
+    font-size: 15px !important;
+    background: #fff !important;
+    border: 1.5px solid #dfe2ea !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+  }
+
+  body.mshein-head.template-page .shopify-section-contact-form textarea {
+    min-height: 120px;
+  }
+
+  body.mshein-head.template-page .shopify-section-contact-form :is(input, textarea):focus {
+    border-color: #16123f !important;
+    outline: 0;
+  }
+
+  body.mshein-head.template-page .shopify-section-contact-form input[type="checkbox"] {
+    accent-color: #16123f;
+  }
+
+  body.mshein-head.template-page .shopify-section-contact-form .submit {
+    margin-top: 6px !important;
+  }
+
+  body.mshein-head.template-page .shopify-section-contact-form .submit button {
+    width: 100%;
+    height: 48px;
+    margin: 0 !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    background: #16123f !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 18px -12px rgb(22 18 63 / 80%) !important;
+  }
+
+  body.mshein-head.template-page .shopify-section-contact-form .submit button::before,
+  body.mshein-head.template-page .shopify-section-contact-form .submit button::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Infos du service client : texte gris, liens et contacts bleu nuit. */
+  body.mshein-head.template-page [id$="__page-service-info-blocks"] {
+    margin: 0;
+  }
+
+  body.mshein-head.template-page [id$="__page-service-info-blocks"] > .m6bx p {
+    color: #4a4f6b !important;
+    font-size: 13px;
+  }
+
+  body.mshein-head.template-page [id$="__page-service-info-blocks"] > .m6bx a {
+    color: #16123f !important;
+    font-weight: 700;
+  }
+
+  body.mshein-head.template-page [id$="__page-service-info-blocks"] > .m6bx :is(i, [class^="icon-"]) {
+    color: #16123f !important;
+  }
+}

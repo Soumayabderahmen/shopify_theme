@@ -269,10 +269,14 @@ function initMobileTemuHeader() {
     body.appendChild(action);
   }
 
+  // Devise du visiteur (CHF, EUR…) : celle de la boutique affichée, comme le panier (avant : « € » écrit en dur).
   function formatWishlistMoney(cents) {
+    var explore = document.querySelector('[data-mobile-explore-drawer][data-currency]');
+    var currency = (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) ||
+      (explore && explore.getAttribute('data-currency')) || 'EUR';
     return new Intl.NumberFormat(document.documentElement.lang || 'it-IT', {
       style: 'currency',
-      currency: 'EUR'
+      currency: currency
     }).format((Number(cents) || 0) / 100);
   }
 
