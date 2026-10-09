@@ -15,6 +15,209 @@
 (function () {
   'use strict';
 
+  /* ---------- Bloc de recherche et produits (rayons, pages collection, recherche) ---------- */
+  // query : tri / filtres déjà dans l'adresse (page collection ouverte avec ?sort_by=…, ?filter…, recherche ?q=…).
+  // view : modèle sans layout qui renvoie le bloc (mshein-dept pour les collections, mshein-search pour la recherche).
+  var createProducts = function (slot, basePath, query, view) {
+    view = view || 'mshein-dept';
+    var results = slot.querySelector('[data-dept-results]');
+    var params = new URLSearchParams(query || '');
+    params.delete('page');
+    params.delete('view');
+    var oneColumn = false;
+    var masonry = null;
+    var token = 0;
+    var sheetHome = null;
+
+    var updateCount = function () {
+      var count = results && results.querySelector('[data-dept-count]');
+      if (!count || !masonry) return;
+      count.innerHTML = String(count.getAttribute('data-template'))
+        .replace('{count}', masonry.cardCount())
+        .replace('{total}', count.getAttribute('data-total'));
+    };
+    var bind = function () {
+      if (masonry) masonry.destroy();
+      var grid = results.querySelector('[data-mshein-grid]');
+      var sentinel = results.querySelector('[data-mshein-sentinel]');
+      masonry = window.msheinMasonry.create({
+        grid: grid,
+        sentinel: sentinel,
+        loader: results.querySelector('[data-mshein-loader]'),
+        onCards: updateCount
+      });
+      masonry.setSource(sentinel && sentinel.getAttribute('data-next'), true);
+      if (oneColumn) masonry.setOneColumn(true);
+      results.querySelectorAll('[data-dept-view]').forEach(function (button) {
+        button.classList.toggle('is-on', button.getAttribute('data-dept-view') === (oneColumn ? '1' : '2'));
+      });
+      updateCount();
+    };
+    var scrollToBlock = function () {
+      var block = slot.querySelector('[data-dept-block]');
+      var rootStyle = getComputedStyle(document.documentElement);
+      var top = block.getBoundingClientRect().top + window.scrollY - (parseFloat(rootStyle.getPropertyValue('--mshein-tabs-top')) || parseFloat(rootStyle.getPropertyValue('--mshein-header-h')) || 0);
+      if (window.scrollY > top) window.scrollTo({ top: top });
+    };
+    // Tri, filtres ou puce : seulement la partie résultats est redemandée (mêmes vrais filtres que la page collection).
+    var reload = function () {
+      var myToken = ++token;
+      results.classList.add('is-loading');
+      var query = params.toString();
+      fetch(basePath + '?view=' + view + (query ? '&' + query : ''), { credentials: 'same-origin' })
+        .then(function (response) {
+          if (!response.ok) throw new Error('Department results request failed: ' + response.status);
+          return response.text();
+        })
+        .then(function (html) {
+          if (myToken !== token) return;
+          var fresh = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-dept-results]');
+          if (!fresh) throw new Error('Department results markup missing');
+          var imported = document.importNode(fresh, true);
+          results.replaceWith(imported);
+          results = imported;
+          bind();
+          scrollToBlock();
+        })
+        .catch(function (error) {
+          console.error('Unable to update the department products.', error);
+          if (myToken === token) results.classList.remove('is-loading');
+        });
+    };
+
+    // Fenêtre Filtri de CE bloc (la page collection et un onglet ouvert ont chacun la leur).
+    var movedPanel = null;
+    var sheet = function () { return movedPanel || results.querySelector('[data-dept-sheet]'); };
+    var openSheet = function (section) {
+      var panel = results.querySelector('[data-dept-sheet]');
+      if (!panel) return;
+      // Fenêtre posée sur la page (au-dessus de l'en-tête et de la barre du bas).
+      sheetHome = panel.parentNode;
+      movedPanel = panel;
+      panel.classList.add('is-mshein-moved');
+      document.body.appendChild(panel);
+      panel.hidden = false;
+      window.requestAnimationFrame(function () { panel.classList.add('is-open'); });
+      document.documentElement.style.overflow = 'hidden';
+      var body = panel.querySelector('[data-dept-sheet-body]');
+      var target = section && body.querySelector('[data-dept-section="' + section + '"]');
+      body.scrollTop = target ? target.offsetTop - 8 : 0;
+    };
+    var closeSheet = function () {
+      var panel = sheet();
+      if (!panel) return;
+      panel.classList.remove('is-open');
+      document.documentElement.style.overflow = '';
+      movedPanel = null;
+      window.setTimeout(function () {
+        panel.hidden = true;
+        panel.classList.remove('is-mshein-moved');
+        if (sheetHome && sheetHome.isConnected) sheetHome.insertBefore(panel, sheetHome.querySelector('[data-mshein-grid], .mshein-feed__grid'));
+        else panel.remove();
+      }, 250);
+    };
+
+    // Tout sauf les filtres : le tri, et pour la recherche ses mots (q) et son type (type=product).
+    var withoutFilters = function () {
+      var kept = new URLSearchParams();
+      params.forEach(function (value, name) {
+        if (name.indexOf('filter.') !== 0) kept.append(name, value);
+      });
+      return kept;
+    };
+
+    var onClick = function (event) {
+      var chip = event.target.closest('[data-dept-chip]');
+      if (chip) {
+        slot.querySelectorAll('[data-dept-chip]').forEach(function (button) { button.classList.toggle('is-on', button === chip); });
+        chip.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+        basePath = new URL(chip.getAttribute('data-dept-chip'), window.location.href).pathname;
+        // Autre collection : ses propres filtres (le tri est gardé).
+        params = withoutFilters();
+        reload();
+        return;
+      }
+      var view = event.target.closest('[data-dept-view]');
+      if (view) {
+        oneColumn = view.getAttribute('data-dept-view') === '1';
+        results.querySelectorAll('[data-dept-view]').forEach(function (button) { button.classList.toggle('is-on', button === view); });
+        masonry.setOneColumn(oneColumn);
+        return;
+      }
+      var quick = event.target.closest('[data-dept-quick]');
+      if (quick) {
+        var name = quick.getAttribute('data-dept-quick');
+        var value = quick.getAttribute('data-dept-quick-value');
+        var values = params.getAll(name);
+        params.delete(name);
+        if (values.indexOf(value) < 0) params.append(name, value);
+        else values.filter(function (item) { return item !== value; }).forEach(function (item) { params.append(name, item); });
+        reload();
+        return;
+      }
+      var open = event.target.closest('[data-dept-open]');
+      if (open) openSheet(open.getAttribute('data-dept-open'));
+    };
+    var onChange = function (event) {
+      if (!event.target.matches('[data-dept-sort]')) return;
+      params.set('sort_by', event.target.value);
+      reload();
+    };
+    // La fenêtre Filtri est déplacée sur la page : ses actions sont écoutées sur le document.
+    var onSheet = function (event) {
+      var panel = sheet();
+      if (!panel || !panel.contains(event.target)) return;
+      if (event.target === panel || event.target.closest('[data-dept-close]')) { closeSheet(); return; }
+      if (event.target.closest('[data-dept-reset]')) {
+        panel.querySelectorAll('input[type="checkbox"]').forEach(function (input) { input.checked = false; });
+        panel.querySelectorAll('input[type="number"]').forEach(function (input) { input.value = ''; });
+      }
+    };
+    var onSubmit = function (event) {
+      var panel = sheet();
+      if (!event.target.matches('[data-dept-form]') || !panel || !panel.contains(event.target)) return;
+      event.preventDefault();
+      params = withoutFilters();
+      new FormData(event.target).forEach(function (value, name) {
+        if (String(value).trim() !== '') params.append(name, value);
+      });
+      closeSheet();
+      reload();
+    };
+    slot.addEventListener('click', onClick);
+    slot.addEventListener('change', onChange);
+    document.addEventListener('click', onSheet);
+    document.addEventListener('submit', onSubmit);
+    bind();
+    return {
+      hasMore: function () { return masonry && masonry.hasMore(); },
+      loadMore: function () { if (masonry) masonry.loadMore(); },
+      destroy: function () {
+        token += 1;
+        if (masonry) masonry.destroy();
+        slot.removeEventListener('click', onClick);
+        slot.removeEventListener('change', onChange);
+        document.removeEventListener('click', onSheet);
+        document.removeEventListener('submit', onSubmit);
+        if (movedPanel) {
+          movedPanel.remove();
+          movedPanel = null;
+          document.documentElement.style.overflow = '';
+        }
+      }
+    };
+  };
+
+  window.msheinResults = { create: createProducts };
+
+  // Recherche mobile (sections/mobile-home-shein.liquid, partie « search ») : mêmes Filtri / tri / colonnes que les rayons,
+  // pages suivantes au défilement ; la recherche garde ses mots (?q=…) à chaque tri ou filtre.
+  var searchBlock = window.matchMedia('(max-width: 760px)').matches && window.msheinMasonry && document.querySelector('[data-mshein-search]');
+  if (searchBlock) {
+    createProducts(searchBlock, searchBlock.getAttribute('data-path') || '/search', window.location.search.slice(1), 'mshein-search');
+    window.msheinMasonry.watchReveal(searchBlock);
+  }
+
   if (window.msheinTabs) return;
   var mobile = window.matchMedia('(max-width: 760px)');
   if (!mobile.matches || !document.body.classList.contains('mshein-home') || !window.msheinMasonry) return;
@@ -214,190 +417,6 @@
     step();
   };
 
-  /* ---------- Bloc de recherche et produits d'un rayon ---------- */
-  // query : tri / filtres déjà dans l'adresse (page collection ouverte avec ?sort_by=…, ?filter…).
-  var createProducts = function (slot, basePath, query) {
-    var results = slot.querySelector('[data-dept-results]');
-    var params = new URLSearchParams(query || '');
-    params.delete('page');
-    params.delete('view');
-    var oneColumn = false;
-    var masonry = null;
-    var token = 0;
-    var sheetHome = null;
-
-    var updateCount = function () {
-      var count = results && results.querySelector('[data-dept-count]');
-      if (!count || !masonry) return;
-      count.innerHTML = String(count.getAttribute('data-template'))
-        .replace('{count}', masonry.cardCount())
-        .replace('{total}', count.getAttribute('data-total'));
-    };
-    var bind = function () {
-      if (masonry) masonry.destroy();
-      var grid = results.querySelector('[data-mshein-grid]');
-      var sentinel = results.querySelector('[data-mshein-sentinel]');
-      masonry = window.msheinMasonry.create({
-        grid: grid,
-        sentinel: sentinel,
-        loader: results.querySelector('[data-mshein-loader]'),
-        onCards: updateCount
-      });
-      masonry.setSource(sentinel && sentinel.getAttribute('data-next'), true);
-      if (oneColumn) masonry.setOneColumn(true);
-      results.querySelectorAll('[data-dept-view]').forEach(function (button) {
-        button.classList.toggle('is-on', button.getAttribute('data-dept-view') === (oneColumn ? '1' : '2'));
-      });
-      updateCount();
-    };
-    var scrollToBlock = function () {
-      var block = slot.querySelector('[data-dept-block]');
-      var top = block.getBoundingClientRect().top + window.scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--mshein-tabs-top')) || 0);
-      if (window.scrollY > top) window.scrollTo({ top: top });
-    };
-    // Tri, filtres ou puce : seulement la partie résultats est redemandée (mêmes vrais filtres que la page collection).
-    var reload = function () {
-      var myToken = ++token;
-      results.classList.add('is-loading');
-      var query = params.toString();
-      fetch(basePath + '?view=mshein-dept' + (query ? '&' + query : ''), { credentials: 'same-origin' })
-        .then(function (response) {
-          if (!response.ok) throw new Error('Department results request failed: ' + response.status);
-          return response.text();
-        })
-        .then(function (html) {
-          if (myToken !== token) return;
-          var fresh = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-dept-results]');
-          if (!fresh) throw new Error('Department results markup missing');
-          var imported = document.importNode(fresh, true);
-          results.replaceWith(imported);
-          results = imported;
-          bind();
-          scrollToBlock();
-        })
-        .catch(function (error) {
-          console.error('Unable to update the department products.', error);
-          if (myToken === token) results.classList.remove('is-loading');
-        });
-    };
-
-    // Fenêtre Filtri de CE bloc (la page collection et un onglet ouvert ont chacun la leur).
-    var movedPanel = null;
-    var sheet = function () { return movedPanel || results.querySelector('[data-dept-sheet]'); };
-    var openSheet = function (section) {
-      var panel = results.querySelector('[data-dept-sheet]');
-      if (!panel) return;
-      // Fenêtre posée sur la page (au-dessus de l'en-tête et de la barre du bas).
-      sheetHome = panel.parentNode;
-      movedPanel = panel;
-      panel.classList.add('is-mshein-moved');
-      document.body.appendChild(panel);
-      panel.hidden = false;
-      window.requestAnimationFrame(function () { panel.classList.add('is-open'); });
-      document.documentElement.style.overflow = 'hidden';
-      var body = panel.querySelector('[data-dept-sheet-body]');
-      var target = section && body.querySelector('[data-dept-section="' + section + '"]');
-      body.scrollTop = target ? target.offsetTop - 8 : 0;
-    };
-    var closeSheet = function () {
-      var panel = sheet();
-      if (!panel) return;
-      panel.classList.remove('is-open');
-      document.documentElement.style.overflow = '';
-      movedPanel = null;
-      window.setTimeout(function () {
-        panel.hidden = true;
-        panel.classList.remove('is-mshein-moved');
-        if (sheetHome && sheetHome.isConnected) sheetHome.insertBefore(panel, sheetHome.querySelector('[data-mshein-grid], .mshein-feed__grid'));
-        else panel.remove();
-      }, 250);
-    };
-
-    var onClick = function (event) {
-      var chip = event.target.closest('[data-dept-chip]');
-      if (chip) {
-        slot.querySelectorAll('[data-dept-chip]').forEach(function (button) { button.classList.toggle('is-on', button === chip); });
-        chip.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-        basePath = new URL(chip.getAttribute('data-dept-chip'), window.location.href).pathname;
-        // Autre collection : ses propres filtres (le tri est gardé).
-        var sort = params.get('sort_by');
-        params = new URLSearchParams();
-        if (sort) params.set('sort_by', sort);
-        reload();
-        return;
-      }
-      var view = event.target.closest('[data-dept-view]');
-      if (view) {
-        oneColumn = view.getAttribute('data-dept-view') === '1';
-        results.querySelectorAll('[data-dept-view]').forEach(function (button) { button.classList.toggle('is-on', button === view); });
-        masonry.setOneColumn(oneColumn);
-        return;
-      }
-      var quick = event.target.closest('[data-dept-quick]');
-      if (quick) {
-        var name = quick.getAttribute('data-dept-quick');
-        var value = quick.getAttribute('data-dept-quick-value');
-        var values = params.getAll(name);
-        params.delete(name);
-        if (values.indexOf(value) < 0) params.append(name, value);
-        else values.filter(function (item) { return item !== value; }).forEach(function (item) { params.append(name, item); });
-        reload();
-        return;
-      }
-      var open = event.target.closest('[data-dept-open]');
-      if (open) openSheet(open.getAttribute('data-dept-open'));
-    };
-    var onChange = function (event) {
-      if (!event.target.matches('[data-dept-sort]')) return;
-      params.set('sort_by', event.target.value);
-      reload();
-    };
-    // La fenêtre Filtri est déplacée sur la page : ses actions sont écoutées sur le document.
-    var onSheet = function (event) {
-      var panel = sheet();
-      if (!panel || !panel.contains(event.target)) return;
-      if (event.target === panel || event.target.closest('[data-dept-close]')) { closeSheet(); return; }
-      if (event.target.closest('[data-dept-reset]')) {
-        panel.querySelectorAll('input[type="checkbox"]').forEach(function (input) { input.checked = false; });
-        panel.querySelectorAll('input[type="number"]').forEach(function (input) { input.value = ''; });
-      }
-    };
-    var onSubmit = function (event) {
-      var panel = sheet();
-      if (!event.target.matches('[data-dept-form]') || !panel || !panel.contains(event.target)) return;
-      event.preventDefault();
-      var sort = params.get('sort_by');
-      params = new URLSearchParams();
-      if (sort) params.set('sort_by', sort);
-      new FormData(event.target).forEach(function (value, name) {
-        if (String(value).trim() !== '') params.append(name, value);
-      });
-      closeSheet();
-      reload();
-    };
-    slot.addEventListener('click', onClick);
-    slot.addEventListener('change', onChange);
-    document.addEventListener('click', onSheet);
-    document.addEventListener('submit', onSubmit);
-    bind();
-    return {
-      hasMore: function () { return masonry && masonry.hasMore(); },
-      loadMore: function () { if (masonry) masonry.loadMore(); },
-      destroy: function () {
-        token += 1;
-        if (masonry) masonry.destroy();
-        slot.removeEventListener('click', onClick);
-        slot.removeEventListener('change', onChange);
-        document.removeEventListener('click', onSheet);
-        document.removeEventListener('submit', onSubmit);
-        if (movedPanel) {
-          movedPanel.remove();
-          movedPanel = null;
-          document.documentElement.style.overflow = '';
-        }
-      }
-    };
-  };
 
   // Page collection : son propre bloc de recherche et ses produits (gardés pendant qu'un autre onglet est ouvert).
   var baseProducts = coll ? createProducts(home.feed, window.location.pathname, window.location.search) : null;

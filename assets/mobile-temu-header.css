@@ -5175,6 +5175,11 @@
     font-family: 'Figtree', system-ui, sans-serif !important;
   }
 
+  /* Page Wishlist : ruban « Prodotti più venduti » des cartes en bleu nuit (plus de violet), comme le reste de la page. */
+  #root [data-wishlist-page] .alibaba-top-selling-ribbon {
+    background: #16123f;
+  }
+
   /* Menu des pages sous l'en-tête (rayons, Contatti, Traccia ordine…) : caché en mobile, les mêmes liens sont déjà
      dans les onglets du header. */
   body.mshein-head.template-page .shopify-section-page-service-menu {
@@ -5332,5 +5337,213 @@
 
   body.mshein-head.template-page [id$="__page-service-info-blocks"] > .m6bx :is(i, [class^="icon-"]) {
     color: #16123f !important;
+  }
+}
+
+/* Liste des collections, page 404 et politiques en mobile (body.mshein-head) au style des autres pages :
+   fond gris clair, cartes blanches arrondies, Figtree, bleu nuit au lieu du violet. Mobile uniquement. */
+@media only screen and (max-width: 760px) {
+  /* ---------- Liste des collections (/collections) : vignettes en 2 colonnes ---------- */
+  body.mshein-head.template-list-collections #content {
+    background: #f4f5f9;
+  }
+
+  body.mshein-head.template-list-collections [id$="__breadcrumbs"] {
+    display: none !important;
+  }
+
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] {
+    padding: 14px 10px 24px;
+    font-family: 'Figtree', system-ui, sans-serif;
+  }
+
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] > header {
+    margin: 0 2px 12px !important;
+  }
+
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] h1 {
+    margin: 0 !important;
+    color: #111 !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px;
+  }
+
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] ul.l4cl {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] ul.l4cl > li {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    background: #fff;
+    border: 0 !important;
+    border-radius: 14px;
+  }
+
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] ul.l4cl > li::before,
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] ul.l4cl > li::after {
+    content: none !important;
+  }
+
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] ul.l4cl figure {
+    margin: 0 !important;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: #f1f2f6;
+    border-radius: 0;
+  }
+
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] ul.l4cl figure :is(picture, img) {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] ul.l4cl p {
+    margin: 0 !important;
+    padding: 9px 10px 11px !important;
+  }
+
+  body.mshein-head.template-list-collections [id$="__main-list-collection"] ul.l4cl p a {
+    color: #16123f !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    line-height: 1.3;
+    text-decoration: none !important;
+  }
+
+  /* ---------- Page 404 : carte blanche sur fond gris, bouton bleu nuit ---------- */
+  body.mshein-head.template-404 #content {
+    background: #f4f5f9;
+  }
+
+  body.mshein-head.template-404 [id$="__main-404"] {
+    padding: 24px 10px 32px !important;
+    background: #f4f5f9 !important;
+  }
+
+  body.mshein-head.template-404 [id$="__main-404"] > figure {
+    display: none !important;
+  }
+
+  body.mshein-head.template-404 [id$="__main-404"] > article {
+    margin: 0 !important;
+    padding: 30px 18px 26px !important;
+    color: #16123f !important;
+    font-family: 'Figtree', system-ui, sans-serif;
+    text-align: center;
+    background: #fff !important;
+    border-radius: 16px;
+  }
+
+  body.mshein-head.template-404 [id$="__main-404"] h1 {
+    margin: 0 0 6px !important;
+    color: #16123f !important;
+    font-family: 'Figtree', system-ui, sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 800 !important;
+  }
+
+  body.mshein-head.template-404 [id$="__main-404"] h1 .strong {
+    display: block;
+    color: #16123f !important;
+    font-size: 64px;
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+
+  body.mshein-head.template-404 [id$="__main-404"] p {
+    color: #4a4f6b !important;
+    font-size: 14px;
+  }
+
+  body.mshein-head.template-404 [id$="__main-404"] .link-btn a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    margin: 6px 0 0 !important;
+    padding: 0 24px !important;
+    color: #fff !important;
+    font-size: 14.5px !important;
+    font-weight: 800 !important;
+    background: #16123f !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+  }
+
+  body.mshein-head.template-404 [id$="__main-404"] .link-btn a::before,
+  body.mshein-head.template-404 [id$="__main-404"] .link-btn a::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* ---------- Politiques (snippets/policy-page.liquid) : en-tête bleu nuit, accents bleu nuit ---------- */
+  body.mshein-head .pp__hero {
+    background: radial-gradient(130% 160% at 0 0, #2f2a5c 0%, #16123f 62%) !important;
+  }
+
+  body.mshein-head .pp__hero::after {
+    content: none !important;
+  }
+
+  body.mshein-head .pp__hero h1 {
+    color: #fff !important;
+  }
+
+  body.mshein-head .pp .pp__eb {
+    color: rgb(255 255 255 / 72%) !important;
+  }
+
+  body.mshein-head .pp__hero-back {
+    color: #fff !important;
+    background: rgb(255 255 255 / 14%) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.mshein-head .pp__back,
+  body.mshein-head .pp__ico,
+  body.mshein-head .pp__num,
+  body.mshein-head .pp__rte .pp__cta--ghost {
+    color: #16123f !important;
+    background: #eef0f6 !important;
+  }
+
+  body.mshein-head .pp h2 i,
+  body.mshein-head .pp__cta,
+  body.mshein-head .pp__rte li::before,
+  body.mshein-head .pp__rte .pp__steps li::before {
+    background: #16123f !important;
+  }
+
+  body.mshein-head .pp__rte .pp__steps li:not(:last-child)::after {
+    background: #dfe2ea !important;
+  }
+
+  body.mshein-head :is(.pp p a, .pp__contact a, .pp__zones b, .pp__toc i, .pp__rte a) {
+    color: #16123f !important;
+  }
+
+  body.mshein-head .pp__num {
+    font-family: 'Figtree', system-ui, sans-serif !important;
+  }
+
+  body.mshein-head .pp__c:target {
+    border-color: #16123f !important;
+    box-shadow: 0 0 0 3px rgb(22 18 63 / 12%), 0 18px 30px -28px rgb(20 17 46 / 45%) !important;
   }
 }

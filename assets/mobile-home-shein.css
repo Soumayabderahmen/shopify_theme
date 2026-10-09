@@ -15,7 +15,7 @@
   /* Boutons du thème (assets/screen.css : bloc flottant, taille minimale, fond en pseudo-élément) remis à zéro dans
      ces parties, comme pour l'en-tête mobile (assets/mobile-temu-header.css). Faible priorité (:where) : les règles
      de chaque bouton ci-dessous s'appliquent. */
-  #root :where(.mshein-feed, .mshein-dept-slot, .mshein-coll) button {
+  #root :where(.mshein-feed, .mshein-dept-slot, .mshein-coll, .mshein-search) button {
     float: none;
     width: auto;
     min-width: 0;
@@ -34,8 +34,8 @@
     box-shadow: none;
   }
 
-  #root :where(.mshein-feed, .mshein-dept-slot, .mshein-coll) button::before,
-  #root :where(.mshein-feed, .mshein-dept-slot, .mshein-coll) button::after {
+  #root :where(.mshein-feed, .mshein-dept-slot, .mshein-coll, .mshein-search) button::before,
+  #root :where(.mshein-feed, .mshein-dept-slot, .mshein-coll, .mshein-search) button::after {
     content: none !important;
     display: none !important;
   }
@@ -400,6 +400,42 @@
     font-family: 'Figtree', system-ui, sans-serif;
     color: #171717;
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* Recherche mobile au design des rayons (snippets/mshein-search.liquid) : l'ancienne page reste pour l'ordinateur. */
+  body.mshein-search:has([data-mshein-search]) [id$="__breadcrumbs"],
+  body.mshein-search:has([data-mshein-search]) [id$="__main-search"] {
+    display: none !important;
+  }
+
+  .mshein-search {
+    min-height: 60vh;
+    font-family: 'Figtree', system-ui, sans-serif;
+    color: #171717;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mshein-search__hd {
+    padding: 14px 12px 4px;
+  }
+
+  .mshein-search__title {
+    margin: 0;
+    color: #111;
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.2px;
+  }
+
+  .mshein-search__empty {
+    margin: 12px;
+    padding: 28px 16px;
+    color: #4a4f6b;
+    font-size: 14px;
+    text-align: center;
+    background: #fff;
+    border-radius: 14px;
   }
 
   /* Changement d'onglet : en-tête et bannière tout de suite, puis les autres blocs (avantages, catégories, coupon,

@@ -9,7 +9,9 @@
     (templates collection.mshein-feed / mshein-sale / mshein-brand / mshein-under, sans layout) ;
   - dept / dept_page : page d'un onglet de rayon (snippets/mshein-dept.liquid) et pages suivantes de ses produits,
     demandées par assets/mobile-home-tabs.js (templates collection.mshein-dept / mshein-dept-page, sans layout) ;
-  - collection : la page collection mobile au même design (templates/collection.json), onglets sans rechargement.
+  - collection : la page collection mobile au même design (templates/collection.json), onglets sans rechargement ;
+  - search / search_results / search_page : la recherche mobile au même design (templates/search.json, modèles
+    search.mshein-search / mshein-search-page sans layout pour le tri, les filtres et les pages suivantes).
   Bannière (sections/section-slideshow.liquid, réglage « mobile_picks ») et en-tête transparent :
   assets/mobile-temu-header.css. Tuiles et coupon : leurs sections (réglages « Disposizione »).
 {%- endcomment -%}
@@ -62,6 +64,22 @@
         {%- for product in collection.products -%}
           {%- if product.selected_or_first_available_variant.price > 5000 -%}{%- continue -%}{%- endif -%}
           {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+        {%- endfor -%}
+        {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
+      {%- endpaginate -%}
+    </ul>
+
+  {%- when 'search_results' -%}
+    {%- comment -%} Recherche : bloc des résultats seul, redemandé à chaque tri / filtre (sans layout). {%- endcomment -%}
+    {%- render 'mshein-search', best: best, flag: flag -%}
+
+  {%- when 'search_page' -%}
+    {%- comment -%} Recherche : page suivante des produits (mots, tri et filtres de l'adresse gardés). {%- endcomment -%}
+    <ul class="mshein-page" data-mshein-page>
+      {%- paginate search.results by 20 -%}
+        {%- for item in search.results -%}
+          {%- if item.object_type != 'product' -%}{%- continue -%}{%- endif -%}
+          {%- render 'mshein-card', product: item, best: best, flag: flag -%}
         {%- endfor -%}
         {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
       {%- endpaginate -%}
@@ -125,6 +143,11 @@
     {%- case part -%}
       {%- when 'perks' -%}
         {%- render 'mshein-perks', home: true -%}
+
+      {%- when 'search' -%}
+        {%- comment -%} Page de recherche mobile au design des rayons (snippets/mshein-search.liquid). {%- endcomment -%}
+        <script src="{{ 'mobile-home-tabs.js' | asset_url }}" defer></script>
+        {%- render 'mshein-search', best: best, flag: flag -%}
 
       {%- when 'collection' -%}
         {%- comment -%}
@@ -335,6 +358,9 @@
         { "value": "brand_page", "label": "Pagina Brand ufficiali (interno)" },
         { "value": "under_page", "label": "Pagina Sotto 50 (interno)" },
         { "value": "collection", "label": "Pagina collezione (mobile)" },
+        { "value": "search", "label": "Pagina di ricerca (mobile)" },
+        { "value": "search_results", "label": "Risultati di ricerca (interno)" },
+        { "value": "search_page", "label": "Pagina risultati di ricerca (interno)" },
         { "value": "dept", "label": "Pagina di un reparto (interno)" },
         { "value": "dept_page", "label": "Pagina prodotti di un reparto (interno)" }
       ],

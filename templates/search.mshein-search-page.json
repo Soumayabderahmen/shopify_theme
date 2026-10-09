@@ -1,0 +1,15 @@
+{
+  "layout": false,
+  "sections": {
+    "main": {
+      "type": "mobile-home-shein",
+      "settings": {
+        "part": "search_page",
+        "menu": "main-menu"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

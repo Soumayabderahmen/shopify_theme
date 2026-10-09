@@ -244,6 +244,17 @@
   window.msheinMasonry = { create: createMasonry, watchReveal: watchReveal };
 
   /* ---------- Fil « Per te » ---------- */
+  /* ---------- Barres collées sous l'en-tête (onglets « Per te », Filtri / tri des rayons et de la recherche) ---------- */
+  // Avant le fil « Per te » : aussi sur les pages sans fil (collections, recherche).
+  var syncTabsTop = function () {
+    // En-tête fixé (accueil, collections) ou collé (recherche…) : les barres collantes se placent dessous.
+    var fixed = headerSection && /fixed|sticky/.test(getComputedStyle(headerSection).position);
+    document.documentElement.style.setProperty('--mshein-tabs-top', (fixed ? headerSection.offsetHeight : 0) + 'px');
+  };
+  window.addEventListener('resize', syncTabsTop);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncTabsTop);
+  syncTabsTop();
+
   var feed = document.querySelector('[data-mshein-feed]');
   if (!feed) return;
   var tabs = feed.querySelector('[data-mshein-tabs]');
@@ -274,12 +285,4 @@
     });
   }
 
-  /* ---------- Onglets collés sous l'en-tête fixé ---------- */
-  var syncTabsTop = function () {
-    var fixed = headerSection && getComputedStyle(headerSection).position === 'fixed';
-    document.documentElement.style.setProperty('--mshein-tabs-top', (fixed ? headerSection.offsetHeight : 0) + 'px');
-  };
-  window.addEventListener('resize', syncTabsTop);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncTabsTop);
-  syncTabsTop();
 })();

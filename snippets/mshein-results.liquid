@@ -1,0 +1,132 @@
+{%- comment -%}
+  Bloc de recherche des produits (mobile, style SHEIN) : Filtri (vrais filtres Shopify), tri, 2 colonnes / 1 colonna,
+  filtres rapides, « Mostrando X di Y prodotti » et produits en 2 colonnes décalées. Partie remplacée à chaque tri,
+  filtre ou puce par assets/mobile-home-tabs.js (window.msheinResults).
+  Utilisé par les rayons et pages collection (snippets/mshein-dept.liquid) et la recherche (sections/mobile-home-shein.liquid).
+  Params : filters, sort_options, current_sort, total (nombre de produits après filtres), cards (cartes de la 1re page),
+  next_url (page suivante), simple (true : tri et colonnes seulement, sans Filtri)
+{%- endcomment -%}
+<div class="mshein-cresults" data-dept-results>
+  {%- liquid
+    assign current_sort_label = ''
+    for option in sort_options
+      if option.value == current_sort
+        assign current_sort_label = option.name
+      endif
+    endfor
+    assign active_filters = 0
+    for filter in filters
+      if filter.type == 'price_range'
+        if filter.min_value.value != nil or filter.max_value.value != nil
+          assign active_filters = active_filters | plus: 1
+        endif
+      else
+        assign active_filters = active_filters | plus: filter.active_values.size
+      endif
+    endfor
+  -%}
+  <div class="mshein-ctool">
+    {%- unless simple -%}
+      {%- if filters.size > 0 -%}
+        <button type="button" class="mshein-cfilter" data-dept-open="">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+          {{ 'mobile.collection.filters' | t }}
+          {%- if active_filters > 0 -%}<i>{{ active_filters }}</i>{%- endif -%}
+        </button>
+      {%- endif -%}
+    {%- endunless -%}
+    <label class="mshein-csort">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg>
+      <span>{{ current_sort_label | escape }}</span>
+      <svg class="mshein-csort__chev" aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      <select aria-label="{{ 'mobile.collection.sort_title' | t }}" data-dept-sort>
+        {%- for option in sort_options -%}
+          <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected{% endif %}>{{ option.name | escape }}</option>
+        {%- endfor -%}
+      </select>
+    </label>
+    <div class="mshein-cview">
+      <button type="button" class="is-on" data-dept-view="2" aria-label="{{ 'mobile.collection.two_cols' | t }}"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
+      <button type="button" data-dept-view="1" aria-label="{{ 'mobile.collection.one_col' | t }}"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="6" rx="2"/><rect x="4" y="13" width="16" height="6" rx="2"/></svg></button>
+    </div>
+  </div>
+
+  {%- unless simple -%}
+    {%- if filters.size > 0 -%}
+      {%- comment -%} Filtres rapides : « Disponibili » d'un toucher, les autres ouvrent la fenêtre à leur section. {%- endcomment -%}
+      <div class="mshein-cfchips">
+        {%- for filter in filters -%}
+          {%- assign first_param = filter.values.first.param_name | default: '' -%}
+          {%- if first_param contains 'availability' -%}
+            {%- assign in_stock = filter.values | where: 'value', '1' | first -%}
+            {%- if in_stock -%}
+              <button type="button" class="mshein-cfchip-av{% if in_stock.active %} is-on{% endif %}" data-dept-quick="{{ in_stock.param_name }}" data-dept-quick-value="1"><i></i>{{ 'mobile.collection.available' | t }}</button>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- for filter in filters -%}
+          {%- assign first_param = filter.values.first.param_name | default: '' -%}
+          {%- if first_param contains 'availability' -%}{%- continue -%}{%- endif -%}
+          {%- assign filter_active = filter.active_values.size -%}
+          {%- if filter.type == 'price_range' -%}
+            {%- assign filter_active = 0 -%}
+            {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}{%- assign filter_active = 1 -%}{%- endif -%}
+          {%- endif -%}
+          <button type="button"{% if filter_active > 0 %} class="is-on"{% endif %} data-dept-open="{{ forloop.index }}">
+            {{- filter.label | escape }}{% if filter_active > 0 and filter.type != 'price_range' %} ({{ filter_active }}){% endif -%}
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  {%- endunless -%}
+
+  {%- liquid
+    # « Mostrando <b>{count}</b> di <b>{total}</b> prodotti » (même texte que la page collection) ; {count} mis à jour par le script.
+    assign results_text = 'mobile.js.collection_results_html' | t
+    assign count_token = '{' | append: 'count' | append: '}'
+    assign total_token = '{' | append: 'total' | append: '}'
+    assign results_line = results_text | replace: count_token, '0' | replace: total_token, total
+  -%}
+  <p class="mshein-ccount" data-dept-count data-template="{{ results_text | escape }}" data-total="{{ total }}">{{ results_line }}</p>
+
+  {%- unless simple -%}
+    {%- comment -%} Fenêtre « Filtri » : vrais filtres de la collection (disponibilità, prezzo, opzioni, tipo…). {%- endcomment -%}
+    <div class="mshein-fsheet" data-dept-sheet hidden>
+      <form class="mshein-fsheet__panel" role="dialog" aria-label="{{ 'mobile.collection.filters' | t }}" data-dept-form>
+        <div class="mshein-fsheet__hd"><b>{{ 'mobile.collection.filters' | t }}</b><button type="button" data-dept-close aria-label="{{ 'general.accessibility.close' | t }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="mshein-fsheet__body" data-dept-sheet-body>
+          {%- for filter in filters -%}
+            <section data-dept-section="{{ forloop.index }}">
+              <h4>{{ filter.label | escape }}</h4>
+              {%- case filter.type -%}
+                {%- when 'price_range' -%}
+                  <div class="mshein-fprice">
+                    <label><span>Min</span><input type="number" inputmode="decimal" min="0" step="0.01" name="{{ filter.min_value.param_name }}" value="{% if filter.min_value.value != nil %}{{ filter.min_value.value | divided_by: 100.0 }}{% endif %}" placeholder="0"></label>
+                    <label><span>Max</span><input type="number" inputmode="decimal" min="0" step="0.01" name="{{ filter.max_value.param_name }}" value="{% if filter.max_value.value != nil %}{{ filter.max_value.value | divided_by: 100.0 }}{% endif %}" placeholder="{{ filter.range_max | divided_by: 100.0 | ceil }}"></label>
+                  </div>
+                {%- else -%}
+                  <div class="mshein-fpills">
+                    {%- for value in filter.values -%}
+                      <label class="mshein-fpill">
+                        <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}"{% if value.active %} checked{% endif %}{% if value.count == 0 and value.active == false %} disabled{% endif %}>
+                        <span>{{ value.label | escape }} <em>{{ value.count }}</em></span>
+                      </label>
+                    {%- endfor -%}
+                  </div>
+              {%- endcase -%}
+            </section>
+          {%- endfor -%}
+        </div>
+        <div class="mshein-fsheet__ft">
+          <button type="button" class="mshein-fsheet__reset" data-dept-reset>{{ 'mobile.collection.reset' | t }}</button>
+          <button type="submit" class="mshein-fsheet__go">{{ 'mobile.collection.show_results' | t }}</button>
+        </div>
+      </form>
+    </div>
+  {%- endunless -%}
+
+  <ul class="mshein-feed__grid" data-mshein-grid>{{ cards }}</ul>
+  <div class="mshein-feed__sentinel" data-mshein-sentinel data-next="{{ next_url | escape }}"></div>
+  <div class="mshein-loader" data-mshein-loader hidden aria-label="{{ 'mobile.js.loading' | t }}"><i></i><i></i><i></i></div>
+</div>

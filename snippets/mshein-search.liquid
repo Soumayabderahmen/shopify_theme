@@ -1,0 +1,50 @@
+{%- comment -%}
+  Page de recherche MOBILE au design des rayons (sections/mobile-home-shein.liquid, parties « search » et
+  « search_results ») : titre, puis le même bloc que les rayons (snippets/mshein-results.liquid) avec les vrais filtres
+  et tris de la recherche Shopify ; 20 produits, la suite au défilement (templates/search.mshein-search-page.json).
+  Tri, filtres et colonnes sans rechargement (assets/mobile-home-tabs.js, window.msheinResults, modèle
+  search.mshein-search). Seuls les produits sont montrés (pas les pages ni les articles).
+  Params : best (collection « Più venduti »), flag
+{%- endcomment -%}
+{%- liquid
+  assign search_next = ''
+  assign search_shown = 0
+  capture search_cards
+    paginate search.results by 20
+      for item in search.results
+        if item.object_type != 'product'
+          continue
+        endif
+        assign search_shown = search_shown | plus: 1
+        render 'mshein-card', product: item, best: best, flag: flag
+      endfor
+      if paginate.next
+        # Bloc redemandé après un tri / filtre (?view=mshein-search) : même adresse, modèle de la page suivante.
+        if paginate.next.url contains 'view=mshein-search'
+          assign search_next = paginate.next.url | replace: 'view=mshein-search', 'view=mshein-search-page'
+        else
+          assign search_next = paginate.next.url | append: '&view=mshein-search-page'
+        endif
+      endif
+    endpaginate
+  endcapture
+  assign search_sort = search.sort_by | default: search.default_sort_by
+-%}
+<div class="mshein-search" data-mshein-search data-path="{{ routes.search_url }}">
+  <div class="mshein-search__hd">
+    <p class="mshein-search__title">
+      {%- if search.performed -%}
+        {{ 'search.results_plus_term' | t: term: search.terms }}
+      {%- else -%}
+        {{ 'search.title' | t }}
+      {%- endif -%}
+    </p>
+  </div>
+  {%- if search.performed and search_shown == 0 and search.results_count == 0 -%}
+    <p class="mshein-search__empty">{{ 'search.no_products_found' | t }}</p>
+  {%- else -%}
+    <div class="mshein-cblock" data-dept-block>
+      {%- render 'mshein-results', filters: search.filters, sort_options: search.sort_options, current_sort: search_sort, total: search.results_count, cards: search_cards, next_url: search_next, simple: false -%}
+    </div>
+  {%- endif -%}
+</div>

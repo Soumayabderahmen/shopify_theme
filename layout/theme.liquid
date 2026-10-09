@@ -78,13 +78,20 @@
       if template.name == 'collection' and template.suffix == blank
         assign mshein_coll = true
       endif
-      # Autres modèles de collection, fiches produit, panier, pages du site (wishlist, Contatti…) et suivi de commande
-      # (app 17TRACK, /apps/17TRACK dans toutes les langues) : nouvel en-tête blanc collé en haut (onglets vers l'accueil #rayon).
+      # Recherche (template search.json) : en mobile, résultats au design des rayons (snippets/mshein-search.liquid).
+      assign mshein_search = false
+      if template.name == 'search' and template.suffix == blank
+        assign mshein_search = true
+      endif
+      # Toutes les autres pages du site (autres modèles de collection, fiches produit, panier, pages, recherche, liste des
+      # collections, blog, articles, politiques, 404) et suivi de commande (app 17TRACK, /apps/17TRACK dans toutes les
+      # langues) : nouvel en-tête blanc collé en haut (onglets vers l'accueil #rayon).
       assign mshein_plain_head = false
       assign request_path_lower = request.path | downcase
-      if template.name == 'product' or template.name == 'cart'
+      assign mshein_plain_templates = 'product,cart,page,search,list-collections,blog,article,404' | split: ','
+      if mshein_plain_templates contains template.name
         assign mshein_plain_head = true
-      elsif template.name == 'page'
+      elsif request.page_type == 'policy'
         assign mshein_plain_head = true
       elsif request_path_lower contains '/apps/17track'
         assign mshein_plain_head = true
@@ -92,8 +99,8 @@
         assign mshein_plain_head = true
       endif
     -%}
-    {%- if template.name == 'index' or mshein_coll -%}
-      {%- comment -%} Accueil et pages collection mobile style SHEIN : styles chargés en tête, pas d'ancien design avant le nouveau. {%- endcomment -%}
+    {%- if template.name == 'index' or mshein_coll or mshein_search -%}
+      {%- comment -%} Accueil, pages collection et recherche mobile style SHEIN : styles chargés en tête, pas d'ancien design avant le nouveau. {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'mobile-home-shein.css' | asset_url }}" media="(max-width: 760px)">
     {%- endif -%}
     {%- comment -%} Barre du bas mobile : style chargé en tête de page pour qu'elle s'affiche finie dès la première image (mobile uniquement). {%- endcomment -%}
@@ -345,7 +352,7 @@
     mshein-head : nouvel en-tête de l'accueil (assets/mobile-temu-header.css). Pages collection.json : comme l'accueil
     (mshein-home : en-tête transparent sur la bannière du rayon) + mshein-coll ; autres modèles de collection : en-tête blanc.
   {%- endcomment -%}
-  <body class="template-{{ template.name | handle }}{% if template.name == 'index' %} mshein-home mshein-head{% elsif mshein_coll %} mshein-home mshein-head mshein-coll{% elsif mshein_plain_head %} mshein-head{% endif %}">
+  <body class="template-{{ template.name | handle }}{% if template.name == 'index' %} mshein-home mshein-head{% elsif mshein_coll %} mshein-home mshein-head mshein-coll{% elsif mshein_plain_head %} mshein-head{% if mshein_search %} mshein-search{% endif %}{% endif %}">
     {%- if template.name == 'index' or mshein_coll -%}
       <script>
         (function () {

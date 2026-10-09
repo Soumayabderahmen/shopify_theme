@@ -9,6 +9,13 @@
  */
 {
   "sections": {
+    "mshein_search": {
+      "type": "mobile-home-shein",
+      "settings": {
+        "part": "search",
+        "menu": "main-menu"
+      }
+    },
     "breadcrumbs": {
       "type": "breadcrumbs",
       "settings": {
@@ -57,6 +64,7 @@
     }
   },
   "order": [
+    "mshein_search",
     "breadcrumbs",
     "main-search"
   ]
