@@ -20,7 +20,9 @@
     assign card_on_sale = true
     assign card_saved = card_variant.compare_at_price | minus: card_variant.price
     assign card_pct = card_saved | times: 100.0 | divided_by: card_variant.compare_at_price | floor
-    assign card_saved_money = card_saved | money_without_trailing_zeros
+    # strip_html : le format monétaire de certaines devises contient <span class=money> (app de devises),
+    # qu'une traduction affiche en texte (« Risparmia <span class=money>€17,43 »).
+    assign card_saved_money = card_saved | money_without_trailing_zeros | strip_html
   endif
 
   assign card_image = card_variant.featured_image | default: product.featured_image

@@ -239,7 +239,8 @@
             endif
           endfor
           assign new_src = collections['new-arrivals'].url | append: feed_suffix | append: '&sort_by=created-descending'
-          assign under_amount = 5000 | money_without_trailing_zeros
+          # strip_html : format monétaire avec <span class=money> dans certaines devises (affiché en texte sinon).
+          assign under_amount = 5000 | money_without_trailing_zeros | strip_html
           assign under_src = routes.all_products_collection_url | append: '?view=mshein-under&sort_by=best-selling&filter.v.price.lte=50'
         -%}
         <div class="mshein-feed" data-mshein-home data-mshein-feed data-brands="{{ 'mobile-brands.json' | asset_url }}">
