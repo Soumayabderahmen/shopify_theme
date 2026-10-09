@@ -4525,6 +4525,12 @@
     display: none !important;
   }
 
+  /* Tant que la bannière n'est pas encore arrivée dans la page : fond foncé de la bannière derrière l'en-tête
+     (logo et icônes blancs lisibles dès la première image, pas d'écran blanc). */
+  body.mshein-home:not(:has([data-mshein-hero])) [id$="__header"].shopify-section {
+    background: #1c1838;
+  }
+
   body.mshein-home #content {
     padding-top: 0 !important;
   }
@@ -4782,6 +4788,19 @@
 
   body.mshein-home #root [data-mshein-hero] .swiper-outer {
     border-radius: 0 !important;
+  }
+
+  /* Bord à bord comme le prototype : sans les marges de l'ancien hero arrondi (margin: -5px 6px, plus fortes
+     que la règle ci-dessus) ni l'image décalée de 6px de chaque côté (produits qui dépassaient à droite). */
+  body.mshein-home #root .shopify-section [data-mshein-hero].m6fr {
+    margin: 0 !important;
+  }
+
+  body.mshein-home #root .shopify-section [data-mshein-hero] article > figure {
+    right: 0;
+    left: 0;
+    width: auto;
+    margin-left: 0;
   }
 
   /* Points de la bannière posés sur le bas de l'image ; le compteur « 1 / 6 » (lu par le script des points)

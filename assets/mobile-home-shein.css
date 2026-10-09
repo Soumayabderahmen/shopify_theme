@@ -778,10 +778,17 @@
     transform: none;
   }
 
-  /* Tuiles de catégories (visibles dès l'ouverture) : même apparition, colonne par colonne, sans script. */
-  .mshein-js .category-tiles--scroll .category-tiles__item {
+  /* Tuiles de catégories et cartes 2×2 (dans le premier écran) : même apparition, sans attendre le script
+     de la page (chargé en dernier) ; les cartes de droite un peu après celles de gauche. */
+  .mshein-js .category-tiles--scroll .category-tiles__item,
+  .mshein-js .mshein-mods .mshein-mod.reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
     animation: mshein-tile-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+
+  .mshein-js .mshein-mods .mshein-mod.reveal:nth-child(even) { animation-delay: 90ms; }
 
   .mshein-js .category-tiles--scroll .category-tiles__item:nth-child(n + 3) { animation-delay: 60ms; }
   .mshein-js .category-tiles--scroll .category-tiles__item:nth-child(n + 5) { animation-delay: 120ms; }
@@ -802,7 +809,8 @@
       transition: none;
     }
 
-    .mshein-js .category-tiles--scroll .category-tiles__item {
+    .mshein-js .category-tiles--scroll .category-tiles__item,
+    .mshein-js .mshein-mods .mshein-mod.reveal {
       animation: none;
     }
 

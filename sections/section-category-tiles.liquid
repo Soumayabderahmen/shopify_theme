@@ -317,12 +317,10 @@
       update();
     }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => { pickDailyTiles(); syncTilesBar(); });
-    } else {
-      pickDailyTiles();
-      syncTilesBar();
-    }
+    // Ce script suit directement les tuiles dans la page : tirage du jour tout de suite, avant le premier affichage
+    // (avant : à la fin du chargement, les tuiles changeaient d'ordre sous les yeux).
+    pickDailyTiles();
+    syncTilesBar();
 
     if (window.Shopify && window.Shopify.designMode) {
       document.addEventListener('shopify:section:load', (event) => {
