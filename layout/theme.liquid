@@ -78,6 +78,13 @@
       if template.name == 'collection' and template.suffix == blank
         assign mshein_coll = true
       endif
+      # Autres modèles de collection, fiches produit et panier : nouvel en-tête blanc collé en haut (onglets vers l'accueil #rayon).
+      assign mshein_plain_head = false
+      if template.name == 'product' or template.name == 'cart'
+        assign mshein_plain_head = true
+      elsif template.name == 'collection' and mshein_coll == false
+        assign mshein_plain_head = true
+      endif
     -%}
     {%- if template.name == 'index' or mshein_coll -%}
       {%- comment -%} Accueil et pages collection mobile style SHEIN : styles chargés en tête, pas d'ancien design avant le nouveau. {%- endcomment -%}
@@ -332,7 +339,7 @@
     mshein-head : nouvel en-tête de l'accueil (assets/mobile-temu-header.css). Pages collection.json : comme l'accueil
     (mshein-home : en-tête transparent sur la bannière du rayon) + mshein-coll ; autres modèles de collection : en-tête blanc.
   {%- endcomment -%}
-  <body class="template-{{ template.name | handle }}{% if template.name == 'index' %} mshein-home mshein-head{% elsif mshein_coll %} mshein-home mshein-head mshein-coll{% elsif template.name == 'collection' %} mshein-head{% endif %}">
+  <body class="template-{{ template.name | handle }}{% if template.name == 'index' %} mshein-home mshein-head{% elsif mshein_coll %} mshein-home mshein-head mshein-coll{% elsif mshein_plain_head %} mshein-head{% endif %}">
     {%- if template.name == 'index' or mshein_coll -%}
       <script>
         (function () {
@@ -404,10 +411,10 @@
     <div id="root">
       {%- render 'accessible-nav' -%}
       {%- sections 'header-group' -%}
-      {%- if template.name == 'collection' and mshein_coll == false -%}
+      {%- if mshein_plain_head -%}
         <script>
           (function () {
-            // Autres modèles de collection, mobile : nouvel en-tête toujours blanc dès son affichage, et sa hauteur pour la barre
+            // Autres modèles de collection, fiches produit et panier, mobile : nouvel en-tête toujours blanc dès son affichage, et sa hauteur pour la barre
             // d'outils collée dessous (assets/mobile-temu-header.css).
             var header = document.querySelector('[id$="__header"].shopify-section');
             if (!header || !window.matchMedia('(max-width: 760px)').matches) return;

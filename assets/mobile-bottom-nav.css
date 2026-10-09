@@ -1,5 +1,6 @@
-/* Barre du bas mobile — version "scura" du prototype ("platinumshop-prototype-mobile-final-scura (1)") :
-   fond blanc, libellés gris / actif bleu, faisceau lumineux bleu, icônes contour (inactif) -> pleines duotone (actif).
+/* Barre du bas mobile — au design du nouvel en-tête (style SHEIN, assets/mobile-temu-header.css) :
+   fond blanc à bord droit et filet gris, libellés gris ardoise / actif bleu nuit en gras, courte barre arrondie
+   au-dessus de l'onglet actif (comme sous l'onglet de rayon du header), icônes contour (inactif) -> pleines (actif).
    snippets/mobile-bottom-navigation.liquid, assets/mobile-bottom-nav.js.
    Chargé uniquement en mobile (media="(max-width: 760px)").
    "body .mobile-bottom-navigation" : plus fort que les anciennes règles de assets/mobile-temu-header.css. */
@@ -71,9 +72,9 @@ body .mobile-bottom-navigation {
   height: calc(66px + env(safe-area-inset-bottom, 0px));
   padding: 0 6px env(safe-area-inset-bottom, 0px);
   border: 0;
-  border-radius: 22px 22px 0 0;
+  border-radius: 0;
   background: #fff;
-  box-shadow: 0 -10px 26px -16px rgba(22, 18, 63, 0.45), inset 0 1px 0 #e1e3e8;
+  box-shadow: 0 -1px 0 #eceef4, 0 -6px 18px -12px rgba(22, 18, 63, 0.18);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
@@ -94,7 +95,7 @@ body .mobile-bottom-navigation > button {
   border-radius: 0;
   background: none;
   box-shadow: none;
-  color: #8a91a0;
+  color: #6b6f80;
   font-family: 'Figtree', system-ui, sans-serif;
   font-size: 10.5px;
   font-weight: 600;
@@ -146,11 +147,11 @@ body .mobile-bottom-navigation svg .fl {
   transform: scale(0.75);
 }
 
-/* Onglet actif : bleu, glyphe plein avec rebond. */
+/* Onglet actif : bleu nuit du header, en gras, glyphe plein avec rebond. */
 body .mobile-bottom-navigation > a.is-active,
 body .mobile-bottom-navigation > button.is-active {
-  color: #3a34d2;
-  font-weight: 700;
+  color: #16123f;
+  font-weight: 800;
 }
 
 body .mobile-bottom-navigation > .is-active svg .fl {
@@ -164,7 +165,7 @@ body .mobile-bottom-navigation > .is-active svg .ol {
 }
 
 body .mobile-bottom-navigation > :focus-visible {
-  outline: 2px solid #3a34d2;
+  outline: 2px solid #16123f;
   outline-offset: -4px;
   border-radius: 12px;
 }
@@ -179,7 +180,8 @@ body .mobile-bottom-navigation .mobile-bottom-navigation__count {
   color: #fff;
 }
 
-/* Faisceau lumineux bleu : trait avec halo + cône de lumière, sous l'onglet actif. */
+/* Repère de l'onglet actif : courte barre arrondie bleu nuit en haut (même barre que sous l'onglet de rayon
+   du header), qui glisse vers l'onglet touché. */
 body .mobile-bottom-navigation .nb-spot {
   position: absolute;
   top: 0;
@@ -215,23 +217,11 @@ body .mobile-bottom-navigation .nb-spot::before {
   position: absolute;
   top: 0;
   left: 50%;
-  width: 38px;
+  width: 20px;
   height: 3px;
-  margin-left: -19px;
-  border-radius: 0 0 6px 6px;
-  background: #3a34d2;
-  box-shadow: 0 0 12px 2px rgba(58, 52, 210, 0.55), 0 0 26px 6px rgba(58, 52, 210, 0.28);
-}
-
-body .mobile-bottom-navigation .nb-spot::after {
-  content: "";
-  position: absolute;
-  top: 3px;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: linear-gradient(180deg, rgba(58, 52, 210, 0.26) 0%, rgba(58, 52, 210, 0.1) 55%, rgba(58, 52, 210, 0) 100%);
-  clip-path: polygon(32% 0, 68% 0, 100% 100%, 0 100%);
+  margin-left: -10px;
+  border-radius: 0 0 3px 3px;
+  background: #16123f;
 }
 
 /* Camion "Consegna" : en route quand l'onglet est actif (traits de vitesse, roues qui tournent,
