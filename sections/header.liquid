@@ -271,15 +271,40 @@
   {%- comment -%} Les "ricerche di tendenza" sont maintenant dans le panneau de recherche (snippets/mobile-search.liquid). {%- endcomment -%}
 
   {%- if mobile_category_menu != blank -%}
+    {%- liquid
+      # Liens du menu en adresse complète vers la boutique (« Traccia ordine » = https://platinumshop.it/apps/17TRACK) :
+      # chemin seul, pour rester sur le site affiché (aperçu ou boutique) et dans la langue du visiteur (/fr/apps/17TRACK),
+      # et onglet marqué sur sa page (comme snippets/mobile-bottom-navigation.liquid).
+      assign tab_own_prefixes = shop.secure_url | append: '|https://www.' | append: shop.domain | append: '|http://' | append: shop.domain | split: '|'
+      assign tab_request_path = request.path | downcase
+    -%}
     <nav class="mobile-temu-categories" aria-label="{{ 'general.accessibility.menu' | t }}">
       <ul>
         {%- for link in mobile_category_menu.links -%}
           {%- unless link.url contains '/pages/wishlist' -%}
+            {%- liquid
+              assign tab_url = link.url
+              for tab_prefix in tab_own_prefixes
+                if tab_url contains tab_prefix
+                  assign tab_url = tab_url | remove_first: tab_prefix
+                  break
+                endif
+              endfor
+              assign tab_start = tab_url | slice: 0, 6
+              if tab_start == '/apps/' and routes.root_url != '/'
+                assign tab_url = routes.root_url | append: tab_url
+              endif
+              assign tab_current = link.current
+              assign tab_path = tab_url | downcase
+              if tab_start == '/apps/' and tab_path == tab_request_path
+                assign tab_current = true
+              endif
+            -%}
             <li>
               <a
-                href="{{ link.url }}"
-                class="{% if link.current or link.child_active %}is-active{% endif %}"
-                {% if link.current %}aria-current="page"{% endif %}
+                href="{{ tab_url }}"
+                class="{% if tab_current or link.child_active %}is-active{% endif %}"
+                {% if tab_current %}aria-current="page"{% endif %}
               >{{ link.title | escape }}</a>
             </li>
           {%- endunless -%}

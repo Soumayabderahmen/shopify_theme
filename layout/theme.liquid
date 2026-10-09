@@ -78,9 +78,13 @@
       if template.name == 'collection' and template.suffix == blank
         assign mshein_coll = true
       endif
-      # Autres modèles de collection, fiches produit et panier : nouvel en-tête blanc collé en haut (onglets vers l'accueil #rayon).
+      # Autres modèles de collection, fiches produit, panier et suivi de commande (app 17TRACK, /apps/17TRACK dans
+      # toutes les langues) : nouvel en-tête blanc collé en haut (onglets vers l'accueil #rayon).
       assign mshein_plain_head = false
+      assign request_path_lower = request.path | downcase
       if template.name == 'product' or template.name == 'cart'
+        assign mshein_plain_head = true
+      elsif request_path_lower contains '/apps/17track'
         assign mshein_plain_head = true
       elsif template.name == 'collection' and mshein_coll == false
         assign mshein_plain_head = true
@@ -425,6 +429,14 @@
             };
             syncHeight();
             if (window.ResizeObserver) new ResizeObserver(syncHeight).observe(header);
+
+            // Onglet de la page (rayon, « Traccia ordine »…) au milieu de la barre d'onglets, visible dès l'ouverture.
+            var tabsList = header.querySelector('.mobile-temu-categories ul');
+            var activeTab = tabsList && tabsList.querySelector('a.is-active');
+            if (activeTab) {
+              var activeItem = activeTab.closest('li') || activeTab;
+              tabsList.scrollLeft = activeItem.offsetLeft - (tabsList.clientWidth - activeItem.offsetWidth) / 2;
+            }
 
             // Onglet de rayon touché (Donna, Uomo…) : sa page au nouveau design, sur l'accueil (#uomo…, même nom que
             // dans assets/mobile-home-tabs.js). Le lien garde sa vraie adresse /collections/… (référencement).

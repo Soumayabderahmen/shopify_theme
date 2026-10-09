@@ -293,10 +293,28 @@
     gap: 3px;
   }
 
-  .mshein-card__stars i {
+  /* Étoiles remplies selon la note exacte : 5 étoiles grises, et par-dessus les mêmes en noir coupées à la note. */
+  .mshein-card__rate {
+    position: relative;
+    display: inline-block;
+    color: #d5d7e0;
+    letter-spacing: -1px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .mshein-card__rate i {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
     color: #111;
     font-style: normal;
-    letter-spacing: -1px;
+  }
+
+  .mshein-card__stars b {
+    color: #111;
+    font-weight: 700;
   }
 
   .mshein-card__stars em {

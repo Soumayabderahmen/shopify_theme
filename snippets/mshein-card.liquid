@@ -5,7 +5,9 @@
   - « New Arrivals » : tag new-arrival (règle de l'app d'étiquettes du site) ;
   - « Verified [marque] », Official Store · Star seller · Brand Official : marques de snippets/badge--brand-products.liquid ;
   - BESTSELLER : 5 premiers produits de « Più venduti » ; « #N Più venduto in [type] » : rang du type dans les 50 premiers ;
-  - étoiles : avis (métachamps syncer.reviews / reviews.rating, comme snippets/pdp-mobile-top.liquid) ;
+  - étoiles : avis de l'app Ali Reviews (métachamp alireviews, comme la fiche produit), sinon syncer.reviews /
+    reviews.rating ; seulement
+    pour une note d'au moins 4 sur 5 avec au moins 3 avis ; remplies selon la note exacte, note et nombre d'avis réels ;
   - « N venduti di recente » : métachamp custom.bestseller_current_month (sinon bestseller_count) ;
   - « Sped. gratuita » au-dessus de 50 (même seuil que product-item), « Reso facile », « Risparmia » ;
   - le nom de la marque (« 🏬 Marque › ») est ajouté par assets/mshein-card.js (liste assets/mobile-brands.json).
@@ -82,17 +84,34 @@
     endif
   endfor
 
+  # Avis : d'abord ceux de l'app Ali Reviews (les mêmes que la fiche produit, mis à jour par l'app à chaque avis :
+  # « "aggregateRating": {"ratingValue": "4.8", "reviewCount": "150"} »), sinon les anciens métachamps d'avis.
   assign card_rating = 0
   assign card_rating_count = 0
-  if product.metafields.syncer.reviews
+  assign card_ali = product.metafields.alireviews.seo_rating_review_key_script | append: '' | strip_newlines | remove: ' '
+  if card_ali contains '"ratingValue":"' and card_ali contains '"reviewCount":"'
+    assign card_rating = card_ali | split: '"ratingValue":"' | last | split: '"' | first
+    assign card_rating_count = card_ali | split: '"reviewCount":"' | last | split: '"' | first
+  elsif product.metafields.syncer.reviews
     assign card_rating = product.metafields.syncer.reviews.value.cumulative_rating
     assign card_rating_count = product.metafields.syncer.reviews.value.total_reviews
   elsif product.metafields.reviews.rating
     assign card_rating = product.metafields.reviews.rating.value.rating
-    assign card_rating_count = product.metafields.reviews.rating_count
+    assign card_rating_count = product.metafields.reviews.rating_count.value
   endif
+  assign card_rating = card_rating | times: 1.0
   assign card_rating_count = card_rating_count | plus: 0
-  assign card_stars = card_rating | round | plus: 0
+  # Étoiles seulement pour une note fiable et bonne : au moins 4 sur 5 et au moins 3 avis.
+  assign card_show_stars = false
+  if card_rating >= 4 and card_rating_count >= 3
+    assign card_show_stars = true
+  endif
+  # Remplissage exact (4,6 → 92 %) et note affichée avec la virgule (sauf en anglais).
+  assign card_star_fill = card_rating | times: 20 | round: 1
+  assign card_rating_text = card_rating | round: 1 | append: ''
+  unless request.locale.iso_code contains 'en'
+    assign card_rating_text = card_rating_text | replace: '.', ','
+  endunless
 
   assign card_sold = product.metafields.custom.bestseller_current_month.value | default: product.metafields.custom.bestseller_count.value | default: 0 | plus: 0
   if card_sold >= 1000
@@ -169,9 +188,10 @@
     {%- if card_type_rank > 0 and card_type_rank <= 5 -%}
       <p class="mshein-card__rank">{{ 'mobile.home_shein.rank_html' | t: rank: card_type_rank, type: product.type }}</p>
     {%- endif -%}
-    {%- if card_rating_count > 0 -%}
-      <p class="mshein-card__stars" aria-label="{{ 'mobile.footer.rating_out_of' | t: rating: card_rating }}">
-        <i aria-hidden="true">{%- for i in (1..5) -%}{%- if i <= card_stars -%}★{%- else -%}☆{%- endif -%}{%- endfor -%}</i>
+    {%- if card_show_stars -%}
+      <p class="mshein-card__stars" aria-label="{{ 'mobile.footer.rating_out_of' | t: rating: card_rating_text }}">
+        <span class="mshein-card__rate" aria-hidden="true">★★★★★<i style="width: {{ card_star_fill }}%;">★★★★★</i></span>
+        <b aria-hidden="true">{{ card_rating_text }}</b>
         <em>({% if card_rating_count >= 100 %}100+{% else %}{{ card_rating_count }}{% endif %})</em>
       </p>
     {%- endif -%}
