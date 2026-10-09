@@ -1,0 +1,34 @@
+{%- comment -%}
+  Bannières des onglets de rayon, préparées dans la page (accueil et pages collection, mobile) : au toucher d'un onglet,
+  assets/mobile-home-tabs.js affiche tout de suite la vraie bannière du rayon (snippets/mshein-dept-hero.liquid), même si
+  le reste du rayon n'est pas encore arrivé. Une balise <template> par rayon du menu (rien n'est affiché ni chargé avant).
+  Params : menu (menu des rayons, comme l'en-tête), best (collection « Più venduti »)
+{%- endcomment -%}
+{%- liquid
+  assign heroes_menu = menu
+  if heroes_menu == blank
+    assign heroes_menu = linklists['main-menu']
+  endif
+-%}
+<div hidden data-mshein-tab-heroes>
+  {%- for hero_link in heroes_menu.links -%}
+    {%- liquid
+      assign hero_collection = nil
+      if hero_link.type == 'collection_link'
+        assign hero_collection = hero_link.object
+      elsif hero_link.type == 'catalog_link' or hero_link.url contains '/collections/all'
+        assign hero_collection = collections['all']
+      endif
+      if hero_collection == nil or hero_collection == blank
+        continue
+      endif
+      assign hero_is_all = false
+      if hero_collection.handle == 'all'
+        assign hero_is_all = true
+      endif
+    -%}
+    <template data-mshein-hero-for="{{ hero_collection.url }}">
+      {%- render 'mshein-dept-hero', collection: hero_collection, best: best, title: hero_link.title, is_all: hero_is_all -%}
+    </template>
+  {%- endfor -%}
+</div>

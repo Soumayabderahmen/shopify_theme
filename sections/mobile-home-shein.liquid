@@ -179,6 +179,7 @@
           endcapture
         -%}
         <script src="{{ 'mobile-home-tabs.js' | asset_url }}" defer></script>
+        {%- render 'mshein-tab-heroes', menu: section.settings.menu, best: best -%}
         <div class="mshein-coll" data-mshein-coll>
           {%- render 'mshein-dept', collection: collection, best: best, flag: flag, menu: section.settings.menu, cards: coll_cards, next_url: coll_next, as_page: true, after_hero: coll_perks -%}
         </div>
@@ -319,6 +320,7 @@
         -%}
         {%- comment -%} Onglets de rayon du header (sans rechargement, lien direct #donna…) : assets/mobile-home-tabs.js. {%- endcomment -%}
         <script src="{{ 'mobile-home-tabs.js' | asset_url }}" defer></script>
+        {%- render 'mshein-tab-heroes', menu: section.settings.menu, best: best -%}
         <div class="mshein-feed" data-mshein-home data-mshein-feed>
           <div class="mshein-feed__tabs" role="tablist" data-mshein-tabs>
             <button type="button" role="tab" aria-selected="true" class="is-on" data-src="{{ for_you_src | append: '&page=2' }}">✨ {{ 'mobile.home_shein.for_you' | t }}</button>

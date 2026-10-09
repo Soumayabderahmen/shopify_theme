@@ -1,0 +1,98 @@
+{%- comment -%}
+  Bannière d'un rayon (mobile, style SHEIN) : photo de la collection, sinon mosaïque de ses 3 meilleures ventes
+  (ordre de « Più venduti », complété par ses produits), nom du rayon, nombre d'articles, « Vedi tutto ».
+  Utilisée par la page du rayon (snippets/mshein-dept.liquid) et, à l'avance, par l'accueil et les pages collection
+  (snippets/mshein-tab-heroes.liquid) : la bannière s'affiche dès le toucher d'un onglet, identique à l'arrivée du rayon.
+  Params : collection, best (collection « Più venduti »), title (nom du rayon dans le menu), is_all (Tutti i Prodotti)
+{%- endcomment -%}
+{%- liquid
+  assign hero_title = title | default: collection.title
+  assign hero_bg = ''
+  assign collage_html = ''
+  if collection.image
+    assign hero_bg = collection.image | image_url: width: 600
+  else
+    # Mêmes 10 « meilleures ventes » que la page du rayon : celles de « Più venduti » présentes dans le rayon (toutes
+    # pour Tutti i Prodotti), complétées par ses produits ; la mosaïque prend les 3 premières qui ont une photo.
+    assign seen_ids = ','
+    assign considered = 0
+    assign collage_count = 0
+    for best_product in best.products limit: 120
+      if is_all == false
+        assign best_handles = best_product.collections | map: 'handle'
+        unless best_handles contains collection.handle
+          continue
+        endunless
+      endif
+      assign seen_ids = seen_ids | append: best_product.id | append: ','
+      assign considered = considered | plus: 1
+      if collage_count < 3
+        assign hero_variant = best_product.selected_or_first_available_variant
+        assign hero_image = hero_variant.featured_image | default: best_product.featured_image
+        if hero_image != blank
+          if hero_bg == ''
+            assign hero_bg = hero_image | image_url: width: 400
+          endif
+          capture collage_item
+            echo '<span>'
+            echo hero_image | image_url: width: 400 | image_tag: loading: 'eager', alt: best_product.title
+            echo '<b>'
+            echo hero_variant.price | money
+            echo '</b></span>'
+          endcapture
+          assign collage_html = collage_html | append: collage_item
+          assign collage_count = collage_count | plus: 1
+        endif
+      endif
+      if considered >= 10
+        break
+      endif
+    endfor
+    if collage_count < 3
+      for hero_product in collection.products
+        if considered >= 10 or collage_count >= 3
+          break
+        endif
+        assign hero_key = ',' | append: hero_product.id | append: ','
+        if seen_ids contains hero_key
+          continue
+        endif
+        assign considered = considered | plus: 1
+        assign hero_variant = hero_product.selected_or_first_available_variant
+        assign hero_image = hero_variant.featured_image | default: hero_product.featured_image
+        if hero_image != blank
+          if hero_bg == ''
+            assign hero_bg = hero_image | image_url: width: 400
+          endif
+          capture collage_item
+            echo '<span>'
+            echo hero_image | image_url: width: 400 | image_tag: loading: 'eager', alt: hero_product.title
+            echo '<b>'
+            echo hero_variant.price | money
+            echo '</b></span>'
+          endcapture
+          assign collage_html = collage_html | append: collage_item
+          assign collage_count = collage_count | plus: 1
+        endif
+      endfor
+    endif
+  endif
+-%}
+<section class="mshein-dhero">
+  <a class="mshein-dhero__media" href="{{ collection.url }}">
+    {%- if collection.image -%}
+      {{ collection.image | image_url: width: 750 | image_tag: loading: 'eager', fetchpriority: 'high', alt: hero_title, sizes: '100vw', widths: '375,560,750' }}
+    {%- else -%}
+      <span class="mshein-dhero__collage">{{ collage_html }}</span>
+    {%- endif -%}
+    <span class="mshein-dhero__shade"></span>
+    <span class="mshein-dhero__txt">
+      <b class="mshein-dhero__title">{{ hero_title | escape }}</b>
+      <span class="mshein-dhero__meta">
+        <span>{{ 'mobile.cart.items_other' | t: count: collection.all_products_count }}</span>
+        <span class="mshein-dhero__cta">{{ 'mobile.category.view_all' | t }}<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
+      </span>
+    </span>
+  </a>
+  {%- if hero_bg != '' -%}<i class="mshein-dhero__bg" style="background-image: url('{{ hero_bg }}');" aria-hidden="true"></i>{%- endif -%}
+</section>

@@ -272,6 +272,11 @@
   var baseUrl = window.location.pathname + window.location.search;
   var minIndex = baseIndex >= 0 ? 0 : -1;
   var isBase = function (index) { return index === baseIndex; };
+  // Bannières des rayons préparées dans la page (snippets/mshein-tab-heroes.liquid), par adresse de collection.
+  var heroTemplates = {};
+  document.querySelectorAll('template[data-mshein-hero-for]').forEach(function (template) {
+    heroTemplates[trimPath(new URL(template.getAttribute('data-mshein-hero-for'), window.location.href).pathname)] = template;
+  });
 
   // Emplacements des pages de rayon, à côté des sections de l'accueil qu'elles remplacent.
   var makeSlot = function (after, name) {
@@ -335,6 +340,17 @@
   var connection = navigator.connection || {};
   var prefetchAllowed = !connection.saveData && !/(^|-)2g$/.test(connection.effectiveType || '');
   var prefetchAllStarted = false;
+  // Photos des bannières préparées : chargées à l'avance (même taille que l'affichage), visibles dès le toucher.
+  var warmHeroImages = function () {
+    Object.keys(heroTemplates).forEach(function (path) {
+      heroTemplates[path].content.querySelectorAll('img').forEach(function (source) {
+        var image = new Image();
+        if (source.getAttribute('sizes')) image.sizes = source.getAttribute('sizes');
+        if (source.getAttribute('srcset')) image.srcset = source.getAttribute('srcset');
+        image.src = source.getAttribute('src');
+      });
+    });
+  };
   var prefetchAll = function () {
     if (prefetchAllStarted || !prefetchAllowed) return;
     prefetchAllStarted = true;
@@ -414,13 +430,16 @@
     if (home.mods) home.mods.hidden = !visible;
     home.feed.hidden = !visible;
   };
-  var clearSlots = function () {
+  // keepHero : bannière déjà affichée pour ce rayon (préparée), gardée telle quelle (pas de saut d'image).
+  var clearSlots = function (keepHero) {
     if (products) products.destroy();
     products = null;
     Object.keys(slots).forEach(function (name) {
+      if (keepHero && name === 'hero') return;
       slots[name].replaceChildren();
       slots[name].hidden = true;
       slots[name].removeAttribute('data-mshein-hero-active');
+      slots[name].removeAttribute('data-hero-for');
     });
   };
   // Retour sur un onglet déjà vu : même position (pages de produits ajoutées si besoin).
@@ -454,12 +473,14 @@
       var element = dept.querySelector('[data-dept-part="' + name + '"]');
       return element ? element.innerHTML : '';
     };
-    clearSlots();
+    var keepHero = slots.hero.getAttribute('data-hero-for') === tab.path && Boolean(slots.hero.firstElementChild);
+    clearSlots(keepHero);
     var isAll = dept.hasAttribute('data-all');
     // « Tutti i Prodotti » : les tuiles de l'accueil restent (ses icônes), comme le prototype.
     setHomeVisible(false, isAll);
     // Partie vide (ex. pas de sous-catégories) : emplacement caché (vérifié sur le texte reçu, sans relire la page).
     Object.keys(slots).forEach(function (name) {
+      if (keepHero && name === 'hero') return;
       var html = part(name);
       slots[name].innerHTML = html;
       slots[name].hidden = !html.trim();
@@ -469,13 +490,21 @@
     window.msheinMasonry.watchReveal(slots.mods);
     products = createProducts(slots.products, tab.path);
   };
-  var showLoading = function () {
+  // Rayon pas encore reçu : sa vraie bannière tout de suite (préparée dans la page, snippets/mshein-tab-heroes.liquid),
+  // forme grise seulement pour les blocs dessous.
+  var showLoading = function (tab) {
     clearSlots();
     setHomeVisible(false, false);
     var shape = function (kind, count) {
       return '<div class="mshein-dskel mshein-dskel--' + kind + '" aria-hidden="true">' + new Array(count + 1).join('<i></i>') + '</div>';
     };
-    slots.hero.innerHTML = shape('hero', 1);
+    var heroTemplate = heroTemplates[trimPath(tab.path)];
+    if (heroTemplate) {
+      slots.hero.replaceChildren(heroTemplate.content.cloneNode(true));
+      slots.hero.setAttribute('data-hero-for', tab.path);
+    } else {
+      slots.hero.innerHTML = shape('hero', 1);
+    }
     slots.cats.innerHTML = shape('cats', 5);
     slots.products.innerHTML = shape('grid', 4);
     slots.hero.hidden = false;
@@ -508,7 +537,7 @@
     // Page pas encore reçue : sa forme s'affiche aussitôt, le contenu la remplace à l'arrivée.
     var waiting = !ready[tab.path];
     if (waiting) {
-      showLoading();
+      showLoading(tab);
       window.scrollTo({ top: 0 });
       syncHeader();
       enter(pageBlocks(slots.products), dir);
@@ -677,6 +706,7 @@
   replaceState(Object.assign({}, history.state, { mshTab: current, mshY: startState && startState.mshY || 0 }), '', window.location.href);
   markTabs(current, false);
   if (isBase(current)) prefetchAround(current);
+  if (prefetchAllowed) whenIdle(warmHeroImages, 1500);
   startDone = true;
 
   window.msheinTabs = { show: showTab };

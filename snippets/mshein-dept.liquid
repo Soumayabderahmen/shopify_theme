@@ -93,13 +93,10 @@
     endunless
   endfor
   assign top_ids = top_list | split: ','
-  assign collage_html = ''
   assign top_html = ''
-  assign collage_count = 0
-  assign collage_bg = ''
 -%}
 
-{%- comment -%} Une seule passe sur les 10 produits : mosaïque de la bannière (3 premiers avec photo) et carrousel « TOP 1… ». {%- endcomment -%}
+{%- comment -%} Une seule passe sur les 10 produits : carrousel « TOP 1… » (la mosaïque de la bannière : snippets/mshein-dept-hero.liquid). {%- endcomment -%}
 {%- for top_id in top_ids -%}
   {%- assign top_product = nil -%}
   {%- for candidate in best.products -%}
@@ -115,12 +112,6 @@
   {%- if top_product == nil -%}{%- continue -%}{%- endif -%}
   {%- assign top_variant = top_product.selected_or_first_available_variant -%}
   {%- assign top_image = top_variant.featured_image | default: top_product.featured_image -%}
-  {%- if top_image != blank and collage_count < 3 -%}
-    {%- if collage_bg == '' -%}{%- assign collage_bg = top_image | image_url: width: 400 -%}{%- endif -%}
-    {%- capture collage_item -%}<span>{{ top_image | image_url: width: 400 | image_tag: loading: 'eager', alt: top_product.title }}<b>{{ top_variant.price | money }}</b></span>{%- endcapture -%}
-    {%- assign collage_html = collage_html | append: collage_item -%}
-    {%- assign collage_count = collage_count | plus: 1 -%}
-  {%- endif -%}
   {%- assign top_sold = top_product.metafields.custom.bestseller_current_month.value | default: top_product.metafields.custom.bestseller_count.value | default: 0 | plus: 0 -%}
   {%- capture top_item -%}
     <a class="mshein-dtop__item reveal" href="{{ top_product.url }}">
@@ -141,32 +132,7 @@
 
   {%- comment -%} Bannière {%- endcomment -%}
   <div data-dept-part="hero"{% if as_page %} data-mshein-hero-active{% endif %}>
-    {%- liquid
-      assign hero_bg = ''
-      if collection.image
-        assign hero_bg = collection.image | image_url: width: 600
-      else
-        assign hero_bg = collage_bg
-      endif
-    -%}
-    <section class="mshein-dhero">
-      <a class="mshein-dhero__media" href="{{ collection.url }}">
-        {%- if collection.image -%}
-          {{ collection.image | image_url: width: 750 | image_tag: loading: 'eager', fetchpriority: 'high', alt: dept_title, sizes: '100vw', widths: '375,560,750' }}
-        {%- else -%}
-          <span class="mshein-dhero__collage">{{ collage_html }}</span>
-        {%- endif -%}
-        <span class="mshein-dhero__shade"></span>
-        <span class="mshein-dhero__txt">
-          <b class="mshein-dhero__title">{{ dept_title | escape }}</b>
-          <span class="mshein-dhero__meta">
-            <span>{{ 'mobile.cart.items_other' | t: count: collection.all_products_count }}</span>
-            <span class="mshein-dhero__cta">{{ 'mobile.category.view_all' | t }}{{ chev }}</span>
-          </span>
-        </span>
-      </a>
-      {%- if hero_bg != '' -%}<i class="mshein-dhero__bg" style="background-image: url('{{ hero_bg }}');" aria-hidden="true"></i>{%- endif -%}
-    </section>
+    {%- render 'mshein-dept-hero', collection: collection, best: best, title: dept_title, is_all: is_all -%}
   </div>
   {{- after_hero -}}
 
