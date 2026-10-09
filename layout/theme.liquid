@@ -447,20 +447,63 @@
               tabsList.scrollLeft = activeItem.offsetLeft - (tabsList.clientWidth - activeItem.offsetWidth) / 2;
             }
 
-            // Onglet de rayon touché (Donna, Uomo…) : sa page au nouveau design, sur l'accueil (#uomo…, même nom que
-            // dans assets/mobile-home-tabs.js). Le lien garde sa vraie adresse /collections/… (référencement).
-            var homeUrl = {{ routes.root_url | json }};
+            // Onglet de rayon touché (Donna, Uomo…) : sa page collection (même design que les onglets, rayons sans
+            // rechargement ensuite). Réponse visible tout de suite : onglet en gras avec sa barre et barre de chargement
+            // du thème en haut ; au doigt, départ dès qu'il se lève (le clic qui suit, analysé ~0,2 à 1,2 s par les
+            // scripts de statistiques, est annulé). Le doigt qui fait défiler la barre d'onglets ne change pas de page.
+            var tabLink = function (target) {
+              var link = target && target.closest && target.closest('.mobile-temu-header .mobile-temu-categories a[href]');
+              if (!link) return null;
+              var url = new URL(link.href, window.location.href);
+              if (url.origin !== window.location.origin || url.search || !/\/collections\/[^/]+\/?$/.test(url.pathname)) return null;
+              return link;
+            };
+            var marked = [];
+            var goToTab = function (link) {
+              var nav = link.closest('.mobile-temu-categories');
+              marked = Array.prototype.map.call(nav.querySelectorAll('a'), function (item) {
+                return { item: item, className: item.className };
+              });
+              nav.querySelectorAll('a').forEach(function (item) { item.classList.remove('is-active', 'is-tab-on'); });
+              link.classList.add('is-tab-on');
+              // Barre de chargement du thème (assets/mobile-temu-header.js) : même élément, même classe.
+              if (!document.querySelector('.mobile-navigation-progress')) {
+                var progress = document.createElement('div');
+                progress.className = 'mobile-navigation-progress';
+                progress.setAttribute('aria-hidden', 'true');
+                progress.appendChild(document.createElement('span'));
+                document.body.appendChild(progress);
+              }
+              document.documentElement.classList.add('mobile-page-loading');
+              window.location.href = link.href;
+            };
+            // Retour arrière vers cette page (mémoire du navigateur) : onglets comme avant.
+            window.addEventListener('pageshow', function () {
+              marked.forEach(function (entry) { entry.item.className = entry.className; });
+              marked = [];
+            });
+            var touch = null;
+            header.addEventListener('touchstart', function (event) {
+              var link = event.touches.length === 1 && tabLink(event.target);
+              touch = link ? { link: link, x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
+            }, { passive: true });
+            header.addEventListener('touchmove', function (event) {
+              if (touch && (Math.abs(event.touches[0].clientX - touch.x) > 10 || Math.abs(event.touches[0].clientY - touch.y) > 10)) touch = null;
+            }, { passive: true });
+            header.addEventListener('touchend', function (event) {
+              var touched = touch;
+              touch = null;
+              if (!touched || !event.cancelable) return;
+              event.preventDefault();
+              event.stopImmediatePropagation();
+              goToTab(touched.link);
+            }, { passive: false });
             window.addEventListener('click', function (event) {
               if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-              var link = event.target.closest && event.target.closest('.mobile-temu-header .mobile-temu-categories a[href]');
+              var link = tabLink(event.target);
               if (!link) return;
-              var url = new URL(link.href, window.location.href);
-              if (url.origin !== window.location.origin || url.search || !/\/collections\/[^/]+\/?$/.test(url.pathname)) return;
-              var slug = link.textContent.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-                .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-              if (!slug) return;
               event.preventDefault();
-              window.location.href = homeUrl + '#' + slug;
+              goToTab(link);
             }, true);
           })();
         </script>

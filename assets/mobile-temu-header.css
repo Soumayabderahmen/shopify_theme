@@ -78,6 +78,19 @@
     }
   }
 
+  /* Pages au nouvel en-tête : barre de chargement juste sous l'en-tête (là où le doigt vient de toucher un onglet),
+     en bleu nuit comme le reste du design. */
+  body.mshein-head .mobile-navigation-progress {
+    top: var(--mshein-header-h, 124px);
+    bottom: auto;
+    z-index: 1001;
+  }
+
+  body.mshein-head .mobile-navigation-progress > span {
+    background: linear-gradient(90deg, #16123f 0%, #5b5f9e 50%, #16123f 100%);
+    box-shadow: none;
+  }
+
   /* Xtra impose overflow:hidden a #root sur mobile. On conserve seulement
      la protection horizontale afin de ne plus couper les menus verticaux. */
   html.mobile-temu-active #root {
