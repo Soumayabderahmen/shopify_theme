@@ -6,7 +6,9 @@
   - modules : 4 cartes 2×2 (Più venduti, Saldi Top, Nuovi arrivi, Tendenze), vrais produits ;
   - feed : onglets + fil « Per te » sans fin en 2 colonnes (cartes snippets/mshein-card.liquid) ;
   - feed_page / sale_page / brand_page / under_page : pages suivantes du fil, demandées par assets/mobile-home-shein.js
-    (templates collection.mshein-feed / mshein-sale / mshein-brand / mshein-under, sans layout).
+    (templates collection.mshein-feed / mshein-sale / mshein-brand / mshein-under, sans layout) ;
+  - dept / dept_page : page d'un onglet de rayon (snippets/mshein-dept.liquid) et pages suivantes de ses produits,
+    demandées par assets/mobile-home-tabs.js (templates collection.mshein-dept / mshein-dept-page, sans layout).
   Bannière (sections/section-slideshow.liquid, réglage « mobile_picks ») et en-tête transparent :
   assets/mobile-temu-header.css. Tuiles et coupon : leurs sections (réglages « Disposizione »).
 {%- endcomment -%}
@@ -63,6 +65,34 @@
         {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
       {%- endpaginate -%}
     </ul>
+
+  {%- when 'dept_page' -%}
+    {%- comment -%} Onglet de rayon : page suivante de ses produits (tri et filtres de l'adresse gardés). {%- endcomment -%}
+    <ul class="mshein-page" data-mshein-page>
+      {%- paginate collection.products by 20 -%}
+        {%- for product in collection.products -%}
+          {%- render 'mshein-card', product: product, best: best, flag: flag -%}
+        {%- endfor -%}
+        {%- if paginate.next -%}<li hidden data-mshein-next="{{ paginate.next.url }}"></li>{%- endif -%}
+      {%- endpaginate -%}
+    </ul>
+
+  {%- when 'dept' -%}
+    {%- liquid
+      # Produits de l'onglet : première page ici, la suite par le template collection.mshein-dept-page.
+      assign dept_next = ''
+      capture dept_cards
+        paginate collection.products by 20
+          for product in collection.products
+            render 'mshein-card', product: product, best: best, flag: flag
+          endfor
+          if paginate.next
+            assign dept_next = paginate.next.url | replace: 'view=mshein-dept', 'view=mshein-dept-page'
+          endif
+        endpaginate
+      endcapture
+    -%}
+    {%- render 'mshein-dept', collection: collection, best: best, flag: flag, menu: section.settings.menu, cards: dept_cards, next_url: dept_next -%}
 
   {%- when 'brand_page' -%}
     {%- comment -%} « Brand ufficiali » : produits dont le titre cite une marque officielle (règle de snippets/badge--brand-products.liquid). {%- endcomment -%}
@@ -243,6 +273,8 @@
           assign under_amount = 5000 | money_without_trailing_zeros | strip_html
           assign under_src = routes.all_products_collection_url | append: '?view=mshein-under&sort_by=best-selling&filter.v.price.lte=50'
         -%}
+        {%- comment -%} Onglets de rayon du header (sans rechargement, lien direct #donna…) : assets/mobile-home-tabs.js. {%- endcomment -%}
+        <script src="{{ 'mobile-home-tabs.js' | asset_url }}" defer></script>
         <div class="mshein-feed" data-mshein-home data-mshein-feed>
           <div class="mshein-feed__tabs" role="tablist" data-mshein-tabs>
             <button type="button" role="tab" aria-selected="true" class="is-on" data-src="{{ for_you_src | append: '&page=2' }}">✨ {{ 'mobile.home_shein.for_you' | t }}</button>
@@ -282,9 +314,17 @@
         { "value": "feed_page", "label": "Pagina della lista (interno)" },
         { "value": "sale_page", "label": "Pagina In offerta (interno)" },
         { "value": "brand_page", "label": "Pagina Brand ufficiali (interno)" },
-        { "value": "under_page", "label": "Pagina Sotto 50 (interno)" }
+        { "value": "under_page", "label": "Pagina Sotto 50 (interno)" },
+        { "value": "dept", "label": "Pagina di un reparto (interno)" },
+        { "value": "dept_page", "label": "Pagina prodotti di un reparto (interno)" }
       ],
       "default": "perks"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu dei reparti (sottocategorie)",
+      "default": "main-menu"
     }
   ],
   "presets": [
