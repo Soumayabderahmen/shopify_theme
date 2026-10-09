@@ -2,11 +2,16 @@
    - Les liens du header vers une collection (Tutti i Prodotti, Donna, Uomo…, menu réel) deviennent des onglets : un toucher
      ouvre la page du rayon SANS recharger la page (/collections/<rayon>?view=mshein-dept, snippets/mshein-dept.liquid),
      placée à la place de la bannière, des tuiles, des cartes 2×2 et du fil (la bande avantages et le coupon restent).
+   - Comme SHEIN : glisser le doigt à gauche / à droite passe au rayon voisin (la page suit le doigt puis glisse) ;
+     la page arrive tout de suite (forme grise en attendant), les rayons voisins sont préparés à l'avance ; en-tête et
+     bannière tout de suite, puis les autres blocs l'un après l'autre, vite (avantages, catégories, coupon, cartes, produits).
    - Chaque onglet a son adresse (#donna, #uomo, #tutti-i-prodotti…) : lien direct, et Retour / Avanti du navigateur
      reviennent à l'onglet précédent, à la même position. Retour à l'accueil : logo ou « Home » de la barre du bas.
    - Bloc de recherche du rayon : puces des sous-catégories, Filtri (vrais filtres Shopify), tri, 2 colonnes / 1 colonna,
      filtres rapides ; produits en 2 colonnes décalées (window.msheinMasonry, assets/mobile-home-shein.js).
-   Les autres liens du header (Contatti, Traccia ordine…) restent des liens normaux. */
+   Les autres liens du header (Contatti, Traccia ordine…) restent des liens normaux.
+   Pages collection (templates/collection.json, [data-mshein-coll]) : même principe, la page de base est la collection
+   elle-même (au design des rayons) ; ses blocs sont remplacés par ceux de l'onglet touché, Retour la remet. */
 (function () {
   'use strict';
 
@@ -18,8 +23,16 @@
   var navList = nav.querySelector('ul') || nav;
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Page de base : l'accueil (ses sections), ou la page collection (les blocs de son rayon).
+  var coll = document.querySelector('[data-mshein-coll]');
   var sectionOf = function (element) { return element ? element.closest('.shopify-section') : null; };
-  var home = {
+  var collPart = function (name) { return coll.querySelector('[data-dept-part="' + name + '"]'); };
+  var home = coll ? {
+    hero: collPart('hero'),
+    tiles: collPart('cats'),
+    mods: collPart('mods'),
+    feed: collPart('products')
+  } : {
     hero: sectionOf(document.querySelector('[data-mshein-hero]')),
     tiles: sectionOf(document.querySelector('.category-tiles--scroll')),
     mods: sectionOf(document.querySelector('.mshein-mods[data-mshein-home]')),
@@ -39,11 +52,23 @@
     return { link: link, path: url.pathname, slug: slug(link.textContent.trim()) };
   }).filter(Boolean);
   if (!tabs.length) return;
+  var trimPath = function (path) { return String(path).replace(/\/+$/, ''); };
+  // baseIndex : onglet qui EST la page de base (page collection d'un rayon), sinon -1 (accueil, sous-catégorie).
+  // baseMark : onglet marqué sur la page de base (rayon de la collection, is-active de sections/header.liquid).
+  var baseIndex = -1;
+  var baseMark = -1;
   tabs.forEach(function (tab, index) {
     tab.link.setAttribute('role', 'tab');
     tab.link.setAttribute('aria-selected', 'false');
     tab.link.setAttribute('data-mshein-tab', String(index));
+    if (coll && trimPath(tab.path) === trimPath(window.location.pathname)) baseIndex = index;
+    if (coll && baseMark < 0 && tab.link.classList.contains('is-active')) baseMark = index;
+    tab.link.classList.remove('is-active');
   });
+  if (baseIndex >= 0) baseMark = baseIndex;
+  var baseUrl = window.location.pathname + window.location.search;
+  var minIndex = baseIndex >= 0 ? 0 : -1;
+  var isBase = function (index) { return index === baseIndex; };
 
   // Emplacements des pages de rayon, à côté des sections de l'accueil qu'elles remplacent.
   var makeSlot = function (after, name) {
@@ -61,9 +86,12 @@
     products: makeSlot(home.feed, 'products')
   };
 
-  var current = -1;
+  var page = document.getElementById('content') || home.feed.parentNode;
+  var current = baseIndex;
+  var startDone = false;
   var requestToken = 0;
   var cache = {};
+  var ready = {};
   var products = null;
 
   var syncHeader = function () { if (window.msheinSyncHeader) window.msheinSyncHeader(); };
@@ -74,6 +102,10 @@
           if (!response.ok) throw new Error('Department request failed: ' + response.status);
           return response.text();
         })
+        .then(function (html) {
+          ready[tab.path] = true;
+          return html;
+        })
         .catch(function (error) {
           delete cache[tab.path];
           throw error;
@@ -81,14 +113,47 @@
     }
     return cache[tab.path];
   };
-  var enter = function (elements) {
+  // Rayons voisins préparés quand le téléphone est libre : glisser vers eux les affiche aussitôt.
+  var prefetchAround = function (index) {
+    var run = function () {
+      [index + 1, index - 1].forEach(function (near) {
+        if (near >= 0 && near < tabs.length) fetchDept(tabs[near]).catch(function () {});
+      });
+    };
+    if (window.requestIdleCallback) window.requestIdleCallback(run, { timeout: 2500 });
+    else window.setTimeout(run, 600);
+  };
+  // Blocs visibles de la page, du haut jusqu'aux produits (avantages et coupon compris) : ordre de la cascade.
+  var pageBlocks = function (last) {
+    var blocks = [];
+    for (var node = slots.hero.parentNode.firstElementChild; node; node = node.nextElementSibling) {
+      if (!node.hidden && node.offsetHeight) blocks.push(node);
+      if (node === last) break;
+    }
+    return blocks;
+  };
+  // En-tête et bannière (1er bloc) affichés tout de suite, puis les autres blocs l'un après l'autre, rapidement,
+  // venant du côté de l'onglet choisi (dir 1 : droite).
+  var enter = function (elements, dir) {
     if (reduceMotion) return;
+    var shown = 0;
     elements.forEach(function (element) {
+      if (!element || element.hidden) return;
       element.classList.remove('mshein-is-entering');
+      if (!shown) {
+        shown += 1;
+        return;
+      }
+      element.style.setProperty('--mshein-enter-delay', 0.04 + (shown - 1) * 0.05 + 's');
+      element.style.setProperty('--mshein-enter-x', (dir || 0) * 32 + 'px');
+      shown += 1;
       void element.offsetWidth;
       element.classList.add('mshein-is-entering');
-      element.addEventListener('animationend', function done() {
+      element.addEventListener('animationend', function done(event) {
+        if (event.target !== element) return;
         element.classList.remove('mshein-is-entering');
+        element.style.removeProperty('--mshein-enter-delay');
+        element.style.removeProperty('--mshein-enter-x');
         element.removeEventListener('animationend', done);
       });
     });
@@ -104,6 +169,7 @@
     navList.scrollTo({ left: item.offsetLeft - (navList.clientWidth - item.offsetWidth) / 2, behavior: smooth ? 'smooth' : 'auto' });
   };
   var markTabs = function (index, smooth) {
+    if (isBase(index)) index = baseMark;
     tabs.forEach(function (tab, tabIndex) {
       var on = tabIndex === index;
       tab.link.classList.toggle('is-tab-on', on);
@@ -114,7 +180,10 @@
   };
   var setHomeVisible = function (visible, keepTiles) {
     home.hero.hidden = !visible;
-    if (home.tiles) home.tiles.hidden = !visible && !keepTiles;
+    // Page collection : sa bannière règle l'en-tête (transparent dessus) seulement quand elle est affichée.
+    if (coll) home.hero.toggleAttribute('data-mshein-hero-active', visible);
+    // Tuiles de l'accueil gardées pour « Tutti i Prodotti » (pas les sous-catégories d'une page collection).
+    if (home.tiles) home.tiles.hidden = !visible && !(keepTiles && !coll);
     if (home.mods) home.mods.hidden = !visible;
     home.feed.hidden = !visible;
   };
@@ -146,9 +215,12 @@
   };
 
   /* ---------- Bloc de recherche et produits d'un rayon ---------- */
-  var createProducts = function (slot, basePath) {
+  // query : tri / filtres déjà dans l'adresse (page collection ouverte avec ?sort_by=…, ?filter…).
+  var createProducts = function (slot, basePath, query) {
     var results = slot.querySelector('[data-dept-results]');
-    var params = new URLSearchParams();
+    var params = new URLSearchParams(query || '');
+    params.delete('page');
+    params.delete('view');
     var oneColumn = false;
     var masonry = null;
     var token = 0;
@@ -209,12 +281,15 @@
         });
     };
 
-    var sheet = function () { return document.querySelector('[data-dept-sheet].is-mshein-moved') || results.querySelector('[data-dept-sheet]'); };
+    // Fenêtre Filtri de CE bloc (la page collection et un onglet ouvert ont chacun la leur).
+    var movedPanel = null;
+    var sheet = function () { return movedPanel || results.querySelector('[data-dept-sheet]'); };
     var openSheet = function (section) {
       var panel = results.querySelector('[data-dept-sheet]');
       if (!panel) return;
       // Fenêtre posée sur la page (au-dessus de l'en-tête et de la barre du bas).
       sheetHome = panel.parentNode;
+      movedPanel = panel;
       panel.classList.add('is-mshein-moved');
       document.body.appendChild(panel);
       panel.hidden = false;
@@ -229,6 +304,7 @@
       if (!panel) return;
       panel.classList.remove('is-open');
       document.documentElement.style.overflow = '';
+      movedPanel = null;
       window.setTimeout(function () {
         panel.hidden = true;
         panel.classList.remove('is-mshein-moved');
@@ -287,7 +363,8 @@
       }
     };
     var onSubmit = function (event) {
-      if (!event.target.matches('[data-dept-form]')) return;
+      var panel = sheet();
+      if (!event.target.matches('[data-dept-form]') || !panel || !panel.contains(event.target)) return;
       event.preventDefault();
       var sort = params.get('sort_by');
       params = new URLSearchParams();
@@ -313,12 +390,18 @@
         slot.removeEventListener('change', onChange);
         document.removeEventListener('click', onSheet);
         document.removeEventListener('submit', onSubmit);
-        var moved = document.querySelector('[data-dept-sheet].is-mshein-moved');
-        if (moved) moved.remove();
-        document.documentElement.style.overflow = '';
+        if (movedPanel) {
+          movedPanel.remove();
+          movedPanel = null;
+          document.documentElement.style.overflow = '';
+        }
       }
     };
   };
+
+  // Page collection : son propre bloc de recherche et ses produits (gardés pendant qu'un autre onglet est ouvert).
+  var baseProducts = coll ? createProducts(home.feed, window.location.pathname, window.location.search) : null;
+  if (coll) window.msheinMasonry.watchReveal(coll);
 
   /* ---------- Changement d'onglet (sans rechargement) ---------- */
   var renderDept = function (tab, html) {
@@ -341,43 +424,58 @@
     window.msheinMasonry.watchReveal(slots.cats);
     window.msheinMasonry.watchReveal(slots.mods);
     products = createProducts(slots.products, tab.path);
-    enter([slots.hero, slots.cats, slots.mods, slots.products]);
   };
   var showLoading = function () {
     clearSlots();
     setHomeVisible(false, false);
-    slots.hero.innerHTML = '<div class="mshein-dept-loading" aria-hidden="true"><i></i><i></i><i></i></div>';
+    var shape = function (kind, count) {
+      return '<div class="mshein-dskel mshein-dskel--' + kind + '" aria-hidden="true">' + new Array(count + 1).join('<i></i>') + '</div>';
+    };
+    slots.hero.innerHTML = shape('hero', 1);
+    slots.cats.innerHTML = shape('cats', 5);
+    slots.products.innerHTML = shape('grid', 4);
     slots.hero.hidden = false;
+    slots.cats.hidden = false;
+    slots.products.hidden = false;
     slots.hero.setAttribute('data-mshein-hero-active', '');
   };
 
-  // index : -1 = accueil, sinon l'onglet. fromHistory : lien direct, ou Retour / Avanti du navigateur.
+  // index : baseIndex = page de base (accueil -1, ou la page collection), sinon l'onglet.
+  // fromHistory : lien direct, ou Retour / Avanti du navigateur.
   var showTab = function (index, fromHistory, y) {
     if (!fromHistory) history.replaceState(Object.assign({}, history.state, { mshTab: current, mshY: window.scrollY }), '', window.location.href);
+    // Sens de l'arrivée : l'onglet de droite arrive par la droite (rien au premier affichage).
+    var dir = startDone ? (index > current ? 1 : -1) : 0;
     current = index;
     var token = ++requestToken;
     markTabs(index, !fromHistory);
     if (!fromHistory) {
-      history.pushState({ mshTab: index, mshY: 0 }, '', index < 0 ? window.location.pathname + window.location.search : '#' + tabs[index].slug);
+      history.pushState({ mshTab: index, mshY: 0 }, '', isBase(index) ? baseUrl : '#' + tabs[index].slug);
     }
-    if (index < 0) {
+    if (isBase(index)) {
       clearSlots();
       setHomeVisible(true);
-      enter([home.hero]);
-      restoreScroll(y);
+      restoreScroll(y, baseProducts);
+      if (dir) enter(pageBlocks(home.feed), dir);
+      prefetchAround(index);
       return;
     }
     var tab = tabs[index];
-    var cached = cache[tab.path];
-    if (!cached) {
+    // Page pas encore reçue : sa forme s'affiche aussitôt, le contenu la remplace à l'arrivée.
+    var waiting = !ready[tab.path];
+    if (waiting) {
       showLoading();
       window.scrollTo({ top: 0 });
       syncHeader();
+      enter(pageBlocks(slots.products), dir);
     }
     fetchDept(tab).then(function (html) {
       if (token !== requestToken) return;
       renderDept(tab, html);
       restoreScroll(y, products);
+      // Après la forme grise, seul le nouveau contenu des emplacements s'anime (le reste est déjà là).
+      enter(waiting ? [slots.hero, slots.cats, slots.mods, slots.products] : pageBlocks(slots.products), waiting ? 0 : dir);
+      prefetchAround(index);
     }).catch(function (error) {
       console.error('Unable to open the department tab.', error);
       if (token !== requestToken) return;
@@ -405,7 +503,7 @@
       // Adresse de l'accueil (avec la langue : « / », « /de »…).
       if (target.origin === window.location.origin && trim(target.pathname) === trim(window.location.pathname) && !target.hash) {
         event.preventDefault();
-        if (current >= 0) showTab(-1);
+        if (!isBase(current)) showTab(baseIndex);
         else window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
@@ -416,20 +514,83 @@
     if (link) fetchDept(tabs[Number(link.getAttribute('data-mshein-tab'))]).catch(function () {});
   }, { passive: true });
 
+  /* ---------- Glisser le doigt : rayon voisin (accueil ← Tutti i Prodotti → Donna → …) ---------- */
+  // Pas de changement d'onglet depuis une bande qui défile déjà de côté (bannière, puces, vignettes…) ni un champ.
+  var scrollsSideways = function (element) {
+    for (var node = element; node && node !== page; node = node.parentElement) {
+      if (node.matches('.swiper, input, select, textarea, [data-dept-sheet]')) return true;
+      if (node.scrollWidth > node.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(node).overflowX)) return true;
+    }
+    return false;
+  };
+  var drag = null;
+  var setDrag = function (shift) {
+    page.style.transform = shift ? 'translate3d(' + shift + 'px, 0, 0)' : '';
+    page.style.opacity = shift ? String(1 - Math.min(Math.abs(shift) / window.innerWidth, 1) * 0.5) : '';
+  };
+  var release = function (shift, to, done) {
+    if (reduceMotion || !page.animate) { setDrag(0); done(); return; }
+    var from = { transform: 'translate3d(' + shift + 'px, 0, 0)', opacity: page.style.opacity || 1 };
+    setDrag(0);
+    var animation = page.animate([from, { transform: 'translate3d(' + to + 'px, 0, 0)', opacity: to ? 0.35 : 1 }], { duration: to ? 170 : 220, easing: 'cubic-bezier(0.3, 0.7, 0.4, 1)' });
+    animation.onfinish = done;
+  };
+  page.addEventListener('touchstart', function (event) {
+    drag = null;
+    if (!mobile.matches || event.touches.length !== 1 || document.documentElement.style.overflow === 'hidden' || scrollsSideways(event.target)) return;
+    var touch = event.touches[0];
+    drag = { x: touch.clientX, y: touch.clientY, time: Date.now(), axis: '', shift: 0 };
+  }, { passive: true });
+  page.addEventListener('touchmove', function (event) {
+    if (!drag || event.touches.length !== 1) return;
+    var touch = event.touches[0];
+    var dx = touch.clientX - drag.x;
+    var dy = touch.clientY - drag.y;
+    if (!drag.axis) {
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      drag.axis = Math.abs(dx) > Math.abs(dy) * 1.3 ? 'x' : 'y';
+    }
+    if (drag.axis !== 'x') return;
+    event.preventDefault();
+    drag.target = current + (dx < 0 ? 1 : -1);
+    drag.edge = drag.target < minIndex || drag.target >= tabs.length;
+    if (!drag.edge && drag.target >= 0) fetchDept(tabs[drag.target]).catch(function () {});
+    // Au bout de la liste : la page résiste.
+    drag.shift = drag.edge ? dx * 0.2 : dx;
+    setDrag(drag.shift);
+  }, { passive: false });
+  var endDrag = function () {
+    var gesture = drag;
+    drag = null;
+    if (!gesture || gesture.axis !== 'x') return;
+    var distance = Math.abs(gesture.shift);
+    var fast = distance > 40 && distance / Math.max(Date.now() - gesture.time, 1) > 0.45;
+    if (gesture.edge || !(distance > window.innerWidth * 0.22 || fast)) {
+      release(gesture.shift, 0, function () {});
+      return;
+    }
+    var out = gesture.shift < 0 ? -window.innerWidth * 0.45 : window.innerWidth * 0.45;
+    release(gesture.shift, out, function () {
+      showTab(gesture.target);
+    });
+  };
+  page.addEventListener('touchend', endDrag, { passive: true });
+  page.addEventListener('touchcancel', endDrag, { passive: true });
+
   // Retour / Avanti du navigateur (et adresse #… changée à la main) : l'onglet de cette étape, sans rechargement.
   var tabFromHash = function () {
     var hash = window.location.hash.replace(/^#/, '');
     for (var index = 0; index < tabs.length; index += 1) {
       if (tabs[index].slug === hash) return index;
     }
-    return -1;
+    return baseIndex;
   };
   window.addEventListener('popstate', function (event) {
     var state = event.state;
     var index = state && typeof state.mshTab === 'number' ? state.mshTab : tabFromHash();
     var y = state && state.mshY ? state.mshY : 0;
     if (index !== current) showTab(index, true, y);
-    else restoreScroll(y, products);
+    else restoreScroll(y, isBase(current) ? baseProducts : products);
   });
   // Départ vers une autre page : position gardée pour le retour.
   window.addEventListener('pagehide', function () {
@@ -440,11 +601,13 @@
   // Lien direct (#donna…) ou retour sur la page depuis une fiche produit : l'onglet de l'adresse s'ouvre directement.
   var startState = history.state;
   var startIndex = startState && typeof startState.mshTab === 'number' ? startState.mshTab : tabFromHash();
-  if (startIndex >= tabs.length) startIndex = -1;
-  if (startIndex >= 0) showTab(startIndex, true, startState && startState.mshY);
-  else if (startState && startState.mshY) restoreScroll(startState.mshY);
+  if (startIndex >= tabs.length || startIndex < minIndex) startIndex = baseIndex;
+  if (!isBase(startIndex)) showTab(startIndex, true, startState && startState.mshY);
+  else if (startState && startState.mshY) restoreScroll(startState.mshY, baseProducts);
   history.replaceState(Object.assign({}, history.state, { mshTab: current, mshY: startState && startState.mshY || 0 }), '', window.location.href);
   markTabs(current, false);
+  if (isBase(current)) prefetchAround(current);
+  startDone = true;
 
   window.msheinTabs = { show: showTab };
 })();

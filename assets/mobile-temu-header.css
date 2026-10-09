@@ -4501,10 +4501,14 @@
    l'en-tête du site est posé sur la bannière (transparent, texte blanc, recherche blanche à bouton foncé) ;
    la barre d'annonces et la bande « Cambio gratuito » sont reprises dans la bande avantages sous la bannière ;
    en descendant, l'en-tête reste en haut et devient blanc (à la place de la barre compacte). Ce fichier est chargé en tête
-   de page : pas de clignotement. Les autres pages et l'ordinateur ne changent pas. */
+   de page : pas de clignotement. L'ordinateur ne change pas.
+   Pages collection (templates/collection.json) : comme l'accueil (body.mshein-home + mshein-coll), en-tête transparent
+   sur la bannière du rayon. Autres modèles de collection (body.mshein-head seule, posée par layout/theme.liquid ;
+   l'accueil a aussi cette classe) : en-tête toujours blanc (mshein-solid posée dès son affichage), collé en haut,
+   la barre d'outils de la collection collée juste dessous. */
 @media only screen and (max-width: 760px) {
-  body.mshein-home [id$="__announcement"],
-  body.mshein-home #nav-top {
+  body.mshein-head [id$="__announcement"],
+  body.mshein-head #nav-top {
     display: none !important;
   }
 
@@ -4521,13 +4525,13 @@
     transition: background-color 0.25s, box-shadow 0.25s;
   }
 
-  body.mshein-home [data-mobile-mini-header] {
+  body.mshein-head [data-mobile-mini-header] {
     display: none !important;
   }
 
   /* Tant que la bannière n'est pas encore arrivée dans la page : fond foncé de la bannière derrière l'en-tête
      (logo et icônes blancs lisibles dès la première image, pas d'écran blanc). */
-  body.mshein-home:not(:has([data-mshein-hero])) [id$="__header"].shopify-section {
+  body.mshein-home:not(:has([data-mshein-hero], [data-mshein-hero-active])) [id$="__header"].shopify-section {
     background: #1c1838;
   }
 
@@ -4535,7 +4539,18 @@
     padding-top: 0 !important;
   }
 
-  body.mshein-home #root .mobile-temu-header {
+  /* Pages collection : en-tête blanc collé en haut ; la barre Filtri / tri se colle juste dessous. */
+  body.mshein-head:not(.mshein-home) [id$="__header"].shopify-section {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  body.mshein-head:not(.mshein-home) #root .clm .clm-tb {
+    top: var(--mshein-header-h, 124px);
+  }
+
+  body.mshein-head #root .mobile-temu-header {
     position: relative;
     padding: 9px 12px 0;
     color: #fff;
@@ -4544,7 +4559,7 @@
   }
 
   /* Ligne du haut : menu 25px, logo 158 × 26 centré, cœur et panier 24px (zones de toucher gardées à 36px). */
-  body.mshein-home #root .mobile-temu-header .mobile-home-header__top {
+  body.mshein-head #root .mobile-temu-header .mobile-home-header__top {
     grid-template-columns: 1fr auto 1fr;
     grid-template-rows: 30px;
     height: 30px;
@@ -4552,7 +4567,7 @@
     margin: 0 0 6px;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-home-header__menu {
+  body.mshein-head #root .mobile-temu-header .mobile-home-header__menu {
     width: 36px !important;
     min-width: 36px !important;
     height: 36px !important;
@@ -4560,43 +4575,43 @@
     margin: 0 0 0 -3px !important;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-home-header__menu svg {
+  body.mshein-head #root .mobile-temu-header .mobile-home-header__menu svg {
     width: 25px;
     height: 25px;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-home-header__logo-text {
+  body.mshein-head #root .mobile-temu-header .mobile-home-header__logo-text {
     width: 158px;
     height: 26px;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-home-header__actions {
+  body.mshein-head #root .mobile-temu-header .mobile-home-header__actions {
     gap: 0;
     margin: 0 -6px 4px 0;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-home-header__icon {
+  body.mshein-head #root .mobile-temu-header .mobile-home-header__icon {
     width: 36px;
     min-width: 36px;
     height: 36px;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-home-header__icon svg {
+  body.mshein-head #root .mobile-temu-header .mobile-home-header__icon svg {
     width: 24px;
     height: 24px;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-home-header__menu,
-  body.mshein-home .mobile-temu-header .mobile-home-header__icon {
+  body.mshein-head #root .mobile-temu-header .mobile-home-header__menu,
+  body.mshein-head .mobile-temu-header .mobile-home-header__icon {
     color: #fff;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-home-header__logo-text text {
+  body.mshein-head #root .mobile-temu-header .mobile-home-header__logo-text text {
     fill: url(#mobile-home-logo-gradient-light);
   }
 
   /* Recherche au style SHEIN : bloc blanc arrondi, bouton loupe foncé (le texte « Cerca » reste lu par les lecteurs d'écran). */
-  body.mshein-home #root .mobile-temu-header .mobile-temu-search {
+  body.mshein-head #root .mobile-temu-header .mobile-temu-search {
     position: relative;
     height: 38px;
     margin: 0 0 8px;
@@ -4606,18 +4621,18 @@
     transition: border-color 0.25s;
   }
 
-  body.mshein-home #root .mobile-temu-search .mobile-temu-search__form {
+  body.mshein-head #root .mobile-temu-search .mobile-temu-search__form {
     gap: 6px;
     height: 100%;
     padding: 0 3px 0 12px;
   }
 
-  body.mshein-home #root .mobile-temu-search .mobile-temu-search__form input {
+  body.mshein-head #root .mobile-temu-search .mobile-temu-search__form input {
     height: 100%;
     font-size: 14px;
   }
 
-  body.mshein-home #root .mobile-temu-search button.mobile-temu-search__camera {
+  body.mshein-head #root .mobile-temu-search button.mobile-temu-search__camera {
     flex: 0 0 22px !important;
     width: 22px;
     min-width: 22px;
@@ -4626,13 +4641,13 @@
     color: #4a4f6b;
   }
 
-  body.mshein-home #root .mobile-temu-search .mobile-temu-search__camera svg {
+  body.mshein-head #root .mobile-temu-search .mobile-temu-search__camera svg {
     width: 22px;
     height: 22px;
   }
 
   /* Texte qui défile dans la recherche : vraies « Di tendenza » des réglages du header (assets/mobile-home-shein.js). */
-  body.mshein-home .mshein-search-ph {
+  body.mshein-head .mshein-search-ph {
     position: absolute;
     top: 8px;
     left: 12px;
@@ -4646,7 +4661,7 @@
     pointer-events: none;
   }
 
-  body.mshein-home .mshein-search-ph span {
+  body.mshein-head .mshein-search-ph span {
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -4654,16 +4669,16 @@
     transition: transform 0.45s ease;
   }
 
-  body.mshein-home .mobile-temu-search:has(.mshein-search-ph) input::placeholder {
+  body.mshein-head .mobile-temu-search:has(.mshein-search-ph) input::placeholder {
     color: transparent;
   }
 
-  body.mshein-home .mobile-temu-search:focus-within .mshein-search-ph,
-  body.mshein-home .mobile-temu-search:has(input:not(:placeholder-shown)) .mshein-search-ph {
+  body.mshein-head .mobile-temu-search:focus-within .mshein-search-ph,
+  body.mshein-head .mobile-temu-search:has(input:not(:placeholder-shown)) .mshein-search-ph {
     display: none;
   }
 
-  body.mshein-home #root .mobile-temu-search .mobile-temu-search__form button[type='submit'] {
+  body.mshein-head #root .mobile-temu-search .mobile-temu-search__form button[type='submit'] {
     position: relative;
     flex: 0 0 40px;
     width: 40px;
@@ -4681,19 +4696,20 @@
   }
 
   /* Onglets de rayon (comme SHEIN, assets/mobile-home-tabs.js) : à 14px du bord, 18px d'écart ; onglets en demi-gras plus
-     clairs, l'onglet ouvert en gras avec une courte barre arrondie centrée dessous. Accueil : aucun onglet actif. */
-  body.mshein-home #root .mobile-temu-header .mobile-temu-categories {
+     clairs, l'onglet ouvert en gras avec une courte barre arrondie centrée dessous. Accueil : aucun onglet actif ;
+     pages collection : le rayon de la page (is-active, sections/header.liquid). */
+  body.mshein-head #root .mobile-temu-header .mobile-temu-categories {
     width: calc(100% + 24px);
     margin: 0 -12px;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-temu-categories ul {
+  body.mshein-head #root .mobile-temu-header .mobile-temu-categories ul {
     gap: 18px;
     padding: 0 14px 6px;
     scroll-padding-inline: 14px;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-temu-categories a {
+  body.mshein-head #root .mobile-temu-header .mobile-temu-categories a {
     position: relative;
     padding: 0 0 9px;
     color: inherit;
@@ -4706,17 +4722,17 @@
     transition: opacity 0.2s, color 0.2s;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-temu-categories a.is-tab-on {
+  body.mshein-head #root .mobile-temu-header .mobile-temu-categories a:is(.is-tab-on, .is-active) {
     font-weight: 800;
     opacity: 1;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-temu-categories a::after {
+  body.mshein-head #root .mobile-temu-header .mobile-temu-categories a::after {
     content: none !important;
     display: none !important;
   }
 
-  body.mshein-home #root .mobile-temu-header .mobile-temu-categories a.is-tab-on::after {
+  body.mshein-head #root .mobile-temu-header .mobile-temu-categories a:is(.is-tab-on, .is-active)::after {
     content: '' !important;
     position: absolute !important;
     right: auto !important;
@@ -4739,49 +4755,49 @@
   }
 
   /* Header blanc (en descendant) : onglets gris, l'onglet ouvert en noir. */
-  body.mshein-home #root .mshein-solid .mobile-temu-header .mobile-temu-categories a {
+  body.mshein-head #root .mshein-solid .mobile-temu-header .mobile-temu-categories a {
     color: #6b6f80;
     opacity: 1;
   }
 
-  body.mshein-home #root .mshein-solid .mobile-temu-header .mobile-temu-categories a.is-tab-on {
+  body.mshein-head #root .mshein-solid .mobile-temu-header .mobile-temu-categories a:is(.is-tab-on, .is-active) {
     color: #000;
   }
 
   /* Fond bleu nuit du header du thème (::before) : transparent en haut pour laisser voir la bannière floutée,
      blanc en descendant (mêmes couleurs que le prototype). */
-  body.mshein-home #root [id$="__header"].shopify-section::before {
+  body.mshein-head #root [id$="__header"].shopify-section::before {
     background: transparent !important;
     transition: background-color 0.25s;
   }
 
-  body.mshein-home #root [id$="__header"].shopify-section.mshein-solid::before {
+  body.mshein-head #root [id$="__header"].shopify-section.mshein-solid::before {
     background: #fff !important;
   }
 
-  body.mshein-home #root [id$="__header"].shopify-section.mshein-solid {
+  body.mshein-head #root [id$="__header"].shopify-section.mshein-solid {
     background: #fff !important;
     box-shadow: 0 1px 0 #eceef4;
   }
 
-  body.mshein-home .mshein-solid #root .mobile-temu-header,
-  body.mshein-home #root .mshein-solid .mobile-temu-header {
+  body.mshein-head .mshein-solid #root .mobile-temu-header,
+  body.mshein-head #root .mshein-solid .mobile-temu-header {
     color: #16123f;
   }
 
-  body.mshein-home #root .mshein-solid .mobile-temu-header .mobile-home-header__menu {
+  body.mshein-head #root .mshein-solid .mobile-temu-header .mobile-home-header__menu {
     color: #2b2a6b;
   }
 
-  body.mshein-home #root .mshein-solid .mobile-temu-header .mobile-home-header__icon {
+  body.mshein-head #root .mshein-solid .mobile-temu-header .mobile-home-header__icon {
     color: #16123f;
   }
 
-  body.mshein-home #root .mshein-solid .mobile-temu-header .mobile-home-header__logo-text text {
+  body.mshein-head #root .mshein-solid .mobile-temu-header .mobile-home-header__logo-text text {
     fill: url(#mobile-home-logo-gradient);
   }
 
-  body.mshein-home #root .mshein-solid .mobile-temu-header .mobile-temu-search {
+  body.mshein-head #root .mshein-solid .mobile-temu-header .mobile-temu-search {
     border-color: #16123f;
   }
 

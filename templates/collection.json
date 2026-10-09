@@ -9,6 +9,13 @@
  */
 {
   "sections": {
+    "mshein_collection": {
+      "type": "mobile-home-shein",
+      "settings": {
+        "part": "collection",
+        "menu": "main-menu"
+      }
+    },
     "breadcrumbs": {
       "type": "breadcrumbs",
       "settings": {
@@ -131,6 +138,7 @@
     }
   },
   "order": [
+    "mshein_collection",
     "breadcrumbs",
     "section_slideshow_g4DAjF",
     "main-collection"

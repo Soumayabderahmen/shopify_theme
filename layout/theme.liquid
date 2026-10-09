@@ -72,8 +72,15 @@
     {%- endcomment -%}
     <link rel="stylesheet" href="{{ 'mshein-card.css' | asset_url }}" media="(max-width: 760px)">
     <script src="{{ 'mshein-card.js' | asset_url }}" defer data-brands="{{ 'mobile-brands.json' | asset_url }}"></script>
-    {%- if template.name == 'index' -%}
-      {%- comment -%} Accueil mobile style SHEIN : styles chargés en tête, pas d'ancien design avant le nouveau. {%- endcomment -%}
+    {%- liquid
+      # Pages collection (template collection.json) : en mobile, même design que les onglets de rayon de l'accueil.
+      assign mshein_coll = false
+      if template.name == 'collection' and template.suffix == blank
+        assign mshein_coll = true
+      endif
+    -%}
+    {%- if template.name == 'index' or mshein_coll -%}
+      {%- comment -%} Accueil et pages collection mobile style SHEIN : styles chargés en tête, pas d'ancien design avant le nouveau. {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'mobile-home-shein.css' | asset_url }}" media="(max-width: 760px)">
     {%- endif -%}
     {%- comment -%} Barre du bas mobile : style chargé en tête de page pour qu'elle s'affiche finie dès la première image (mobile uniquement). {%- endcomment -%}
@@ -321,17 +328,21 @@
     cartes s'affichent directement au nouveau design (sans attendre les sections plus bas). Les animations
     d'apparition sont prêtes avant le premier affichage (mobile, mouvements autorisés).
   {%- endcomment -%}
-  <body class="template-{{ template.name | handle }}{% if template.name == 'index' %} mshein-home{% endif %}">
-    {%- if template.name == 'index' -%}
+  {%- comment -%}
+    mshein-head : nouvel en-tête de l'accueil (assets/mobile-temu-header.css). Pages collection.json : comme l'accueil
+    (mshein-home : en-tête transparent sur la bannière du rayon) + mshein-coll ; autres modèles de collection : en-tête blanc.
+  {%- endcomment -%}
+  <body class="template-{{ template.name | handle }}{% if template.name == 'index' %} mshein-home mshein-head{% elsif mshein_coll %} mshein-home mshein-head mshein-coll{% elsif template.name == 'collection' %} mshein-head{% endif %}">
+    {%- if template.name == 'index' or mshein_coll -%}
       <script>
         (function () {
           if (window.matchMedia('(max-width: 760px)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             document.documentElement.classList.add('mshein-js');
           }
-          // Sections style SHEIN retirées de l'accueil : retour à l'en-tête normal.
+          // Sections style SHEIN retirées de la page : retour à l'en-tête normal.
           document.addEventListener('DOMContentLoaded', function () {
-            if (!document.querySelector('[data-mshein-home]')) {
-              document.body.classList.remove('mshein-home');
+            if (!document.querySelector('[data-mshein-home], [data-mshein-coll]')) {
+              document.body.classList.remove('mshein-home', 'mshein-head', 'mshein-coll');
               document.documentElement.classList.remove('mshein-js');
             }
           });
@@ -393,6 +404,39 @@
     <div id="root">
       {%- render 'accessible-nav' -%}
       {%- sections 'header-group' -%}
+      {%- if template.name == 'collection' and mshein_coll == false -%}
+        <script>
+          (function () {
+            // Autres modèles de collection, mobile : nouvel en-tête toujours blanc dès son affichage, et sa hauteur pour la barre
+            // d'outils collée dessous (assets/mobile-temu-header.css).
+            var header = document.querySelector('[id$="__header"].shopify-section');
+            if (!header || !window.matchMedia('(max-width: 760px)').matches) return;
+            header.classList.add('mshein-solid');
+            var syncHeight = function () {
+              var height = Math.round(header.getBoundingClientRect().height);
+              if (height > 0) document.documentElement.style.setProperty('--mshein-header-h', height + 'px');
+            };
+            syncHeight();
+            if (window.ResizeObserver) new ResizeObserver(syncHeight).observe(header);
+
+            // Onglet de rayon touché (Donna, Uomo…) : sa page au nouveau design, sur l'accueil (#uomo…, même nom que
+            // dans assets/mobile-home-tabs.js). Le lien garde sa vraie adresse /collections/… (référencement).
+            var homeUrl = {{ routes.root_url | json }};
+            window.addEventListener('click', function (event) {
+              if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+              var link = event.target.closest && event.target.closest('.mobile-temu-header .mobile-temu-categories a[href]');
+              if (!link) return;
+              var url = new URL(link.href, window.location.href);
+              if (url.origin !== window.location.origin || url.search || !/\/collections\/[^/]+\/?$/.test(url.pathname)) return;
+              var slug = link.textContent.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+                .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+              if (!slug) return;
+              event.preventDefault();
+              window.location.href = homeUrl + '#' + slug;
+            }, true);
+          })();
+        </script>
+      {%- endif -%}
       {%- sections 'overlay-group' -%}
       <main id="content">
         {%- comment -%} Politiques : bouton retour, mise en page et politique d'expédition traduite (snippets/policy-page.liquid). {%- endcomment -%}

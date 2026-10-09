@@ -10,8 +10,11 @@
     tri, 2 colonnes / 1 colonna, filtres rapides, « Mostrando X di Y ») et les produits.
   « Tutti i Prodotti » (/collections/all) : vignettes = les rayons du menu, bloc de recherche de la page « Prodotti »
   (tri et colonnes seulement). Données réelles uniquement.
+  Aussi la page collection elle-même en mobile (sections/mobile-home-shein.liquid, partie « collection ») : toute
+  collection du menu, à n'importe quel niveau ; sans sous-catégories, ses puces sont ses collections sœurs.
   Params : collection, best (collection « Più venduti »), flag, menu (menu des rayons), cards (cartes de la 1re page),
-  next_url (page suivante des produits)
+  next_url (page suivante des produits), as_page (true : page collection elle-même), after_hero (bande avantages sous la
+  bannière, page collection)
 {%- endcomment -%}
 {%- liquid
   assign dept_menu = menu
@@ -23,14 +26,39 @@
     assign is_all = true
   endif
 
-  # Lien du rayon dans le menu (même adresse que la collection).
+  # Lien du rayon dans le menu (même adresse que la collection) : d'abord les rayons, puis leurs sous-catégories.
   assign dept_link = nil
+  assign parent_link = nil
   for top_link in dept_menu.links
     if top_link.url == collection.url or top_link.object.handle == collection.handle
       assign dept_link = top_link
       break
     endif
   endfor
+  if dept_link == nil
+    for top_link in dept_menu.links
+      for level2 in top_link.links
+        if level2.url == collection.url or level2.object.handle == collection.handle
+          assign dept_link = level2
+          assign parent_link = top_link
+          break
+        endif
+        for level3 in level2.links
+          if level3.url == collection.url or level3.object.handle == collection.handle
+            assign dept_link = level3
+            assign parent_link = level2
+            break
+          endif
+        endfor
+        if dept_link != nil
+          break
+        endif
+      endfor
+      if dept_link != nil
+        break
+      endif
+    endfor
+  endif
   assign dept_title = dept_link.title | default: collection.title
 
   # Meilleures ventes du rayon : ordre de « Più venduti » (produits de « Più venduti » présents dans le rayon).
@@ -112,7 +140,7 @@
 <div class="mshein-dept" data-mshein-dept data-title="{{ dept_title | escape }}" data-handle="{{ collection.handle }}"{% if is_all %} data-all{% endif %}>
 
   {%- comment -%} Bannière {%- endcomment -%}
-  <div data-dept-part="hero">
+  <div data-dept-part="hero"{% if as_page %} data-mshein-hero-active{% endif %}>
     {%- liquid
       assign hero_bg = ''
       if collection.image
@@ -140,6 +168,7 @@
       {%- if hero_bg != '' -%}<i class="mshein-dhero__bg" style="background-image: url('{{ hero_bg }}');" aria-hidden="true"></i>{%- endif -%}
     </section>
   </div>
+  {{- after_hero -}}
 
   {%- comment -%} Sous-catégories {%- endcomment -%}
   <div data-dept-part="cats">
@@ -323,25 +352,40 @@
     <div class="mshein-cblock{% if is_all %} mshein-cblock--simple{% endif %}" data-dept-block>
       {%- unless is_all -%}
         {%- comment -%} Puces : sous-catégories du menu (niveau 3, sinon niveau 2), comme les pages collection du site. {%- endcomment -%}
+        {%- liquid
+          # Sans sous-catégories (ex. Bikini & Costumi) : les collections sœurs, celle de la page choisie, et « Vedi tutti »
+          # = la catégorie parente (comme l'ancienne page collection).
+          assign chip_parent = dept_link
+          assign chips_siblings = false
+          if dept_link.links.size == 0 and parent_link != nil
+            assign chip_parent = parent_link
+            assign chips_siblings = true
+          endif
+        -%}
         {%- capture chips_html -%}
           {%- assign seen_chips = ',' -%}
-          {%- for group in dept_link.links -%}
-            {%- if group.links.size > 0 -%}
+          {%- for group in chip_parent.links -%}
+            {%- if group.links.size > 0 and chips_siblings == false -%}
               {%- assign chip_links = group.links -%}
             {%- else -%}
-              {%- assign chip_links = dept_link.links | where: 'url', group.url -%}
+              {%- assign chip_links = chip_parent.links | where: 'url', group.url -%}
             {%- endif -%}
             {%- for chip in chip_links -%}
               {%- assign chip_key = ',' | append: chip.url | append: ',' -%}
-              {%- if seen_chips contains chip_key or chip.type != 'collection_link' or chip.object == blank or chip.object.handle == collection.handle -%}{%- continue -%}{%- endif -%}
+              {%- if seen_chips contains chip_key or chip.type != 'collection_link' or chip.object == blank -%}{%- continue -%}{%- endif -%}
+              {%- if chip.object.handle == collection.handle and chips_siblings == false -%}{%- continue -%}{%- endif -%}
               {%- assign seen_chips = seen_chips | append: chip.url | append: ',' -%}
-              <button type="button" data-dept-chip="{{ chip.object.url }}">{{ chip.title | escape }}</button>
+              <button type="button"{% if chip.object.handle == collection.handle %} class="is-on"{% endif %} data-dept-chip="{{ chip.object.url }}">{{ chip.title | escape }}</button>
             {%- endfor -%}
           {%- endfor -%}
         {%- endcapture -%}
         {%- if chips_html != blank -%}
           <div class="mshein-cchips" data-dept-chips>
-            <button type="button" class="is-on" data-dept-chip="{{ collection.url }}">{{ 'mobile.explore.see_all' | t }}</button>
+            {%- if chips_siblings and chip_parent.object != blank -%}
+              <button type="button" data-dept-chip="{{ chip_parent.object.url }}">{{ 'mobile.explore.see_all' | t }}</button>
+            {%- elsif chips_siblings == false -%}
+              <button type="button" class="is-on" data-dept-chip="{{ collection.url }}">{{ 'mobile.explore.see_all' | t }}</button>
+            {%- endif -%}
             {{- chips_html -}}
           </div>
         {%- endif -%}

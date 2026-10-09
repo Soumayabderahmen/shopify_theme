@@ -8,7 +8,8 @@
   - feed_page / sale_page / brand_page / under_page : pages suivantes du fil, demandées par assets/mobile-home-shein.js
     (templates collection.mshein-feed / mshein-sale / mshein-brand / mshein-under, sans layout) ;
   - dept / dept_page : page d'un onglet de rayon (snippets/mshein-dept.liquid) et pages suivantes de ses produits,
-    demandées par assets/mobile-home-tabs.js (templates collection.mshein-dept / mshein-dept-page, sans layout).
+    demandées par assets/mobile-home-tabs.js (templates collection.mshein-dept / mshein-dept-page, sans layout) ;
+  - collection : la page collection mobile au même design (templates/collection.json), onglets sans rechargement.
   Bannière (sections/section-slideshow.liquid, réglage « mobile_picks ») et en-tête transparent :
   assets/mobile-temu-header.css. Tuiles et coupon : leurs sections (réglages « Disposizione »).
 {%- endcomment -%}
@@ -123,20 +124,38 @@
 
     {%- case part -%}
       {%- when 'perks' -%}
-        {%- comment -%} Messages de la barre d'annonces et de la bande « Cambio gratuito » (cachées en haut de l'accueil mobile). {%- endcomment -%}
-        <div class="mshein-perks" data-mshein-home>
-          <div class="mshein-perk">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>
-            <div><b>{{ 'mobile.home_shein.perk_exchange' | t }}</b><small>{{ 'mobile.home_shein.perk_exchange_text' | t }}</small></div>
-          </div>
-          <div class="mshein-perk">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>
-            <div><b>{{ 'mobile.home_shein.perk_klarna' | t }}</b><small>{{ 'mobile.home_shein.perk_klarna_text' | t }}</small></div>
-          </div>
-          <div class="mshein-perk">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5c0-1 1-1.5 2.5-1.5s2.5.6 2.5 1.6c0 2.4-5 1.2-5 3.6 0 1 1 1.8 2.5 1.8s2.5-.6 2.5-1.5"/></svg>
-            <div><b>{{ 'mobile.home_shein.perk_cashback' | t }}</b><small>{{ 'mobile.home_shein.perk_cashback_text' | t }}</small></div>
-          </div>
+        {%- render 'mshein-perks', home: true -%}
+
+      {%- when 'collection' -%}
+        {%- comment -%}
+          Page collection mobile au design des onglets de rayon : bannière sous l'en-tête transparent, bande avantages,
+          sous-catégories, 4 cartes, bloc de recherche et produits (snippets/mshein-dept.liquid). Les onglets du header
+          y changent de rayon sans recharger (#donna…, assets/mobile-home-tabs.js). L'ancienne page reste pour l'ordinateur.
+        {%- endcomment -%}
+        {%- liquid
+          assign coll_next = ''
+          capture coll_cards
+            paginate collection.products by 20
+              for product in collection.products
+                render 'mshein-card', product: product, best: best, flag: flag
+              endfor
+              if paginate.next
+                assign coll_next = paginate.next.url
+                if coll_next contains '?'
+                  assign coll_next = coll_next | append: '&view=mshein-dept-page'
+                else
+                  assign coll_next = coll_next | append: '?view=mshein-dept-page'
+                endif
+              endif
+            endpaginate
+          endcapture
+          capture coll_perks
+            render 'mshein-perks'
+          endcapture
+        -%}
+        <script src="{{ 'mobile-home-tabs.js' | asset_url }}" defer></script>
+        <div class="mshein-coll" data-mshein-coll>
+          {%- render 'mshein-dept', collection: collection, best: best, flag: flag, menu: section.settings.menu, cards: coll_cards, next_url: coll_next, as_page: true, after_hero: coll_perks -%}
         </div>
 
       {%- when 'modules' -%}
@@ -315,6 +334,7 @@
         { "value": "sale_page", "label": "Pagina In offerta (interno)" },
         { "value": "brand_page", "label": "Pagina Brand ufficiali (interno)" },
         { "value": "under_page", "label": "Pagina Sotto 50 (interno)" },
+        { "value": "collection", "label": "Pagina collezione (mobile)" },
         { "value": "dept", "label": "Pagina di un reparto (interno)" },
         { "value": "dept_page", "label": "Pagina prodotti di un reparto (interno)" }
       ],
