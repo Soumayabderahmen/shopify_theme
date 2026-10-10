@@ -253,9 +253,13 @@
   var tabs = Array.prototype.slice.call(nav.querySelectorAll('a[href]')).map(function (link) {
     var url = new URL(link.href, window.location.href);
     if (url.origin !== window.location.origin || url.search || !/\/collections\/[^/]+\/?$/.test(url.pathname)) return null;
-    return { link: link, path: url.pathname, slug: slug(link.textContent.trim()) };
+    return { link: link, path: url.pathname, query: '', key: url.pathname, slug: slug(link.textContent.trim()) };
   }).filter(Boolean);
   if (!tabs.length) return;
+  // Autres collections ouvertes sur place (vignettes, icônes, tuiles, « Vedi tutto », cartes, panneaux Categoria / Esplora…) :
+  // ajoutées ici au premier toucher, numérotées après les onglets (tabs.length + n). mark : onglet du header à marquer.
+  var extras = [];
+  var pageAt = function (index) { return index < tabs.length ? tabs[index] : extras[index - tabs.length]; };
   var trimPath = function (path) { return String(path).replace(/\/+$/, ''); };
   // baseIndex : onglet qui EST la page de base (page collection d'un rayon), sinon -1 (accueil, sous-catégorie).
   // baseMark : onglet marqué sur la page de base (rayon de la collection, is-active de sections/header.liquid).
@@ -315,23 +319,24 @@
   var products = null;
 
   var syncHeader = function () { if (window.msheinSyncHeader) window.msheinSyncHeader(); };
+  // Rayon (onglet ou autre collection, avec son tri / ses filtres éventuels) : demandé une fois, gardé en mémoire.
   var fetchDept = function (tab) {
-    if (!cache[tab.path]) {
-      cache[tab.path] = fetch(tab.path + '?view=mshein-dept', { credentials: 'same-origin' })
+    if (!cache[tab.key]) {
+      cache[tab.key] = fetch(tab.path + '?view=mshein-dept' + (tab.query ? '&' + tab.query : ''), { credentials: 'same-origin' })
         .then(function (response) {
           if (!response.ok) throw new Error('Department request failed: ' + response.status);
           return response.text();
         })
         .then(function (html) {
-          ready[tab.path] = true;
+          ready[tab.key] = true;
           return html;
         })
         .catch(function (error) {
-          delete cache[tab.path];
+          delete cache[tab.key];
           throw error;
         });
     }
-    return cache[tab.path];
+    return cache[tab.key];
   };
   // Rayons voisins préparés quand le téléphone est libre : glisser vers eux les affiche aussitôt.
   var whenIdle = function (run, timeout) {
@@ -359,7 +364,7 @@
     prefetchAllStarted = true;
     var next = 0;
     var step = function () {
-      while (next < tabs.length && cache[tabs[next].path]) next += 1;
+      while (next < tabs.length && cache[tabs[next].key]) next += 1;
       if (next >= tabs.length) return;
       var tab = tabs[next];
       next += 1;
@@ -416,6 +421,9 @@
   };
   var markTabs = function (index, smooth) {
     if (isBase(index)) index = baseMark;
+    // Autre collection : l'onglet du rayon qui la contient (connu à l'arrivée de la page), sinon l'onglet déjà marqué.
+    else if (index >= tabs.length) index = pageAt(index).mark;
+    if (typeof index !== 'number' || index >= tabs.length) return;
     tabs.forEach(function (tab, tabIndex) {
       var on = tabIndex === index;
       tab.link.classList.toggle('is-tab-on', on);
@@ -476,7 +484,7 @@
       var element = dept.querySelector('[data-dept-part="' + name + '"]');
       return element ? element.innerHTML : '';
     };
-    var keepHero = slots.hero.getAttribute('data-hero-for') === tab.path && Boolean(slots.hero.firstElementChild);
+    var keepHero = slots.hero.getAttribute('data-hero-for') === tab.key && Boolean(slots.hero.firstElementChild);
     clearSlots(keepHero);
     var isAll = dept.hasAttribute('data-all');
     // « Tutti i Prodotti » : les tuiles de l'accueil restent (ses icônes), comme le prototype.
@@ -491,7 +499,41 @@
     slots.hero.setAttribute('data-mshein-hero-active', '');
     window.msheinMasonry.watchReveal(slots.cats);
     window.msheinMasonry.watchReveal(slots.mods);
-    products = createProducts(slots.products, tab.path);
+    products = createProducts(slots.products, tab.path, tab.query);
+    // Autre collection : l'onglet du header du rayon qui la contient (ex. Bikini → Donna), donné par la page reçue.
+    var top = dept.getAttribute('data-top');
+    if (tab.extra && top) {
+      var topPath = trimPath(new URL(top, window.location.href).pathname);
+      tabs.forEach(function (item, itemIndex) { if (trimPath(item.path) === topPath) tab.mark = itemIndex; });
+      if (pageAt(current) === tab) markTabs(current, true);
+    }
+  };
+  // Bannière immédiate d'une autre collection : photo et nom du lien touché (la vraie bannière la remplace à l'arrivée).
+  var provisionalHero = function (tab) {
+    var section = document.createElement('section');
+    section.className = 'mshein-dhero';
+    var media = document.createElement('span');
+    media.className = 'mshein-dhero__media';
+    if (tab.image) {
+      var image = tab.image.cloneNode(false);
+      image.removeAttribute('loading');
+      image.removeAttribute('width');
+      image.removeAttribute('height');
+      image.setAttribute('sizes', '100vw');
+      image.alt = '';
+      media.appendChild(image);
+    }
+    var shade = document.createElement('span');
+    shade.className = 'mshein-dhero__shade';
+    var text = document.createElement('span');
+    text.className = 'mshein-dhero__txt';
+    var title = document.createElement('b');
+    title.className = 'mshein-dhero__title';
+    title.textContent = tab.title || '';
+    text.appendChild(title);
+    media.append(shade, text);
+    section.appendChild(media);
+    return section;
   };
   // Rayon pas encore reçu : sa vraie bannière tout de suite (préparée dans la page, snippets/mshein-tab-heroes.liquid),
   // forme grise seulement pour les blocs dessous.
@@ -501,10 +543,12 @@
     var shape = function (kind, count) {
       return '<div class="mshein-dskel mshein-dskel--' + kind + '" aria-hidden="true">' + new Array(count + 1).join('<i></i>') + '</div>';
     };
-    var heroTemplate = heroTemplates[trimPath(tab.path)];
+    var heroTemplate = !tab.query && heroTemplates[trimPath(tab.path)];
     if (heroTemplate) {
       slots.hero.replaceChildren(heroTemplate.content.cloneNode(true));
-      slots.hero.setAttribute('data-hero-for', tab.path);
+      slots.hero.setAttribute('data-hero-for', tab.key);
+    } else if (tab.extra) {
+      slots.hero.replaceChildren(provisionalHero(tab));
     } else {
       slots.hero.innerHTML = shape('hero', 1);
     }
@@ -526,8 +570,10 @@
     var token = ++requestToken;
     markTabs(index, !fromHistory);
     if (!fromHistory) {
-      // Vraie adresse du rayon (/collections/…) : lien partagé ou page rechargée = la vraie page collection, au même design.
-      pushState({ mshTab: index, mshY: 0 }, '', isBase(index) ? baseUrl : tabs[index].path);
+      // Vraie adresse du rayon (/collections/…, avec son tri / ses filtres) : lien partagé ou page rechargée = la vraie
+      // page collection, au même design.
+      var target = pageAt(index);
+      pushState({ mshTab: index, mshY: 0 }, '', isBase(index) ? baseUrl : target.path + (target.query ? '?' + target.query : ''));
     }
     if (isBase(index)) {
       clearSlots();
@@ -537,9 +583,9 @@
       prefetchAround(index);
       return;
     }
-    var tab = tabs[index];
+    var tab = pageAt(index);
     // Page pas encore reçue : sa forme s'affiche aussitôt, le contenu la remplace à l'arrivée.
-    var waiting = !ready[tab.path];
+    var waiting = !ready[tab.key];
     if (waiting) {
       showLoading(tab);
       window.scrollTo({ top: 0 });
@@ -557,7 +603,7 @@
       console.error('Unable to open the department tab.', error);
       if (token !== requestToken) return;
       // En cas d'erreur réseau : la vraie page de la collection.
-      window.location.href = tab.link.href;
+      window.location.href = tab.href || tab.link.href;
     });
   };
 
@@ -617,6 +663,102 @@
   }, { passive: false });
   nav.addEventListener('touchcancel', function () { tap = null; }, { passive: true });
 
+  /* ---------- Toute autre collection : vignettes, icônes, tuiles, « Vedi tutto », cartes, panneaux Categoria / Esplora… ---------- */
+  // Même principe que les onglets : sur place, sans rechargement, vraie adresse (avec son tri / ses filtres).
+  var collectionLink = function (target) {
+    var link = target && target.closest && target.closest('a[href]');
+    if (!link || nav.contains(link) || link.target === '_blank' || link.hasAttribute('download') || link.closest('[data-dept-sheet]')) return null;
+    var url = new URL(link.href, window.location.href);
+    var match = url.pathname.match(/\/collections\/([^/]+)\/?$/);
+    // vendors / types : listes spéciales de Shopify (pas des collections).
+    if (url.origin !== window.location.origin || !match || /^(vendors|types)$/.test(match[1])) return null;
+    return { link: link, url: url };
+  };
+  var markOf = function (index) {
+    if (isBase(index)) return baseMark;
+    return index >= tabs.length ? pageAt(index).mark : index;
+  };
+  // Nom du lien pour la bannière immédiate : premier texte non vide (titre de carte, nom de vignette…).
+  var linkTitle = function (link) {
+    var parts = link.querySelectorAll('.mshein-mod__hd b, .mshein-dhero__title, b, strong, span');
+    for (var i = 0; i < parts.length; i += 1) {
+      var text = parts[i].textContent.trim();
+      if (text && !parts[i].querySelector('img')) return text.replace(/\s+/g, ' ');
+    }
+    return (link.getAttribute('aria-label') || link.textContent || '').trim().replace(/\s+/g, ' ');
+  };
+  var pageIndexFor = function (found) {
+    var params = new URLSearchParams(found.url.search);
+    params.delete('page');
+    params.delete('view');
+    var query = params.toString();
+    var path = found.url.pathname;
+    if (!query) {
+      for (var i = 0; i < tabs.length; i += 1) if (trimPath(tabs[i].path) === trimPath(path)) return i;
+      if (coll && trimPath(path) === trimPath(basePathname) && !window.location.search) return baseIndex;
+    }
+    var key = path + '?' + query;
+    for (var j = 0; j < extras.length; j += 1) if (extras[j].key === key) return tabs.length + j;
+    extras.push({
+      path: path,
+      query: query,
+      key: key,
+      href: found.url.href,
+      extra: true,
+      title: linkTitle(found.link).slice(0, 60),
+      image: found.link.querySelector('img'),
+      mark: markOf(current)
+    });
+    return tabs.length + extras.length - 1;
+  };
+  // Lien vers la collection déjà ouverte (ex. « Vedi tutto » de sa bannière) : ses produits.
+  var scrollToProducts = function () {
+    var holder = isBase(current) ? home.feed : slots.products;
+    var block = holder && holder.querySelector('[data-dept-block]');
+    if (!block) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    var rootStyle = getComputedStyle(document.documentElement);
+    var offset = parseFloat(rootStyle.getPropertyValue('--mshein-tabs-top')) || parseFloat(rootStyle.getPropertyValue('--mshein-header-h')) || 0;
+    window.scrollTo({ top: block.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
+  };
+  var openCollection = function (found) {
+    if (window.msheinPanels) window.msheinPanels.closeAll();
+    var index = pageIndexFor(found);
+    if (index === current) scrollToProducts();
+    else showTab(index);
+  };
+  window.addEventListener('click', function (event) {
+    if (!mobile.matches || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    var found = collectionLink(event.target);
+    if (!found) return;
+    event.preventDefault();
+    openCollection(found);
+  }, true);
+  // Au doigt : préparé dès le contact, ouvert quand le doigt se lève (le clic qui suit est annulé) ; un doigt qui fait
+  // défiler (une bande, la page) n'ouvre rien.
+  var linkTap = null;
+  document.addEventListener('touchstart', function (event) {
+    var found = event.touches.length === 1 && collectionLink(event.target);
+    linkTap = found ? { found: found, x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
+    if (found) fetchDept(pageAt(pageIndexFor(found))).catch(function () {});
+  }, { passive: true, capture: true });
+  document.addEventListener('touchmove', function (event) {
+    if (linkTap && (Math.abs(event.touches[0].clientX - linkTap.x) > 10 || Math.abs(event.touches[0].clientY - linkTap.y) > 10)) linkTap = null;
+  }, { passive: true, capture: true });
+  document.addEventListener('touchend', function (event) {
+    var touched = linkTap;
+    linkTap = null;
+    if (!touched || !mobile.matches || !event.cancelable) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openCollection(touched.found);
+  }, { passive: false, capture: true });
+  document.addEventListener('touchcancel', function () { linkTap = null; }, { passive: true, capture: true });
+  document.addEventListener('pointerdown', function (event) {
+    if (event.pointerType === 'touch') return;
+    var found = collectionLink(event.target);
+    if (found) fetchDept(pageAt(pageIndexFor(found))).catch(function () {});
+  }, { passive: true, capture: true });
+
   /* ---------- Glisser le doigt : rayon voisin (accueil ← Tutti i Prodotti → Donna → …) ---------- */
   // Pas de changement d'onglet depuis une bande qui défile déjà de côté (bannière, puces, vignettes…) ni un champ.
   var scrollsSideways = function (element) {
@@ -656,7 +798,8 @@
     if (drag.axis !== 'x') return;
     event.preventDefault();
     drag.target = current + (dx < 0 ? 1 : -1);
-    drag.edge = drag.target < minIndex || drag.target >= tabs.length;
+    // Autre collection ouverte (pas un onglet) : pas de voisin à glisser, la page résiste.
+    drag.edge = current >= tabs.length || drag.target < minIndex || drag.target >= tabs.length;
     if (!drag.edge && drag.target >= 0) fetchDept(tabs[drag.target]).catch(function () {});
     // Au bout de la liste : la page résiste.
     drag.shift = drag.edge ? dx * 0.2 : dx;

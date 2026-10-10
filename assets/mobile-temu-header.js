@@ -1747,6 +1747,14 @@ function initMobileTemuHeader() {
     exploreDrawer.addEventListener('transitionend', onTransitionEnd);
     window.setTimeout(settle, 420);
   };
+  // Panneaux Categoria et Esplora fermés tout de suite (sans animation) : une collection touchée dedans s'ouvre sur place
+  // au design des rayons (assets/mobile-home-tabs.js).
+  window.msheinPanels = {
+    closeAll: function () {
+      closeCategoryBrowser(false);
+      if (exploreDrawer && exploreDrawer.open) finishCloseExploreDrawer(false);
+    }
+  };
   var openExploreDrawer = function () {
     if (!exploreDrawer || exploreDrawer.open) return;
     if (exploreDrawerClosing) {

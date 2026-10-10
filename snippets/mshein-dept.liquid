@@ -27,11 +27,14 @@
   endif
 
   # Lien du rayon dans le menu (même adresse que la collection) : d'abord les rayons, puis leurs sous-catégories.
+  # dept_top : l'onglet du header auquel le rayon appartient (lui-même, ou le rayon qui contient la sous-catégorie).
   assign dept_link = nil
   assign parent_link = nil
+  assign dept_top = nil
   for top_link in dept_menu.links
     if top_link.url == collection.url or top_link.object.handle == collection.handle
       assign dept_link = top_link
+      assign dept_top = top_link
       break
     endif
   endfor
@@ -41,12 +44,14 @@
         if level2.url == collection.url or level2.object.handle == collection.handle
           assign dept_link = level2
           assign parent_link = top_link
+          assign dept_top = top_link
           break
         endif
         for level3 in level2.links
           if level3.url == collection.url or level3.object.handle == collection.handle
             assign dept_link = level3
             assign parent_link = level2
+            assign dept_top = top_link
             break
           endif
         endfor
@@ -128,7 +133,7 @@
 
 {%- capture chev -%}<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>{%- endcapture -%}
 
-<div class="mshein-dept" data-mshein-dept data-title="{{ dept_title | escape }}" data-handle="{{ collection.handle }}"{% if is_all %} data-all{% endif %}>
+<div class="mshein-dept" data-mshein-dept data-title="{{ dept_title | escape }}" data-handle="{{ collection.handle }}"{% if dept_top %} data-top="{{ dept_top.url }}"{% endif %}{% if is_all %} data-all{% endif %}>
 
   {%- comment -%} Bannière {%- endcomment -%}
   <div data-dept-part="hero"{% if as_page %} data-mshein-hero-active{% endif %}>
