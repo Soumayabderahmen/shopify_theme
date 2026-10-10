@@ -14,7 +14,8 @@
   collection du menu, à n'importe quel niveau ; sans sous-catégories, ses puces sont ses collections sœurs.
   Params : collection, best (collection « Più venduti »), flag, menu (menu des rayons), cards (cartes de la 1re page),
   next_url (page suivante des produits), as_page (true : page collection elle-même), after_hero (bande avantages sous la
-  bannière, page collection)
+  bannière, page collection), sale (true : rayon « In offerta » = produits en promotion de « Tutti i Prodotti », cartes
+  déjà filtrées par l'appelant ; titre « In offerta », sans les 4 cartes ni nombre de produits ni Filtri)
 {%- endcomment -%}
 {%- liquid
   assign dept_menu = menu
@@ -65,6 +66,9 @@
     endfor
   endif
   assign dept_title = dept_link.title | default: collection.title
+  if sale
+    assign dept_title = 'mobile.explore.on_sale' | t
+  endif
 
   # Meilleures ventes du rayon : ordre de « Più venduti » (produits de « Più venduti » présents dans le rayon).
   assign dept_best = ''
@@ -133,11 +137,11 @@
 
 {%- capture chev -%}<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>{%- endcapture -%}
 
-<div class="mshein-dept" data-mshein-dept data-title="{{ dept_title | escape }}" data-handle="{{ collection.handle }}"{% if dept_top %} data-top="{{ dept_top.url }}"{% endif %}{% if is_all %} data-all{% endif %}>
+<div class="mshein-dept" data-mshein-dept data-title="{{ dept_title | escape }}" data-handle="{{ collection.handle }}"{% if dept_top and sale != true %} data-top="{{ dept_top.url }}"{% endif %}{% if is_all %} data-all{% endif %}{% if sale %} data-sale{% endif %}>
 
   {%- comment -%} Bannière {%- endcomment -%}
   <div data-dept-part="hero"{% if as_page %} data-mshein-hero-active{% endif %}>
-    {%- render 'mshein-dept-hero', collection: collection, best: best, title: dept_title, is_all: is_all -%}
+    {%- render 'mshein-dept-hero', collection: collection, best: best, title: dept_title, is_all: is_all, sale: sale -%}
   </div>
   {{- after_hero -}}
 
@@ -201,6 +205,7 @@
 
   {%- comment -%} 4 cartes du rayon {%- endcomment -%}
   <div data-dept-part="mods">
+    {%- unless sale -%}
     {%- liquid
       # Saldi Top : les 2 plus fortes remises parmi les produits chargés du rayon (50 premiers).
       assign sale_a = nil
@@ -316,6 +321,7 @@
         {%- endif -%}
       {%- endfor -%}
     </div>
+    {%- endunless -%}
   </div>
 
   {%- comment -%} Bloc de recherche des pages collection + produits {%- endcomment -%}
@@ -364,7 +370,7 @@
 
       {%- comment -%} Partie remplacée à chaque tri / filtre / puce (mêmes vrais filtres Shopify que la page collection). {%- endcomment -%}
       {%- assign dept_sort = collection.sort_by | default: collection.default_sort_by -%}
-      {%- render 'mshein-results', filters: collection.filters, sort_options: collection.sort_options, current_sort: dept_sort, total: collection.products_count, cards: cards, next_url: next_url, simple: is_all -%}
+      {%- render 'mshein-results', filters: collection.filters, sort_options: collection.sort_options, current_sort: dept_sort, total: collection.products_count, cards: cards, next_url: next_url, simple: is_all, no_count: sale -%}
     </div>
   </div>
 </div>

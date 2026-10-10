@@ -73,10 +73,13 @@
     <link rel="stylesheet" href="{{ 'mshein-card.css' | asset_url }}" media="(max-width: 760px)">
     <script src="{{ 'mshein-card.js' | asset_url }}" defer data-brands="{{ 'mobile-brands.json' | asset_url }}"></script>
     {%- liquid
-      # Pages collection (template collection.json) : en mobile, même design que les onglets de rayon de l'accueil.
+      # Pages collection (template collection.json) et page « In offerta » (collection.offerte.json) : en mobile, même
+      # design que les onglets de rayon de l'accueil.
       assign mshein_coll = false
-      if template.name == 'collection' and template.suffix == blank
-        assign mshein_coll = true
+      if template.name == 'collection'
+        if template.suffix == blank or template.suffix == 'offerte'
+          assign mshein_coll = true
+        endif
       endif
       # Recherche (template search.json) : en mobile, résultats au design des rayons (snippets/mshein-search.liquid).
       assign mshein_search = false
@@ -455,7 +458,9 @@
             var tabsNav = header.querySelector('.mobile-temu-categories');
             var collectionPath = function (href) {
               var url = new URL(href, window.location.href);
-              // ?view=… : morceau de page chargé par un script (produits suivants du panneau Categoria…), pas une page.
+              // ?view=… : morceau de page chargé par un script (produits suivants du panneau Categoria…), pas une page ;
+              // sauf ?view=offerte, la page « In offerta » (aucun onglet ne lui correspond : rien n'est marqué).
+              if (url.origin === window.location.origin && url.searchParams.get('view') === 'offerte' && /\/collections\/[^/]+\/?$/.test(url.pathname)) return url.pathname.replace(/\/$/, '') + '?view=offerte';
               if (url.origin !== window.location.origin || url.searchParams.has('view') || !/\/collections\/[^/]+\/?$/.test(url.pathname)) return null;
               if (/\/collections\/(vendors|types)\/?$/.test(url.pathname)) return null;
               return url.pathname.replace(/\/$/, '');

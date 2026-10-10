@@ -9,7 +9,11 @@
     (templates collection.mshein-feed / mshein-sale / mshein-brand / mshein-under, sans layout) ;
   - dept / dept_page : page d'un onglet de rayon (snippets/mshein-dept.liquid) et pages suivantes de ses produits,
     demandées par assets/mobile-home-tabs.js (templates collection.mshein-dept / mshein-dept-page, sans layout) ;
+  - dept_sale : rayon « In offerta » (liens « Super saldi », « Vedi tutte » d'In offerta vers /collections/all?view=offerte),
+    même page de rayon avec seulement les produits en promotion (template collection.mshein-dept-sale, sans layout) ;
+    pages suivantes : sale_page ;
   - collection : la page collection mobile au même design (templates/collection.json), onglets sans rechargement ;
+    aussi la page « In offerta » (templates/collection.offerte.json, /collections/all?view=offerte) : promotions seulement ;
   - search / search_results / search_page : la recherche mobile au même design (templates/search.json, modèles
     search.mshein-search / mshein-search-page sans layout pour le tri, les filtres et les pages suivantes).
   Bannière (sections/section-slideshow.liquid, réglage « mobile_picks ») et en-tête transparent :
@@ -98,6 +102,27 @@
       {%- endpaginate -%}
     </ul>
 
+  {%- when 'dept_sale' -%}
+    {%- liquid
+      # « In offerta » : produits avec un prix barré, lus 48 par 48 comme sale_page (pages suivantes).
+      assign sale_next = ''
+      capture sale_cards
+        paginate collection.products by 48
+          for product in collection.products
+            assign sale_variant = product.selected_or_first_available_variant
+            unless sale_variant.compare_at_price > sale_variant.price
+              continue
+            endunless
+            render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag
+          endfor
+          if paginate.next
+            assign sale_next = paginate.next.url | replace: 'view=mshein-dept-sale', 'view=mshein-sale'
+          endif
+        endpaginate
+      endcapture
+    -%}
+    {%- render 'mshein-dept', collection: collection, best: best, flag: flag, menu: section.settings.menu, cards: sale_cards, next_url: sale_next, sale: true -%}
+
   {%- when 'dept' -%}
     {%- liquid
       # Produits de l'onglet : première page ici, la suite par le template collection.mshein-dept-page.
@@ -158,21 +183,41 @@
           y changent de rayon sans recharger (vraie adresse du rayon, assets/mobile-home-tabs.js). L'ancienne page reste pour l'ordinateur.
         {%- endcomment -%}
         {%- liquid
+          # Page « In offerta » (/collections/all?view=offerte) : promotions seulement, 48 produits lus par page comme sale_page.
+          assign coll_sale = false
+          if template.suffix == 'offerte'
+            assign coll_sale = true
+          endif
           assign coll_next = ''
           capture coll_cards
-            paginate collection.products by 20
-              for product in collection.products
-                render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag
-              endfor
-              if paginate.next
-                assign coll_next = paginate.next.url
-                if coll_next contains '?'
-                  assign coll_next = coll_next | append: '&view=mshein-dept-page'
-                else
-                  assign coll_next = coll_next | append: '?view=mshein-dept-page'
+            if coll_sale
+              paginate collection.products by 48
+                for product in collection.products
+                  assign sale_variant = product.selected_or_first_available_variant
+                  unless sale_variant.compare_at_price > sale_variant.price
+                    continue
+                  endunless
+                  render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag
+                endfor
+                if paginate.next
+                  assign coll_next = paginate.next.url | replace: 'view=offerte', 'view=mshein-sale'
                 endif
-              endif
-            endpaginate
+              endpaginate
+            else
+              paginate collection.products by 20
+                for product in collection.products
+                  render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag
+                endfor
+                if paginate.next
+                  assign coll_next = paginate.next.url
+                  if coll_next contains '?'
+                    assign coll_next = coll_next | append: '&view=mshein-dept-page'
+                  else
+                    assign coll_next = coll_next | append: '?view=mshein-dept-page'
+                  endif
+                endif
+              endpaginate
+            endif
           endcapture
           capture coll_perks
             render 'mshein-perks'
@@ -180,8 +225,8 @@
         -%}
         <script src="{{ 'mobile-home-tabs.js' | asset_url }}" defer></script>
         {%- render 'mshein-tab-heroes', menu: section.settings.menu, best: best -%}
-        <div class="mshein-coll" data-mshein-coll>
-          {%- render 'mshein-dept', collection: collection, best: best, flag: flag, menu: section.settings.menu, cards: coll_cards, next_url: coll_next, as_page: true, after_hero: coll_perks -%}
+        <div class="mshein-coll" data-mshein-coll{% if coll_sale %} data-view="mshein-dept-sale"{% endif %}>
+          {%- render 'mshein-dept', collection: collection, best: best, flag: flag, menu: section.settings.menu, cards: coll_cards, next_url: coll_next, as_page: true, after_hero: coll_perks, sale: coll_sale -%}
         </div>
 
       {%- when 'modules' -%}
@@ -359,6 +404,7 @@
         { "value": "feed", "label": "Per te (lista infinita)" },
         { "value": "feed_page", "label": "Pagina della lista (interno)" },
         { "value": "sale_page", "label": "Pagina In offerta (interno)" },
+        { "value": "dept_sale", "label": "Reparto In offerta (interno)" },
         { "value": "brand_page", "label": "Pagina Brand ufficiali (interno)" },
         { "value": "under_page", "label": "Pagina Sotto 50 (interno)" },
         { "value": "collection", "label": "Pagina collezione (mobile)" },

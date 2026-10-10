@@ -229,6 +229,8 @@
 
   // Page de base : l'accueil (ses sections), ou la page collection (les blocs de son rayon).
   var coll = document.querySelector('[data-mshein-coll]');
+  // Page « In offerta » (/collections/all?view=offerte) : ses produits sont redemandés avec son modèle (promotions seulement).
+  var collView = coll ? coll.getAttribute('data-view') || '' : '';
   var sectionOf = function (element) { return element ? element.closest('.shopify-section') : null; };
   var collPart = function (name) { return coll.querySelector('[data-dept-part="' + name + '"]'); };
   var home = coll ? {
@@ -269,8 +271,9 @@
     tab.link.setAttribute('role', 'tab');
     tab.link.setAttribute('aria-selected', 'false');
     tab.link.setAttribute('data-mshein-tab', String(index));
-    if (coll && trimPath(tab.path) === trimPath(window.location.pathname)) baseIndex = index;
-    if (coll && baseMark < 0 && tab.link.classList.contains('is-active')) baseMark = index;
+    // « In offerta » est sur /collections/all mais n'est pas l'onglet « Tutti i Prodotti » : aucun onglet marqué.
+    if (coll && !collView && trimPath(tab.path) === trimPath(window.location.pathname)) baseIndex = index;
+    if (coll && !collView && baseMark < 0 && tab.link.classList.contains('is-active')) baseMark = index;
     tab.link.classList.remove('is-active');
   });
   if (baseIndex >= 0) baseMark = baseIndex;
@@ -322,7 +325,7 @@
   // Rayon (onglet ou autre collection, avec son tri / ses filtres éventuels) : demandé une fois, gardé en mémoire.
   var fetchDept = function (tab) {
     if (!cache[tab.key]) {
-      cache[tab.key] = fetch(tab.path + '?view=mshein-dept' + (tab.query ? '&' + tab.query : ''), { credentials: 'same-origin' })
+      cache[tab.key] = fetch(tab.path + '?view=' + (tab.view || 'mshein-dept') + (tab.query ? '&' + tab.query : ''), { credentials: 'same-origin' })
         .then(function (response) {
           if (!response.ok) throw new Error('Department request failed: ' + response.status);
           return response.text();
@@ -473,7 +476,7 @@
 
 
   // Page collection : son propre bloc de recherche et ses produits (gardés pendant qu'un autre onglet est ouvert).
-  var baseProducts = coll ? createProducts(home.feed, window.location.pathname, window.location.search) : null;
+  var baseProducts = coll ? createProducts(home.feed, window.location.pathname, window.location.search, collView || undefined) : null;
   if (coll) window.msheinMasonry.watchReveal(coll);
 
   /* ---------- Changement d'onglet (sans rechargement) ---------- */
@@ -499,7 +502,7 @@
     slots.hero.setAttribute('data-mshein-hero-active', '');
     window.msheinMasonry.watchReveal(slots.cats);
     window.msheinMasonry.watchReveal(slots.mods);
-    products = createProducts(slots.products, tab.path, tab.query);
+    products = createProducts(slots.products, tab.path, tab.query, tab.view);
     // Autre collection : l'onglet du header du rayon qui la contient (ex. Bikini → Donna), donné par la page reçue.
     var top = dept.getAttribute('data-top');
     if (tab.extra && top) {
@@ -543,7 +546,7 @@
     var shape = function (kind, count) {
       return '<div class="mshein-dskel mshein-dskel--' + kind + '" aria-hidden="true">' + new Array(count + 1).join('<i></i>') + '</div>';
     };
-    var heroTemplate = !tab.query && heroTemplates[trimPath(tab.path)];
+    var heroTemplate = !tab.query && !tab.view && heroTemplates[trimPath(tab.path)];
     if (heroTemplate) {
       slots.hero.replaceChildren(heroTemplate.content.cloneNode(true));
       slots.hero.setAttribute('data-hero-for', tab.key);
@@ -573,7 +576,7 @@
       // Vraie adresse du rayon (/collections/…, avec son tri / ses filtres) : lien partagé ou page rechargée = la vraie
       // page collection, au même design.
       var target = pageAt(index);
-      pushState({ mshTab: index, mshY: 0 }, '', isBase(index) ? baseUrl : target.path + (target.query ? '?' + target.query : ''));
+      pushState({ mshTab: index, mshY: 0 }, '', isBase(index) ? baseUrl : target.address || target.path + (target.query ? '?' + target.query : ''));
     }
     if (isBase(index)) {
       clearSlots();
@@ -672,7 +675,10 @@
     var match = url.pathname.match(/\/collections\/([^/]+)\/?$/);
     // vendors / types : listes spéciales de Shopify (pas des collections). ?view=… : morceau de page chargé par
     // un script (produits suivants du panneau Categoria…), pas une page.
-    if (url.origin !== window.location.origin || !match || /^(vendors|types)$/.test(match[1]) || url.searchParams.has('view')) return null;
+    if (url.origin !== window.location.origin || !match || /^(vendors|types)$/.test(match[1])) return null;
+    // « In offerta » (/collections/all?view=offerte : « Super saldi », « Vedi tutte ») : rayon des promotions.
+    if (url.searchParams.get('view') === 'offerte') return { link: link, url: url, sale: true };
+    if (url.searchParams.has('view')) return null;
     return { link: link, url: url };
   };
   var markOf = function (index) {
@@ -689,6 +695,25 @@
     return (link.getAttribute('aria-label') || link.textContent || '').trim().replace(/\s+/g, ' ');
   };
   var pageIndexFor = function (found) {
+    if (found.sale) {
+      // Déjà sur la page « In offerta » : ses produits.
+      if (collView === 'mshein-dept-sale') return baseIndex;
+      for (var s = 0; s < extras.length; s += 1) if (extras[s].view === 'mshein-dept-sale') return tabs.length + s;
+      extras.push({
+        path: found.url.pathname,
+        query: '',
+        key: 'sale:' + found.url.pathname,
+        view: 'mshein-dept-sale',
+        address: found.url.pathname + '?view=offerte',
+        href: found.url.href,
+        extra: true,
+        title: linkTitle(found.link).slice(0, 60),
+        image: found.link.querySelector('img'),
+        // Aucun onglet du header marqué (ce n'est pas « Tutti i Prodotti »).
+        mark: -1
+      });
+      return tabs.length + extras.length - 1;
+    }
     var params = new URLSearchParams(found.url.search);
     params.delete('page');
     params.delete('view');

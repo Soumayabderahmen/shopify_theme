@@ -4,12 +4,17 @@
   Utilisée par la page du rayon (snippets/mshein-dept.liquid) et, à l'avance, par l'accueil et les pages collection
   (snippets/mshein-tab-heroes.liquid) : la bannière s'affiche dès le toucher d'un onglet, identique à l'arrivée du rayon.
   Params : collection, best (collection « Più venduti »), title (nom du rayon dans le menu), is_all (Tutti i Prodotti)
+  sale (true : rayon « In offerta » : mosaïque de produits en promotion, sans nombre d'articles, lien vers la page « offerte »)
 {%- endcomment -%}
 {%- liquid
   assign hero_title = title | default: collection.title
   assign hero_bg = ''
+  assign hero_url = collection.url
+  if sale
+    assign hero_url = routes.all_products_collection_url | append: '?view=offerte'
+  endif
   assign collage_html = ''
-  if collection.image
+  if collection.image and sale != true
     assign hero_bg = collection.image | image_url: width: 600
   else
     # Mêmes 10 « meilleures ventes » que la page du rayon : celles de « Più venduti » présentes dans le rayon (toutes
@@ -21,6 +26,12 @@
       if is_all == false
         assign best_handles = best_product.collections | map: 'handle'
         unless best_handles contains collection.handle
+          continue
+        endunless
+      endif
+      if sale
+        assign sale_check = best_product.selected_or_first_available_variant
+        unless sale_check.compare_at_price > sale_check.price
           continue
         endunless
       endif
@@ -57,8 +68,13 @@
         if seen_ids contains hero_key
           continue
         endif
-        assign considered = considered | plus: 1
         assign hero_variant = hero_product.selected_or_first_available_variant
+        if sale
+          unless hero_variant.compare_at_price > hero_variant.price
+            continue
+          endunless
+        endif
+        assign considered = considered | plus: 1
         assign hero_image = hero_variant.featured_image | default: hero_product.featured_image
         if hero_image != blank
           if hero_bg == ''
@@ -79,8 +95,8 @@
   endif
 -%}
 <section class="mshein-dhero">
-  <a class="mshein-dhero__media" href="{{ collection.url }}">
-    {%- if collection.image -%}
+  <a class="mshein-dhero__media" href="{{ hero_url }}">
+    {%- if collection.image and sale != true -%}
       {{ collection.image | image_url: width: 750 | image_tag: loading: 'eager', fetchpriority: 'high', alt: hero_title, sizes: '100vw', widths: '375,560,750' }}
     {%- else -%}
       <span class="mshein-dhero__collage">{{ collage_html }}</span>
@@ -89,7 +105,7 @@
     <span class="mshein-dhero__txt">
       <b class="mshein-dhero__title">{{ hero_title | escape }}</b>
       <span class="mshein-dhero__meta">
-        <span>{{ 'mobile.cart.items_other' | t: count: collection.all_products_count }}</span>
+        {%- unless sale -%}<span>{{ 'mobile.cart.items_other' | t: count: collection.all_products_count }}</span>{%- endunless -%}
         <span class="mshein-dhero__cta">{{ 'mobile.category.view_all' | t }}<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
       </span>
     </span>

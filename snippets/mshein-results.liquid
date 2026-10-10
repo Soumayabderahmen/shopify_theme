@@ -5,6 +5,7 @@
   Utilisé par les rayons et pages collection (snippets/mshein-dept.liquid) et la recherche (sections/mobile-home-shein.liquid).
   Params : filters, sort_options, current_sort, total (nombre de produits après filtres), cards (cartes de la 1re page),
   next_url (page suivante), simple (true : tri et colonnes seulement, sans Filtri)
+  no_count (true : sans « Mostrando X di Y », ex. « In offerta » : Shopify compterait toute la collection)
 {%- endcomment -%}
 <div class="mshein-cresults" data-dept-results>
   {%- liquid
@@ -88,7 +89,9 @@
     assign total_token = '{' | append: 'total' | append: '}'
     assign results_line = results_text | replace: count_token, '0' | replace: total_token, total
   -%}
+  {%- unless no_count -%}
   <p class="mshein-ccount" data-dept-count data-template="{{ results_text | escape }}" data-total="{{ total }}">{{ results_line }}</p>
+  {%- endunless -%}
 
   {%- unless simple -%}
     {%- comment -%} Fenêtre « Filtri » : vrais filtres de la collection (disponibilità, prezzo, opzioni, tipo…). {%- endcomment -%}
