@@ -3,6 +3,13 @@
   {% for rule in group.rules %}
     {{- rule -}}
   {% endfor %}
+  {%- comment -%}
+    Morceaux de page demandés par le site mobile (rayons, recherche, pages suivantes : ?view=mshein-dept,
+    mshein-dept-page, mshein-search…) : pas des pages, Google ne les explore pas. Les vraies pages ne changent pas.
+  {%- endcomment -%}
+  {%- if group.user_agent.value == '*' %}
+{{ 'Disallow: /*view=mshein*' }}
+  {%- endif -%}
   {%- if group.sitemap != blank -%}
     {{ group.sitemap }}
   {%- endif -%}
