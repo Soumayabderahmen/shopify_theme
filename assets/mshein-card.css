@@ -374,28 +374,32 @@
   /* Pastilles : « Sped. gratuita » et « Reso facile » à la même place (l'un après l'autre), « Risparmia » à côté. */
   /* Une seule ligne comme le prototype : « Risparmia » reste à côté de « Sped. gratuita / Reso facile »
      (sur un très petit écran, il rétrécit au lieu de passer dessous). */
+  /* « Livraison gratuite / Retours faciles » et « Économisez … » côte à côte, en entier : texte un peu plus petit,
+     « Économisez » jamais coupé (c'est la pastille de gauche qui cède la place si la carte est trop étroite). */
   .mshein-chips {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
     min-width: 0;
     margin-top: 5px;
   }
 
   .mshein-chips > .mshein-rot {
-    flex-shrink: 0;
+    flex: 0 1 auto;
+    min-width: 0;
   }
 
   .mshein-chip {
     display: inline-flex;
     align-items: center;
     gap: 2px;
-    height: 17px;
-    padding: 1px 3px;
-    font-size: 9px;
+    height: 16px;
+    padding: 0 3px;
+    font-size: 8px;
     font-weight: 700;
     letter-spacing: -0.1px;
+    line-height: 1;
     white-space: nowrap;
     border-radius: 4px;
   }
@@ -405,17 +409,15 @@
 
   .mshein-chip--save {
     position: relative;
-    flex: 0 1 auto;
-    min-width: 0;
+    flex: none;
     overflow: hidden;
-    text-overflow: ellipsis;
     color: #fff;
     background: linear-gradient(90deg, #ff4d5e, #e4323c);
   }
 
   .mshein-chip--save svg {
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     fill: currentColor;
   }
 
@@ -439,7 +441,7 @@
   .mshein-rot {
     position: relative;
     display: inline-block;
-    height: 17px;
+    height: 16px;
     overflow: hidden;
     vertical-align: middle;
   }
@@ -451,7 +453,7 @@
 
   .mshein-rot__track > * {
     display: flex;
-    height: 17px;
+    height: 16px;
   }
 
   .mshein-rot--2 .mshein-rot__track {
@@ -460,8 +462,8 @@
 
   @keyframes mshein-rot-swap {
     0%, 42% { transform: translateY(0); }
-    50%, 92% { transform: translateY(-17px); }
-    100% { transform: translateY(-34px); }
+    50%, 92% { transform: translateY(-16px); }
+    100% { transform: translateY(-32px); }
   }
 
   /* Official Store · Star seller · Brand Official : même défilement que le site (snippets/badge--brand-products.liquid,
