@@ -155,7 +155,7 @@
         {%- comment -%}
           Page collection mobile au design des onglets de rayon : bannière sous l'en-tête transparent, bande avantages,
           sous-catégories, 4 cartes, bloc de recherche et produits (snippets/mshein-dept.liquid). Les onglets du header
-          y changent de rayon sans recharger (#donna…, assets/mobile-home-tabs.js). L'ancienne page reste pour l'ordinateur.
+          y changent de rayon sans recharger (vraie adresse du rayon, assets/mobile-home-tabs.js). L'ancienne page reste pour l'ordinateur.
         {%- endcomment -%}
         {%- liquid
           assign coll_next = ''
@@ -318,7 +318,7 @@
           assign under_amount = 5000 | money_without_trailing_zeros | strip_html
           assign under_src = routes.all_products_collection_url | append: '?view=mshein-under&sort_by=best-selling&filter.v.price.lte=50'
         -%}
-        {%- comment -%} Onglets de rayon du header (sans rechargement, lien direct #donna…) : assets/mobile-home-tabs.js. {%- endcomment -%}
+        {%- comment -%} Onglets de rayon du header (sans rechargement, vraie adresse du rayon) : assets/mobile-home-tabs.js. {%- endcomment -%}
         <script src="{{ 'mobile-home-tabs.js' | asset_url }}" defer></script>
         {%- render 'mshein-tab-heroes', menu: section.settings.menu, best: best -%}
         <div class="mshein-feed" data-mshein-home data-mshein-feed>

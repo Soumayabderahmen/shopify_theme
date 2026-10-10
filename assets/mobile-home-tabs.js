@@ -5,8 +5,9 @@
    - Comme SHEIN : glisser le doigt à gauche / à droite passe au rayon voisin (la page suit le doigt puis glisse) ;
      la page arrive tout de suite (forme grise en attendant), les rayons voisins sont préparés à l'avance ; en-tête et
      bannière tout de suite, puis les autres blocs l'un après l'autre, vite (avantages, catégories, coupon, cartes, produits).
-   - Chaque onglet a son adresse (#donna, #uomo, #tutti-i-prodotti…) : lien direct, et Retour / Avanti du navigateur
-     reviennent à l'onglet précédent, à la même position. Retour à l'accueil : logo ou « Home » de la barre du bas.
+   - Chaque onglet affiche la vraie adresse de son rayon (/collections/abbigliamento-donna-tutti…) : lien partagé ou page
+     rechargée = la vraie page collection, au même design ; Retour / Avanti du navigateur reviennent à l'onglet précédent,
+     à la même position. Retour à l'accueil : logo ou « Home » de la barre du bas.
    - Bloc de recherche du rayon : puces des sous-catégories, Filtri (vrais filtres Shopify), tri, 2 colonnes / 1 colonna,
      filtres rapides ; produits en 2 colonnes décalées (window.msheinMasonry, assets/mobile-home-shein.js).
    Les autres liens du header (Contatti, Traccia ordine…) restent des liens normaux.
@@ -269,7 +270,9 @@
     tab.link.classList.remove('is-active');
   });
   if (baseIndex >= 0) baseMark = baseIndex;
-  var baseUrl = window.location.pathname + window.location.search;
+  // Adresse de la page chargée (l'adresse affichée change ensuite avec l'onglet ouvert).
+  var basePathname = window.location.pathname;
+  var baseUrl = basePathname + window.location.search;
   var minIndex = baseIndex >= 0 ? 0 : -1;
   var isBase = function (index) { return index === baseIndex; };
   // Bannières des rayons préparées dans la page (snippets/mshein-tab-heroes.liquid), par adresse de collection.
@@ -523,7 +526,8 @@
     var token = ++requestToken;
     markTabs(index, !fromHistory);
     if (!fromHistory) {
-      pushState({ mshTab: index, mshY: 0 }, '', isBase(index) ? baseUrl : '#' + tabs[index].slug);
+      // Vraie adresse du rayon (/collections/…) : lien partagé ou page rechargée = la vraie page collection, au même design.
+      pushState({ mshTab: index, mshY: 0 }, '', isBase(index) ? baseUrl : tabs[index].path);
     }
     if (isBase(index)) {
       clearSlots();
@@ -577,7 +581,7 @@
       var target = new URL(homeLink.href, window.location.href);
       var trim = function (path) { return String(path).replace(/\/+$/, ''); };
       // Adresse de l'accueil (avec la langue : « / », « /de »…).
-      if (target.origin === window.location.origin && trim(target.pathname) === trim(window.location.pathname) && !target.hash) {
+      if (target.origin === window.location.origin && trim(target.pathname) === trim(basePathname) && !target.hash) {
         event.preventDefault();
         if (!isBase(current)) showTab(baseIndex);
         else window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -676,7 +680,7 @@
   page.addEventListener('touchend', endDrag, { passive: true });
   page.addEventListener('touchcancel', endDrag, { passive: true });
 
-  // Retour / Avanti du navigateur (et adresse #… changée à la main) : l'onglet de cette étape, sans rechargement.
+  // Retour / Avanti du navigateur : l'onglet de cette étape, sans rechargement (anciens liens #donna… : nom du rayon).
   var tabFromHash = function () {
     var hash = window.location.hash.replace(/^#/, '');
     for (var index = 0; index < tabs.length; index += 1) {
@@ -697,13 +701,15 @@
   });
 
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  // Lien direct (#donna…) ou retour sur la page depuis une fiche produit : l'onglet de l'adresse s'ouvre directement.
+  // Retour sur la page depuis une fiche produit, ou ancien lien direct (#donna…) : l'onglet de l'adresse s'ouvre
+  // directement ; un ancien lien #… prend la vraie adresse du rayon (/collections/…).
   var startState = history.state;
   var startIndex = startState && typeof startState.mshTab === 'number' ? startState.mshTab : tabFromHash();
   if (startIndex >= tabs.length || startIndex < minIndex) startIndex = baseIndex;
   if (!isBase(startIndex)) showTab(startIndex, true, startState && startState.mshY);
   else if (startState && startState.mshY) restoreScroll(startState.mshY, baseProducts);
-  replaceState(Object.assign({}, history.state, { mshTab: current, mshY: startState && startState.mshY || 0 }), '', window.location.href);
+  var startUrl = !startState && !isBase(current) && window.location.hash ? tabs[current].path : window.location.href;
+  replaceState(Object.assign({}, history.state, { mshTab: current, mshY: startState && startState.mshY || 0 }), '', startUrl);
   markTabs(current, false);
   if (isBase(current)) prefetchAround(current);
   if (prefetchAllowed) whenIdle(warmHeroImages, 1500);

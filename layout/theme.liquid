@@ -85,7 +85,7 @@
       endif
       # Toutes les autres pages du site (autres modèles de collection, fiches produit, panier, pages, recherche, liste des
       # collections, blog, articles, politiques, 404) et suivi de commande (app 17TRACK, /apps/17TRACK dans toutes les
-      # langues) : nouvel en-tête blanc collé en haut (onglets vers l'accueil #rayon).
+      # langues) : nouvel en-tête blanc collé en haut (onglets vers la page collection du rayon).
       assign mshein_plain_head = false
       assign request_path_lower = request.path | downcase
       assign mshein_plain_templates = 'product,cart,page,search,list-collections,blog,article,404' | split: ','
