@@ -447,25 +447,44 @@
               tabsList.scrollLeft = activeItem.offsetLeft - (tabsList.clientWidth - activeItem.offsetWidth) / 2;
             }
 
-            // Onglet de rayon touché (Donna, Uomo…) : sa page collection (même design que les onglets, rayons sans
-            // rechargement ensuite). Réponse visible tout de suite : onglet en gras avec sa barre et barre de chargement
-            // du thème en haut ; au doigt, départ dès qu'il se lève (le clic qui suit, analysé ~0,2 à 1,2 s par les
-            // scripts de statistiques, est annulé). Le doigt qui fait défiler la barre d'onglets ne change pas de page.
+            // Lien vers une collection touché (onglets Donna, Uomo…, panneau Categoria, fiche produit…) : sa page
+            // collection (même design que les onglets, rayons sans rechargement ensuite). Réponse visible tout de suite :
+            // panneau fermé, onglet du rayon en gras avec sa barre et barre de chargement du thème sous l'en-tête ; au
+            // doigt, départ dès qu'il se lève (le clic qui suit, analysé ~0,2 à 1,2 s par les scripts de statistiques,
+            // est annulé). Le doigt qui fait défiler (onglets, panneau, page) ne change pas de page.
+            var tabsNav = header.querySelector('.mobile-temu-categories');
+            var collectionPath = function (href) {
+              var url = new URL(href, window.location.href);
+              // ?view=… : morceau de page chargé par un script (produits suivants du panneau Categoria…), pas une page.
+              if (url.origin !== window.location.origin || url.searchParams.has('view') || !/\/collections\/[^/]+\/?$/.test(url.pathname)) return null;
+              if (/\/collections\/(vendors|types)\/?$/.test(url.pathname)) return null;
+              return url.pathname.replace(/\/$/, '');
+            };
             var tabLink = function (target) {
-              var link = target && target.closest && target.closest('.mobile-temu-header .mobile-temu-categories a[href]');
-              if (!link) return null;
-              var url = new URL(link.href, window.location.href);
-              if (url.origin !== window.location.origin || url.search || !/\/collections\/[^/]+\/?$/.test(url.pathname)) return null;
-              return link;
+              var link = target && target.closest && target.closest('a[href]');
+              // « Nuovi » du panneau Categoria : change de liste dans le panneau, pas de page.
+              if (!link || link.target === '_blank' || link.hasAttribute('download') || link.hasAttribute('data-category-new-toggle')) return null;
+              if (link.closest('.mobile-temu-categories') && !header.contains(link)) return null;
+              return collectionPath(link.href) ? link : null;
             };
             var marked = [];
             var goToTab = function (link) {
-              var nav = link.closest('.mobile-temu-categories');
-              marked = Array.prototype.map.call(nav.querySelectorAll('a'), function (item) {
-                return { item: item, className: item.className };
-              });
-              nav.querySelectorAll('a').forEach(function (item) { item.classList.remove('is-active', 'is-tab-on'); });
-              link.classList.add('is-tab-on');
+              // Onglet du rayon : le lien lui-même, sinon l'onglet de la même collection.
+              var path = collectionPath(link.href);
+              var tab = tabsNav && tabsNav.contains(link) ? link : null;
+              if (!tab && tabsNav) {
+                tab = Array.prototype.find.call(tabsNav.querySelectorAll('a[href]'), function (item) {
+                  return collectionPath(item.href) === path;
+                }) || null;
+              }
+              if (tab) {
+                marked = Array.prototype.map.call(tabsNav.querySelectorAll('a'), function (item) {
+                  return { item: item, className: item.className };
+                });
+                tabsNav.querySelectorAll('a').forEach(function (item) { item.classList.remove('is-active', 'is-tab-on'); });
+                tab.classList.add('is-tab-on');
+              }
+              if (window.msheinPanels) window.msheinPanels.closeAll();
               // Barre de chargement du thème (assets/mobile-temu-header.js) : même élément, même classe.
               if (!document.querySelector('.mobile-navigation-progress')) {
                 var progress = document.createElement('div');
@@ -483,21 +502,21 @@
               marked = [];
             });
             var touch = null;
-            header.addEventListener('touchstart', function (event) {
+            document.addEventListener('touchstart', function (event) {
               var link = event.touches.length === 1 && tabLink(event.target);
               touch = link ? { link: link, x: event.touches[0].clientX, y: event.touches[0].clientY } : null;
-            }, { passive: true });
-            header.addEventListener('touchmove', function (event) {
+            }, { passive: true, capture: true });
+            document.addEventListener('touchmove', function (event) {
               if (touch && (Math.abs(event.touches[0].clientX - touch.x) > 10 || Math.abs(event.touches[0].clientY - touch.y) > 10)) touch = null;
-            }, { passive: true });
-            header.addEventListener('touchend', function (event) {
+            }, { passive: true, capture: true });
+            document.addEventListener('touchend', function (event) {
               var touched = touch;
               touch = null;
               if (!touched || !event.cancelable) return;
               event.preventDefault();
               event.stopImmediatePropagation();
               goToTab(touched.link);
-            }, { passive: false });
+            }, { passive: false, capture: true });
             window.addEventListener('click', function (event) {
               if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
               var link = tabLink(event.target);

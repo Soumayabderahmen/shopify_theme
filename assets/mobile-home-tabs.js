@@ -670,8 +670,9 @@
     if (!link || nav.contains(link) || link.target === '_blank' || link.hasAttribute('download') || link.closest('[data-dept-sheet]')) return null;
     var url = new URL(link.href, window.location.href);
     var match = url.pathname.match(/\/collections\/([^/]+)\/?$/);
-    // vendors / types : listes spéciales de Shopify (pas des collections).
-    if (url.origin !== window.location.origin || !match || /^(vendors|types)$/.test(match[1])) return null;
+    // vendors / types : listes spéciales de Shopify (pas des collections). ?view=… : morceau de page chargé par
+    // un script (produits suivants du panneau Categoria…), pas une page.
+    if (url.origin !== window.location.origin || !match || /^(vendors|types)$/.test(match[1]) || url.searchParams.has('view')) return null;
     return { link: link, url: url };
   };
   var markOf = function (index) {
