@@ -220,7 +220,7 @@
 }
 
 /* Bouton « haut de page » du thème : absent du prototype, il passait sur la barre d'achat. */
-html body:has([data-pdp-hd]) #totop {
+html body.pdp-m-page #totop {
   display: none !important;
 }
 
@@ -439,23 +439,23 @@ body.template-product {
 
 /* Comme SHEIN : pas de barre du bas du site sur la fiche (la barre d'achat prend sa place). Le tiroir panier, les bulles
    des apps et le bouton cookie descendent d'autant (assets/mobile-bottom-nav.css les plaçait au-dessus d'elle). */
-html body:has([data-pdp-hd]) .mobile-bottom-navigation {
+html body.pdp-m-page .mobile-bottom-navigation {
   display: none !important;
 }
 
-html body:has([data-pdp-hd]) #root .m6pn {
+html body.pdp-m-page #root .m6pn {
   bottom: env(safe-area-inset-bottom, 0px);
 }
 
-html body:has([data-pdp-hd]) #honeypop-app button[class*="BubbleLauncher"] {
+html body.pdp-m-page #honeypop-app button[class*="BubbleLauncher"] {
   bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-html body:has([data-pdp-hd]) .firepush-widget-container {
+html body.pdp-m-page .firepush-widget-container {
   bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-html body:has([data-pdp-hd]) pandectes-cmp {
+html body.pdp-m-page pandectes-cmp {
   --mobile-cookie-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -3216,13 +3216,13 @@ html body:has(.pdp-m__lb:not([hidden])) .firepush-widget-container {
    de section sous l'en-tête une fois les photos passées. L'en-tête du site reste dans la page (son lien panier ouvre
    le tiroir), seulement masqué. */
 /* « < Tornare » du fil d'Ariane : remplacé par la flèche de l'en-tête. */
-body.template-product:has([data-pdp-hd]) [id$="__breadcrumbs"],
-body.template-product:has([data-pdp-hd]) [id$="__header"].shopify-section {
+body.template-product.pdp-m-page [id$="__breadcrumbs"],
+body.template-product.pdp-m-page [id$="__header"].shopify-section {
   display: none !important;
 }
 
 /* Marge du haut de la page (espace sous l'ancien en-tête) : l'en-tête de la fiche est tout en haut. */
-body.template-product:has([data-pdp-hd]) #content {
+body.template-product.pdp-m-page #content {
   padding-top: 0 !important;
 }
 

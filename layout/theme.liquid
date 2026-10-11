@@ -362,7 +362,12 @@
     mshein-head : nouvel en-tête de l'accueil (assets/mobile-temu-header.css). Pages collection.json : comme l'accueil
     (mshein-home : en-tête transparent sur la bannière du rayon) + mshein-coll ; autres modèles de collection : en-tête blanc.
   {%- endcomment -%}
-  <body class="template-{{ template.name | handle }}{% if template.name == 'index' %} mshein-home mshein-head{% elsif mshein_coll %} mshein-home mshein-head mshein-coll{% elsif mshein_plain_head %} mshein-head{% if mshein_search %} mshein-search{% endif %}{% endif %}">
+  {%- comment -%}
+    pdp-m-page : fiche produit (sections/main-product.liquid affiche toujours la fiche mobile, snippets/pdp-mobile-top.liquid).
+    Connue dès la balise <body> : assets/pdp-mobile.css masque l'en-tête et la barre du bas du site dès le premier affichage
+    (avec « :has([data-pdp-hd]) », il fallait attendre que la fiche arrive : l'ancien en-tête apparaissait un instant).
+  {%- endcomment -%}
+  <body class="template-{{ template.name | handle }}{% if template.name == 'product' %} pdp-m-page{% endif %}{% if template.name == 'index' %} mshein-home mshein-head{% elsif mshein_coll %} mshein-home mshein-head mshein-coll{% elsif mshein_plain_head %} mshein-head{% if mshein_search %} mshein-search{% endif %}{% endif %}">
     {%- if template.name == 'index' or mshein_coll -%}
       <script>
         (function () {
