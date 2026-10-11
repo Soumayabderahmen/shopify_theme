@@ -727,7 +727,8 @@
     "share_save": "Salvează imaginea",
     "share_more": "Mai mult",
     "copied": "Link copiat",
-    "buy_off": "-{{ percent }}% REDUCERE!"
+    "buy_off": "-{{ percent }}% REDUCERE!",
+    "coupon_band": "Cupon -{{ percent }}% la toată comanda · {{ code }}"
   },
   "mobile_terms": {
     "eyebrow": "Cupon platinumshop",

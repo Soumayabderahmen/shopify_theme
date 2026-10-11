@@ -3416,7 +3416,8 @@
     "share_save": "Save image",
     "share_more": "More",
     "copied": "Link copied",
-    "buy_off": "-{{ percent }}% OFF!"
+    "buy_off": "-{{ percent }}% OFF!",
+    "coupon_band": "Coupon -{{ percent }}% on your whole order · {{ code }}"
   },
   "mobile_terms": {
     "eyebrow": "platinumshop coupon",

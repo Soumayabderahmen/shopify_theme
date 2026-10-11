@@ -129,30 +129,64 @@
       </div>
       <span class="pdp-m__cnt" data-pdp-count>1 / {{ pm_media_count }}</span>
     </section>
-    {%- if pm_media_count > 1 -%}
-      <div class="pdp-m__thumbs" data-pdp-thumbs aria-label="{{ 'mobile.pdp.thumbnails' | t }}">
-        {%- assign pm_index = 0 -%}
-        {%- for media in product.media -%}
-          {%- if media.preview_image -%}
-            <button type="button" class="pdp-m__th" data-index="{{ pm_index }}"{% if pm_index == 0 %} aria-current="true"{% endif %} {% assign pm_photo_number = pm_index | plus: 1 %}aria-label="{{ 'mobile.pdp.photo_n' | t: number: pm_photo_number }}">
-              <img src="{{ media.preview_image | image_url: width: 108, height: 108, crop: 'center' }}" width="54" height="54" alt="" loading="lazy">
-            </button>
-            {%- assign pm_index = pm_index | plus: 1 -%}
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
-    {%- endif -%}
   {%- endif -%}
 
+  {%- comment -%} Bande avantages sous les photos (prototype SHEIN) : la même que sous la bannière de l'accueil. {%- endcomment -%}
+  {%- render 'mshein-perks' -%}
+
+  {%- comment -%}
+    Carte prix au style SHEIN : prix, -%, prix barré ; prix avec le coupon ; bande coupon (« Riscuoti » applique le code) ;
+    titre sur 2 lignes (flèche pour tout lire) avec la note à droite (★ 4,7 / (19), lien vers les avis).
+  {%- endcomment -%}
+  {%- capture pm_star -%}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg>{%- endcapture -%}
   <section class="pdp-m__card pdp-m__price-card">
-    <div class="pdp-m__tags">
-      <span class="pdp-m__tag">{{ 'mobile.pdp.top_pick' | t }}</span>
-      <a href="#pdp-reviews" class="pdp-m__rate" data-pdp-goto-reviews>
-        {%- if pm_rating_count > 0 -%}
-          <span class="pdp-m__rst" aria-label="{{ 'mobile.pdp.rating_out_of' | t: rating: pm_rating }}"><i style="width: {{ pm_stars_width }}%"></i></span>
-          {{ pm_rating | round: 1 }} · {{ pm_rating_count }} {% if pm_rating_count == 1 %}{{ 'mobile.pdp.review' | t }}{% else %}{{ 'mobile.pdp.reviews' | t }}{% endif %}
+    <div class="pdp-m__prow">
+      {%- liquid
+        # Centimes plus petits, comme SHEIN (« €117,79 » avec « ,79 » réduit) ; assets/pdp-mobile.js découpe de même.
+        assign pm_price_txt = pm_price | money | strip_html
+        assign pm_price_tail = pm_price_txt | slice: -3, 3
+        assign pm_price_sep = pm_price_tail | slice: 0, 1
+        assign pm_price_head = pm_price_txt.size | minus: 3
+      -%}
+      <span class="pdp-m__price{% if pm_compare > pm_price %} is-sale{% endif %}" data-pdp-price>
+        {%- if pm_price_sep == ',' or pm_price_sep == '.' -%}
+          {{ pm_price_txt | slice: 0, pm_price_head }}<small>{{ pm_price_tail }}</small>
         {%- else -%}
-          <span class="pdp-m__stars-off" aria-hidden="true">★★★★★</span>{{ 'mobile.pdp.reviews_title_short' | t }}
+          {{ pm_price_txt }}
+        {%- endif -%}
+        {{- mm_cur -}}
+      </span>
+      {%- liquid
+        assign pm_save = 0
+        if pm_compare > pm_price
+          assign pm_save = pm_compare | minus: pm_price | times: 100 | divided_by: pm_compare
+        endif
+      -%}
+      <span class="pdp-m__save" data-pdp-save{% unless pm_save > 0 %} hidden{% endunless %}>-{{ pm_save }}%</span>
+      <span class="pdp-m__old" data-pdp-old{% unless pm_compare > pm_price %} hidden{% endunless %}>{{ pm_compare | money }}{{ mm_cur }}</span>
+    </div>
+    {%- if pm_coupon_code != blank -%}
+      {%- comment -%} Prix avec le coupon (réduction Shopify sur toute la commande), mis à jour à chaque variante (assets/pdp-mobile.js). {%- endcomment -%}
+      {%- liquid
+        assign pm_with_coupon = 100 | minus: pm_coupon_percent | times: pm_price | divided_by: 100.0 | round
+        assign pm_with_coupon_money = pm_with_coupon | money | append: mm_cur
+        assign pm_with_coupon_tpl = 'mobile.pdp.with_coupon' | t: percent: pm_coupon_percent, price: '__PRICE__'
+      -%}
+      <p class="pdp-m__wc" data-pdp-with-coupon data-percent="{{ pm_coupon_percent }}" data-template="{{ pm_with_coupon_tpl | escape }}">{{ pm_with_coupon_tpl | replace: '__PRICE__', pm_with_coupon_money }}</p>
+      <div class="pdp-m__cpn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4 2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 0 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>
+        <span>{{ 'mobile_pdp_hd.coupon_band' | t: percent: pm_coupon_percent, code: pm_coupon_code }}</span>
+        <button class="pdp-m__claim" type="button" data-pdp-claim>{{ 'mobile.pdp.claim' | t }}</button>
+      </div>
+    {%- endif -%}
+    <div class="pdp-m__trow">
+      <div class="pdp-m__title" role="heading" aria-level="1" data-pdp-title>{{ product.title | escape }}</div>
+      <button class="pdp-m__tmore" type="button" data-pdp-title-more aria-label="{{ 'mobile.pdp.show_all' | t | escape }}" aria-expanded="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <a href="#pdp-reviews" class="pdp-m__rate" data-pdp-goto-reviews data-star="{{ pm_star | escape }}">
+        {%- if pm_rating_count > 0 -%}
+          <b aria-label="{{ 'mobile.pdp.rating_out_of' | t: rating: pm_rating }}">{{ pm_star }}{{ pm_rating | round: 1 }}</b><small>({{ pm_rating_count }})</small>
+        {%- else -%}
+          <b>{{ pm_star }}</b><small>{{ 'mobile.pdp.reviews_title_short' | t }}</small>
         {%- endif -%}
       </a>
       {%- if pm_rating_count == 0 -%}
@@ -180,114 +214,23 @@
             if (!link || isNaN(value) || !(count > 0)) return;
             var shown = value.toLocaleString(document.documentElement.lang || 'it', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
             var label = {{ 'mobile.pdp.rating_out_of' | t: rating: '__R__' | json }}.replace('__R__', shown);
-            var star = document.createElement('span');
-            star.className = 'pdp-m__rst';
-            star.setAttribute('aria-label', label);
-            star.innerHTML = '<i style="width:' + Math.min(100, value * 20) + '%"></i>';
-            link.textContent = shown + ' · ' + count + ' ' + (count === 1 ? {{ 'mobile.pdp.review' | t | json }} : {{ 'mobile.pdp.reviews' | t | json }});
-            link.insertBefore(star, link.firstChild);
+            link.innerHTML = '<b>' + link.getAttribute('data-star') + shown + '</b><small>(' + count + ')</small>';
+            link.firstChild.setAttribute('aria-label', label);
           })();
         </script>
       {%- endif -%}
-      {%- comment -%}
-        « +N articoli venduti » retiré : le nombre venait du métachamp custom.moq (saisi à la main), pas des vraies
-        ventes, et contredisait le nombre d'avis. Pour le remettre : product.metafields.custom.moq + clé mobile.pdp.items_sold.
-      {%- endcomment -%}
     </div>
-    <div class="pdp-m__title" role="heading" aria-level="1" data-pdp-title>{{ product.title | escape }}</div>
-    <button class="pdp-m__more" type="button" data-pdp-title-more hidden>{{ 'mobile.pdp.show_all' | t }}</button>
-    <div class="pdp-m__prow">
-      <span class="pdp-m__price{% if pm_compare > pm_price %} is-sale{% endif %}" data-pdp-price>{{ pm_price | money }}{{ mm_cur }}</span>
-      <span class="pdp-m__old" data-pdp-old{% unless pm_compare > pm_price %} hidden{% endunless %}>{{ pm_compare | money }}{{ mm_cur }}</span>
-      {%- liquid
-        assign pm_save = 0
-        if pm_compare > pm_price
-          assign pm_save = pm_compare | minus: pm_price | times: 100 | divided_by: pm_compare
-        endif
-      -%}
-      <span class="pdp-m__save" data-pdp-save{% unless pm_save > 0 %} hidden{% endunless %}>-{{ pm_save }}%</span>
-      <span class="pdp-m__iva">{% render 'mobile-tax-note', kind: 'short', vat_key: 'mobile.pdp' %}</span>
-    </div>
-    {%- if pm_coupon_code != blank -%}
-      {%- comment -%} Prix avec le coupon (réduction Shopify sur toute la commande), mis à jour à chaque variante (assets/pdp-mobile.js). {%- endcomment -%}
-      {%- liquid
-        assign pm_with_coupon = 100 | minus: pm_coupon_percent | times: pm_price | divided_by: 100.0 | round
-        assign pm_with_coupon_money = pm_with_coupon | money | append: mm_cur
-        assign pm_with_coupon_tpl = 'mobile.pdp.with_coupon' | t: percent: pm_coupon_percent, price: '__PRICE__'
-      -%}
-      <p class="pdp-m__wc" data-pdp-with-coupon data-percent="{{ pm_coupon_percent }}" data-template="{{ pm_with_coupon_tpl | escape }}">{{ pm_with_coupon_tpl | replace: '__PRICE__', pm_with_coupon_money }}</p>
-    {%- endif -%}
-    {%- if pm_coupon_code != blank -%}
-      <div class="pdp-m__tkt">
-        <span class="pdp-m__pc">-{{ pm_coupon_percent }}%</span>
-        <span class="pdp-m__tx"><b>{{ 'mobile.pdp.coupon_title' | t: percent: pm_coupon_percent }}</b>{{ 'mobile.pdp.coupon_short' | t }}<br>{{ 'mobile.pdp.expires_in' | t }} <em data-pdp-coupon-timer>02{{ 'mobile.pdp.days_short' | t }} 00:00:00</em></span>
-        <button class="pdp-m__claim" type="button" data-pdp-claim>{{ 'mobile.pdp.claim' | t }}</button>
-      </div>
-    {%- endif -%}
   </section>
 
-  {%- comment -%} 4. Vantaggi esclusivi : mêmes avantages que le bloc du site ; « Termini » et la garantie ouvrent ses vraies fenêtres. {%- endcomment -%}
-  <section class="pdp-m__card">
-    <div class="pdp-m__ctitle"><h3>{{ 'mobile.pdp.benefits_title' | t }}</h3></div>
-    <ul class="pdp-m__adv">
-      {%- if pm_coupon_code != blank -%}
-        <li>
-          <span class="pdp-m__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 4v0a2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 0 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg></span>
-          <span class="pdp-m__t"><b>{{ 'mobile.pdp.coupon_title' | t: percent: pm_coupon_percent }}</b><small>{{ 'mobile.pdp.coupon_long' | t: percent: pm_coupon_percent, code: pm_coupon_code }}</small></span>
-          <button class="pdp-m__mini" type="button" data-pdp-pt-sheet="terms" data-pdp-pt-open="coupon">{{ 'mobile.pdp.terms' | t }}</button>
-        </li>
-      {%- endif -%}
-      {%- comment -%}
-        Livraison gratuite dynamique : « su questo ordine » si le prix de la variante atteint le seuil, sinon « da 50 € ».
-        Mis à jour par assets/pdp-mobile.js au changement de variante (et pour les devises converties).
-      {%- endcomment -%}
-      {%- if pm_ship_base > 0 -%}
-        {%- liquid
-          assign pm_ship_text_free = 'mobile.pdp.free_shipping_order' | t
-          assign pm_ship_text_from = ''
-          if pm_ship_threshold > 0
-            # Espace insécable : « 50 € » ne se coupe pas sur deux lignes.
-            assign pm_ship_amount = pm_ship_threshold | money_without_trailing_zeros | strip_html | append: mm_cur | replace: ' ', ' '
-            assign pm_ship_text_from = 'mobile.pdp.free_shipping_from' | t: amount: pm_ship_amount
-          endif
-        -%}
-        <li
-          data-pdp-ship
-          data-threshold="{{ pm_ship_threshold }}"
-          data-base="{{ pm_ship_base }}"
-          data-text-free="{{ pm_ship_text_free | escape }}"
-          data-text-from="{{ pm_ship_text_from | escape }}"
-          data-money-sample="{{ 123456700 | money_without_trailing_zeros | strip_html | append: mm_cur | escape }}"
-        >
-          <span class="pdp-m__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span>
-          <span class="pdp-m__t">
-            <b>{{ 'mobile.pdp.free_shipping' | t }}</b>
-            <small data-pdp-ship-text>
-              {%- if pm_ship_threshold > 0 -%}
-                {%- if pm_price >= pm_ship_threshold -%}{{ pm_ship_text_free }}{%- else -%}{{ pm_ship_text_from }}{%- endif -%}
-              {%- endif -%}
-            </small>
-          </span>
-          {%- if shop.shipping_policy != blank -%}
-            <a class="pdp-m__mini" href="{{ shop.shipping_policy.url }}">{{ 'mobile.pdp.shipping_details' | t }}</a>
-          {%- endif -%}
-        </li>
-      {%- endif -%}
-    </ul>
-    <button class="pdp-m__trust" type="button" data-pdp-pt-open="price">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg>
-      <span>{{ 'mobile.pdp.price_guarantee_cta' | t }}</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 6 6 6-6 6"/></svg>
-    </button>
-    {%- comment -%} Fenêtre « Protections » (paiements, livraison, retours, confidentialité, garantie de prix). {%- endcomment -%}
-    {%- render 'pdp-mobile-protect' -%}
-    {%- comment -%} Fenêtre « Garantie commande » (section 9), même design. {%- endcomment -%}
-    {%- render 'pdp-mobile-order' -%}
-    {%- comment -%} Fenêtre « Conditions du coupon » (bouton « Termini » ci-dessus), même design. {%- endcomment -%}
-    {%- if pm_coupon_code != blank -%}
-      {%- render 'pdp-mobile-terms', code: pm_coupon_code, percent: pm_coupon_percent -%}
-    {%- endif -%}
-  </section>
+  {%- comment -%}
+    4. Vantaggi esclusivi : retirée de l'écran (prototype SHEIN : bande coupon et bande avantages à la place).
+    Ses fenêtres restent, ouvertes par les cartes « Protezioni » (8) et « Garanzia Ordine » (9) et la feuille des conditions.
+  {%- endcomment -%}
+  {%- render 'pdp-mobile-protect' -%}
+  {%- render 'pdp-mobile-order' -%}
+  {%- if pm_coupon_code != blank -%}
+    {%- render 'pdp-mobile-terms', code: pm_coupon_code, percent: pm_coupon_percent -%}
+  {%- endif -%}
 
   {%- comment -%} 5. Options réelles du produit : un choix ici coche l'option correspondante du formulaire du thème. {%- endcomment -%}
   {%- unless product.has_only_default_variant -%}

@@ -208,7 +208,7 @@
     });
   });
 
-  /* ---------- Titre : « Mostra tutto » seulement si le titre est coupé ---------- */
+  /* ---------- Titre sur 2 lignes : flèche (comme SHEIN) seulement si le titre est coupé ---------- */
   var title = root.querySelector('[data-pdp-title]');
   var titleMore = root.querySelector('[data-pdp-title-more]');
   if (title && titleMore) {
@@ -217,7 +217,9 @@
     });
     titleMore.addEventListener('click', function () {
       var open = title.classList.toggle('is-open');
-      titleMore.textContent = open ? T('show_less') : T('show_all');
+      titleMore.classList.toggle('is-open', open);
+      titleMore.setAttribute('aria-expanded', String(open));
+      titleMore.setAttribute('aria-label', open ? T('show_less') : T('show_all'));
     });
   }
 
@@ -249,22 +251,6 @@
     tick();
     window.setInterval(tick, 1000);
   }
-
-  /* Badges de marque des produits de marque (snippets/prodducts--brand-popap.liquid : « Negozio Ufficiale del Marchio »,
-     snippets/badge--brand-products.liquid : « Official Store · Star seller · Brand Official ») : rendus dans l'ancien
-     formulaire du thème, bas de page ; placés sous les vignettes. Déplacés, pas copiés : la flèche garde
-     l'ouverture du tiroir des produits de la marque. */
-  (function () {
-    var thumbs = root.querySelector('.pdp-m__thumbs');
-    var store = document.querySelector('#main-product .f8pr .brand-badges-container');
-    var strip = document.querySelector('#main-product .f8pr .badge-scroll-wrapper');
-    if (!thumbs || (!store && !strip)) return;
-    var box = document.createElement('div');
-    box.className = 'pdp-m__brand';
-    if (store) box.appendChild(store);
-    if (strip) box.appendChild(strip);
-    thumbs.insertAdjacentElement('afterend', box);
-  })();
 
   /* « Riscuoti » : ajoute le vrai code au panier (/cart/update.js, en gardant les codes déjà saisis) ; Shopify le reprend
      au checkout. « Appliqué ✓ » seulement si Shopify enregistre le code et le confirme (discount_codes[].applicable,
@@ -351,7 +337,16 @@
     if (!variant) return;
     var sale = variant.compare > variant.price;
     if (priceEl) {
-      priceEl.textContent = money(variant.price);
+      // Centimes plus petits, comme SHEIN (« €117,79 » avec « ,79 » réduit) ; même découpe que le Liquid.
+      var priceText = money(variant.price);
+      var cents = priceText.match(/^(.*\d)([.,]\d{2})(\D*)$/);
+      priceEl.textContent = cents ? cents[1] : priceText;
+      if (cents) {
+        var small = document.createElement('small');
+        small.textContent = cents[2];
+        priceEl.appendChild(small);
+        if (cents[3]) priceEl.appendChild(document.createTextNode(cents[3]));
+      }
       priceEl.classList.toggle('is-sale', sale);
     }
     if (oldEl) {
@@ -1608,8 +1603,8 @@
       var value = average ? parseFloat(average.textContent.replace(',', '.')) : NaN;
       if (!rateLink || isNaN(value) || !countMatch || Number(countMatch[1]) === 0) return false;
       var shown = value.toLocaleString(document.documentElement.lang || 'it', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-      rateLink.innerHTML = '<span class="pdp-m__rst" aria-label="' + T('rating_out_of', { rating: shown }) + '"><i style="width:' + (value * 20) + '%"></i></span>'
-        + shown + ' · ' + T(Number(countMatch[1]) === 1 ? 'reviews_one' : 'reviews_other', { count: countMatch[1] });
+      // Comme SHEIN : « ★ 4,7 » et « (19) » dessous, à droite du titre.
+      rateLink.innerHTML = '<b aria-label="' + T('rating_out_of', { rating: shown }) + '">' + rateLink.getAttribute('data-star') + shown + '</b><small>(' + countMatch[1] + ')</small>';
       return true;
     };
     if (!readAppRating()) {

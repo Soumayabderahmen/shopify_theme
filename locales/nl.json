@@ -650,7 +650,8 @@
     "share_save": "Afbeelding opslaan",
     "share_more": "Meer",
     "copied": "Link gekopieerd",
-    "buy_off": "-{{ percent }}% KORTING!"
+    "buy_off": "-{{ percent }}% KORTING!",
+    "coupon_band": "Kortingscode -{{ percent }}% op je hele bestelling · {{ code }}"
   },
   "mobile_terms": {
     "eyebrow": "platinumshop-coupon",
