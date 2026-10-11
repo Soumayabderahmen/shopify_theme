@@ -19,7 +19,21 @@
 {%- endcomment -%}
 {%- liquid
   assign card_tag = container | default: 'li'
-  assign card_variant = product.selected_or_first_available_variant
+  assign card_first = product.selected_or_first_available_variant
+  assign card_variant = card_first
+  # Prix « Da … » : variante disponible la moins chère quand elle coûte moins que la première (tri « Prezzo crescente »
+  # de Shopify fait sur ce prix : sans ça, une carte à €47 pouvait suivre une carte à €26). Prix, -% et prix barré de
+  # cette variante ; la photo reste celle de la première variante.
+  assign card_from = false
+  if product.price_varies and product.price_min < card_first.price
+    for card_v in product.variants
+      if card_v.available and card_v.price == product.price_min
+        assign card_variant = card_v
+        assign card_from = true
+        break
+      endif
+    endfor
+  endif
   assign card_on_sale = false
   assign card_pct = 0
   if card_variant.compare_at_price > card_variant.price
@@ -33,7 +47,7 @@
     assign card_saved_money = card_saved_rounded | money_without_trailing_zeros | strip_html
   endif
 
-  assign card_image = card_variant.featured_image | default: product.featured_image
+  assign card_image = card_first.featured_image | default: product.featured_image
   assign card_ratio = 1
   if card_image.aspect_ratio > 0
     assign card_ratio = 1.0 | divided_by: card_image.aspect_ratio
@@ -213,7 +227,13 @@
       </p>
     {%- endif -%}
     <p class="mshein-card__price{% if card_on_sale %} is-sale{% endif %}">
-      <span class="mshein-card__now{% if card_tag == 'li' %} alibaba-card__price-main{% endif %}">{{ card_variant.price | money }}</span>
+      <span class="mshein-card__now{% if card_tag == 'li' %} alibaba-card__price-main{% endif %}">
+        {%- if card_from -%}
+          {%- comment -%} « Da {amount} » (texte des scripts) : le mot avant le montant. {%- endcomment -%}
+          {{- 'mobile.js.collection_from' | t | split: '{' | first | strip -}}{{ ' ' }}
+        {%- endif -%}
+        {{- card_variant.price | money -}}
+      </span>
       {%- if card_on_sale -%}
         <span class="mshein-card__pct">-{{ card_pct }}%</span><s class="old-price">{{ card_variant.compare_at_price | money }}</s>
       {%- endif -%}
