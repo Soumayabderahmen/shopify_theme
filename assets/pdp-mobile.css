@@ -95,11 +95,17 @@
   scroll-snap-align: center;
 }
 
+/* Photo entière, centrée dans le carré : les photos du produit n'ont pas toutes le même format (750 × 1000, bannières
+   2480 × 228…). Le thème impose « height: auto !important » aux images : la photo débordait et était coupée en bas. */
 #root .pdp-m__sl img {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: 100% !important;
+  object-fit: contain;
+}
+
+.pdp-m__sl {
+  background: #fff;
 }
 
 .pdp-m__cnt {
