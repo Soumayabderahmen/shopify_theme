@@ -1889,6 +1889,29 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   margin: 0;
 }
 
+/* « Acquista ora » (bouton Shopify sans marque, quand Shop Pay n'est pas proposé) : sorti du formulaire du thème, il
+   perdait ses styles et s'affichait en simple texte. Même taille que « Aggiungi al carrello », contour bleu nuit. */
+#root .pdp-m .pdp-m__express .shopify-payment-button__button--unbranded {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  height: 52px;
+  min-height: 0;
+  margin: 0;
+  padding: 0 16px;
+  color: var(--pm-ink);
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  background: #fff;
+  border: 1.5px solid var(--pm-ink);
+  border-radius: 16px;
+  box-shadow: none;
+}
+
 .pdp-m__cta svg {
   width: 21px;
   height: 21px;
