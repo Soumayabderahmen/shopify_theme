@@ -3498,8 +3498,8 @@ body.template-product:has([data-pdp-hd]) #content {
 /* ===================== Avis au style du prototype SHEIN (bloc Ali Reviews déplacé dans #pdp-reviews) =====================
    Même contenu réel (note, barres, médias, liste, « Carica altro ») ; seul l'habillage change : carte blanche arrondie,
    titre centré, médias en grandes vignettes, bande cadeau orange, avis en cartes bordées avec l'initiale de l'auteur
-   (assets/pdp-mobile.js, data-pdp-initial). Le choix de langue de l'app et « Scrivi una Recensione » sont masqués
-   comme dans le prototype : toucher la bande cadeau ouvre toujours le formulaire d'avis de l'app. */
+   (assets/pdp-mobile.js, data-pdp-initial). « Scrivi una Recensione » est masqué comme dans le prototype : toucher
+   la bande cadeau ouvre toujours le formulaire d'avis de l'app. Le drapeau (langue des avis) reste à droite du titre. */
 #root .pdp-m #pdp-reviews {
   margin: 8px 8px 0;
   padding: 14px 14px 16px;
@@ -3535,9 +3535,26 @@ body.template-product:has([data-pdp-hd]) #content {
   text-align: center !important;
 }
 
-#root #pdp-reviews .alr-wh-comp-select-language,
 #root #pdp-reviews .alr-wh-comp-filter-buttons {
   display: none !important;
+}
+
+/* Choix de la langue des avis (drapeau) : gardé, à droite du titre centré. */
+#root #pdp-reviews .alr-wh-comp-review-box-title {
+  position: relative;
+  padding: 0 58px !important;
+}
+
+#root #pdp-reviews .alr-wh-comp-review-box-title-content {
+  font-size: 18px !important;
+}
+
+#root #pdp-reviews .alr-wh-comp-select-language {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  margin: 0 !important;
+  transform: translateY(-50%);
 }
 
 /* Note : grand chiffre, étoiles, nombre d'avis, centrés */

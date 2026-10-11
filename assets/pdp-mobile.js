@@ -15,6 +15,15 @@
   (function () {
     var header = root.querySelector('[data-pdp-hd]');
     if (!header) return;
+    // L'en-tête du site est masqué sur la fiche (assets/pdp-mobile.css) : l'ajout rapide des cartes
+    // (snippets/mobile-quick-add.liquid, rendu dans cet en-tête) en sort, sinon il s'ouvre caché.
+    var siteHeader = document.querySelector('[id$="__header"].shopify-section');
+    var pageRoot = document.getElementById('root');
+    if (siteHeader && pageRoot) {
+      siteHeader.querySelectorAll('[data-qa-scrim], [data-mobile-quick-add], [data-qa-toast]').forEach(function (el) {
+        pageRoot.appendChild(el);
+      });
+    }
     var row = header.querySelector('.pdp-m__hdr');
     // Hauteur de la ligne de l'en-tête : barres collées dessous (puces de « Potrebbe piacerti anche »).
     var syncHeight = function () {
