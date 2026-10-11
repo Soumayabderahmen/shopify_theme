@@ -2168,6 +2168,37 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   scroll-margin-top: 60px;
 }
 
+/* Avis et « Potrebbe piacerti anche » atteints par un lien (note ★, onglets) : sous l'en-tête ET la barre d'onglets
+   (40px) qui apparaît pendant le saut ; sinon le titre « Recensioni dei Clienti » restait caché dessous. */
+#root .pdp-m #pdp-reviews,
+#root .pdp-m #pdp-related {
+  scroll-margin-top: calc(var(--mshein-header-h, 52px) + 40px);
+}
+
+/* Avis pas encore affichés par l'app (Ali Reviews remplit son bloc avec un délai) : squelette animé au lieu d'un
+   grand vide gris quand on y arrive par la note ★ ou l'onglet « Recensioni ». */
+#root .pdp-m #pdp-reviews:has([data-pdp-reviews-slot] .shopify-app-block):not(:has(.alr-wh-comp-review-box-title)) [data-pdp-reviews-slot] {
+  min-height: 360px;
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 0%), rgb(255 255 255 / 70%), rgb(255 255 255 / 0%)) -200px 0 / 200px 100% no-repeat,
+    linear-gradient(#eceef4, #eceef4) center 8px / 55% 20px no-repeat,
+    linear-gradient(#eceef4, #eceef4) center 48px / 64px 44px no-repeat,
+    linear-gradient(#eceef4, #eceef4) center 104px / 40% 12px no-repeat,
+    linear-gradient(#eceef4, #eceef4) 0 140px / 100% 8px no-repeat,
+    linear-gradient(#eceef4, #eceef4) 0 160px / 100% 8px no-repeat,
+    linear-gradient(#eceef4, #eceef4) 0 180px / 100% 8px no-repeat,
+    linear-gradient(#eceef4, #eceef4) 0 220px / 48% 130px no-repeat,
+    linear-gradient(#eceef4, #eceef4) 100% 220px / 48% 130px no-repeat;
+  border-radius: 12px;
+  animation: pdp-rv-shine 1.2s linear infinite;
+}
+
+@keyframes pdp-rv-shine {
+  to {
+    background-position: calc(100% + 200px) 0, center 8px, center 48px, center 104px, 0 140px, 0 160px, 0 180px, 0 220px, 100% 220px;
+  }
+}
+
 .pdp-m__desc .pdp-m__sec {
   margin-top: 0;
   padding: 14px 16px 18px;

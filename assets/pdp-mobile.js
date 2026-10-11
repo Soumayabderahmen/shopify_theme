@@ -147,11 +147,14 @@
       });
       tabButtons.forEach(function (button, index) { button.classList.toggle('is-on', index === active); });
     };
-    window.addEventListener('scroll', function () {
+    var queueSync = function () {
       if (ticking) return;
       ticking = true;
       window.requestAnimationFrame(syncTabs);
-    }, { passive: true });
+    };
+    window.addEventListener('scroll', queueSync, { passive: true });
+    // Hauteurs qui changent sans défilement (avis de l'app, produits « Consigliati » chargés après) : onglet actif recalculé.
+    if ('ResizeObserver' in window) new ResizeObserver(queueSync).observe(root);
     syncTabs();
     tabButtons.forEach(function (button) {
       button.addEventListener('click', function () {
