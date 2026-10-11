@@ -26,10 +26,10 @@
         "faq_1": {
           "type": "text",
           "settings": {
-            "faq_question": "When will my order be delivered?",
+            "faq_question": "Quando verrà consegnato il mio ordine?",
             "icon": "none",
             "header_image_width": 25,
-            "faq_answer": "<p>We ship worldwide. Your order will be packaged really carefully and delivered wherever you want. Delivery takes between 2-4 business days. You will receive an e-mail after ordering with more information about the delivery.</p>",
+            "faq_answer": "<p>Spediamo in tutto il mondo. Il tuo ordine verrà imballato con la massima cura e consegnato dove desideri. La consegna richiede da 2 a 4 giorni lavorativi. Dopo l'ordine riceverai un'e-mail con maggiori informazioni sulla consegna.</p>",
             "page": "",
             "image_width": 465,
             "liquid": "",
@@ -40,10 +40,10 @@
         "faq_2": {
           "type": "text",
           "settings": {
-            "faq_question": "Can I Return my product?",
+            "faq_question": "Posso restituire il mio prodotto?",
             "icon": "none",
             "header_image_width": 25,
-            "faq_answer": "<p>Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "faq_answer": "<p>Gli ordini possono essere restituiti o cambiati entro 30 giorni dalla ricezione del pacco, purché siano nelle condizioni originali e rivendibili.</p>",
             "page": "",
             "image_width": 465,
             "liquid": "",
@@ -54,10 +54,10 @@
         "faq_3": {
           "type": "text",
           "settings": {
-            "faq_question": "What can I do if my item (or part of it) is damaged?",
+            "faq_question": "Cosa posso fare se il mio articolo (o una parte di esso) è danneggiato?",
             "icon": "none",
             "header_image_width": 25,
-            "faq_answer": "<p>We work hard to deliver your items without damage. Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "faq_answer": "<p>Facciamo il possibile per consegnare i tuoi articoli senza danni. Gli ordini possono essere restituiti o cambiati entro 30 giorni dalla ricezione del pacco, purché siano nelle condizioni originali e rivendibili.</p>",
             "page": "",
             "image_width": 465,
             "liquid": "",
@@ -74,7 +74,7 @@
       "settings": {
         "alignment": "left",
         "compact": false,
-        "title": "<h2>Frequently asked questions</h2>",
+        "title": "<h2>Domande frequenti</h2>",
         "title_underline_style": "none",
         "spacing_desktop": 50,
         "spacing_mobile": 30
@@ -93,24 +93,24 @@
         "b5e4bbb1-c18d-4871-8369-8084a11a9ba8": {
           "type": "text",
           "settings": {
-            "title": "Name",
-            "placeholder": "Name",
+            "title": "Nome",
+            "placeholder": "Nome",
             "required": false
           }
         },
         "42924c9f-d314-4b70-98a2-8c9c70530399": {
           "type": "textarea",
           "settings": {
-            "title": "Message",
-            "placeholder": "Message",
+            "title": "Messaggio",
+            "placeholder": "Messaggio",
             "required": false
           }
         },
         "99db52c7-524d-42d1-b323-6fa663d9bcd3": {
           "type": "checkbox",
           "settings": {
-            "title": "I want to receive marketing",
-            "option_1": "Yes",
+            "title": "Voglio ricevere offerte e novità",
+            "option_1": "Sì",
             "option_2": "No",
             "option_3": "",
             "option_4": "",
@@ -128,7 +128,7 @@
       ],
       "settings": {
         "alignment": "left",
-        "title": "<h2>Contact form</h2>",
+        "title": "<h2>Modulo di contatto</h2>",
         "title_underline_style": "none",
         "button_style": "primary plain",
         "show_placeholder": true,
@@ -144,8 +144,8 @@
           "type": "information",
           "settings": {
             "color_palette": "scheme-7",
-            "title": "Account details",
-            "text": "<p><a href=\"/account\" title=\"/account\">Track your last order</a>, <a href=\"/account\" title=\"/account\">view all orders</a> or <a href=\"/account/addresses\" title=\"/account/addresses\">manage your addresses</a>.</p>",
+            "title": "Il mio account",
+            "text": "<p><a href=\"/account\" title=\"/account\">Segui il tuo ultimo ordine</a>, <a href=\"/account\" title=\"/account\">vedi tutti gli ordini</a> o <a href=\"/account/addresses\" title=\"/account/addresses\">gestisci i tuoi indirizzi</a>.</p>",
             "show_login_links": true,
             "show_shop_address": false,
             "show_maps_url": false,
@@ -158,8 +158,8 @@
           "type": "information",
           "settings": {
             "color_palette": "scheme-3",
-            "title": "Customer service",
-            "text": "<p>Give us a call or send us an email whenever you feel like. </p>",
+            "title": "Servizio clienti",
+            "text": "<p>Chiamaci o scrivici una e-mail quando vuoi.</p>",
             "show_login_links": false,
             "show_shop_address": false,
             "show_maps_url": false,
