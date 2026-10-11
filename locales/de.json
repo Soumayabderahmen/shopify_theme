@@ -653,7 +653,8 @@
     "share_more": "Mehr",
     "copied": "Link kopiert",
     "buy_off": "-{{ percent }}% RABATT!",
-    "coupon_band": "Gutschein -{{ percent }}% auf die ganze Bestellung · {{ code }}"
+    "coupon_band": "Gutschein -{{ percent }}% auf die ganze Bestellung · {{ code }}",
+    "guarantee_sub": "Rückgabe, Versand und Erstattungen"
   },
   "mobile_terms": {
     "eyebrow": "platinumshop-Gutschein",

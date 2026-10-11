@@ -740,7 +740,8 @@
     "share_more": "Plus",
     "copied": "Lien copié",
     "buy_off": "-{{ percent }}% DE RÉDUCTION !",
-    "coupon_band": "Coupon -{{ percent }}% sur toute la commande · {{ code }}"
+    "coupon_band": "Coupon -{{ percent }}% sur toute la commande · {{ code }}",
+    "guarantee_sub": "Retours, livraison et remboursements"
   },
   "mobile_terms": {
     "eyebrow": "Coupon platinumshop",

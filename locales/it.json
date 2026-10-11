@@ -742,7 +742,8 @@
     "share_more": "Altro",
     "copied": "Link copiato",
     "buy_off": "-{{ percent }}% DI SCONTO!",
-    "coupon_band": "Coupon -{{ percent }}% su tutto l'ordine · {{ code }}"
+    "coupon_band": "Coupon -{{ percent }}% su tutto l'ordine · {{ code }}",
+    "guarantee_sub": "Resi, spedizione e rimborsi"
   },
   "mobile_terms": {
     "eyebrow": "Coupon platinumshop",

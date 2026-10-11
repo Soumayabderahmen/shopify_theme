@@ -671,7 +671,8 @@
     "share_more": "Meer",
     "copied": "Link gekopieerd",
     "buy_off": "-{{ percent }}% KORTING!",
-    "coupon_band": "Kortingscode -{{ percent }}% op je hele bestelling · {{ code }}"
+    "coupon_band": "Kortingscode -{{ percent }}% op je hele bestelling · {{ code }}",
+    "guarantee_sub": "Retouren, verzending en terugbetalingen"
   },
   "mobile_terms": {
     "eyebrow": "platinumshop-coupon",

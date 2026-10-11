@@ -748,7 +748,8 @@
     "share_more": "Mai mult",
     "copied": "Link copiat",
     "buy_off": "-{{ percent }}% REDUCERE!",
-    "coupon_band": "Cupon -{{ percent }}% la toată comanda · {{ code }}"
+    "coupon_band": "Cupon -{{ percent }}% la toată comanda · {{ code }}",
+    "guarantee_sub": "Retururi, livrare și rambursări"
   },
   "mobile_terms": {
     "eyebrow": "Cupon platinumshop",

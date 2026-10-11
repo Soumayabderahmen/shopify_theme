@@ -3437,7 +3437,8 @@
     "share_more": "More",
     "copied": "Link copied",
     "buy_off": "-{{ percent }}% OFF!",
-    "coupon_band": "Coupon -{{ percent }}% on your whole order · {{ code }}"
+    "coupon_band": "Coupon -{{ percent }}% on your whole order · {{ code }}",
+    "guarantee_sub": "Returns, shipping and refunds"
   },
   "mobile_terms": {
     "eyebrow": "platinumshop coupon",
