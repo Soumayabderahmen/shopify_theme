@@ -1953,8 +1953,9 @@
         buy.classList.toggle('is-hidden', entries[entries.length - 1].isIntersecting);
       }).observe(mainCta);
     }
-    // Cœur : wishlist du site (window.mobileWishlist, assets/mobile-temu-header.js, chargé après ce script :
-    // mis en place à DOMContentLoaded, une fois tous les scripts « defer » exécutés), variante choisie comprise.
+    // Cœur : wishlist du site (window.mobileWishlist, assets/mobile-temu-header.js, chargé après ce script). Visible et
+    // déjà rouge dès le premier affichage (snippets/pdp-mobile-top.liquid lit la wishlist enregistrée) ; un toucher
+    // avant la fin du chargement attend la wishlist (DOMContentLoaded, après tous les scripts « defer »).
     var fav = buy.querySelector('[data-pdp-fav]');
     var paintFav = function () {
       var saved = window.mobileWishlist.has(fav.getAttribute('data-product-id'));
@@ -1962,30 +1963,31 @@
       fav.setAttribute('aria-pressed', String(saved));
       fav.setAttribute('aria-label', fav.getAttribute(saved ? 'data-remove' : 'data-add'));
     };
-    var setupFav = function () {
-      if (!fav || !window.mobileWishlist) return;
-      fav.hidden = false;
-      paintFav();
-      fav.addEventListener('click', function () {
-        var variant = currentVariant();
-        var saved = window.mobileWishlist.toggle({
-          id: fav.getAttribute('data-product-id'),
-          variantId: variant ? variant.id : '',
-          variantTitle: variant ? variant.title : '',
-          title: fav.getAttribute('data-title'),
-          url: fav.getAttribute('data-url'),
-          image: fav.getAttribute('data-image'),
-          price: variant ? money(variant.price) : '',
-          priceCents: variant ? variant.price : 0,
-          compareAtPrice: variant && variant.compare > variant.price ? money(variant.compare) : '',
-          compareAtPriceCents: variant ? variant.compare : 0
-        });
-        paintFav();
-        if (root.pdpToast) root.pdpToast(fav.getAttribute(saved ? 'data-added' : 'data-removed'));
-      });
+    var whenWishlist = function (callback) {
+      if (window.mobileWishlist) callback();
+      else document.addEventListener('DOMContentLoaded', function () { if (window.mobileWishlist) callback(); });
     };
-    if (window.mobileWishlist) setupFav();
-    else document.addEventListener('DOMContentLoaded', setupFav);
+    var toggleFav = function () {
+      var variant = currentVariant();
+      var saved = window.mobileWishlist.toggle({
+        id: fav.getAttribute('data-product-id'),
+        variantId: variant ? variant.id : '',
+        variantTitle: variant ? variant.title : '',
+        title: fav.getAttribute('data-title'),
+        url: fav.getAttribute('data-url'),
+        image: fav.getAttribute('data-image'),
+        price: variant ? money(variant.price) : '',
+        priceCents: variant ? variant.price : 0,
+        compareAtPrice: variant && variant.compare > variant.price ? money(variant.compare) : '',
+        compareAtPriceCents: variant ? variant.compare : 0
+      });
+      paintFav();
+      if (root.pdpToast) root.pdpToast(fav.getAttribute(saved ? 'data-added' : 'data-removed'));
+    };
+    if (fav) {
+      whenWishlist(paintFav);
+      fav.addEventListener('click', function () { whenWishlist(toggleFav); });
+    }
   }
   // « -X% DI SCONTO! » du bouton de la barre : réduction de la variante choisie (rien sans prix barré).
   var buyOff = buy && buy.querySelector('[data-pdp-buy-off]');

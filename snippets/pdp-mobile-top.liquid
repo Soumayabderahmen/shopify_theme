@@ -546,7 +546,23 @@
     assign buy_off_text = 'mobile_pdp_hd.buy_off' | t: percent: buy_off
   -%}
   <div class="pdp-m__buy" data-pdp-buy>
-    <button class="pdp-m__fav" type="button" data-pdp-fav hidden aria-pressed="false" data-add="{{ 'mobile.js.add_to_wishlist' | t | escape }}" data-remove="{{ 'mobile.js.remove_from_wishlist' | t | escape }}" data-added="{{ 'mobile.js.added_to_wishlist' | t | escape }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t | escape }}" data-product-id="{{ product.id }}" data-title="{{ product.title | escape }}" data-url="{{ product.url }}" data-image="{{ product.featured_image | image_url: width: 600 }}" aria-label="{{ 'mobile.js.add_to_wishlist' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+    <button class="pdp-m__fav" type="button" data-pdp-fav aria-pressed="false" data-add="{{ 'mobile.js.add_to_wishlist' | t | escape }}" data-remove="{{ 'mobile.js.remove_from_wishlist' | t | escape }}" data-added="{{ 'mobile.js.added_to_wishlist' | t | escape }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t | escape }}" data-product-id="{{ product.id }}" data-title="{{ product.title | escape }}" data-url="{{ product.url }}" data-image="{{ product.featured_image | image_url: width: 600 }}" aria-label="{{ 'mobile.js.add_to_wishlist' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+    <script>
+      /* Cœur rouge dès la première image si le produit est déjà dans la wishlist (même stockage que
+         assets/mobile-temu-header.js) ; le toucher est branché ensuite par assets/pdp-mobile.js. */
+      (function () {
+        var fav = document.currentScript.previousElementSibling;
+        try {
+          var items = JSON.parse(window.localStorage.getItem('platinumshop:wishlist:v1') || '[]');
+          var saved = Array.isArray(items) && items.some(function (item) { return item && String(item.id) === fav.getAttribute('data-product-id'); });
+          if (saved) {
+            fav.classList.add('is-on');
+            fav.setAttribute('aria-pressed', 'true');
+            fav.setAttribute('aria-label', fav.getAttribute('data-remove'));
+          }
+        } catch (error) { /* stockage indisponible : cœur vide */ }
+      })();
+    </script>
     <button class="pdp-m__go" type="button" data-pdp-add>
       <small data-pdp-buy-off data-template="{{ buy_off_template | escape }}"{% if buy_off < 1 %} hidden{% endif %}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"/></svg><span>{{ buy_off_text }}</span></small>
       <b>{{ 'mobile.pdp.add_to_cart' | t }}</b>
