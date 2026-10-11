@@ -222,6 +222,22 @@
           </svg>
           <span class="mobile-home-cart-count"{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span>
         </a>
+        <script>
+          /* Nom lu par les lecteurs d'écran : suit le compteur (mis à jour par tous les scripts du panier), sinon il
+             annonçait encore l'ancien total une fois le panier vidé. */
+          (function () {
+            var link = document.currentScript.previousElementSibling;
+            var count = link && link.querySelector('.mobile-home-cart-count');
+            if (!count) return;
+            var title = {{ 'cart.title' | t | json }};
+            var sync = function () {
+              var n = parseInt(count.textContent, 10) || 0;
+              link.setAttribute('aria-label', count.hidden || n === 0 ? title : title + ' (' + n + ')');
+            };
+            sync();
+            new MutationObserver(sync).observe(count, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+          })();
+        </script>
       {%- endunless -%}
     </div>
   </div>
