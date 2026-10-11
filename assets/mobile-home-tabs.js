@@ -671,6 +671,8 @@
   var collectionLink = function (target) {
     var link = target && target.closest && target.closest('a[href]');
     if (!link || nav.contains(link) || link.target === '_blank' || link.hasAttribute('download') || link.closest('[data-dept-sheet]')) return null;
+    // Ancre de la page (rayons à gauche du panneau Categoria) : pas un lien de collection, même complétée par le navigateur.
+    if ((link.getAttribute('href') || '').charAt(0) === '#') return null;
     var url = new URL(link.href, window.location.href);
     var match = url.pathname.match(/\/collections\/([^/]+)\/?$/);
     // vendors / types : listes spéciales de Shopify (pas des collections). ?view=… : morceau de page chargé par

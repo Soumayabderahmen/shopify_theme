@@ -481,6 +481,9 @@
               var link = target && target.closest && target.closest('a[href]');
               // « Nuovi » du panneau Categoria : change de liste dans le panneau, pas de page.
               if (!link || link.target === '_blank' || link.hasAttribute('download') || link.hasAttribute('data-category-new-toggle')) return null;
+              // Ancre de la page (« #mobile-category-panel-5 » : rayons à gauche du panneau Categoria) : sur une page
+              // collection, le navigateur la complète en « /collections/…#… », qui ressemblait à un lien de collection.
+              if ((link.getAttribute('href') || '').charAt(0) === '#') return null;
               if (link.closest('.mobile-temu-categories') && !header.contains(link)) return null;
               return collectionPath(link.href) ? link : null;
             };
