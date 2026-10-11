@@ -271,6 +271,9 @@ function initMobileTemuHeader() {
 
   // Devise du visiteur (CHF, EUR…) : celle de la boutique affichée, comme le panier (avant : « € » écrit en dur).
   function formatWishlistMoney(cents) {
+    // Mobile : format de prix de la boutique (snippets/mobile-i18n.liquid), comme le panier et les cartes
+    // (« CHF 17.00 », pas « 17,00 CHF »). L'ordinateur garde son format.
+    if (window.mobileMoney && window.matchMedia('(max-width: 760px)').matches) return window.mobileMoney(Number(cents) || 0);
     var explore = document.querySelector('[data-mobile-explore-drawer][data-currency]');
     var currency = (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) ||
       (explore && explore.getAttribute('data-currency')) || 'EUR';
@@ -1877,6 +1880,8 @@ function initMobileTemuHeader() {
     if (typeof price !== 'number' || !Number.isFinite(price)) {
       throw new Error('Invalid product price for recently viewed product.');
     }
+    // Format de prix de la boutique (snippets/mobile-i18n.liquid), comme les cartes et le panier.
+    if (window.mobileMoney) return window.mobileMoney(price);
     return new Intl.NumberFormat(document.documentElement.lang || 'it-IT', {
       style: 'currency',
       currency: currency
