@@ -439,26 +439,84 @@
     <div data-pdp-reviews-slot></div>
   </section>
 
-  {%- comment -%} 13. Potrebbe piacerti anche : recommandations Shopify (API), remplies par le script. « Mostra più prodotti »
-     ajoute 6 produits de plus : les recommandations restantes, puis les recommandations des produits déjà affichés
-     (produits semblables, prix dans la devise du client). {%- endcomment -%}
-  <section class="pdp-m__rel" data-pdp-related data-url="{{ routes.product_recommendations_url }}.json?limit=10&intent=related&product_id=" data-product-id="{{ product.id }}" hidden>
+  {%- comment -%}
+    13. Potrebbe piacerti anche, comme SHEIN : puces collées sous l'en-tête = « Consigliati » (recommandations Shopify du
+    produit, puis sa catégorie) et les catégories proches dans le menu principal (la catégorie du produit, ses sœurs du
+    même groupe, puis les autres groupes du même rayon). Cartes de la page d'accueil (snippets/mshein-card.liquid) en
+    2 colonnes décalées, 20 de plus en approchant du bas, sans bouton ; un toucher sur une puce change le fil sur place.
+    Pages des catégories : modèle collection.mshein-dept-page ; recommandations : search.mshein-search-page (assets/pdp-mobile.js).
+  {%- endcomment -%}
+  {%- liquid
+    assign rl_menu = linklists['main-menu']
+    assign rl_handles = product.collections | map: 'handle'
+    assign rl_cat = nil
+    assign rl_group = nil
+    assign rl_top = nil
+    for rl_top_link in rl_menu.links
+      for rl_level2 in rl_top_link.links
+        for rl_level3 in rl_level2.links
+          if rl_level3.type == 'collection_link' and rl_handles contains rl_level3.object.handle
+            assign rl_cat = rl_level3
+            assign rl_group = rl_level2
+            assign rl_top = rl_top_link
+            break
+          endif
+        endfor
+        if rl_cat != nil
+          break
+        endif
+      endfor
+      if rl_cat != nil
+        break
+      endif
+    endfor
+    # Sans catégorie de 3e niveau : un groupe (2e niveau) qui contient le produit.
+    if rl_cat == nil
+      for rl_top_link in rl_menu.links
+        for rl_level2 in rl_top_link.links
+          if rl_level2.type == 'collection_link' and rl_handles contains rl_level2.object.handle
+            assign rl_cat = rl_level2
+            assign rl_top = rl_top_link
+            break
+          endif
+        endfor
+        if rl_cat != nil
+          break
+        endif
+      endfor
+    endif
+    assign rl_seen = ','
+  -%}
+  {%- capture rl_chips -%}
+    {%- if rl_cat != nil -%}
+      {%- assign rl_seen = rl_seen | append: rl_cat.object.handle | append: ',' -%}
+      <button type="button" role="tab" aria-selected="false" data-src="{{ rl_cat.object.url }}?view=mshein-dept-page">{{ rl_cat.title | escape }}</button>
+      {%- if rl_group != nil -%}
+        {%- for rl_link in rl_group.links -%}
+          {%- assign rl_key = ',' | append: rl_link.object.handle | append: ',' -%}
+          {%- if rl_link.type != 'collection_link' or rl_link.object == blank or rl_seen contains rl_key or rl_link.object.products_count == 0 -%}{%- continue -%}{%- endif -%}
+          {%- assign rl_seen = rl_seen | append: rl_link.object.handle | append: ',' -%}
+          <button type="button" role="tab" aria-selected="false" data-src="{{ rl_link.object.url }}?view=mshein-dept-page">{{ rl_link.title | escape }}</button>
+        {%- endfor -%}
+      {%- endif -%}
+      {%- for rl_link in rl_top.links -%}
+        {%- assign rl_key = ',' | append: rl_link.object.handle | append: ',' -%}
+        {%- if rl_link.type != 'collection_link' or rl_link.object == blank or rl_seen contains rl_key or rl_link.object.products_count == 0 -%}{%- continue -%}{%- endif -%}
+        {%- if rl_group != nil and rl_link.object.handle == rl_group.object.handle -%}{%- continue -%}{%- endif -%}
+        {%- assign rl_seen = rl_seen | append: rl_link.object.handle | append: ',' -%}
+        <button type="button" role="tab" aria-selected="false" data-src="{{ rl_link.object.url }}?view=mshein-dept-page">{{ rl_link.title | escape }}</button>
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endcapture -%}
+  <section class="pdp-m__rel" id="pdp-related" data-pdp-related data-url="{{ routes.product_recommendations_url }}.json?limit=10&intent=related&product_id={{ product.id }}" data-search="{{ routes.search_url }}" data-product-id="{{ product.id }}" data-handle="{{ product.handle }}"{% if rl_cat != nil %} data-cat="{{ rl_cat.object.url }}?view=mshein-dept-page"{% endif %}>
     <h2>{{ 'mobile.pdp.you_may_like' | t }}</h2>
-    <div class="pdp-m__rail" data-pdp-rail></div>
-    <button type="button" class="pdp-m__relmore" data-pdp-related-more aria-haspopup="dialog" hidden>{{ 'product.form.show_more' | t }}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
-    {%- comment -%} Fenêtre « Mostra più prodotti » : produits semblables, 6 de plus à chaque fin de liste (assets/pdp-mobile.js). {%- endcomment -%}
-    <dialog class="pdp-m__pt pdp-m__rsh" data-pdp-related-sheet aria-labelledby="pdp-rsh-title">
-      <div class="pdp-m__pt-in">
-        <div class="pdp-m__rsh-hd">
-          <h2 id="pdp-rsh-title">{{ 'mobile.pdp.you_may_like' | t }}</h2>
-          <button class="pdp-m__pt-x" type="button" data-pdp-related-close aria-label="{{ 'mobile.pdp.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-        </div>
-        <div class="pdp-m__pt-body" data-pdp-related-body>
-          <div class="pdp-m__rail pdp-m__rsh-grid" data-pdp-related-grid></div>
-          <div class="pdp-m__rsh-end" data-pdp-related-end aria-hidden="true"><span></span><span></span><span></span></div>
-        </div>
-      </div>
-    </dialog>
+    <div class="pdp-m__rchips" role="tablist" data-pdp-rchips>
+      <button type="button" role="tab" aria-selected="true" class="is-on" data-src="rec">{{ 'mobile.home.recommended' | t }}</button>
+      {{- rl_chips -}}
+    </div>
+    <div class="pdp-m__feed" data-pdp-feed><ul class="pdp-m__fcol"></ul><ul class="pdp-m__fcol"></ul></div>
+    <div class="mshein-loader pdp-m__floader" data-pdp-feed-loader hidden aria-label="{{ 'mobile.js.loading' | t }}"><i></i><i></i><i></i></div>
+    <div class="pdp-m__fsent" data-pdp-feed-sentinel></div>
   </section>
 
   {%- comment -%} 14. Barre d'achat fixe (au-dessus de la barre du bas) : cachée quand le gros bouton est visible. {%- endcomment -%}

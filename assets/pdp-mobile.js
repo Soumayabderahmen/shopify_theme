@@ -1487,120 +1487,163 @@
     });
   });
 
-  /* ---------- Potrebbe piacerti anche : recommandations Shopify ---------- */
+  /* ---------- Potrebbe piacerti anche, comme SHEIN (snippets/pdp-mobile-top.liquid, section 13) ----------
+     Puces : « Consigliati » (recommandations Shopify du produit, dans leur ordre, puis sa catégorie) et les catégories
+     proches du menu. Cartes de la page d'accueil (snippets/mshein-card.liquid, rendues par le serveur : pages
+     search.mshein-search-page pour les recommandations, collection.mshein-dept-page pour les catégories) en 2 colonnes
+     décalées ; page suivante dès qu'on approche du bas (points du site) ; une puce change le fil sur place. */
   var related = root.querySelector('[data-pdp-related]');
   if (related) {
-    var relatedRail = related.querySelector('[data-pdp-rail]');
-    var relatedMore = related.querySelector('[data-pdp-related-more]');
-    var RELATED_STEP = 6;
-    var relatedPool = [];
-    var relatedSeen = {};
-    relatedSeen[related.getAttribute('data-product-id')] = true;
-    var relatedCard = function (product) {
-      // Prix, prix barré et −% de la même variante (1re disponible, comme les cartes produit).
-      var variants = product.variants || [];
-      var shown = variants.find(function (variant) { return variant.available; }) || variants[0] || product;
-      var price = shown.price;
-      var compareAt = shown.compare_at_price || 0;
-      var sale = compareAt > price;
-      var off = sale ? Math.floor((compareAt - price) * 100 / compareAt) : 0;
-      var image = product.featured_image ? product.featured_image + (product.featured_image.indexOf('?') === -1 ? '?' : '&') + 'width=360' : '';
-      var title = String(product.title).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
-      return '<a class="pdp-m__rc" href="' + product.url + '"><span class="pdp-m__pp">' + (image ? '<img src="' + image + '" alt="" loading="lazy">' : '') + (sale ? '<i>-' + off + '%</i>' : '') + '</span><p>' + title + '</p><div class="pdp-m__pr' + (sale ? ' is-sale' : '') + '"><b>' + money(price) + '</b>' + (sale ? '<s>' + money(compareAt) + '</s>' : '') + '</div></a>';
+    var feedBox = related.querySelector('[data-pdp-feed]');
+    var feedCols = feedBox.querySelectorAll('.pdp-m__fcol');
+    var feedLoader = related.querySelector('[data-pdp-feed-loader]');
+    var feedSentinel = related.querySelector('[data-pdp-feed-sentinel]');
+    var feedChips = related.querySelector('[data-pdp-rchips]');
+    var currentHandle = related.getAttribute('data-handle');
+    var feed = { token: 0, queue: [], next: null, busy: false, seen: {}, heights: [0, 0], order: null, clear: false };
+    var cardHandle = function (card) {
+      var link = card.querySelector('a[href*="/products/"]');
+      var match = link && /\/products\/([^/?#]+)/.exec(link.getAttribute('href'));
+      return match ? decodeURIComponent(match[1]) : '';
     };
-    var showRelated = function (products, target) {
-      (target || relatedRail).insertAdjacentHTML('beforeend', products.map(relatedCard).join(''));
+    // Hauteur estimée en « largeurs de carte » (photo + lignes), comme le fil de l'accueil : sans mesurer la page.
+    var cardHeight = function (card) {
+      var media = card.querySelector('.mshein-card__img');
+      var ratio = media && /aspect-ratio:\s*1\s*\/\s*([\d.]+)/.exec(media.getAttribute('style') || '');
+      var height = (ratio ? parseFloat(ratio[1]) : 1.2) + 0.62;
+      ['.mshein-card__rank', '.mshein-card__stars', '.mshein-card__sold', '.mshein-brandbar'].forEach(function (selector) {
+        if (card.querySelector(selector)) height += 0.09;
+      });
+      return height;
     };
-    // Recommandations d'un produit (sans ceux déjà vus) ; ses produits deviennent à leur tour des sources pour « Mostra
-    // più prodotti » : toujours des produits semblables, jamais de doublon.
-    var relatedSources = [related.getAttribute('data-product-id')];
-    var recommend = function (id) {
-      return fetch(related.getAttribute('data-url') + id, { credentials: 'same-origin' })
+    var addFeedCards = function (cards) {
+      cards.forEach(function (card) {
+        var handle = cardHandle(card);
+        if (!handle || handle === currentHandle || feed.seen[handle]) return;
+        feed.seen[handle] = true;
+        card.classList.remove('reveal');
+        card.classList.add('pdp-m__fin');
+        var index = feed.heights[0] <= feed.heights[1] ? 0 : 1;
+        feed.heights[index] += cardHeight(card);
+        feedCols[index].appendChild(card);
+      });
+      if (window.msheinCards) window.msheinCards.decorate(feedBox);
+    };
+    var loadFeed = function () {
+      if (feed.busy || !feed.next) return;
+      feed.busy = true;
+      feedLoader.hidden = false;
+      var token = feed.token;
+      var url = feed.next;
+      fetch(url, { credentials: 'same-origin' })
         .then(function (response) {
-          if (!response.ok) throw new Error('Recommendations ' + response.status);
-          return response.json();
+          if (!response.ok) throw new Error('Feed page request failed: ' + response.status);
+          return response.text();
         })
-        .then(function (data) {
-          return ((data && data.products) || []).filter(function (product) {
-            if (relatedSeen[product.id]) return false;
-            relatedSeen[product.id] = true;
-            relatedSources.push(product.id);
-            return true;
-          });
-        });
-    };
-    // Remplit la réserve jusqu'à 6 produits, en passant aux sources suivantes (au plus 4 appels par toucher).
-    var fillPool = function (tries) {
-      if (relatedPool.length >= RELATED_STEP || !relatedSources.length || !tries) return Promise.resolve();
-      return recommend(relatedSources.shift()).then(function (products) {
-        relatedPool = relatedPool.concat(products);
-        return fillPool(tries - 1);
-      });
-    };
-    var relatedDone = function () {
-      return !relatedPool.length && !relatedSources.length;
-    };
-    var updateMore = function () {
-      if (relatedMore) relatedMore.hidden = relatedDone();
-    };
-    // « Mostra più prodotti » : fenêtre (comme « Protections ») avec les produits semblables suivants ; 6 de plus
-    // quand on arrive en bas de la liste.
-    var relatedSheet = related.querySelector('[data-pdp-related-sheet]');
-    if (relatedMore && relatedSheet && typeof relatedSheet.showModal === 'function') {
-      var sheetGrid = relatedSheet.querySelector('[data-pdp-related-grid]');
-      var sheetBody = relatedSheet.querySelector('[data-pdp-related-body]');
-      var sheetEnd = relatedSheet.querySelector('[data-pdp-related-end]');
-      var sheetLoading = false;
-      var loadSheet = function () {
-        if (sheetLoading || relatedDone()) return;
-        sheetLoading = true;
-        fillPool(4).catch(function (error) {
+        .then(function (html) {
+          if (token !== feed.token) return;
+          var page = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-mshein-page]');
+          var nextLink = page && page.querySelector('[data-mshein-next]');
+          feed.next = nextLink ? nextLink.getAttribute('data-mshein-next') : (feed.queue.shift() || null);
+          var cards = page ? Array.prototype.slice.call(page.querySelectorAll(':scope > li.mshein-card')) : [];
+          // Recommandations : même ordre que Shopify (la recherche les rend par pertinence).
+          if (feed.order) {
+            var order = feed.order;
+            cards.sort(function (a, b) { return order.indexOf(cardHandle(a)) - order.indexOf(cardHandle(b)); });
+            feed.order = null;
+          }
+          // Formes grises gardées jusqu'aux premières cartes.
+          if (feed.clear) {
+            feedCols[0].innerHTML = '';
+            feedCols[1].innerHTML = '';
+            feed.clear = false;
+          }
+          addFeedCards(cards);
+          feed.busy = false;
+          feedLoader.hidden = true;
+          // Bas de page encore proche (page sans nouvelle carte, écran haut) : page suivante tout de suite.
+          if (feed.next && feedSentinel.getBoundingClientRect().top < window.innerHeight + 700) loadFeed();
+        })
+        .catch(function (error) {
           console.warn('[PDP mobile]', error);
-        }).then(function () {
-          showRelated(relatedPool.splice(0, RELATED_STEP), sheetGrid);
-          sheetLoading = false;
-          sheetEnd.hidden = relatedDone();
-          // Liste encore plus courte que la fenêtre : on continue tout de suite.
-          if (!relatedDone() && sheetBody.scrollHeight <= sheetBody.clientHeight + 200) loadSheet();
+          if (token !== feed.token) return;
+          feed.busy = false;
+          feedLoader.hidden = true;
         });
-      };
-      if ('IntersectionObserver' in window) {
-        new IntersectionObserver(function (entries) {
-          if (entries[0].isIntersecting && relatedSheet.open) loadSheet();
-        }, { root: sheetBody, rootMargin: '0px 0px 300px' }).observe(sheetEnd);
-      }
-      var closeRelated = function () {
-        relatedSheet.classList.remove('is-open');
-        window.setTimeout(function () { if (relatedSheet.open) relatedSheet.close(); }, 220);
-      };
-      relatedSheet.querySelector('[data-pdp-related-close]').addEventListener('click', closeRelated);
-      relatedSheet.addEventListener('click', function (event) {
-        if (event.target === relatedSheet) closeRelated();
-      });
-      relatedSheet.addEventListener('cancel', function (event) {
-        event.preventDefault();
-        closeRelated();
-      });
-      relatedMore.addEventListener('click', function () {
-        if (!relatedSheet.open) relatedSheet.showModal();
-        window.requestAnimationFrame(function () { relatedSheet.classList.add('is-open'); });
-        if (!sheetGrid.children.length) loadSheet();
-      });
-    }
-    var loadRelated = function () {
-      fillPool(1)
-        .then(function () {
-          if (!relatedPool.length) return;
-          showRelated(relatedPool.splice(0, RELATED_STEP));
-          related.hidden = false;
-          updateMore();
-        })
-        .catch(function (error) { console.warn('[PDP mobile]', error); });
     };
-    // Demandés 0,5 s après la mise en place de la fiche (pas à l'événement « load », qui attend toutes les apps,
-    // ~9 s) : la réponse de Shopify prend ~1 s, ils sont prêts avant que le client arrive en bas, au lieu
-    // d'attendre qu'il s'approche des avis.
-    window.setTimeout(loadRelated, 500);
+    // Recommandations du produit (identifiants Shopify) : pages de cartes du site, dans l'ordre.
+    var recommendedHandles = null;
+    var recommendations = function () {
+      if (recommendedHandles) return Promise.resolve(recommendedHandles);
+      return fetch(related.getAttribute('data-url'), { credentials: 'same-origin' })
+        .then(function (response) { return response.ok ? response.json() : { products: [] }; })
+        .then(function (data) {
+          recommendedHandles = ((data && data.products) || []).map(function (product) { return product.handle; })
+            .filter(function (handle) { return handle !== currentHandle && handle.indexOf(currentHandle + '-') !== 0; });
+          return recommendedHandles;
+        })
+        .catch(function () { recommendedHandles = []; return recommendedHandles; });
+    };
+    var startFeed = function (src, withSkeleton) {
+      feed.token += 1;
+      var token = feed.token;
+      feed.busy = true;
+      feed.next = null;
+      feed.queue = [];
+      feed.seen = {};
+      feed.heights = [0, 0];
+      feed.order = null;
+      feedLoader.hidden = true;
+      var shape = '<li class="pdp-m__fsk" aria-hidden="true"><i></i><i></i><i></i></li>';
+      feedCols[0].innerHTML = withSkeleton ? shape + shape + shape : '';
+      feedCols[1].innerHTML = withSkeleton ? shape + shape + shape : '';
+      var category = related.getAttribute('data-cat');
+      var sources = src === 'rec'
+        ? recommendations().then(function (handles) {
+          var list = [];
+          if (handles.length) {
+            var query = handles.map(function (handle) { return 'handle:"' + handle + '"'; }).join(' OR ');
+            list.push(related.getAttribute('data-search') + '?q=' + encodeURIComponent(query) + '&type=product&view=mshein-search-page');
+            feed.order = handles;
+          }
+          if (category) list.push(category);
+          return list;
+        })
+        : Promise.resolve([src]);
+      sources.then(function (list) {
+        if (token !== feed.token) return;
+        feed.clear = true;
+        feed.queue = list;
+        feed.next = feed.queue.shift() || null;
+        feed.busy = false;
+        related.hidden = !feed.next;
+        loadFeed();
+      });
+    };
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) loadFeed();
+      }, { rootMargin: '0px 0px 700px' }).observe(feedSentinel);
+    }
+    feedChips.addEventListener('click', function (event) {
+      var chip = event.target.closest('[data-src]');
+      if (!chip || chip.classList.contains('is-on')) return;
+      feedChips.querySelectorAll('[data-src]').forEach(function (item) {
+        var on = item === chip;
+        item.classList.toggle('is-on', on);
+        item.setAttribute('aria-selected', String(on));
+      });
+      // Puce au milieu de la rangée (défilement de la rangée seulement).
+      feedChips.scrollTo({ left: chip.offsetLeft - (feedChips.clientWidth - chip.offsetWidth) / 2, behavior: 'smooth' });
+      // Puces collées en haut : le fil repart de son début, juste sous elles.
+      var chipsBox = feedChips.getBoundingClientRect();
+      if (feedBox.getBoundingClientRect().top < chipsBox.bottom) {
+        window.scrollTo({ top: window.scrollY + feedBox.getBoundingClientRect().top - chipsBox.bottom });
+      }
+      startFeed(chip.getAttribute('data-src'), true);
+    });
+    // Demandé 0,5 s après la mise en place de la fiche : prêt avant que le client arrive en bas.
+    window.setTimeout(function () { startFeed('rec', false); }, 500);
   }
 
   /* ---------- Barre d'achat fixe : variante + prix ; cachée quand le gros bouton est visible ---------- */

@@ -2648,6 +2648,148 @@ dl.pdp-m__spec {
   50% { opacity: 1; transform: translateY(-3px); }
 }
 
+/* 13 bis. Potrebbe piacerti anche, comme SHEIN : puces rectangulaires (l'active en noir) collées sous l'en-tête,
+   cartes de l'accueil (assets/mshein-card.css) en 2 colonnes décalées sur fond gris, comme le fil de l'accueil. */
+#root .pdp-m .pdp-m__rel {
+  padding: 16px 0 6px;
+  background: #fff;
+}
+
+.pdp-m .pdp-m__rel h2 {
+  margin: 0 0 4px;
+}
+
+.pdp-m__rchips {
+  position: sticky;
+  top: var(--mshein-header-h, 0px);
+  z-index: 20;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 12px;
+  background: #fff;
+  scrollbar-width: none;
+}
+
+.pdp-m__rchips::-webkit-scrollbar {
+  display: none;
+}
+
+#root .pdp-m .pdp-m__rchips button {
+  flex: none;
+  height: 32px;
+  margin: 0;
+  padding: 0 12px;
+  color: #2b2f45;
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #f3f4f8;
+  border: 0;
+  border-radius: 6px;
+}
+
+#root .pdp-m .pdp-m__rchips button.is-on {
+  color: #fff;
+  font-weight: 800;
+  background: var(--pm-ink, #16123f);
+}
+
+.pdp-m__feed {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-height: 200px;
+  padding: 6px 6px 0;
+  background: #f4f5f9;
+}
+
+.pdp-m__fcol {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdp-m__fin {
+  animation: pdp-m-fin 0.35s ease both;
+}
+
+@keyframes pdp-m-fin {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+.pdp-m__fsk {
+  overflow: hidden;
+  list-style: none;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.pdp-m__fsk i {
+  display: block;
+  background: linear-gradient(100deg, #eceef3 30%, #f6f7fa 50%, #eceef3 70%);
+  background-size: 200% 100%;
+  animation: pdp-m-fsk 1.1s linear infinite;
+}
+
+.pdp-m__fsk i:first-child {
+  aspect-ratio: 3 / 4;
+}
+
+.pdp-m__fsk i + i {
+  height: 10px;
+  margin: 8px 8px 0;
+  border-radius: 4px;
+}
+
+.pdp-m__fsk i:last-child {
+  width: 55%;
+  margin-bottom: 10px;
+}
+
+@keyframes pdp-m-fsk {
+  to { background-position: -200% 0; }
+}
+
+.pdp-m__floader {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  padding: 14px 0 22px;
+  background: #f4f5f9;
+}
+
+.pdp-m__floader[hidden] {
+  display: none;
+}
+
+.pdp-m__floader i {
+  width: 8px;
+  height: 8px;
+  background: #c6c8da;
+  border-radius: 5px;
+  animation: pdp-m-floader 1.2s ease-in-out infinite;
+}
+
+.pdp-m__floader i:nth-child(2) { animation-delay: 0.4s; }
+.pdp-m__floader i:nth-child(3) { animation-delay: 0.8s; }
+
+@keyframes pdp-m-floader {
+  0%, 45%, 100% { width: 8px; background: #c6c8da; }
+  12%, 30% { width: 22px; background: #3a34d2; }
+}
+
+.pdp-m__fsent {
+  height: 1px;
+  background: #f4f5f9;
+}
+
 /* 14. Barre d'achat fixe */
 .pdp-m__buy {
   position: fixed;
