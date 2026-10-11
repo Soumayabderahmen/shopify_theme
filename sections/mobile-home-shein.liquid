@@ -368,7 +368,8 @@
         {%- render 'mshein-tab-heroes', menu: section.settings.menu, best: best -%}
         <div class="mshein-feed" data-mshein-home data-mshein-feed>
           <div class="mshein-feed__tabs" role="tablist" data-mshein-tabs>
-            <button type="button" role="tab" aria-selected="true" class="is-on" data-src="{{ for_you_src | append: '&page=2' }}">✨ {{ 'mobile.home_shein.for_you' | t }}</button>
+            {%- comment -%} « Per te » : produits et pages lus dans un ordre au hasard (assets/mobile-home-shein.js, data-random-*). {%- endcomment -%}
+            <button type="button" role="tab" aria-selected="true" class="is-on" data-src="{{ for_you_src | append: '&page=2' }}" data-random-total="{{ best.products_count }}" data-random-per-page="10">✨ {{ 'mobile.home_shein.for_you' | t }}</button>
             <button type="button" role="tab" aria-selected="false" data-src="{{ sale_src }}">🔥 {{ 'mobile.explore.on_sale' | t }}</button>
             {%- if brand_src != '' -%}
               <button type="button" role="tab" aria-selected="false" data-src="{{ brand_src | strip }}">✓ {{ 'mobile.home_shein.official_brands' | t }}</button>

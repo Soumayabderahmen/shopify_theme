@@ -37,17 +37,32 @@
         .replace('{count}', masonry.cardCount())
         .replace('{total}', count.getAttribute('data-total'));
     };
+    // Rayons et pages collection au tri par défaut, sans filtre : produits et pages dans un ordre au hasard, pour que
+    // le client voie d'autres produits à chaque visite (assets/mobile-home-shein.js). Tri ou filtre choisis, recherche,
+    // « In offerta » : ordre de Shopify gardé.
+    var randomInfo = function () {
+      if (view !== 'mshein-dept') return null;
+      var chosen = false;
+      params.forEach(function (value, key) {
+        if (key === 'sort_by' || key === 'q' || key.indexOf('filter.') === 0) chosen = true;
+      });
+      var count = results.querySelector('[data-dept-count]');
+      var total = count ? Number(count.getAttribute('data-total')) : 0;
+      return chosen || !(total > 20) ? null : { total: total, perPage: 20, shown: 1 };
+    };
     var bind = function () {
       if (masonry) masonry.destroy();
       var grid = results.querySelector('[data-mshein-grid]');
       var sentinel = results.querySelector('[data-mshein-sentinel]');
+      var random = randomInfo();
       masonry = window.msheinMasonry.create({
         grid: grid,
         sentinel: sentinel,
         loader: results.querySelector('[data-mshein-loader]'),
-        onCards: updateCount
+        onCards: updateCount,
+        random: Boolean(random)
       });
-      masonry.setSource(sentinel && sentinel.getAttribute('data-next'), true);
+      masonry.setSource(sentinel && sentinel.getAttribute('data-next'), true, random);
       if (oneColumn) masonry.setOneColumn(true);
       results.querySelectorAll('[data-dept-view]').forEach(function (button) {
         button.classList.toggle('is-on', button.getAttribute('data-dept-view') === (oneColumn ? '1' : '2'));

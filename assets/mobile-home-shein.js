@@ -174,7 +174,25 @@
       watchReveal(columnsWrap);
       if (options.onCards) options.onCards();
     };
+    // Ordre au hasard (options.random, puis setSource(…, random)) : pour que le client voie d'autres produits à chaque
+    // visite, les cartes de chaque page sont mélangées et les pages suivantes sont lues dans un ordre au hasard parmi
+    // toutes les pages de la liste (sans doublon), au lieu de 2, 3, 4… Jamais quand le client a choisi un tri ou un filtre.
+    var shuffle = function (list) {
+      for (var i = list.length - 1; i > 0; i -= 1) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var swap = list[i];
+        list[i] = list[j];
+        list[j] = swap;
+      }
+      return list;
+    };
+    var randomMode = Boolean(options.random);
     var firstCards = Array.prototype.slice.call(grid.children);
+    // Le lien « page suivante » caché (li[data-mshein-next]) reste à la fin, seules les cartes sont mélangées.
+    if (randomMode) {
+      var realCards = shuffle(firstCards.filter(function (card) { return card.classList.contains('mshein-card'); }));
+      firstCards = realCards.concat(firstCards.filter(function (card) { return !card.classList.contains('mshein-card'); }));
+    }
     grid.replaceWith(columnsWrap);
     addCards(firstCards);
 
@@ -182,6 +200,22 @@
     var nextUrl = null;
     var busy = false;
     var token = 0;
+    // Toutes les pages de la liste (sauf celle déjà affichée), dans un ordre au hasard.
+    // random : { total: nombre de produits, perPage: produits par page, shown: page déjà affichée (1 par défaut) }.
+    var randomQueue = function (source, random) {
+      var first = String(source || '').split(/\s+/).filter(Boolean)[0];
+      if (!first || !random || !(random.total > 0) || !(random.perPage > 0)) return null;
+      var pages = Math.min(200, Math.ceil(random.total / random.perPage));
+      var shown = random.shown || 1;
+      var list = [];
+      for (var page = 1; page <= pages; page += 1) {
+        if (page === shown) continue;
+        var url = new URL(first, window.location.href);
+        url.searchParams.set('page', String(page));
+        list.push(url.pathname + url.search);
+      }
+      return shuffle(list);
+    };
     var showLoader = function (show) {
       if (loader) loader.hidden = !show;
     };
@@ -200,8 +234,10 @@
           var page = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-mshein-page]');
           if (!page) throw new Error('Feed page markup missing');
           var next = page.querySelector('[data-mshein-next]');
-          nextUrl = next ? next.getAttribute('data-mshein-next') : (queue.shift() || null);
-          addCards(page.querySelectorAll(':scope > li.mshein-card'));
+          if (randomMode) nextUrl = queue.shift() || null;
+          else nextUrl = next ? next.getAttribute('data-mshein-next') : (queue.shift() || null);
+          var cards = Array.prototype.slice.call(page.querySelectorAll(':scope > li.mshein-card'));
+          addCards(randomMode ? shuffle(cards) : cards);
           busy = false;
           showLoader(false);
           // Page sans carte (ex. « In offerta » : aucune promo sur ces produits) ou fin d'écran pas atteinte : suite tout de suite.
@@ -227,8 +263,8 @@
       loadMore: loadMore,
       hasMore: function () { return Boolean(nextUrl) || busy; },
       cardCount: function () { return columnsWrap.querySelectorAll('.mshein-card').length; },
-      // Nouvelle source : colonnes vidées, chargement en cours oublié.
-      setSource: function (source, keepCards) {
+      // Nouvelle source : colonnes vidées, chargement en cours oublié. random (facultatif) : pages dans un ordre au hasard.
+      setSource: function (source, keepCards, random) {
         token += 1;
         busy = false;
         showLoader(false);
@@ -237,7 +273,9 @@
           columnHeights = [0, 0];
           cardIndex = 0;
         }
-        queue = String(source || '').split(/\s+/).filter(Boolean);
+        var randomPages = randomQueue(source, random);
+        randomMode = Boolean(randomPages);
+        queue = randomPages || String(source || '').split(/\s+/).filter(Boolean);
         nextUrl = queue.shift() || null;
       },
       // « 1 colonna » : les cartes affichées sont remises dans l'ordre, dans une seule colonne (ou de nouveau 2).
@@ -274,15 +312,21 @@
   var feed = document.querySelector('[data-mshein-feed]');
   if (!feed) return;
   var tabs = feed.querySelector('[data-mshein-tabs]');
+  // Onglet au hasard (« Per te ») : data-random-total (produits de la liste) et data-random-per-page (produits par page).
+  var randomOf = function (tab) {
+    var total = tab ? Number(tab.getAttribute('data-random-total')) : 0;
+    return total > 0 ? { total: total, perPage: Number(tab.getAttribute('data-random-per-page')) || 10, shown: 1 } : null;
+  };
+  var activeTab = tabs && tabs.querySelector('.is-on');
   var masonry = createMasonry({
     grid: feed.querySelector('[data-mshein-grid]'),
     sentinel: feed.querySelector('[data-mshein-sentinel]'),
-    loader: feed.querySelector('[data-mshein-loader]')
+    loader: feed.querySelector('[data-mshein-loader]'),
+    random: Boolean(randomOf(activeTab))
   });
   // Pages suivantes : adresse de l'onglet, puis lien « page suivante » de chaque page ; plusieurs collections à la suite
-  // (Brand ufficiali : Nike, puis Adidas…).
-  var activeTab = tabs && tabs.querySelector('.is-on');
-  masonry.setSource(activeTab && activeTab.getAttribute('data-src'), true);
+  // (Brand ufficiali : Nike, puis Adidas…). « Per te » : pages dans un ordre au hasard (autres produits à chaque visite).
+  masonry.setSource(activeTab && activeTab.getAttribute('data-src'), true, randomOf(activeTab));
 
   if (tabs) {
     tabs.addEventListener('click', function (event) {
@@ -293,7 +337,10 @@
         button.classList.toggle('is-on', selected);
         button.setAttribute('aria-selected', String(selected));
       });
-      masonry.setSource(tab.getAttribute('data-src'));
+      // « Per te » au hasard : toutes ses pages, la première comprise (les cartes affichées sont remplacées).
+      var random = randomOf(tab);
+      if (random) random.shown = 0;
+      masonry.setSource(tab.getAttribute('data-src'), false, random);
       // Haut du fil sous les onglets (si on était plus bas).
       var top = feed.getBoundingClientRect().top + window.scrollY - (parseFloat(getComputedStyle(tabs).top) || 0);
       if (window.scrollY > top) window.scrollTo({ top: top });
