@@ -220,6 +220,168 @@
     });
   });
 
+  /* ---------- Visionneuse plein écran (photos du produit et de la description), comme SHEIN : glisser, flèches,
+     compteur ; zoom par double toucher ou à deux doigts (1 à 4×), photo zoomée déplacée à un doigt ; zoom remis à zéro
+     en changeant de photo. ---------- */
+  var viewer = (function () {
+    var box = root.querySelector('[data-pdp-lightbox]');
+    if (!box) return null;
+    var track = box.querySelector('[data-pdp-lb-slides]');
+    var count = box.querySelector('[data-pdp-lb-count]');
+    document.body.appendChild(box);
+    var list = null;
+    var index = 0;
+    var onClose = null;
+    var zoom = { el: null, s: 1, x: 0, y: 0 };
+    var currentImg = function () {
+      var slide = track.children[index];
+      return slide ? slide.querySelector('img') : null;
+    };
+    var paint = function () {
+      if (zoom.el) zoom.el.style.transform = zoom.s > 1 ? 'translate(' + zoom.x + 'px, ' + zoom.y + 'px) scale(' + zoom.s + ')' : '';
+      box.classList.toggle('is-zoom', zoom.s > 1);
+    };
+    var resetZoom = function () {
+      if (zoom.el) zoom.el.style.transform = '';
+      zoom = { el: null, s: 1, x: 0, y: 0 };
+      box.classList.remove('is-zoom');
+    };
+    // La photo agrandie ne laisse jamais de vide sur les bords.
+    var clamp = function () {
+      if (!zoom.el) return;
+      var maxX = zoom.el.offsetWidth * (zoom.s - 1) / 2;
+      var maxY = zoom.el.offsetHeight * (zoom.s - 1) / 2;
+      zoom.x = Math.max(-maxX, Math.min(maxX, zoom.x));
+      zoom.y = Math.max(-maxY, Math.min(maxY, zoom.y));
+    };
+    // Zoom vers un point de l'écran (le point touché reste sous le doigt).
+    var zoomTo = function (scale, clientX, clientY) {
+      var img = currentImg();
+      if (!img) return;
+      if (zoom.el !== img) { resetZoom(); zoom.el = img; }
+      var rect = img.getBoundingClientRect();
+      var cx = rect.left + rect.width / 2;
+      var cy = rect.top + rect.height / 2;
+      var ratio = scale / zoom.s;
+      zoom.x += (clientX - cx) * (1 - ratio);
+      zoom.y += (clientY - cy) * (1 - ratio);
+      zoom.s = scale;
+      if (zoom.s <= 1.01) { resetZoom(); return; }
+      clamp();
+      paint();
+    };
+    var setCount = function () { count.textContent = (index + 1) + ' / ' + list.length; };
+    var show = function (i, smooth) {
+      index = Math.max(0, Math.min(list.length - 1, i));
+      resetZoom();
+      track.scrollTo({ left: index * track.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
+      setCount();
+    };
+    track.addEventListener('scroll', function () {
+      var i = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+      if (list && i !== index) { index = i; resetZoom(); setCount(); }
+    }, { passive: true });
+
+    // Gestes : double toucher, pincement, déplacement de la photo zoomée.
+    var lastTap = { t: 0, x: 0, y: 0 };
+    var pinch = null;
+    var pan = null;
+    var moved = false;
+    var dist = function (a, b) { return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); };
+    track.addEventListener('touchstart', function (event) {
+      moved = false;
+      if (event.touches.length === 2) {
+        var img = currentImg();
+        if (zoom.el !== img) { resetZoom(); zoom.el = img; }
+        pinch = { d: dist(event.touches[0], event.touches[1]), s: zoom.s,
+          x: (event.touches[0].clientX + event.touches[1].clientX) / 2, y: (event.touches[0].clientY + event.touches[1].clientY) / 2 };
+        pan = null;
+      } else if (event.touches.length === 1 && zoom.s > 1) {
+        pan = { x: event.touches[0].clientX - zoom.x, y: event.touches[0].clientY - zoom.y };
+      }
+    }, { passive: true });
+    track.addEventListener('touchmove', function (event) {
+      // Pendant le geste, la photo suit le doigt sans animation.
+      if (zoom.el) zoom.el.style.transition = 'none';
+      if (pinch && event.touches.length === 2) {
+        event.preventDefault();
+        moved = true;
+        zoomTo(Math.max(1, Math.min(4, pinch.s * dist(event.touches[0], event.touches[1]) / pinch.d)), pinch.x, pinch.y);
+      } else if (pan && event.touches.length === 1 && zoom.s > 1) {
+        event.preventDefault();
+        moved = true;
+        zoom.x = event.touches[0].clientX - pan.x;
+        zoom.y = event.touches[0].clientY - pan.y;
+        clamp();
+        paint();
+      }
+    }, { passive: false });
+    track.addEventListener('touchend', function (event) {
+      if (zoom.el) zoom.el.style.transition = '';
+      if (event.touches.length < 2) pinch = null;
+      if (event.touches.length === 0) pan = null;
+      if (moved || event.changedTouches.length !== 1 || event.touches.length) return;
+      var touch = event.changedTouches[0];
+      var now = Date.now();
+      if (now - lastTap.t < 300 && Math.hypot(touch.clientX - lastTap.x, touch.clientY - lastTap.y) < 30) {
+        event.preventDefault();
+        zoomTo(zoom.s > 1 ? 1 : 2.5, touch.clientX, touch.clientY);
+        lastTap.t = 0;
+      } else {
+        lastTap = { t: now, x: touch.clientX, y: touch.clientY };
+      }
+    });
+    // Souris (ordinateur, tests) : double clic.
+    track.addEventListener('dblclick', function (event) {
+      zoomTo(zoom.s > 1 ? 1 : 2.5, event.clientX, event.clientY);
+    });
+
+    var close = function () {
+      box.hidden = true;
+      document.body.style.overflow = '';
+      resetZoom();
+      if (onClose) onClose(index);
+    };
+    box.querySelector('[data-pdp-lb-close]').addEventListener('click', close);
+    box.querySelectorAll('[data-pdp-lb-step]').forEach(function (button) {
+      button.addEventListener('click', function () { show(index + Number(button.getAttribute('data-pdp-lb-step')), true); });
+    });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && !box.hidden) close(); });
+
+    return {
+      // srcs : adresses des photos ; done(index) : appelé à la fermeture avec la photo affichée.
+      open: function (srcs, i, done) {
+        if (list !== srcs) {
+          list = srcs;
+          track.innerHTML = srcs.map(function (src) {
+            return '<div><img src="' + String(src).replace(/"/g, '&quot;') + '" alt="" referrerpolicy="no-referrer" draggable="false"></div>';
+          }).join('');
+        }
+        onClose = done || null;
+        box.hidden = false;
+        document.body.style.overflow = 'hidden';
+        show(i, false);
+      }
+    };
+  })();
+
+  // Toucher une photo du produit : visionneuse plein écran en grand format (1500 px) ; à la fermeture, la galerie
+  // reste sur la dernière photo regardée.
+  if (viewer && slides) {
+    var galleryPhotos = null;
+    slides.addEventListener('click', function (event) {
+      var slide = event.target.closest('.pdp-m__sl');
+      if (!slide) return;
+      if (!galleryPhotos) {
+        galleryPhotos = Array.prototype.map.call(slides.querySelectorAll('.pdp-m__sl img'), function (img) {
+          var src = img.getAttribute('src') || '';
+          return /[?&]width=\d+/.test(src) ? src.replace(/([?&]width=)\d+/, '$11500') : src;
+        });
+      }
+      viewer.open(galleryPhotos, Array.prototype.indexOf.call(slides.children, slide), function (i) { goToSlide(i, false); });
+    });
+  }
+
   /* ---------- Titre sur 2 lignes : flèche (comme SHEIN) seulement si le titre est coupé ---------- */
   var title = root.querySelector('[data-pdp-title]');
   var titleMore = root.querySelector('[data-pdp-title-more]');
@@ -1553,37 +1715,13 @@
     box.appendChild(link);
   };
 
-  // Visionneuse des photos de la description.
+  // Photos de la description : même visionneuse plein écran que les photos du produit.
   var setupLightbox = function () {
-    var box = root.querySelector('[data-pdp-lightbox]');
-    var track = box && box.querySelector('[data-pdp-lb-slides]');
-    var count = box && box.querySelector('[data-pdp-lb-count]');
-    if (!box || !photos.length) return;
-    document.body.appendChild(box);
-    track.innerHTML = photos.map(function (src) { return '<div><img src="' + src + '" alt="" loading="lazy" referrerpolicy="no-referrer"></div>'; }).join('');
-    var index = 0;
-    var show = function (i, smooth) {
-      index = Math.max(0, Math.min(photos.length - 1, i));
-      track.scrollTo({ left: index * track.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
-      count.textContent = (index + 1) + ' / ' + photos.length;
-    };
-    track.addEventListener('scroll', function () {
-      var i = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
-      if (i !== index) { index = i; count.textContent = (index + 1) + ' / ' + photos.length; }
-    }, { passive: true });
-    var close = function () { box.hidden = true; document.body.style.overflow = ''; };
+    if (!viewer || !photos.length) return;
     descBox.addEventListener('click', function (event) {
       var photo = event.target.closest('[data-pdp-photo]');
-      if (!photo) return;
-      box.hidden = false;
-      document.body.style.overflow = 'hidden';
-      show(Number(photo.getAttribute('data-pdp-photo')), false);
+      if (photo) viewer.open(photos, Number(photo.getAttribute('data-pdp-photo')));
     });
-    box.querySelector('[data-pdp-lb-close]').addEventListener('click', close);
-    box.querySelectorAll('[data-pdp-lb-step]').forEach(function (button) {
-      button.addEventListener('click', function () { show(index + Number(button.getAttribute('data-pdp-lb-step')), true); });
-    });
-    document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && !box.hidden) close(); });
   };
 
   buildDescription();

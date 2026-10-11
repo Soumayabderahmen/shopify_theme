@@ -3116,6 +3116,42 @@ dl.pdp-m__spec {
   max-height: 100%;
   object-fit: contain;
   border-radius: 12px;
+  transition: transform 0.2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Glisser d'une photo à l'autre ; pincement et déplacement gérés par le script (pas de zoom de toute la page). */
+.pdp-m__lbs {
+  touch-action: pan-x;
+}
+
+/* Photo zoomée : la rangée ne défile plus, le doigt déplace la photo. */
+.pdp-m__lb.is-zoom .pdp-m__lbs {
+  overflow: hidden;
+  touch-action: none;
+}
+
+.pdp-m__lb.is-zoom .pdp-m__lbs img {
+  border-radius: 0;
+}
+
+.pdp-m__lb.is-zoom .pdp-m__lbp,
+.pdp-m__lb.is-zoom .pdp-m__lbn {
+  display: none !important;
+}
+
+/* Visionneuse ouverte : le bouton cookie (Pandectes) et les bulles des apps ne passent pas sur la photo.
+   visibility (Pandectes impose « display: block !important » sur son élément). */
+html body:has(.pdp-m__lb:not([hidden])) pandectes-cmp,
+html body:has(.pdp-m__lb:not([hidden])) #honeypop-app,
+html body:has(.pdp-m__lb:not([hidden])) .firepush-widget-container {
+  visibility: hidden !important;
+}
+
+/* Photos du produit : un toucher ouvre la visionneuse plein écran. */
+.pdp-m__sl {
+  cursor: zoom-in;
 }
 
 /* Boutons ronds de 42 px : le thème impose min-width 120px aux boutons (ovales flous sur la photo). */
