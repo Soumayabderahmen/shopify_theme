@@ -13,7 +13,9 @@
     assign pti_key = pti_plain | md5 | slice: 0, 10
     assign pti_key = 'contact_page.h' | append: pti_key | append: '_html'
     assign pti_tr = pti_key | t
-    unless pti_tr contains 'translation missing' or pti_tr == blank or pti_tr == pti_key
+    # Shopify écrit « Translation missing: fr.contact_page… » (majuscule) : comparaison en minuscules.
+    assign pti_check = pti_tr | downcase
+    unless pti_check contains 'translation missing' or pti_tr == blank or pti_tr == pti_key
       if pti_tr contains '<'
         assign pti_out = pti_tr
       else
