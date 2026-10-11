@@ -701,10 +701,11 @@
       for (var s = 0; s < extras.length; s += 1) if (extras[s].view === 'mshein-dept-sale') return tabs.length + s;
       extras.push({
         path: found.url.pathname,
-        query: '',
+        // Promotions les plus vendues d'abord (le tri par défaut de « Tutti i prodotti » est alphabétique).
+        query: 'sort_by=' + (found.url.searchParams.get('sort_by') || 'best-selling'),
         key: 'sale:' + found.url.pathname,
         view: 'mshein-dept-sale',
-        address: found.url.pathname + '?view=offerte',
+        address: found.url.pathname + '?view=offerte&sort_by=' + (found.url.searchParams.get('sort_by') || 'best-selling'),
         href: found.url.href,
         extra: true,
         title: linkTitle(found.link).slice(0, 60),

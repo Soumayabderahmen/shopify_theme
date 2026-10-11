@@ -23,9 +23,16 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
+    {%- liquid
+      # Page « In offerta » (/collections/all?view=offerte) : son nom, pas celui de « Tutti i prodotti » (« Prodotti »).
+      assign theme_page_title = page_title
+      if template.name == 'collection' and template.suffix == 'offerte'
+        assign theme_page_title = 'mobile.explore.on_sale' | t
+      endif
+    -%}
     <title>
-      {{ page_title }}
-      {% unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}
+      {{ theme_page_title }}
+      {% unless theme_page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}
     </title>
     {%- if page_description -%}<meta name="description" content="{{ page_description | escape }}">{%- endif -%}
     <meta name="theme-color" content="{{ settings.default_color_scheme.settings.accent }}">

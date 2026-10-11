@@ -11,7 +11,7 @@
   assign hero_bg = ''
   assign hero_url = collection.url
   if sale
-    assign hero_url = routes.all_products_collection_url | append: '?view=offerte'
+    assign hero_url = routes.all_products_collection_url | append: '?view=offerte&sort_by=best-selling'
   endif
   assign collage_html = ''
   if collection.image and sale != true

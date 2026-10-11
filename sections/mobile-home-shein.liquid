@@ -31,7 +31,7 @@
   if sale_collection != blank and sale_collection.products_count > 0
     assign sale_url = sale_collection.url
   else
-    assign sale_url = routes.all_products_collection_url | append: '?view=offerte'
+    assign sale_url = routes.all_products_collection_url | append: '?view=offerte&sort_by=best-selling'
   endif
 -%}
 
