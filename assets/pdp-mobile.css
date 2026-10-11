@@ -3196,13 +3196,48 @@ body.template-product:has([data-pdp-hd]) #content {
   border-radius: 9px;
 }
 
-.pdp-m__hsrch span {
+/* Champ de saisie (comme la recherche de l'accueil) : styles du thème neutralisés. */
+#root .pdp-m .pdp-m__hsrch input {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  font-size: 13.5px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  height: 34px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  color: #16123f;
+  font-size: 16px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+#root .pdp-m .pdp-m__hsrch input::placeholder {
+  color: #6b6f86;
+  opacity: 1;
+}
+
+#root .pdp-m .pdp-m__hsrch input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+#root .pdp-m .pdp-m__hsrch button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  min-width: 0 !important;
+  height: 34px !important;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  color: var(--pm-ink);
+  background: none;
+  border: 0;
+  box-shadow: none;
 }
 
 .pdp-m__hsrch svg {

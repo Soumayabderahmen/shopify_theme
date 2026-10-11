@@ -70,7 +70,11 @@
   <header class="pdp-m__hd" data-pdp-hd>
     <div class="pdp-m__hdr">
       <a class="pdp-m__hi" href="{{ routes.root_url }}" data-pdp-back aria-label="{{ 'mobile_pdp_hd.back' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></a>
-      <a class="pdp-m__hsrch" href="{{ routes.search_url }}" aria-label="{{ 'mobile_pdp_hd.search' | t }}"><span>{{ product.title | escape }}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></a>
+      {%- comment -%} Vrai champ, comme sur l'accueil : le panneau de recherche du site s'ouvre au toucher (assets/mobile-search.js, data-mobile-search-extra). {%- endcomment -%}
+      <form class="pdp-m__hsrch" action="{{ routes.search_url }}" method="get" role="search" data-mobile-search-extra>
+        <input type="search" name="q" placeholder="{{ 'search.search_form.placeholder' | t }}" aria-label="{{ 'mobile_pdp_hd.search' | t }}" autocomplete="off">
+        <button type="submit" aria-label="{{ 'mobile_pdp_hd.search' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+      </form>
       <a class="pdp-m__hi" href="{{ routes.cart_url }}" data-pdp-cart aria-label="{{ 'mobile_pdp_hd.cart' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg><span class="mobile-home-cart-count pdp-m__hcount"{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span></a>
       <button class="pdp-m__hi" type="button" data-pdp-share-open aria-haspopup="dialog" aria-label="{{ 'mobile_pdp_hd.share' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg></button>
       <button class="pdp-m__hi" type="button" data-pdp-menu-open aria-haspopup="menu" aria-expanded="false" aria-label="{{ 'mobile_pdp_hd.more' | t }}"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>

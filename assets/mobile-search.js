@@ -432,7 +432,7 @@
   }
 
   function setValue(value) {
-    [nativeInput, miniInput].forEach(function (input) { if (input) input.value = value; });
+    [nativeInput, miniInput, activeInput].forEach(function (input) { if (input) input.value = value; });
   }
 
   // Lance la recherche réelle (/search?q=…) ; le terme est compté sur la page de résultats.
@@ -475,6 +475,10 @@
 
   wire(nativeForm, nativeInput);
   wire(miniForm, miniInput);
+  // Autres barres de recherche mobiles (en-tête de la fiche produit, snippets/pdp-mobile-top.liquid) : même panneau.
+  document.querySelectorAll('[data-mobile-search-extra]').forEach(function (form) {
+    wire(form, form.querySelector('input[type="search"]'));
+  });
 
   scrim.addEventListener('click', function () { close(); });
   panel.querySelector('[data-mobile-search-cancel]').addEventListener('click', function () {
