@@ -28,7 +28,7 @@
   <li>
     <a
       target="_blank"
-      onclick="return !window.open(this.href,'{{ share.title }}', 'width=500,height=500')"
+      onclick="return !window.open(this.href,'share', 'width=500,height=500')"
       href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url }}{{ share.url }}"
       ><i aria-hidden="true" class="icon-facebook"></i> <span>{{ 'social_share.facebook' | t }}</span></a
     >
@@ -38,7 +38,7 @@
   <li>
     <a
       target="_blank"
-      onclick="return !window.open(this.href,'{{ share.title }}', 'width=500,height=500')"
+      onclick="return !window.open(this.href,'share', 'width=500,height=500')"
       href="https://twitter.com/intent/tweet?url={{ shop.url }}{{ share.url }}"
       ><i aria-hidden="true" class="icon-twitter"></i> <span>{{ 'social_share.twitter' | t }}</span></a
     >
@@ -48,7 +48,7 @@
   <li>
     <a
       target="_blank"
-      onclick="return !window.open(this.href,'{{ share.title }}', 'width=500,height=500')"
+      onclick="return !window.open(this.href,'share', 'width=500,height=500')"
       href="http://pinterest.com/pin/create/button/?url={{ shop.url }}{{ share.url }}&media={% if share.featured_image %}{{ share.featured_image | image_url }}{% else %}{{ share.image | image_url }}{% endif %}&description={{ share.title | url_encode }}"
       ><i aria-hidden="true" class="icon-pinterest"></i> <span>{{ 'social_share.pinterest' | t }}</span></a
     >
