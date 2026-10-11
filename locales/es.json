@@ -646,7 +646,8 @@
     "share_copy": "Copiar enlace",
     "share_save": "Guardar imagen",
     "share_more": "Más",
-    "copied": "Enlace copiado"
+    "copied": "Enlace copiado",
+    "buy_off": "¡-{{ percent }}% DE DESCUENTO!"
   },
   "mobile_terms": {
     "eyebrow": "Cupón platinumshop",

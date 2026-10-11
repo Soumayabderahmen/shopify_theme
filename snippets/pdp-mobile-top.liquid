@@ -586,13 +586,24 @@
     <div class="pdp-m__fsent" data-pdp-feed-sentinel></div>
   </section>
 
-  {%- comment -%} 14. Barre d'achat fixe (au-dessus de la barre du bas) : cachée quand le gros bouton est visible. {%- endcomment -%}
+  {%- comment -%}
+    14. Barre d'achat fixe au style SHEIN (au-dessus de la barre du bas) : cœur de la wishlist du site et bouton foncé
+    « -X% DI SCONTO! / AGGIUNGI AL CARRELLO » (réduction de la variante choisie) ; cachée quand le gros bouton est visible.
+  {%- endcomment -%}
+  {%- liquid
+    assign buy_off = 0
+    if pm_compare > pm_price
+      assign buy_off = pm_compare | minus: pm_price | times: 100 | divided_by: pm_compare
+    endif
+    assign buy_off_template = 'mobile_pdp_hd.buy_off' | t: percent: '__PCT__'
+    assign buy_off_text = 'mobile_pdp_hd.buy_off' | t: percent: buy_off
+  -%}
   <div class="pdp-m__buy" data-pdp-buy>
-    <button class="pdp-m__vr" type="button" data-pdp-to-options aria-label="{{ 'mobile.pdp.choose_options' | t }}">
-      <small><span data-pdp-buy-variant>{{ pm_variant.title }}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></small>
-      <b data-pdp-buy-price>{{ pm_price | money }}{{ mm_cur }}</b>
+    <button class="pdp-m__fav" type="button" data-pdp-fav hidden aria-pressed="false" data-add="{{ 'mobile.js.add_to_wishlist' | t | escape }}" data-remove="{{ 'mobile.js.remove_from_wishlist' | t | escape }}" data-added="{{ 'mobile.js.added_to_wishlist' | t | escape }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t | escape }}" data-product-id="{{ product.id }}" data-title="{{ product.title | escape }}" data-url="{{ product.url }}" data-image="{{ product.featured_image | image_url: width: 600 }}" aria-label="{{ 'mobile.js.add_to_wishlist' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+    <button class="pdp-m__go" type="button" data-pdp-add>
+      <small data-pdp-buy-off data-template="{{ buy_off_template | escape }}"{% if buy_off < 1 %} hidden{% endif %}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"/></svg><span>{{ buy_off_text }}</span></small>
+      <b>{{ 'mobile.pdp.add_to_cart' | t }}</b>
     </button>
-    <button class="pdp-m__go" type="button" data-pdp-add>{{ 'mobile.pdp.add_to_cart' | t }}</button>
   </div>
 
   {%- comment -%} Visionneuse des photos de la description. {%- endcomment -%}

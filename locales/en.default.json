@@ -3415,7 +3415,8 @@
     "share_copy": "Copy link",
     "share_save": "Save image",
     "share_more": "More",
-    "copied": "Link copied"
+    "copied": "Link copied",
+    "buy_off": "-{{ percent }}% OFF!"
   },
   "mobile_terms": {
     "eyebrow": "platinumshop coupon",

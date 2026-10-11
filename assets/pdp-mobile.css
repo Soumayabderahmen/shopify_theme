@@ -2964,48 +2964,92 @@ dl.pdp-m__spec {
   transform: translateY(130%);
 }
 
-#root .pdp-m .pdp-m__vr {
-  flex: 1;
-  min-width: 0;
-  line-height: 1.2;
-  text-align: left;
-}
-
-.pdp-m__vr small {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  overflow: hidden;
-  color: var(--pm-mute);
-  font-size: 12px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.pdp-m__vr small svg {
+/* Comme SHEIN : cœur (wishlist) + bouton foncé « -X% DI SCONTO! / AGGIUNGI AL CARRELLO ». */
+#root .pdp-m .pdp-m__fav {
+  display: grid;
   flex: none;
-  width: 14px;
-  height: 14px;
+  place-items: center;
+  width: 40px;
+  min-width: 0;
+  height: 46px;
+  margin: 0;
+  padding: 0;
+  color: var(--pm-ink);
+  background: none;
+  border: 0;
+  box-shadow: none;
 }
 
-.pdp-m__vr b {
-  display: block;
-  font-family: 'Sora', sans-serif;
-  font-size: 19px;
-  font-weight: 800;
+#root .pdp-m .pdp-m__fav[hidden] {
+  display: none;
+}
+
+#root .pdp-m .pdp-m__fav::before {
+  content: none;
+}
+
+.pdp-m__fav svg {
+  width: 26px;
+  height: 26px;
+  transition: transform 0.2s;
+}
+
+#root .pdp-m .pdp-m__fav.is-on {
+  color: var(--pm-deal);
+}
+
+.pdp-m__fav.is-on svg {
+  fill: currentColor;
+  transform: scale(1.08);
 }
 
 #root .pdp-m .pdp-m__go {
-  flex: none;
-  height: 48px;
-  padding: 0 24px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  height: 46px;
+  margin: 0;
+  padding: 0 12px;
   color: #fff;
+  line-height: 1.15;
+  text-align: center;
+  background: var(--pm-ink);
+  border: 0;
+  border-radius: 10px;
+  box-shadow: none;
+  transition: transform 0.15s;
+}
+
+.pdp-m__go small {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ffd166;
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.pdp-m__go small[hidden] {
+  display: none;
+}
+
+.pdp-m__go small svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
+}
+
+.pdp-m__go b {
   font-size: 14.5px;
   font-weight: 800;
-  background: linear-gradient(180deg, #4a44e6, #3a34d2);
-  border-radius: 14px;
-  box-shadow: 0 10px 18px -12px rgb(58 52 210 / 90%);
-  transition: transform 0.15s;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 #root .pdp-m .pdp-m__go:active {

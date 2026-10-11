@@ -649,7 +649,8 @@
     "share_copy": "Link kopiëren",
     "share_save": "Afbeelding opslaan",
     "share_more": "Meer",
-    "copied": "Link gekopieerd"
+    "copied": "Link gekopieerd",
+    "buy_off": "-{{ percent }}% KORTING!"
   },
   "mobile_terms": {
     "eyebrow": "platinumshop-coupon",

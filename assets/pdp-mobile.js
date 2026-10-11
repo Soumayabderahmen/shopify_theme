@@ -32,6 +32,7 @@
       window.clearTimeout(toastTimer);
       toastTimer = window.setTimeout(function () { toastBox.classList.remove('is-on'); }, 1800);
     };
+    root.pdpToast = toast;
 
     // Retour : page précédente du site, sinon l'accueil (lien).
     var back = header.querySelector('[data-pdp-back]');
@@ -976,16 +977,6 @@
     }
     centerChecked(list);
   });
-  // Titre de variante de la barre d'achat : couleur sans le code fournisseur répété, comme dans la carte des options.
-  var variantLabel = function (variant) {
-    return variant.options ? variant.options.map(function (value, i) {
-      var block = optionsCard && optionsCard.querySelector('[data-option-index="' + i + '"]');
-      return (block && block.pdpNames && block.pdpNames[value]) || value;
-    }).join(' / ') : (variant.title || '');
-  };
-  var buyVariant = root.querySelector('[data-pdp-buy-variant]');
-  if (buyVariant && colorRows.length && currentVariant()) buyVariant.textContent = variantLabel(currentVariant());
-
   var gallery = root.querySelector('.pdp-m__gal');
   var preview = null;
   var previewTimer = null;
@@ -1805,11 +1796,48 @@
         buy.classList.toggle('is-hidden', entries[0].isIntersecting);
       }).observe(mainCta);
     }
-    buy.querySelector('[data-pdp-to-options]').addEventListener('click', function () {
-      var target = document.getElementById('pdp-variants') || mainCta;
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+    // Cœur : wishlist du site (window.mobileWishlist, assets/mobile-temu-header.js, chargé après ce script :
+    // mis en place à DOMContentLoaded, une fois tous les scripts « defer » exécutés), variante choisie comprise.
+    var fav = buy.querySelector('[data-pdp-fav]');
+    var paintFav = function () {
+      var saved = window.mobileWishlist.has(fav.getAttribute('data-product-id'));
+      fav.classList.toggle('is-on', saved);
+      fav.setAttribute('aria-pressed', String(saved));
+      fav.setAttribute('aria-label', fav.getAttribute(saved ? 'data-remove' : 'data-add'));
+    };
+    var setupFav = function () {
+      if (!fav || !window.mobileWishlist) return;
+      fav.hidden = false;
+      paintFav();
+      fav.addEventListener('click', function () {
+        var variant = currentVariant();
+        var saved = window.mobileWishlist.toggle({
+          id: fav.getAttribute('data-product-id'),
+          variantId: variant ? variant.id : '',
+          variantTitle: variant ? variant.title : '',
+          title: fav.getAttribute('data-title'),
+          url: fav.getAttribute('data-url'),
+          image: fav.getAttribute('data-image'),
+          price: variant ? money(variant.price) : '',
+          priceCents: variant ? variant.price : 0,
+          compareAtPrice: variant && variant.compare > variant.price ? money(variant.compare) : '',
+          compareAtPriceCents: variant ? variant.compare : 0
+        });
+        paintFav();
+        if (root.pdpToast) root.pdpToast(fav.getAttribute(saved ? 'data-added' : 'data-removed'));
+      });
+    };
+    if (window.mobileWishlist) setupFav();
+    else document.addEventListener('DOMContentLoaded', setupFav);
   }
+  // « -X% DI SCONTO! » du bouton de la barre : réduction de la variante choisie (rien sans prix barré).
+  var buyOff = buy && buy.querySelector('[data-pdp-buy-off]');
+  var paintBuyOff = function (variant) {
+    if (!buyOff || !variant) return;
+    var off = variant.compare > variant.price ? Math.floor((variant.compare - variant.price) * 100 / variant.compare) : 0;
+    buyOff.hidden = off < 1;
+    buyOff.querySelector('span').textContent = String(buyOff.getAttribute('data-template')).replace('__PCT__', off);
+  };
 
   /* ---------- Klarna : message officiel de l'app Klarna On-site Messaging (bloc « Klarna Placement » de la fiche)
      à la place de notre ligne calculée (prix ÷ 3), qui ne connaît pas les montants min / max de Klarna.
@@ -1879,10 +1907,7 @@
     syncOptions();
     highlightSize();
     updateTotals();
-    if (buy) {
-      buy.querySelector('[data-pdp-buy-variant]').textContent = variantLabel(variant);
-      buy.querySelector('[data-pdp-buy-price]').textContent = money(variant.price);
-    }
+    paintBuyOff(variant);
     // Message officiel : Klarna le recalcule quand le montant change.
     if (klarnaPlacement && klarnaPlacement.getAttribute('data-purchase-amount') !== String(variant.price)) {
       klarnaPlacement.setAttribute('data-purchase-amount', String(variant.price));

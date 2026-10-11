@@ -631,7 +631,8 @@
     "share_copy": "Link kopieren",
     "share_save": "Bild speichern",
     "share_more": "Mehr",
-    "copied": "Link kopiert"
+    "copied": "Link kopiert",
+    "buy_off": "-{{ percent }}% RABATT!"
   },
   "mobile_terms": {
     "eyebrow": "platinumshop-Gutschein",

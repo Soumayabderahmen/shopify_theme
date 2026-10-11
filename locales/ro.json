@@ -726,7 +726,8 @@
     "share_copy": "Copiază linkul",
     "share_save": "Salvează imaginea",
     "share_more": "Mai mult",
-    "copied": "Link copiat"
+    "copied": "Link copiat",
+    "buy_off": "-{{ percent }}% REDUCERE!"
   },
   "mobile_terms": {
     "eyebrow": "Cupon platinumshop",
