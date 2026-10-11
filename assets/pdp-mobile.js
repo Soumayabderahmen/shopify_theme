@@ -1583,6 +1583,17 @@
   if (reviewsSlot && reviewsBlock) {
     var reviewsHome = reviewsBlock.closest('.shopify-section');
     reviewsSlot.appendChild(reviewsBlock);
+    // Comme le prototype SHEIN : initiale de l'auteur à la place de l'avatar gris de l'app (CSS data-pdp-initial),
+    // aussi pour les avis ajoutés par « Carica altro ».
+    var markInitials = function () {
+      reviewsBlock.querySelectorAll('.alr-wh-comp-review-avatar:not([data-pdp-initial])').forEach(function (avatar) {
+        var author = avatar.parentElement && avatar.parentElement.querySelector('.alr-wh-comp-review-author');
+        var name = author ? author.textContent.trim() : '';
+        if (name) avatar.setAttribute('data-pdp-initial', name.charAt(0).toUpperCase());
+      });
+    };
+    markInitials();
+    new MutationObserver(markInitials).observe(reviewsBlock, { childList: true, subtree: true });
     // Section de l'app (bloc « _blocks » de templates/product.json) vide une fois le bloc déplacé : sa boîte
     // (20 px de marge intérieure + 30 px en dessous) laissait un grand vide avant le pied de page.
     if (reviewsHome && !reviewsHome.contains(root) && !reviewsHome.innerText.trim() && !reviewsHome.querySelector('img, iframe, video, .shopify-app-block')) {
@@ -1787,8 +1798,9 @@
   if (buy) {
     if (mainCta && 'IntersectionObserver' in window) {
       // Comme le prototype : barre toujours visible, sauf quand le gros bouton « Aggiungi al carrello » est à l'écran.
+      // Dernier état reçu : un saut rapide (onglet, lien « avis ») envoie entrée et sortie dans le même lot.
       new IntersectionObserver(function (entries) {
-        buy.classList.toggle('is-hidden', entries[0].isIntersecting);
+        buy.classList.toggle('is-hidden', entries[entries.length - 1].isIntersecting);
       }).observe(mainCta);
     }
     // Cœur : wishlist du site (window.mobileWishlist, assets/mobile-temu-header.js, chargé après ce script :
