@@ -10,6 +10,148 @@
   // Textes traduits (snippets/mobile-i18n.liquid, clés mobile.js.* des fichiers locales).
   var T = window.mobileT || function (key) { return key; };
 
+  /* ---------- En-tête au style SHEIN (snippets/pdp-mobile-top.liquid) : retour, recherche, panier, partager, ⋯,
+     onglets de section « Articolo / Recensioni / Consigliati » ---------- */
+  (function () {
+    var header = root.querySelector('[data-pdp-hd]');
+    if (!header) return;
+    var row = header.querySelector('.pdp-m__hdr');
+    // Hauteur de la ligne de l'en-tête : barres collées dessous (puces de « Potrebbe piacerti anche »).
+    var syncHeight = function () {
+      if (row.offsetHeight > 0) document.documentElement.style.setProperty('--mshein-header-h', row.offsetHeight + 'px');
+    };
+    syncHeight();
+    window.addEventListener('resize', syncHeight);
+
+    var toastBox = root.querySelector('[data-pdp-toast]');
+    var toastTimer = null;
+    var toast = function (text) {
+      if (!toastBox) return;
+      toastBox.textContent = text;
+      toastBox.classList.add('is-on');
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(function () { toastBox.classList.remove('is-on'); }, 1800);
+    };
+
+    // Retour : page précédente du site, sinon l'accueil (lien).
+    var back = header.querySelector('[data-pdp-back]');
+    back.addEventListener('click', function (event) {
+      if (document.referrer && document.referrer.indexOf(window.location.origin) === 0 && window.history.length > 1) {
+        event.preventDefault();
+        window.history.back();
+      }
+    });
+
+    // Panier : même tiroir que l'en-tête du site (son lien, masqué sur la fiche, garde le comportement du thème).
+    header.querySelector('[data-pdp-cart]').addEventListener('click', function (event) {
+      var siteCart = document.querySelector('[id$="__header"] a[data-panel="cart"]');
+      if (!siteCart) return;
+      event.preventDefault();
+      siteCart.click();
+    });
+
+    // Menu ⋯ (Home, Lista dei desideri, Traccia ordine, Servizio clienti) : sous le bouton, fermé en touchant ailleurs.
+    var menuButton = header.querySelector('[data-pdp-menu-open]');
+    var menu = header.querySelector('[data-pdp-menu]');
+    var setMenu = function (open) {
+      menu.hidden = !open;
+      menuButton.setAttribute('aria-expanded', String(open));
+    };
+    menuButton.addEventListener('click', function (event) {
+      event.stopPropagation();
+      setMenu(menu.hidden);
+    });
+    document.addEventListener('click', function (event) {
+      if (!menu.hidden && !menu.contains(event.target)) setMenu(false);
+    });
+
+    // Partager, comme SHEIN : feuille du bas avec WhatsApp, Messaggi, Instagram (partage du téléphone), lien, image.
+    var share = root.querySelector('[data-pdp-share]');
+    if (share) {
+      document.body.appendChild(share);
+      var shareUrl = share.getAttribute('data-url');
+      var shareText = share.getAttribute('data-text');
+      var setShare = function (open) {
+        if (open) {
+          share.hidden = false;
+          window.requestAnimationFrame(function () { share.classList.add('is-open'); });
+        } else {
+          share.classList.remove('is-open');
+          window.setTimeout(function () { share.hidden = true; }, 260);
+        }
+      };
+      var copyLink = function () {
+        var done = function () { toast(share.getAttribute('data-copied')); };
+        if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(shareUrl).then(done).catch(done);
+        else {
+          var area = document.createElement('textarea');
+          area.value = shareUrl;
+          area.style.position = 'fixed';
+          area.style.left = '-9999px';
+          document.body.appendChild(area);
+          area.select();
+          try { document.execCommand('copy'); } catch (error) { /* copie refusée par le navigateur */ }
+          document.body.removeChild(area);
+          done();
+        }
+      };
+      header.querySelector('[data-pdp-share-open]').addEventListener('click', function () { setShare(true); });
+      share.addEventListener('click', function (event) {
+        if (event.target === share || event.target.closest('[data-pdp-share-close]')) { setShare(false); return; }
+        var button = event.target.closest('[data-share]');
+        if (!button) return;
+        var kind = button.getAttribute('data-share');
+        var message = shareText + ' ' + shareUrl;
+        if (kind === 'whatsapp') window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener');
+        else if (kind === 'sms') window.location.href = 'sms:?&body=' + encodeURIComponent(message);
+        else if (kind === 'image') window.open(share.getAttribute('data-image'), '_blank', 'noopener');
+        else if (kind === 'copy') copyLink();
+        else if (navigator.share) navigator.share({ title: document.title, text: shareText, url: shareUrl }).catch(function () {});
+        else copyLink();
+        setShare(false);
+      });
+    }
+
+    // Onglets de section : visibles une fois les photos passées, masqués quand les puces des produits sont collées
+    // (comme SHEIN) ; l'onglet de la partie visible est souligné, un toucher y amène.
+    var tabsBar = header.querySelector('[data-pdp-stabs]');
+    var tabButtons = Array.prototype.slice.call(tabsBar.querySelectorAll('[data-pdp-stab]'));
+    var gallery = root.querySelector('.pdp-m__gal') || root.querySelector('.pdp-m__price-card');
+    var targetOf = function (button) {
+      var id = button.getAttribute('data-pdp-stab');
+      return id === 'top' ? null : document.getElementById(id);
+    };
+    var chips = root.querySelector('[data-pdp-rchips]');
+    var relatedBox = root.querySelector('[data-pdp-related]');
+    var ticking = false;
+    var syncTabs = function () {
+      ticking = false;
+      var rowBottom = row.getBoundingClientRect().bottom;
+      var chipsStuck = chips && relatedBox && !relatedBox.hidden && relatedBox.getBoundingClientRect().top < rowBottom && chips.getBoundingClientRect().top <= rowBottom + 1;
+      header.classList.toggle('has-tabs', Boolean(gallery && gallery.getBoundingClientRect().bottom < rowBottom) && !chipsStuck);
+      var line = rowBottom + 60;
+      var active = 0;
+      tabButtons.forEach(function (button, index) {
+        var target = targetOf(button);
+        if (target && !target.hidden && target.getBoundingClientRect().top <= line) active = index;
+      });
+      tabButtons.forEach(function (button, index) { button.classList.toggle('is-on', index === active); });
+    };
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(syncTabs);
+    }, { passive: true });
+    syncTabs();
+    tabButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        var target = targetOf(button);
+        var offset = row.offsetHeight + tabsBar.offsetHeight;
+        window.scrollTo({ top: target ? target.getBoundingClientRect().top + window.scrollY - offset + 1 : 0, behavior: 'smooth' });
+      });
+    });
+  })();
+
   /* ---------- Pleine largeur : décalage = retrait réel de la page à gauche ---------- */
   var alignToScreen = function () {
     root.style.setProperty('--pm-shift-l', '0px');

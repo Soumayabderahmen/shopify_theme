@@ -3119,3 +3119,342 @@ dl.pdp-m__spec {
     transition: none;
   }
 }
+
+/* ===================== En-tête de la fiche au style SHEIN (snippets/pdp-mobile-top.liquid) =====================
+   Remplace l'en-tête du site sur la fiche mobile : retour, recherche (nom du produit), panier, partager, ⋯ ; onglets
+   de section sous l'en-tête une fois les photos passées. L'en-tête du site reste dans la page (son lien panier ouvre
+   le tiroir), seulement masqué. */
+/* « < Tornare » du fil d'Ariane : remplacé par la flèche de l'en-tête. */
+body.template-product:has([data-pdp-hd]) [id$="__breadcrumbs"],
+body.template-product:has([data-pdp-hd]) [id$="__header"].shopify-section {
+  display: none !important;
+}
+
+/* Marge du haut de la page (espace sous l'ancien en-tête) : l'en-tête de la fiche est tout en haut. */
+body.template-product:has([data-pdp-hd]) #content {
+  padding-top: 0 !important;
+}
+
+.pdp-m__hd {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: #fff;
+  box-shadow: 0 1px 0 var(--pm-line, #eceef4);
+}
+
+.pdp-m__hdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 12px;
+}
+
+#root .pdp-m .pdp-m__hi {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  color: var(--pm-ink);
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+#root .pdp-m .pdp-m__hi::before,
+#root .pdp-m .pdp-m__hi::after {
+  content: none;
+}
+
+.pdp-m__hi svg {
+  width: 23px;
+  height: 23px;
+}
+
+.pdp-m__hi:first-child {
+  margin-left: -4px;
+}
+
+.pdp-m__hsrch {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px 0 12px;
+  color: #4a4f6b;
+  text-decoration: none;
+  background: #f3f4f8;
+  border-radius: 9px;
+}
+
+.pdp-m__hsrch span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdp-m__hsrch svg {
+  flex: none;
+  width: 19px;
+  height: 19px;
+  color: var(--pm-ink);
+}
+
+#root .pdp-m .pdp-m__hcount {
+  position: absolute;
+  top: -4px;
+  right: -7px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+  background: var(--pm-deal, #e4323c);
+  border-radius: 999px;
+}
+
+#root .pdp-m .pdp-m__hcount[hidden] {
+  display: none;
+}
+
+.pdp-m__stabs {
+  display: flex;
+  height: 0;
+  overflow: hidden;
+  background: #fff;
+  transition: height 0.22s ease;
+}
+
+.pdp-m__hd.has-tabs .pdp-m__stabs {
+  height: 40px;
+  border-top: 1px solid var(--pm-line, #eceef4);
+}
+
+#root .pdp-m .pdp-m__stabs button {
+  position: relative;
+  flex: 1;
+  height: 40px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  color: #6b6f86;
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+#root .pdp-m .pdp-m__stabs button::before {
+  content: none;
+}
+
+#root .pdp-m .pdp-m__stabs button.is-on {
+  color: var(--pm-ink);
+  font-weight: 800;
+}
+
+#root .pdp-m .pdp-m__stabs button.is-on::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 22px;
+  height: 3px;
+  background: var(--pm-ink);
+  border-radius: 3px;
+  transform: translateX(-50%);
+}
+
+/* Menu ⋯ */
+.pdp-m__hmenu {
+  position: absolute;
+  top: 46px;
+  right: 8px;
+  z-index: 5;
+  width: 220px;
+  padding: 6px 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 14px 34px -10px rgb(22 18 63 / 35%);
+  transform-origin: top right;
+  animation: pdp-m-menu 0.18s ease;
+}
+
+@keyframes pdp-m-menu {
+  from { opacity: 0; transform: scale(0.94); }
+}
+
+.pdp-m__hmenu a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--pm-ink);
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pdp-m__hmenu a + a {
+  border-top: 1px solid var(--pm-line, #eceef4);
+}
+
+.pdp-m__hmenu svg {
+  flex: none;
+  width: 21px;
+  height: 21px;
+  color: var(--pm-blue, #3a34d2);
+}
+
+/* Partager (feuille du bas, déplacée dans <body> par le script) */
+.pdp-m__share {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  background: rgb(22 18 63 / 0%);
+  transition: background 0.25s;
+}
+
+.pdp-m__share.is-open {
+  background: rgb(22 18 63 / 45%);
+}
+
+.pdp-m__share[hidden] {
+  display: none;
+}
+
+.pdp-m__share-in {
+  position: relative;
+  width: 100%;
+  padding: 22px 18px calc(26px + env(safe-area-inset-bottom, 0px));
+  color: #16123f;
+  font-family: 'Figtree', system-ui, sans-serif;
+  text-align: center;
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pdp-m__share.is-open .pdp-m__share-in {
+  transform: none;
+}
+
+/* Le thème impose min-width 120px / hauteur 45px aux boutons. */
+.pdp-m__share button {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.pdp-m__share .pdp-m__share-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px !important;
+  color: #7a7f95;
+}
+
+.pdp-m__share-x svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pdp-m__share-t {
+  margin: 4px 0;
+  font-family: 'Sora', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.pdp-m__share-s {
+  margin: 0 0 20px;
+  color: #7a7f95;
+  font-size: 13.5px;
+}
+
+.pdp-m__share-g {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px 8px;
+}
+
+.pdp-m__share-g button {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.pdp-m__share-g span {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  color: #fff;
+  border-radius: 50%;
+}
+
+.pdp-m__share-g svg {
+  width: 28px;
+  height: 28px;
+}
+
+.pdp-m__share-g .is-wa { background: #25d366; }
+.pdp-m__share-g .is-msg { background: #34c759; }
+.pdp-m__share-g .is-ig { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285aeb 90%); }
+.pdp-m__share-g .is-grey { color: #16123f; background: #f1f2f7; }
+
+.pdp-m__toast {
+  position: fixed;
+  left: 50%;
+  bottom: 160px;
+  z-index: 1001;
+  max-width: 320px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgb(22 18 63 / 92%);
+  border-radius: 10px;
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+
+.pdp-m__toast.is-on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}

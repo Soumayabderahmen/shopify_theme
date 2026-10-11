@@ -56,6 +56,56 @@
     [{%- for v in product.variants -%}{"id":{{ v.id }},"price":{{ v.price }},"compare":{{ v.compare_at_price | default: 0 }},"media":{{ v.featured_media.id | default: 0 }},"available":{{ v.available }},"inv":{% if v.inventory_management == 'shopify' and v.inventory_policy == 'deny' %}{{ v.inventory_quantity }}{% else %}null{% endif %},"options":{{ v.options | json }},"title":{{ v.title | json }}}{% unless forloop.last %},{% endunless %}{%- endfor -%}]
   </script>
 
+  {%- comment -%}
+    En-tête de la fiche au style SHEIN (remplace l'en-tête du site sur la fiche mobile, assets/pdp-mobile.css) : retour,
+    recherche (nom du produit), panier (ouvre le tiroir du site, compteur commun .mobile-home-cart-count), partager, ⋯ ;
+    onglets « Articolo / Recensioni / Consigliati » une fois les photos passées (assets/pdp-mobile.js).
+  {%- endcomment -%}
+  {%- liquid
+    assign hd_track = pages['traccia-ordine']
+    assign hd_help = pages['contatti']
+    assign hd_wishlist = pages['wishlist']
+    assign hd_share_text = 'mobile_pdp_hd.share_text' | t: shop: shop.name
+  -%}
+  <header class="pdp-m__hd" data-pdp-hd>
+    <div class="pdp-m__hdr">
+      <a class="pdp-m__hi" href="{{ routes.root_url }}" data-pdp-back aria-label="{{ 'mobile_pdp_hd.back' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></a>
+      <a class="pdp-m__hsrch" href="{{ routes.search_url }}" aria-label="{{ 'mobile_pdp_hd.search' | t }}"><span>{{ product.title | escape }}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></a>
+      <a class="pdp-m__hi" href="{{ routes.cart_url }}" data-pdp-cart aria-label="{{ 'mobile_pdp_hd.cart' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg><span class="mobile-home-cart-count pdp-m__hcount"{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span></a>
+      <button class="pdp-m__hi" type="button" data-pdp-share-open aria-haspopup="dialog" aria-label="{{ 'mobile_pdp_hd.share' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg></button>
+      <button class="pdp-m__hi" type="button" data-pdp-menu-open aria-haspopup="menu" aria-expanded="false" aria-label="{{ 'mobile_pdp_hd.more' | t }}"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>
+    </div>
+    <nav class="pdp-m__stabs" data-pdp-stabs aria-label="{{ product.title | escape }}">
+      <button type="button" class="is-on" data-pdp-stab="top">{{ 'mobile_pdp_hd.tab_item' | t }}</button>
+      <button type="button" data-pdp-stab="pdp-reviews">{{ 'mobile_pdp_hd.tab_reviews' | t }}</button>
+      <button type="button" data-pdp-stab="pdp-related">{{ 'mobile_pdp_hd.tab_rec' | t }}</button>
+    </nav>
+    <nav class="pdp-m__hmenu" role="menu" data-pdp-menu hidden>
+      <a role="menuitem" href="{{ routes.root_url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7M5 10v10h5v-6h4v6h5V10"/></svg>{{ 'mobile_pdp_hd.menu_home' | t }}</a>
+      {%- if hd_wishlist != empty -%}<a role="menuitem" href="{{ hd_wishlist.url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>{{ 'mobile_pdp_hd.menu_wishlist' | t }}</a>{%- endif -%}
+      {%- if hd_track != empty -%}<a role="menuitem" href="{{ hd_track.url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>{{ 'mobile_pdp_hd.menu_track' | t }}</a>{%- endif -%}
+      {%- if hd_help != empty -%}<a role="menuitem" href="{{ hd_help.url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/><path d="M19 19c0 1.5-2 2-5 2"/></svg>{{ 'mobile_pdp_hd.menu_help' | t }}</a>{%- endif -%}
+    </nav>
+  </header>
+
+  {%- comment -%} Partager, comme SHEIN : WhatsApp, Messaggi, Instagram (partage du téléphone), copier le lien, image, autres. {%- endcomment -%}
+  <div class="pdp-m__share" data-pdp-share data-url="{{ shop.url }}{{ product.url }}" data-text="{{ hd_share_text | escape }}" data-image="{{ product.featured_image | image_url: width: 1200 }}" data-copied="{{ 'mobile_pdp_hd.copied' | t | escape }}" hidden>
+    <div class="pdp-m__share-in" role="dialog" aria-modal="true" aria-labelledby="pdp-share-title">
+      <button class="pdp-m__share-x" type="button" data-pdp-share-close aria-label="{{ 'mobile.pdp.close' | t }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <p class="pdp-m__share-t" id="pdp-share-title">{{ 'mobile_pdp_hd.share_title' | t }}</p>
+      <p class="pdp-m__share-s">{{ hd_share_text }}</p>
+      <div class="pdp-m__share-g">
+        <button type="button" data-share="whatsapp"><span class="is-wa"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.4 5 5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.6 11.6 0 0 0 4.4 3.9c1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.4z"/></svg></span>WhatsApp</button>
+        <button type="button" data-share="sms"><span class="is-msg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.8 2 11.5c0 2.6 1.4 4.9 3.6 6.5L5 21.5l3.9-2.2c1 .3 2 .4 3.1.4 5.5 0 10-3.8 10-8.5S17.5 3 12 3zm-4 9.7a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4zm4 0a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4zm4 0a1.2 1.2 0 1 1 0-2.4 1.2 1.2 0 0 1 0 2.4z"/></svg></span>{{ 'mobile_pdp_hd.share_sms' | t }}</button>
+        <button type="button" data-share="native"><span class="is-ig"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor"/></svg></span>Instagram</button>
+        <button type="button" data-share="copy"><span class="is-grey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>{{ 'mobile_pdp_hd.share_copy' | t }}</button>
+        <button type="button" data-share="image"><span class="is-grey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 19h14"/></svg></span>{{ 'mobile_pdp_hd.share_save' | t }}</button>
+        <button type="button" data-share="native"><span class="is-grey"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></span>{{ 'mobile_pdp_hd.share_more' | t }}</button>
+      </div>
+    </div>
+  </div>
+  <div class="pdp-m__toast" data-pdp-toast role="status" aria-live="polite"></div>
+
   {%- if pm_media_count > 0 -%}
     <section class="pdp-m__gal" aria-roledescription="{{ 'mobile.pdp.carousel' | t }}" aria-label="{{ 'mobile.pdp.gallery' | t }}">
       <div class="pdp-m__slides" data-pdp-slides>

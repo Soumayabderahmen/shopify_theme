@@ -699,6 +699,27 @@
       "fastest_delivery": "Livraison la plus rapide en 2 à 3 jours ouvrables"
     }
   },
+  "mobile_pdp_hd": {
+    "back": "Retour",
+    "search": "Rechercher",
+    "cart": "Panier",
+    "share": "Partager",
+    "more": "Plus",
+    "tab_item": "Article",
+    "tab_reviews": "Avis",
+    "tab_rec": "Recommandés",
+    "menu_home": "Accueil",
+    "menu_wishlist": "Liste d'envies",
+    "menu_track": "Suivre ma commande",
+    "menu_help": "Service client",
+    "share_title": "Partager avec des amis",
+    "share_text": "J'ai trouvé de superbes articles chez {{ shop }} !",
+    "share_sms": "Messages",
+    "share_copy": "Copier le lien",
+    "share_save": "Enregistrer l'image",
+    "share_more": "Plus",
+    "copied": "Lien copié"
+  },
   "mobile_terms": {
     "eyebrow": "Coupon platinumshop",
     "desc": "Tout savoir sur le coupon de cette page : réduction, utilisation et droits des clients.",

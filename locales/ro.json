@@ -707,6 +707,27 @@
       "fastest_delivery": "Livrare rapidă în 2-3 zile lucrătoare"
     }
   },
+  "mobile_pdp_hd": {
+    "back": "Înapoi",
+    "search": "Caută",
+    "cart": "Coș",
+    "share": "Distribuie",
+    "more": "Mai mult",
+    "tab_item": "Articol",
+    "tab_reviews": "Recenzii",
+    "tab_rec": "Recomandate",
+    "menu_home": "Acasă",
+    "menu_wishlist": "Listă de dorințe",
+    "menu_track": "Urmărește comanda",
+    "menu_help": "Serviciul clienți",
+    "share_title": "Distribuie prietenilor",
+    "share_text": "Am găsit articole grozave la {{ shop }}!",
+    "share_sms": "Mesaje",
+    "share_copy": "Copiază linkul",
+    "share_save": "Salvează imaginea",
+    "share_more": "Mai mult",
+    "copied": "Link copiat"
+  },
   "mobile_terms": {
     "eyebrow": "Cupon platinumshop",
     "desc": "Totul despre cuponul de pe această pagină: reducere, utilizare și drepturile clienților.",

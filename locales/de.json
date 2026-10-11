@@ -612,6 +612,27 @@
   "form": {
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
+  "mobile_pdp_hd": {
+    "back": "Zurück",
+    "search": "Suchen",
+    "cart": "Warenkorb",
+    "share": "Teilen",
+    "more": "Mehr",
+    "tab_item": "Artikel",
+    "tab_reviews": "Bewertungen",
+    "tab_rec": "Empfohlen",
+    "menu_home": "Startseite",
+    "menu_wishlist": "Wunschliste",
+    "menu_track": "Bestellung verfolgen",
+    "menu_help": "Kundenservice",
+    "share_title": "Mit Freunden teilen",
+    "share_text": "Ich habe tolle Artikel bei {{ shop }} gefunden!",
+    "share_sms": "Nachrichten",
+    "share_copy": "Link kopieren",
+    "share_save": "Bild speichern",
+    "share_more": "Mehr",
+    "copied": "Link kopiert"
+  },
   "mobile_terms": {
     "eyebrow": "platinumshop-Gutschein",
     "desc": "Alles zum Gutschein dieser Seite: Rabatt, Einlösung und Rechte der Kunden.",

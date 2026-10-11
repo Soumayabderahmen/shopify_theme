@@ -3396,6 +3396,27 @@
       "fastest_delivery": "Fastest delivery in 2-3 business days"
     }
   },
+  "mobile_pdp_hd": {
+    "back": "Back",
+    "search": "Search",
+    "cart": "Cart",
+    "share": "Share",
+    "more": "More",
+    "tab_item": "Item",
+    "tab_reviews": "Reviews",
+    "tab_rec": "Recommended",
+    "menu_home": "Home",
+    "menu_wishlist": "Wishlist",
+    "menu_track": "Track order",
+    "menu_help": "Customer service",
+    "share_title": "Share with friends",
+    "share_text": "I found great items at {{ shop }}!",
+    "share_sms": "Messages",
+    "share_copy": "Copy link",
+    "share_save": "Save image",
+    "share_more": "More",
+    "copied": "Link copied"
+  },
   "mobile_terms": {
     "eyebrow": "platinumshop coupon",
     "desc": "Everything about the coupon on this page: discount, how to use it and customer rights.",

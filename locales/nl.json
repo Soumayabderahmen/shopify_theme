@@ -630,6 +630,27 @@
   "border": {
     "top_picks": "Topkeuzes"
   },
+  "mobile_pdp_hd": {
+    "back": "Terug",
+    "search": "Zoeken",
+    "cart": "Winkelwagen",
+    "share": "Delen",
+    "more": "Meer",
+    "tab_item": "Artikel",
+    "tab_reviews": "Reviews",
+    "tab_rec": "Aanbevolen",
+    "menu_home": "Home",
+    "menu_wishlist": "Verlanglijst",
+    "menu_track": "Bestelling volgen",
+    "menu_help": "Klantenservice",
+    "share_title": "Delen met vrienden",
+    "share_text": "Ik heb geweldige artikelen gevonden bij {{ shop }}!",
+    "share_sms": "Berichten",
+    "share_copy": "Link kopiëren",
+    "share_save": "Afbeelding opslaan",
+    "share_more": "Meer",
+    "copied": "Link gekopieerd"
+  },
   "mobile_terms": {
     "eyebrow": "platinumshop-coupon",
     "desc": "Alles over de coupon op deze pagina: korting, gebruik en rechten van klanten.",
