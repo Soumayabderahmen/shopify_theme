@@ -1,0 +1,29 @@
+{%- comment -%}
+  Traduction des textes saisis dans l'éditeur (page « Contatti » : sections section-faq, section-contact-form,
+  page-service-info-blocks) dans la langue du visiteur, avec les fichiers locales/*.json du thème.
+  Clé : groupe « contact_page », « h » + 10 premiers caractères du md5 du texte sans balises (le texte italien du modèle
+  templates/page.contact.json), suffixe _html. Valeur sans balise : remplace le texte à l'intérieur des balises d'origine
+  (<h2>, <p>…) ; valeur avec balises : remplace tout. Sans traduction, le texte d'origine reste tel quel (autres pages).
+  Params : text, attr (true : texte simple échappé pour un attribut, ex. placeholder)
+{%- endcomment -%}
+{%- liquid
+  assign pti_plain = text | strip_html | strip
+  assign pti_out = text
+  if pti_plain != blank
+    assign pti_key = pti_plain | md5 | slice: 0, 10
+    assign pti_key = 'contact_page.h' | append: pti_key | append: '_html'
+    assign pti_tr = pti_key | t
+    unless pti_tr contains 'translation missing' or pti_tr == blank or pti_tr == pti_key
+      if pti_tr contains '<'
+        assign pti_out = pti_tr
+      else
+        assign pti_out = text | replace: pti_plain, pti_tr
+      endif
+    endunless
+  endif
+  if attr
+    echo pti_out | strip_html | strip | escape
+  else
+    echo pti_out
+  endif
+-%}

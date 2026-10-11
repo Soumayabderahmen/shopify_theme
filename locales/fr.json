@@ -699,6 +699,26 @@
       "fastest_delivery": "Livraison la plus rapide en 2 à 3 jours ouvrables"
     }
   },
+  "contact_page": {
+    "h453f747c3c_html": "Questions fréquentes",
+    "h2f53a1da41_html": "Quand ma commande sera-t-elle livrée ?",
+    "ha56511222c_html": "Nous livrons dans le monde entier. Votre commande est emballée avec le plus grand soin et livrée où vous le souhaitez. La livraison prend de 2 à 4 jours ouvrés. Après votre commande, vous recevrez un e-mail avec plus d'informations sur la livraison.",
+    "h331c497901_html": "Puis-je retourner mon produit ?",
+    "hf0fc717729_html": "Les commandes peuvent être retournées ou échangées dans les 30 jours suivant la réception du colis, à condition d'être dans leur état d'origine et revendables.",
+    "h4215789fea_html": "Que faire si mon article (ou une partie) est endommagé ?",
+    "h0db35c096f_html": "Nous faisons tout pour livrer vos articles sans dommage. Les commandes peuvent être retournées ou échangées dans les 30 jours suivant la réception du colis, à condition d'être dans leur état d'origine et revendables.",
+    "hefe91789db_html": "Formulaire de contact",
+    "hce8ae9da5b_html": "E-mail",
+    "hc0289e9889_html": "Nom",
+    "h8b56cfb0d1_html": "Message",
+    "hf4b451ffd2_html": "Je veux recevoir les offres et nouveautés",
+    "h34d6ee6e3c_html": "Oui",
+    "hbafd7322c6_html": "Non",
+    "h1c4b69d02f_html": "Mon compte",
+    "h239fb23c96_html": "<p><a href=\"/account\" title=\"/account\">Suivre ma dernière commande</a>, <a href=\"/account\" title=\"/account\">voir toutes mes commandes</a> ou <a href=\"/account/addresses\" title=\"/account/addresses\">gérer mes adresses</a>.</p>",
+    "h0aa64ed883_html": "Service client",
+    "hde0ea4a366_html": "Appelez-nous ou écrivez-nous un e-mail quand vous voulez."
+  },
   "mobile_pdp_hd": {
     "back": "Retour",
     "search": "Rechercher",

@@ -612,6 +612,26 @@
   "form": {
     "fastest_delivery": "Schnellste Lieferung in 2–3 Werktagen"
   },
+  "contact_page": {
+    "h453f747c3c_html": "Häufige Fragen",
+    "h2f53a1da41_html": "Wann wird meine Bestellung geliefert?",
+    "ha56511222c_html": "Wir versenden weltweit. Deine Bestellung wird sorgfältig verpackt und dorthin geliefert, wo du möchtest. Die Lieferung dauert 2 bis 4 Werktage. Nach der Bestellung erhältst du eine E-Mail mit weiteren Informationen zur Lieferung.",
+    "h331c497901_html": "Kann ich mein Produkt zurückgeben?",
+    "hf0fc717729_html": "Bestellungen können innerhalb von 30 Tagen nach Erhalt des Pakets zurückgegeben oder umgetauscht werden, sofern sie sich im ursprünglichen, wiederverkaufsfähigen Zustand befinden.",
+    "h4215789fea_html": "Was kann ich tun, wenn mein Artikel (oder ein Teil davon) beschädigt ist?",
+    "h0db35c096f_html": "Wir tun alles, um deine Artikel unbeschädigt zu liefern. Bestellungen können innerhalb von 30 Tagen nach Erhalt des Pakets zurückgegeben oder umgetauscht werden, sofern sie sich im ursprünglichen, wiederverkaufsfähigen Zustand befinden.",
+    "hefe91789db_html": "Kontaktformular",
+    "hce8ae9da5b_html": "E-Mail",
+    "hc0289e9889_html": "Name",
+    "h8b56cfb0d1_html": "Nachricht",
+    "hf4b451ffd2_html": "Ich möchte Angebote und Neuigkeiten erhalten",
+    "h34d6ee6e3c_html": "Ja",
+    "hbafd7322c6_html": "Nein",
+    "h1c4b69d02f_html": "Mein Konto",
+    "h239fb23c96_html": "<p><a href=\"/account\" title=\"/account\">Letzte Bestellung verfolgen</a>, <a href=\"/account\" title=\"/account\">alle Bestellungen ansehen</a> oder <a href=\"/account/addresses\" title=\"/account/addresses\">Adressen verwalten</a>.</p>",
+    "h0aa64ed883_html": "Kundenservice",
+    "hde0ea4a366_html": "Ruf uns an oder schreib uns eine E-Mail, wann immer du möchtest."
+  },
   "mobile_pdp_hd": {
     "back": "Zurück",
     "search": "Suchen",

@@ -707,6 +707,26 @@
       "fastest_delivery": "Livrare rapidă în 2-3 zile lucrătoare"
     }
   },
+  "contact_page": {
+    "h453f747c3c_html": "Întrebări frecvente",
+    "h2f53a1da41_html": "Când va fi livrată comanda mea?",
+    "ha56511222c_html": "Livrăm în toată lumea. Comanda ta va fi ambalată cu grijă și livrată oriunde dorești. Livrarea durează între 2 și 4 zile lucrătoare. După comandă vei primi un e-mail cu mai multe informații despre livrare.",
+    "h331c497901_html": "Pot returna produsul?",
+    "hf0fc717729_html": "Comenzile pot fi returnate sau schimbate în termen de 30 de zile de la primirea coletului, cu condiția să fie în starea originală și să poată fi revândute.",
+    "h4215789fea_html": "Ce pot face dacă articolul meu (sau o parte din el) este deteriorat?",
+    "h0db35c096f_html": "Facem tot posibilul să livrăm articolele fără deteriorări. Comenzile pot fi returnate sau schimbate în termen de 30 de zile de la primirea coletului, cu condiția să fie în starea originală și să poată fi revândute.",
+    "hefe91789db_html": "Formular de contact",
+    "hce8ae9da5b_html": "E-mail",
+    "hc0289e9889_html": "Nume",
+    "h8b56cfb0d1_html": "Mesaj",
+    "hf4b451ffd2_html": "Vreau să primesc oferte și noutăți",
+    "h34d6ee6e3c_html": "Da",
+    "hbafd7322c6_html": "Nu",
+    "h1c4b69d02f_html": "Contul meu",
+    "h239fb23c96_html": "<p><a href=\"/account\" title=\"/account\">Urmărește ultima comandă</a>, <a href=\"/account\" title=\"/account\">vezi toate comenzile</a> sau <a href=\"/account/addresses\" title=\"/account/addresses\">gestionează adresele</a>.</p>",
+    "h0aa64ed883_html": "Serviciul clienți",
+    "hde0ea4a366_html": "Sună-ne sau trimite-ne un e-mail oricând dorești."
+  },
   "mobile_pdp_hd": {
     "back": "Înapoi",
     "search": "Caută",

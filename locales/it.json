@@ -701,6 +701,26 @@
       "fastest_delivery": "Consegna più rapida in 2-3 giorni lavorativi"
     }
   },
+  "contact_page": {
+    "h453f747c3c_html": "Domande frequenti",
+    "h2f53a1da41_html": "Quando verrà consegnato il mio ordine?",
+    "ha56511222c_html": "Spediamo in tutto il mondo. Il tuo ordine verrà imballato con la massima cura e consegnato dove desideri. La consegna richiede da 2 a 4 giorni lavorativi. Dopo l'ordine riceverai un'e-mail con maggiori informazioni sulla consegna.",
+    "h331c497901_html": "Posso restituire il mio prodotto?",
+    "hf0fc717729_html": "Gli ordini possono essere restituiti o cambiati entro 30 giorni dalla ricezione del pacco, purché siano nelle condizioni originali e rivendibili.",
+    "h4215789fea_html": "Cosa posso fare se il mio articolo (o una parte di esso) è danneggiato?",
+    "h0db35c096f_html": "Facciamo il possibile per consegnare i tuoi articoli senza danni. Gli ordini possono essere restituiti o cambiati entro 30 giorni dalla ricezione del pacco, purché siano nelle condizioni originali e rivendibili.",
+    "hefe91789db_html": "Modulo di contatto",
+    "hce8ae9da5b_html": "Email",
+    "hc0289e9889_html": "Nome",
+    "h8b56cfb0d1_html": "Messaggio",
+    "hf4b451ffd2_html": "Voglio ricevere offerte e novità",
+    "h34d6ee6e3c_html": "Sì",
+    "hbafd7322c6_html": "No",
+    "h1c4b69d02f_html": "Il mio account",
+    "h239fb23c96_html": "<p><a href=\"/account\" title=\"/account\">Segui il tuo ultimo ordine</a>, <a href=\"/account\" title=\"/account\">vedi tutti gli ordini</a> o <a href=\"/account/addresses\" title=\"/account/addresses\">gestisci i tuoi indirizzi</a>.</p>",
+    "h0aa64ed883_html": "Servizio clienti",
+    "hde0ea4a366_html": "Chiamaci o scrivici una e-mail quando vuoi."
+  },
   "mobile_pdp_hd": {
     "back": "Indietro",
     "search": "Cerca",

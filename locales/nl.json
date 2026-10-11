@@ -630,6 +630,26 @@
   "border": {
     "top_picks": "Topkeuzes"
   },
+  "contact_page": {
+    "h453f747c3c_html": "Veelgestelde vragen",
+    "h2f53a1da41_html": "Wanneer wordt mijn bestelling geleverd?",
+    "ha56511222c_html": "We verzenden wereldwijd. Je bestelling wordt zorgvuldig verpakt en geleverd waar je maar wilt. De levering duurt 2 tot 4 werkdagen. Na je bestelling ontvang je een e-mail met meer informatie over de levering.",
+    "h331c497901_html": "Kan ik mijn product retourneren?",
+    "hf0fc717729_html": "Bestellingen kunnen binnen 30 dagen na ontvangst van het pakket worden geretourneerd of omgeruild, mits ze in de originele, verkoopbare staat zijn.",
+    "h4215789fea_html": "Wat kan ik doen als mijn artikel (of een deel ervan) beschadigd is?",
+    "h0db35c096f_html": "We doen er alles aan om je artikelen onbeschadigd te leveren. Bestellingen kunnen binnen 30 dagen na ontvangst van het pakket worden geretourneerd of omgeruild, mits ze in de originele, verkoopbare staat zijn.",
+    "hefe91789db_html": "Contactformulier",
+    "hce8ae9da5b_html": "E-mail",
+    "hc0289e9889_html": "Naam",
+    "h8b56cfb0d1_html": "Bericht",
+    "hf4b451ffd2_html": "Ik wil aanbiedingen en nieuws ontvangen",
+    "h34d6ee6e3c_html": "Ja",
+    "hbafd7322c6_html": "Nee",
+    "h1c4b69d02f_html": "Mijn account",
+    "h239fb23c96_html": "<p><a href=\"/account\" title=\"/account\">Volg je laatste bestelling</a>, <a href=\"/account\" title=\"/account\">bekijk alle bestellingen</a> of <a href=\"/account/addresses\" title=\"/account/addresses\">beheer je adressen</a>.</p>",
+    "h0aa64ed883_html": "Klantenservice",
+    "hde0ea4a366_html": "Bel ons of stuur ons een e-mail wanneer je wilt."
+  },
   "mobile_pdp_hd": {
     "back": "Terug",
     "search": "Zoeken",

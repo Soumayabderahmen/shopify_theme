@@ -3396,6 +3396,26 @@
       "fastest_delivery": "Fastest delivery in 2-3 business days"
     }
   },
+  "contact_page": {
+    "h453f747c3c_html": "Frequently asked questions",
+    "h2f53a1da41_html": "When will my order be delivered?",
+    "ha56511222c_html": "We ship worldwide. Your order will be packaged really carefully and delivered wherever you want. Delivery takes between 2 and 4 business days. After ordering you will receive an e-mail with more information about the delivery.",
+    "h331c497901_html": "Can I return my product?",
+    "hf0fc717729_html": "Orders can be returned or exchanged within 30 days of receiving the parcel, provided they are in their original resalable condition.",
+    "h4215789fea_html": "What can I do if my item (or part of it) is damaged?",
+    "h0db35c096f_html": "We work hard to deliver your items without damage. Orders can be returned or exchanged within 30 days of receiving the parcel, provided they are in their original resalable condition.",
+    "hefe91789db_html": "Contact form",
+    "hce8ae9da5b_html": "Email",
+    "hc0289e9889_html": "Name",
+    "h8b56cfb0d1_html": "Message",
+    "hf4b451ffd2_html": "I want to receive offers and news",
+    "h34d6ee6e3c_html": "Yes",
+    "hbafd7322c6_html": "No",
+    "h1c4b69d02f_html": "My account",
+    "h239fb23c96_html": "<p><a href=\"/account\" title=\"/account\">Track your last order</a>, <a href=\"/account\" title=\"/account\">view all orders</a> or <a href=\"/account/addresses\" title=\"/account/addresses\">manage your addresses</a>.</p>",
+    "h0aa64ed883_html": "Customer service",
+    "hde0ea4a366_html": "Call us or send us an e-mail whenever you like."
+  },
   "mobile_pdp_hd": {
     "back": "Back",
     "search": "Search",

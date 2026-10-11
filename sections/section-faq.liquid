@@ -36,7 +36,7 @@
           {% endif %}
         "
       >
-        {{ section.settings.title }}
+        {%- render 'page-text-i18n', text: section.settings.title -%}
       </div>
     {%- endif -%}
     <div class="accordion-a">
@@ -74,10 +74,10 @@
                   #shopify-section-{{ section.id }} .block-{{ block.id }} svg { --secondary_bg: var(--primary_text); height: auto!important; width: {{ image_width }}px!important; }
                 </style>
               {%- endif -%}
-              <span>{{ block.settings.faq_question }}</span>
+              <span>{%- render 'page-text-i18n', text: block.settings.faq_question -%}</span>
             </summary>
             <div>
-              {%- if block.settings.faq_answer != empty -%}{{ block.settings.faq_answer }}{%- endif -%}
+              {%- if block.settings.faq_answer != empty -%}{%- render 'page-text-i18n', text: block.settings.faq_answer -%}{%- endif -%}
               {%- if block.settings.page -%}{{ block.settings.page.content }}{%- endif %}
               {%- if block.settings.image != blank -%}
                 <div class="m20">

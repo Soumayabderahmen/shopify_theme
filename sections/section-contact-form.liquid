@@ -66,7 +66,7 @@
           {% endif %}
         "
       >
-        {{ section.settings.title }}
+        {%- render 'page-text-i18n', text: section.settings.title -%}
       </header>
     {%- endif -%}
     {%- if section.blocks.size > 0 -%}
@@ -81,7 +81,7 @@
             {%- if block.type == 'text' or block.type == 'email' or block.type == 'tel' -%}
               <p class="w50" {{ block.shopify_attributes }}>
                 <label for="{{ block.settings.title | handleize }}">
-                  {{- block.settings.title }}
+                  {%- render 'page-text-i18n', text: block.settings.title -%}
                   {%- if block.settings.required or block.type == 'email' -%}
                     <span class="overlay-theme">*</span>
                   {%- endif -%}
@@ -91,7 +91,7 @@
                   id="{{ block.settings.title | handleize }}"
                   name="contact[{% if block.type == 'email' %}email{% else %}{{ block.settings.title | strip_html | escape }}{% endif %}]"
                   {% if section.settings.show_placeholder %}
-                    placeholder="{%- if block.settings.placeholder != empty -%}{{ block.settings.placeholder }}{%- else -%}{{ block.settings.title }}{%- endif -%}"
+                    placeholder="{%- if block.settings.placeholder != empty -%}{%- render 'page-text-i18n', text: block.settings.placeholder, attr: true -%}{%- else -%}{%- render 'page-text-i18n', text: block.settings.title, attr: true -%}{%- endif -%}"
                   {% endif %}
                   {% if block.settings.required or block.type == 'email' %}
                     required
@@ -101,7 +101,7 @@
             {%- elsif block.type == 'textarea' -%}
               <p class="w50 m20" {{ block.shopify_attributes }}>
                 <label for="{{ block.settings.title | handleize }}">
-                  {{- block.settings.title }}
+                  {%- render 'page-text-i18n', text: block.settings.title -%}
                   {%- if block.settings.required -%}
                     <span class="overlay-theme">*</span>
                   {%- endif -%}
@@ -110,7 +110,7 @@
                   id="{{ block.settings.title | handleize }}"
                   name="contact[{% if has_message %}{{ block.settings.title | strip_html | escape }}{% else %}body{% endif %}]"
                   {% if section.settings.show_placeholder %}
-                    placeholder="{%- if block.settings.placeholder != empty -%}{{ block.settings.placeholder }}{%- else -%}{{ block.settings.title }}{%- endif -%}"
+                    placeholder="{%- if block.settings.placeholder != empty -%}{%- render 'page-text-i18n', text: block.settings.placeholder, attr: true -%}{%- else -%}{%- render 'page-text-i18n', text: block.settings.title, attr: true -%}{%- endif -%}"
                   {% endif %}
                   {% if block.settings.required %}
                     required
@@ -125,7 +125,7 @@
               >
                 {%- if block.settings.title != empty -%}
                   <label for="{{ block.settings.title | handleize }}">
-                    {{- block.settings.title }}
+                    {%- render 'page-text-i18n', text: block.settings.title -%}
                     {%- if block.settings.required -%}
                       <span class="overlay-theme">*</span>
                     {%- endif -%}
@@ -146,7 +146,7 @@
                           {% endif %}
                         >
                         <label for="{% if block.settings.title != empty %}{{ block.settings.title | handleize }}-{% endif %}{{ block.settings[handle] | handleize }}">
-                          {{- block.settings[handle] -}}
+                          {%- render 'page-text-i18n', text: block.settings[handle] -%}
                         </label>
                       </li>
                     {%- endif -%}
@@ -156,7 +156,7 @@
             {%- elsif block.type == 'select' %}
               <p class="w50" {{ block.shopify_attributes }}>
                 <label for="{{ block.settings.title | handleize }}">
-                  {{- block.settings.title }}
+                  {%- render 'page-text-i18n', text: block.settings.title -%}
                   {%- if block.settings.required -%}
                     <span class="overlay-theme">*</span>
                   {%- endif -%}
