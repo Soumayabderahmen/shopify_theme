@@ -1003,6 +1003,7 @@
       "claim": "Einlösen",
       "benefits_title": "Exklusive Vorteile für diesen Artikel",
       "coupon_long": "{{ percent }} % Rabatt auf die gesamte Bestellung mit dem Code {{ code }}",
+      "with_coupon": "Mit Gutschein -{{ percent }} %: {{ price }}",
       "terms": "Bedingungen",
       "free_shipping": "Kostenloser Versand",
       "free_shipping_order": "Kostenloser Versand für diese Bestellung",

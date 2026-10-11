@@ -1098,6 +1098,7 @@
       "claim": "Revendică",
       "benefits_title": "Avantaje exclusive pentru acest articol",
       "coupon_long": "{{ percent }}% reducere la întreaga comandă cu codul {{ code }}",
+      "with_coupon": "Cu cuponul -{{ percent }}%: {{ price }}",
       "terms": "Termeni",
       "free_shipping": "Livrare gratuită",
       "free_shipping_order": "Livrare gratuită pentru această comandă",

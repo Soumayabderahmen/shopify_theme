@@ -1090,6 +1090,7 @@
       "claim": "Récupérer",
       "benefits_title": "Avantages exclusifs pour cet article",
       "coupon_long": "{{ percent }} % de réduction sur toute la commande avec le code {{ code }}",
+      "with_coupon": "Avec le coupon -{{ percent }} % : {{ price }}",
       "terms": "Conditions",
       "free_shipping": "Livraison gratuite",
       "free_shipping_order": "Livraison gratuite sur cette commande",

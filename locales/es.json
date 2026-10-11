@@ -1018,6 +1018,7 @@
       "claim": "Canjear",
       "benefits_title": "Ventajas exclusivas para este artículo",
       "coupon_long": "{{ percent }} % de descuento en todo el pedido con el código {{ code }}",
+      "with_coupon": "Con el cupón -{{ percent }} %: {{ price }}",
       "terms": "Condiciones",
       "free_shipping": "Envío gratis",
       "free_shipping_order": "Envío gratis en este pedido",

@@ -1092,6 +1092,7 @@
       "claim": "Riscuoti",
       "benefits_title": "Vantaggi esclusivi per l'articolo",
       "coupon_long": "{{ percent }}% di sconto su tutto l'ordine con il codice {{ code }}",
+      "with_coupon": "Con il coupon -{{ percent }}%: {{ price }}",
       "terms": "Termini",
       "free_shipping": "Spedizione gratuita",
       "free_shipping_order": "Spedizione gratuita su questo ordine",

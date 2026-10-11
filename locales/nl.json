@@ -1021,6 +1021,7 @@
       "claim": "Claimen",
       "benefits_title": "Exclusieve voordelen voor dit artikel",
       "coupon_long": "{{ percent }}% korting op je hele bestelling met de code {{ code }}",
+      "with_coupon": "Met coupon -{{ percent }}%: {{ price }}",
       "terms": "Voorwaarden",
       "free_shipping": "Gratis verzending",
       "free_shipping_order": "Gratis verzending voor deze bestelling",

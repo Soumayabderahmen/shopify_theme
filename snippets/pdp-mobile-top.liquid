@@ -159,6 +159,15 @@
       <span class="pdp-m__iva">{% render 'mobile-tax-note', kind: 'short', vat_key: 'mobile.pdp' %}</span>
     </div>
     {%- if pm_coupon_code != blank -%}
+      {%- comment -%} Prix avec le coupon (réduction Shopify sur toute la commande), mis à jour à chaque variante (assets/pdp-mobile.js). {%- endcomment -%}
+      {%- liquid
+        assign pm_with_coupon = 100 | minus: pm_coupon_percent | times: pm_price | divided_by: 100.0 | round
+        assign pm_with_coupon_money = pm_with_coupon | money | append: mm_cur
+        assign pm_with_coupon_tpl = 'mobile.pdp.with_coupon' | t: percent: pm_coupon_percent, price: '__PRICE__'
+      -%}
+      <p class="pdp-m__wc" data-pdp-with-coupon data-percent="{{ pm_coupon_percent }}" data-template="{{ pm_with_coupon_tpl | escape }}">{{ pm_with_coupon_tpl | replace: '__PRICE__', pm_with_coupon_money }}</p>
+    {%- endif -%}
+    {%- if pm_coupon_code != blank -%}
       <div class="pdp-m__tkt">
         <span class="pdp-m__pc">-{{ pm_coupon_percent }}%</span>
         <span class="pdp-m__tx"><b>{{ 'mobile.pdp.coupon_title' | t: percent: pm_coupon_percent }}</b>{{ 'mobile.pdp.coupon_short' | t }}<br>{{ 'mobile.pdp.expires_in' | t }} <em data-pdp-coupon-timer>02{{ 'mobile.pdp.days_short' | t }} 00:00:00</em></span>

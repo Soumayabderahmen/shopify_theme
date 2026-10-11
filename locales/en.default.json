@@ -3787,6 +3787,7 @@
       "claim": "Collect",
       "benefits_title": "Exclusive benefits for this item",
       "coupon_long": "{{ percent }}% off your whole order with code {{ code }}",
+      "with_coupon": "With coupon -{{ percent }}%: {{ price }}",
       "terms": "Terms",
       "free_shipping": "Free shipping",
       "free_shipping_order": "Free shipping on this order",

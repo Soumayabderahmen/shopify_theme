@@ -377,6 +377,57 @@
   background: var(--pm-ok);
 }
 
+/* Prix aux couleurs de la charte (prototype SHEIN v3) : prix bleu nuit, −% indigo, « Con il coupon » indigo,
+   ticket coupon violet comme « Coupon della settimana » de l'accueil (texte et bouton blancs). */
+.pdp-m__price,
+.pdp-m__price.is-sale {
+  color: var(--pm-ink);
+}
+
+.pdp-m__save {
+  color: var(--pm-blue);
+  background: #ecebfd;
+}
+
+.pdp-m__wc {
+  margin: 4px 0 0;
+  color: var(--pm-blue);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pdp-m__tkt {
+  color: #fff;
+  background: linear-gradient(110deg, #3a34d2, #6b5cff 60%, #a78bfa);
+  box-shadow: 0 10px 20px -14px rgb(58 52 210 / 85%);
+}
+
+.pdp-m__tkt::before,
+.pdp-m__tkt::after {
+  box-shadow: none;
+}
+
+.pdp-m__pc {
+  color: #fff;
+  border-right-color: rgb(255 255 255 / 45%);
+}
+
+.pdp-m__tx,
+.pdp-m__tx b,
+.pdp-m__tx em {
+  color: #fff;
+}
+
+#root .pdp-m .pdp-m__claim {
+  color: var(--pm-blue);
+  background: #fff;
+}
+
+#root .pdp-m .pdp-m__claim.is-done {
+  color: var(--pm-ok);
+  background: #e7f7ef;
+}
+
 /* ===================== Étapes 2 à 4 ===================== */
 
 /* Anciens blocs Xtra remplacés par la nouvelle fiche (mobile). Leurs fenêtres (Termini, garantie prix,

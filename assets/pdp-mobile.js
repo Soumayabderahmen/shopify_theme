@@ -219,6 +219,12 @@
       saveEl.hidden = !sale;
       if (sale) saveEl.textContent = '-' + Math.floor((variant.compare - variant.price) * 100 / variant.compare) + '%';
     }
+    // « Con il coupon -20% : … » : prix de la variante moins le coupon (même arrondi que le Liquid).
+    var withCouponEl = root.querySelector('[data-pdp-with-coupon]');
+    if (withCouponEl) {
+      var couponPercent = Number(withCouponEl.getAttribute('data-percent')) || 0;
+      withCouponEl.textContent = String(withCouponEl.getAttribute('data-template')).replace('__PRICE__', money(Math.round(variant.price * (100 - couponPercent) / 100)));
+    }
     if (variant.media && slides) {
       var target = slides.querySelector('[data-media-id="' + variant.media + '"]');
       if (target) goToSlide(Array.prototype.indexOf.call(slides.children, target));
