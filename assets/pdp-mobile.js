@@ -365,7 +365,8 @@
       // À droite des boutons de la dernière option quand c'est une rangée simple (« Spedizioni da » : China Mainland) ;
       // sous la carte, à droite, après une grille de tailles ou des couleurs.
       var rows = optionsCard.querySelectorAll('[data-option-index]');
-      var row = rows.length ? rows[rows.length - 1].querySelector('.pdp-m__sz:not(.pdp-m__sz--grid)') : null;
+      // … ou de la ligne « Spedito da » (une seule origine, prototype SHEIN).
+      var row = rows.length ? rows[rows.length - 1].querySelector('.pdp-m__sz:not(.pdp-m__sz--grid), .pdp-m__from') : null;
       if (row) {
         optionPrice.classList.add('is-inline');
         row.appendChild(optionPrice);

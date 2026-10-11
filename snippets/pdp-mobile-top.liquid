@@ -251,7 +251,7 @@
             assign is_color = true
           endif
           assign is_ship = false
-          if option_name contains 'ship' or option_name contains 'spedit' or option_name contains 'country' or option_name contains 'paese'
+          if option_name contains 'ship' or option_name contains 'spedit' or option_name contains 'spedizion' or option_name contains 'country' or option_name contains 'paese'
             assign is_ship = true
           endif
           assign is_size = false
@@ -295,6 +295,14 @@
             endif
           endif
         -%}
+        {%- if is_ship and option.values.size == 1 -%}
+          {%- comment -%} Une seule origine d'expédition : rien à choisir, simple ligne « 📍 Spedito da : … » (prototype SHEIN),
+             le prix de la variante se place à sa droite (assets/pdp-mobile.js). {%- endcomment -%}
+          <div class="pdp-m__opt pdp-m__opt--from" data-option-index="{{ forloop.index0 }}">
+            <div class="pdp-m__from"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span>{{ option_label }}:</span> <b data-pdp-option-name>{{ option.values.first | escape }}</b></div>
+          </div>
+          {%- continue -%}
+        {%- endif -%}
         <div class="pdp-m__opt" data-option-index="{{ forloop.index0 }}"{% if is_size %} data-pdp-size data-size-label="{{ 'mobile.pdp.size' | t | escape }}"{% endif %}>
           <div class="pdp-m__olab">
             <span><span data-pdp-option-label>{{ option_label }}</span>: <b data-pdp-option-name>{{ option.selected_value }}</b>

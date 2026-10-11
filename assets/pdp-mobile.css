@@ -1443,6 +1443,106 @@ body.template-product {
   100% { opacity: 1; transform: none; }
 }
 
+/* Tailles en pastilles (prototype SHEIN v3) : blanches, contour bleu nuit épais pour la taille choisie ; le petit texte
+   (plage de poids, longueur du pied) reste à côté du code. Les règles des grilles ci-dessous sont remplacées. */
+#root .pdp-m .pdp-m__sz.pdp-m__sz--grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+#root .pdp-m .pdp-m__sz.pdp-m__sz--grid .pdp-m__szb {
+  position: relative;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  width: auto;
+  min-width: 54px !important;
+  height: 36px;
+  min-height: 0;
+  padding: 0 14px;
+  color: var(--pm-ink);
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 34px;
+  background: #fff;
+  border: 1px solid #d9dce6;
+  border-radius: 999px;
+  box-shadow: none;
+}
+
+#root .pdp-m .pdp-m__sz.pdp-m__sz--grid .pdp-m__szb b {
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+#root .pdp-m .pdp-m__sz.pdp-m__sz--grid .pdp-m__szb small {
+  color: #8a8ea3;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+#root .pdp-m .pdp-m__sz.pdp-m__sz--grid .pdp-m__szb[aria-checked='true'] {
+  color: var(--pm-ink);
+  font-weight: 800;
+  background: #fff;
+  border: 1.5px solid var(--pm-ink);
+  box-shadow: 0 0 0 0.5px var(--pm-ink);
+}
+
+#root .pdp-m .pdp-m__sz.pdp-m__sz--grid .pdp-m__szb[aria-checked='true'] small {
+  color: #5b5f78;
+}
+
+#root .pdp-m .pdp-m__sz.pdp-m__sz--grid .pdp-m__szb.is-unavailable {
+  color: #b8bbc9;
+  background: #f7f8fa;
+  border-color: #e6e8f0;
+}
+
+#root .pdp-m .pdp-m__sz.pdp-m__sz--grid .pdp-m__szb:active {
+  transform: scale(0.96);
+}
+
+/* « 📍 Spedito da : China Mainland » (une seule origine) ; le prix de la variante à droite. */
+.pdp-m__opt--from {
+  margin-top: 14px;
+}
+
+.pdp-m__from {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: var(--pm-mute);
+  font-size: 12.5px;
+}
+
+.pdp-m__from svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+}
+
+.pdp-m__from b {
+  overflow: hidden;
+  color: var(--pm-ink);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdp-m__from .pdp-m__optp.is-inline {
+  flex: none;
+  margin-left: auto;
+}
+
 /* Pointures (prototype « pointures ») : grille de 5, pointure EU en gros, longueur du pied en petit. */
 .pdp-m__sz--shoe {
   grid-template-columns: repeat(5, minmax(0, 1fr));
