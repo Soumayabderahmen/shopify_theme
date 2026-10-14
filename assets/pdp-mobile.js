@@ -69,8 +69,8 @@
     root.pdpToast = toast;
 
     // Retour : page précédente du site, sinon l'accueil (lien).
-    // Retour : effet immédiat au toucher (flèche enfoncée, fiche qui glisse vers la droite, barre de chargement en
-    // haut) pendant que la page précédente revient, pour que le client ne croie pas que la page bloque.
+    // Retour : effet immédiat (flèche enfoncée, voile léger avec indicateur de chargement, barre en haut) pendant que
+    // la page précédente revient, pour que le client ne croie pas que la page bloque.
     var back = header.querySelector('[data-pdp-back]');
     var showLeaving = function () {
       document.documentElement.classList.add('pdp-m-leaving');
@@ -79,8 +79,27 @@
         bar.className = 'pdp-m__navbar';
         bar.setAttribute('aria-hidden', 'true');
         document.body.appendChild(bar);
+        var veil = document.createElement('div');
+        veil.className = 'pdp-m__leave';
+        veil.setAttribute('aria-hidden', 'true');
+        veil.innerHTML = '<i></i>';
+        document.body.appendChild(veil);
       }
     };
+    var hideLeaving = function () {
+      document.documentElement.classList.remove('pdp-m-leaving');
+      document.querySelectorAll('.pdp-m__navbar, .pdp-m__leave').forEach(function (el) { el.remove(); });
+    };
+    // Bouton retour du navigateur (et geste retour d'Android) : même effet, dès que le retour commence
+    // (API Navigation ; sans elle, le navigateur garde son comportement habituel).
+    if (window.navigation && window.navigation.addEventListener) {
+      window.navigation.addEventListener('navigate', function (event) {
+        if (event.navigationType !== 'traverse' || !event.destination || event.destination.sameDocument) return;
+        var target = event.destination.index;
+        var current = window.navigation.currentEntry ? window.navigation.currentEntry.index : -1;
+        if (target < current) showLeaving();
+      });
+    }
     back.addEventListener('click', function (event) {
       showLeaving();
       if (document.referrer && document.referrer.indexOf(window.location.origin) === 0 && window.history.length > 1) {
@@ -93,10 +112,7 @@
     });
     // Fiche réaffichée depuis la mémoire du navigateur (bouton « avant ») : effet de départ retiré.
     window.addEventListener('pageshow', function (event) {
-      if (!event.persisted) return;
-      document.documentElement.classList.remove('pdp-m-leaving');
-      var bar = document.querySelector('.pdp-m__navbar');
-      if (bar) bar.remove();
+      if (event.persisted) hideLeaving();
     });
 
     // Panier : même tiroir que l'en-tête du site (son lien, masqué sur la fiche, garde le comportement du thème).

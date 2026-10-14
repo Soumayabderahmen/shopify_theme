@@ -3436,23 +3436,38 @@ html.pdp-m-leaving #root .pdp-m .pdp-m__hi[data-pdp-back] svg {
   transform: translateX(-3px);
 }
 
-/* La fiche glisse un peu vers la droite et s'estompe, comme une page qui se ferme. « left » plutôt que transform :
-   un transform déplacerait les éléments fixes de la fiche (barre d'achat en bas, en-tête collant). */
-#root .pdp-m {
-  position: relative;
-  left: 0;
+/* Voile blanc léger sur toute la page et indicateur de chargement au centre : rien ne bouge (une fiche qui glissait
+   découvrait ce qu'il y a derrière elle). */
+.pdp-m__leave {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  display: grid;
+  place-items: center;
+  background: rgb(255 255 255 / 55%);
+  -webkit-backdrop-filter: blur(1.5px);
+  backdrop-filter: blur(1.5px);
+  animation: pdp-m-leave-in 0.18s ease both;
+  pointer-events: auto;
 }
 
-html.pdp-m-leaving,
-html.pdp-m-leaving body {
-  overflow-x: hidden;
+.pdp-m__leave i {
+  display: block;
+  width: 34px;
+  height: 34px;
+  border: 3px solid #e3e1fb;
+  border-top-color: #3a34d2;
+  border-radius: 50%;
+  box-shadow: 0 8px 24px -10px rgb(58 52 210 / 55%);
+  animation: pdp-m-leave-spin 0.7s linear infinite;
 }
 
-html.pdp-m-leaving #root .pdp-m {
-  left: 28px;
-  opacity: 0.55;
-  transition: left 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.24s ease;
-  pointer-events: none;
+@keyframes pdp-m-leave-in {
+  from { opacity: 0; }
+}
+
+@keyframes pdp-m-leave-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Barre de chargement fine en haut de l'écran, jusqu'à l'arrivée de la page précédente. */
@@ -3497,8 +3512,9 @@ html.pdp-m-leaving #root .pdp-m {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.pdp-m-leaving #root .pdp-m {
-    left: 0;
+  .pdp-m__leave,
+  .pdp-m__leave i {
+    animation: none;
   }
 
   .pdp-m__navbar::before,
