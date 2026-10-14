@@ -1531,7 +1531,7 @@
     // (livraison, retours, paiement, avis… du fournisseur : ce sont les conditions de la boutique qui comptent).
     var TOPICS = [
       ['skip', /^(welcome to (our|my)|dear (customers?|friends?|my friend|buyers?)|hello|hi,? friend)/i],
-      ['drop', /\bship(ping|ment|ped|s)?\b|deliver|spedizion|consegn|payment|pagament|feedback|refund|return|exchange|\breso\b|rimbors|contact|about us|chi siamo|wholesale|dropship|warrant|garanzi|tracking|you may also like|shopping (tips|guide)|goods code|packag|imballag|after.?sale/i],
+      ['drop', /\bship(ping|ment|ped|s)?\b|deliver|spedizion|consegn|payment|pagament|feedback|refund|return|exchange|\breso\b|rimbors|contact|about us|chi siamo|wholesale|dropship|warrant|garanzi|tracking|you may also like|why choose us|shopping (tips|guide)|goods code|packag|imballag|after.?sale/i],
       ['size', /size|tagli|measure|misur|choose the correct|guida/i],
       ['note', /^(notes?|notice|attention|tips|please (note|attention|read)|pay attention|colou?r difference|chromatic|about smell|reminder|warm prompt|warning|avvis|nota|attenzione)/i],
       ['feat', /feature|caratteristic|highlight|punti di forza/i],
@@ -1551,21 +1551,26 @@
       if ((m = text.match(/^【\s*(.{2,40}?)\s*】\s*[:：]?$/))) return { title: m[1], sure: true };
       if ((m = text.match(/^([^:：]{2,40}?)\s*[:：]$/))) return { title: m[1], sure: false };
       // « 3. Return policy », « Return Policy » seul sur sa ligne : titre seulement s'il annonce une politique.
-      var bare = text.replace(/^\d{1,2}\s*[.)]\s*/, '');
+      var bare = text.replace(/^[\s>»•*\-–]+/, '').replace(/^\d{1,2}\s*[.)]\s*/, '').replace(/[?!]+$/, '');
       if (bare.length <= 40 && !/[:：]/.test(bare) && bare.split(' ').length <= 5 && !/^free\b/i.test(bare) && topicOf(bare) === 'drop') return { title: bare, sure: false };
       return null;
     };
-    var POLICY = /positive feedback|(5|five) stars?|leave (us )?(a |your )?(good )?feedback|contact us|we will (ship|send|deliver)|ship(ped)? (out )?(the |your )?(parcel|item|order|goods)|after (the )?paymen|business days|working days|custom(s)? (duty|tax|fee)|import (tax|duty)|tracking (number|info)|open (a )?dispute|refund|return (it|them|the (item|goods))|free shipping|shipping (cost|fee|time|method)|delivery time|we accept|paypal|escrow|your feedback|feedback (is|are) (very )?important/i;
+    var POLICY = /positive feedback|(5|five) stars?|leave (us )?(a |your )?(good )?feedback|contact us|we will (ship|send|deliver)|ship(ped)? (out )?(the |your )?(parcel|item|order|goods)|after (the )?paymen|business days|working days|custom(s)? (duty|tax|fee)|import (tax|duty)|tracking (number|info)|open (a )?dispute|refund|return (it|them|the (item|goods))|free shipping|shipping (cost|fee|time|method)|delivery time|we accept|paypal|escrow|tracciare il (tuo )?pacco|numero di tracciamento|17track|copiato nel browser|copy (it )?(in|to) (your )?browser|your feedback|feedback (is|are) (very )?important/i;
     // Phrases de politique du fournisseur glissées dans le texte (« We will ship out the parcel in 3-7 days after
     // payment », « leave 5 stars positive feedback ») : retirées, ce sont les conditions de la boutique qui valent.
     // Rend le texte gardé, ou null si le paragraphe n'était que cela.
+    // Liste à puces : seules les puces de politique ou de texte type (« Imported ») sont retirées.
+    var cleanList = function (el) {
+      Array.prototype.slice.call(el.children).forEach(function (li) {
+        var line = li.textContent.replace(/\s+/g, ' ').trim();
+        if (POLICY.test(line) || isBoilerplate(line) || PLACEHOLDER.test(line)) li.remove();
+      });
+      return el.children.length ? el.textContent.replace(/\s+/g, ' ').trim() : null;
+    };
     var stripPolicy = function (el, text) {
+      if (el.tagName === 'UL' || el.tagName === 'OL') return cleanList(el);
       if (!POLICY.test(text) || el.querySelector('img, table')) return text;
-      // Liste à puces : seules les puces de politique sont retirées.
-      if (el.tagName === 'UL' || el.tagName === 'OL') {
-        Array.prototype.slice.call(el.children).forEach(function (li) { if (POLICY.test(li.textContent)) li.remove(); });
-        return el.children.length ? el.textContent.replace(/\s+/g, ' ').trim() : null;
-      }
+      if (el.tagName === 'UL' || el.tagName === 'OL') return cleanList(el);
       if (el.tagName !== 'P') return text;
       var kept = text.replace(/([.!?。！？])\s*/g, '$1\u0001').replace(/\s+(?=\d{1,2}[.)]\s*[A-Z])/g, '\u0001').split('\u0001').filter(function (sentence) {
         return sentence.trim() && !POLICY.test(sentence);
@@ -1574,9 +1579,19 @@
       el.textContent = kept;
       return kept;
     };
+    // Balises de modèle de l'outil d'import (« [xlmodel]-[size]-[9999] ») : ligne faite seulement de [crochets].
+    var PLACEHOLDER = /^[\s\-–_|:.]*(\[[^\]]{1,30}\][\s\-–_|:.]*)+$/;
+    // Lignes types répétées sur des centaines de fiches (relevé sur tout le catalogue) : restes de l'outil d'import
+    // (« Imported », « modname=ckeditor »), mentions de conformité, publicité du fournisseur, et titres seuls qui
+    // répètent le nom de l'onglet (« Breve descrizione », « Product photo », « Specifiche »).
+    var BOILERPLATE = /^(imported|modname\s*=|nome mod\s*=|contenuti sessualmente allusivi|sexually suggestive|immagine oscena|wish you (have )?a (pleasant|happy|nice) shopping|happy shopping|before placing an order,? you must check|so that you will have a successful shopping|brand new and high quality|100% brand new|high quality[!. ]*$|high quality, please feel free|nuovissimo e di alta qualit|(product|model|real)\s*(photos?|show|display|pictures?)$|breve descrizione$|brief description$|descrizione( del prodotto)?$|product description$|description$|specifiche( del prodotto)?$|specifica$|specifications?$|caratteristiche$|features?$|dettagli del prodotto$|product details$|informazioni sul prodotto$|product information$)|discount code|coupon code/i;
+    var isBoilerplate = function (text) {
+      return BOILERPLATE.test(text.replace(/^[\s>»•*\-–]+/, '').replace(/[\s:：]+$/, ''));
+    };
     // Lignes inutiles : salutations, liste de mots-clés pour le référencement (« Leather Shoes,men's shoes,… »).
     var isJunkLine = function (text) {
       if (/^(welcome to (our|my)|dear (customers?|friends?|my friend|buyers?))/i.test(text)) return true;
+      if (PLACEHOLDER.test(text) || isBoilerplate(text)) return true;
       return text.length > 60 && (text.match(/,/g) || []).length >= 5 && !/[.:;!?]/.test(text);
     };
 
@@ -1623,7 +1638,7 @@
           mode = '';
           target = sectionFor(topic === 'size' || topic === 'feat' ? topic : 'desc');
           // Les autres faux titres (Real Pictures, Care Instruction…) restent en petit titre dans la section.
-          if (topic !== 'size' && topic !== 'feat' && !/^(description|product description|descrizione)$/i.test(heading.title)) {
+          if (topic !== 'size' && topic !== 'feat' && !isBoilerplate(heading.title)) {
             var sub = document.createElement('h4');
             sub.setAttribute('data-pdp-sub', '');
             sub.textContent = heading.title.replace(/[:：]\s*$/, '');
@@ -1632,6 +1647,15 @@
           return;
         }
         if (mode === 'drop' || isJunkLine(text)) return;
+        // Autre petit titre « Xxx: » sans sujet reconnu (« Avvertenza o informazione sulla sicurezza: ») : petit titre
+        // dans la section en cours, au lieu d'une ligne de texte qui finit par deux-points.
+        if (heading && !heading.sure && !topic) {
+          var minor = document.createElement('h4');
+          minor.setAttribute('data-pdp-sub', '');
+          minor.textContent = heading.title;
+          (target || (current && current.key !== 'spec' ? current : sectionFor('desc'))).nodes.push(minor);
+          return;
+        }
         text = stripPolicy(el, text);
         if (text === null) return;
         // Lignes sans lettre ni chiffre (« \' », « *** ») : bruit de l'import.
@@ -1650,7 +1674,7 @@
         dest.nodes.push(el);
         return;
       }
-      if (stripPolicy(el, text) === null) return;
+      if (stripPolicy(el, text) === null || PLACEHOLDER.test(text) || (el.tagName === 'P' && isBoilerplate(text))) return;
       if (!current) {
         current = { title: T('description'), key: 'desc', nodes: [] };
         sections.push(current);
