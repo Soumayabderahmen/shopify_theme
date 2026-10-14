@@ -1423,6 +1423,10 @@
     if (/descri/.test(t)) return 'desc';
     return 'sec' + Math.random().toString(36).slice(2, 7);
   };
+  // Caractéristiques « Libellé : valeur » des fiches importées dans la langue du client (assets/spec-i18n.js).
+  var specLang = document.documentElement.lang || 'it';
+  var specLabel = function (text) { return window.specI18n ? window.specI18n.label(text, specLang) : text; };
+  var specValue = function (text) { return window.specI18n ? window.specI18n.value(text, specLang) : text; };
   // Ligne « size_info: {…} » des descriptions importées : tableau construit par assets/size-info.js (partagé avec le desktop).
   var sizeInfoTable = function (text) {
     return window.sizeInfo ? window.sizeInfo.table(text) : null;
@@ -1433,12 +1437,38 @@
     var doc = descSource.content.cloneNode(true);
     var items = [];
     // Aplatit les blocs « conteneurs » de la description (div qui n'enveloppent que d'autres blocs).
+    // Texte nu et éléments en ligne (span, gras, <br>…) posés hors paragraphe, ou <div> qui ne contient que du texte
+    // (« Materiali: pelle naturale ») : regroupés en paragraphes, sinon ce texte était perdu.
+    var INLINE = /^(SPAN|B|STRONG|EM|I|U|A|FONT|SMALL|SUP|SUB|LABEL|BR|MARK|S|DEL|INS|CODE|ABBR|TIME)$/;
     var collect = function (parent) {
-      Array.prototype.forEach.call(parent.children, function (el) {
+      var buffer = [];
+      var flushInline = function () {
+        var hasText = buffer.some(function (node) { return node.textContent.trim(); });
+        if (hasText) {
+          var p = document.createElement('p');
+          buffer.forEach(function (node) { p.appendChild(node); });
+          items.push(p);
+        }
+        buffer = [];
+      };
+      Array.prototype.slice.call(parent.childNodes).forEach(function (el) {
+        if (el.nodeType === 3 || (el.nodeType === 1 && INLINE.test(el.tagName) && !el.querySelector('img, table'))) {
+          buffer.push(el);
+          return;
+        }
+        if (el.nodeType !== 1) return;
+        flushInline();
         var tag = el.tagName;
-        if (/^(META|LINK|SCRIPT|STYLE|BR)$/.test(tag)) return;
+        if (/^(META|LINK|SCRIPT|STYLE)$/.test(tag)) return;
         if (tag === 'IMG') { photos.push(el.getAttribute('src')); return; }
         if (tag === 'DIV' || tag === 'SECTION' || tag === 'ARTICLE') {
+          var onlyText = el.textContent.trim() && Array.prototype.every.call(el.children, function (child) { return INLINE.test(child.tagName); });
+          if (onlyText) {
+            var line = document.createElement('p');
+            line.innerHTML = el.innerHTML;
+            items.push(line);
+            return;
+          }
           var table = el.querySelector('table');
           var onlyImages = !el.textContent.trim() && el.querySelector('img');
           if (onlyImages) {
@@ -1453,6 +1483,7 @@
         }
         items.push(el);
       });
+      flushInline();
     };
     collect(doc);
 
@@ -1475,6 +1506,10 @@
     // Un paragraphe à plusieurs lignes (<br> ou retours à la ligne) devient un paragraphe par ligne.
     var splitLines = function (el) {
       if (el.tagName !== 'P' && el.tagName !== 'SPAN') return [el];
+      // Paragraphe qui mêle texte et photos : les photos vont dans l'onglet « Foto », le texte est traité seul.
+      if (el.textContent.trim() && el.querySelector('img') && !el.querySelector('table, ul, ol')) {
+        el.querySelectorAll('img').forEach(function (img) { photos.push(img.getAttribute('src')); img.remove(); });
+      }
       if (el.querySelector('img, table, ul, ol') || el.classList.contains('detail-desc-decorate-title')) return [el];
       var parts = el.innerHTML.split(/<br\s*\/?>|\n/i).map(function (part) { return part.replace(/&nbsp;/g, ' ').trim(); }).filter(Boolean);
       // Phrase coupée en deux par le fournisseur (« …in United States » / « sizes. Please… ») : recollée.
@@ -1496,7 +1531,7 @@
     // (livraison, retours, paiement, avis… du fournisseur : ce sont les conditions de la boutique qui comptent).
     var TOPICS = [
       ['skip', /^(welcome to (our|my)|dear (customers?|friends?|my friend|buyers?)|hello|hi,? friend)/i],
-      ['drop', /ship|deliver|spedizion|consegn|payment|pagament|feedback|refund|return|exchange|\breso\b|rimbors|contact|about us|chi siamo|wholesale|dropship|warrant|garanzi|tracking|you may also like|shopping (tips|guide)|goods code|packag|imballag|after.?sale/i],
+      ['drop', /\bship(ping|ment|ped|s)?\b|deliver|spedizion|consegn|payment|pagament|feedback|refund|return|exchange|\breso\b|rimbors|contact|about us|chi siamo|wholesale|dropship|warrant|garanzi|tracking|you may also like|shopping (tips|guide)|goods code|packag|imballag|after.?sale/i],
       ['size', /size|tagli|measure|misur|choose the correct|guida/i],
       ['note', /^(notes?|notice|attention|tips|please (note|attention|read)|pay attention|colou?r difference|chromatic|about smell|reminder|warm prompt|warning|avvis|nota|attenzione)/i],
       ['feat', /feature|caratteristic|highlight|punti di forza/i],
@@ -1515,7 +1550,29 @@
       if ((m = text.match(/^\/\s*(\S.{1,60})$/))) return { title: m[1], sure: true };
       if ((m = text.match(/^【\s*(.{2,40}?)\s*】\s*[:：]?$/))) return { title: m[1], sure: true };
       if ((m = text.match(/^([^:：]{2,40}?)\s*[:：]$/))) return { title: m[1], sure: false };
+      // « 3. Return policy », « Return Policy » seul sur sa ligne : titre seulement s'il annonce une politique.
+      var bare = text.replace(/^\d{1,2}\s*[.)]\s*/, '');
+      if (bare.length <= 40 && !/[:：]/.test(bare) && bare.split(' ').length <= 5 && !/^free\b/i.test(bare) && topicOf(bare) === 'drop') return { title: bare, sure: false };
       return null;
+    };
+    var POLICY = /positive feedback|(5|five) stars?|leave (us )?(a |your )?(good )?feedback|contact us|we will (ship|send|deliver)|ship(ped)? (out )?(the |your )?(parcel|item|order|goods)|after (the )?paymen|business days|working days|custom(s)? (duty|tax|fee)|import (tax|duty)|tracking (number|info)|open (a )?dispute|refund|return (it|them|the (item|goods))|free shipping|shipping (cost|fee|time|method)|delivery time|we accept|paypal|escrow|your feedback|feedback (is|are) (very )?important/i;
+    // Phrases de politique du fournisseur glissées dans le texte (« We will ship out the parcel in 3-7 days after
+    // payment », « leave 5 stars positive feedback ») : retirées, ce sont les conditions de la boutique qui valent.
+    // Rend le texte gardé, ou null si le paragraphe n'était que cela.
+    var stripPolicy = function (el, text) {
+      if (!POLICY.test(text) || el.querySelector('img, table')) return text;
+      // Liste à puces : seules les puces de politique sont retirées.
+      if (el.tagName === 'UL' || el.tagName === 'OL') {
+        Array.prototype.slice.call(el.children).forEach(function (li) { if (POLICY.test(li.textContent)) li.remove(); });
+        return el.children.length ? el.textContent.replace(/\s+/g, ' ').trim() : null;
+      }
+      if (el.tagName !== 'P') return text;
+      var kept = text.replace(/([.!?。！？])\s*/g, '$1\u0001').replace(/\s+(?=\d{1,2}[.)]\s*[A-Z])/g, '\u0001').split('\u0001').filter(function (sentence) {
+        return sentence.trim() && !POLICY.test(sentence);
+      }).join(' ').trim();
+      if (!/[A-Za-z0-9À-ÿ]/.test(kept)) return null;
+      el.textContent = kept;
+      return kept;
     };
     // Lignes inutiles : salutations, liste de mots-clés pour le référencement (« Leather Shoes,men's shoes,… »).
     var isJunkLine = function (text) {
@@ -1575,6 +1632,8 @@
           return;
         }
         if (mode === 'drop' || isJunkLine(text)) return;
+        text = stripPolicy(el, text);
+        if (text === null) return;
         // Lignes sans lettre ni chiffre (« \' », « *** ») : bruit de l'import.
         if (el.tagName !== 'TABLE' && !/[A-Za-z0-9À-ÿЀ-ӿ一-鿿]/.test(text) && !el.querySelector('img, table')) return;
         // Doublons (bloc « Size Description » répété) : une seule fois.
@@ -1591,6 +1650,7 @@
         dest.nodes.push(el);
         return;
       }
+      if (stripPolicy(el, text) === null) return;
       if (!current) {
         current = { title: T('description'), key: 'desc', nodes: [] };
         sections.push(current);
@@ -1729,7 +1789,11 @@
           var labelKey = pair[1].trim().toLowerCase().replace(/\s+/g, ' ');
           if (labels[labelKey]) return;
           labels[labelKey] = true;
-          pairs.push({ label: pair[1].trim(), value: pair[2].trim(), html: node.outerHTML });
+          // Libellé et valeur dans la langue du client (assets/spec-i18n.js) ; lignes sans intérêt masquées.
+          var pairLabel = specLabel(pair[1].trim());
+          var pairValue = specValue(pair[2].trim());
+          if (pairLabel === null || pairValue === null) return;
+          pairs.push({ label: pairLabel, value: pairValue, html: node.outerHTML });
           return;
         }
         flushPairs();
@@ -1752,7 +1816,14 @@
           var twoCols = rows.length > 0 && rows.every(function (row) { return row.cells.length === 2; });
           if (twoCols && key !== 'size') {
             body += '<dl class="pdp-m__spec">' + rows.map(function (row) {
-              return '<dt>' + row.cells[0].innerHTML.replace(/:\s*$/, '') + '</dt><dd>' + row.cells[1].innerHTML + '</dd>';
+              var cellLabel = row.cells[0].textContent.trim().replace(/:\s*$/, '');
+              var cellValue = row.cells[1].textContent.trim();
+              var dt = specLabel(cellLabel);
+              var dd = specValue(cellValue);
+              if (dt === null || dd === null) return '';
+              // Case avec mise en forme (lien, gras) : gardée telle quelle si rien n'est traduit.
+              return '<dt>' + (dt === cellLabel ? row.cells[0].innerHTML.replace(/:\s*$/, '') : escapeHtml(dt)) + '</dt><dd>'
+                + (dd === cellValue ? row.cells[1].innerHTML : escapeHtml(dd)) + '</dd>';
             }).join('') + '</dl>';
           } else {
             var dual = /cm\s*\/\s*pollici|cm\s*\/\s*inch/i.test(rows[0] ? rows[0].textContent : '');
