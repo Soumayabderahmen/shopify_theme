@@ -18,8 +18,9 @@
       || document.querySelector('.brand-badges-container .js-drawer-trigger[data-target="brandDrawerOverlay"]');
     var bar = trigger && trigger.closest('.brand-badges-container');
     if (!slot || !bar) return;
+    // Autres marques de chaussures : bande et badges déjà rendus dans l'emplacement (snippets/pdp-mobile-top.liquid).
     var scope = bar.closest('[class*="__main-product"], .shopify-section') || document;
-    var badges = scope.querySelector('.badge-scroll-wrapper');
+    var badges = slot.querySelector('.badge-scroll-wrapper') || scope.querySelector('.badge-scroll-wrapper');
     slot.appendChild(bar);
     if (badges) slot.appendChild(badges);
     // Sa fenêtre aussi : ses cartes « Altri prodotti da Nike » prennent alors le style des cartes du site (#root).

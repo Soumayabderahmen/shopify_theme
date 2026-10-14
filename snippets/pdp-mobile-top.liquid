@@ -141,7 +141,35 @@
     l'ancien bloc produit affiche (snippets/prodducts--brand-popap.liquid, badge--brand-products.liquid) : mêmes textes
     traduits, même fenêtre, sans les dupliquer.
   {%- endcomment -%}
-  <div class="pdp-m__brand" data-pdp-brand hidden></div>
+  {%- comment -%}
+    Autres marques de chaussures (Skechers, Li-Ning, Xti… : snippets/shoe-brand.liquid, même liste que les cartes) : la
+    même bande, la même fenêtre et les mêmes badges, rendus ici (l'ancien bloc produit ne les rend que pour les marques
+    officielles, et le desktop reste inchangé).
+  {%- endcomment -%}
+  {%- liquid
+    assign pm_brand_title = product.title | downcase
+    assign pm_official = false
+    assign pm_official_brands = 'jordan, nike, adidas, puma, reebok, new balance, onemix, asics' | split: ', '
+    for pm_official_brand in pm_official_brands
+      if pm_brand_title contains pm_official_brand
+        assign pm_official = true
+        break
+      endif
+    endfor
+    assign pm_shoe_brand = ''
+    unless pm_official
+      capture pm_shoe_brand
+        render 'shoe-brand', product: product
+      endcapture
+      assign pm_shoe_brand = pm_shoe_brand | strip
+    endunless
+  -%}
+  <div class="pdp-m__brand" data-pdp-brand hidden>
+    {%- if pm_shoe_brand != blank -%}
+      {%- render 'prodducts--brand-popap', product: product, shoe_brand: pm_shoe_brand -%}
+      {%- render 'badge--brand-products', product: product, shoe_brand: pm_shoe_brand -%}
+    {%- endif -%}
+  </div>
 
   {%- comment -%} Bande avantages sous les photos (prototype SHEIN) : la même que sous la bannière de l'accueil. {%- endcomment -%}
   {%- render 'mshein-perks' -%}

@@ -1,0 +1,34 @@
+{%- comment -%}
+  Marque d'une chaussure, en dehors des marques officielles (Jordan, Nike, Adidas… : snippets/badge--brand-products.liquid).
+  Écrit le nom affiché (« Skechers », « Li-Ning », « Dr. Martens »…) ou rien. Liste relevée sur les chaussures du catalogue.
+  Seulement pour une chaussure, et la marque doit être un mot entier du titre (« Vans » pas dans « canvas »,
+  « Xti » pas dans « textile »).
+  Utilisé par snippets/mshein-card.liquid (bande « Verified [marque] » des cartes) et snippets/pdp-mobile-top.liquid
+  (bande « Negozio Ufficiale del Marchio » de la fiche mobile).
+  Usage : {% capture brand %}{% render 'shoe-brand', product: product %}{% endcapture %}
+{%- endcomment -%}
+{%- liquid
+  assign sb_title = product.title | downcase
+  assign sb_text = product.type | append: ' ' | append: sb_title | downcase
+  assign sb_is_shoe = false
+  assign sb_shoe_words = 'scarp,sneaker,shoe,stival,boot,sandal,mocassin,loafer,tacc,decollet,décollet,ciabatt,slipper,heel,trainer,espadrill,ballerin,anfib,zoccol,sabot,pantofol' | split: ','
+  for sb_word in sb_shoe_words
+    if sb_text contains sb_word
+      assign sb_is_shoe = true
+      break
+    endif
+  endfor
+  if sb_is_shoe
+    assign sb_words = sb_title | replace: '. ', ' ' | replace: ',', ' ' | replace: '.', ' ' | replace: '(', ' ' | replace: ')', ' ' | replace: '/', ' ' | replace: '|', ' ' | replace: ':', ' ' | replace: ';', ' ' | replace: '"', ' ' | replace: '!', ' ' | replace: '[', ' ' | replace: ']', ' ' | replace: '™', ' ' | replace: '®', ' '
+    assign sb_words = ' ' | append: sb_words | append: ' '
+    assign sb_brands = 'skechers:Skechers|li-ning:Li-Ning|li ning:Li-Ning|xtep:Xtep|xti:Xti|joma:Joma|mustang:Mustang|liyke:Liyke|carmela:Carmela|refresh:Refresh|tamaris:Tamaris|victoria:Victoria|pikolinos:Pikolinos|wonders:Wonders|converse:Converse|guess:Guess|pepe jeans:Pepe Jeans|vans:Vans|superga:Superga|ugg:UGG|geox:Geox|dr martens:Dr. Martens|michael kors:Michael Kors|munich:Munich|lotto:Lotto|mizuno:Mizuno' | split: '|'
+    for sb_brand in sb_brands
+      assign sb_key = sb_brand | split: ':' | first
+      assign sb_word = ' ' | append: sb_key | append: ' '
+      if sb_words contains sb_word
+        echo sb_brand | split: ':' | last
+        break
+      endif
+    endfor
+  endif
+-%}

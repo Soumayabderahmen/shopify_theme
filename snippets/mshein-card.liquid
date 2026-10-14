@@ -73,32 +73,13 @@
   endfor
 
   # Bande « Verified [marque] » : marques officielles ci-dessus, et aussi les autres marques de chaussures du catalogue
-  # (relevé sur les 2 753 chaussures), chacune avec sa couleur (assets/mshein-card.css). Seulement pour une chaussure,
-  # et la marque doit être un mot entier du titre (« Vans » pas dans « canvas », « Xti » pas dans « textile »).
+  # (snippets/shoe-brand.liquid, même liste que la fiche mobile), chacune avec sa couleur (assets/mshein-card.css).
   assign card_ver_brand = card_brand
   if card_ver_brand == ''
-    assign card_is_shoe = false
-    assign card_shoe_text = product.type | append: ' ' | append: card_title_lower | downcase
-    assign card_shoe_words = 'scarp,sneaker,shoe,stival,boot,sandal,mocassin,loafer,tacc,decollet,décollet,ciabatt,slipper,heel,trainer,espadrill,ballerin,anfib,zoccol,sabot,pantofol' | split: ','
-    for shoe_word in card_shoe_words
-      if card_shoe_text contains shoe_word
-        assign card_is_shoe = true
-        break
-      endif
-    endfor
-    if card_is_shoe
-      assign card_title_words = card_title_lower | replace: '. ', ' ' | replace: ',', ' ' | replace: '.', ' ' | replace: '(', ' ' | replace: ')', ' ' | replace: '/', ' ' | replace: '|', ' ' | replace: ':', ' ' | replace: ';', ' ' | replace: '"', ' ' | replace: '!', ' ' | replace: '[', ' ' | replace: ']', ' ' | replace: '™', ' ' | replace: '®', ' '
-      assign card_title_words = ' ' | append: card_title_words | append: ' '
-      assign card_shoe_brands = 'skechers:Skechers|li-ning:Li-Ning|li ning:Li-Ning|xtep:Xtep|xti:Xti|joma:Joma|mustang:Mustang|liyke:Liyke|carmela:Carmela|refresh:Refresh|tamaris:Tamaris|victoria:Victoria|pikolinos:Pikolinos|wonders:Wonders|converse:Converse|guess:Guess|pepe jeans:Pepe Jeans|vans:Vans|superga:Superga|ugg:UGG|geox:Geox|dr martens:Dr. Martens|michael kors:Michael Kors|munich:Munich|lotto:Lotto|mizuno:Mizuno' | split: '|'
-      for shoe_brand in card_shoe_brands
-        assign shoe_brand_key = shoe_brand | split: ':' | first
-        assign shoe_brand_word = ' ' | append: shoe_brand_key | append: ' '
-        if card_title_words contains shoe_brand_word
-          assign card_ver_brand = shoe_brand | split: ':' | last
-          break
-        endif
-      endfor
-    endif
+    capture card_ver_brand
+      render 'shoe-brand', product: product
+    endcapture
+    assign card_ver_brand = card_ver_brand | strip
   endif
 
   # Rangs réels dans « Più venduti » : 5 premiers = BESTSELLER ; rang dans le type de produit (50 premiers).

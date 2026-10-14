@@ -1386,6 +1386,10 @@
     {% break %}
   {% endif %}
 {% endfor %}
+{%- comment -%} Fiche mobile : autre marque de chaussures (snippets/shoe-brand.liquid) passée par snippets/pdp-mobile-top.liquid. {%- endcomment -%}
+{%- if matched_brand == "" and shoe_brand != blank -%}
+  {%- assign matched_brand = shoe_brand -%}
+{%- endif -%}
 
 {% case request.locale.iso_code %}
   {% when 'it' %}
