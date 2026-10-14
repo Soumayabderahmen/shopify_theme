@@ -1445,7 +1445,9 @@
             el.querySelectorAll('img').forEach(function (img) { photos.push(img.getAttribute('src')); });
             return;
           }
-          if (table && el.children.length === 1) { items.push(table); return; }
+          // Bloc qui n'est que l'enveloppe du tableau. Une enveloppe plus large (« detailmodule_html » des fiches
+          // importées : tableaux + titres + photos) est parcourue, sinon tout sauf le premier tableau était perdu.
+          if (table && el.children.length === 1 && el.children[0] === table) { items.push(table); return; }
           collect(el);
           return;
         }
@@ -1482,8 +1484,28 @@
       }
       current.nodes.push(el);
     });
+    // Tableaux de mesures rangés sous un autre titre (« Measurement In CM » sous « SPECIFICATIONS » des fiches
+    // importées) : déplacés dans l'onglet des tailles, au lieu d'être lus comme une liste « libellé / valeur ».
+    var isSizeTable = function (node) {
+      if (node.tagName !== 'TABLE' || !node.rows || node.rows.length < 2) return false;
+      var twoCols = Array.prototype.every.call(node.rows, function (row) { return row.cells.length === 2; });
+      return !twoCols && /size|tagli|taille|größe|talla|maat|mărim|measure|misur|mesur|\bcm\b|inch|pollici/i.test(node.textContent);
+    };
+    var sizeSection = sections.filter(function (section) { return (section.key || keyFor(section.title)) === 'size'; })[0];
+    sections.forEach(function (section) {
+      if (section === sizeSection) return;
+      var moved = section.nodes.filter(isSizeTable);
+      if (!moved.length) return;
+      if (!sizeSection) {
+        sizeSection = { title: T('size_guide'), key: 'size', nodes: [] };
+        sections.push(sizeSection);
+      }
+      section.nodes = section.nodes.filter(function (node) { return moved.indexOf(node) === -1; });
+      sizeSection.nodes = sizeSection.nodes.concat(moved);
+    });
+    sections = sections.filter(function (section) { return section.nodes.length; });
     // Tableau du fournisseur seulement si la description n'a pas déjà sa propre section de tailles.
-    if (supplierSizeTable && !sections.some(function (section) { return keyFor(section.title) === 'size'; })) {
+    if (supplierSizeTable && !sections.some(function (section) { return (section.key || keyFor(section.title)) === 'size'; })) {
       sections.push({ title: T('size_guide'), key: 'size', nodes: [supplierSizeTable] });
     }
     if (!sections.length && !photos.length) return;
@@ -1513,6 +1535,8 @@
         pairs = [];
       };
       section.nodes.forEach(function (node) {
+        // Un élément inattendu de la description est montré tel quel, sans empêcher l'affichage du reste.
+        try {
         // Styles en ligne du fournisseur (tailles, gras italique, surlignage jaune) : retirés, la charte s'applique.
         if (node.tagName !== 'TABLE') {
           node.removeAttribute('style');
@@ -1539,8 +1563,10 @@
         if (node.tagName === 'TABLE') {
           flushParagraphs();
           var rows = Array.prototype.slice.call(node.rows);
-          var twoCols = rows.every(function (row) { return row.cells.length === 2; });
-          if (key === 'spec' || (twoCols && key !== 'size')) {
+          // Liste « libellé / valeur » seulement pour un vrai tableau à deux colonnes (une ligne d'une seule case,
+          // comme le titre « Measurement In CM », faisait planter toute la description).
+          var twoCols = rows.length > 0 && rows.every(function (row) { return row.cells.length === 2; });
+          if (twoCols && key !== 'size') {
             body += '<dl class="pdp-m__spec">' + rows.map(function (row) {
               return '<dt>' + row.cells[0].innerHTML.replace(/:\s*$/, '') + '</dt><dd>' + row.cells[1].innerHTML + '</dd>';
             }).join('') + '</dl>';
@@ -1559,6 +1585,9 @@
           return;
         }
         paragraphs += node.outerHTML;
+        } catch (error) {
+          paragraphs += node.outerHTML;
+        }
       });
       flushPairs();
       flushParagraphs();

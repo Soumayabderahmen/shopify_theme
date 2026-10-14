@@ -2429,6 +2429,15 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   border: 0;
 }
 
+/* Tableaux des fiches importées : chaque case contient un <p> dont les marges du thème doublaient la hauteur des lignes. */
+.pdp-m__tw th p,
+.pdp-m__tw td p {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  line-height: 1.25;
+}
+
 .pdp-m__tw tr:first-child th,
 .pdp-m__tw tr:first-child td {
   color: var(--pm-ink-2);
