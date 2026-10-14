@@ -1316,6 +1316,7 @@
       "no_products": "Ningún producto",
       "no_match": "Sin resultados para “{{ terms }}”",
       "shoe_prefix": "N.º",
+      "shades": "Tonos",
       "colors": {
         "black": "Negro",
         "white": "Blanco",

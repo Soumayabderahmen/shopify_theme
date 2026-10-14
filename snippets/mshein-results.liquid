@@ -323,6 +323,11 @@
                       endfor
                       assign value_families = value_families | split: ','
                     -%}
+                    {%- comment -%}
+                      Rond = toute la couleur. Petite flèche sur le rond (couleur qui réunit plusieurs valeurs) : panneau
+                      « Tonalità · Rosso » sous la grille avec les vraies valeurs Shopify de cette couleur, à choisir une à une.
+                    {%- endcomment -%}
+                    {%- capture shade_panels -%}{%- endcapture -%}
                     <div class="mshein-fsws">
                       {%- for key in color_order -%}
                         {%- assign members = 0 -%}
@@ -332,22 +337,37 @@
                             {%- if value_families[forloop.index0] == key and value.count > 0 or value_families[forloop.index0] == key and value.active -%}
                               {%- assign members = members | plus: 1 -%}
                               {%- if value.active -%}{%- assign family_on = true -%}{%- endif -%}
-                              <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" data-family-member="{{ key }}"{% if value.active %} checked{% endif %}>
+                              <label class="mshein-fshade">
+                                <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" data-family-member="{{ key }}" data-label="{{ value.label | escape }}"{% if value.active %} checked{% endif %}>
+                                <span>{{ value.label | escape }}</span>
+                              </label>
                             {%- endif -%}
                           {%- endfor -%}
                         {%- endcapture -%}
                         {%- if members > 0 -%}
                           {%- assign color_key = 'mobile.collection.colors.' | append: key -%}
                           {%- assign color_name = color_key | t -%}
-                          <label class="mshein-fsw">
-                            <input type="checkbox" data-dept-family="{{ key }}" data-label="{{ color_name | escape }}" data-color="{{ key }}"{% if family_on %} checked{% endif %}>
-                            <i class="mshein-fsw__dot is-{{ key }}{% if light_colors contains key %} is-light{% endif %}" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>
-                            <span>{{ color_name | escape }}</span>
-                          </label>
-                          <span hidden>{{ member_inputs }}</span>
+                          <div class="mshein-fsw-wrap">
+                            <label class="mshein-fsw">
+                              <input type="checkbox" data-dept-family="{{ key }}" data-label="{{ color_name | escape }}" data-color="{{ key }}"{% if family_on %} checked{% endif %}>
+                              <i class="mshein-fsw__dot is-{{ key }}{% if light_colors contains key %} is-light{% endif %}" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>
+                              <span>{{ color_name | escape }}</span>
+                            </label>
+                            {%- if members > 1 -%}
+                              <button type="button" class="mshein-fsw__more" data-dept-shades-open="{{ key }}" aria-expanded="false" aria-label="{{ 'mobile.collection.shades' | t | escape }} · {{ color_name | escape }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+                            {%- endif -%}
+                          </div>
+                          {%- capture shade_panel -%}
+                            <div class="mshein-fshades" data-dept-shades="{{ key }}"{% if members > 1 %} hidden{% else %} hidden data-single{% endif %}>
+                              {%- if members > 1 -%}<b>{{ 'mobile.collection.shades' | t }} · {{ color_name | escape }}</b>{%- endif -%}
+                              <div>{{ member_inputs }}</div>
+                            </div>
+                          {%- endcapture -%}
+                          {%- assign shade_panels = shade_panels | append: shade_panel -%}
                         {%- endif -%}
                       {%- endfor -%}
                     </div>
+                    {{ shade_panels }}
                     {%- comment -%} Valeur sans couleur claire déjà choisie (lien partagé…) : gardée pour pouvoir la retirer. {%- endcomment -%}
                     {%- for value in filter.values -%}
                       {%- if value_families[forloop.index0] == '-' and value.active -%}

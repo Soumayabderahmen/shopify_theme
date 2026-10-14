@@ -1388,6 +1388,7 @@
       "no_products": "Aucun produit",
       "no_match": "Aucun résultat pour « {{ terms }} »",
       "shoe_prefix": "Pointure",
+      "shades": "Nuances",
       "colors": {
         "black": "Noir",
         "white": "Blanc",

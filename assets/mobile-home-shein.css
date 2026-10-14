@@ -1046,6 +1046,28 @@
     transition: opacity 0.2s;
   }
 
+  /* Produits en cours de chargement (tri, filtres) : rond qui tourne au-dessus des produits, bien visible. */
+  .mshein-cresults {
+    position: relative;
+  }
+
+  .mshein-cresults.is-loading::after {
+    content: '';
+    position: absolute;
+    top: 150px;
+    left: 50%;
+    z-index: 5;
+    width: 44px;
+    height: 44px;
+    margin-left: -22px;
+    background: #fff;
+    border: 4px solid #e1e3ec;
+    border-top-color: #3a34d2;
+    border-radius: 50%;
+    box-shadow: 0 6px 18px rgb(22 18 63 / 18%);
+    animation: mshein-fspin 0.7s linear infinite;
+  }
+
   /* « 1 colonna » : une carte par ligne. */
   .mshein-feed__grid.is-one {
     grid-template-columns: 1fr;
@@ -1883,6 +1905,144 @@
     outline-offset: 6px;
   }
 
+  /* Couleur choisie en partie (quelques tonalités seulement) : anneau en pointillé. */
+  .mshein-fsheet .mshein-fsw input:indeterminate ~ .mshein-fsw__dot::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border: 2.5px dashed #3a34d2;
+    border-radius: 50%;
+  }
+
+  .mshein-fsheet .mshein-fsw input:indeterminate ~ span {
+    color: #16123f;
+    font-weight: 800;
+  }
+
+  .mshein-fsheet .mshein-fsw input:indeterminate ~ .mshein-fsw__dot svg {
+    opacity: 0;
+  }
+
+  /* Flèche sur le rond : ouvre « Tonalità · Rosso ». */
+  .mshein-fsheet .mshein-fsw-wrap {
+    position: relative;
+  }
+
+  .mshein-fsheet .mshein-fsw__more {
+    position: absolute;
+    top: 22px;
+    left: calc(50% + 10px);
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    color: #16123f;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgb(22 18 63 / 30%);
+  }
+
+  .mshein-fsheet .mshein-fsw__more[hidden] {
+    display: none;
+  }
+
+  .mshein-fsheet .mshein-fsw__more svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 2.6;
+    transition: transform 0.2s;
+  }
+
+  .mshein-fsheet .mshein-fsw__more[aria-expanded="true"] {
+    color: #fff;
+    background: #3a34d2;
+  }
+
+  .mshein-fsheet .mshein-fsw__more[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+
+  .mshein-fsheet .mshein-fshades {
+    margin-top: 16px;
+    padding: 12px;
+    background: #f5f6f8;
+    border-radius: 14px;
+    animation: mshein-fpop 0.22s cubic-bezier(0.3, 1.5, 0.5, 1);
+  }
+
+  .mshein-fsheet .mshein-fshades[hidden] {
+    display: none;
+  }
+
+  .mshein-fsheet .mshein-fshades b {
+    display: block;
+    margin-bottom: 10px;
+    color: #16123f;
+    font: 700 13.5px/1.2 'Sora', system-ui, sans-serif;
+  }
+
+  .mshein-fsheet .mshein-fshades > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .mshein-fsheet .mshein-fshade {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .mshein-fsheet .mshein-fshade input {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .mshein-fsheet .mshein-fshade > span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 13px;
+    color: #16123f;
+    font-size: 13px;
+    font-weight: 600;
+    background: #fff;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1.5px #dadce6;
+  }
+
+  .mshein-fsheet .mshein-fshade > span {
+    gap: 7px;
+    padding-left: 8px;
+  }
+
+  .mshein-fsheet .mshein-fshade .mshein-fshade__dot {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    box-shadow: inset 0 0 0 1px rgb(22 18 63 / 18%);
+  }
+
+  .mshein-fsheet .mshein-fshade input:checked + span .mshein-fshade__dot {
+    box-shadow: inset 0 0 0 1px rgb(22 18 63 / 18%), 0 0 0 2px #fff;
+  }
+
+  .mshein-fsheet .mshein-fshade input:checked + span {
+    color: #fff;
+    background: #16123f;
+    box-shadow: none;
+  }
+
+  .mshein-fsheet .mshein-fshade input:focus-visible + span {
+    outline: 2px solid #3a34d2;
+    outline-offset: 2px;
+  }
+
   .mshein-fsheet .mshein-fsw__dot.is-black { background: #1a1a1a; }
   .mshein-fsheet .mshein-fsw__dot.is-white { background: #fafafa; }
   .mshein-fsheet .mshein-fsw__dot.is-gray { background: #9a9da6; }
@@ -1943,8 +2103,28 @@
     cursor: default;
   }
 
+  /* Nombre en cours de calcul : petit rond qui tourne dans le bouton (le bouton reste utilisable). */
   .mshein-fsheet .mshein-fsheet__go.is-counting {
-    opacity: 0.8;
+    position: relative;
+  }
+
+  .mshein-fsheet .mshein-fsheet__go.is-counting::before {
+    content: '';
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 8px;
+    vertical-align: -2px;
+    border: 2.5px solid rgb(255 255 255 / 35%);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: mshein-fspin 0.7s linear infinite;
+  }
+
+  @keyframes mshein-fspin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   .mshein-fsheet .mshein-fsheet__go.is-tick {

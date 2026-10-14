@@ -1390,6 +1390,7 @@
       "no_products": "Nessun prodotto",
       "no_match": "Nessun risultato per “{{ terms }}”",
       "shoe_prefix": "N°",
+      "shades": "Tonalità",
       "colors": {
         "black": "Nero",
         "white": "Bianco",

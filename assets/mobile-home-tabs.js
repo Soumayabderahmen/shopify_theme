@@ -75,18 +75,44 @@
       var top = block.getBoundingClientRect().top + window.scrollY - (parseFloat(rootStyle.getPropertyValue('--mshein-tabs-top')) || parseFloat(rootStyle.getPropertyValue('--mshein-header-h')) || 0);
       if (window.scrollY > top) window.scrollTo({ top: top });
     };
+    // Bloc des résultats seul (collection.mshein-dept-results : sans bannière ni cartes du rayon, plus léger). Une même
+    // demande sert au nombre de « Mostra N prodotti » et aux produits : « Mostra » affiche tout de suite ce qui est
+    // déjà arrivé (ou attend la même demande, sans en refaire une).
+    var resultsView = view === 'mshein-dept' ? 'mshein-dept-results' : view;
+    var resultsCache = {};
+    var resultsOrder = [];
+    var fetchResults = function (query) {
+      var key = basePath + '?' + query;
+      if (!resultsCache[key]) {
+        resultsCache[key] = fetch(basePath + '?view=' + resultsView + (query ? '&' + query : ''), { credentials: 'same-origin' })
+          .then(function (response) {
+            if (!response.ok) throw new Error('Department results request failed: ' + response.status);
+            return response.text();
+          });
+        resultsCache[key].catch(function () { delete resultsCache[key]; });
+        resultsOrder.push(key);
+        if (resultsOrder.length > 8) delete resultsCache[resultsOrder.shift()];
+      }
+      return resultsCache[key];
+    };
+    // Barre de chargement sous l'en-tête (la même que pour changer de page) pendant que les produits arrivent.
+    var progress = function (on) {
+      if (on && !document.querySelector('.mobile-navigation-progress')) {
+        var bar = document.createElement('div');
+        bar.className = 'mobile-navigation-progress';
+        bar.setAttribute('aria-hidden', 'true');
+        bar.appendChild(document.createElement('span'));
+        document.body.appendChild(bar);
+      }
+      document.documentElement.classList.toggle('mobile-page-loading', on);
+    };
     // Tri, filtres ou puce : seulement la partie résultats est redemandée (mêmes vrais filtres que la page collection).
     var reload = function () {
       var myToken = ++token;
       results.classList.add('is-loading');
-      var query = params.toString();
-      // Mêmes choix que le nombre déjà demandé dans la fenêtre Filtri : sa page sert directement.
-      var cached = countCache && countCache.query === query ? countCache.html : null;
-      (cached !== null ? Promise.resolve(cached) : fetch(basePath + '?view=' + view + (query ? '&' + query : ''), { credentials: 'same-origin' })
-        .then(function (response) {
-          if (!response.ok) throw new Error('Department results request failed: ' + response.status);
-          return response.text();
-        }))
+      progress(true);
+      scrollToBlock();
+      fetchResults(params.toString())
         .then(function (html) {
           if (myToken !== token) return;
           var fresh = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-dept-results]');
@@ -96,10 +122,14 @@
           results = imported;
           bind();
           scrollToBlock();
+          progress(false);
         })
         .catch(function (error) {
           console.error('Unable to update the department products.', error);
-          if (myToken === token) results.classList.remove('is-loading');
+          if (myToken === token) {
+            results.classList.remove('is-loading');
+            progress(false);
+          }
         });
     };
 
@@ -138,8 +168,16 @@
         var chipPrefix = section.getAttribute('data-chip-prefix') || '';
         var summaryPrefix = section.getAttribute('data-summary-prefix') || '';
         // Valeurs réunies sous une couleur (black, Black…) : une seule pastille, celle de la couleur.
-        section.querySelectorAll('input[type="checkbox"]:checked:not([data-family-member])').forEach(function (input) {
+        // .checked plutôt que :checked : une couleur choisie en partie (indeterminate) ne répond plus à :checked.
+        Array.prototype.filter.call(section.querySelectorAll('input[type="checkbox"]:not([data-family-member])'), function (input) {
+          return input.checked;
+        }).forEach(function (input) {
           var label = input.getAttribute('data-label') || input.value;
+          // Couleur choisie en partie (quelques tonalités) : « Rosso · 2 ».
+          if (input.indeterminate) {
+            var key = input.getAttribute('data-dept-family');
+            label += ' · ' + shadeVisible(section, key).filter(function (member) { return member.checked; }).length;
+          }
           labels.push(withPrefix(summaryPrefix, label));
           picks.push({ label: withPrefix(chipPrefix, label), input: input, color: input.getAttribute('data-color') });
         });
@@ -308,13 +346,129 @@
     // Couleur cochée (Nero…) : toutes ses vraies valeurs de la boutique (black, Black, Black thick…) suivent.
     var setFamily = function (input, checked) {
       input.checked = checked;
+      input.indeterminate = false;
       input.closest('[data-dept-section]').querySelectorAll('[data-family-member="' + input.getAttribute('data-dept-family') + '"]').forEach(function (member) {
         member.checked = checked;
       });
     };
+    // Tonalità choisies une à une : la couleur est cochée si au moins une l'est, « en partie » (anneau en
+    // pointillé) si elles ne le sont pas toutes.
+    // Petit rond de couleur de chaque tonalité, d'après son vrai nom : « Dark grey » → gris foncé, « Brown grey » →
+    // mélange brun / gris, « Light blue » → bleu clair ; nom sans couleur connue : la couleur du rond de la famille.
+    // Couleurs de base = celles des ronds (les couleurs nommées du navigateur trompent : « darkgrey » y est plus clair
+    // que « grey », « brown » y est rouge).
+    var SHADE_WORDS = { black: '#1a1a1a', nero: '#1a1a1a', white: '#fafafa', bianco: '#fafafa', grey: '#9a9da6', gray: '#9a9da6', grigio: '#9a9da6', red: '#c8102e', rosso: '#c8102e', pink: '#f2a7c3', rosa: '#f2a7c3', orange: '#f28b2c', arancione: '#f28b2c', yellow: '#f2c230', giallo: '#f2c230', green: '#3e6b48', verde: '#3e6b48', blue: '#2c4a8c', blu: '#2c4a8c', purple: '#8e6fa8', viola: '#8e6fa8', brown: '#7a4e2d', marrone: '#7a4e2d', beige: '#d9c3a5', azzurro: '#8ec5e8', oro: '#d4af37', gold: '#d4af37', argento: '#c0c4cc', silver: '#c0c4cc', khaki: '#b7a77a', kaki: '#b7a77a', camel: '#c19a6b', apricot: '#fbceb1', wine: '#722f37', burgundy: '#800020', bordeaux: '#800020', navy: '#1b2a4e', rose: '#e8607e', rosy: '#e8607e', coffee: '#6f4e37', champagne: '#f7e7ce', mint: '#98ff98', army: '#4b5320', olive: '#5b6236', nude: '#e3bc9a', cream: '#fffdd0', ivory: '#fffff0' };
+    var shadeColor = function (name) {
+      var valid = function (color) { return color && window.CSS && CSS.supports('color', color) ? color : null; };
+      var words = name.toLowerCase().replace(/[^a-zà-ù\s]/g, ' ').split(/\s+/).filter(Boolean);
+      var tinted = words.some(function (word) { return /^(light|pale|baby|soft|pastel|chiaro|dark|deep|scuro)$/.test(word); });
+      var whole = !tinted && words.length > 1 && valid(words.join(''));
+      if (whole) return whole;
+      var colors = words.map(function (word) { return valid(SHADE_WORDS[word]) || valid(word); }).filter(Boolean);
+      if (!colors.length) return null;
+      var color = colors.length > 1 ? 'color-mix(in srgb, ' + colors[colors.length - 2] + ', ' + colors[colors.length - 1] + ')' : colors[0];
+      if (/\b(light|pale|baby|soft|pastel|chiaro)\b/.test(name.toLowerCase())) return 'color-mix(in srgb, ' + color + ', #fff 45%)';
+      if (/\b(dark|deep|scuro)\b/.test(name.toLowerCase())) return 'color-mix(in srgb, ' + color + ', #000 35%)';
+      return color;
+    };
+
+    // Couleur → rouge / vert / bleu (via un petit canvas, qui comprend aussi color-mix), pour comparer deux tonalités.
+    var rgbCanvas = null;
+    var rgbOf = function (color) {
+      try {
+        rgbCanvas = rgbCanvas || document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+        rgbCanvas.clearRect(0, 0, 1, 1);
+        rgbCanvas.fillStyle = '#000';
+        rgbCanvas.fillStyle = color;
+        rgbCanvas.fillRect(0, 0, 1, 1);
+        var data = rgbCanvas.getImageData(0, 0, 1, 1).data;
+        return [data[0], data[1], data[2]];
+      } catch (error) {
+        return null;
+      }
+    };
+    // Écart sous lequel l'œil ne voit pas de vraie différence (Ivory / White, Rose red / Rosy red).
+    var SAME_SHADE = 40;
+    var sameShade = function (a, b) {
+      return a && b && Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2) + Math.pow(a[2] - b[2], 2)) < SAME_SHADE;
+    };
+
+    // Tonalità de même couleur (Red, red, RED ; Rose red, Rosy red ; Ivory, White) : une seule pastille qui les coche toutes.
+    var mergeShades = function (panel) {
+      panel.querySelectorAll('[data-dept-shades]').forEach(function (shades) {
+        if (shades.getAttribute('data-merged') === 'true') return;
+        shades.setAttribute('data-merged', 'true');
+        var firsts = {};
+        var seen = [];
+        shades.querySelectorAll('.mshein-fshade').forEach(function (pill) {
+          var input = pill.querySelector('input');
+          var name = String(input.getAttribute('data-label')).trim().replace(/\s+/g, ' ');
+          // Même nom, ou couleur que l'œil ne distingue pas : une seule pastille, nom de la première.
+          var color = shadeColor(name);
+          var rgb = color ? rgbOf(color) : null;
+          var key = 'name:' + name.toLowerCase();
+          var first = firsts[key];
+          if (!first && rgb) {
+            var match = seen.filter(function (item) { return sameShade(item.rgb, rgb); })[0];
+            if (match) first = match.input;
+          }
+          if (!first) {
+            firsts[key] = input;
+            if (rgb) seen.push({ rgb: rgb, input: input });
+            input.msheinTwins = [];
+            var text = pill.querySelector('span');
+            text.textContent = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+            var dot = document.createElement('i');
+            dot.className = 'mshein-fshade__dot mshein-fsw__dot is-' + shades.getAttribute('data-dept-shades');
+            dot.setAttribute('aria-hidden', 'true');
+            if (color) dot.style.background = color;
+            text.prepend(dot);
+            return;
+          }
+          first.msheinTwins.push(input);
+          if (input.checked) first.checked = true;
+          pill.hidden = true;
+        });
+        // Une seule tonalité une fois réunies : pas de flèche sur le rond.
+        if (Object.keys(firsts).length < 2) {
+          var button = shades.closest('[data-dept-section]').querySelector('[data-dept-shades-open="' + shades.getAttribute('data-dept-shades') + '"]');
+          if (button) button.hidden = true;
+        }
+      });
+    };
+    var shadeVisible = function (section, key) {
+      return Array.prototype.filter.call(section.querySelectorAll('[data-family-member="' + key + '"]'), function (input) {
+        return !input.closest('.mshein-fshade[hidden]');
+      });
+    };
+    var syncFamily = function (section, key) {
+      var family = section.querySelector('[data-dept-family="' + key + '"]');
+      if (!family) return;
+      var members = shadeVisible(section, key);
+      var checked = members.filter(function (input) { return input.checked; }).length;
+      family.checked = checked > 0;
+      family.indeterminate = checked > 0 && checked < members.length;
+    };
+    var syncFamilies = function (panel) {
+      panel.querySelectorAll('[data-dept-family]').forEach(function (family) {
+        syncFamily(family.closest('[data-dept-section]'), family.getAttribute('data-dept-family'));
+      });
+    };
+    // Flèche sur un rond : panneau « Tonalità · Rosso » (un seul ouvert à la fois).
+    var toggleShades = function (button) {
+      var section = button.closest('[data-dept-section]');
+      var key = button.getAttribute('data-dept-shades-open');
+      var opening = button.getAttribute('aria-expanded') !== 'true';
+      section.querySelectorAll('[data-dept-shades-open]').forEach(function (other) { other.setAttribute('aria-expanded', 'false'); });
+      section.querySelectorAll('[data-dept-shades]').forEach(function (shades) { shades.hidden = true; });
+      if (!opening) return;
+      button.setAttribute('aria-expanded', 'true');
+      var shades = section.querySelector('[data-dept-shades="' + key + '"]');
+      shades.hidden = false;
+      shades.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    };
     // « Mostra N risultati » : nombre de produits avec les choix en cours, demandé à Shopify (même page que le
     // résultat, gardée pour l'afficher tout de suite à « Mostra »).
-    var countCache = null;
     var countToken = 0;
     var countTimer = null;
     var formQuery = function (form) {
@@ -323,9 +477,6 @@
         if (String(value).trim() !== '') query.append(name, value);
       });
       return query.toString();
-    };
-    var resultsUrl = function (query) {
-      return basePath + '?view=' + view + (query ? '&' + query : '');
     };
     // « Mostra 4.112 prodotti » / « Mostra 1 prodotto » / « Nessun prodotto » (bouton éteint) ; petit battement
     // quand le nombre change.
@@ -347,15 +498,10 @@
       var myToken = ++countToken;
       window.clearTimeout(countTimer);
       go.classList.add('is-counting');
+      // Demande lancée presque tout de suite (le temps de cocher une 2e case) : les produits arrivent avec le nombre.
       countTimer = window.setTimeout(function () {
-        var query = formQuery(panel.querySelector('[data-dept-form]'));
-        fetch(resultsUrl(query), { credentials: 'same-origin' })
-          .then(function (response) {
-            if (!response.ok) throw new Error('Filter count request failed: ' + response.status);
-            return response.text();
-          })
+        fetchResults(formQuery(panel.querySelector('[data-dept-form]')))
           .then(function (html) {
-            countCache = { query: query, html: html };
             if (myToken !== countToken) return;
             var count = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-dept-count]');
             go.classList.remove('is-counting');
@@ -365,7 +511,7 @@
             console.error('Unable to count the filtered products.', error);
             if (myToken === countToken) go.classList.remove('is-counting');
           });
-      }, 300);
+      }, 150);
     };
     var openSheet = function (section) {
       var panel = results.querySelector('[data-dept-sheet]');
@@ -377,6 +523,8 @@
       document.body.appendChild(panel);
       panel.hidden = false;
       sortGrids(panel);
+      mergeShades(panel);
+      syncFamilies(panel);
       renderPicked(panel);
       panel.querySelectorAll('[data-dept-section]').forEach(function (part) { syncPrice(part, false); });
       // Nombre actuel écrit à la mode du pays (4.112).
@@ -458,6 +606,12 @@
         setSection(section, !section.classList.contains('is-open'));
         return;
       }
+      var shadesButton = event.target.closest('[data-dept-shades-open]');
+      if (shadesButton) {
+        event.preventDefault();
+        toggleShades(shadesButton);
+        return;
+      }
       var more = event.target.closest('[data-dept-more]');
       if (more) {
         var all = more.closest('[data-dept-section]').classList.toggle('is-all');
@@ -487,6 +641,7 @@
           searchList(input);
         });
         panel.querySelectorAll('[data-dept-section]').forEach(function (part) { syncPrice(part, false); });
+        syncFamilies(panel);
         renderPicked(panel);
         refreshCount(panel);
         return;
@@ -513,6 +668,10 @@
         return;
       }
       if (event.target.matches('[data-dept-family]')) setFamily(event.target, event.target.checked);
+      if (event.target.matches('[data-family-member]')) {
+        (event.target.msheinTwins || []).forEach(function (twin) { twin.checked = event.target.checked; });
+        syncFamily(event.target.closest('[data-dept-section]'), event.target.getAttribute('data-family-member'));
+      }
       if (event.target.matches('[data-dept-range-input]')) slidePrice(event.target);
       if (event.target.matches('[data-dept-price]')) syncPrice(event.target.closest('[data-dept-section]'), false);
       renderPicked(panel);

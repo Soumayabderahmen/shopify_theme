@@ -140,6 +140,32 @@
     -%}
     {%- render 'mshein-dept', collection: collection, best: best, flag: flag, menu: section.settings.menu, cards: dept_cards, next_url: dept_next -%}
 
+  {%- when 'dept_results' -%}
+    {%- comment -%}
+      Rayon / page collection : bloc des résultats seul (Filtri, tri, produits), redemandé à chaque tri / filtre par
+      assets/mobile-home-tabs.js (template collection.mshein-dept-results) — bien plus léger que toute la page du rayon.
+    {%- endcomment -%}
+    {%- liquid
+      assign dept_next = ''
+      capture dept_cards
+        paginate collection.products by 20
+          for product in collection.products
+            render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag
+          endfor
+          if paginate.next
+            assign dept_next = paginate.next.url | replace: 'view=mshein-dept-results', 'view=mshein-dept-page'
+          endif
+        endpaginate
+      endcapture
+      assign dept_sort = collection.sort_by | default: collection.default_sort_by
+      assign dept_all = false
+      if collection.handle == 'all'
+        assign dept_all = true
+      endif
+    -%}
+    {%- render 'mshein-results', filters: collection.filters, sort_options: collection.sort_options, current_sort: dept_sort, total: collection.products_count, cards: dept_cards, next_url: dept_next, simple: dept_all -%}
+
+
   {%- when 'brand_page' -%}
     {%- comment -%} « Brand ufficiali » : produits dont le titre cite une marque officielle (règle de snippets/badge--brand-products.liquid). {%- endcomment -%}
     {%- assign official_brands = 'jordan, nike, adidas, puma, reebok, new balance, onemix, asics' | split: ', ' -%}
@@ -413,7 +439,8 @@
         { "value": "search_results", "label": "Risultati di ricerca (interno)" },
         { "value": "search_page", "label": "Pagina risultati di ricerca (interno)" },
         { "value": "dept", "label": "Pagina di un reparto (interno)" },
-        { "value": "dept_page", "label": "Pagina prodotti di un reparto (interno)" }
+        { "value": "dept_page", "label": "Pagina prodotti di un reparto (interno)" },
+        { "value": "dept_results", "label": "Risultati di un reparto (interno)" }
       ],
       "default": "perks"
     },

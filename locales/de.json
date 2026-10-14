@@ -1301,6 +1301,7 @@
       "no_products": "Keine Produkte",
       "no_match": "Keine Ergebnisse für „{{ terms }}“",
       "shoe_prefix": "Gr.",
+      "shades": "Farbtöne",
       "colors": {
         "black": "Schwarz",
         "white": "Weiß",

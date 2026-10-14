@@ -4085,6 +4085,7 @@
       "no_products": "No products",
       "no_match": "No results for “{{ terms }}”",
       "shoe_prefix": "Size",
+      "shades": "Shades",
       "colors": {
         "black": "Black",
         "white": "White",
