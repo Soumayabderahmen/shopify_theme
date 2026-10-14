@@ -374,8 +374,12 @@
   function place() {
     var anchor = activeForm === miniForm ? mini : activeForm;
     if (!anchor) return;
-    var rect = anchor.getBoundingClientRect();
-    var top = Math.max(0, Math.round(rect.bottom + (activeForm === miniForm ? 0 : 10)));
+    // Barre de l'en-tête de la fiche : elle est prise dans l'empilement de la page (sous le voile). Voile et panneau
+    // commencent donc juste sous cet en-tête, qui reste net et utilisable au-dessus.
+    var extraHead = activeForm && activeForm.hasAttribute('data-mobile-search-extra') ? activeForm.closest('header') : null;
+    var rect = (extraHead || anchor).getBoundingClientRect();
+    var top = Math.max(0, Math.round(rect.bottom + (activeForm === miniForm || extraHead ? 0 : 10)));
+    scrim.style.top = extraHead ? top + 'px' : '';
     var viewport = window.visualViewport;
     var visibleBottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
     var bottomNav = document.querySelector('.mobile-bottom-navigation');
