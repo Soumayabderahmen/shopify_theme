@@ -2301,6 +2301,24 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   margin-top: 12px;
 }
 
+/* Fiches importées : lignes d'un même paragraphe du fournisseur (séparées par des <br>) restées serrées. */
+.pdp-m__txt p[data-pdp-line] + p[data-pdp-line] {
+  margin-top: 4px;
+}
+
+/* Petit titre d'un bloc du fournisseur (« Real Pictures », « Care Instruction »…). */
+.pdp-m__txt .pdp-m__sub {
+  margin: 16px 0 6px;
+  color: var(--pm-ink);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.pdp-m__txt .pdp-m__sub:first-child {
+  margin-top: 0;
+}
+
 .pdp-m__clamp {
   position: relative;
 }
@@ -2494,6 +2512,14 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   width: 22px;
   height: 22px;
   color: var(--pm-orange);
+}
+
+.pdp-m__warn p {
+  margin: 0;
+}
+
+.pdp-m__warn p + p {
+  margin-top: 4px;
 }
 
 .pdp-m__warn b,

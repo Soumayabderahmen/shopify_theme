@@ -1465,17 +1465,130 @@
       return false;
     });
 
+    // ---- Fiches importées (AliExpress…) : le texte libre du fournisseur est rangé par sujet ----
+    // Elles n'ont qu'un vrai titre (« SPECIFICATIONS ») ; le reste est un bloc de texte avec de faux titres
+    // (« / Size Chart », « Feature: », « 【Notice】 », paragraphe « detail-desc-decorate-title »). Les fiches
+    // réécrites (Panoramica, Caratteristiche, Vantaggi…) gardent leurs vrais titres et ne passent pas par là.
+    var rewritten = items.some(function (el) {
+      return /^H[1-4]$/.test(el.tagName) && /^(ov|feat|adv|desc)$/.test(keyFor(el.textContent.trim()));
+    });
+    // Un paragraphe à plusieurs lignes (<br> ou retours à la ligne) devient un paragraphe par ligne.
+    var splitLines = function (el) {
+      if (el.tagName !== 'P' && el.tagName !== 'SPAN') return [el];
+      if (el.querySelector('img, table, ul, ol') || el.classList.contains('detail-desc-decorate-title')) return [el];
+      var parts = el.innerHTML.split(/<br\s*\/?>|\n/i).map(function (part) { return part.replace(/&nbsp;/g, ' ').trim(); }).filter(Boolean);
+      // Phrase coupée en deux par le fournisseur (« …in United States » / « sizes. Please… ») : recollée.
+      parts = parts.reduce(function (list, part) {
+        var last = list[list.length - 1];
+        if (last && !/[.!?:;~。！？]\s*$/.test(last.replace(/<[^>]+>/g, '')) && /^[a-zàèéìòù]/.test(part.replace(/<[^>]+>/g, ''))) list[list.length - 1] = last + ' ' + part;
+        else list.push(part);
+        return list;
+      }, []);
+      if (parts.length < 2) return [el];
+      return parts.map(function (part) {
+        var p = document.createElement('p');
+        p.setAttribute('data-pdp-line', '');
+        p.innerHTML = part;
+        return p;
+      }).filter(function (p) { return p.textContent.trim(); });
+    };
+    // Sujet d'un faux titre : rangé (tailles, caractéristiques, description), encadré (remarques), ou retiré
+    // (livraison, retours, paiement, avis… du fournisseur : ce sont les conditions de la boutique qui comptent).
+    var TOPICS = [
+      ['skip', /^(welcome to (our|my)|dear (customers?|friends?|my friend|buyers?)|hello|hi,? friend)/i],
+      ['drop', /ship|deliver|spedizion|consegn|payment|pagament|feedback|refund|return|exchange|\breso\b|rimbors|contact|about us|chi siamo|wholesale|dropship|warrant|garanzi|tracking|you may also like|shopping (tips|guide)|goods code|packag|imballag|after.?sale/i],
+      ['size', /size|tagli|measure|misur|choose the correct|guida/i],
+      ['note', /^(notes?|notice|attention|tips|please (note|attention|read)|pay attention|colou?r difference|chromatic|about smell|reminder|warm prompt|warning|avvis|nota|attenzione)/i],
+      ['feat', /feature|caratteristic|highlight|punti di forza/i],
+      ['desc', /descri|detail|dettagl|informazion|product|prodotto|material|care|show|pictur|photo|foto|display|parameter|specific/i]
+    ];
+    var topicOf = function (title) {
+      for (var i = 0; i < TOPICS.length; i += 1) if (TOPICS[i][1].test(title)) return TOPICS[i][0];
+      return null;
+    };
+    var pseudoTitle = function (el) {
+      if (/^(H[1-4]|TABLE|UL|OL)$/.test(el.tagName) || el.querySelector('img')) return null;
+      var text = el.textContent.replace(/\s+/g, ' ').trim();
+      if (!text || text.length > 70) return null;
+      var m;
+      if (el.classList.contains('detail-desc-decorate-title')) return { title: text.replace(/^\/\s*/, ''), sure: true };
+      if ((m = text.match(/^\/\s*(\S.{1,60})$/))) return { title: m[1], sure: true };
+      if ((m = text.match(/^【\s*(.{2,40}?)\s*】\s*[:：]?$/))) return { title: m[1], sure: true };
+      if ((m = text.match(/^([^:：]{2,40}?)\s*[:：]$/))) return { title: m[1], sure: false };
+      return null;
+    };
+    // Lignes inutiles : salutations, liste de mots-clés pour le référencement (« Leather Shoes,men's shoes,… »).
+    var isJunkLine = function (text) {
+      if (/^(welcome to (our|my)|dear (customers?|friends?|my friend|buyers?))/i.test(text)) return true;
+      return text.length > 60 && (text.match(/,/g) || []).length >= 5 && !/[.:;!?]/.test(text);
+    };
+
     var sections = [];
     var current = null;
+    var sectionFor = function (key) {
+      var found = sections.filter(function (section) { return section.key === key; })[0];
+      if (found) return found;
+      found = { title: T({ desc: 'description', feat: 'desc_tab_feat', size: 'size_guide' }[key]), key: key, nodes: [] };
+      sections.push(found);
+      return found;
+    };
+    var target = null; // section choisie par le dernier faux titre
+    var mode = '';     // 'drop' : texte retiré jusqu'au prochain titre ; 'note' : remarques en encadré
+    var seen = {};
+    items = items.reduce(function (list, el) { return list.concat(splitLines(el)); }, []);
     items.forEach(function (el) {
       if (/^H[1-4]$/.test(el.tagName)) {
-        current = { title: el.textContent.trim(), nodes: [] };
+        var title = el.textContent.trim();
+        current = { title: title, nodes: [] };
+        current.key = keyFor(title);
         sections.push(current);
+        target = null;
+        mode = !rewritten && topicOf(title) === 'drop' ? 'drop' : '';
         return;
       }
       if (el.tagName === 'P' && !el.textContent.trim() && !el.querySelector('img')) return;
       if (el.tagName === 'P' && el.querySelector('img') && !el.textContent.trim()) {
         el.querySelectorAll('img').forEach(function (img) { photos.push(img.getAttribute('src')); });
+        return;
+      }
+      var text = el.textContent.replace(/\s+/g, ' ').trim();
+      if (!rewritten) {
+        var heading = pseudoTitle(el);
+        var topic = heading ? topicOf(heading.title) : null;
+        if (heading && (heading.sure || topic)) {
+          if (topic === 'skip') return;
+          if (topic === 'drop') { mode = 'drop'; return; }
+          if (topic === 'note') {
+            mode = 'note';
+            if (!target) target = current && current.key !== 'spec' ? current : sectionFor('desc');
+            return;
+          }
+          mode = '';
+          target = sectionFor(topic === 'size' || topic === 'feat' ? topic : 'desc');
+          // Les autres faux titres (Real Pictures, Care Instruction…) restent en petit titre dans la section.
+          if (topic !== 'size' && topic !== 'feat' && !/^(description|product description|descrizione)$/i.test(heading.title)) {
+            var sub = document.createElement('h4');
+            sub.setAttribute('data-pdp-sub', '');
+            sub.textContent = heading.title.replace(/[:：]\s*$/, '');
+            target.nodes.push(sub);
+          }
+          return;
+        }
+        if (mode === 'drop' || isJunkLine(text)) return;
+        // Lignes sans lettre ni chiffre (« \' », « *** ») : bruit de l'import.
+        if (el.tagName !== 'TABLE' && !/[A-Za-z0-9À-ÿЀ-ӿ一-鿿]/.test(text) && !el.querySelector('img, table')) return;
+        // Doublons (bloc « Size Description » répété) : une seule fois.
+        if (text.length > 15) {
+          if (seen[text]) return;
+          seen[text] = true;
+        }
+        if (mode === 'note') el.setAttribute('data-pdp-note', '');
+        // Sous « SPECIFICATIONS », seules les lignes « Libellé : valeur » et les tableaux restent ;
+        // le texte libre qui suit va dans « Descrizione ».
+        var dest = target || current;
+        if (!target && current && current.key === 'spec' && el.tagName !== 'TABLE' && !/^[^:：\n]{1,45}?\s*[:：]\s*\S/.test(text)) dest = sectionFor('desc');
+        if (!dest) dest = sectionFor('desc');
+        dest.nodes.push(el);
         return;
       }
       if (!current) {
@@ -1484,10 +1597,43 @@
       }
       current.nodes.push(el);
     });
+
+    // Lignes « Size 38, Foot Length: 24.0cm » (au moins 3 de suite) : vrai tableau dans « Guida alle taglie ».
+    var SIZE_LINE = /^(?:size|taglia|eu|us|uk)?\s*([0-9]{2,3}(?:[.,]5)?|[0-9]?X{0,4}[SML]|XX?L|[0-9]XL)\s*[,，:\-–]\s*([^:：,]{2,30}?)\s*[:：]\s*([\d.,]+\s*(?:cm|mm|inch|in|")?)\s*$/i;
+    sections.forEach(function (section) {
+      var out = [];
+      var run = [];
+      var flushRun = function () {
+        if (run.length >= 3 && run.every(function (r) { return r.label.toLowerCase() === run[0].label.toLowerCase(); })) {
+          var table = document.createElement('table');
+          var head = table.insertRow();
+          [T('size'), run[0].label].forEach(function (label) { head.insertCell().textContent = label; });
+          run.forEach(function (r) {
+            var row = table.insertRow();
+            row.insertCell().textContent = r.size;
+            row.insertCell().textContent = r.value;
+          });
+          table.setAttribute('data-pdp-size-lines', '');
+          out.push(table);
+        } else {
+          run.forEach(function (r) { out.push(r.el); });
+        }
+        run = [];
+      };
+      section.nodes.forEach(function (node) {
+        var m = node.tagName === 'P' ? node.textContent.replace(/\s+/g, ' ').trim().match(SIZE_LINE) : null;
+        if (m) { run.push({ el: node, size: m[1], label: m[2].trim(), value: m[3].trim() }); return; }
+        flushRun();
+        out.push(node);
+      });
+      flushRun();
+      section.nodes = out;
+    });
     // Tableaux de mesures rangés sous un autre titre (« Measurement In CM » sous « SPECIFICATIONS » des fiches
     // importées) : déplacés dans l'onglet des tailles, au lieu d'être lus comme une liste « libellé / valeur ».
     var isSizeTable = function (node) {
       if (node.tagName !== 'TABLE' || !node.rows || node.rows.length < 2) return false;
+      if (node.hasAttribute('data-pdp-size-lines')) return true;
       var twoCols = Array.prototype.every.call(node.rows, function (row) { return row.cells.length === 2; });
       return !twoCols && /size|tagli|taille|größe|talla|maat|mărim|measure|misur|mesur|\bcm\b|inch|pollici/i.test(node.textContent);
     };
@@ -1503,10 +1649,24 @@
       section.nodes = section.nodes.filter(function (node) { return moved.indexOf(node) === -1; });
       sizeSection.nodes = sizeSection.nodes.concat(moved);
     });
-    sections = sections.filter(function (section) { return section.nodes.length; });
-    // Tableau du fournisseur seulement si la description n'a pas déjà sa propre section de tailles.
-    if (supplierSizeTable && !sections.some(function (section) { return (section.key || keyFor(section.title)) === 'size'; })) {
-      sections.push({ title: T('size_guide'), key: 'size', nodes: [supplierSizeTable] });
+    // Section vide, ou faite seulement de petits titres sans texte : pas d'onglet.
+    sections = sections.filter(function (section) {
+      return section.nodes.some(function (node) { return !node.hasAttribute('data-pdp-sub'); });
+    });
+    // Tableau du fournisseur seulement si la description n'a pas déjà son propre tableau de tailles
+    // (une section de tailles faite seulement de conseils le reçoit en tête).
+    if (supplierSizeTable) {
+      var sizeSec = sections.filter(function (section) { return (section.key || keyFor(section.title)) === 'size'; })[0];
+      if (!sizeSec) sections.push({ title: T('size_guide'), key: 'size', nodes: [supplierSizeTable] });
+      else if (!sizeSec.nodes.some(function (node) { return node.tagName === 'TABLE'; })) sizeSec.nodes.unshift(supplierSizeTable);
+    }
+    // Fiches importées : onglets dans un ordre fixe (Specifiche, Descrizione, Caratteristiche, …, Guida alle taglie).
+    if (!rewritten) {
+      var rank = { spec: 0, desc: 1, feat: 2, size: 8 };
+      sections = sections.map(function (section, i) { return { s: section, i: i }; }).sort(function (a, b) {
+        var ra = rank[a.s.key || keyFor(a.s.title)]; var rb = rank[b.s.key || keyFor(b.s.title)];
+        return (ra === undefined ? 5 : ra) - (rb === undefined ? 5 : rb) || a.i - b.i;
+      }).map(function (entry) { return entry.s; });
     }
     if (!sections.length && !photos.length) return;
 
@@ -1534,6 +1694,12 @@
         }
         pairs = [];
       };
+      var labels = {};
+      var notes = '';
+      var flushNotes = function () {
+        if (notes) body += '<div class="pdp-m__warn">' + WARN + '<span>' + notes + '</span></div>';
+        notes = '';
+      };
       section.nodes.forEach(function (node) {
         // Un élément inattendu de la description est montré tel quel, sans empêcher l'affichage du reste.
         try {
@@ -1543,8 +1709,26 @@
           node.querySelectorAll('[style]').forEach(function (el) { el.removeAttribute('style'); });
         }
         var text = node.textContent.trim();
+        // Remarques du fournisseur (« Attention », « Notes »…) : regroupées dans un encadré.
+        if (node.hasAttribute('data-pdp-note')) {
+          flushPairs();
+          flushParagraphs();
+          notes += '<p>' + node.innerHTML + '</p>';
+          return;
+        }
+        flushNotes();
+        // Petit titre d'un bloc du fournisseur (« Real Pictures », « Care Instruction »…).
+        if (node.hasAttribute('data-pdp-sub')) {
+          flushPairs();
+          paragraphs += '<h4 class="pdp-m__sub">' + escapeHtml(text) + '</h4>';
+          return;
+        }
         var pair = node.tagName === 'P' && text.length <= 120 && !node.querySelector('img') ? text.match(/^([^:：\n]{1,45}?)\s*[:：]\s*(\S[\s\S]*)$/) : null;
         if (pair) {
+          // Même libellé déjà donné dans la section (« Material » répété par le texte du fournisseur) : ignoré.
+          var labelKey = pair[1].trim().toLowerCase().replace(/\s+/g, ' ');
+          if (labels[labelKey]) return;
+          labels[labelKey] = true;
           pairs.push({ label: pair[1].trim(), value: pair[2].trim(), html: node.outerHTML });
           return;
         }
@@ -1591,6 +1775,7 @@
       });
       flushPairs();
       flushParagraphs();
+      flushNotes();
       // Sections reconnues : nom de l'onglet dans la langue du client (« SPECIFICATIONS » -> « Technische Daten ») ;
       // les autres gardent le titre de la description.
       var known = { spec: 'desc_tab_spec', feat: 'desc_tab_feat', adv: 'desc_tab_adv', ov: 'desc_tab_ov', desc: 'description', size: 'size_guide' }[key];
@@ -1630,7 +1815,7 @@
     if (section.hasAttribute('data-pdp-clamp')) return;
     section.setAttribute('data-pdp-clamp', '');
     var blocks = Array.prototype.slice.call(section.children);
-    if (!blocks.length || !blocks.every(function (block) { return block.classList.contains('pdp-m__txt') || block.classList.contains('pdp-m__spec'); })) return;
+    if (!blocks.length || !blocks.every(function (block) { return block.classList.contains('pdp-m__txt') || block.classList.contains('pdp-m__spec') || block.classList.contains('pdp-m__warn'); })) return;
     var box = document.createElement('div');
     box.className = 'pdp-m__clamp';
     blocks.forEach(function (block) { box.appendChild(block); });
