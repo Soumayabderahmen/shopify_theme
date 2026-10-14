@@ -1312,6 +1312,7 @@
       "over_html": "Meer dan {{ amount }}",
       "reset": "Resetten",
       "selected": "Geselecteerde filters",
+      "none_selected": "Geen filter geselecteerd",
       "available": "Op voorraad",
       "only_available": "Alleen producten op voorraad tonen",
       "search_in": "Zoeken in {{ label }}",

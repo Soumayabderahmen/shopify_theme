@@ -1309,6 +1309,7 @@
       "over_html": "Más de {{ amount }}",
       "reset": "Restablecer",
       "selected": "Filtros seleccionados",
+      "none_selected": "Ningún filtro seleccionado",
       "available": "Disponibles",
       "only_available": "Mostrar solo productos disponibles",
       "search_in": "Buscar en {{ label }}",

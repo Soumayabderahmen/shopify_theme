@@ -104,6 +104,64 @@
     // Fenêtre Filtri de CE bloc (la page collection et un onglet ouvert ont chacun la leur).
     var movedPanel = null;
     var sheet = function () { return movedPanel || results.querySelector('[data-dept-sheet]'); };
+
+    // « Filtri selezionati » sous le titre : un bouton par choix coché (et le prix), à jour à chaque toucher ; un toucher
+    // sur un choix le retire. Nombre de choix à côté de « Filtri » et de chaque section.
+    var renderPicked = function (panel) {
+      var box = panel.querySelector('[data-dept-picked]');
+      if (!box) return;
+      var list = box.querySelector('[data-dept-picked-list]');
+      var picks = [];
+      panel.querySelectorAll('[data-dept-section]').forEach(function (section) {
+        var count = 0;
+        section.querySelectorAll('input[type="checkbox"]:checked').forEach(function (input) {
+          count += 1;
+          picks.push({ label: input.getAttribute('data-label') || input.value, input: input });
+        });
+        var min = section.querySelector('[data-dept-price="min"]');
+        var max = section.querySelector('[data-dept-price="max"]');
+        if (min && max && (min.value.trim() !== '' || max.value.trim() !== '')) {
+          count += 1;
+          var money = function (value) {
+            try {
+              return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'currency', currency: box.getAttribute('data-currency') || 'EUR', maximumFractionDigits: 2 }).format(Number(value));
+            } catch (error) {
+              return value;
+            }
+          };
+          var label = min.value.trim() !== '' && max.value.trim() !== '' ? money(min.value) + ' – ' + money(max.value)
+            : min.value.trim() !== '' ? String(box.getAttribute('data-over')).replace('{amount}', money(min.value))
+            : String(box.getAttribute('data-up-to')).replace('{amount}', money(max.value));
+          picks.push({ label: label.replace(/<[^>]*>/g, ''), price: [min, max] });
+        }
+        var badge = section.querySelector('[data-dept-section-count]');
+        if (badge) {
+          badge.hidden = count === 0;
+          badge.textContent = count;
+        }
+      });
+      list.replaceChildren.apply(list, picks.map(function (pick, index) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'mshein-fpick';
+        button.setAttribute('data-dept-unpick', index);
+        button.setAttribute('aria-label', box.getAttribute('data-remove') + ' : ' + pick.label);
+        var text = document.createElement('span');
+        text.textContent = pick.label;
+        button.appendChild(text);
+        button.insertAdjacentHTML('beforeend', '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg>');
+        return button;
+      }));
+      list.msheinPicks = picks;
+      list.hidden = picks.length === 0;
+      box.querySelector('[data-dept-picked-none]').hidden = picks.length > 0;
+      box.querySelector('[data-dept-picked-clear]').hidden = picks.length < 2;
+      var total = panel.querySelector('[data-dept-picked-count]');
+      if (total) {
+        total.hidden = picks.length === 0;
+        total.textContent = picks.length;
+      }
+    };
     var openSheet = function (section) {
       var panel = results.querySelector('[data-dept-sheet]');
       if (!panel) return;
@@ -113,6 +171,7 @@
       panel.classList.add('is-mshein-moved');
       document.body.appendChild(panel);
       panel.hidden = false;
+      renderPicked(panel);
       window.requestAnimationFrame(function () { panel.classList.add('is-open'); });
       document.documentElement.style.overflow = 'hidden';
       var body = panel.querySelector('[data-dept-sheet-body]');
@@ -187,7 +246,21 @@
       if (event.target.closest('[data-dept-reset]')) {
         panel.querySelectorAll('input[type="checkbox"]').forEach(function (input) { input.checked = false; });
         panel.querySelectorAll('input[type="number"]').forEach(function (input) { input.value = ''; });
+        renderPicked(panel);
+        return;
       }
+      var unpick = event.target.closest('[data-dept-unpick]');
+      if (unpick) {
+        var pick = unpick.parentNode.msheinPicks[Number(unpick.getAttribute('data-dept-unpick'))];
+        if (pick && pick.input) pick.input.checked = false;
+        if (pick && pick.price) pick.price.forEach(function (input) { input.value = ''; });
+        renderPicked(panel);
+      }
+    };
+    // Choix cochés / prix tapés dans la fenêtre : « Filtri selezionati » suit.
+    var onSheetInput = function (event) {
+      var panel = sheet();
+      if (panel && panel.contains(event.target) && event.target.matches('input')) renderPicked(panel);
     };
     var onSubmit = function (event) {
       var panel = sheet();
@@ -203,6 +276,7 @@
     slot.addEventListener('click', onClick);
     slot.addEventListener('change', onChange);
     document.addEventListener('click', onSheet);
+    document.addEventListener('input', onSheetInput);
     document.addEventListener('submit', onSubmit);
     bind();
     return {
@@ -214,6 +288,7 @@
         slot.removeEventListener('click', onClick);
         slot.removeEventListener('change', onChange);
         document.removeEventListener('click', onSheet);
+        document.removeEventListener('input', onSheetInput);
         document.removeEventListener('submit', onSubmit);
         if (movedPanel) {
           movedPanel.remove();

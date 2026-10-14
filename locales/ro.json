@@ -1389,6 +1389,7 @@
       "over_html": "Peste {{ amount }}",
       "reset": "Resetează",
       "selected": "Filtre selectate",
+      "none_selected": "Niciun filtru selectat",
       "available": "În stoc",
       "only_available": "Arată doar produsele în stoc",
       "search_in": "Caută în {{ label }}",

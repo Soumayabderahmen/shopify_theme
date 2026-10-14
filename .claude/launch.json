@@ -27,6 +27,12 @@
       "port": 8767
     },
     {
+      "name": "scratch-frames",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["C:\\Users\\TROOPY\\AppData\\Local\\Temp\\claude\\C--Users-TROOPY-Documents-shopify-copie-samsouma\\b9a8d92d-b340-4bb3-b548-4fca517d3dec\\scratchpad\\serve.py", "C:\\Users\\TROOPY\\AppData\\Local\\Temp\\claude\\C--Users-TROOPY-Documents-shopify-copie-samsouma\\b9a8d92d-b340-4bb3-b548-4fca517d3dec\\scratchpad\\video"],
+      "autoPort": true
+    },
+    {
       "name": "shopify-theme-dev-attach",
       "port": 9292,
       "url": "http://127.0.0.1:9292"

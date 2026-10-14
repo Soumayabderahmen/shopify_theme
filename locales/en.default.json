@@ -4078,6 +4078,7 @@
       "over_html": "Over {{ amount }}",
       "reset": "Reset",
       "selected": "Selected filters",
+      "none_selected": "No filter selected",
       "available": "In stock",
       "only_available": "Show in-stock products only",
       "search_in": "Search in {{ label }}",

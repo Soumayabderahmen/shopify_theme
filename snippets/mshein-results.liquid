@@ -87,6 +87,7 @@
     assign results_text = 'mobile.js.collection_results_html' | t
     assign count_token = '{' | append: 'count' | append: '}'
     assign total_token = '{' | append: 'total' | append: '}'
+    assign amount_token = '{' | append: 'amount' | append: '}'
     assign results_line = results_text | replace: count_token, '0' | replace: total_token, total
   -%}
   {%- unless no_count -%}
@@ -94,25 +95,40 @@
   {%- endunless -%}
 
   {%- unless simple -%}
-    {%- comment -%} Fenêtre « Filtri » : vrais filtres de la collection (disponibilità, prezzo, opzioni, tipo…). {%- endcomment -%}
+    {%- comment -%}
+      Fenêtre « Filtri » : vrais filtres de la collection (disponibilità, prezzo, opzioni, tipo…). Sous le titre, les choix
+      du client (« Filtri selezionati »), mis à jour à chaque toucher par assets/mobile-home-tabs.js : un toucher sur un choix
+      le retire, sans descendre dans la liste.
+    {%- endcomment -%}
     <div class="mshein-fsheet" data-dept-sheet hidden>
       <form class="mshein-fsheet__panel" role="dialog" aria-label="{{ 'mobile.collection.filters' | t }}" data-dept-form>
-        <div class="mshein-fsheet__hd"><b>{{ 'mobile.collection.filters' | t }}</b><button type="button" data-dept-close aria-label="{{ 'general.accessibility.close' | t }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+        <div class="mshein-fsheet__hd">
+          <b>{{ 'mobile.collection.filters' | t }}<i data-dept-picked-count hidden></i></b>
+          <button type="button" data-dept-close aria-label="{{ 'general.accessibility.close' | t }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+        <div class="mshein-fsheet__picked" data-dept-picked data-remove="{{ 'mobile.collection.remove_filter' | t | escape }}" data-up-to="{{ 'mobile.collection.up_to_html' | t: amount: amount_token | escape }}" data-over="{{ 'mobile.collection.over_html' | t: amount: amount_token | escape }}" data-currency="{{ cart.currency.iso_code }}">
+          <div class="mshein-fsheet__picked-hd">
+            <span>{{ 'mobile.collection.selected' | t }}</span>
+            <button type="button" data-dept-reset data-dept-picked-clear hidden>{{ 'mobile.collection.clear_all' | t }}</button>
+          </div>
+          <p class="mshein-fsheet__none" data-dept-picked-none>{{ 'mobile.collection.none_selected' | t }}</p>
+          <div class="mshein-fsheet__chips" data-dept-picked-list></div>
+        </div>
         <div class="mshein-fsheet__body" data-dept-sheet-body>
           {%- for filter in filters -%}
             <section data-dept-section="{{ forloop.index }}">
-              <h4>{{ filter.label | escape }}</h4>
+              <h4>{{ filter.label | escape }}<i data-dept-section-count hidden></i></h4>
               {%- case filter.type -%}
                 {%- when 'price_range' -%}
                   <div class="mshein-fprice">
-                    <label><span>Min</span><input type="number" inputmode="decimal" min="0" step="0.01" name="{{ filter.min_value.param_name }}" value="{% if filter.min_value.value != nil %}{{ filter.min_value.value | divided_by: 100.0 }}{% endif %}" placeholder="0"></label>
-                    <label><span>Max</span><input type="number" inputmode="decimal" min="0" step="0.01" name="{{ filter.max_value.param_name }}" value="{% if filter.max_value.value != nil %}{{ filter.max_value.value | divided_by: 100.0 }}{% endif %}" placeholder="{{ filter.range_max | divided_by: 100.0 | ceil }}"></label>
+                    <label><span>{{ 'mobile.collection.min' | t }}</span><input type="number" inputmode="decimal" min="0" step="0.01" name="{{ filter.min_value.param_name }}" value="{% if filter.min_value.value != nil %}{{ filter.min_value.value | divided_by: 100.0 }}{% endif %}" placeholder="0" aria-label="{{ 'mobile.collection.price_min' | t | escape }}" data-dept-price="min"></label>
+                    <label><span>{{ 'mobile.collection.max' | t }}</span><input type="number" inputmode="decimal" min="0" step="0.01" name="{{ filter.max_value.param_name }}" value="{% if filter.max_value.value != nil %}{{ filter.max_value.value | divided_by: 100.0 }}{% endif %}" placeholder="{{ filter.range_max | divided_by: 100.0 | ceil }}" aria-label="{{ 'mobile.collection.price_max' | t | escape }}" data-dept-price="max"></label>
                   </div>
                 {%- else -%}
                   <div class="mshein-fpills">
                     {%- for value in filter.values -%}
                       <label class="mshein-fpill">
-                        <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}"{% if value.active %} checked{% endif %}{% if value.count == 0 and value.active == false %} disabled{% endif %}>
+                        <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" data-label="{{ value.label | escape }}"{% if value.active %} checked{% endif %}{% if value.count == 0 and value.active == false %} disabled{% endif %}>
                         <span>{{ value.label | escape }} <em>{{ value.count }}</em></span>
                       </label>
                     {%- endfor -%}

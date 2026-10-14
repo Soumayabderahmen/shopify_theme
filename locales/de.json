@@ -1294,6 +1294,7 @@
       "over_html": "Über {{ amount }}",
       "reset": "Zurücksetzen",
       "selected": "Ausgewählte Filter",
+      "none_selected": "Kein Filter ausgewählt",
       "available": "Verfügbar",
       "only_available": "Nur verfügbare Produkte anzeigen",
       "search_in": "In {{ label }} suchen",
