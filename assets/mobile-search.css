@@ -63,10 +63,14 @@ html.mobile-search-lock {
   overflow: hidden;
 }
 
-/* Le header reste visible au-dessus du voile pendant la recherche. */
+/* Le header reste visible au-dessus du voile pendant la recherche. Accueil et collections (mshein-home) : il reste
+   fixé sur la bannière (assets/mobile-temu-header.css), sinon il retombe dans la page et perd son fond violet. */
 html.mobile-search-lock #root > .shopify-section-header {
-  position: relative;
   z-index: 993 !important;
+}
+
+html.mobile-search-lock body:not(.mshein-home) #root > .shopify-section-header {
+  position: relative;
 }
 
 .mobile-search-panel *,

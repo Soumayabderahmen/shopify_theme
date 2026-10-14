@@ -374,12 +374,13 @@
   function place() {
     var anchor = activeForm === miniForm ? mini : activeForm;
     if (!anchor) return;
-    // Barre de l'en-tête de la fiche : elle est prise dans l'empilement de la page (sous le voile). Voile et panneau
-    // commencent donc juste sous cet en-tête, qui reste net et utilisable au-dessus.
+    // Le voile commence sous la barre : elle reste nette au même niveau que le panneau. Sur la fiche, la barre est prise
+    // dans l'empilement de la page (sous le voile) ; sur l'accueil et les collections, le fond violet de l'en-tête
+    // appartient à la bannière derrière lui et serait grisé.
     var extraHead = activeForm && activeForm.hasAttribute('data-mobile-search-extra') ? activeForm.closest('header') : null;
     var rect = (extraHead || anchor).getBoundingClientRect();
     var top = Math.max(0, Math.round(rect.bottom + (activeForm === miniForm || extraHead ? 0 : 10)));
-    scrim.style.top = extraHead ? top + 'px' : '';
+    scrim.style.top = Math.max(0, Math.round(rect.bottom)) + 'px';
     var viewport = window.visualViewport;
     var visibleBottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
     var bottomNav = document.querySelector('.mobile-bottom-navigation');
