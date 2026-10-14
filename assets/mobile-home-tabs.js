@@ -109,10 +109,11 @@
     // Tri, filtres ou puce : seulement la partie résultats est redemandée (mêmes vrais filtres que la page collection).
     var reload = function () {
       var myToken = ++token;
+      var query = params.toString();
       results.classList.add('is-loading');
       progress(true);
       scrollToBlock();
-      fetchResults(params.toString())
+      fetchResults(query)
         .then(function (html) {
           if (myToken !== token) return;
           var fresh = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-dept-results]');
@@ -121,8 +122,14 @@
           results.replaceWith(imported);
           results = imported;
           bind();
+          // Fenêtre Filtri restée ouverte (choix retiré) : remplacée par la nouvelle, aux nombres à jour.
+          if (movedPanel) adoptSheet();
           scrollToBlock();
           progress(false);
+          // Adresse de la page = filtres et tri en cours (page rechargée ou partagée : mêmes produits).
+          if (window.location.pathname === basePath) {
+            History.prototype.replaceState.call(window.history, window.history.state, '', basePath + (query ? '?' + query : '') + window.location.hash);
+          }
         })
         .catch(function (error) {
           console.error('Unable to update the department products.', error);
@@ -535,9 +542,61 @@
       document.documentElement.style.overflow = 'hidden';
       if (section) openSection(panel, section);
     };
+    // Choix de la fenêtre appliqués aux produits tout de suite (fenêtre gardée ouverte).
+    var applyNow = function (panel) {
+      params = new URLSearchParams(formQuery(panel.querySelector('[data-dept-form]')));
+      reload();
+    };
+    // Après un rechargement fenêtre ouverte : la nouvelle fenêtre (nombres de Shopify à jour) prend la place de
+    // l'ancienne, mêmes sections ouvertes, même tonalités ouvertes, même position.
+    var adoptSheet = function () {
+      var old = movedPanel;
+      var fresh = results.querySelector('[data-dept-sheet]');
+      if (!old || !fresh) return;
+      var ids = function (selector) {
+        return Array.prototype.map.call(old.querySelectorAll(selector), function (node) { return node.getAttribute('data-dept-section'); });
+      };
+      var openIds = ids('.mshein-fsec.is-open');
+      var allIds = ids('.mshein-fsec.is-all');
+      var shadesButton = old.querySelector('[data-dept-shades-open][aria-expanded="true"]');
+      var openShades = shadesButton ? shadesButton.getAttribute('data-dept-shades-open') : '';
+      var scroll = old.querySelector('[data-dept-sheet-body]').scrollTop;
+      sheetHome = fresh.parentNode;
+      fresh.classList.add('is-mshein-moved', 'is-open');
+      fresh.hidden = false;
+      old.replaceWith(fresh);
+      movedPanel = fresh;
+      fresh.querySelectorAll('.mshein-fsec').forEach(function (section) {
+        var id = section.getAttribute('data-dept-section');
+        setSection(section, openIds.indexOf(id) >= 0);
+        if (allIds.indexOf(id) >= 0) {
+          section.classList.add('is-all');
+          var more = section.querySelector('[data-dept-more]');
+          if (more) {
+            more.setAttribute('aria-expanded', 'true');
+            more.querySelector('span').textContent = more.getAttribute('data-less');
+          }
+        }
+      });
+      sortGrids(fresh);
+      mergeShades(fresh);
+      syncFamilies(fresh);
+      renderPicked(fresh);
+      fresh.querySelectorAll('[data-dept-section]').forEach(function (part) { syncPrice(part, false); });
+      var reopen = openShades && fresh.querySelector('[data-dept-shades-open="' + openShades + '"]');
+      if (reopen && !reopen.hidden) toggleShades(reopen);
+      var go = fresh.querySelector('[data-dept-go]');
+      var current = results.querySelector('[data-dept-count]');
+      if (go && current) setGo(go, Number(current.getAttribute('data-total')), true);
+      fresh.querySelector('[data-dept-sheet-body]').scrollTop = scroll;
+    };
     var closeSheet = function () {
       var panel = sheet();
       if (!panel) return;
+      // Fenêtre fermée (✕, à côté) après un changement : il est appliqué, rien n'est perdu.
+      var form = panel.querySelector('[data-dept-form]');
+      var changed = form && formQuery(form) !== params.toString();
+      if (changed) params = new URLSearchParams(formQuery(form));
       panel.classList.remove('is-open');
       document.documentElement.style.overflow = '';
       movedPanel = null;
@@ -547,6 +606,7 @@
         if (sheetHome && sheetHome.isConnected) sheetHome.insertBefore(panel, sheetHome.querySelector('[data-mshein-grid], .mshein-feed__grid'));
         else panel.remove();
       }, 250);
+      if (changed) reload();
     };
 
     // Tout sauf les filtres : le tri, et pour la recherche ses mots (q) et son type (type=product).
@@ -644,6 +704,8 @@
         syncFamilies(panel);
         renderPicked(panel);
         refreshCount(panel);
+        // « Azzera » / « Cancella » : produits sans filtre tout de suite.
+        applyNow(panel);
         return;
       }
       var unpick = event.target.closest('[data-dept-unpick]');
@@ -657,6 +719,8 @@
         }
         renderPicked(panel);
         refreshCount(panel);
+        // ✕ sur un choix : retiré des produits tout de suite.
+        applyNow(panel);
       }
     };
     // Choix cochés, prix tapés ou glissés : pastilles, résumés et « Mostra N prodotti » suivent.
