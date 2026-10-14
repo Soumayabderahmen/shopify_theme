@@ -3414,6 +3414,103 @@ body.template-product.pdp-m-page #content {
   height: 23px;
 }
 
+/* Retour : réaction immédiate au toucher (assets/pdp-mobile.js, classe pdp-m-leaving sur <html>). */
+#root .pdp-m .pdp-m__hi[data-pdp-back] {
+  border-radius: 50%;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root .pdp-m .pdp-m__hi[data-pdp-back]:active,
+html.pdp-m-leaving #root .pdp-m .pdp-m__hi[data-pdp-back] {
+  background: #e9eaf2;
+  box-shadow: 0 0 0 6px #e9eaf2;
+  transform: scale(0.88);
+}
+
+#root .pdp-m .pdp-m__hi[data-pdp-back] svg {
+  transition: transform 0.2s ease;
+}
+
+html.pdp-m-leaving #root .pdp-m .pdp-m__hi[data-pdp-back] svg {
+  transform: translateX(-3px);
+}
+
+/* La fiche glisse un peu vers la droite et s'estompe, comme une page qui se ferme. « left » plutôt que transform :
+   un transform déplacerait les éléments fixes de la fiche (barre d'achat en bas, en-tête collant). */
+#root .pdp-m {
+  position: relative;
+  left: 0;
+}
+
+html.pdp-m-leaving,
+html.pdp-m-leaving body {
+  overflow-x: hidden;
+}
+
+html.pdp-m-leaving #root .pdp-m {
+  left: 28px;
+  opacity: 0.55;
+  transition: left 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.24s ease;
+  pointer-events: none;
+}
+
+/* Barre de chargement fine en haut de l'écran, jusqu'à l'arrivée de la page précédente. */
+.pdp-m__navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483647;
+  width: 100%;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pdp-m__navbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #3a34d2, #8b5cf6, #3a34d2);
+  transform-origin: left center;
+  animation: pdp-m-navbar 2.4s cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+
+.pdp-m__navbar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 75%), transparent);
+  animation: pdp-m-navbar-shine 1s linear infinite;
+}
+
+@keyframes pdp-m-navbar {
+  from { transform: scaleX(0.08); }
+  to { transform: scaleX(0.9); }
+}
+
+@keyframes pdp-m-navbar-shine {
+  from { left: -30%; }
+  to { left: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.pdp-m-leaving #root .pdp-m {
+    left: 0;
+  }
+
+  .pdp-m__navbar::before,
+  .pdp-m__navbar::after {
+    animation: none;
+  }
+
+  .pdp-m__navbar::before {
+    transform: scaleX(0.6);
+  }
+}
+
 .pdp-m__hi:first-child {
   margin-left: -4px;
 }

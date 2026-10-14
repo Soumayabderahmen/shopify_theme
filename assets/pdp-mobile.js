@@ -69,12 +69,34 @@
     root.pdpToast = toast;
 
     // Retour : page précédente du site, sinon l'accueil (lien).
+    // Retour : effet immédiat au toucher (flèche enfoncée, fiche qui glisse vers la droite, barre de chargement en
+    // haut) pendant que la page précédente revient, pour que le client ne croie pas que la page bloque.
     var back = header.querySelector('[data-pdp-back]');
+    var showLeaving = function () {
+      document.documentElement.classList.add('pdp-m-leaving');
+      if (!document.querySelector('.pdp-m__navbar')) {
+        var bar = document.createElement('div');
+        bar.className = 'pdp-m__navbar';
+        bar.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(bar);
+      }
+    };
     back.addEventListener('click', function (event) {
+      showLeaving();
       if (document.referrer && document.referrer.indexOf(window.location.origin) === 0 && window.history.length > 1) {
         event.preventDefault();
-        window.history.back();
+        // Une image peinte avec l'effet, puis le retour (instantané si le navigateur a gardé la page en mémoire).
+        window.requestAnimationFrame(function () {
+          window.requestAnimationFrame(function () { window.history.back(); });
+        });
       }
+    });
+    // Fiche réaffichée depuis la mémoire du navigateur (bouton « avant ») : effet de départ retiré.
+    window.addEventListener('pageshow', function (event) {
+      if (!event.persisted) return;
+      document.documentElement.classList.remove('pdp-m-leaving');
+      var bar = document.querySelector('.pdp-m__navbar');
+      if (bar) bar.remove();
     });
 
     // Panier : même tiroir que l'en-tête du site (son lien, masqué sur la fiche, garde le comportement du thème).
