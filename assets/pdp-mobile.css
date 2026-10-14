@@ -122,6 +122,52 @@
   backdrop-filter: blur(8px);
 }
 
+/* Marques officielles sous les photos : bande « Negozio Ufficiale del Marchio » et badges qui défilent
+   (styles d'origine des snippets, seulement les marges ajustées ici). */
+#root .pdp-m__brand {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 8px 12px 10px;
+  background: #fff;
+}
+
+#root .pdp-m__brand[hidden] {
+  display: none;
+}
+
+#root .pdp-m__brand .brand-badges-container,
+#root .pdp-m__brand .badge-scroll-wrapper {
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+}
+
+#root .pdp-m__brand .brand-badges-container .badge-store {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+#root .pdp-m__brand .brand-badges-container .badge-content {
+  flex: 1;
+  min-width: 0;
+}
+
+#root .pdp-m__brand .brand-badges-container .badge-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#root .pdp-m__brand .badge-scroll-wrapper .badge-store {
+  width: auto;
+  padding: 4px 9px;
+  border-radius: 6px;
+}
+
 /* Cartes : blanches, arrondies, serrées (prototype SHEIN) */
 .pdp-m__card {
   margin: 8px 8px 0;

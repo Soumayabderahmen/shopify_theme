@@ -135,6 +135,14 @@
     </section>
   {%- endif -%}
 
+  {%- comment -%}
+    Marques officielles (Nike, Adidas…) : bande « Negozio Ufficiale del Marchio » (sa fenêtre d'information) et badges
+    Official Store / Star seller / Brand Official, comme avant sous les photos. assets/pdp-mobile.js y déplace ceux que
+    l'ancien bloc produit affiche (snippets/prodducts--brand-popap.liquid, badge--brand-products.liquid) : mêmes textes
+    traduits, même fenêtre, sans les dupliquer.
+  {%- endcomment -%}
+  <div class="pdp-m__brand" data-pdp-brand hidden></div>
+
   {%- comment -%} Bande avantages sous les photos (prototype SHEIN) : la même que sous la bannière de l'accueil. {%- endcomment -%}
   {%- render 'mshein-perks' -%}
 

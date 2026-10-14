@@ -10,6 +10,30 @@
   // Textes traduits (snippets/mobile-i18n.liquid, clés mobile.js.* des fichiers locales).
   var T = window.mobileT || function (key) { return key; };
 
+  // Marques officielles : bande « Negozio Ufficiale del Marchio » (avec sa fenêtre) et badges Official Store /
+  // Star seller / Brand Official, déplacés depuis l'ancien bloc produit jusque sous les photos (snippets/pdp-mobile-top.liquid).
+  (function () {
+    var slot = root.querySelector('[data-pdp-brand]');
+    var trigger = document.getElementById('brandPopupTrigger')
+      || document.querySelector('.brand-badges-container .js-drawer-trigger[data-target="brandDrawerOverlay"]');
+    var bar = trigger && trigger.closest('.brand-badges-container');
+    if (!slot || !bar) return;
+    var scope = bar.closest('[class*="__main-product"], .shopify-section') || document;
+    var badges = scope.querySelector('.badge-scroll-wrapper');
+    slot.appendChild(bar);
+    if (badges) slot.appendChild(badges);
+    // Sa fenêtre aussi : ses cartes « Altri prodotti da Nike » prennent alors le style des cartes du site (#root).
+    // Son script la remet dans <body> à chaque ouverture : elle revient aussitôt dans la fiche.
+    var drawer = document.getElementById(trigger.getAttribute('data-target') || 'brandDrawerOverlay');
+    if (drawer) {
+      root.appendChild(drawer);
+      new MutationObserver(function () {
+        if (drawer.parentNode === document.body) root.appendChild(drawer);
+      }).observe(document.body, { childList: true });
+    }
+    slot.hidden = false;
+  })();
+
   /* ---------- En-tête au style SHEIN (snippets/pdp-mobile-top.liquid) : retour, recherche, panier, partager, ⋯,
      onglets de section « Articolo / Recensioni / Consigliati » ---------- */
   (function () {
