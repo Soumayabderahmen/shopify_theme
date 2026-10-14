@@ -52,20 +52,6 @@
 {%- comment -%} Caché par défaut (desktop) ; assets/pdp-mobile.css, chargé seulement en mobile, l'affiche. {%- endcomment -%}
 <style>.pdp-m{display:none}</style>
 <div class="pdp-m" data-pdp-mobile data-coupon-code="{{ pm_coupon_code }}">
-  {%- comment -%}
-    Pleine largeur dès le premier affichage : même calcul que alignToScreen (assets/pdp-mobile.js), fait ici tout de
-    suite. Le script principal est différé ; sans ceci la fiche s'affichait d'abord décalée (marges du thème), puis
-    sautait en place.
-  {%- endcomment -%}
-  <script>
-    (function () {
-      var root = document.currentScript && document.currentScript.parentElement;
-      if (!root || !window.matchMedia('(max-width: 760px)').matches) return;
-      var rect = root.getBoundingClientRect();
-      root.style.setProperty('--pm-shift-l', (-rect.left) + 'px');
-      root.style.setProperty('--pm-shift-r', (-(document.documentElement.clientWidth - rect.right)) + 'px');
-    })();
-  </script>
   <script type="application/json" data-pdp-variants>
     [{%- for v in product.variants -%}{"id":{{ v.id }},"price":{{ v.price }},"compare":{{ v.compare_at_price | default: 0 }},"media":{{ v.featured_media.id | default: 0 }},"available":{{ v.available }},"inv":{% if v.inventory_management == 'shopify' and v.inventory_policy == 'deny' %}{{ v.inventory_quantity }}{% else %}null{% endif %},"options":{{ v.options | json }},"title":{{ v.title | json }}}{% unless forloop.last %},{% endunless %}{%- endfor -%}]
   </script>

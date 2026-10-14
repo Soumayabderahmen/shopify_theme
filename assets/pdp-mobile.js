@@ -190,16 +190,7 @@
     });
   })();
 
-  /* ---------- Pleine largeur : décalage = retrait réel de la page à gauche ---------- */
-  var alignToScreen = function () {
-    root.style.setProperty('--pm-shift-l', '0px');
-    root.style.setProperty('--pm-shift-r', '0px');
-    var rect = root.getBoundingClientRect();
-    root.style.setProperty('--pm-shift-l', (-rect.left) + 'px');
-    root.style.setProperty('--pm-shift-r', (-(document.documentElement.clientWidth - rect.right)) + 'px');
-  };
-  alignToScreen();
-  window.addEventListener('resize', alignToScreen);
+  /* Pleine largeur : faite en CSS seul (assets/pdp-mobile.css, #root .pdp-m), dès le premier affichage. */
 
   /* ---------- Galerie ---------- */
   var slides = root.querySelector('[data-pdp-slides]');

@@ -17,15 +17,17 @@
 
 #root .pdp-m {
   display: block;
-  /* Pleine largeur de l'écran : marges négatives posées par assets/pdp-mobile.js (--pm-shift-l / -r =
-     retraits réels de la page à gauche et à droite, qui ne sont pas symétriques). */
+  /* Pleine largeur de l'écran, en CSS seul (dès le premier affichage, quel que soit l'ordre d'arrivée des fichiers) :
+     l'article du thème (.m6pr) recule de --cols à gauche (24 px en mobile) dans #root qui a 6 px de marge de chaque
+     côté (comme le pied de page mobile : margin 0 -6px). Retraits non symétriques : gauche = --cols − 6 px,
+     droite = −6 px. Avant : mesurés par un script, la fiche s'affichait d'abord décalée puis sautait en place. */
   width: auto !important;
   max-width: none !important;
   /* Le thème donne aux blocs de la fiche une bordure gauche de 24 px (marge du desktop). */
   padding-right: 0 !important;
   padding-left: 0 !important;
   border: 0 !important;
-  margin: 0 var(--pm-shift-r, 0px) 0 var(--pm-shift-l, 0px);
+  margin: 0 -6px 0 calc(var(--cols, 24px) - 6px);
   padding-bottom: 4px;
   color: var(--pm-ink);
   font-family: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
