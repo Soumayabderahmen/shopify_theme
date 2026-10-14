@@ -1331,7 +1331,13 @@
         "beige": "Beige",
         "gold": "Dorado",
         "silver": "Plateado",
-        "multicolor": "Multicolor"
+        "multicolor": "Multicolor",
+        "burgundy": "Burdeos",
+        "navy": "Azul marino",
+        "lightblue": "Celeste",
+        "olive": "Verde oliva",
+        "khaki": "Caqui",
+        "camel": "Camel"
       },
       "available": "Disponibles",
       "only_available": "Mostrar solo productos disponibles",

@@ -201,8 +201,8 @@
       Tous les choix sont de vraies cases du formulaire : « Mostra » envoie exactement les filtres Shopify.
     {%- endcomment -%}
     {%- liquid
-      assign color_order = 'black,white,gray,red,pink,orange,yellow,green,blue,purple,brown,beige,gold,silver,multicolor' | split: ','
-      assign light_colors = 'white,beige,yellow,pink,silver,gold'
+      assign color_order = 'black,white,gray,red,burgundy,pink,orange,yellow,green,olive,blue,navy,lightblue,purple,brown,camel,khaki,beige,gold,silver,multicolor' | split: ','
+      assign light_colors = 'white,beige,yellow,pink,silver,gold,lightblue'
       assign list_shown = 7
       assign grid_shown = 12
     -%}
@@ -380,7 +380,7 @@
                       un produit). Valeurs qui ne sont pas des tailles standard (28, 40 cm…) : une case chacune, après.
                     {%- endcomment -%}
                     {%- liquid
-                      assign size_order = 'xxs,xs,s,m,l,xl,2xl,3xl,4xl,5xl,6xl,one' | split: ','
+                      assign size_order = '3xs,xxs,xs,s,m,l,xl,2xl,3xl,4xl,5xl,6xl,one' | split: ','
                       assign value_sizes = ''
                       for value in filter.values
                         capture size_key

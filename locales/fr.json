@@ -1403,7 +1403,13 @@
         "beige": "Beige",
         "gold": "Or",
         "silver": "Argent",
-        "multicolor": "Multicolore"
+        "multicolor": "Multicolore",
+        "burgundy": "Bordeaux",
+        "navy": "Bleu marine",
+        "lightblue": "Bleu ciel",
+        "olive": "Vert olive",
+        "khaki": "Kaki",
+        "camel": "Camel"
       },
       "available": "Disponibles",
       "only_available": "Afficher uniquement les produits disponibles",

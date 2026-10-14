@@ -6,7 +6,9 @@
 {%- endcomment -%}
 {%- liquid
   assign color_label = label | downcase
-  assign color_rules = 'multicolor:multicolor,multi-color,multi color,colorful,rainbow|black:black,nero,noir,schwarz,negro,zwart,negru|white:white,bianco,blanc,weiss,weiß,blanco,ivory|gold:gold,dorato,golden|silver:silver,argento,argent|gray:gray,grey,grigio,gris,grau,grijs,charcoal|red:red,rosso,rouge,rojo,wine,burgundy,bordeaux|pink:pink,rosa,rose,fuchsia,magenta,roze,blush|orange:orange,arancio,naranja,coral|yellow:yellow,giallo,jaune,gelb,amarillo,mustard|green:green,verde,vert,grün,olive,army,mint|blue:blue,blu,bleu,azul,blau,navy,denim,azzurro,cyan,turquoise,teal|purple:purple,viola,violet,lila,lilac,lavender,mauve|brown:brown,marrone,marron,braun,coffee,camel,chocolate,caramel|beige:beige,khaki,apricot,cream,nude,champagne,sand' | split: '|'
+  # Nuances que le client reconnaît (Bordeaux, Blu navy, Azzurro, Verde militare, Kaki, Cammello) avant leur couleur
+  # de base : « wine red » → Bordeaux et non Rosso, « light blue » → Azzurro et non Blu…
+  assign color_rules = 'multicolor:multicolor,multi-color,multi color,multi,colorful,rainbow|burgundy:burgundy,bordeaux,bordò,wine,marsala|navy:navy,blu navy,dark blue,blu scuro,marine|lightblue:light blue,sky blue,azzurro,baby blue,celeste,bleu ciel|olive:army,olive,militare,khaki green|khaki:khaki,kaki,cachi|camel:camel,cammello|black:black,nero,noir,schwarz,negro,zwart,negru|white:white,bianco,blanc,weiss,weiß,blanco,ivory|gold:gold,dorato,golden,oro|silver:silver,argento,argent|gray:gray,grey,grigio,gris,grau,grijs,charcoal|red:red,rosso,rouge,rojo,ruby|pink:pink,rosa,rose,fuchsia,magenta,roze,blush|orange:orange,arancio,naranja,coral,rust,sherbet,tangerine,fox|yellow:yellow,giallo,jaune,gelb,amarillo,mustard|green:green,verde,vert,grün,mint,sage|blue:blue,blu,bleu,azul,blau,denim,cyan,turquoise,teal,cerulean|purple:purple,viola,violet,lila,lilac,lavender,mauve|brown:brown,marrone,marron,braun,coffee,chocolate,caramel,mocha,taupe|beige:beige,apricot,cream,nude,champagne,sand,tan' | split: '|'
   assign family = '-'
   for rule in color_rules
     assign rule_parts = rule | split: ':'

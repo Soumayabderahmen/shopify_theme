@@ -1411,7 +1411,13 @@
         "beige": "Bej",
         "gold": "Auriu",
         "silver": "Argintiu",
-        "multicolor": "Multicolor"
+        "multicolor": "Multicolor",
+        "burgundy": "Bordo",
+        "navy": "Bleumarin",
+        "lightblue": "Bleu deschis",
+        "olive": "Verde măsliniu",
+        "khaki": "Kaki",
+        "camel": "Camel"
       },
       "available": "În stoc",
       "only_available": "Arată doar produsele în stoc",

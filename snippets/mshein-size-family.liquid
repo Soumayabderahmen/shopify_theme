@@ -1,7 +1,7 @@
 {%- comment -%}
   Taille standard d'une valeur de filtre « Taglia / Size » de la boutique (M, m, « M fit 165-173CM », « Asiatico M » → m ;
   XXL, 2XL → 2xl ; tu, One Size, Taglia Unica → one…), pour la fenêtre Filtri mobile (snippets/mshein-results.liquid).
-  Écrit la clé (xxs, xs, s, m, l, xl, 2xl … 6xl, one) ou « - » quand la valeur n'est pas une taille standard (28, 40 cm…).
+  Écrit la clé (3xs, xxs, xs, s, m, l, xl, 2xl … 6xl, one) ou « - » quand la valeur n'est pas une taille standard (28, 40 cm…).
   Params : label
 {%- endcomment -%}
 {%- liquid
@@ -14,21 +14,33 @@
       break
     endif
   endfor
+  # Tailles écrites en toutes lettres (« Extra Large », « Medium »…).
+  if size_family == '-'
+    if size_label contains 'EXTRA EXTRA LARGE' or size_label contains 'XX LARGE' or size_label contains 'XXLARGE'
+      assign size_family = '2xl'
+    elsif size_label contains 'EXTRA LARGE' or size_label contains 'X LARGE' or size_label contains 'XLARGE'
+      assign size_family = 'xl'
+    elsif size_label contains 'EXTRA SMALL' or size_label contains 'X SMALL' or size_label contains 'XSMALL'
+      assign size_family = 'xs'
+    endif
+  endif
   if size_family == '-'
     assign size_words = size_label | replace: 'ASIATICO ', '' | replace: 'ASIAN ', '' | replace: 'ASIA ', '' | replace: 'EU ', '' | replace: 'US ', '' | split: ' '
     assign size_token = size_words.first | default: ''
     case size_token
+      when 'XXXS', '3XS'
+        assign size_family = '3xs'
       when 'XXS', '2XS'
         assign size_family = 'xxs'
       when 'XS'
         assign size_family = 'xs'
-      when 'S'
+      when 'S', 'SMALL'
         assign size_family = 's'
-      when 'M'
+      when 'M', 'MEDIUM'
         assign size_family = 'm'
-      when 'L'
+      when 'L', 'LARGE'
         assign size_family = 'l'
-      when 'XL'
+      when 'XL', '1XL'
         assign size_family = 'xl'
       when 'XXL', '2XL'
         assign size_family = '2xl'

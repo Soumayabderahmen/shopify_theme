@@ -4100,7 +4100,13 @@
         "beige": "Beige",
         "gold": "Gold",
         "silver": "Silver",
-        "multicolor": "Multicolor"
+        "multicolor": "Multicolor",
+        "burgundy": "Burgundy",
+        "navy": "Navy",
+        "lightblue": "Light blue",
+        "olive": "Olive",
+        "khaki": "Khaki",
+        "camel": "Camel"
       },
       "available": "In stock",
       "only_available": "Show in-stock products only",

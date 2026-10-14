@@ -1895,6 +1895,12 @@
   .mshein-fsheet .mshein-fsw__dot.is-purple { background: #8e6fa8; }
   .mshein-fsheet .mshein-fsw__dot.is-brown { background: #7a4e2d; }
   .mshein-fsheet .mshein-fsw__dot.is-beige { background: #d9c3a5; }
+  .mshein-fsheet .mshein-fsw__dot.is-burgundy { background: #7b1e2e; }
+  .mshein-fsheet .mshein-fsw__dot.is-navy { background: #1b2a4e; }
+  .mshein-fsheet .mshein-fsw__dot.is-lightblue { background: #8ec5e8; }
+  .mshein-fsheet .mshein-fsw__dot.is-olive { background: #5b6236; }
+  .mshein-fsheet .mshein-fsw__dot.is-khaki { background: #b7a77a; }
+  .mshein-fsheet .mshein-fsw__dot.is-camel { background: #c19a6b; }
   .mshein-fsheet .mshein-fsw__dot.is-gold { background: linear-gradient(135deg, #f6e27a, #c9a227 55%, #f3dc8a); }
   .mshein-fsheet .mshein-fsw__dot.is-silver { background: linear-gradient(135deg, #f2f3f5, #b7bcc4 55%, #e9eaee); }
   .mshein-fsheet .mshein-fsw__dot.is-multicolor { background: conic-gradient(#e4323c, #f2c230, #3e6b48, #2c4a8c, #8e6fa8, #e4323c); }

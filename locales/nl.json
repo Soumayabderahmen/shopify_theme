@@ -1334,7 +1334,13 @@
         "beige": "Beige",
         "gold": "Goud",
         "silver": "Zilver",
-        "multicolor": "Veelkleurig"
+        "multicolor": "Veelkleurig",
+        "burgundy": "Bordeaux",
+        "navy": "Marineblauw",
+        "lightblue": "Lichtblauw",
+        "olive": "Olijfgroen",
+        "khaki": "Kaki",
+        "camel": "Camel"
       },
       "available": "Op voorraad",
       "only_available": "Alleen producten op voorraad tonen",

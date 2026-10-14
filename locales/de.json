@@ -1316,7 +1316,13 @@
         "beige": "Beige",
         "gold": "Gold",
         "silver": "Silber",
-        "multicolor": "Mehrfarbig"
+        "multicolor": "Mehrfarbig",
+        "burgundy": "Bordeaux",
+        "navy": "Marineblau",
+        "lightblue": "Hellblau",
+        "olive": "Olivgrün",
+        "khaki": "Khaki",
+        "camel": "Camel"
       },
       "available": "Verfügbar",
       "only_available": "Nur verfügbare Produkte anzeigen",
