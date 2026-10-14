@@ -1,7 +1,7 @@
 {%- comment -%}
   Bloc de recherche des produits (mobile, style SHEIN) : Filtri (vrais filtres Shopify), tri, 2 colonnes / 1 colonna,
-  filtres rapides, « Mostrando X di Y prodotti » et produits en 2 colonnes décalées. Partie remplacée à chaque tri,
-  filtre ou puce par assets/mobile-home-tabs.js (window.msheinResults).
+  raccourcis de filtres, « Mostrando X di Y prodotti » et produits en 2 colonnes décalées. Partie remplacée à chaque tri,
+  filtre ou raccourci par assets/mobile-home-tabs.js (window.msheinResults).
   Utilisé par les rayons et pages collection (snippets/mshein-dept.liquid) et la recherche (sections/mobile-home-shein.liquid).
   Params : filters, sort_options, current_sort, total (nombre de produits après filtres), cards (cartes de la 1re page),
   next_url (page suivante), simple (true : tri et colonnes seulement, sans Filtri)
@@ -15,21 +15,106 @@
         assign current_sort_label = option.name
       endif
     endfor
+    # Par filtre : sa forme dans la fenêtre (filter_kinds : switch = Disponibilità, price = Prezzo, color = couleurs,
+    # size = tailles, shoe = pointures, list = cases à cocher) et son nombre de choix (filter_counts). Couleurs comptées par
+    # couleur claire (Nero = black + Black + Black thick… compte 1).
     assign active_filters = 0
+    assign filter_counts = ''
+    assign filter_kinds = ''
+    assign filter_visible = ''
     for filter in filters
+      assign group_name = filter.label | downcase
+      assign first_param = filter.values.first.param_name | default: '' | downcase
+      assign kind = 'list'
       if filter.type == 'price_range'
-        if filter.min_value.value != nil or filter.max_value.value != nil
-          assign active_filters = active_filters | plus: 1
-        endif
+        assign kind = 'price'
+      elsif first_param contains 'availability'
+        assign kind = 'switch'
+      elsif first_param contains 'color' or first_param contains 'colour' or group_name contains 'color' or group_name contains 'colour' or group_name contains 'couleur' or group_name contains 'farbe' or group_name contains 'kleur' or group_name contains 'culoare'
+        assign kind = 'color'
+      elsif first_param contains 'shoe' or first_param contains 'scarpa' or group_name contains 'scarpa' or group_name contains 'shoe' or group_name contains 'pointure' or group_name contains 'schuh' or group_name contains 'zapato' or group_name contains 'schoen' or group_name contains 'pantof'
+        assign kind = 'shoe'
+      elsif first_param contains 'size' or first_param contains 'taglia' or first_param contains 'dimensione' or group_name contains 'taglia' or group_name contains 'size' or group_name contains 'dimensione' or group_name contains 'taille' or group_name contains 'größe' or group_name contains 'talla' or group_name contains 'maat' or group_name contains 'mărime'
+        assign kind = 'size'
       else
-        assign active_filters = active_filters | plus: filter.active_values.size
+        assign short_values = true
+        for value in filter.values
+          if value.label.size > 5
+            assign short_values = false
+            break
+          endif
+        endfor
+        if short_values and filter.values.size <= 40
+          assign kind = 'size'
+        endif
       endif
+      assign chosen = 0
+      if kind == 'price'
+        if filter.min_value.value != nil or filter.max_value.value != nil
+          assign chosen = 1
+        endif
+      elsif kind == 'color'
+        assign seen_families = ','
+        for value in filter.active_values
+          capture family
+            render 'mshein-color-family', label: value.label
+          endcapture
+          assign family_key = ',' | append: family | append: ','
+          if family == '-'
+            assign chosen = chosen | plus: 1
+          elsif seen_families contains family_key
+            continue
+          else
+            assign chosen = chosen | plus: 1
+            assign seen_families = seen_families | append: family | append: ','
+          endif
+        endfor
+      elsif kind == 'size'
+        # Tailles comptées par taille standard (M = M + m + « M fit 165-173CM »… compte 1).
+        assign seen_families = ','
+        for value in filter.active_values
+          capture family
+            render 'mshein-size-family', label: value.label
+          endcapture
+          assign family_key = ',' | append: family | append: ','
+          if family == '-'
+            assign chosen = chosen | plus: 1
+          elsif seen_families contains family_key
+            continue
+          else
+            assign chosen = chosen | plus: 1
+            assign seen_families = seen_families | append: family | append: ','
+          endif
+        endfor
+      else
+        assign chosen = filter.active_values.size
+      endif
+      # Valeurs qui ont des produits avec les filtres en cours (ou déjà choisies) : sans aucune, la section et son
+      # raccourci ne sont pas montrés (ex. pointures quand « Abiti » est choisi).
+      assign visible = 0
+      if kind == 'price' or kind == 'switch'
+        assign visible = 1
+      else
+        for value in filter.values
+          if value.count > 0 or value.active
+            assign visible = visible | plus: 1
+          endif
+        endfor
+      endif
+      assign active_filters = active_filters | plus: chosen
+      assign filter_counts = filter_counts | append: chosen | append: ','
+      assign filter_kinds = filter_kinds | append: kind | append: ','
+      assign filter_visible = filter_visible | append: visible | append: ','
     endfor
+    assign filter_counts = filter_counts | split: ','
+    assign filter_kinds = filter_kinds | split: ','
+    assign filter_visible = filter_visible | split: ','
+    assign amount_token = '{' | append: 'amount' | append: '}'
   -%}
   <div class="mshein-ctool">
     {%- unless simple -%}
       {%- if filters.size > 0 -%}
-        <button type="button" class="mshein-cfilter" data-dept-open="">
+        <button type="button" class="mshein-cfilter{% if active_filters > 0 %} is-on{% endif %}" data-dept-open="">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
           {{ 'mobile.collection.filters' | t }}
           {%- if active_filters > 0 -%}<i>{{ active_filters }}</i>{%- endif -%}
@@ -54,11 +139,13 @@
 
   {%- unless simple -%}
     {%- if filters.size > 0 -%}
-      {%- comment -%} Filtres rapides : « Disponibili » d'un toucher, les autres ouvrent la fenêtre à leur section. {%- endcomment -%}
+      {%- comment -%}
+        Raccourcis (prototype « Filtri v2 ») : « Disponibili » d'un toucher, les autres ouvrent la fenêtre directement sur
+        leur section ; nombre de choix dans une pastille, prix choisi écrit en clair.
+      {%- endcomment -%}
       <div class="mshein-cfchips">
         {%- for filter in filters -%}
-          {%- assign first_param = filter.values.first.param_name | default: '' -%}
-          {%- if first_param contains 'availability' -%}
+          {%- if filter_kinds[forloop.index0] == 'switch' -%}
             {%- assign in_stock = filter.values | where: 'value', '1' | first -%}
             {%- if in_stock -%}
               <button type="button" class="mshein-cfchip-av{% if in_stock.active %} is-on{% endif %}" data-dept-quick="{{ in_stock.param_name }}" data-dept-quick-value="1"><i></i>{{ 'mobile.collection.available' | t }}</button>
@@ -66,15 +153,23 @@
           {%- endif -%}
         {%- endfor -%}
         {%- for filter in filters -%}
-          {%- assign first_param = filter.values.first.param_name | default: '' -%}
-          {%- if first_param contains 'availability' -%}{%- continue -%}{%- endif -%}
-          {%- assign filter_active = filter.active_values.size -%}
-          {%- if filter.type == 'price_range' -%}
-            {%- assign filter_active = 0 -%}
-            {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}{%- assign filter_active = 1 -%}{%- endif -%}
-          {%- endif -%}
+          {%- if filter_kinds[forloop.index0] == 'switch' -%}{%- continue -%}{%- endif -%}
+          {%- assign filter_shown = filter_visible[forloop.index0] | plus: 0 -%}
+          {%- if filter_shown == 0 -%}{%- continue -%}{%- endif -%}
+          {%- assign filter_active = filter_counts[forloop.index0] | plus: 0 -%}
           <button type="button"{% if filter_active > 0 %} class="is-on"{% endif %} data-dept-open="{{ forloop.index }}">
-            {{- filter.label | escape }}{% if filter_active > 0 and filter.type != 'price_range' %} ({{ filter_active }}){% endif -%}
+            {%- if filter.type == 'price_range' and filter_active > 0 -%}
+              {%- if filter.min_value.value != nil and filter.max_value.value != nil -%}
+                {{- filter.min_value.value | money_without_trailing_zeros }} – {{ filter.max_value.value | money_without_trailing_zeros -}}
+              {%- elsif filter.max_value.value != nil -%}
+                {{- 'mobile.collection.up_to_html' | t: amount: amount_token | replace: amount_token, '' | strip_html -}}{{ filter.max_value.value | money_without_trailing_zeros -}}
+              {%- else -%}
+                {{- 'mobile.collection.over_html' | t: amount: amount_token | replace: amount_token, '' | strip_html -}}{{ filter.min_value.value | money_without_trailing_zeros -}}
+              {%- endif -%}
+            {%- else -%}
+              {{- filter.label | escape -}}
+              {%- if filter_active > 0 -%}<b>{{ filter_active }}</b>{%- endif -%}
+            {%- endif -%}
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
           </button>
         {%- endfor -%}
@@ -87,7 +182,6 @@
     assign results_text = 'mobile.js.collection_results_html' | t
     assign count_token = '{' | append: 'count' | append: '}'
     assign total_token = '{' | append: 'total' | append: '}'
-    assign amount_token = '{' | append: 'amount' | append: '}'
     assign results_line = results_text | replace: count_token, '0' | replace: total_token, total
   -%}
   {%- unless no_count -%}
@@ -96,50 +190,296 @@
 
   {%- unless simple -%}
     {%- comment -%}
-      Fenêtre « Filtri » : vrais filtres de la collection (disponibilità, prezzo, opzioni, tipo…). Sous le titre, les choix
-      du client (« Filtri selezionati »), mis à jour à chaque toucher par assets/mobile-home-tabs.js : un toucher sur un choix
-      le retire, sans descendre dans la liste.
+      Fenêtre « Filtri » (prototype « Filtri v2 ») avec les vrais filtres Shopify de la collection :
+      - en-tête : Filtri + nombre de choix, « Azzera », ✕ ; dessous, les choix en pastilles (✕ sur chacune) ;
+      - Disponibilità : interrupteur direct ; Prezzo : curseur double à échelle non linéaire (range_max réel), champs,
+        prix rapides ; listes : recherche, cases avec compteur, 7 visibles puis « Mostra altre (N) » ; Taglia / pointures :
+        grille avec compteur (0 = barré) ; couleurs : vraies valeurs réunies en couleurs claires traduites (black, Black,
+        black1… = Nero), valeurs sans couleur (« 1 », « 2 »…) non montrées ;
+      - chaque section affiche dans son titre le résumé du choix (« Tutti », « Abiti +2 ») ;
+      - pied : « Cancella » + « Mostra N prodotti » (nombre réel demandé à Shopify à chaque changement).
+      Tous les choix sont de vraies cases du formulaire : « Mostra » envoie exactement les filtres Shopify.
     {%- endcomment -%}
+    {%- liquid
+      assign color_order = 'black,white,gray,red,pink,orange,yellow,green,blue,purple,brown,beige,gold,silver,multicolor' | split: ','
+      assign light_colors = 'white,beige,yellow,pink,silver,gold'
+      assign list_shown = 7
+      assign grid_shown = 12
+    -%}
     <div class="mshein-fsheet" data-dept-sheet hidden>
       <form class="mshein-fsheet__panel" role="dialog" aria-label="{{ 'mobile.collection.filters' | t }}" data-dept-form>
         <div class="mshein-fsheet__hd">
           <b>{{ 'mobile.collection.filters' | t }}<i data-dept-picked-count hidden></i></b>
-          <button type="button" data-dept-close aria-label="{{ 'general.accessibility.close' | t }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-        </div>
-        <div class="mshein-fsheet__picked" data-dept-picked data-remove="{{ 'mobile.collection.remove_filter' | t | escape }}" data-up-to="{{ 'mobile.collection.up_to_html' | t: amount: amount_token | escape }}" data-over="{{ 'mobile.collection.over_html' | t: amount: amount_token | escape }}" data-currency="{{ cart.currency.iso_code }}">
-          <div class="mshein-fsheet__picked-hd">
-            <span>{{ 'mobile.collection.selected' | t }}</span>
-            <button type="button" data-dept-reset data-dept-picked-clear hidden>{{ 'mobile.collection.clear_all' | t }}</button>
+          <div class="mshein-fsheet__hd-r">
+            <button type="button" class="mshein-fsheet__clr" data-dept-reset data-dept-picked-clear disabled>{{ 'mobile.collection.reset' | t }}</button>
+            <button type="button" class="mshein-fsheet__x" data-dept-close aria-label="{{ 'general.accessibility.close' | t }}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
           </div>
-          <p class="mshein-fsheet__none" data-dept-picked-none>{{ 'mobile.collection.none_selected' | t }}</p>
-          <div class="mshein-fsheet__chips" data-dept-picked-list></div>
         </div>
-        <div class="mshein-fsheet__body" data-dept-sheet-body>
+        <div class="mshein-fsheet__sel" data-dept-picked aria-label="{{ 'mobile.collection.selected' | t | escape }}" data-remove="{{ 'mobile.collection.remove_filter' | t | escape }}" data-up-to="{{ 'mobile.collection.up_to_html' | t: amount: amount_token | strip_html | escape }}" data-over="{{ 'mobile.collection.over_html' | t: amount: amount_token | strip_html | escape }}" data-currency="{{ cart.currency.iso_code }}" hidden></div>
+        <div class="mshein-fsheet__body" data-dept-sheet-body data-all="{{ 'mobile.collection.all' | t | escape }}">
           {%- for filter in filters -%}
-            <section data-dept-section="{{ forloop.index }}">
-              <h4>{{ filter.label | escape }}<i data-dept-section-count hidden></i></h4>
-              {%- case filter.type -%}
-                {%- when 'price_range' -%}
-                  <div class="mshein-fprice">
-                    <label><span>{{ 'mobile.collection.min' | t }}</span><input type="number" inputmode="decimal" min="0" step="0.01" name="{{ filter.min_value.param_name }}" value="{% if filter.min_value.value != nil %}{{ filter.min_value.value | divided_by: 100.0 }}{% endif %}" placeholder="0" aria-label="{{ 'mobile.collection.price_min' | t | escape }}" data-dept-price="min"></label>
-                    <label><span>{{ 'mobile.collection.max' | t }}</span><input type="number" inputmode="decimal" min="0" step="0.01" name="{{ filter.max_value.param_name }}" value="{% if filter.max_value.value != nil %}{{ filter.max_value.value | divided_by: 100.0 }}{% endif %}" placeholder="{{ filter.range_max | divided_by: 100.0 | ceil }}" aria-label="{{ 'mobile.collection.price_max' | t | escape }}" data-dept-price="max"></label>
-                  </div>
-                {%- else -%}
-                  <div class="mshein-fpills">
+            {%- liquid
+              assign kind = filter_kinds[forloop.index0]
+              assign chosen = filter_counts[forloop.index0] | plus: 0
+              assign shown = filter_visible[forloop.index0] | plus: 0
+              assign open = false
+              if chosen > 0
+                assign open = true
+              endif
+            -%}
+            {%- if kind == 'switch' -%}
+              {%- assign in_stock = filter.values | where: 'value', '1' | first -%}
+              <div class="mshein-fswitch" data-dept-section="{{ forloop.index }}" data-kind="switch">
+                {%- if in_stock -%}
+                  <label class="mshein-fswitch__row">
+                    <input type="checkbox" role="switch" name="{{ in_stock.param_name }}" value="1" data-label="{{ 'mobile.collection.available' | t | escape }}"{% if in_stock.active %} checked{% endif %}>
+                    <span class="mshein-fswitch__tx"><b>{{ filter.label | escape }}</b><small>{{ 'mobile.collection.only_available' | t }} ({{ in_stock.count }})</small></span>
+                    <span class="mshein-fswitch__t" aria-hidden="true"></span>
+                  </label>
+                {%- endif -%}
+                {%- for value in filter.values -%}
+                  {%- if value.value != '1' and value.active -%}
+                    <input type="checkbox" hidden name="{{ value.param_name }}" value="{{ value.value | escape }}" data-label="{{ value.label | escape }}" checked>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+              {%- continue -%}
+            {%- endif -%}
+            {%- if shown == 0 -%}{%- continue -%}{%- endif -%}
+            {%- liquid
+              # Pastilles des choix comme le prototype : « Taglia M », « N° 38 » (pointures : aussi dans le résumé).
+              assign chip_prefix = ''
+              assign summary_prefix = ''
+              if kind == 'shoe'
+                assign chip_prefix = 'mobile.collection.shoe_prefix' | t
+                assign summary_prefix = chip_prefix
+              elsif kind == 'size'
+                assign chip_prefix = filter.label
+              endif
+            -%}
+            <div class="mshein-fsec{% if open %} is-open{% endif %}" data-dept-section="{{ forloop.index }}" data-kind="{{ kind }}"{% if chip_prefix != blank %} data-chip-prefix="{{ chip_prefix | escape }}"{% endif %}{% if summary_prefix != blank %} data-summary-prefix="{{ summary_prefix | escape }}"{% endif %}>
+              <button type="button" class="mshein-fsec__hd" data-dept-toggle aria-expanded="{{ open }}">
+                <span class="mshein-fsec__t">{{ filter.label | escape }}</span>
+                <span class="mshein-fsec__v" data-dept-summary>{{ 'mobile.collection.all' | t }}</span>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="mshein-fsec__p"><div><div class="mshein-fsec__in">
+                {%- case kind -%}
+                  {%- when 'price' -%}
+                    {%- liquid
+                      assign price_max = filter.range_max | divided_by: 100.0 | ceil
+                      assign price_min_value = ''
+                      if filter.min_value.value != nil
+                        assign price_min_value = filter.min_value.value | divided_by: 100.0
+                      endif
+                      assign price_max_value = ''
+                      if filter.max_value.value != nil
+                        assign price_max_value = filter.max_value.value | divided_by: 100.0
+                      endif
+                    -%}
+                    <div class="mshein-frange" data-dept-range data-max="{{ price_max }}">
+                      <div class="mshein-frange__tr"><div class="mshein-frange__fl" data-dept-range-fill></div></div>
+                      <input type="range" min="0" max="1000" value="0" aria-label="{{ 'mobile.collection.price_min' | t | escape }}" data-dept-range-input="min">
+                      <input type="range" min="0" max="1000" value="1000" aria-label="{{ 'mobile.collection.price_max' | t | escape }}" data-dept-range-input="max">
+                    </div>
+                    <div class="mshein-fprice">
+                      <label><span>{{ cart.currency.symbol }}</span><input type="number" inputmode="decimal" min="0" step="0.01" name="{{ filter.min_value.param_name }}" value="{{ price_min_value }}" placeholder="0" aria-label="{{ 'mobile.collection.price_min' | t | escape }}" data-dept-price="min"></label>
+                      <i aria-hidden="true"></i>
+                      <label><span>{{ cart.currency.symbol }}</span><input type="number" inputmode="decimal" min="0" step="0.01" name="{{ filter.max_value.param_name }}" value="{{ price_max_value }}" placeholder="{{ price_max }}" aria-label="{{ 'mobile.collection.price_max' | t | escape }}" data-dept-price="max"></label>
+                    </div>
+                    <div class="mshein-fpq">
+                      {%- assign price_steps = '0,10,25,50,100' | split: ',' -%}
+                      {%- for step in price_steps -%}
+                        {%- liquid
+                          assign step_min = step | plus: 0
+                          assign step_max = ''
+                          unless forloop.last
+                            assign next_index = forloop.index
+                            assign step_max = price_steps[next_index] | plus: 0
+                          endunless
+                          if step_min >= price_max
+                            break
+                          endif
+                        -%}
+                        <button type="button" aria-pressed="false" data-dept-pq-min="{% if step_min > 0 %}{{ step_min }}{% endif %}" data-dept-pq-max="{{ step_max }}">
+                          {%- if step_min == 0 -%}
+                            {{- 'mobile.collection.up_to_html' | t: amount: amount_token | strip_html | replace: amount_token, '' -}}{{ step_max | times: 100 | money_without_trailing_zeros -}}
+                          {%- elsif step_max == '' -%}
+                            {{- 'mobile.collection.over_html' | t: amount: amount_token | strip_html | replace: amount_token, '' -}}{{ step_min | times: 100 | money_without_trailing_zeros -}}
+                          {%- else -%}
+                            {{- step_min | times: 100 | money_without_trailing_zeros }} – {{ step_max | times: 100 | money_without_trailing_zeros -}}
+                          {%- endif -%}
+                        </button>
+                      {%- endfor -%}
+                    </div>
+                  {%- when 'color' -%}
+                    {%- liquid
+                      assign value_families = ''
+                      for value in filter.values
+                        capture family
+                          render 'mshein-color-family', label: value.label
+                        endcapture
+                        assign value_families = value_families | append: family | append: ','
+                      endfor
+                      assign value_families = value_families | split: ','
+                    -%}
+                    <div class="mshein-fsws">
+                      {%- for key in color_order -%}
+                        {%- assign members = 0 -%}
+                        {%- assign family_on = false -%}
+                        {%- capture member_inputs -%}
+                          {%- for value in filter.values -%}
+                            {%- if value_families[forloop.index0] == key and value.count > 0 or value_families[forloop.index0] == key and value.active -%}
+                              {%- assign members = members | plus: 1 -%}
+                              {%- if value.active -%}{%- assign family_on = true -%}{%- endif -%}
+                              <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" data-family-member="{{ key }}"{% if value.active %} checked{% endif %}>
+                            {%- endif -%}
+                          {%- endfor -%}
+                        {%- endcapture -%}
+                        {%- if members > 0 -%}
+                          {%- assign color_key = 'mobile.collection.colors.' | append: key -%}
+                          {%- assign color_name = color_key | t -%}
+                          <label class="mshein-fsw">
+                            <input type="checkbox" data-dept-family="{{ key }}" data-label="{{ color_name | escape }}" data-color="{{ key }}"{% if family_on %} checked{% endif %}>
+                            <i class="mshein-fsw__dot is-{{ key }}{% if light_colors contains key %} is-light{% endif %}" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>
+                            <span>{{ color_name | escape }}</span>
+                          </label>
+                          <span hidden>{{ member_inputs }}</span>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </div>
+                    {%- comment -%} Valeur sans couleur claire déjà choisie (lien partagé…) : gardée pour pouvoir la retirer. {%- endcomment -%}
                     {%- for value in filter.values -%}
-                      <label class="mshein-fpill">
-                        <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" data-label="{{ value.label | escape }}"{% if value.active %} checked{% endif %}{% if value.count == 0 and value.active == false %} disabled{% endif %}>
-                        <span>{{ value.label | escape }} <em>{{ value.count }}</em></span>
-                      </label>
+                      {%- if value_families[forloop.index0] == '-' and value.active -%}
+                        <input type="checkbox" hidden name="{{ value.param_name }}" value="{{ value.value | escape }}" data-label="{{ value.label | escape }}" checked>
+                      {%- endif -%}
                     {%- endfor -%}
-                  </div>
-              {%- endcase -%}
-            </section>
+                  {%- when 'shoe' -%}
+                    {%- comment -%}
+                      Pointures : « N° 38 » sans nombre de produits ; valeurs sans produit non montrées ; ordre croissant
+                      (3,5 · 4 · 4,5…), 12 visibles puis « Mostra altre » : posés par assets/mobile-home-tabs.js (sortGrids).
+                    {%- endcomment -%}
+                    <div class="mshein-fchips" data-dept-grid>
+                      {%- for value in filter.values -%}
+                        {%- if value.count == 0 and value.active == false -%}{%- continue -%}{%- endif -%}
+                        <label class="mshein-fchp">
+                          <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" data-label="{{ value.label | escape }}"{% if value.active %} checked{% endif %}>
+                          <span>{{ chip_prefix }} {{ value.label | escape }}</span>
+                        </label>
+                      {%- endfor -%}
+                    </div>
+                    {%- if shown > grid_shown -%}
+                      {%- assign others = shown | minus: grid_shown -%}
+                      <button type="button" class="mshein-fmore" data-dept-more aria-expanded="false" data-more="{{ 'mobile.collection.show_others' | t: count: others | escape }}" data-less="{{ 'mobile.collection.show_less' | t | escape }}"><span>{{ 'mobile.collection.show_others' | t: count: others }}</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+                    {%- endif -%}
+                  {%- when 'size' -%}
+                    {%- comment -%}
+                      Tailles (prototype) : XS · S · M · L · XL · 2XL · 3XL · 4XL · Taglia unica, chacune regroupant les vraies
+                      valeurs de la boutique (M, m, « M fit 165-173CM », « Asiatico M »…) ; une taille cochée coche toutes ses
+                      valeurs. Nombre de produits affiché quand la taille n'a qu'une valeur (sinon il compterait deux fois
+                      un produit). Valeurs qui ne sont pas des tailles standard (28, 40 cm…) : une case chacune, après.
+                    {%- endcomment -%}
+                    {%- liquid
+                      assign size_order = 'xxs,xs,s,m,l,xl,2xl,3xl,4xl,5xl,6xl,one' | split: ','
+                      assign value_sizes = ''
+                      for value in filter.values
+                        capture size_key
+                          render 'mshein-size-family', label: value.label
+                        endcapture
+                        assign value_sizes = value_sizes | append: size_key | append: ','
+                      endfor
+                      assign value_sizes = value_sizes | split: ','
+                      assign grid_count = 0
+                    -%}
+                    <div class="mshein-fchips" data-dept-grid>
+                      {%- for key in size_order -%}
+                        {%- assign members = 0 -%}
+                        {%- assign family_on = false -%}
+                        {%- assign family_count = 0 -%}
+                        {%- for value in filter.values -%}
+                          {%- if value_sizes[forloop.index0] == key -%}
+                            {%- if value.count > 0 or value.active -%}
+                              {%- assign members = members | plus: 1 -%}
+                              {%- assign family_count = value.count -%}
+                              {%- if value.active -%}{%- assign family_on = true -%}{%- endif -%}
+                            {%- endif -%}
+                          {%- endif -%}
+                        {%- endfor -%}
+                        {%- if members > 0 -%}
+                          {%- liquid
+                            assign grid_count = grid_count | plus: 1
+                            if key == 'one'
+                              assign size_name = 'mobile.collection.one_size' | t
+                            else
+                              assign size_name = key | upcase
+                            endif
+                          -%}
+                          <label class="mshein-fchp{% if key == 'one' %} is-wide{% endif %}">
+                            <input type="checkbox" data-dept-family="{{ key }}" data-label="{{ size_name | escape }}"{% if family_on %} checked{% endif %}>
+                            <span>{{ size_name | escape }}{% if members == 1 %}<small>{{ family_count }}</small>{% endif %}</span>
+                          </label>
+                        {%- endif -%}
+                      {%- endfor -%}
+                      {%- for value in filter.values -%}
+                        {%- if value_sizes[forloop.index0] != '-' -%}{%- continue -%}{%- endif -%}
+                        {%- if value.count == 0 and value.active == false -%}{%- continue -%}{%- endif -%}
+                        {%- assign grid_count = grid_count | plus: 1 -%}
+                        <label class="mshein-fchp{% if value.label.size > 4 %} is-wide{% endif %}">
+                          <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" data-label="{{ value.label | escape }}"{% if value.active %} checked{% endif %}>
+                          <span>{{ value.label | escape }}<small>{{ value.count }}</small></span>
+                        </label>
+                      {%- endfor -%}
+                    </div>
+                    <span hidden>
+                      {%- for value in filter.values -%}
+                        {%- if value_sizes[forloop.index0] == '-' -%}{%- continue -%}{%- endif -%}
+                        {%- if value.count == 0 and value.active == false -%}{%- continue -%}{%- endif -%}
+                        <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" data-family-member="{{ value_sizes[forloop.index0] }}"{% if value.active %} checked{% endif %}>
+                      {%- endfor -%}
+                    </span>
+                    {%- if grid_count > grid_shown -%}
+                      {%- assign others = grid_count | minus: grid_shown -%}
+                      <button type="button" class="mshein-fmore" data-dept-more aria-expanded="false" data-more="{{ 'mobile.collection.show_others' | t: count: others | escape }}" data-less="{{ 'mobile.collection.show_less' | t | escape }}"><span>{{ 'mobile.collection.show_others' | t: count: others }}</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+                    {%- endif -%}
+                  {%- else -%}
+                    {%- if shown > list_shown -%}
+                      <label class="mshein-fsrch">
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                        <input type="search" placeholder="{{ 'mobile.collection.search_in' | t: label: filter.label | escape }}" aria-label="{{ 'mobile.collection.search_in' | t: label: filter.label | escape }}" data-dept-search autocomplete="off">
+                      </label>
+                    {%- endif -%}
+                    <div class="mshein-fcks">
+                      {%- assign list_index = 0 -%}
+                      {%- for value in filter.values -%}
+                        {%- if value.count == 0 and value.active == false -%}{%- continue -%}{%- endif -%}
+                        {%- assign list_index = list_index | plus: 1 -%}
+                        <label class="mshein-fck{% if list_index > list_shown and value.active == false %} is-more{% endif %}">
+                          <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value | escape }}" data-label="{{ value.label | escape }}"{% if value.active %} checked{% endif %}{% if value.count == 0 and value.active == false %} disabled{% endif %}>
+                          <span class="mshein-fck__bx" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+                          <span class="mshein-fck__t" data-dept-name>{{ value.label | escape }}</span>
+                          <span class="mshein-fck__n">{{ value.count }}</span>
+                        </label>
+                      {%- endfor -%}
+                    </div>
+                    <p class="mshein-fnone" data-dept-none data-template="{{ 'mobile.collection.no_match' | t: terms: amount_token | escape }}" hidden></p>
+                    {%- if shown > list_shown -%}
+                      {%- assign others = shown | minus: list_shown -%}
+                      <button type="button" class="mshein-fmore" data-dept-more aria-expanded="false" data-more="{{ 'mobile.collection.show_others' | t: count: others | escape }}" data-less="{{ 'mobile.collection.show_less' | t | escape }}"><span>{{ 'mobile.collection.show_others' | t: count: others }}</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+                    {%- endif -%}
+                {%- endcase -%}
+              </div></div></div>
+            </div>
           {%- endfor -%}
         </div>
         <div class="mshein-fsheet__ft">
-          <button type="button" class="mshein-fsheet__reset" data-dept-reset>{{ 'mobile.collection.reset' | t }}</button>
-          <button type="submit" class="mshein-fsheet__go">{{ 'mobile.collection.show_results' | t }}</button>
+          <button type="button" class="mshein-fsheet__reset" data-dept-reset>{{ 'mobile.collection.clear' | t }}</button>
+          {%- if no_count -%}
+            <button type="submit" class="mshein-fsheet__go">{{ 'mobile.collection.show_results' | t }}</button>
+          {%- else -%}
+            <button type="submit" class="mshein-fsheet__go" data-dept-go data-template="{{ 'mobile.collection.show_count' | t: count: count_token | escape }}" data-one="{{ 'mobile.collection.show_count_one' | t | escape }}" data-zero="{{ 'mobile.collection.no_products' | t | escape }}">
+              {%- if total == 1 -%}{{ 'mobile.collection.show_count_one' | t }}{%- elsif total == 0 -%}{{ 'mobile.collection.no_products' | t }}{%- else -%}{{ 'mobile.collection.show_count' | t: count: total }}{%- endif -%}
+            </button>
+          {%- endif -%}
         </div>
       </form>
     </div>

@@ -1,0 +1,25 @@
+{%- comment -%}
+  Couleur claire d'une valeur de filtre « Color » de la boutique (black, Black thick, black1 → black ; army green → green…),
+  pour la fenêtre Filtri mobile (snippets/mshein-results.liquid). Écrit la clé (black, white… voir mobile.collection.colors)
+  ou « - » quand le nom n'a pas de couleur reconnaissable (« 1 », « 2 »…). Premier groupe trouvé dans cet ordre.
+  Params : label
+{%- endcomment -%}
+{%- liquid
+  assign color_label = label | downcase
+  assign color_rules = 'multicolor:multicolor,multi-color,multi color,colorful,rainbow|black:black,nero,noir,schwarz,negro,zwart,negru|white:white,bianco,blanc,weiss,weiß,blanco,ivory|gold:gold,dorato,golden|silver:silver,argento,argent|gray:gray,grey,grigio,gris,grau,grijs,charcoal|red:red,rosso,rouge,rojo,wine,burgundy,bordeaux|pink:pink,rosa,rose,fuchsia,magenta,roze,blush|orange:orange,arancio,naranja,coral|yellow:yellow,giallo,jaune,gelb,amarillo,mustard|green:green,verde,vert,grün,olive,army,mint|blue:blue,blu,bleu,azul,blau,navy,denim,azzurro,cyan,turquoise,teal|purple:purple,viola,violet,lila,lilac,lavender,mauve|brown:brown,marrone,marron,braun,coffee,camel,chocolate,caramel|beige:beige,khaki,apricot,cream,nude,champagne,sand' | split: '|'
+  assign family = '-'
+  for rule in color_rules
+    assign rule_parts = rule | split: ':'
+    assign rule_words = rule_parts[1] | split: ','
+    for word in rule_words
+      if color_label contains word
+        assign family = rule_parts[0]
+        break
+      endif
+    endfor
+    if family != '-'
+      break
+    endif
+  endfor
+  echo family
+-%}

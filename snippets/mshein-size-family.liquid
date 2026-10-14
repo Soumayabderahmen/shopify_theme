@@ -1,0 +1,46 @@
+{%- comment -%}
+  Taille standard d'une valeur de filtre « Taglia / Size » de la boutique (M, m, « M fit 165-173CM », « Asiatico M » → m ;
+  XXL, 2XL → 2xl ; tu, One Size, Taglia Unica → one…), pour la fenêtre Filtri mobile (snippets/mshein-results.liquid).
+  Écrit la clé (xxs, xs, s, m, l, xl, 2xl … 6xl, one) ou « - » quand la valeur n'est pas une taille standard (28, 40 cm…).
+  Params : label
+{%- endcomment -%}
+{%- liquid
+  assign size_label = label | strip | upcase | replace: '-', ' ' | replace: '(', ' ' | replace: '/', ' ' | replace: ',', ' '
+  assign size_family = '-'
+  assign one_size_words = 'TU,ONE SIZE,ONESIZE,FREE SIZE,FREESIZE,TAGLIA UNICA,UNICA,TAILLE UNIQUE,EINHEITSGRÖSSE,TALLA ÚNICA,TALLA UNICA' | split: ','
+  for word in one_size_words
+    if size_label == word or size_label contains 'TAGLIA UNICA' or size_label contains 'ONE SIZE' or size_label contains 'FREE SIZE'
+      assign size_family = 'one'
+      break
+    endif
+  endfor
+  if size_family == '-'
+    assign size_words = size_label | replace: 'ASIATICO ', '' | replace: 'ASIAN ', '' | replace: 'ASIA ', '' | replace: 'EU ', '' | replace: 'US ', '' | split: ' '
+    assign size_token = size_words.first | default: ''
+    case size_token
+      when 'XXS', '2XS'
+        assign size_family = 'xxs'
+      when 'XS'
+        assign size_family = 'xs'
+      when 'S'
+        assign size_family = 's'
+      when 'M'
+        assign size_family = 'm'
+      when 'L'
+        assign size_family = 'l'
+      when 'XL'
+        assign size_family = 'xl'
+      when 'XXL', '2XL'
+        assign size_family = '2xl'
+      when 'XXXL', '3XL'
+        assign size_family = '3xl'
+      when 'XXXXL', '4XL'
+        assign size_family = '4xl'
+      when 'XXXXXL', '5XL'
+        assign size_family = '5xl'
+      when 'XXXXXXL', '6XL'
+        assign size_family = '6xl'
+    endcase
+  endif
+  echo size_family
+-%}

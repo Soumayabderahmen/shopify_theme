@@ -80,11 +80,13 @@
       var myToken = ++token;
       results.classList.add('is-loading');
       var query = params.toString();
-      fetch(basePath + '?view=' + view + (query ? '&' + query : ''), { credentials: 'same-origin' })
+      // Mêmes choix que le nombre déjà demandé dans la fenêtre Filtri : sa page sert directement.
+      var cached = countCache && countCache.query === query ? countCache.html : null;
+      (cached !== null ? Promise.resolve(cached) : fetch(basePath + '?view=' + view + (query ? '&' + query : ''), { credentials: 'same-origin' })
         .then(function (response) {
           if (!response.ok) throw new Error('Department results request failed: ' + response.status);
           return response.text();
-        })
+        }))
         .then(function (html) {
           if (myToken !== token) return;
           var fresh = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-dept-results]');
@@ -105,62 +107,265 @@
     var movedPanel = null;
     var sheet = function () { return movedPanel || results.querySelector('[data-dept-sheet]'); };
 
-    // « Filtri selezionati » sous le titre : un bouton par choix coché (et le prix), à jour à chaque toucher ; un toucher
-    // sur un choix le retire. Nombre de choix à côté de « Filtri » et de chaque section.
+    // Fenêtre Filtri (prototype « Filtri v2 ») : tous les choix sont de vraies cases / champs du formulaire.
+    var money = function (box, value) {
+      try {
+        return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'currency', currency: box.getAttribute('data-currency') || 'EUR', maximumFractionDigits: 2, minimumFractionDigits: 0 }).format(Number(value));
+      } catch (error) {
+        return value;
+      }
+    };
+    var priceLabel = function (box, min, max) {
+      if (min !== '' && max !== '') return money(box, min) + ' – ' + money(box, max);
+      if (min !== '') return String(box.getAttribute('data-over')).replace('{amount}', money(box, min));
+      return String(box.getAttribute('data-up-to')).replace('{amount}', money(box, max));
+    };
+
+    // Choix en pastilles sous le titre (✕ sur chacune), nombre à côté de « Filtri », « Azzera » actif seulement avec
+    // un choix, et résumé dans le titre de chaque section (« Tutti », « Abiti +2 », « CHF 10 – CHF 50 »).
     var renderPicked = function (panel) {
       var box = panel.querySelector('[data-dept-picked]');
       if (!box) return;
-      var list = box.querySelector('[data-dept-picked-list]');
+      var all = panel.querySelector('[data-dept-sheet-body]').getAttribute('data-all');
       var picks = [];
       panel.querySelectorAll('[data-dept-section]').forEach(function (section) {
-        var count = 0;
-        section.querySelectorAll('input[type="checkbox"]:checked').forEach(function (input) {
-          count += 1;
-          picks.push({ label: input.getAttribute('data-label') || input.value, input: input });
+        var labels = [];
+        // Préfixe des pastilles (« Taglia M », « N° 38 »), sauf si la valeur le dit déjà (« Taglia unica »).
+        var withPrefix = function (prefix, label) {
+          if (!prefix || label.toLowerCase().indexOf(prefix.toLowerCase()) === 0) return label;
+          return prefix + ' ' + label;
+        };
+        var chipPrefix = section.getAttribute('data-chip-prefix') || '';
+        var summaryPrefix = section.getAttribute('data-summary-prefix') || '';
+        // Valeurs réunies sous une couleur (black, Black…) : une seule pastille, celle de la couleur.
+        section.querySelectorAll('input[type="checkbox"]:checked:not([data-family-member])').forEach(function (input) {
+          var label = input.getAttribute('data-label') || input.value;
+          labels.push(withPrefix(summaryPrefix, label));
+          picks.push({ label: withPrefix(chipPrefix, label), input: input, color: input.getAttribute('data-color') });
         });
         var min = section.querySelector('[data-dept-price="min"]');
         var max = section.querySelector('[data-dept-price="max"]');
         if (min && max && (min.value.trim() !== '' || max.value.trim() !== '')) {
-          count += 1;
-          var money = function (value) {
-            try {
-              return new Intl.NumberFormat(document.documentElement.lang || undefined, { style: 'currency', currency: box.getAttribute('data-currency') || 'EUR', maximumFractionDigits: 2 }).format(Number(value));
-            } catch (error) {
-              return value;
-            }
-          };
-          var label = min.value.trim() !== '' && max.value.trim() !== '' ? money(min.value) + ' – ' + money(max.value)
-            : min.value.trim() !== '' ? String(box.getAttribute('data-over')).replace('{amount}', money(min.value))
-            : String(box.getAttribute('data-up-to')).replace('{amount}', money(max.value));
-          picks.push({ label: label.replace(/<[^>]*>/g, ''), price: [min, max] });
+          var label = priceLabel(box, min.value.trim(), max.value.trim());
+          labels.push(label);
+          picks.push({ label: label, price: [min, max] });
         }
-        var badge = section.querySelector('[data-dept-section-count]');
-        if (badge) {
-          badge.hidden = count === 0;
-          badge.textContent = count;
+        var summary = section.querySelector('[data-dept-summary]');
+        if (summary) {
+          summary.textContent = labels.length ? labels[0] + (labels.length > 1 ? ' +' + (labels.length - 1) : '') : all;
+          summary.classList.toggle('is-on', labels.length > 0);
         }
       });
-      list.replaceChildren.apply(list, picks.map(function (pick, index) {
-        var button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'mshein-fpick';
-        button.setAttribute('data-dept-unpick', index);
-        button.setAttribute('aria-label', box.getAttribute('data-remove') + ' : ' + pick.label);
-        var text = document.createElement('span');
-        text.textContent = pick.label;
-        button.appendChild(text);
-        button.insertAdjacentHTML('beforeend', '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg>');
-        return button;
+      box.replaceChildren.apply(box, picks.map(function (pick, index) {
+        var chip = document.createElement('span');
+        chip.className = 'mshein-fchip';
+        if (pick.color) {
+          var dot = document.createElement('i');
+          dot.className = 'mshein-fsw__dot is-' + pick.color;
+          chip.appendChild(dot);
+        }
+        chip.appendChild(document.createTextNode(pick.label));
+        var remove = document.createElement('button');
+        remove.type = 'button';
+        remove.setAttribute('data-dept-unpick', index);
+        remove.setAttribute('aria-label', box.getAttribute('data-remove') + ' : ' + pick.label);
+        remove.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+        chip.appendChild(remove);
+        return chip;
       }));
-      list.msheinPicks = picks;
-      list.hidden = picks.length === 0;
-      box.querySelector('[data-dept-picked-none]').hidden = picks.length > 0;
-      box.querySelector('[data-dept-picked-clear]').hidden = picks.length < 2;
+      box.msheinPicks = picks;
+      box.hidden = picks.length === 0;
+      panel.querySelector('[data-dept-picked-clear]').disabled = picks.length === 0;
       var total = panel.querySelector('[data-dept-picked-count]');
       if (total) {
         total.hidden = picks.length === 0;
         total.textContent = picks.length;
       }
+    };
+
+    // Prezzo : curseur double à échelle non linéaire (sinon tout le catalogue tiendrait dans le début de la barre),
+    // relié aux champs min / max (les vrais paramètres envoyés) et aux prix rapides.
+    var CURVE = 8;
+    var priceOf = function (max, t) {
+      return t >= 1 ? max : (Math.exp(CURVE * t) - 1) / (Math.exp(CURVE) - 1) * max;
+    };
+    var placeOf = function (max, price) {
+      return Math.min(1, Math.log(1 + price / max * (Math.exp(CURVE) - 1)) / CURVE);
+    };
+    var roundPrice = function (price) {
+      return price < 20 ? Math.round(price) : price < 200 ? Math.round(price / 5) * 5 : price < 1000 ? Math.round(price / 10) * 10 : Math.round(price / 100) * 100;
+    };
+    var samePrice = function (a, b) {
+      return (a === '' && b === '') || (a !== '' && b !== '' && Number(a) === Number(b));
+    };
+    var syncPrice = function (section, fromSlider) {
+      var range = section.querySelector('[data-dept-range]');
+      if (!range) return;
+      var max = Number(range.getAttribute('data-max')) || 1;
+      var minInput = section.querySelector('[data-dept-price="min"]');
+      var maxInput = section.querySelector('[data-dept-price="max"]');
+      var low = minInput.value.trim() === '' ? 0 : placeOf(max, Number(minInput.value));
+      var high = maxInput.value.trim() === '' ? 1 : placeOf(max, Number(maxInput.value));
+      if (!fromSlider) {
+        range.querySelector('[data-dept-range-input="min"]').value = Math.round(low * 1000);
+        range.querySelector('[data-dept-range-input="max"]').value = Math.round(high * 1000);
+      }
+      var fill = range.querySelector('[data-dept-range-fill]');
+      fill.style.left = (low * 100) + '%';
+      fill.style.right = ((1 - high) * 100) + '%';
+      section.querySelectorAll('[data-dept-pq-min]').forEach(function (button) {
+        var on = samePrice(minInput.value.trim(), button.getAttribute('data-dept-pq-min')) && samePrice(maxInput.value.trim(), button.getAttribute('data-dept-pq-max'));
+        button.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    };
+    var slidePrice = function (input) {
+      var section = input.closest('[data-dept-section]');
+      var range = input.closest('[data-dept-range]');
+      var max = Number(range.getAttribute('data-max')) || 1;
+      var low = range.querySelector('[data-dept-range-input="min"]');
+      var high = range.querySelector('[data-dept-range-input="max"]');
+      var a = Number(low.value);
+      var b = Number(high.value);
+      if (a > b - 20) {
+        if (input === low) a = b - 20;
+        else b = a + 20;
+        low.value = a;
+        high.value = b;
+      }
+      section.querySelector('[data-dept-price="min"]').value = a <= 0 ? '' : roundPrice(priceOf(max, a / 1000));
+      section.querySelector('[data-dept-price="max"]').value = b >= 1000 ? '' : roundPrice(priceOf(max, b / 1000));
+      syncPrice(section, true);
+    };
+
+    // Listes longues (Categoria…) : recherche dans la section (texte trouvé surligné), « Mostra altre (N) ».
+    var searchList = function (input) {
+      var section = input.closest('[data-dept-section]');
+      var words = input.value.trim();
+      var lower = words.toLowerCase();
+      var shown = 0;
+      section.querySelectorAll('.mshein-fck').forEach(function (row) {
+        var label = row.querySelector('input').getAttribute('data-label') || '';
+        var at = lower ? label.toLowerCase().indexOf(lower) : -1;
+        var hit = !lower || at >= 0;
+        row.hidden = !hit;
+        if (hit) shown += 1;
+        var name = row.querySelector('[data-dept-name]');
+        name.textContent = '';
+        if (at >= 0) {
+          var mark = document.createElement('mark');
+          mark.textContent = label.slice(at, at + words.length);
+          name.append(label.slice(0, at), mark, label.slice(at + words.length));
+        } else {
+          name.textContent = label;
+        }
+      });
+      section.classList.toggle('is-searching', lower !== '');
+      var none = section.querySelector('[data-dept-none]');
+      if (none) {
+        none.hidden = shown > 0;
+        none.textContent = String(none.getAttribute('data-template')).replace('{amount}', words);
+      }
+    };
+
+    // Tailles / pointures : ordre numérique quand toutes les valeurs sont des nombres (Shopify donne 4…47 puis 10,5…),
+    // 12 premières visibles puis « Mostra altre » (une valeur choisie reste toujours visible).
+    var sortGrids = function (panel) {
+      panel.querySelectorAll('[data-dept-grid]').forEach(function (grid) {
+        if (grid.getAttribute('data-sorted') === 'true') return;
+        grid.setAttribute('data-sorted', 'true');
+        var chips = Array.prototype.slice.call(grid.children);
+        var numberOf = function (chip) {
+          return Number(String(chip.querySelector('input').getAttribute('data-label')).trim().replace(',', '.'));
+        };
+        if (chips.every(function (chip) { return !isNaN(numberOf(chip)); })) {
+          chips.sort(function (a, b) { return numberOf(a) - numberOf(b); });
+          chips.forEach(function (chip) { grid.appendChild(chip); });
+        }
+        chips.forEach(function (chip, index) {
+          chip.classList.toggle('is-more', index >= 12 && !chip.querySelector('input').checked);
+        });
+      });
+    };
+
+    // Sections : ouvertes / fermées d'un toucher sur leur titre.
+    var setSection = function (section, open) {
+      section.classList.toggle('is-open', open);
+      section.querySelector('[data-dept-toggle]').setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    // Raccourci « Categoria », « Color »… sous la barre : seule sa section ouverte, amenée en haut et signalée.
+    var openSection = function (panel, index) {
+      var target = panel.querySelector('.mshein-fsec[data-dept-section="' + index + '"]');
+      if (!target) return;
+      panel.querySelectorAll('.mshein-fsec').forEach(function (section) { setSection(section, section === target); });
+      var body = panel.querySelector('[data-dept-sheet-body]');
+      window.setTimeout(function () {
+        body.scrollTo({ top: body.scrollTop + target.getBoundingClientRect().top - body.getBoundingClientRect().top - 4, behavior: 'smooth' });
+        target.classList.remove('is-flash');
+        void target.offsetWidth;
+        target.classList.add('is-flash');
+      }, 300);
+    };
+    // Couleur cochée (Nero…) : toutes ses vraies valeurs de la boutique (black, Black, Black thick…) suivent.
+    var setFamily = function (input, checked) {
+      input.checked = checked;
+      input.closest('[data-dept-section]').querySelectorAll('[data-family-member="' + input.getAttribute('data-dept-family') + '"]').forEach(function (member) {
+        member.checked = checked;
+      });
+    };
+    // « Mostra N risultati » : nombre de produits avec les choix en cours, demandé à Shopify (même page que le
+    // résultat, gardée pour l'afficher tout de suite à « Mostra »).
+    var countCache = null;
+    var countToken = 0;
+    var countTimer = null;
+    var formQuery = function (form) {
+      var query = withoutFilters();
+      new FormData(form).forEach(function (value, name) {
+        if (String(value).trim() !== '') query.append(name, value);
+      });
+      return query.toString();
+    };
+    var resultsUrl = function (query) {
+      return basePath + '?view=' + view + (query ? '&' + query : '');
+    };
+    // « Mostra 4.112 prodotti » / « Mostra 1 prodotto » / « Nessun prodotto » (bouton éteint) ; petit battement
+    // quand le nombre change.
+    var setGo = function (go, total, quiet) {
+      var text = total === 0 ? go.getAttribute('data-zero')
+        : total === 1 ? go.getAttribute('data-one')
+        : String(go.getAttribute('data-template')).replace('{count}', total.toLocaleString(document.documentElement.lang || undefined));
+      go.disabled = total === 0;
+      if (go.textContent.trim() === text) return;
+      go.textContent = text;
+      if (quiet) return;
+      go.classList.remove('is-tick');
+      void go.offsetWidth;
+      go.classList.add('is-tick');
+    };
+    var refreshCount = function (panel) {
+      var go = panel.querySelector('[data-dept-go]');
+      if (!go) return;
+      var myToken = ++countToken;
+      window.clearTimeout(countTimer);
+      go.classList.add('is-counting');
+      countTimer = window.setTimeout(function () {
+        var query = formQuery(panel.querySelector('[data-dept-form]'));
+        fetch(resultsUrl(query), { credentials: 'same-origin' })
+          .then(function (response) {
+            if (!response.ok) throw new Error('Filter count request failed: ' + response.status);
+            return response.text();
+          })
+          .then(function (html) {
+            countCache = { query: query, html: html };
+            if (myToken !== countToken) return;
+            var count = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-dept-count]');
+            go.classList.remove('is-counting');
+            if (count) setGo(go, Number(count.getAttribute('data-total')));
+          })
+          .catch(function (error) {
+            console.error('Unable to count the filtered products.', error);
+            if (myToken === countToken) go.classList.remove('is-counting');
+          });
+      }, 300);
     };
     var openSheet = function (section) {
       var panel = results.querySelector('[data-dept-sheet]');
@@ -171,12 +376,16 @@
       panel.classList.add('is-mshein-moved');
       document.body.appendChild(panel);
       panel.hidden = false;
+      sortGrids(panel);
       renderPicked(panel);
+      panel.querySelectorAll('[data-dept-section]').forEach(function (part) { syncPrice(part, false); });
+      // Nombre actuel écrit à la mode du pays (4.112).
+      var go = panel.querySelector('[data-dept-go]');
+      var current = results.querySelector('[data-dept-count]');
+      if (go && current) setGo(go, Number(current.getAttribute('data-total')), true);
       window.requestAnimationFrame(function () { panel.classList.add('is-open'); });
       document.documentElement.style.overflow = 'hidden';
-      var body = panel.querySelector('[data-dept-sheet-body]');
-      var target = section && body.querySelector('[data-dept-section="' + section + '"]');
-      body.scrollTop = target ? target.offsetTop - 8 : 0;
+      if (section) openSection(panel, section);
     };
     var closeSheet = function () {
       var panel = sheet();
@@ -243,24 +452,71 @@
       var panel = sheet();
       if (!panel || !panel.contains(event.target)) return;
       if (event.target === panel || event.target.closest('[data-dept-close]')) { closeSheet(); return; }
+      var toggle = event.target.closest('[data-dept-toggle]');
+      if (toggle) {
+        var section = toggle.closest('[data-dept-section]');
+        setSection(section, !section.classList.contains('is-open'));
+        return;
+      }
+      var more = event.target.closest('[data-dept-more]');
+      if (more) {
+        var all = more.closest('[data-dept-section]').classList.toggle('is-all');
+        more.setAttribute('aria-expanded', all ? 'true' : 'false');
+        more.querySelector('span').textContent = more.getAttribute(all ? 'data-less' : 'data-more');
+        return;
+      }
+      // Prix rapide (« Fino a 10 », « 10 – 25 »…) : choisi, ou retiré s'il l'était déjà.
+      var quickPrice = event.target.closest('[data-dept-pq-min]');
+      if (quickPrice) {
+        var priceSection = quickPrice.closest('[data-dept-section]');
+        var minInput = priceSection.querySelector('[data-dept-price="min"]');
+        var maxInput = priceSection.querySelector('[data-dept-price="max"]');
+        var same = quickPrice.getAttribute('aria-pressed') === 'true';
+        minInput.value = same ? '' : quickPrice.getAttribute('data-dept-pq-min');
+        maxInput.value = same ? '' : quickPrice.getAttribute('data-dept-pq-max');
+        syncPrice(priceSection, false);
+        renderPicked(panel);
+        refreshCount(panel);
+        return;
+      }
       if (event.target.closest('[data-dept-reset]')) {
         panel.querySelectorAll('input[type="checkbox"]').forEach(function (input) { input.checked = false; });
         panel.querySelectorAll('input[type="number"]').forEach(function (input) { input.value = ''; });
+        panel.querySelectorAll('[data-dept-search]').forEach(function (input) {
+          input.value = '';
+          searchList(input);
+        });
+        panel.querySelectorAll('[data-dept-section]').forEach(function (part) { syncPrice(part, false); });
         renderPicked(panel);
+        refreshCount(panel);
         return;
       }
       var unpick = event.target.closest('[data-dept-unpick]');
       if (unpick) {
-        var pick = unpick.parentNode.msheinPicks[Number(unpick.getAttribute('data-dept-unpick'))];
-        if (pick && pick.input) pick.input.checked = false;
-        if (pick && pick.price) pick.price.forEach(function (input) { input.value = ''; });
+        var pick = unpick.closest('[data-dept-picked]').msheinPicks[Number(unpick.getAttribute('data-dept-unpick'))];
+        if (pick && pick.input && pick.input.hasAttribute('data-dept-family')) setFamily(pick.input, false);
+        else if (pick && pick.input) pick.input.checked = false;
+        if (pick && pick.price) {
+          pick.price.forEach(function (input) { input.value = ''; });
+          syncPrice(pick.price[0].closest('[data-dept-section]'), false);
+        }
         renderPicked(panel);
+        refreshCount(panel);
       }
     };
-    // Choix cochés / prix tapés dans la fenêtre : « Filtri selezionati » suit.
+    // Choix cochés, prix tapés ou glissés : pastilles, résumés et « Mostra N prodotti » suivent.
     var onSheetInput = function (event) {
       var panel = sheet();
-      if (panel && panel.contains(event.target) && event.target.matches('input')) renderPicked(panel);
+      if (!panel || !panel.contains(event.target) || !event.target.matches('input')) return;
+      if (event.target.matches('[data-dept-search]')) {
+        searchList(event.target);
+        return;
+      }
+      if (event.target.matches('[data-dept-family]')) setFamily(event.target, event.target.checked);
+      if (event.target.matches('[data-dept-range-input]')) slidePrice(event.target);
+      if (event.target.matches('[data-dept-price]')) syncPrice(event.target.closest('[data-dept-section]'), false);
+      renderPicked(panel);
+      refreshCount(panel);
     };
     var onSubmit = function (event) {
       var panel = sheet();
