@@ -1752,6 +1752,53 @@
         return (ra === undefined ? 5 : ra) - (rb === undefined ? 5 : rb) || a.i - b.i;
       }).map(function (entry) { return entry.s; });
     }
+    // Même tableau donné deux fois, en cm puis en pouces (« Measurement In CM » / « Measurement In Inch ») :
+    // un seul tableau, avec la bascule cm / pollici. Les lignes-titres d'une seule case sont retirées.
+    var unitRows = function (table) {
+      return Array.prototype.filter.call(table.rows, function (row) { return row.cells.length > 1; }).map(function (row) {
+        return Array.prototype.map.call(row.cells, function (cell) { return cell.textContent.replace(/\s+/g, ' ').trim(); });
+      });
+    };
+    var unitOf = function (table) {
+      var head = Array.prototype.filter.call(table.rows, function (row) { return row.cells.length === 1; }).map(function (row) { return row.textContent; }).join(' ')
+        || (table.rows[0] ? table.rows[0].textContent : '');
+      // « Measurement In CM » : le mot « In » n'est pas l'abréviation de « inch ».
+      if (/inch|pollic|pouce|zoll|pulgada/i.test(head)) return 'in';
+      if (/\bcm\b|centim/i.test(head)) return 'cm';
+      return '';
+    };
+    sections.forEach(function (section) {
+      if ((section.key || keyFor(section.title)) !== 'size') return;
+      var tables = section.nodes.filter(function (node) { return node.tagName === 'TABLE' && !node.hasAttribute('data-pdp-size-lines'); });
+      for (var i = 0; i < tables.length; i += 1) {
+        for (var j = 0; j < tables.length; j += 1) {
+          if (i === j || unitOf(tables[i]) !== 'cm' || unitOf(tables[j]) !== 'in') continue;
+          var cm = unitRows(tables[i]);
+          var inch = unitRows(tables[j]);
+          var sameShape = cm.length > 1 && cm.length === inch.length && cm.every(function (row, r) {
+            return row.length === inch[r].length && row[0].toLowerCase() === inch[r][0].toLowerCase();
+          });
+          if (!sameShape) continue;
+          var merged = document.createElement('table');
+          merged.setAttribute('data-pdp-units', '');
+          cm.forEach(function (row, r) {
+            var tr = merged.insertRow();
+            row.forEach(function (text, c) {
+              var cell = tr.insertCell();
+              cell.textContent = text;
+              if (r > 0 && c > 0 && inch[r][c] !== text) {
+                cell.setAttribute('data-cm', text);
+                cell.setAttribute('data-in', inch[r][c]);
+              }
+            });
+          });
+          section.nodes = section.nodes.map(function (node) { return node === tables[i] ? merged : node; })
+            .filter(function (node) { return node !== tables[j]; });
+          return;
+        }
+      }
+    });
+
     if (!sections.length && !photos.length) return;
 
     var html = '';
@@ -1850,7 +1897,7 @@
                 + (dd === cellValue ? row.cells[1].innerHTML : escapeHtml(dd)) + '</dd>';
             }).join('') + '</dl>';
           } else {
-            var dual = /cm\s*\/\s*pollici|cm\s*\/\s*inch/i.test(rows[0] ? rows[0].textContent : '');
+            var dual = /cm\s*\/\s*pollici|cm\s*\/\s*inch/i.test(rows[0] ? rows[0].textContent : '') || node.hasAttribute('data-pdp-units');
             if (dual) body += '<div class="pdp-m__unit" role="group" aria-label="' + T('unit') + '"><button type="button" aria-pressed="true" data-unit="cm">cm</button><button type="button" aria-pressed="false" data-unit="in">' + T('inches') + '</button></div>';
             node.removeAttribute('style');
             node.querySelectorAll('[style]').forEach(function (cell) { cell.removeAttribute('style'); });
@@ -1977,6 +2024,9 @@
         var parts = text.split(/\s*\/\s*/);
         if (r === 0) {
           cells.push({ cell: cell, cm: text.replace(/\(\s*cm\s*\/\s*(pollici|inch(es)?)\s*\)/i, '(cm)'), inch: text.replace(/\(\s*cm\s*\/\s*(pollici|inch(es)?)\s*\)/i, '(' + T('inches') + ')') });
+        } else if (cell.hasAttribute('data-cm')) {
+          // Tableau fusionné « Measurement In CM » + « Measurement In Inch » (buildDescription).
+          cells.push({ cell: cell, cm: cell.getAttribute('data-cm'), inch: cell.getAttribute('data-in') });
         } else if (parts.length === 2 && /cm/i.test(parts[0])) {
           cells.push({ cell: cell, cm: parts[0], inch: parts[1] });
         }
@@ -1995,6 +2045,15 @@
     }
     highlightSize();
   };
+  // « 2XL » et « XXL », « 3XL » et « XXXL », « 2XS » et « XXS » : même taille.
+  var sameLetterSize = function (a, b) {
+    var canon = function (text) {
+      var t = String(text || '').toUpperCase().replace(/\s+/g, '');
+      var m = t.match(/^(\d)X([SL])$/);
+      return m ? new Array(Number(m[1]) + 1).join('X') + m[2] : t;
+    };
+    return Boolean(a && b) && canon(a) === canon(b);
+  };
   var highlightSize = function () {
     if (!descBox) return;
     var table = descBox.querySelector('[data-pdp-section="size"] .pdp-m__tw table');
@@ -2004,7 +2063,8 @@
     Array.prototype.forEach.call(table.rows, function (row, r) {
       var label = row.cells[0] ? row.cells[0].textContent.trim() : '';
       // Pointures : « 39 (Foot24.5cm) » ou « 39 » dans le tableau = pointure 39 choisie.
-      var same = values.indexOf(label) !== -1 || Boolean(current && (current.shoe ? shoeNumber(label) === current.code : parseSize(label).code === current.code));
+      var same = values.indexOf(label) !== -1 || Boolean(current && (current.shoe ? shoeNumber(label) === current.code : sameLetterSize(parseSize(label).code, current.code)))
+        || values.some(function (value) { return sameLetterSize(label, value); });
       row.classList.toggle('is-selected', r > 0 && same);
     });
   };
