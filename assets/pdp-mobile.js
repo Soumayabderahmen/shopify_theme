@@ -100,19 +100,54 @@
         if (target < current) showLeaving();
       });
     }
+    var fromSite = !!document.referrer && document.referrer.indexOf(window.location.origin) === 0 && window.history.length > 1;
+    var afterPaint = function (fn) {
+      window.requestAnimationFrame(function () { window.requestAnimationFrame(fn); });
+    };
+    // Safari (iPhone) n'a pas l'API Navigation : une étape d'historique « garde » (même adresse) est ajoutée sur la
+    // fiche. Le bouton retour du navigateur ramène d'abord sur l'étape de base de la fiche (popstate, sans changer de
+    // page) : l'effet s'affiche, puis le vrai retour suit. L'étape de base est marquée (pdpBase) car le thème remplace
+    // l'état de l'étape courante au changement de variante.
+    var onGuard = false;
+    var stuckTimer;
+    var pushGuard = function () {
+      if (!fromSite || (window.navigation && window.navigation.addEventListener)) return;
+      try {
+        window.history.replaceState(Object.assign({}, window.history.state, { pdpBase: 1 }), '', window.location.href);
+        window.history.pushState({ pdpGuard: 1 }, '', window.location.href);
+        onGuard = true;
+      } catch (error) { onGuard = false; }
+    };
+    pushGuard();
+    window.addEventListener('popstate', function (event) {
+      if (!onGuard || !event.state || !event.state.pdpBase) return;
+      onGuard = false;
+      showLeaving();
+      afterPaint(function () { window.history.back(); });
+      // Pas de page précédente : la fiche reste, effet retiré et garde remise.
+      stuckTimer = window.setTimeout(function () { hideLeaving(); pushGuard(); }, 3000);
+    });
+    window.addEventListener('pagehide', function () { window.clearTimeout(stuckTimer); });
     back.addEventListener('click', function (event) {
       showLeaving();
-      if (document.referrer && document.referrer.indexOf(window.location.origin) === 0 && window.history.length > 1) {
+      if (fromSite) {
         event.preventDefault();
         // Une image peinte avec l'effet, puis le retour (instantané si le navigateur a gardé la page en mémoire).
-        window.requestAnimationFrame(function () {
-          window.requestAnimationFrame(function () { window.history.back(); });
+        afterPaint(function () {
+          if (onGuard) {
+            onGuard = false;
+            window.history.go(-2);
+          } else {
+            window.history.back();
+          }
         });
       }
     });
-    // Fiche réaffichée depuis la mémoire du navigateur (bouton « avant ») : effet de départ retiré.
+    // Fiche réaffichée depuis la mémoire du navigateur : effet de départ retiré, garde remise si on est sur l'étape de base.
     window.addEventListener('pageshow', function (event) {
-      if (event.persisted) hideLeaving();
+      if (!event.persisted) return;
+      hideLeaving();
+      if (window.history.state && window.history.state.pdpBase) pushGuard();
     });
 
     // Panier : même tiroir que l'en-tête du site (son lien, masqué sur la fiche, garde le comportement du thème).
