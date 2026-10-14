@@ -72,6 +72,35 @@
     endif
   endfor
 
+  # Bande « Verified [marque] » : marques officielles ci-dessus, et aussi les autres marques de chaussures du catalogue
+  # (relevé sur les 2 753 chaussures), chacune avec sa couleur (assets/mshein-card.css). Seulement pour une chaussure,
+  # et la marque doit être un mot entier du titre (« Vans » pas dans « canvas », « Xti » pas dans « textile »).
+  assign card_ver_brand = card_brand
+  if card_ver_brand == ''
+    assign card_is_shoe = false
+    assign card_shoe_text = product.type | append: ' ' | append: card_title_lower | downcase
+    assign card_shoe_words = 'scarp,sneaker,shoe,stival,boot,sandal,mocassin,loafer,tacc,decollet,décollet,ciabatt,slipper,heel,trainer,espadrill,ballerin,anfib,zoccol,sabot,pantofol' | split: ','
+    for shoe_word in card_shoe_words
+      if card_shoe_text contains shoe_word
+        assign card_is_shoe = true
+        break
+      endif
+    endfor
+    if card_is_shoe
+      assign card_title_words = card_title_lower | replace: '. ', ' ' | replace: ',', ' ' | replace: '.', ' ' | replace: '(', ' ' | replace: ')', ' ' | replace: '/', ' ' | replace: '|', ' ' | replace: ':', ' ' | replace: ';', ' ' | replace: '"', ' ' | replace: '!', ' ' | replace: '[', ' ' | replace: ']', ' ' | replace: '™', ' ' | replace: '®', ' '
+      assign card_title_words = ' ' | append: card_title_words | append: ' '
+      assign card_shoe_brands = 'skechers:Skechers|li-ning:Li-Ning|li ning:Li-Ning|xtep:Xtep|xti:Xti|joma:Joma|mustang:Mustang|liyke:Liyke|carmela:Carmela|refresh:Refresh|tamaris:Tamaris|victoria:Victoria|pikolinos:Pikolinos|wonders:Wonders|converse:Converse|guess:Guess|pepe jeans:Pepe Jeans|vans:Vans|superga:Superga|ugg:UGG|geox:Geox|dr martens:Dr. Martens|michael kors:Michael Kors|munich:Munich|lotto:Lotto|mizuno:Mizuno' | split: '|'
+      for shoe_brand in card_shoe_brands
+        assign shoe_brand_key = shoe_brand | split: ':' | first
+        assign shoe_brand_word = ' ' | append: shoe_brand_key | append: ' '
+        if card_title_words contains shoe_brand_word
+          assign card_ver_brand = shoe_brand | split: ':' | last
+          break
+        endif
+      endfor
+    endif
+  endif
+
   # Rangs réels dans « Più venduti » : 5 premiers = BESTSELLER ; rang dans le type de produit (50 premiers).
   # Rapide : les identifiants des 50 premiers (best_ids, calculés une fois par la page, sinon ici) disent d'abord si le
   # produit en fait partie ; la boucle des rangs ne tourne que pour ceux-là (avant : 50 tours pour chaque carte).
@@ -156,7 +185,7 @@
     cartes du site (container 'div'), la carte du thème voisine les porte déjà : pas ici, sinon les styles des grilles
     du thème s'appliquent à cette carte.
   {%- endcomment -%}
-  <div class="mshein-card__img{% if card_tag == 'li' %} alibaba-card__picture{% endif %}{% if card_brand != '' or card_best %} has-strip{% endif %}" style="aspect-ratio: 1 / {{ card_ratio }};">
+  <div class="mshein-card__img{% if card_tag == 'li' %} alibaba-card__picture{% endif %}{% if card_ver_brand != '' or card_best %} has-strip{% endif %}" style="aspect-ratio: 1 / {{ card_ratio }};">
     <a class="mshein-card__link" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
       {%- if card_image != blank -%}
         <img
@@ -190,8 +219,8 @@
     >
       <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z"/></svg>
     </button>
-    {%- if card_brand != '' -%}
-      <div class="mshein-strip"><span class="mshein-strip__ver mshein-strip__ver--{{ card_brand | handleize }}"><i aria-hidden="true">✓</i>Verified {{ card_brand }}</span></div>
+    {%- if card_ver_brand != '' -%}
+      <div class="mshein-strip"><span class="mshein-strip__ver mshein-strip__ver--{{ card_ver_brand | handleize }}"><i aria-hidden="true">✓</i>Verified {{ card_ver_brand }}</span></div>
     {%- elsif card_best -%}
       <div class="mshein-strip mshein-strip--best"><span class="mshein-strip__best">BESTSELLER</span></div>
     {%- endif -%}

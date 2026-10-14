@@ -192,7 +192,7 @@
     gap: 4px;
     letter-spacing: 0.4px;
     text-transform: uppercase;
-    background: linear-gradient(135deg, #96052e, #de2e69);
+    background: linear-gradient(135deg, var(--ver-a, #96052e), var(--ver-b, #de2e69));
   }
 
   .mshein-strip__ver i {
@@ -200,7 +200,7 @@
     place-items: center;
     width: 13px;
     height: 13px;
-    color: #96052e;
+    color: var(--ver-a, #96052e);
     font-size: 9px;
     font-style: normal;
     background: #fff;
@@ -225,6 +225,38 @@
   .mshein-strip__ver--reebok i {
     color: #b3121a;
   }
+
+  /* Une couleur par marque (même bande, teintes différentes) : snippets/mshein-card.liquid, card_ver_brand. */
+  .mshein-strip__ver--jordan { --ver-a: #111111; --ver-b: #c8102e; }
+  .mshein-strip__ver--puma { --ver-a: #1a1a1a; --ver-b: #4a4a4a; }
+  .mshein-strip__ver--new-balance { --ver-a: #2f3b48; --ver-b: #7a8a9c; }
+  .mshein-strip__ver--onemix { --ver-a: #e65100; --ver-b: #ff9a3c; }
+  .mshein-strip__ver--asics { --ver-a: #001e62; --ver-b: #0057b8; }
+  .mshein-strip__ver--skechers { --ver-a: #0a2c6b; --ver-b: #2f6fe0; }
+  .mshein-strip__ver--li-ning { --ver-a: #8b0000; --ver-b: #ff4500; }
+  .mshein-strip__ver--xtep { --ver-a: #00695c; --ver-b: #26c6da; }
+  .mshein-strip__ver--xti { --ver-a: #ad1457; --ver-b: #f06292; }
+  .mshein-strip__ver--joma { --ver-a: #00205b; --ver-b: #d71920; }
+  .mshein-strip__ver--mustang { --ver-a: #5a3a1a; --ver-b: #a0632d; }
+  .mshein-strip__ver--liyke { --ver-a: #4a148c; --ver-b: #ab47bc; }
+  .mshein-strip__ver--carmela { --ver-a: #6a1b4d; --ver-b: #b03a7e; }
+  .mshein-strip__ver--refresh { --ver-a: #1b7f3b; --ver-b: #3cc26b; }
+  .mshein-strip__ver--tamaris { --ver-a: #3d2b56; --ver-b: #7b5ea7; }
+  .mshein-strip__ver--victoria { --ver-a: #0d47a1; --ver-b: #42a5f5; }
+  .mshein-strip__ver--pikolinos { --ver-a: #6d4c41; --ver-b: #a1887f; }
+  .mshein-strip__ver--wonders { --ver-a: #263238; --ver-b: #607d8b; }
+  .mshein-strip__ver--converse { --ver-a: #000000; --ver-b: #333333; }
+  .mshein-strip__ver--guess { --ver-a: #7a5c12; --ver-b: #c9a227; }
+  .mshein-strip__ver--pepe-jeans { --ver-a: #1d3557; --ver-b: #457b9d; }
+  .mshein-strip__ver--vans { --ver-a: #b00020; --ver-b: #1a1a1a; }
+  .mshein-strip__ver--superga { --ver-a: #12355b; --ver-b: #c9a227; }
+  .mshein-strip__ver--ugg { --ver-a: #8d6a3f; --ver-b: #d2a679; }
+  .mshein-strip__ver--geox { --ver-a: #003b5c; --ver-b: #00a3a1; }
+  .mshein-strip__ver--dr-martens { --ver-a: #3b0a0a; --ver-b: #7a1f1f; }
+  .mshein-strip__ver--michael-kors { --ver-a: #3d2b1f; --ver-b: #b8956a; }
+  .mshein-strip__ver--munich { --ver-a: #002f6c; --ver-b: #e30613; }
+  .mshein-strip__ver--lotto { --ver-a: #003399; --ver-b: #00a0e9; }
+  .mshein-strip__ver--mizuno { --ver-a: #0a1f44; --ver-b: #5bc2e7; }
 
   .mshein-card__body {
     padding: 6px 5px 8px 6px;
