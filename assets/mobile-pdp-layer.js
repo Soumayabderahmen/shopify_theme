@@ -193,14 +193,58 @@
     reviewsSaved = null;
   };
 
+  // Boutons de paiement rapide : quand leur module est déjà chargé (2e fiche ouverte), Shopify dessine le bouton deux
+  // fois dans le même élément (deux « Paga con PayPal »). Seul le dernier rendu est gardé.
+  var WALLETS = 'shopify-paypal-button, shopify-google-pay-button, shopify-apple-pay-button, shopify-shop-pay-button';
+  var dedupeWallets = function () {
+    added.forEach(function (node) {
+      if (!node.querySelectorAll) return;
+      node.querySelectorAll(WALLETS).forEach(function (button) {
+        var trim = function () {
+          var renders = Array.prototype.filter.call(button.children, function (child) { return child.tagName === 'DIV'; });
+          renders.slice(0, -1).forEach(function (render) { render.remove(); });
+        };
+        trim();
+        var watcher = new MutationObserver(trim);
+        watcher.observe(button, { childList: true });
+        window.setTimeout(function () { watcher.disconnect(); }, 10000);
+      });
+    });
+  };
+
+  // Klarna : son élément <klarna-placement> est déjà actif (klarna.js chargé par la page) et se dessine dès l'insertion,
+  // avant que l'app lui donne montant et langue → « No content found ». Une fois ces réglages posés, le bloc est
+  // remplacé par une copie, qui se dessine alors avec le bon message (« 3 pagamenti da … »).
+  var refreshKlarna = function () {
+    added.forEach(function (node) {
+      if (!node.querySelectorAll) return;
+      node.querySelectorAll('klarna-placement').forEach(function (placement) {
+        var swap = function (target) {
+          var copy = target.cloneNode(false);
+          marked.push(copy);
+          target.replaceWith(copy);
+        };
+        if (placement.hasAttribute('data-purchase-amount')) { swap(placement); return; }
+        var watcher = new MutationObserver(function () {
+          if (!placement.hasAttribute('data-purchase-amount') || !placement.isConnected) return;
+          watcher.disconnect();
+          swap(placement);
+        });
+        watcher.observe(placement, { attributes: true });
+        window.setTimeout(function () { watcher.disconnect(); }, 15000);
+      });
+    });
+  };
+
   var initTheme = function () {
     reviewsAfter();
+    dedupeWallets();
+    refreshKlarna();
     INIT_EVENTS.forEach(function (name) {
       try { window.dispatchEvent(new CustomEvent(name)); } catch (error) { console.error(error); }
     });
-    try {
-      if (window.Shopify && window.Shopify.PaymentButton && window.Shopify.PaymentButton.init) window.Shopify.PaymentButton.init();
-    } catch (error) { console.error(error); }
+    // Boutons de paiement rapide (<shopify-accelerated-checkout>) : ils se dessinent seuls à l'insertion ;
+    // Shopify.PaymentButton.init() les dessinait une deuxième fois (deux « Paga con PayPal »).
     try { window.dispatchEvent(new CustomEvent('removeSDCcss')); } catch (error) { console.error(error); }
     // Formulaire d'achat : ajout au panier en arrière-plan et panier latéral, comme sur la fiche normale.
     try {
@@ -233,9 +277,22 @@
     } catch (error) { console.error(error); }
   };
 
+  // Éléments venus de la fiche : retenus, pour les retirer aussi quand ses scripts les ont déplacés ailleurs (fenêtres
+  // du guide des tailles, de la marque… mises dans <body>) ; sinon ceux d'une fiche précédente restaient, avec les
+  // mêmes identifiants (#scDrawer…) que ceux de la nouvelle. Liste en mémoire, pas d'attribut : Klarna lit tous les
+  // data-… de son bloc comme réglages (un attribut de plus et il n'affiche plus rien).
+  var marked = [];
+  var mark = function (node) {
+    if (node.nodeType !== 1) return;
+    marked.push(node);
+    node.querySelectorAll('*').forEach(function (child) { marked.push(child); });
+  };
+
   var removeProduct = function () {
     added.forEach(function (node) { if (node.parentNode) node.parentNode.removeChild(node); });
     added = [];
+    marked.forEach(function (node) { if (node.isConnected && node.parentNode) node.parentNode.removeChild(node); });
+    marked = [];
   };
 
   var close = function () {
@@ -296,11 +353,13 @@
     var anchor = Array.prototype.filter.call(main.children, function (node) { return FOOTER_GROUP.test(node.className || ''); })[0] || null;
     sections.forEach(function (node) {
       var copy = document.importNode(node, true);
+      mark(copy);
       main.insertBefore(copy, anchor);
       added.push(copy);
     });
     if (sticky) {
       var stickyCopy = document.importNode(sticky, true);
+      mark(stickyCopy);
       pageRoot.insertBefore(stickyCopy, document.getElementById('quickshop'));
       added.push(stickyCopy);
     }

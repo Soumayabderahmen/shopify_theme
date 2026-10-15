@@ -30,7 +30,13 @@
 
   assign pm_rating = 0
   assign pm_rating_count = 0
-  if product.metafields.syncer.reviews
+  # Note de l'app Ali Reviews, comme les cartes (snippets/mshein-card.liquid) : affichée tout de suite, aussi quand la
+  # fiche est ouverte sur place (assets/mobile-pdp-layer.js, sans le JSON-LD de la page).
+  assign pm_ali = product.metafields.alireviews.seo_rating_review_key_script | append: '' | strip_newlines | remove: ' '
+  if pm_ali contains '"ratingValue":"' and pm_ali contains '"reviewCount":"'
+    assign pm_rating = pm_ali | split: '"ratingValue":"' | last | split: '"' | first | times: 1.0
+    assign pm_rating_count = pm_ali | split: '"reviewCount":"' | last | split: '"' | first
+  elsif product.metafields.syncer.reviews
     assign pm_rating = product.metafields.syncer.reviews.value.cumulative_rating
     assign pm_rating_count = product.metafields.syncer.reviews.value.total_reviews
   elsif product.metafields.reviews.rating
@@ -224,7 +230,10 @@
       <button class="pdp-m__tmore" type="button" data-pdp-title-more aria-label="{{ 'mobile.pdp.show_all' | t | escape }}" aria-expanded="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
       <a href="#pdp-reviews" class="pdp-m__rate" data-pdp-goto-reviews data-star="{{ pm_star | escape }}">
         {%- if pm_rating_count > 0 -%}
-          <b aria-label="{{ 'mobile.pdp.rating_out_of' | t: rating: pm_rating }}">{{ pm_star }}{{ pm_rating | round: 1 }}</b><small>({{ pm_rating_count }})</small>
+          {%- assign pm_rating_shown = pm_rating | round: 1 | append: '' -%}
+          {%- unless pm_rating_shown contains '.' -%}{%- assign pm_rating_shown = pm_rating_shown | append: '.0' -%}{%- endunless -%}
+          {%- if request.locale.iso_code != 'en' -%}{%- assign pm_rating_shown = pm_rating_shown | replace: '.', ',' -%}{%- endif -%}
+          <b aria-label="{{ 'mobile.pdp.rating_out_of' | t: rating: pm_rating_shown }}">{{ pm_star }}{{ pm_rating_shown }}</b><small>({{ pm_rating_count }})</small>
         {%- else -%}
           <b>{{ pm_star }}</b><small>{{ 'mobile.pdp.reviews_title_short' | t }}</small>
         {%- endif -%}
