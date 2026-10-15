@@ -452,7 +452,8 @@
   }
 
   function wire(form, input) {
-    if (!form || !input) return;
+    if (!form || !input || form.hasAttribute('data-mobile-search-wired')) return null;
+    form.setAttribute('data-mobile-search-wired', '');
     input.setAttribute('autocomplete', 'off');
     input.setAttribute('aria-controls', 'mobile-search-panel');
     function activate() {
@@ -476,6 +477,7 @@
       event.preventDefault();
       go(input.value);
     });
+    return activate;
   }
 
   wire(nativeForm, nativeInput);
@@ -483,6 +485,15 @@
   // Autres barres de recherche mobiles (en-tête de la fiche produit, snippets/pdp-mobile-top.liquid) : même panneau.
   document.querySelectorAll('[data-mobile-search-extra]').forEach(function (form) {
     wire(form, form.querySelector('input[type="search"]'));
+  });
+  // Barres ajoutées après le chargement (fiche ouverte sur place, assets/mobile-pdp-layer.js) : branchées au premier
+  // toucher, puis le panneau s'ouvre comme pour les autres.
+  document.addEventListener('focusin', function (event) {
+    var form = event.target.closest && event.target.closest('[data-mobile-search-extra]');
+    if (!form || form.hasAttribute('data-mobile-search-wired')) return;
+    var input = form.querySelector('input[type="search"]');
+    var activate = wire(form, input);
+    if (activate && event.target === input) activate();
   });
 
   scrim.addEventListener('click', function () { close(); });

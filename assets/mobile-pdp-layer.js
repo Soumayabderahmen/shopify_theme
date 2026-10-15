@@ -28,6 +28,7 @@
   if (!main || !pageRoot) return;
 
   var cache = {};
+  var ran = {};
   var added = [];
   var addedSheets = [];
   var saved = null;
@@ -125,10 +126,15 @@
       if (type && type !== 'text/javascript' && type !== 'application/javascript' && type !== 'module') { resolve(); return; }
       var src = old.getAttribute('src');
       if (src && !RERUN.test(src)) {
-        var known = Array.prototype.some.call(document.scripts, function (script) {
-          return script !== old && script.src && bare(script.src) === bare(abs(src));
+        // Déjà exécuté : par nous, ou présent dans la page hors de la fiche insérée (les copies encore inertes de la
+        // fiche ne comptent pas : drower-product.js y figure deux fois et aurait été sauté deux fois).
+        var key = bare(abs(src));
+        var known = ran[key] || Array.prototype.some.call(document.scripts, function (script) {
+          return script !== old && script.src && bare(script.src) === key
+            && !added.some(function (node) { return node.contains(script); });
         });
         if (known) { resolve(); return; }
+        ran[key] = true;
       }
       var script = document.createElement('script');
       Array.prototype.forEach.call(old.attributes, function (attribute) { script.setAttribute(attribute.name, attribute.value); });
@@ -272,6 +278,8 @@
   // fermés, comme lors d'un changement de page.
   var closeOverlays = function () {
     document.querySelectorAll('[data-mobile-quick-add].is-open [data-qa-close]').forEach(function (button) { button.click(); });
+    // Fenêtre de marque (assets/drower-product.js) : sa croix rend aussi le défilement.
+    document.querySelectorAll('.js-drawer-modal.is-active .js-drawer-close').forEach(function (button) { button.click(); });
     try {
       if (root.classList.contains('m6pn-open') && typeof window.hidePanels === 'function') window.hidePanels();
     } catch (error) { console.error(error); }
@@ -303,6 +311,10 @@
     removeProduct();
     saved.hidden.forEach(function (entry) { entry.node.style.display = entry.display; });
     document.body.className = saved.bodyClass;
+    // Styles posés par la fiche (blocage du défilement d'une fenêtre restée ouverte, hauteur de son en-tête…) : ceux
+    // de la page reviennent, sinon l'accueil pouvait rester bloqué (body overflow: hidden).
+    document.body.style.cssText = saved.bodyStyle;
+    root.style.cssText = saved.htmlStyle;
     document.title = saved.title;
     addedSheets.forEach(function (entry) { entry.link.media = 'not all'; });
     reviewsRestore();
@@ -336,6 +348,8 @@
       saved = {
         y: window.scrollY,
         bodyClass: document.body.className,
+        bodyStyle: document.body.style.cssText,
+        htmlStyle: root.style.cssText,
         title: document.title,
         restoration: 'scrollRestoration' in window.history ? window.history.scrollRestoration : 'auto',
         hidden: []
