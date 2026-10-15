@@ -347,6 +347,11 @@
   // Fenêtre d'ajout rapide (assets/mobile-quick-add.js) ou panneau du thème (panier latéral…) encore ouverts :
   // fermés, comme lors d'un changement de page.
   var closeOverlays = function () {
+    // Panneaux « Categoria » et « Esplora » du header (assets/mobile-temu-header.js) : fermés tout de suite, sinon
+    // la fiche s'ouvrait derrière le panneau resté ouvert. Leur fermeture remet aussi la page à sa position.
+    try {
+      if (window.msheinPanels && typeof window.msheinPanels.closeAll === 'function') window.msheinPanels.closeAll();
+    } catch (error) { console.error(error); }
     document.querySelectorAll('[data-mobile-quick-add].is-open [data-qa-close]').forEach(function (button) { button.click(); });
     // Fenêtre de marque (assets/drower-product.js) : sa croix rend aussi le défilement.
     document.querySelectorAll('.js-drawer-modal.is-active .js-drawer-close').forEach(function (button) { button.click(); });
@@ -377,6 +382,7 @@
     token += 1;
     progress(false);
     removeSkeleton();
+    openY = null;
     if (!saved) return;
     closeOverlays();
     removeProduct();
@@ -393,6 +399,14 @@
     var restoration = saved.restoration;
     saved = null;
     current = null;
+    // Ancrage de défilement du navigateur coupé ~1 s : en réaffichant la page il « corrigeait » la position et
+    // décalait l'écran d'une rangée de cartes.
+    root.style.overflowAnchor = 'none';
+    document.body.style.overflowAnchor = 'none';
+    window.setTimeout(function () {
+      root.style.overflowAnchor = '';
+      document.body.style.overflowAnchor = '';
+    }, 1200);
     jump(y);
     window.requestAnimationFrame(function () {
       if (Math.abs(window.scrollY - y) > 2) jump(y);
@@ -417,7 +431,7 @@
 
     if (!saved) {
       saved = {
-        y: window.scrollY,
+        y: openY !== null ? openY : window.scrollY,
         bodyClass: document.body.className,
         bodyStyle: document.body.style.cssText,
         htmlStyle: root.style.cssText,
@@ -431,6 +445,7 @@
         node.style.display = 'none';
       });
       if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+      openY = null;
     } else {
       removeProduct();
     }
@@ -481,6 +496,7 @@
     return String(text || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   };
   var cardImage = '';
+  var openY = null;
   var showSkeleton = function (link) {
     removeSkeleton();
     // Carte entière (le lien de la photo a lui-même « card » dans sa classe : on remonte au-dessus).
@@ -535,6 +551,10 @@
     var mine = (token += 1);
     progress(true);
     if (push) {
+      // Avant d'enregistrer la position : un panneau du header ouvert la bloque (et la remet en se fermant).
+      closeOverlays();
+      // Position de la page au toucher (sous l'aperçu, la page peut encore bouger avant l'arrivée de la fiche).
+      if (!saved) openY = window.scrollY;
       showSkeleton(link);
       pushProduct(href);
     }
