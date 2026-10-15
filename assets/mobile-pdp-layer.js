@@ -35,6 +35,18 @@
   var current = null;
   var token = 0;
 
+  // Saut de position sans animation (le thème a scroll-behavior: smooth : la fiche glissait depuis la position de la
+  // page, et le retour n'arrivait pas tout à fait au même endroit).
+  var jump = function (y) {
+    var previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    try { window.scrollTo({ top: y, left: 0, behavior: 'instant' }); } catch (error) { window.scrollTo(0, y); }
+    if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
+    // Lecture de la position avant de rendre le réglage du thème : sinon le saut part plus tard, en défilement doux.
+    void window.scrollY;
+    root.style.scrollBehavior = previous;
+  };
+
   var isProduct = function (url) {
     return url.origin === window.location.origin && PRODUCT_PATH.test(url.pathname);
   };
@@ -53,15 +65,66 @@
     root.classList.toggle('mobile-page-loading', on);
   };
 
-  // Page HTML de la fiche, demandée une fois (dès le toucher) et gardée une minute.
-  var fetchPage = function (href) {
-    var key = bare(href);
-    var hit = cache[key];
-    if (hit && Date.now() - hit.time < 60000) return hit.promise;
-    var promise = fetch(href, { credentials: 'same-origin' }).then(function (response) {
+  // Fiche demandée à Shopify. La première fois : la page entière (2 Mo), d'où l'on retient la liste de ses sections,
+  // ses styles / scripts d'en-tête et ses classes. Ensuite : seulement ses sections (API « sections » de Shopify,
+  // ~3 fois plus léger et 2 fois plus rapide), assemblées en une page équivalente. Une fiche d'un autre modèle
+  // (sections différentes) repasse par la page entière.
+  var CFG_KEY = 'pdpSwapCfg1';
+  var cfg = null;
+  try { cfg = JSON.parse(window.localStorage.getItem(CFG_KEY) || 'null'); } catch (error) { cfg = null; }
+  var learn = function (doc) {
+    var productMain = doc.getElementById('content');
+    if (!productMain) return;
+    var ids = Array.prototype.filter.call(productMain.children, function (node) {
+      return node.id && node.id.indexOf('shopify-section-') === 0 && !FOOTER_GROUP.test(node.className || '');
+    }).map(function (node) { return node.id.replace('shopify-section-', ''); });
+    if (doc.getElementById('shopify-section-sticky-add-to-cart')) ids.push('sticky-add-to-cart');
+    if (!ids.length || ids.length > 5) { cfg = null; return; }
+    var head = Array.prototype.map.call(doc.head.querySelectorAll('link[rel="stylesheet"], script[src]'), function (node) { return node.outerHTML; }).join('');
+    var suffix = (doc.title.match(/\s[–—-]\s[^–—-]+$/) || [''])[0];
+    cfg = { ids: ids, head: head, bodyClass: doc.body.className, suffix: suffix };
+    try { window.localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (error) { /* stockage plein ou refusé */ }
+  };
+  var parse = function (html) { return new DOMParser().parseFromString(html, 'text/html'); };
+  var fetchFull = function (href) {
+    return fetch(href, { credentials: 'same-origin' }).then(function (response) {
       if (!response.ok) throw new Error('Product page ' + response.status);
       return response.text();
+    }).then(function (text) {
+      var doc = parse(text);
+      learn(doc);
+      return doc;
     });
+  };
+  var fetchSections = function (href) {
+    var known = cfg;
+    var url = bare(href) + '?sections=' + known.ids.map(encodeURIComponent).join(',');
+    return fetch(url, { credentials: 'same-origin' }).then(function (response) {
+      if (!response.ok) throw new Error('Sections ' + response.status);
+      return response.json();
+    }).then(function (data) {
+      var body = '';
+      var sticky = '';
+      for (var i = 0; i < known.ids.length; i++) {
+        var html = data[known.ids[i]];
+        if (!html) throw new Error('Section missing: ' + known.ids[i]);
+        if (known.ids[i] === 'sticky-add-to-cart') sticky = html;
+        else body += html;
+      }
+      var doc = parse('<!doctype html><html><head>' + known.head + '<title></title></head><body class="' +
+        known.bodyClass.replace(/"/g, '&quot;') + '"><main id="content">' + body + '</main>' + sticky + '</body></html>');
+      var title = doc.querySelector('[data-pdp-title]');
+      if (!title || !doc.querySelector('[data-pdp-mobile]')) throw new Error('Mobile product section not found');
+      doc.title = title.textContent.trim() + known.suffix;
+      return doc;
+    });
+  };
+  // Fiche demandée une fois (préchargement, toucher) et gardée 3 minutes.
+  var fetchDoc = function (href) {
+    var key = bare(href);
+    var hit = cache[key];
+    if (hit && Date.now() - hit.time < 180000) return hit.promise;
+    var promise = (cfg ? fetchSections(href).catch(function () { return fetchFull(href); }) : fetchFull(href));
     cache[key] = { time: Date.now(), promise: promise };
     promise.catch(function () { delete cache[key]; });
     return promise;
@@ -313,6 +376,7 @@
   var close = function () {
     token += 1;
     progress(false);
+    removeSkeleton();
     if (!saved) return;
     closeOverlays();
     removeProduct();
@@ -329,9 +393,9 @@
     var restoration = saved.restoration;
     saved = null;
     current = null;
-    window.scrollTo(0, y);
+    jump(y);
     window.requestAnimationFrame(function () {
-      if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
+      if (Math.abs(window.scrollY - y) > 2) jump(y);
       if ('scrollRestoration' in window.history) window.history.scrollRestoration = restoration;
     });
     syncCart();
@@ -372,6 +436,18 @@
     }
 
     var anchor = Array.prototype.filter.call(main.children, function (node) { return FOOTER_GROUP.test(node.className || ''); })[0] || null;
+    // Première photo de la galerie : chargée en priorité, et la photo de la carte touchée (déjà téléchargée) affichée
+    // dessous en attendant, pour ne pas montrer une zone vide.
+    var firstSlide = productMain.querySelector('[data-pdp-slides] > *');
+    if (firstSlide) {
+      var firstImg = firstSlide.querySelector('img');
+      if (firstImg) {
+        firstImg.setAttribute('loading', 'eager');
+        firstImg.setAttribute('fetchpriority', 'high');
+      }
+      if (cardImage) firstSlide.style.background = '#fff url("' + cardImage.replace(/"/g, '%22') + '") center / contain no-repeat';
+    }
+    cardImage = '';
     sections.forEach(function (node) {
       var copy = document.importNode(node, true);
       mark(copy);
@@ -387,43 +463,93 @@
     document.body.className = doc.body.className;
     document.title = doc.title;
     current = bare(href);
-    window.scrollTo(0, 0);
+    jump(0);
+    removeSkeleton();
     var scripts = headScripts.map(function (script) { return document.importNode(script, true); });
     reviewsBefore();
     return runScripts(added, scripts).then(initTheme);
   };
 
-  var open = function (href, push) {
+  // Aperçu immédiat, dès le toucher : photo, titre et prix de la carte touchée sur une page blanche (en-tête avec
+  // flèche retour, blocs gris), comme SHEIN ; la vraie fiche le remplace dès qu'elle est prête.
+  var skeleton = null;
+  var removeSkeleton = function () {
+    if (skeleton && skeleton.parentNode) skeleton.parentNode.removeChild(skeleton);
+    skeleton = null;
+  };
+  var esc = function (text) {
+    return String(text || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+  };
+  var cardImage = '';
+  var showSkeleton = function (link) {
+    removeSkeleton();
+    // Carte entière (le lien de la photo a lui-même « card » dans sa classe : on remonte au-dessus).
+    var card = link && (link.closest('li') || link.closest('article') ||
+      (link.parentElement && link.parentElement.closest('[class*="card"]')) || link);
+    var img = card && card.querySelector('img');
+    var src = img ? (img.currentSrc || img.src || '') : '';
+    cardImage = src;
+    // Nom du produit seul (le titre des cartes commence parfois par l'étiquette de marque « 🏬 Pokemon › »).
+    var titleEl = card && (card.querySelector('[class*="title"] a[href*="/products/"], h3 a[href*="/products/"]') ||
+      card.querySelector('[class*="title"], h2, h3'));
+    var priceEl = card && card.querySelector('[class*="price"]:not([class*="old"]):not([class*="compare"])');
+    var title = titleEl ? titleEl.textContent.replace(/\s+/g, ' ').trim() : '';
+    var priceMatch = priceEl ? priceEl.textContent.replace(/\s+/g, ' ').match(/[€$£]\s?\d[\d.,]*|\d[\d.,]*\s?[€$£]/) : null;
+    var price = priceMatch ? priceMatch[0] : '';
+    var grey = function (w, h, m) { return '<i style="display:block;width:' + w + ';height:' + h + 'px;margin:' + (m || '10px 14px 0') + ';border-radius:8px;background:#f0f1f5"></i>'; };
+    skeleton = document.createElement('div');
+    skeleton.className = 'pdp-swap-skeleton';
+    skeleton.setAttribute('aria-hidden', 'true');
+    skeleton.style.cssText = 'position:fixed;inset:0;z-index:2147480000;background:#fff;overflow:hidden;font-family:inherit';
+    skeleton.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;height:52px;padding:0 12px;border-bottom:1px solid #f0f1f5">' +
+        '<button type="button" data-skeleton-back aria-label="Indietro" style="all:unset;display:grid;place-items:center;width:32px;height:32px;cursor:pointer">' +
+          '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16123f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>' +
+        '<i style="flex:1;height:36px;border-radius:12px;background:#f2f3f7"></i></div>' +
+      '<div style="aspect-ratio:1/1;width:100%;background:#f5f5f7 center/contain no-repeat' + (src ? ' url(&quot;' + esc(src) + '&quot;)' : '') + '"></div>' +
+      (price ? '<div style="margin:14px 14px 0;font-size:24px;font-weight:800;color:#16123f">' + esc(price) + '</div>' : grey('40%', 24, '14px 14px 0')) +
+      (title ? '<div style="margin:8px 14px 0;font-size:14px;line-height:1.4;color:#16123f;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(title) + '</div>' : grey('90%', 16)) +
+      grey('100%', 44, '16px 14px 0') + grey('70%', 14) + grey('100%', 64, '16px 14px 0');
+    skeleton.querySelector('[data-skeleton-back]').addEventListener('click', function () { window.history.back(); });
+    document.body.appendChild(skeleton);
+  };
+
+  // Nouvelle étape d'historique pour la fiche, posée dès le toucher (l'aperçu est déjà « la fiche »).
+  var pushProduct = function (href) {
+    var state = window.history.state;
+    // Onglets de l'accueil (assets/mobile-home-tabs.js) : au retour ils remettent la position enregistrée.
+    if (!saved && state && typeof state.mshTab === 'number') {
+      window.history.replaceState(Object.assign({}, state, { mshY: window.scrollY }), '', window.location.href);
+      state = window.history.state;
+    }
+    // Fiche déjà affichée (produit recommandé) : sa position est gardée pour y revenir.
+    if (saved) window.history.replaceState(Object.assign({}, state, { pdpY: window.scrollY }), '', window.location.href);
+    state = window.history.state;
+    var base = Object.assign({}, state);
+    delete base.pdpSwap;
+    delete base.pdpY;
+    window.history.pushState(Object.assign(base, { pdpSwap: href }), '', href);
+  };
+
+  var open = function (href, push, link) {
     var mine = (token += 1);
     progress(true);
-    return fetchPage(href)
-      .then(function (text) {
+    if (push) {
+      showSkeleton(link);
+      pushProduct(href);
+    }
+    var backY = !push && window.history.state && window.history.state.pdpY;
+    return fetchDoc(href)
+      .then(function (doc) {
         if (mine !== token) return null;
-        var doc = new DOMParser().parseFromString(text, 'text/html');
         return loadStyles(doc).then(function () { return doc; });
       })
       .then(function (doc) {
         if (!doc || mine !== token) return;
-        if (push) {
-          var state = window.history.state;
-          // Onglets de l'accueil (assets/mobile-home-tabs.js) : au retour ils remettent la position enregistrée.
-          if (!saved && state && typeof state.mshTab === 'number') {
-            window.history.replaceState(Object.assign({}, state, { mshY: window.scrollY }), '', window.location.href);
-            state = window.history.state;
-          }
-          // Fiche déjà affichée (produit recommandé) : sa position est gardée pour y revenir.
-          if (saved) window.history.replaceState(Object.assign({}, state, { pdpY: window.scrollY }), '', window.location.href);
-          state = window.history.state;
-          var base = Object.assign({}, state);
-          delete base.pdpSwap;
-          delete base.pdpY;
-          window.history.pushState(Object.assign(base, { pdpSwap: href }), '', href);
-        }
-        var backY = !push && window.history.state && window.history.state.pdpY;
         return show(doc, href).then(function () {
           if (mine !== token) return;
           progress(false);
-          if (backY) window.scrollTo(0, backY);
+          if (backY) jump(backY);
         });
       })
       .catch(function (error) {
@@ -450,8 +576,65 @@
   // Page demandée dès le toucher : elle arrive souvent avant la fin du toucher.
   document.addEventListener('touchstart', function (event) {
     var url = productLink(event);
-    if (url) fetchPage(url.href).catch(function () {});
+    if (url) fetchDoc(url.href).catch(function () {});
   }, { passive: true });
+
+  // Préchargement, comme les onglets du header : les fiches des cartes restées visibles ~0,6 s sont demandées en
+  // avance, une à la fois, quand le navigateur est libre (24 au plus par page ; jamais en mode économie de données
+  // ni en 2G). Au toucher, la fiche est souvent déjà là.
+  (function () {
+    if (!('IntersectionObserver' in window)) return;
+    var connection = navigator.connection || {};
+    if (connection.saveData || /2g/.test(connection.effectiveType || '')) return;
+    var queue = [];
+    var seen = {};
+    var budget = 24;
+    var busy = false;
+    var timers = new WeakMap();
+    var idle = window.requestIdleCallback || function (fn) { return window.setTimeout(fn, 200); };
+    var pump = function () {
+      if (busy || !queue.length || budget <= 0 || saved || !mobile.matches) return;
+      busy = true;
+      budget -= 1;
+      var href = queue.shift();
+      idle(function () {
+        fetchDoc(href).catch(function () {}).then(function () { busy = false; pump(); });
+      });
+    };
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var link = entry.target;
+        if (entry.isIntersecting) {
+          timers.set(link, window.setTimeout(function () {
+            var key = bare(link.href);
+            if (seen[key]) return;
+            seen[key] = true;
+            queue.push(link.href);
+            pump();
+          }, 600));
+        } else if (timers.has(link)) {
+          window.clearTimeout(timers.get(link));
+          timers.delete(link);
+        }
+      });
+    }, { threshold: 0.6 });
+    var watched = new WeakSet();
+    var watch = function () {
+      if (!mobile.matches) return;
+      main.querySelectorAll('a[href*="/products/"]').forEach(function (link) {
+        if (watched.has(link) || !link.querySelector('img')) return;
+        if (!isProduct(new URL(link.href, window.location.href))) return;
+        watched.add(link);
+        observer.observe(link);
+      });
+    };
+    watch();
+    var pending = null;
+    new MutationObserver(function () {
+      if (pending) return;
+      pending = window.setTimeout(function () { pending = null; watch(); }, 500);
+    }).observe(main, { childList: true, subtree: true });
+  })();
 
   document.addEventListener('click', function (event) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -459,7 +642,7 @@
     if (!url) return;
     event.preventDefault();
     if (bare(url.href) === current) return;
-    open(url.href, true);
+    open(url.href, true, event.target.closest('a[href]'));
   });
 
   // Retour / avance : l'adresse décide (le thème remplace l'état de l'étape au changement de variante).
