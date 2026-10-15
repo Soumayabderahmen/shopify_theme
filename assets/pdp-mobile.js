@@ -2118,6 +2118,25 @@
   buildDescription();
   addMeasuresLink();
 
+  /* ---------- Klarna : pendant son chargement, l'app floute son texte (filter: blur 5px) ; sur un réseau lent le
+     client voyait un bandeau flou. Le texte est caché à la place, puis apparaît net (style ajouté dans son
+     shadow DOM ouvert, gardé quand l'app se redessine, par ex. au changement de variante). ---------- */
+  (function () {
+    var fix = function (placement) {
+      var shadow = placement.shadowRoot;
+      if (!shadow || shadow.querySelector('style[data-pdp-klarna]')) return;
+      var style = document.createElement('style');
+      style.setAttribute('data-pdp-klarna', '');
+      style.textContent = '.loading p{filter:none!important;opacity:0!important;transition:none!important}';
+      shadow.appendChild(style);
+    };
+    var scan = function () { document.querySelectorAll('klarna-placement').forEach(fix); };
+    scan();
+    // L'app crée et remplace son bloc après coup (et la fiche ouverte sur place le recrée) : surveillé 90 s.
+    var klarnaTimer = window.setInterval(scan, 200);
+    window.setTimeout(function () { window.clearInterval(klarnaTimer); }, 90000);
+  })();
+
   /* ---------- Avis : le bloc de l'app d'avis (Ali Reviews) est placé dans la section « Recensioni » ---------- */
   var reviewsSlot = root.querySelector('[data-pdp-reviews-slot]');
   var reviewsBlock = document.querySelector('.shopify-app-block[id*="ali_reviews_widget_box"]');
