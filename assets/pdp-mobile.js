@@ -2119,15 +2119,16 @@
   addMeasuresLink();
 
   /* ---------- Klarna : pendant son chargement, l'app floute son texte (filter: blur 5px) ; sur un réseau lent le
-     client voyait un bandeau flou. Le texte est caché à la place, puis apparaît net (style ajouté dans son
-     shadow DOM ouvert, gardé quand l'app se redessine, par ex. au changement de variante). ---------- */
+     client voyait un bandeau flou. Le flou est retiré : quand l'app recharge son message, l'ancien reste net
+     jusqu'au nouveau (le cacher le faisait clignoter) ; au premier chargement il n'y a pas encore de texte.
+     Style ajouté dans son shadow DOM ouvert, gardé quand l'app se redessine (changement de variante…). ---------- */
   (function () {
     var fix = function (placement) {
       var shadow = placement.shadowRoot;
       if (!shadow || shadow.querySelector('style[data-pdp-klarna]')) return;
       var style = document.createElement('style');
       style.setAttribute('data-pdp-klarna', '');
-      style.textContent = '.loading p{filter:none!important;opacity:0!important;transition:none!important}';
+      style.textContent = '.loading p{filter:none!important;transition:none!important}';
       shadow.appendChild(style);
     };
     var scan = function () { document.querySelectorAll('klarna-placement').forEach(fix); };

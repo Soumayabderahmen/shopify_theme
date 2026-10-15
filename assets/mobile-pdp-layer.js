@@ -229,11 +229,11 @@
           var copy = target.cloneNode(false);
           marked.push(copy);
           target.replaceWith(copy);
-          // Texte caché au lieu de flou pendant son chargement (même style que assets/pdp-mobile.js), dès sa création.
+          // Pas de flou pendant son chargement (même style que assets/pdp-mobile.js), dès sa création.
           if (copy.shadowRoot && !copy.shadowRoot.querySelector('style[data-pdp-klarna]')) {
             var style = document.createElement('style');
             style.setAttribute('data-pdp-klarna', '');
-            style.textContent = '.loading p{filter:none!important;opacity:0!important;transition:none!important}';
+            style.textContent = '.loading p{filter:none!important;transition:none!important}';
             copy.shadowRoot.appendChild(style);
           }
         };
