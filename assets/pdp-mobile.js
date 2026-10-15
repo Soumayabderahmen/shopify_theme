@@ -68,9 +68,15 @@
     };
     root.pdpToast = toast;
 
-    // Retour : page précédente du site, sinon l'accueil (lien).
+    // Retour : page précédente du site, sinon l'accueil (lien). Fiche ouverte sur place (assets/mobile-pdp-layer.js) :
+    // la page d'origine réapparaît.
     var back = header.querySelector('[data-pdp-back]');
     back.addEventListener('click', function (event) {
+      if (window.__pdpSwap && window.__pdpSwap.active()) {
+        event.preventDefault();
+        window.__pdpSwap.back();
+        return;
+      }
       if (document.referrer && document.referrer.indexOf(window.location.origin) === 0 && window.history.length > 1) {
         event.preventDefault();
         window.history.back();
@@ -2154,8 +2160,19 @@
       return true;
     };
     if (!readAppRating()) {
+      // Relue aussi chaque seconde (30 s au plus) : l'app finit parfois son affichage sans changement observé.
+      var ratingTries = 0;
+      var ratingTimer = window.setInterval(function () {
+        ratingTries += 1;
+        if (readAppRating() || ratingTries >= 30) {
+          window.clearInterval(ratingTimer);
+          ratingObserver.disconnect();
+        }
+      }, 1000);
       var ratingObserver = new MutationObserver(function () {
-        if (readAppRating()) ratingObserver.disconnect();
+        if (!readAppRating()) return;
+        ratingObserver.disconnect();
+        window.clearInterval(ratingTimer);
       });
       ratingObserver.observe(reviewsBlock, { childList: true, subtree: true, characterData: true });
     }

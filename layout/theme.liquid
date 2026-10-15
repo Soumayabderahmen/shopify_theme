@@ -650,5 +650,9 @@
       })();
     </script>
     <!-- Script di Prefetching Istantaneo per Shopify -->
+    {%- comment -%} Mobile : fiche produit ouverte par-dessus la page, retour instantané (inactif sur ordinateur). {%- endcomment -%}
+    {%- unless template.name == 'product' -%}
+      <script src="{{ 'mobile-pdp-layer.js' | asset_url }}" defer></script>
+    {%- endunless -%}
   </body>
 </html>
