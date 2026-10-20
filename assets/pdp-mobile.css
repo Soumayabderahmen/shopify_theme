@@ -170,18 +170,19 @@
   border-radius: 6px;
 }
 
-/* Cartes : blanches, arrondies, serrées (prototype SHEIN) */
+/* Cartes : blanches, pleine largeur, séparées de 8px (prototype v8) */
 .pdp-m__card {
-  margin: 8px 8px 0;
-  padding: 14px 14px 16px;
+  margin: 8px 0 0;
+  padding: 14px;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 0;
   box-shadow: none;
 }
 
 .pdp-m .pdp-m__card h3 {
-  font-size: 16px !important;
-  font-weight: 800 !important;
+  font-family: 'Sora', sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
 }
 
 /* Bande avantages sous les photos (snippets/mshein-perks.liquid, mêmes valeurs que le prototype) */
@@ -243,8 +244,100 @@
 /* 3. Carte prix (prototype SHEIN) : collée à la bande avantages, prix, -%, prix barré, prix avec coupon,
    bande coupon violette, titre sur 2 lignes + note à droite. */
 .pdp-m .pdp-m__price-card {
-  margin: 0;
-  border-radius: 0 0 16px 16px;
+  position: relative;
+  margin: 8px 0 0;
+  border-radius: 0;
+}
+
+/* Prototype v8 : bloc prix à gauche, « Salva » (favori) en haut à droite. */
+.pdp-m__ptop {
+  padding-right: 44px;
+}
+
+#root .pdp-m .pdp-m__bm {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 38px !important;
+  height: 38px !important;
+  color: var(--pm-ink);
+  border-radius: 50%;
+}
+
+#root .pdp-m .pdp-m__bm:active {
+  background: var(--pm-blue-soft);
+}
+
+.pdp-m__bm svg {
+  width: 22px;
+  height: 22px;
+}
+
+#root .pdp-m .pdp-m__bm.is-on {
+  color: var(--pm-blue);
+}
+
+#root .pdp-m .pdp-m__bm.is-on svg {
+  fill: currentColor;
+}
+
+.pdp-m__vat {
+  margin: 4px 0 0;
+  color: var(--pm-mute);
+  font-size: 12px;
+}
+
+.pdp-m__shipl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 9px 0 0;
+  color: #2c2f45;
+  font-size: 13px;
+}
+
+.pdp-m__shipl svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: #128c4a;
+}
+
+.pdp-m__shipl b {
+  color: #128c4a;
+  font-weight: 700;
+}
+
+.pdp-m__seller {
+  margin: 4px 0 0;
+  color: var(--pm-mute);
+  font-size: 12px;
+}
+
+#root .pdp-m .pdp-m__seller a {
+  color: var(--pm-blue);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.pdp-m__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 8px;
+  color: #2c2f45;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pdp-m__sold::before {
+  content: '·';
+  margin-right: 8px;
+  color: var(--pm-mute);
 }
 
 .pdp-m__prow {
@@ -258,13 +351,14 @@
 .pdp-m__price.is-sale {
   color: var(--pm-ink);
   font-family: 'Sora', sans-serif;
-  font-size: 25px;
+  font-size: 30px;
   font-weight: 800;
+  line-height: 1;
   letter-spacing: -0.5px;
 }
 
 .pdp-m__price small {
-  font-size: 15px;
+  font-size: 17px;
 }
 
 /* Bouton « haut de page » du thème : absent du prototype, il passait sur la barre d'achat. */
@@ -274,17 +368,19 @@ html body.pdp-m-page #totop {
 
 .pdp-m__save {
   align-self: center;
-  padding: 2px 7px;
-  color: var(--pm-blue);
+  padding: 1px 6px;
+  color: #fff;
+  font-family: 'Sora', sans-serif;
   font-size: 12px;
-  font-weight: 800;
-  background: #ecebfd;
-  border-radius: 6px;
+  font-weight: 700;
+  line-height: 18px;
+  background: var(--pm-deal);
+  border-radius: 4px;
 }
 
 .pdp-m__old {
-  color: #9a9db0;
-  font-size: 13px;
+  color: var(--pm-mute);
+  font-size: 14px;
   text-decoration: line-through;
 }
 
@@ -292,39 +388,39 @@ html body.pdp-m-page #totop {
   display: none !important;
 }
 
-.pdp-m__wc {
-  margin: 3px 0 0;
-  color: var(--pm-blue);
-  font-size: 12.5px;
-  font-weight: 700;
-}
-
+/* Bande coupon bleu ciel (prototype v8) : code + prix avec le coupon dessous, « Riscuoti » à droite. */
 .pdp-m__cpn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 9px;
+  gap: 10px;
+  margin-top: 10px;
   padding: 9px 10px 9px 12px;
-  color: #fff;
-  background: linear-gradient(110deg, #3a34d2, #6b5cff 60%, #a78bfa);
+  color: #0b6db3;
+  background: #e8f4fd;
+  border: 1px dashed #9fd0f3;
   border-radius: 12px;
-  box-shadow: 0 8px 18px -12px rgb(58 52 210 / 80%);
 }
 
 .pdp-m__cpn svg {
   flex: none;
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
 }
 
-.pdp-m__cpn span {
+.pdp-m__cpn > span {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.35;
+}
+
+.pdp-m__cpn .pdp-m__wc {
+  display: block;
+  margin: 2px 0 0;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 #root .pdp-m .pdp-m__claim {
@@ -333,27 +429,28 @@ html body.pdp-m-page #totop {
   height: auto;
   min-height: 0;
   margin: 0;
-  padding: 5px 12px;
-  color: var(--pm-blue);
+  padding: 7px 14px;
+  color: #fff;
+  font-family: 'Sora', sans-serif;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.2;
-  background: #fff;
+  background: #1a8ad6;
   border: 0;
   border-radius: 999px;
   box-shadow: none;
 }
 
 #root .pdp-m .pdp-m__claim.is-done {
-  color: var(--pm-ok);
-  background: #e7f7ef;
+  color: #fff;
+  background: #128c4a;
 }
 
 .pdp-m__trow {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin-top: 11px;
+  margin-top: 12px;
 }
 
 .pdp-m__title {
@@ -361,11 +458,11 @@ html body.pdp-m-page #totop {
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  color: #171717;
+  color: var(--pm-ink);
   font-family: 'Figtree', system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.4;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -404,32 +501,33 @@ html body.pdp-m-page #totop {
   height: 14px;
 }
 
+/* Note dans la ligne sous le vendeur (prototype v8) : « ★ 4,8 (36 recensioni) ». */
 #root .pdp-m .pdp-m__rate {
-  display: block;
-  flex: none;
-  color: #171717;
-  text-align: right;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #2c2f45;
   text-decoration: none;
 }
 
 .pdp-m__rate b {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  font-size: 13.5px;
-  font-weight: 800;
+  gap: 3px;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .pdp-m__rate b svg {
-  width: 13px;
-  height: 13px;
-  fill: #f5a623;
+  width: 14px;
+  height: 14px;
+  fill: #f5a524;
 }
 
 .pdp-m__rate small {
-  display: block;
-  color: #7a7f95;
-  font-size: 11px;
+  color: var(--pm-mute);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* ===================== Étapes 2 à 4 ===================== */
@@ -1897,15 +1995,16 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   justify-content: center;
   gap: 9px;
   width: 100%;
-  height: 56px;
-  margin-top: 14px;
+  height: 50px;
+  margin-top: 12px;
   color: #fff;
-  font-size: 15.5px;
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
   font-weight: 800;
   text-align: center;
-  background: linear-gradient(180deg, #4a44e6 0%, #3a34d2 100%);
-  border-radius: 16px;
-  box-shadow: 0 14px 24px -14px rgb(58 52 210 / 90%), inset 0 1px 0 rgb(255 255 255 / 30%);
+  background: linear-gradient(135deg, #3a34d2, #16123f);
+  border-radius: 999px;
+  box-shadow: none;
   transition: transform 0.15s;
 }
 
@@ -1965,137 +2064,214 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   height: 21px;
 }
 
-/* 7. Fidélité */
-.pdp-m__rw {
-  background: linear-gradient(135deg, #f3f2ff, #e8e6fe);
-}
-
-.pdp-m__rwr {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.pdp-m__rwr + .pdp-m__rwr {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed rgb(58 52 210 / 25%);
-}
-
-.pdp-m__ic {
+/* 7. « Premi con questo acquisto » (prototype v8) : deux tuiles, points (jaune) et crédit (vert) ; une seule tuile
+   prend toute la largeur. */
+.pdp-m__rwg {
   display: grid;
-  flex: none;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  color: var(--pm-blue);
-  background: #fff;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pdp-m__rwt {
+  position: relative;
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
   border-radius: 14px;
-  box-shadow: 0 6px 14px -8px rgb(58 52 210 / 60%);
 }
 
-.pdp-m__ic--pink {
-  color: #b3174f;
-  background: #ffd3e2;
-  box-shadow: none;
+.pdp-m__rwt--pts {
+  background: linear-gradient(135deg, #fff7df, #ffeec2);
 }
 
-.pdp-m__ic svg {
-  width: 22px;
-  height: 22px;
+.pdp-m__rwt--crd {
+  background: linear-gradient(135deg, #e9f8ef, #d4f1e0);
 }
 
-.pdp-m__rwr b {
+.pdp-m__rwt small {
   display: block;
-  font-size: 14px;
+  color: #8a6200;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 }
 
-.pdp-m__rwr small {
-  color: var(--pm-ink-2);
+.pdp-m__rwt--crd small {
+  color: #0f7a3f;
+}
+
+.pdp-m__rwt b {
+  display: block;
+  margin: 4px 0 2px;
+  overflow: hidden;
+  color: var(--pm-ink);
+  font-family: 'Sora', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdp-m__rwt span {
+  position: relative;
+  z-index: 1;
+  display: block;
+  color: #2c2f45;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+/* Émojis du prototype (⭐, 💰) en grand, pâles, coupés dans le coin bas droit. */
+.pdp-m .pdp-m__rwt i {
+  position: absolute;
+  top: auto;
+  right: -6px;
+  bottom: -8px;
+  height: auto;
+  font-size: 40px;
+  font-style: normal;
+  line-height: 1;
+  opacity: 0.35;
+}
+
+/* « Accedi per accumulare i premi » en gris, « · Come funziona » en violet gras (prototype v8). */
+.pdp-m__rwn {
+  margin: 10px 0 0;
+  color: var(--pm-mute);
   font-size: 12px;
 }
 
+#root .pdp-m .pdp-m__rwn a {
+  color: var(--pm-mute);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+#root .pdp-m .pdp-m__rwn button {
+  display: inline;
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0;
+  padding: 0 !important;
+  color: var(--pm-blue);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: inherit;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+
+.pdp-m__rwh {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  color: #2c2f45;
+  font-size: 12.5px;
+  line-height: 1.5;
+  background: #f4f5f9;
+  border-radius: 12px;
+}
+
 /* 8-10. Protezioni, Garanzia, Klarna */
-/* Protections (prototype « Icone ») : rangée défilante de raccourcis ronds, icône dans un cercle lavande, libellé
-   dessous ; fine barre de défilement violette. Chaque raccourci ouvre la feuille « Protections » sur sa carte. */
+/* Protections (prototype v8, style TikTok Shop) : rangée défilante, icône bleue au trait au-dessus du libellé,
+   séparateurs fins entre les cases. Chaque case ouvre la feuille « Protections » sur sa carte. */
 .pdp-m__prot {
   display: flex;
   flex-wrap: nowrap;
-  gap: 5px;
-  margin: 0 -14px -4px;
-  padding: 3px 14px 12px;
+  margin: 0 -14px;
+  padding: 0 14px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
-  scroll-padding-inline: 14px;
-  scrollbar-width: thin;
-  scrollbar-color: #c9c6ed transparent;
+  scrollbar-width: none;
 }
 
 .pdp-m__prot::-webkit-scrollbar {
-  height: 3px;
-}
-
-.pdp-m__prot::-webkit-scrollbar-thumb {
-  background: #c9c6ed;
-  border-radius: 3px;
+  display: none;
 }
 
 #root .pdp-m .pdp-m__prot button {
   display: flex;
-  flex: 0 0 88px;
+  flex: 0 0 108px;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
   gap: 8px;
   min-width: 0 !important;
-  min-height: 84px !important;
+  min-height: 0 !important;
   height: auto !important;
   margin: 0;
-  padding: 4px 3px !important;
-  color: #37344f;
-  text-align: center;
-  white-space: nowrap;
+  padding: 2px 12px 4px !important;
+  color: var(--pm-ink);
+  text-align: left;
+  white-space: normal;
   background: transparent;
   border: 0;
-  border-radius: 12px;
+  border-radius: 0;
   box-shadow: none;
-  scroll-snap-align: start;
+}
+
+#root .pdp-m .pdp-m__prot button:first-child {
+  flex-basis: 96px;
+  padding-left: 0 !important;
+}
+
+#root .pdp-m .pdp-m__prot button + button {
+  border-left: 1px solid #ecebf3;
+}
+
+#root .pdp-m .pdp-m__prot button:active {
+  opacity: 0.6;
 }
 
 .pdp-m__prot-ic {
-  display: grid;
+  display: block;
   flex: none;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  color: var(--pm-blue);
-  background: #f0effc;
-  border-radius: 50%;
-  transition: background 0.18s, transform 0.18s;
-}
-
-#root .pdp-m .pdp-m__prot button:active .pdp-m__prot-ic {
-  background: #e4e1fa;
-  transform: scale(0.94);
+  color: #2f6fdc;
 }
 
 .pdp-m__prot-ic svg {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
 }
 
 .pdp-m__prot-tx b {
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
 }
 
-/* Garantie commande (prototype « Icone ») : une ligne bouclier + « Garanzia Ordine » + sous-titre + flèche. */
-#root .pdp-m .pdp-m__gentry {
-  padding: 0;
+/* « › » à droite du titre « Protezioni » : ouvre la feuille. */
+#root .pdp-m .pdp-m__prot-all {
+  display: grid;
+  place-items: center;
+  width: 32px !important;
+  min-width: 0 !important;
+  height: 32px !important;
+  min-height: 0 !important;
+  margin: -6px -8px -6px 0;
+  padding: 0 !important;
+  color: var(--pm-mute);
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: none;
 }
 
+#root .pdp-m .pdp-m__prot-all:active {
+  background: var(--pm-blue-soft);
+}
+
+.pdp-m__prot-all svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* « Spedizione e resi » (prototype v8) : titre puis trois lignes (livraison, reso e cambio, Garanzia Ordine) séparées
+   par un filet, icône + titre + texte + flèche. */
 #root .pdp-m .pdp-m__gentry > button {
   display: flex;
   align-items: center;
@@ -2105,33 +2281,47 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   height: auto !important;
   min-height: 0 !important;
   margin: 0;
-  padding: 16px !important;
+  padding: 12px 0 !important;
   color: var(--pm-ink);
   text-align: left;
   background: none;
   border: 0;
-  border-radius: inherit;
+  border-top: 1px solid #ecebf3;
+  border-radius: 0;
   box-shadow: none;
 }
 
+#root .pdp-m .pdp-m__gentry > .pdp-m__ctitle + button {
+  border-top: 0;
+}
+
+#root .pdp-m .pdp-m__gentry > button:last-child {
+  padding-bottom: 0 !important;
+}
+
 #root .pdp-m .pdp-m__gentry > button:active {
-  background: #faf9ff;
+  opacity: 0.6;
+}
+
+.pdp-m .pdp-m__gentry-ic--ok {
+  color: #128c4a;
+}
+
+.pdp-m .pdp-m__gentry-tx b.is-ok {
+  color: #128c4a;
 }
 
 .pdp-m__gentry-ic {
-  display: grid;
+  display: block;
   flex: none;
-  place-items: center;
-  width: 40px;
-  height: 40px;
+  align-self: flex-start;
+  width: 22px;
   color: var(--pm-blue);
-  background: #efedff;
-  border-radius: 12px;
 }
 
 .pdp-m__gentry-ic svg {
-  width: 23px;
-  height: 23px;
+  width: 22px;
+  height: 22px;
 }
 
 .pdp-m__gentry-tx {
@@ -2141,23 +2331,24 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
 
 .pdp-m__gentry-tx b {
   display: block;
+  margin-bottom: 2px;
   color: var(--pm-ink);
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .pdp-m__gentry-tx small {
   display: block;
-  margin-top: 4px;
-  color: #77788d;
-  font-size: 12px;
+  color: var(--pm-mute);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .pdp-m__gentry-go {
   flex: none;
   width: 16px;
   height: 16px;
-  color: var(--pm-blue);
+  color: #b3b5c4;
 }
 
 .pdp-m__kl {
@@ -2219,11 +2410,30 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
 
 /* 11. Description : carte à la charte (onglets en pastilles, texte aéré, « Lire la suite » sur les longs textes) */
 .pdp-m__desc {
-  margin: 12px 12px 0;
+  margin: 8px 0 0;
   overflow: hidden;
   background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 1px 2px rgb(22 18 63 / 4%), 0 10px 24px -18px rgb(22 18 63 / 35%);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Titre « Descrizione » au-dessus des onglets (prototype v8) */
+.pdp-m .pdp-m__desc-h {
+  margin: 0;
+  padding: 14px 14px 0;
+}
+
+.pdp-m .pdp-m__desc-h h3 {
+  margin: 0;
+  color: var(--pm-ink);
+  font-family: 'Sora', sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+}
+
+.pdp-m .pdp-m__desc-h + .pdp-m__tabs .pdp-m__tabs-in {
+  gap: 8px;
+  padding: 12px 14px 0;
 }
 
 .pdp-m__tabs {
@@ -2246,25 +2456,27 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   display: none;
 }
 
+/* Pastilles du prototype v8 : gris clair, l'onglet actif lavande avec un contour lavande. */
 #root .pdp-m .pdp-m__tab {
   flex: 0 0 auto;
   height: auto !important;
   min-height: 0 !important;
   padding: 8px 14px !important;
-  color: var(--pm-ink-2);
+  color: var(--pm-ink);
+  font-family: 'Sora', sans-serif;
   font-size: 13px;
   font-weight: 700;
   line-height: 1.3;
   white-space: nowrap;
-  background: #f4f6fa;
+  background: #f4f5f9;
   border-radius: 999px;
   transition: color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 
 #root .pdp-m .pdp-m__tab[aria-selected='true'] {
   color: var(--pm-blue);
-  background: var(--pm-blue-soft);
-  box-shadow: inset 0 0 0 1px rgb(58 52 210 / 22%);
+  background: #ecebfd;
+  box-shadow: inset 0 0 0 1.5px #d9d6ff;
 }
 
 /* Pastilles : plus de trait sous l'onglet actif. */
@@ -2312,7 +2524,7 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
 
 .pdp-m__desc .pdp-m__sec {
   margin-top: 0;
-  padding: 14px 16px 18px;
+  padding: 12px 14px 14px;
 }
 
 .pdp-m .pdp-m__sec h2 {
@@ -2371,9 +2583,9 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   position: relative;
 }
 
-/* Texte coupé : hauteur limitée + fondu blanc en bas. */
+/* Texte coupé : hauteur limitée + fondu blanc en bas (prototype v8 : 196px, fondu de 60px). */
 .pdp-m__clamp.is-clamped {
-  max-height: 200px;
+  max-height: 196px;
   overflow: hidden;
 }
 
@@ -2383,34 +2595,47 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   right: 0;
   bottom: 0;
   left: 0;
-  height: 72px;
+  height: 60px;
   background: linear-gradient(rgb(255 255 255 / 0%), #fff);
   pointer-events: none;
 }
 
+/* « … Per saperne di più » (prototype v8) : lien souligné posé en bas à droite, sur le fondu ; une fois ouvert,
+   simple lien à droite sous le texte. */
 #root .pdp-m .pdp-m__more-txt {
-  display: inline-flex;
+  position: relative;
+  z-index: 2;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  width: fit-content !important;
+  min-width: 0 !important;
   height: auto !important;
   min-height: 0 !important;
-  margin-top: 10px;
-  padding: 8px 14px !important;
+  margin: -39px 1px 0 auto;
+  padding: 10px 12px 10px 40px !important;
   color: var(--pm-blue);
   font-size: 13px;
   font-weight: 700;
-  background: var(--pm-blue-soft);
-  border-radius: 999px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  background: linear-gradient(90deg, rgb(255 255 255 / 0%), #fff 30%);
+  border: 0;
+  border-radius: 0 0 12px 0;
+  box-shadow: none;
+}
+
+#root .pdp-m .pdp-m__more-txt[aria-expanded='false'] span::before {
+  content: '… ';
+}
+
+#root .pdp-m .pdp-m__more-txt[aria-expanded='true'] {
+  margin-top: 0;
+  padding: 10px 12px !important;
+  background: none;
 }
 
 .pdp-m__more-txt svg {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.2s;
-}
-
-.pdp-m__more-txt[aria-expanded='true'] svg {
-  transform: rotate(180deg);
+  display: none;
 }
 
 .pdp-m__txt b,
@@ -2473,23 +2698,24 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   background: var(--pm-ink);
 }
 
+/* Guide des tailles (prototype v8) : tableau simple, ligne d'en-tête grise, filets fins, chiffres en gras. */
 .pdp-m__tw {
   overflow-x: auto;
-  border-radius: 14px;
-  box-shadow: inset 0 0 0 1px var(--pm-line);
 }
 
 .pdp-m__tw table {
   width: 100%;
-  min-width: 430px;
+  min-width: 0;
   margin: 0;
-  font-size: 12.5px;
+  color: var(--pm-ink);
+  font-size: 13px;
+  font-weight: 600;
   border-collapse: collapse;
 }
 
 .pdp-m__tw th,
 .pdp-m__tw td {
-  padding: 11px 10px;
+  padding: 9px 4px;
   text-align: center;
   white-space: nowrap;
   border: 0;
@@ -2506,30 +2732,28 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
 
 .pdp-m__tw tr:first-child th,
 .pdp-m__tw tr:first-child td {
-  color: var(--pm-ink-2);
-  font-size: 11.5px;
-  font-weight: 800;
+  color: var(--pm-mute);
+  font-size: 13px;
+  font-weight: 600;
   line-height: 1.25;
   white-space: normal;
-  background: #f6f7fb;
+  background: #f4f5f9;
 }
 
+/* Première colonne figée quand le tableau défile (beaucoup de colonnes de mesures). */
 .pdp-m__tw th:first-child,
 .pdp-m__tw td:first-child {
   position: sticky;
   left: 0;
-  font-weight: 800;
-  text-align: left;
   background: #fff;
-  box-shadow: 1px 0 0 var(--pm-line);
 }
 
 .pdp-m__tw tr:first-child > :first-child {
-  background: #f6f7fb;
+  background: #f4f5f9;
 }
 
 .pdp-m__tw tr + tr td {
-  border-top: 1px solid #f0f1f6;
+  border-top: 1px solid #ecebf3;
 }
 
 .pdp-m__tw tr.is-selected td {
@@ -2540,7 +2764,7 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
 
 .pdp-m__tw tr.is-selected td:first-child {
   background: #ecebfd;
-  box-shadow: inset 3px 0 0 var(--pm-blue), 1px 0 0 var(--pm-line);
+  box-shadow: inset 3px 0 0 var(--pm-blue);
 }
 
 .pdp-m__warn {
@@ -2575,22 +2799,23 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   color: var(--pm-ink);
 }
 
+/* Tableau des spécifications (prototype v8) : libellé gris sur fond gris clair, valeur en gras, filets fins. */
 dl.pdp-m__spec {
   display: grid;
-  grid-template-columns: 38% 1fr;
+  grid-template-columns: 42% 1fr;
   margin: 0;
   overflow: hidden;
   font-size: 13px;
-  border-radius: 14px;
-  box-shadow: inset 0 0 0 1px var(--pm-line);
+  border: 1px solid #ecebf3;
+  border-radius: 12px;
 }
 
 .pdp-m__spec dt,
 .pdp-m__spec dd {
   margin: 0;
-  padding: 9px 12px;
+  padding: 10px 12px;
   line-height: 1.35;
-  border-top: 1px solid #f0f1f6;
+  border-top: 1px solid #ecebf3;
 }
 
 .pdp-m__spec dt:first-of-type,
@@ -2602,7 +2827,7 @@ dl.pdp-m__spec {
 .pdp-m__spec dt {
   color: var(--pm-mute);
   font-weight: 500;
-  background: #f8f9fc;
+  background: #f4f5f9;
 }
 
 .pdp-m__spec dd {
@@ -2644,11 +2869,11 @@ dl.pdp-m__spec {
   font-style: italic;
 }
 
+/* Onglet « Foto » (prototype v8) : 2 photos carrées par ligne. */
 .pdp-m__media {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 6px;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
 }
 
 #root .pdp-m .pdp-m__media button {
@@ -2661,9 +2886,9 @@ dl.pdp-m__spec {
   padding: 0;
   aspect-ratio: 1;
   overflow: hidden;
-  background: #f1f2f7;
+  background: #f4f5f9;
   border: 0;
-  border-radius: 14px;
+  border-radius: 10px;
 }
 
 /* Photo qui remplit sa case (même cadrage pour un tableau des tailles très large que pour une photo carrée). */
@@ -3732,14 +3957,14 @@ body.template-product.pdp-m-page #content {
 }
 
 /* ===================== Avis au style du prototype SHEIN (bloc Ali Reviews déplacé dans #pdp-reviews) =====================
-   Même contenu réel (note, barres, médias, liste, « Carica altro ») ; seul l'habillage change : carte blanche arrondie,
-   titre centré, médias en grandes vignettes, bande cadeau orange, avis en cartes bordées avec l'initiale de l'auteur
-   (assets/pdp-mobile.js, data-pdp-initial). « Scrivi una Recensione » est masqué comme dans le prototype : toucher
+   Même contenu réel (note, barres, médias, liste, « Carica altro ») ; seul l'habillage change (prototype v8) : carte
+   blanche pleine largeur, titre à gauche, médias en grandes vignettes, avis en lignes séparées par un filet avec
+   l'initiale de l'auteur (assets/pdp-mobile.js, data-pdp-initial), bande cadeau orange après la liste. « Scrivi una Recensione » est masqué comme dans le prototype : toucher
    la bande cadeau ouvre toujours le formulaire d'avis de l'app. Le drapeau (langue des avis) reste à droite du titre. */
 #root .pdp-m #pdp-reviews {
-  margin: 8px 8px 0;
-  padding: 14px 14px 16px;
-  border-radius: 16px;
+  margin: 8px 0 0;
+  padding: 14px;
+  border-radius: 0;
 }
 
 #root #pdp-reviews [data-pdp-reviews-slot] {
@@ -3756,33 +3981,29 @@ body.template-product.pdp-m-page #content {
 
 #root #pdp-reviews .alr-wh-comp-review-box-title {
   display: block !important;
-  margin: 0 0 8px !important;
+  margin: 0 0 12px !important;
   padding: 0 !important;
-  text-align: center;
+  text-align: left;
 }
 
 #root #pdp-reviews .alr-wh-comp-review-box-title-content {
   width: auto !important;
   color: var(--pm-ink) !important;
   font-family: 'Sora', sans-serif !important;
-  font-size: 19px !important;
+  font-size: 17px !important;
   font-weight: 800 !important;
   line-height: 1.3 !important;
-  text-align: center !important;
+  text-align: left !important;
 }
 
 #root #pdp-reviews .alr-wh-comp-filter-buttons {
   display: none !important;
 }
 
-/* Choix de la langue des avis (drapeau) : gardé, à droite du titre centré. */
+/* Choix de la langue des avis (drapeau) : gardé, à droite du titre (prototype v8). */
 #root #pdp-reviews .alr-wh-comp-review-box-title {
   position: relative;
-  padding: 0 58px !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-review-box-title-content {
-  font-size: 18px !important;
+  padding: 0 64px 0 0 !important;
 }
 
 #root #pdp-reviews .alr-wh-comp-select-language {
@@ -3793,121 +4014,62 @@ body.template-product.pdp-m-page #content {
   transform: translateY(-50%);
 }
 
-/* Note : grand chiffre, étoiles, nombre d'avis, centrés */
+/* Note (prototype v8) : grand chiffre à gauche, étoiles et nombre d'avis à sa droite */
 #root #pdp-reviews .alr-wh-comp-summary-average-header {
   display: flex !important;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 4px;
+  justify-content: flex-start;
+  gap: 10px;
   min-height: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
-  text-align: center;
+  text-align: left;
+}
+
+#root #pdp-reviews .alr-wh-rating-star-icon {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+#root #pdp-reviews .alr-wh-rating-total-review {
+  margin: 0 !important;
+  color: var(--pm-mute) !important;
+  font-size: 12px !important;
+  text-align: left !important;
 }
 
 #root #pdp-reviews .alr-wh-rating-star-average {
-  color: #171717 !important;
+  color: var(--pm-ink) !important;
   font-family: 'Sora', sans-serif !important;
-  font-size: 40px !important;
+  font-size: 28px !important;
   font-weight: 800 !important;
   line-height: 1 !important;
 }
 
 #root #pdp-reviews .alr-wh-comp-rating-star svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
 }
 
 #root #pdp-reviews .alr-wh-comp-rating-star-icon-fill,
 #root #pdp-reviews .alr-wh-comp-rating-star-icon--fill {
-  color: #f5a623 !important;
-  fill: #f5a623 !important;
+  color: #f5a524 !important;
+  fill: #f5a524 !important;
 }
 
-/* Barres : étoile + chiffre, barre fine bleu nuit, nombre gris à droite */
-#root #pdp-reviews .alr-wh-comp-review-rating-detail {
-  gap: 8px;
-  margin-top: 14px !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-review-rating-detail-point,
-#root #pdp-reviews .alr-wh-comp-review-rating-detail-number {
-  color: #171717 !important;
-  font-size: 12.5px !important;
-  font-weight: 700 !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-review-rating-detail-number {
-  color: #7a7f95 !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-review-rating-detail-item .alr-wh-comp-rating-star svg {
-  width: 12px;
-  height: 12px;
-}
-
-#root #pdp-reviews .alr-wh-comp-review-rating-detail-bar {
-  height: 6px !important;
-  overflow: hidden;
-  background: #eceef4 !important;
-  border-radius: 6px !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-review-rating-detail-percent {
-  height: 100% !important;
-  background: var(--pm-ink) !important;
-  border-radius: 6px !important;
-}
-
-/* « Tutti i media » : 2 grandes vignettes par ligne, la dernière avec « +N » */
+/* Prototype v8 : sous la note, directement les avis ; ni barres 5★…1★, ni galerie « Tutti i media » (les photos
+   restent dans chaque avis). */
+#root #pdp-reviews .alr-wh-comp-review-rating-detail,
 #root #pdp-reviews .alr-wh-comp-photo-gallery {
-  margin: 18px 0 0 !important;
+  display: none !important;
+}
+
+#root #pdp-reviews .alr-wh-comp-summary-average-list {
+  margin: 0 0 12px !important;
   padding: 0 !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-photo-gallery-header {
-  margin: 0 0 8px !important;
-  color: #171717 !important;
-  font-family: 'Figtree', system-ui, sans-serif !important;
-  font-size: 15px !important;
-  font-weight: 800 !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-photo-gallery-body {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px !important;
-  width: 100% !important;
-  margin: 0 !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-photo-gallery-item {
-  justify-self: stretch;
-  width: 100% !important;
-  max-width: none !important;
-  height: auto !important;
-  max-height: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-photo-gallery-item .alr-wh-comp-review-image {
-  position: relative;
-  width: 100% !important;
-  max-width: none !important;
-  height: auto !important;
-  max-height: none !important;
-  aspect-ratio: 1;
-  overflow: hidden;
-  background: #f1f2f6;
-  border-radius: 14px !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-photo-gallery-item img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover;
-  border-radius: 0 !important;
 }
 
 #root #pdp-reviews .alr-wh-comp-review-image-overlay {
@@ -3923,65 +4085,25 @@ body.template-product.pdp-m-page #content {
   border-radius: 0 !important;
 }
 
-/* Onglet « Recensioni (19) » souligné, recherche et tri en gris clair arrondis */
+/* Liste des avis (prototype v8) : ni onglet « Recensioni (19) », ni recherche, ni tri ; les avis directement sous la
+   note, puis la bande cadeau (seul accès au formulaire d'avis de l'app) après la liste. */
 #root #pdp-reviews .alr-wh-comp-tab {
-  margin-top: 18px !important;
+  margin-top: 0 !important;
 }
 
-#root #pdp-reviews .alr-wh-comp-tab-header {
-  border-bottom: 1px solid #eceef4 !important;
+#root #pdp-reviews .alr-wh-comp-tab-header,
+#root #pdp-reviews .alr-wh-comp-review-filter-wrap {
+  display: none !important;
 }
 
-#root #pdp-reviews .alr-wh-comp-tab-item {
-  padding: 0 0 8px !important;
-  color: #171717 !important;
-  font-size: 15px !important;
-  font-weight: 800 !important;
-  border: 0 !important;
-  box-shadow: inset 0 -3px 0 var(--pm-ink) !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-tab-item::after,
-#root #pdp-reviews .alr-wh-comp-tab-item::before {
-  content: none !important;
+#root #pdp-reviews .alr-wh-comp-tab-pane {
+  display: flex !important;
+  flex-direction: column;
 }
 
 #root #pdp-reviews .alr-wh-comp-review-filter {
-  margin: 12px 0 0 !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-review-filter-wrap {
+  order: 1;
   margin: 0 !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-review-filter-left {
-  gap: 8px !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-input-search {
-  height: 38px !important;
-  padding: 0 12px !important;
-  background: #f6f7fb !important;
-  border: 0 !important;
-  border-radius: 999px !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-input-search input {
-  min-height: 0 !important;
-  height: 36px !important;
-  font-size: 13.5px !important;
-  background: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-#root #pdp-reviews .alr-wh-comp-review-sort {
-  flex: none;
-  width: 38px !important;
-  height: 38px !important;
-  background: #f6f7fb !important;
-  border: 0 !important;
-  border-radius: 50% !important;
 }
 
 /* Bande cadeau : fond orange clair, rond orange « % » */
@@ -4061,29 +4183,63 @@ body.template-product.pdp-m-page #content {
   font-weight: 800;
 }
 
-/* Avis : cartes bordées sur 2 colonnes, initiale de l'auteur, photos en carrés de 3 */
+/* Avis (prototype v8) : une ligne pleine largeur par avis, séparée par un filet ; initiale de l'auteur, nom · date,
+   étoiles, texte, photos en vignettes de 64px. La grille en 2 colonnes de l'app (positions absolues) est annulée. */
+#root #pdp-reviews .alr-wh-comp-review-listing {
+  height: auto !important;
+}
+
+#root #pdp-reviews .alr-wh-comp-review-listing-item {
+  position: static !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
 #root #pdp-reviews .alr-wh-comp-review-item-list {
-  padding: 11px !important;
-  background: #fff !important;
+  padding: 12px 0 !important;
+  background: none !important;
   border: 0 !important;
-  border-radius: 14px !important;
-  box-shadow: inset 0 0 0 1px #eceef4 !important;
+  border-top: 1px solid #ecebf3 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#root #pdp-reviews .alr-wh-comp-review-item-list-header {
+  display: block !important;
 }
 
 #root #pdp-reviews .alr-wh-comp-review-account {
   display: flex !important;
   align-items: center;
-  gap: 7px !important;
+  gap: 8px !important;
+}
+
+#root #pdp-reviews .alr-wh-comp-review-account-country-wrap,
+#root #pdp-reviews .alr-wh-comp-review-account-flag-date-wrap {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px;
+  min-width: 0;
+  margin: 0 !important;
+}
+
+#root #pdp-reviews .alr-wh-comp-review-account-flag-date-wrap::before {
+  content: '·';
+  color: var(--pm-mute);
 }
 
 #root #pdp-reviews .alr-wh-comp-review-avatar[data-pdp-initial] {
   display: grid !important;
   flex: none;
   place-items: center;
-  width: 30px !important;
-  height: 30px !important;
+  width: 28px !important;
+  height: 28px !important;
   margin: 0 !important;
-  background: var(--pm-blue-soft) !important;
+  background: #ecebfd !important;
   border-radius: 50% !important;
 }
 
@@ -4098,8 +4254,9 @@ body.template-product.pdp-m-page #content {
   width: auto !important;
   height: auto !important;
   color: var(--pm-blue);
-  font-size: 13px;
-  font-weight: 800;
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
   line-height: 1;
   background: none !important;
   transform: none !important;
@@ -4112,67 +4269,62 @@ body.template-product.pdp-m-page #content {
 
 #root #pdp-reviews .alr-wh-comp-review-author {
   overflow: hidden;
-  color: #171717 !important;
+  color: var(--pm-ink) !important;
   font-size: 13px !important;
-  font-weight: 800 !important;
+  font-weight: 700 !important;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 #root #pdp-reviews .alr-wh-comp-review-date {
-  color: #7a7f95 !important;
-  font-size: 11px !important;
+  color: var(--pm-mute) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
   white-space: nowrap;
 }
 
+/* Étoiles sous le nom, alignées sur le texte (36px = initiale + écart), sans « Valutazione: 5/5 » en double. */
 #root #pdp-reviews .alr-wh-comp-review-item-list-rating-verify-purchase {
-  margin-top: 8px !important;
+  display: flex !important;
+  margin: 4px 0 0 36px !important;
 }
 
-#root #pdp-reviews .alr-wh-comp-verify-purchase,
-#root #pdp-reviews .alr-wh-comp-verify-purchase span {
-  padding: 0 !important;
-  color: #7a7f95 !important;
-  font-size: 11.5px !important;
-  background: none !important;
+#root #pdp-reviews .alr-wh-comp-verify-purchase {
+  display: none !important;
 }
 
 #root #pdp-reviews .alr-wh-comp-list-star-rating svg {
-  width: 13px;
-  height: 13px;
+  width: 12px;
+  height: 12px;
 }
 
 #root #pdp-reviews .alr-wh-comp-text-content {
   margin-top: 6px !important;
-  color: #171717 !important;
-  font-size: 13px !important;
+  color: #2c2f45 !important;
+  font-size: 14px !important;
   line-height: 1.45 !important;
 }
 
 #root #pdp-reviews .alr-wh-comp-text-content-more {
-  color: #7a7f95 !important;
-  font-size: 12.5px !important;
-  font-weight: 600 !important;
+  color: var(--pm-blue) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
 }
 
 #root #pdp-reviews .alr-wh-comp-review-media-list {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px !important;
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 6px !important;
   margin-top: 8px !important;
 }
 
-#root #pdp-reviews .alr-wh-comp-review-media-list > :nth-child(n + 4) {
-  display: none !important;
-}
-
 #root #pdp-reviews .alr-wh-comp-review-media-list .alr-wh-comp-review-image {
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 1;
+  flex: none;
+  width: 64px !important;
+  height: 64px !important;
   margin: 0 !important;
   overflow: hidden;
-  background: #f1f2f6;
+  background: #f4f5f9;
   border: 0 !important;
   border-radius: 8px !important;
 }
@@ -4184,25 +4336,14 @@ body.template-product.pdp-m-page #content {
   border-radius: 0 !important;
 }
 
+/* « È stato utile? » : absent du prototype. */
 #root #pdp-reviews .alr-wh-comp-review-reaction-helpful {
-  display: flex !important;
-  flex-direction: row-reverse;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 5px;
-  margin-top: 9px !important;
+  display: none !important;
 }
 
-#root #pdp-reviews .alr-wh-comp-review-helpful,
-#root #pdp-reviews .alr-wh-comp-review-reaction {
-  margin: 0 !important;
-  color: #7a7f95 !important;
-  font-size: 11.5px !important;
-}
-
-/* « Carica altro » : bouton pleine largeur bordé bleu nuit */
+/* « Carica altro » : bouton gris pleine largeur, comme « Vedi tutte le recensioni › » du prototype. */
 #root #pdp-reviews .alireviews-review-box-load-more {
-  margin: 14px 0 0 !important;
+  margin: 8px 0 0 !important;
   padding: 0 !important;
 }
 
@@ -4212,17 +4353,188 @@ body.template-product.pdp-m-page #content {
   justify-content: center;
   width: 100% !important;
   max-width: none !important;
-  height: 42px !important;
+  height: auto !important;
   margin: 0 !important;
+  padding: 11px !important;
   color: var(--pm-ink) !important;
-  background: #fff !important;
-  border: 1.5px solid var(--pm-ink) !important;
-  border-radius: 999px !important;
+  background: #f4f5f9 !important;
+  border: 0 !important;
+  border-radius: 12px !important;
 }
 
 #root #pdp-reviews .alr-wh-comp-button-load-more p {
   margin: 0 !important;
   color: var(--pm-ink) !important;
-  font-size: 14px !important;
+  font-family: 'Sora', sans-serif !important;
+  font-size: 13px !important;
   font-weight: 700 !important;
+}
+
+#root #pdp-reviews .alr-wh-comp-button-load-more p::after {
+  content: ' ›';
+}
+
+/* Onglet « Vantaggi esclusivi › » : coins hauts arrondis, dégradé rose → lavande, collé à la carte prix (aucun espace),
+   flèche juste après le texte. */
+#root .pdp-m .pdp-m__vant {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  width: 100%;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0;
+  padding: 12px 14px !important;
+  color: var(--pm-ink);
+  text-align: left;
+  background: linear-gradient(90deg, #fbe4ee 0%, #f1ecfb 55%, #f7f6fd 100%);
+  border: 0;
+  border-radius: 16px 16px 0 0;
+  box-shadow: none;
+}
+
+#root .pdp-m .pdp-m__vant:active {
+  opacity: 0.8;
+}
+
+#root .pdp-m .pdp-m__vant b {
+  font-family: 'Sora', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pdp-m__vant-go {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: #6b6f80;
+}
+
+/* Carte prix collée sous l'onglet « Vantaggi esclusivi ». */
+#root .pdp-m .pdp-m__vant ~ .pdp-m__price-card {
+  margin-top: 0;
+}
+
+/* Feuille « Vantaggi esclusivi » (prototype v8) : fond dégradé, grand titre + illustration, cartes blanches, « Chiudi ». */
+#root .pdp-m .pdp-m__pt.pdp-m__vs {
+  height: auto;
+  max-height: 90vh;
+  background: linear-gradient(160deg, #dff3fb 0%, #ecebfd 55%, #f6e6f7 100%);
+}
+
+.pdp-m__vs .pdp-m__pt-body {
+  padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
+}
+
+.pdp-m__vs .pdp-m__pt-body::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin: 0 auto 6px;
+  background: rgb(22 18 63 / 15%);
+  border-radius: 2px;
+}
+
+.pdp-m__vs-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 6px 0 16px;
+}
+
+.pdp-m .pdp-m__vs-hd h2 {
+  margin: 0;
+  color: var(--pm-ink);
+  font-family: 'Sora', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.pdp-m__vs-hd svg {
+  flex: none;
+  width: 96px;
+  height: 78px;
+}
+
+.pdp-m__vcard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+  padding: 14px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 10px rgb(22 18 63 / 5%);
+}
+
+.pdp-m__vi {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.pdp-m__vi svg {
+  width: 26px;
+  height: 26px;
+}
+
+.pdp-m__vi--cpn {
+  background: #fde7eb;
+}
+
+.pdp-m__vi--ship {
+  background: #dff5f2;
+}
+
+.pdp-m__vi--ex {
+  background: #ecebfd;
+}
+
+.pdp-m__vi--cb {
+  background: #fff4d6;
+}
+
+.pdp-m__vcard b {
+  display: block;
+  color: var(--pm-ink);
+  font-family: 'Sora', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.pdp-m__vcard p {
+  margin: 3px 0 0;
+  color: var(--pm-mute);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#root .pdp-m .pdp-m__vlink {
+  display: inline;
+  margin-left: 4px;
+  color: var(--pm-ink);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+#root .pdp-m .pdp-m__vclose {
+  display: block;
+  width: 100%;
+  height: 52px !important;
+  margin-top: 6px;
+  color: var(--pm-ink);
+  font-family: 'Sora', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  background: rgb(22 18 63 / 7%);
+  border-radius: 999px;
 }

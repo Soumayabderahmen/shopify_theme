@@ -683,30 +683,29 @@
       return checked ? radioValue(checked) : null;
     });
   };
-  // Prix de la combinaison choisie, en bas à droite de la carte des options : il suit chaque toucher sur une taille ou
+  // Prix de la combinaison choisie, à droite de la dernière rangée d'options : il suit chaque toucher sur une taille ou
   // une couleur (le prix change selon la variante), avec l'ancien prix barré en promotion.
   var optionPrice = null;
   var paintOptionPrice = function (selected) {
     var match = variants.find(function (variant) {
       return variant.options && variant.options.every(function (optionValue, i) { return optionValue === selected[i]; });
     });
-    if (!match) return;
+    if (!match || optionPrice === false) return;
     if (!optionPrice) {
+      // À droite des boutons de la dernière option quand c'est une rangée simple (« Spedizioni da » : China Mainland)
+      // ou de la ligne « Spedito da » (une seule origine). Après une grille de tailles ou des couleurs : pas de prix
+      // sous la carte (prototype v8), il est déjà dans « Aggiungi al carrello ».
+      var rows = optionsCard.querySelectorAll('[data-option-index]');
+      var row = rows.length ? rows[rows.length - 1].querySelector('.pdp-m__sz:not(.pdp-m__sz--grid), .pdp-m__from') : null;
+      if (!row) {
+        optionPrice = false;
+        return;
+      }
       optionPrice = document.createElement('div');
-      optionPrice.className = 'pdp-m__optp';
+      optionPrice.className = 'pdp-m__optp is-inline';
       optionPrice.setAttribute('aria-live', 'polite');
       optionPrice.innerHTML = '<s></s><b></b>';
-      // À droite des boutons de la dernière option quand c'est une rangée simple (« Spedizioni da » : China Mainland) ;
-      // sous la carte, à droite, après une grille de tailles ou des couleurs.
-      var rows = optionsCard.querySelectorAll('[data-option-index]');
-      // … ou de la ligne « Spedito da » (une seule origine, prototype SHEIN).
-      var row = rows.length ? rows[rows.length - 1].querySelector('.pdp-m__sz:not(.pdp-m__sz--grid), .pdp-m__from') : null;
-      if (row) {
-        optionPrice.classList.add('is-inline');
-        row.appendChild(optionPrice);
-      } else {
-        optionsCard.appendChild(optionPrice);
-      }
+      row.appendChild(optionPrice);
     }
     var key = match.id + ':' + match.price;
     if (optionPrice.getAttribute('data-key') === key) return;
@@ -1361,7 +1360,8 @@
      compare au seuil converti au taux (vérifié avec ses tarifs : 48 CHF gratuit, 46 CHF payant pour 50 €) ;
      comparaison sur le seuil exact, affichage arrondi au-dessus à deux chiffres significatifs (« dès CHF 48 »). */
   var ship = root.querySelector('[data-pdp-ship]');
-  var shipText = ship && ship.querySelector('[data-pdp-ship-text]');
+  // Texte affiché à plusieurs endroits (carte prix, « Spedizione e resi », feuille « Vantaggi esclusivi »).
+  var shipTexts = ship ? root.querySelectorAll('[data-pdp-ship-text]') : [];
   var shipThreshold = ship ? Number(ship.getAttribute('data-threshold')) || 0 : 0;
   var shipLimit = shipThreshold;
   if (ship && !shipThreshold) {
@@ -1383,12 +1383,27 @@
   };
   // Textes déjà formatés par Shopify en euros ; devises converties : montant calculé ici.
   var updateShipping = function (price) {
-    if (!shipText || !shipThreshold) return;
+    if (!shipTexts.length || !shipThreshold) return;
     var text = price >= shipLimit
       ? (ship.getAttribute('data-text-free') || T('pdp_ship_free_order'))
       : (ship.getAttribute('data-text-from') || T('pdp_ship_from', { amount: shopMoney(shipThreshold) }));
-    if (shipText.textContent !== text) shipText.textContent = text;
+    shipTexts.forEach(function (shipText) {
+      if (shipText.textContent !== text) shipText.textContent = text;
+    });
   };
+
+  /* ---------- Dates de livraison (« Consegna entro 25 ott – 29 ott ») : délais de la politique d'expédition du pays
+     du client (data-pdp-eta = « min,max » jours, snippets/pdp-mobile-top.liquid), dates au format de la langue. ---------- */
+  var etaDate = function (days) {
+    var date = new Date();
+    date.setDate(date.getDate() + days);
+    return date.toLocaleDateString(document.documentElement.lang || 'it', { day: 'numeric', month: 'short' }).replace(/\.$/, '');
+  };
+  root.querySelectorAll('[data-pdp-eta]').forEach(function (eta) {
+    var range = String(eta.getAttribute('data-pdp-eta')).split(',').map(Number);
+    if (range.length !== 2 || isNaN(range[0]) || isNaN(range[1])) return;
+    eta.textContent = String(eta.getAttribute('data-template')).replace('__RANGE__', etaDate(range[0]) + ' – ' + etaDate(range[1]));
+  });
   var firstVariant = variants.find(function (item) { return String(item.id) === lastVariantId; }) || variants[0];
   if (firstVariant) updateShipping(firstVariant.price);
 
@@ -1398,10 +1413,10 @@
     if (!rewards) return true;
     var found = false;
     var pointsSource = document.querySelector('#main-product .honeypop-pp-text');
-    var pointsMatch = pointsSource && pointsSource.textContent.match(/([\d.,]+)\s*points?[^~]*~?\s*([\d.,]+\s*€)?/i);
+    var pointsMatch = pointsSource && pointsSource.textContent.match(/([\d.,]+)\s*points?/i);
     if (pointsMatch) {
-      root.querySelector('[data-pdp-points-text]').textContent = T('points_earn', { points: pointsMatch[1] });
-      root.querySelector('[data-pdp-points-sub]').textContent = T('points_sub') + (pointsMatch[2] ? ' (≈ ' + pointsMatch[2].trim() + ')' : '');
+      // Tuile du prototype v8 : « +22217 » puis « punti da usare sul prossimo ordine ».
+      root.querySelector('[data-pdp-points-text]').textContent = '+' + pointsMatch[1];
       root.querySelector('[data-pdp-points]').hidden = false;
       found = true;
     }
@@ -1410,19 +1425,35 @@
       return /store credit/i.test(el.textContent) && el.querySelector('.money') && el.textContent.length < 120;
     });
     var creditMoney = creditHost && creditHost.querySelector('.money');
-    if (creditMoney) {
-      root.querySelector('[data-pdp-credit-text]').textContent = T('credit_receive', { amount: creditMoney.textContent.trim() });
+    var creditText = creditMoney ? creditMoney.textContent.trim() : '';
+    if (!creditText) {
+      // Widget Koin (« Receive $17.90 store credit when purchasing each item. »), hors du formulaire, sans .money.
+      var koin = document.querySelector('#main-product .koin-promotion-widget__description');
+      var koinMatch = koin && koin.textContent.match(/([^\w\s]*\d[\d.,]*(?:\s?[^\w\s]+)?)\s+store credit/i);
+      if (koinMatch) creditText = koinMatch[1].trim();
+    }
+    if (creditText) {
+      root.querySelector('[data-pdp-credit-text]').textContent = '+' + creditText;
       root.querySelector('[data-pdp-credit]').hidden = false;
       found = true;
     }
     rewards.hidden = !found;
-    return Boolean(pointsMatch && creditMoney);
+    return Boolean(pointsMatch && creditText);
   };
   var rewardTries = 0;
   var rewardTimer = window.setInterval(function () {
     rewardTries += 1;
     if (readRewards() || rewardTries > 40) window.clearInterval(rewardTimer);
   }, 500);
+  // « Come funziona » : déplie / replie l'explication sous les tuiles.
+  var rewardsHow = root.querySelector('[data-pdp-rewards-how]');
+  var rewardsHowText = root.querySelector('#pdp-rewards-how');
+  if (rewardsHow && rewardsHowText) {
+    rewardsHow.addEventListener('click', function () {
+      rewardsHowText.hidden = !rewardsHowText.hidden;
+      rewardsHow.setAttribute('aria-expanded', String(!rewardsHowText.hidden));
+    });
+  }
 
   /* ---------- Description en sections + onglets collants (vrais titres de la description) ---------- */
   var descSource = root.querySelector('[data-pdp-desc-src]');
@@ -1962,7 +1993,8 @@
     var tabsHtml = '<nav class="pdp-m__tabs" aria-label="' + T('desc_sections') + '"><div class="pdp-m__tabs-in" role="tablist">' + tabs.map(function (tab, i) {
       return '<button type="button" class="pdp-m__tab" role="tab" aria-selected="' + (i === 0) + '" data-pdp-tab="' + tab.key + '">' + tab.title + '</button>';
     }).join('') + '<i class="pdp-m__ind" data-pdp-ind></i></div></nav>';
-    descBox.innerHTML = tabsHtml + html;
+    // Titre « Descrizione » au-dessus des onglets (prototype v8).
+    descBox.innerHTML = '<div class="pdp-m__desc-h"><h3>' + T('description') + '</h3></div>' + tabsHtml + html;
 
     setupTabs();
     setupSizeTable();
@@ -2153,8 +2185,21 @@
         if (name) avatar.setAttribute('data-pdp-initial', name.charAt(0).toUpperCase());
       });
     };
-    markInitials();
-    new MutationObserver(markInitials).observe(reviewsBlock, { childList: true, subtree: true });
+    // Prototype v8 : note au format de la langue (« 4,8 » et non « 4.8 » de l'app) ; réécrite seulement si elle diffère,
+    // sinon l'observateur ci-dessous se relancerait sans fin.
+    var localizeAverage = function () {
+      var average = reviewsBlock.querySelector('.alr-wh-rating-star-average');
+      var value = average ? parseFloat(average.textContent.replace(',', '.')) : NaN;
+      if (isNaN(value)) return;
+      var shown = value.toLocaleString(document.documentElement.lang || 'it', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      if (average.textContent.trim() !== shown) average.textContent = shown;
+    };
+    var markReviews = function () {
+      markInitials();
+      localizeAverage();
+    };
+    markReviews();
+    new MutationObserver(markReviews).observe(reviewsBlock, { childList: true, subtree: true, characterData: true });
     // Section de l'app (bloc « _blocks » de templates/product.json) vide une fois le bloc déplacé : sa boîte
     // (20 px de marge intérieure + 30 px en dessous) laissait un grand vide avant le pied de page.
     if (reviewsHome && !reviewsHome.contains(root) && !reviewsHome.innerText.trim() && !reviewsHome.querySelector('img, iframe, video, .shopify-app-block')) {
@@ -2175,8 +2220,9 @@
       var value = average ? parseFloat(average.textContent.replace(',', '.')) : NaN;
       if (!rateLink || isNaN(value) || !countMatch || Number(countMatch[1]) === 0) return false;
       var shown = value.toLocaleString(document.documentElement.lang || 'it', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-      // Comme SHEIN : « ★ 4,7 » et « (19) » dessous, à droite du titre.
-      rateLink.innerHTML = '<b aria-label="' + T('rating_out_of', { rating: shown }) + '">' + rateLink.getAttribute('data-star') + shown + '</b><small>(' + countMatch[1] + ')</small>';
+      // Prototype v8 : « ★ 4,7 (19 recensioni) » sous le vendeur.
+      var countWord = rateLink.getAttribute(Number(countMatch[1]) === 1 ? 'data-one' : 'data-many') || '';
+      rateLink.innerHTML = '<b aria-label="' + T('rating_out_of', { rating: shown }) + '">' + rateLink.getAttribute('data-star') + shown + '</b><small>(' + countMatch[1] + (countWord ? ' ' + countWord : '') + ')</small>';
       return true;
     };
     if (!readAppRating()) {
@@ -2379,11 +2425,15 @@
     // déjà rouge dès le premier affichage (snippets/pdp-mobile-top.liquid lit la wishlist enregistrée) ; un toucher
     // avant la fin du chargement attend la wishlist (DOMContentLoaded, après tous les scripts « defer »).
     var fav = buy.querySelector('[data-pdp-fav]');
+    // « Salva » de la carte prix (prototype v8) : même favori que le cœur de la barre d'achat, mêmes états.
+    var favMirrors = root.querySelectorAll('[data-pdp-fav-mirror]');
     var paintFav = function () {
       var saved = window.mobileWishlist.has(fav.getAttribute('data-product-id'));
-      fav.classList.toggle('is-on', saved);
-      fav.setAttribute('aria-pressed', String(saved));
-      fav.setAttribute('aria-label', fav.getAttribute(saved ? 'data-remove' : 'data-add'));
+      [fav].concat(Array.prototype.slice.call(favMirrors)).forEach(function (button) {
+        button.classList.toggle('is-on', saved);
+        button.setAttribute('aria-pressed', String(saved));
+        button.setAttribute('aria-label', fav.getAttribute(saved ? 'data-remove' : 'data-add'));
+      });
     };
     var whenWishlist = function (callback) {
       if (window.mobileWishlist) callback();
@@ -2409,6 +2459,9 @@
     if (fav) {
       whenWishlist(paintFav);
       fav.addEventListener('click', function () { whenWishlist(toggleFav); });
+      favMirrors.forEach(function (button) {
+        button.addEventListener('click', function () { whenWishlist(toggleFav); });
+      });
     }
   }
   // « -X% DI SCONTO! » du bouton de la barre : réduction de la variante choisie (rien sans prix barré).

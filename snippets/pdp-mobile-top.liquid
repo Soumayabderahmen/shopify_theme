@@ -27,6 +27,16 @@
   if cart.currency.iso_code == shop.currency
     assign pm_ship_threshold = pm_ship_base
   endif
+  # Délais de livraison de la politique d'expédition de la boutique (feuille « Protezioni ») selon le pays du client :
+  # Italie 3–7 jours, Union européenne 7–15, reste du monde 15–30 ; dates calculées par assets/pdp-mobile.js.
+  assign pm_country = localization.country.iso_code
+  assign pm_eu = 'AT,BE,BG,HR,CY,CZ,DK,EE,FI,FR,DE,GR,HU,IE,LV,LT,LU,MT,NL,PL,PT,RO,SK,SI,ES,SE' | split: ','
+  assign pm_eta_days = '15,30'
+  if pm_country == 'IT' or pm_country == 'SM' or pm_country == 'VA'
+    assign pm_eta_days = '3,7'
+  elsif pm_eu contains pm_country
+    assign pm_eta_days = '7,15'
+  endif
 
   assign pm_rating = 0
   assign pm_rating_count = 0
@@ -55,6 +65,27 @@
 -%}
 {%- comment -%} Code de la devise après les prix quand « $ » est ambigu (« $94.00 CAD »). {%- endcomment -%}
 {%- capture mm_cur -%}{% render 'mobile-money-suffix' %}{%- endcapture -%}
+{%- liquid
+  # Livraison gratuite : textes « su questo ordine » / « da 50 € », mis à jour par assets/pdp-mobile.js (variante, devise).
+  assign pm_ship_text_free = 'mobile.pdp.free_shipping_order' | t
+  assign pm_ship_text_from = ''
+  if pm_ship_threshold > 0
+    # Espace insécable : « 50 € » ne se coupe pas sur deux lignes.
+    assign pm_ship_amount = pm_ship_threshold | money_without_trailing_zeros | strip_html | append: mm_cur | replace: ' ', ' '
+    assign pm_ship_text_from = 'mobile.pdp.free_shipping_from' | t: amount: pm_ship_amount
+  endif
+  assign pm_ship_text = ''
+  if pm_ship_threshold > 0
+    if pm_price >= pm_ship_threshold
+      assign pm_ship_text = pm_ship_text_free
+    else
+      assign pm_ship_text = pm_ship_text_from
+    endif
+  endif
+  assign pm_money_sample = 123456700 | money_without_trailing_zeros | strip_html | append: mm_cur
+-%}
+{%- comment -%} Attributs lus par assets/pdp-mobile.js (seuil exact, devise convertie, format des montants). {%- endcomment -%}
+{%- capture pm_ship_attrs -%} data-pdp-ship data-threshold="{{ pm_ship_threshold }}" data-base="{{ pm_ship_base }}" data-text-free="{{ pm_ship_text_free | escape }}" data-text-from="{{ pm_ship_text_from | escape }}" data-money-sample="{{ pm_money_sample | escape }}"{%- endcapture -%}
 {%- comment -%} Caché par défaut (desktop) ; assets/pdp-mobile.css, chargé seulement en mobile, l'affiche. {%- endcomment -%}
 <style>.pdp-m{display:none}</style>
 <div class="pdp-m" data-pdp-mobile data-coupon-code="{{ pm_coupon_code }}">
@@ -177,8 +208,16 @@
     {%- endif -%}
   </div>
 
-  {%- comment -%} Bande avantages sous les photos (prototype SHEIN) : la même que sous la bannière de l'accueil. {%- endcomment -%}
-  {%- render 'mshein-perks' -%}
+  {%- comment -%}
+    Onglet « Vantaggi esclusivi › » collé au-dessus de la carte prix (coins hauts arrondis, dégradé rose → lavande) :
+    ouvre la feuille des avantages de l'article (snippets/pdp-mobile-vant.liquid : coupon des réglages du thème,
+    livraison gratuite au vrai seuil, cambio, cashback).
+  {%- endcomment -%}
+  <button class="pdp-m__vant" type="button" data-pdp-pt-sheet="vant" data-pdp-pt-open="top" aria-haspopup="dialog">
+    <b>{{ 'mobile.pdp.vant_band' | t }}</b>
+    <svg class="pdp-m__vant-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+  </button>
+  {%- render 'pdp-mobile-vant', code: pm_coupon_code, percent: pm_coupon_percent, ship_base: pm_ship_base, ship_text: pm_ship_text -%}
 
   {%- comment -%}
     Carte prix au style SHEIN : prix, -%, prix barré ; prix avec le coupon ; bande coupon (« Riscuoti » applique le code) ;
@@ -186,6 +225,12 @@
   {%- endcomment -%}
   {%- capture pm_star -%}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg>{%- endcapture -%}
   <section class="pdp-m__card pdp-m__price-card">
+    {%- comment -%}
+      Prototype v8 : prix, prix barré, -% ; « IVA inclusa » ; « Salva » à droite (même liste de favoris que le cœur de la
+      barre d'achat, assets/pdp-mobile.js) ; livraison gratuite + dates de livraison ; titre ; vendeur ; note et ventes réelles ;
+      bande coupon bleue avec le prix une fois le coupon appliqué.
+    {%- endcomment -%}
+    <div class="pdp-m__ptop">
     <div class="pdp-m__prow">
       {%- liquid
         # Centimes plus petits, comme SHEIN (« €117,79 » avec « ,79 » réduit) ; assets/pdp-mobile.js découpe de même.
@@ -208,32 +253,43 @@
           assign pm_save = pm_compare | minus: pm_price | times: 100 | divided_by: pm_compare
         endif
       -%}
-      <span class="pdp-m__save" data-pdp-save{% unless pm_save > 0 %} hidden{% endunless %}>-{{ pm_save }}%</span>
       <span class="pdp-m__old" data-pdp-old{% unless pm_compare > pm_price %} hidden{% endunless %}>{{ pm_compare | money }}{{ mm_cur }}</span>
+      <span class="pdp-m__save" data-pdp-save{% unless pm_save > 0 %} hidden{% endunless %}>-{{ pm_save }}%</span>
     </div>
-    {%- if pm_coupon_code != blank -%}
-      {%- comment -%} Prix avec le coupon (réduction Shopify sur toute la commande), mis à jour à chaque variante (assets/pdp-mobile.js). {%- endcomment -%}
-      {%- liquid
-        assign pm_with_coupon = 100 | minus: pm_coupon_percent | times: pm_price | divided_by: 100.0 | round
-        assign pm_with_coupon_money = pm_with_coupon | money | append: mm_cur
-        assign pm_with_coupon_tpl = 'mobile.pdp.with_coupon' | t: percent: pm_coupon_percent, price: '__PRICE__'
-      -%}
-      <p class="pdp-m__wc" data-pdp-with-coupon data-percent="{{ pm_coupon_percent }}" data-template="{{ pm_with_coupon_tpl | escape }}">{{ pm_with_coupon_tpl | replace: '__PRICE__', pm_with_coupon_money }}</p>
-      <div class="pdp-m__cpn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4 2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 0 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>
-        <span>{{ 'mobile_pdp_hd.coupon_band' | t: percent: pm_coupon_percent, code: pm_coupon_code }}</span>
-        <button class="pdp-m__claim" type="button" data-pdp-claim>{{ 'mobile.pdp.claim' | t }}</button>
-      </div>
-    {%- endif -%}
+    <p class="pdp-m__vat">{% render 'mobile-tax-note', kind: 'short', vat_key: 'mobile.pdp' %}</p>
+    </div>
+    <button class="pdp-m__bm" type="button" data-pdp-fav-mirror aria-pressed="false" aria-label="{{ 'mobile.js.add_to_wishlist' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
+
+    {%- comment -%} Livraison gratuite au vrai seuil + dates de livraison du pays du client (assets/pdp-mobile.js). {%- endcomment -%}
+    {%- assign pm_eta_tpl = 'mobile.pdp.delivery_by' | t: range: '__RANGE__' -%}
+    <p class="pdp-m__shipl"{% if pm_ship_base > 0 %} {{ pm_ship_attrs }}{% endif %}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6h13v10H1zM14 10h4l3 3v3h-7"/><circle cx="5.5" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>
+      {%- if pm_ship_base > 0 -%}<b data-pdp-ship-text>{{ pm_ship_text | default: pm_ship_text_free }}</b>{%- endif -%}
+      <span data-pdp-eta="{{ pm_eta_days }}" data-template="{{ pm_eta_tpl | escape }}"></span>
+    </p>
+
     <div class="pdp-m__trow">
       <div class="pdp-m__title" role="heading" aria-level="1" data-pdp-title>{{ product.title | escape }}</div>
       <button class="pdp-m__tmore" type="button" data-pdp-title-more aria-label="{{ 'mobile.pdp.show_all' | t | escape }}" aria-expanded="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
-      <a href="#pdp-reviews" class="pdp-m__rate" data-pdp-goto-reviews data-star="{{ pm_star | escape }}">
+    </div>
+    <p class="pdp-m__seller">{{ 'mobile.pdp.sold_by' | t: shop: '' | strip }} <a href="{{ routes.root_url }}">{{ shop.name | escape }}</a></p>
+
+    {%- comment -%} Note réelle de l'app d'avis (lien vers les avis) et ventes réelles (métachamps, comme les cartes). {%- endcomment -%}
+    {%- liquid
+      assign pm_sold = product.metafields.custom.bestseller_current_month.value | default: product.metafields.custom.bestseller_count.value | default: 0 | plus: 0
+      if pm_sold >= 1000
+        assign pm_sold_text = pm_sold | divided_by: 100 | divided_by: 10.0 | append: 'K+'
+      else
+        assign pm_sold_text = pm_sold
+      endif
+    -%}
+    <div class="pdp-m__meta">
+      <a href="#pdp-reviews" class="pdp-m__rate" data-pdp-goto-reviews data-star="{{ pm_star | escape }}" data-one="{{ 'mobile.pdp.review' | t | escape }}" data-many="{{ 'mobile.pdp.reviews' | t | escape }}">
         {%- if pm_rating_count > 0 -%}
           {%- assign pm_rating_shown = pm_rating | round: 1 | append: '' -%}
           {%- unless pm_rating_shown contains '.' -%}{%- assign pm_rating_shown = pm_rating_shown | append: '.0' -%}{%- endunless -%}
           {%- if request.locale.iso_code != 'en' -%}{%- assign pm_rating_shown = pm_rating_shown | replace: '.', ',' -%}{%- endif -%}
-          <b aria-label="{{ 'mobile.pdp.rating_out_of' | t: rating: pm_rating_shown }}">{{ pm_star }}{{ pm_rating_shown }}</b><small>({{ pm_rating_count }})</small>
+          <b aria-label="{{ 'mobile.pdp.rating_out_of' | t: rating: pm_rating_shown }}">{{ pm_star }}{{ pm_rating_shown }}</b><small>({{ pm_rating_count }} {% if pm_rating_count == 1 %}{{ 'mobile.pdp.review' | t }}{% else %}{{ 'mobile.pdp.reviews' | t }}{% endif %})</small>
         {%- else -%}
           <b>{{ pm_star }}</b><small>{{ 'mobile.pdp.reviews_title_short' | t }}</small>
         {%- endif -%}
@@ -263,17 +319,37 @@
             if (!link || isNaN(value) || !(count > 0)) return;
             var shown = value.toLocaleString(document.documentElement.lang || 'it', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
             var label = {{ 'mobile.pdp.rating_out_of' | t: rating: '__R__' | json }}.replace('__R__', shown);
-            link.innerHTML = '<b>' + link.getAttribute('data-star') + shown + '</b><small>(' + count + ')</small>';
+            link.innerHTML = '<b>' + link.getAttribute('data-star') + shown + '</b><small>(' + count + ' ' + link.getAttribute(count === 1 ? 'data-one' : 'data-many') + ')</small>';
             link.firstChild.setAttribute('aria-label', label);
           })();
         </script>
       {%- endif -%}
+      {%- if pm_sold > 0 -%}
+        <span class="pdp-m__sold">{{ 'mobile.home_shein.sold_recent' | t: count: pm_sold_text }}</span>
+      {%- endif -%}
     </div>
+
+    {%- if pm_coupon_code != blank -%}
+      {%- comment -%} Bande coupon bleue (prototype v8) : code des réglages du thème, prix avec le coupon (réduction Shopify sur toute la commande, mis à jour à chaque variante par assets/pdp-mobile.js), « Riscuoti » l'applique. {%- endcomment -%}
+      {%- liquid
+        assign pm_with_coupon = 100 | minus: pm_coupon_percent | times: pm_price | divided_by: 100.0 | round
+        assign pm_with_coupon_money = pm_with_coupon | money | append: mm_cur
+        assign pm_with_coupon_tpl = 'mobile.pdp.with_coupon' | t: percent: pm_coupon_percent, price: '__PRICE__'
+      -%}
+      <div class="pdp-m__cpn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4 2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 0 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>
+        <span>
+          {{- 'mobile_pdp_hd.coupon_band' | t: percent: pm_coupon_percent, code: pm_coupon_code -}}
+          <small class="pdp-m__wc" data-pdp-with-coupon data-percent="{{ pm_coupon_percent }}" data-template="{{ pm_with_coupon_tpl | escape }}">{{ pm_with_coupon_tpl | replace: '__PRICE__', pm_with_coupon_money }}</small>
+        </span>
+        <button class="pdp-m__claim" type="button" data-pdp-claim>{{ 'mobile.pdp.claim' | t }}</button>
+      </div>
+    {%- endif -%}
   </section>
 
   {%- comment -%}
-    4. Vantaggi esclusivi : retirée de l'écran (prototype SHEIN : bande coupon et bande avantages à la place).
-    Ses fenêtres restent, ouvertes par les cartes « Protezioni » (8) et « Garanzia Ordine » (9) et la feuille des conditions.
+    Fenêtres ouvertes par la bande « Vantaggi esclusivi », les cartes « Protezioni » (8), « Spedizione e resi » (9) et
+    « Termini » du coupon.
   {%- endcomment -%}
   {%- render 'pdp-mobile-protect' -%}
   {%- render 'pdp-mobile-order' -%}
@@ -418,38 +494,62 @@
     </button>
   </section>
 
-  {%- comment -%} 7. Fidélité : textes repris des apps de points / crédit (Honeypop) une fois affichées. {%- endcomment -%}
+  {%- comment -%}
+    7. « Premi con questo acquisto » (prototype v8) : deux tuiles, points et crédit réels des apps de fidélité (Honeypop,
+    lus par assets/pdp-mobile.js une fois affichés) ; carte cachée sans ces données ; « Accedi » pour les clients non
+    connectés et « Come funziona », qui déplie l'explication sous les tuiles.
+  {%- endcomment -%}
   <section class="pdp-m__card pdp-m__rw" data-pdp-rewards hidden>
-    <div class="pdp-m__rwr" data-pdp-points hidden>
-      <span class="pdp-m__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="m8.5 14.5-1.5 6.5 5-2.5 5 2.5-1.5-6.5"/></svg></span>
-      <span><b data-pdp-points-text></b><small data-pdp-points-sub>{{ 'mobile.pdp.with_purchase' | t }}</small></span>
+    <div class="pdp-m__ctitle"><h3>{{ 'mobile.pdp.rewards_title' | t }}</h3></div>
+    <div class="pdp-m__rwg">
+      <div class="pdp-m__rwt pdp-m__rwt--pts" data-pdp-points hidden>
+        <small>{{ 'mobile.pdp.points_label' | t }}</small>
+        <b data-pdp-points-text></b>
+        <span>{{ 'mobile.pdp.points_tile_sub' | t }}</span>
+        <i aria-hidden="true">&#11088;</i>
+      </div>
+      <div class="pdp-m__rwt pdp-m__rwt--crd" data-pdp-credit hidden>
+        <small>{{ 'mobile.pdp.credit_label' | t }}</small>
+        <b data-pdp-credit-text></b>
+        <span>{{ 'mobile.pdp.credit_sub' | t }}</span>
+        <i aria-hidden="true">&#128176;</i>
+      </div>
     </div>
-    <div class="pdp-m__rwr" data-pdp-credit hidden>
-      <span class="pdp-m__ic pdp-m__ic--pink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="14.5" r="1.2" fill="currentColor"/></svg></span>
-      <span><b data-pdp-credit-text></b><small>{{ 'mobile.pdp.credit_sub' | t }}</small></span>
-    </div>
+    <p class="pdp-m__rwn">
+      {%- unless customer -%}<a href="{{ routes.account_login_url }}">{{ 'mobile.pdp.rewards_login' | t }}</a> · {% endunless -%}
+      <button type="button" data-pdp-rewards-how aria-expanded="false" aria-controls="pdp-rewards-how">{{ 'mobile.pdp.rewards_how' | t }}</button>
+    </p>
+    <p class="pdp-m__rwh" id="pdp-rewards-how" hidden>{{ 'mobile.pdp.rewards_how_text' | t }}</p>
   </section>
 
   {%- comment -%} 8. Protections : chaque case ouvre la feuille « Protections » sur son onglet (snippets/pdp-mobile-protect.liquid). {%- endcomment -%}
   <section class="pdp-m__card">
-    <div class="pdp-m__ctitle"><h3>{{ 'protezioni.header_title' | t: shop_name: shop.name }}</h3></div>
+    <div class="pdp-m__ctitle">
+      <h3>{{ 'protezioni.header_title' | t: shop_name: shop.name }}</h3>
+      {%- comment -%} « › » du prototype v8 : ouvre la feuille « Protezioni » en haut (aucune carte visée). {%- endcomment -%}
+      <button class="pdp-m__prot-all" type="button" data-pdp-pt-open="" aria-haspopup="dialog" aria-label="{{ 'protezioni.header_title' | t: shop_name: shop.name | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+    </div>
     {%- comment -%} Prototype « Icone » : rangée défilante de raccourcis ronds, libellé sous l'icône. {%- endcomment -%}
     <div class="pdp-m__prot" role="group" aria-label="{{ 'protezioni.header_title' | t: shop_name: shop.name | escape }}">
       <button type="button" data-pdp-pt-open="pay">
         <span class="pdp-m__prot-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h4"/></svg></span>
-        <span class="pdp-m__prot-tx"><b>{{ 'protezioni.cards.pagamenti' | t }}</b></span>
+        <span class="pdp-m__prot-tx"><b>{{ 'protezioni.pagamenti.title' | t }}</b></span>
       </button>
       <button type="button" data-pdp-pt-open="ship">
         <span class="pdp-m__prot-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span>
-        <span class="pdp-m__prot-tx"><b>{{ 'protezioni.cards.consegna' | t }}</b></span>
+        <span class="pdp-m__prot-tx"><b>{{ 'protezioni.consegna.title' | t }}</b></span>
       </button>
       <button type="button" data-pdp-pt-open="ret">
         <span class="pdp-m__prot-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></span>
-        <span class="pdp-m__prot-tx"><b>{{ 'protezioni.cards.rimborso' | t }}</b></span>
+        <span class="pdp-m__prot-tx"><b>{{ 'protezioni.overview.card_title' | t }}</b></span>
+      </button>
+      <button type="button" data-pdp-pt-open="help">
+        <span class="pdp-m__prot-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2.5" y="14" width="4" height="6" rx="1.5"/><rect x="17.5" y="14" width="4" height="6" rx="1.5"/><path d="M19.5 20a3 3 0 0 1-3 2H13"/></svg></span>
+        <span class="pdp-m__prot-tx"><b>{{ 'mobile_protect.support_title' | t }}</b></span>
       </button>
       <button type="button" data-pdp-pt-open="priv">
         <span class="pdp-m__prot-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg></span>
-        <span class="pdp-m__prot-tx"><b>{{ 'protezioni.cards.privacy' | t }}</b></span>
+        <span class="pdp-m__prot-tx"><b>{{ 'protezioni.privacy.title' | t }}</b></span>
       </button>
     </div>
   </section>
@@ -459,11 +559,35 @@
     la feuille « Garantie commande » (snippets/pdp-mobile-order.liquid : uniquement des engagements écrits dans les
     politiques de la boutique — reso 30 giorni, garanzia sul prezzo, preparazione, pacco danneggiato, tracking, rimborso).
   {%- endcomment -%}
+  {%- comment -%}
+    « Spedizione e resi » (prototype v8) : livraison (gratuite au vrai seuil, date estimée selon le pays, envoi suivi) et
+    retours 30 jours, qui ouvrent la feuille « Protezioni » sur leur carte ; « Garanzia Ordine » ouvre sa feuille.
+  {%- endcomment -%}
+  {%- capture pm_go -%}<svg class="pdp-m__gentry-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>{%- endcapture -%}
+  {%- assign pm_eta_est_tpl = 'mobile.pdp.delivery_estimate' | t: range: '__RANGE__' -%}
   <section class="pdp-m__card pdp-m__gentry">
+    <div class="pdp-m__ctitle"><h3>{{ 'mobile.pdp.ship_returns_title' | t }}</h3></div>
+    <button type="button" data-pdp-pt-open="ship" aria-haspopup="dialog">
+      <span class="pdp-m__gentry-ic pdp-m__gentry-ic--ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6h13v10H1zM14 10h4l3 3v3h-7"/><circle cx="5.5" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg></span>
+      <span class="pdp-m__gentry-tx">
+        {%- if pm_ship_base > 0 -%}
+          <b class="is-ok" data-pdp-ship-text>{{ pm_ship_text | default: pm_ship_text_free }}</b>
+        {%- else -%}
+          <b>{{ 'protezioni.consegna.title' | t }}</b>
+        {%- endif -%}
+        <small><span data-pdp-eta="{{ pm_eta_days }}" data-template="{{ pm_eta_est_tpl | escape }}"></span><br>{{ 'mobile.pdp.tracking_included' | t }}</small>
+      </span>
+      {{- pm_go -}}
+    </button>
+    <button type="button" data-pdp-pt-open="ret" aria-haspopup="dialog">
+      <span class="pdp-m__gentry-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></span>
+      <span class="pdp-m__gentry-tx"><b>{{ 'mobile.pdp.returns_title' | t }}</b><small>{{ 'mobile.pdp.returns_text' | t }}</small></span>
+      {{- pm_go -}}
+    </button>
     <button type="button" data-pdp-pt-sheet="order" data-pdp-pt-open="ret" aria-haspopup="dialog">
       <span class="pdp-m__gentry-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg></span>
       <span class="pdp-m__gentry-tx"><b>{{ 'mobile.pdp.guarantee_title' | t }}</b><small>{{ 'mobile_pdp_hd.guarantee_sub' | t }}</small></span>
-      <svg class="pdp-m__gentry-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+      {{- pm_go -}}
     </button>
   </section>
 
