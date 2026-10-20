@@ -1355,6 +1355,15 @@
       });
     });
   });
+  // Feuille « Vantaggi esclusivi » ouverte d'elle-même 2 s après l'ouverture de chaque fiche ; pas si une autre feuille
+  // est déjà ouverte, si l'onglet est caché ou si le client a quitté la fiche entre-temps (fiche ouverte sur place).
+  var vantButton = root.querySelector('.pdp-m__vant');
+  if (vantButton) {
+    window.setTimeout(function () {
+      if (!document.body.contains(vantButton) || document.hidden || document.querySelector('dialog[open]')) return;
+      vantButton.click();
+    }, 2000);
+  }
   /* ---------- Livraison gratuite : seuil des réglages du thème dans la devise du client ----------
      En euros (devise de la boutique) : seuil du Liquid (data-threshold). Autres devises (data-threshold = 0) : Shopify
      compare au seuil converti au taux (vérifié avec ses tarifs : 48 CHF gratuit, 46 CHF payant pour 50 €) ;

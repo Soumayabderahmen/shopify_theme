@@ -4374,8 +4374,8 @@ body.template-product.pdp-m-page #content {
   content: ' ›';
 }
 
-/* Onglet « Vantaggi esclusivi › » : coins hauts arrondis, dégradé rose → lavande, collé à la carte prix (aucun espace),
-   flèche juste après le texte. */
+/* Onglet « Vantaggi esclusivi › » clair : coins hauts arrondis, dégradé bleu ciel pâle → lavande pâle (même famille de
+   bleus que la boutique), texte bleu nuit et flèche grise, collé à la carte prix (aucun espace). */
 #root .pdp-m .pdp-m__vant {
   display: flex;
   align-items: center;
@@ -4388,7 +4388,7 @@ body.template-product.pdp-m-page #content {
   padding: 12px 14px !important;
   color: var(--pm-ink);
   text-align: left;
-  background: linear-gradient(90deg, #fbe4ee 0%, #f1ecfb 55%, #f7f6fd 100%);
+  background: linear-gradient(90deg, #dcefff 0%, #e6ecff 50%, #eeeaff 100%);
   border: 0;
   border-radius: 16px 16px 0 0;
   box-shadow: none;
@@ -4421,7 +4421,12 @@ body.template-product.pdp-m-page #content {
 #root .pdp-m .pdp-m__pt.pdp-m__vs {
   height: auto;
   max-height: 90vh;
-  background: linear-gradient(160deg, #dff3fb 0%, #ecebfd 55%, #f6e6f7 100%);
+  background: linear-gradient(160deg, #dcefff 0%, #e6ecff 50%, #eeeaff 100%);
+}
+
+/* Le focus d'ouverture va sur le corps de la feuille (autofocus) et non sur « Termini », qui s'affichait encadré. */
+.pdp-m__vs .pdp-m__pt-body:focus {
+  outline: none;
 }
 
 .pdp-m__vs .pdp-m__pt-body {
@@ -4491,7 +4496,7 @@ body.template-product.pdp-m-page #content {
 }
 
 .pdp-m__vi--ship {
-  background: #dff5f2;
+  background: #e6f6ec;
 }
 
 .pdp-m__vi--ex {
