@@ -14,6 +14,26 @@
   // Textes traduits (snippets/mobile-i18n.liquid, clés mobile.js.* des fichiers locales).
   var T = window.mobileT || function (key) { return key; };
 
+  // Fiche ouverte sur place (assets/mobile-pdp-layer.js) : ce script repart à chaque fiche. Ses minuteries et ses
+  // écouteurs sur la page s'arrêtent quand sa fiche n'y est plus — sinon ils s'additionnaient d'une fiche à l'autre
+  // (17 minuteries après 2 fiches, de 4 fois par seconde à 1 fois par seconde, sur des fiches retirées gardées en
+  // mémoire) jusqu'au plantage de la page sur téléphone (« Uffa! » de Chrome).
+  var gone = function () { return !root.isConnected; };
+  var every = function (callback, delay) {
+    var id = window.setInterval(function () {
+      if (gone()) { window.clearInterval(id); return; }
+      callback();
+    }, delay);
+    return id;
+  };
+  var listen = function (target, type, callback, options) {
+    var handler = function (event) {
+      if (gone()) { target.removeEventListener(type, handler, options); return; }
+      callback(event);
+    };
+    target.addEventListener(type, handler, options);
+  };
+
   // Mesures groupées : toutes les lectures de taille / position à l'image suivante, puis toutes les écritures. Au
   // démarrage, chaque lecture faite entre deux changements obligeait le navigateur à recalculer toute la fiche
   // (~30-60 ms chacune, 3 à 4 fois plus sur téléphone) : ~300 ms de calcul avant que la fiche puisse s'afficher.
@@ -49,9 +69,11 @@
     var drawer = document.getElementById(trigger.getAttribute('data-target') || 'brandDrawerOverlay');
     if (drawer) {
       root.appendChild(drawer);
-      new MutationObserver(function () {
+      var drawerWatch = new MutationObserver(function () {
+        if (gone()) { drawerWatch.disconnect(); return; }
         if (drawer.parentNode === document.body) root.appendChild(drawer);
-      }).observe(document.body, { childList: true });
+      });
+      drawerWatch.observe(document.body, { childList: true });
     }
     slot.hidden = false;
   })();
@@ -78,7 +100,7 @@
       });
     };
     syncHeight();
-    window.addEventListener('resize', syncHeight);
+    listen(window, 'resize', syncHeight);
 
     var toastBox = root.querySelector('[data-pdp-toast]');
     var toastTimer = null;
@@ -125,7 +147,7 @@
       event.stopPropagation();
       setMenu(menu.hidden);
     });
-    document.addEventListener('click', function (event) {
+    listen(document, 'click', function (event) {
       if (!menu.hidden && !menu.contains(event.target)) setMenu(false);
     });
 
@@ -210,7 +232,7 @@
       ticking = true;
       measure(readTabs, applyTabs);
     };
-    window.addEventListener('scroll', queueSync, { passive: true });
+    listen(window, 'scroll', queueSync, { passive: true });
     // Hauteurs qui changent sans défilement (avis de l'app, produits « Consigliati » chargés après) : onglet actif recalculé.
     if ('ResizeObserver' in window) new ResizeObserver(queueSync).observe(root);
     queueSync();
@@ -395,7 +417,7 @@
     box.querySelectorAll('[data-pdp-lb-step]').forEach(function (button) {
       button.addEventListener('click', function () { show(index + Number(button.getAttribute('data-pdp-lb-step')), true); });
     });
-    document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && !box.hidden) close(); });
+    listen(document, 'keydown', function (event) { if (event.key === 'Escape' && !box.hidden) close(); });
 
     return {
       // srcs : adresses des photos ; done(index) : appelé à la fermeture avec la photo affichée.
@@ -472,7 +494,7 @@
   };
   if (timer) {
     tick();
-    window.setInterval(tick, 1000);
+    every(tick, 1000);
   }
 
   /* « Riscuoti » : ajoute le vrai code au panier (/cart/update.js, en gardant les codes déjà saisis) ; Shopify le reprend
@@ -663,7 +685,7 @@
   if (idInput) {
     // Le thème met à jour l'identifiant de variante après coup, sans événement fiable : on le compare
     // régulièrement (simple lecture d'une valeur, coût négligeable), seulement quand la page est visible.
-    window.setInterval(function () {
+    every(function () {
       if (document.hidden) return;
       applyChosenVariant();
       applyQuantity();
@@ -1319,7 +1341,7 @@
   };
   if (shipTimer) {
     tickShip();
-    window.setInterval(tickShip, 1000);
+    every(tickShip, 1000);
   }
 
   /* ---------- Feuilles « Protections », « Garantie commande » et « Conditions du coupon » (snippets/pdp-mobile-protect.liquid,
@@ -1493,7 +1515,7 @@
     return Boolean(pointsMatch && creditText);
   };
   var rewardTries = 0;
-  var rewardTimer = window.setInterval(function () {
+  var rewardTimer = every(function () {
     rewardTries += 1;
     if (readRewards() || rewardTries > 40) window.clearInterval(rewardTimer);
   }, 500);
@@ -2226,7 +2248,7 @@
     var scan = function () { document.querySelectorAll('klarna-placement').forEach(fix); };
     scan();
     // L'app crée et remplace son bloc après coup (et la fiche ouverte sur place le recrée) : surveillé 90 s.
-    var klarnaTimer = window.setInterval(scan, 200);
+    var klarnaTimer = every(scan, 200);
     window.setTimeout(function () { window.clearInterval(klarnaTimer); }, 90000);
   })();
 
@@ -2288,7 +2310,7 @@
     if (!readAppRating()) {
       // Relue aussi chaque seconde (30 s au plus) : l'app finit parfois son affichage sans changement observé.
       var ratingTries = 0;
-      var ratingTimer = window.setInterval(function () {
+      var ratingTimer = every(function () {
         ratingTries += 1;
         if (readAppRating() || ratingTries >= 30) {
           window.clearInterval(ratingTimer);
@@ -2587,9 +2609,9 @@
       });
       live.querySelectorAll('input, select, textarea').forEach(copyField);
     };
-    document.addEventListener('input', dynamicSync);
-    document.addEventListener('change', dynamicSync);
-    window.setInterval(function () {
+    listen(document, 'input', dynamicSync);
+    listen(document, 'change', dynamicSync);
+    every(function () {
       if (!document.hidden) dynamicSync();
     }, 500);
   })();

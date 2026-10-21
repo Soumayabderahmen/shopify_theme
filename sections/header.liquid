@@ -330,6 +330,8 @@
   {%- endif -%}
 </div>
 
+{%- comment -%} Caches du téléphone vidés quand le site change (avant les scripts qui les lisent). {%- endcomment -%}
+{%- render 'mobile-cache-version', menu: mobile_category_menu -%}
 {%- render 'mobile-bottom-navigation', menu: mobile_category_menu -%}
 
 <script>

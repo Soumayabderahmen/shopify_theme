@@ -1,0 +1,73 @@
+{%- comment -%}
+  Caches du téléphone vidés quand le site change (mobile uniquement, rendu par sections/header.liquid avant les scripts
+  qui les lisent : assets/mobile-temu-header.js, assets/mobile-pdp-layer.js… sont chargés en « defer »).
+
+  Version du site = empreinte de ce qui change le contenu gardé :
+  - fichiers du thème (adresse ?v=… de chaque fichier, nouvelle à chaque mise à jour du fichier) ;
+  - nombre de produits et de collections (produit ou collection ajoutés / supprimés) ;
+  - menu de Categoria (titres, liens et sous-menus) ;
+  - cache_epoch : à augmenter à la main pour tout vider (par ex. après une modification d'un fichier .liquid seul).
+  Version différente de celle gardée dans le téléphone → caches de contenu vidés, nouvelle version retenue.
+
+  Vidés : panneau Categoria et listes (IndexedDB PlatinumMobileCategoryCache), liste des fichiers de la fiche
+  (pdpSwapCfg1), produits vus gardés (mobileRecentProductCache), listes des pages collection (clm_hist:…) et
+  tendances de recherche de la session (ps_trend_meta_v2).
+  Gardés (choix du client) : favoris, articles vus, recherches récentes, taille, minuteurs, affichage en colonnes.
+
+  Paramètre : menu (menu de Categoria).
+{%- endcomment -%}
+{%- liquid
+  assign cache_epoch = 1
+  assign cache_assets = 'mobile-temu-header.js,mobile-temu-header.css,mobile-pdp-layer.js,pdp-mobile.js,pdp-mobile.css,mobile-home-shein.js,mobile-home-shein.css,mshein-card.js,mshein-card.css,collection-mobile.js,collection-mobile.css,mobile-search.js' | split: ','
+  capture cache_sign
+    echo cache_epoch
+    echo '|' | append: shop.products_count | append: '|' | append: collections.size
+    for asset_name in cache_assets
+      echo asset_name | asset_url
+    endfor
+    # Menu : nom stable du lien (handle, même dans toutes les langues) et adresse sans paramètres ni préfixe de langue
+    # (un lien d'app, « My Wishlist », porte un jeton signé nouveau à chaque requête : la version changeait sans cesse).
+    if menu != blank
+      assign lang_prefix = routes.root_url
+      for link in menu.links
+        assign path = link.url | split: '?' | first
+        if lang_prefix != '/'
+          assign path = path | remove_first: lang_prefix
+        endif
+        echo link.handle | append: path | append: link.links.size
+        for child in link.links
+          assign path = child.url | split: '?' | first
+          if lang_prefix != '/'
+            assign path = path | remove_first: lang_prefix
+          endif
+          echo child.handle | append: path | append: child.links.size
+          for grandchild in child.links
+            assign path = grandchild.url | split: '?' | first
+            if lang_prefix != '/'
+              assign path = path | remove_first: lang_prefix
+            endif
+            echo grandchild.handle | append: path
+          endfor
+        endfor
+      endfor
+    endif
+  endcapture
+  assign cache_version = cache_sign | md5
+-%}
+<script>
+  (function () {
+    if (!window.matchMedia('(max-width: 760px)').matches) return;
+    var version = {{ cache_version | json }};
+    try {
+      if (window.localStorage.getItem('mshCacheVersion') === version) return;
+      ['pdpSwapCfg1', 'mobileRecentProductCache'].forEach(function (key) { window.localStorage.removeItem(key); });
+      for (var i = window.sessionStorage.length - 1; i >= 0; i--) {
+        var key = window.sessionStorage.key(i);
+        if (key && (key.indexOf('clm_hist:') === 0 || key === 'ps_trend_meta_v2')) window.sessionStorage.removeItem(key);
+      }
+      // Ouverture par assets/mobile-temu-header.js après : elle attend la fin de la suppression (base neuve).
+      if (window.indexedDB) window.indexedDB.deleteDatabase('PlatinumMobileCategoryCache');
+      window.localStorage.setItem('mshCacheVersion', version);
+    } catch (error) { /* stockage indisponible : rien n'est gardé, rien à vider */ }
+  })();
+</script>
