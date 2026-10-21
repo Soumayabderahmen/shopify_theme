@@ -683,29 +683,30 @@
       return checked ? radioValue(checked) : null;
     });
   };
-  // Prix de la combinaison choisie, à droite de la dernière rangée d'options : il suit chaque toucher sur une taille ou
+  // Prix de la combinaison choisie, en bas à droite de la carte des options : il suit chaque toucher sur une taille ou
   // une couleur (le prix change selon la variante), avec l'ancien prix barré en promotion.
   var optionPrice = null;
   var paintOptionPrice = function (selected) {
     var match = variants.find(function (variant) {
       return variant.options && variant.options.every(function (optionValue, i) { return optionValue === selected[i]; });
     });
-    if (!match || optionPrice === false) return;
+    if (!match) return;
     if (!optionPrice) {
-      // À droite des boutons de la dernière option quand c'est une rangée simple (« Spedizioni da » : China Mainland)
-      // ou de la ligne « Spedito da » (une seule origine). Après une grille de tailles ou des couleurs : pas de prix
-      // sous la carte (prototype v8), il est déjà dans « Aggiungi al carrello ».
-      var rows = optionsCard.querySelectorAll('[data-option-index]');
-      var row = rows.length ? rows[rows.length - 1].querySelector('.pdp-m__sz:not(.pdp-m__sz--grid), .pdp-m__from') : null;
-      if (!row) {
-        optionPrice = false;
-        return;
-      }
       optionPrice = document.createElement('div');
-      optionPrice.className = 'pdp-m__optp is-inline';
+      optionPrice.className = 'pdp-m__optp';
       optionPrice.setAttribute('aria-live', 'polite');
       optionPrice.innerHTML = '<s></s><b></b>';
-      row.appendChild(optionPrice);
+      // À droite des boutons de la dernière option quand c'est une rangée simple (« Spedizioni da » : China Mainland)
+      // ou de la ligne « Spedito da » (une seule origine) ; sous la carte, à droite, après une grille de tailles ou des
+      // couleurs (chaque couleur et chaque taille a son prix).
+      var rows = optionsCard.querySelectorAll('[data-option-index]');
+      var row = rows.length ? rows[rows.length - 1].querySelector('.pdp-m__sz:not(.pdp-m__sz--grid), .pdp-m__from') : null;
+      if (row) {
+        optionPrice.classList.add('is-inline');
+        row.appendChild(optionPrice);
+      } else {
+        optionsCard.appendChild(optionPrice);
+      }
     }
     var key = match.id + ':' + match.price;
     if (optionPrice.getAttribute('data-key') === key) return;
