@@ -52,6 +52,9 @@
   };
   var bare = function (href) { return String(href).split('?')[0].split('#')[0]; };
   var abs = function (href) { return new URL(href, window.location.href).href; };
+  // Même feuille de style quel que soit le numéro du thème (/cdn/shop/t/70/ ou /t/71/) : la liste retenue d'un autre
+  // thème ajoutait une 2e copie de screen.css, theme-xtra.css… déjà chargées par la page.
+  var sheetKey = function (href) { return bare(href).replace(/\/cdn\/shop\/t\/\d+\//, '/cdn/shop/t/'); };
 
   // Barre de chargement du thème (assets/mobile-temu-header.js) : même élément, même classe.
   var progress = function (on) {
@@ -142,7 +145,16 @@
   };
   var sheetFor = function (link) {
     var href = abs(link.getAttribute('href'));
-    var mine = addedSheets.filter(function (entry) { return bare(entry.link.href) === bare(href); })[0];
+    var mine = addedSheets.filter(function (entry) { return sheetKey(entry.link.href) === sheetKey(href); })[0];
+    var inPage = Array.prototype.some.call(document.querySelectorAll('link[rel="stylesheet"]'), function (node) {
+      return (!mine || node !== mine.link) && sheetKey(node.href) === sheetKey(href);
+    });
+    // Feuille chargée entre-temps par le thème lui-même (async-menu.css à l'ouverture du menu…) : notre copie part.
+    if (mine && inPage) {
+      if (mine.link.parentNode) mine.link.parentNode.removeChild(mine.link);
+      addedSheets.splice(addedSheets.indexOf(mine), 1);
+      return null;
+    }
     if (mine) {
       // Liste retenue d'une version précédente du thème (?v= différent) : la version demandée par la fiche gagne.
       if (mine.link.href !== href) {
@@ -151,9 +163,6 @@
       }
       return mine;
     }
-    var inPage = Array.prototype.some.call(document.querySelectorAll('link[rel="stylesheet"]'), function (node) {
-      return bare(node.href) === bare(href);
-    });
     if (inPage) return null;
     var copy = document.createElement('link');
     copy.rel = 'stylesheet';
