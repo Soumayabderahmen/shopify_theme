@@ -914,15 +914,18 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   text-transform: uppercase;
 }
 
+/* Titre sur une ligne (comme TikTok Shop), au-dessus de l'écusson en filigrane qu'il peut chevaucher. */
 #root .pdp-m .pdp-m__pt-hd h2 {
-  max-width: 64%;
+  position: relative;
+  z-index: 1;
+  max-width: none;
   margin: 8px 0 0;
   color: #16123f;
   font-family: 'Sora', system-ui, sans-serif;
-  font-size: 28px;
+  font-size: 21px;
   font-weight: 800;
-  letter-spacing: -0.8px;
-  line-height: 1.1;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
   text-transform: none;
   overflow-wrap: anywhere;
 }
@@ -934,6 +937,8 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
 }
 
 #root .pdp-m .pdp-m__pt-ds {
+  position: relative;
+  z-index: 1;
   max-width: 64%;
   margin: 10px 0 0;
   color: var(--pm-ink-2);
@@ -941,14 +946,16 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
   line-height: 1.55;
 }
 
-/* Écusson à double contour avec le monogramme PL. */
+/* Écusson en filigrane (comme TikTok Shop) : halo blanc doux, à droite sous le titre (le titre sur une ligne reste
+   dégagé), à côté de l'accroche. */
 .pdp-m__pt-cr {
   position: absolute;
-  top: 62px;
-  right: 18px;
-  width: 104px;
-  height: 122px;
-  filter: drop-shadow(0 16px 26px rgb(58 52 210 / 22%));
+  top: 106px;
+  right: 20px;
+  width: 86px;
+  height: 100px;
+  filter: drop-shadow(0 0 16px rgb(255 255 255 / 95%)) drop-shadow(0 8px 18px rgb(90 75 240 / 12%));
+  pointer-events: none;
 }
 
 .pdp-m__pt-nav {

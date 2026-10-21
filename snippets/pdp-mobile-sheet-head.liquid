@@ -16,20 +16,29 @@
 <header class="pdp-m__pt-hd">
   <span class="pdp-m__pt-brand">{% render 'pl-logo', size: 28, class: 'pdp-m__pt-plx' %}<span>{% if sh_name_tail != '' %}{{ sh_name_head | escape }}<b>{{ sh_name_tail | escape }}</b>{% else %}{{ sh_name }}{% endif %}</span></span>
   <p class="pdp-m__pt-eb">{{ eyebrow }}</p>
-  <h2 id="{{ id }}-title">{{ title_html }}</h2>
+  {%- comment -%} Titre sur une seule ligne (comme TikTok Shop) : le retour à la ligne des feuilles devient une espace. {%- endcomment -%}
+  <h2 id="{{ id }}-title">{{ title_html | replace: '<br>', ' ' }}</h2>
   <p class="pdp-m__pt-ds">{{ desc }}</p>
+  {%- comment -%}
+    Écusson en filigrane (comme TikTok Shop) aux couleurs de la boutique : écusson lavande au reflet clair en haut,
+    liseré blanc, halo doux ; monogramme PL indigo (dégradé du logo) avec son point ambre et un relief lavande (copie
+    décalée dessous). Posé à droite, sous le titre, à côté de l'accroche.
+  {%- endcomment -%}
   <svg class="pdp-m__pt-cr" viewBox="0 0 120 140" aria-hidden="true">
     <defs>
-      <linearGradient id="{{ id }}-shb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#d9e1ff"/></linearGradient>
-      <linearGradient id="{{ id }}-shs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9b4fa"/><stop offset="1" stop-color="#5a4bf0"/></linearGradient>
+      <radialGradient id="{{ id }}-shb" cx=".35" cy=".2" r=".95"><stop offset="0" stop-color="#fbfaff"/><stop offset=".55" stop-color="#ecebfd"/><stop offset="1" stop-color="#d9d6ff"/></radialGradient>
+      <linearGradient id="{{ id }}-shl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a4bf0"/><stop offset="1" stop-color="#2a22b8"/></linearGradient>
     </defs>
-    <path d="M60 5 110 23v41c0 35-22 60-50 72C32 124 10 99 10 64V23z" fill="url(#{{ id }}-shb)" stroke="url(#{{ id }}-shs)" stroke-width="1.6"/>
-    <path d="M60 14 101 29v35c0 29-18 50-41 61C37 114 19 93 19 64V29z" fill="none" stroke="#5a4bf0" stroke-width=".7" opacity=".3"/>
-    {%- comment -%} Monogramme en <svg> imbriqué (x/y) plutôt qu'un transform : le thème impose un transform-origin aux SVG, qui décalait le logo. {%- endcomment -%}
-    <svg x="37" y="44" width="46.08" height="46.08" viewBox="0 0 64 64">
-      <rect width="64" height="64" rx="16" fill="url(#pl-logo-g)"/>
-      <path fill="#fff" fill-rule="evenodd" d="M12 15h12.5a10 10 0 0 1 0 20H20v14h-8zM20 22v6h4.2a3 3 0 0 0 0-6z"/>
-      <path fill="#fff" d="M36.5 15h8v26H54v8H36.5z"/>
+    <path d="M60 5 110 23v41c0 35-22 60-50 72C32 124 10 99 10 64V23z" fill="url(#{{ id }}-shb)"/>
+    <path d="M60 13 102 28v36c0 30-18 51-42 62-24-11-42-32-42-62V28z" fill="none" stroke="#fff" stroke-width="1.6" opacity=".9"/>
+    {%- comment -%} Monogrammes en <svg> imbriqués (x/y) plutôt qu'un transform : le thème impose un transform-origin aux SVG, qui décalait le logo. {%- endcomment -%}
+    <svg x="31" y="42" width="62" height="62" viewBox="0 0 64 64">
+      <path fill="#c9c4ff" fill-rule="evenodd" d="M12 15h12.5a10 10 0 0 1 0 20H20v14h-8zM20 22v6h4.2a3 3 0 0 0 0-6z"/>
+      <path fill="#c9c4ff" d="M36.5 15h8v26H54v8H36.5z"/>
+    </svg>
+    <svg x="28" y="39" width="62" height="62" viewBox="0 0 64 64">
+      <path fill="url(#{{ id }}-shl)" fill-rule="evenodd" d="M12 15h12.5a10 10 0 0 1 0 20H20v14h-8zM20 22v6h4.2a3 3 0 0 0 0-6z"/>
+      <path fill="url(#{{ id }}-shl)" d="M36.5 15h8v26H54v8H36.5z"/>
       <circle cx="51" cy="18.5" r="3.6" fill="#ffb020"/>
     </svg>
   </svg>
