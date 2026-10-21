@@ -7,8 +7,6 @@
   class="no-js{% if request.design_mode %} theme-editor{% endif %}{% unless settings.enable_hyphens %} no-hyph{% endunless %}"
 >
   <head>
-   {%- include 'tapita-seo-schema' -%}   
-
    {%- include 'tapita-seo-schema' -%}
 
     <!-- Added by AVADA SEO Suite -->
@@ -593,64 +591,10 @@
     {{ settings.custom_script_for_body }}
     {% render 'beacon' %}
     {% render 'indexeddb-cache' %}
-    <script>
-      (function () {
-        // Prevent redirect loops
-        if (sessionStorage.getItem('geo_redirected')) return;
-
-        const currentPath = window.location.pathname;
-
-        // Use Shopify's built-in localization object via a fetch
-        fetch('/localization.json')
-          .then((res) => res.json())
-          .then((data) => {
-            const country = data.country && data.country.iso_code ? data.country.iso_code.toUpperCase() : null;
-
-            if (!country) return;
-
-            // Map country codes → your language URL prefix
-            const countryLangMap = {
-              // English-speaking countries → /en
-              US: '/en',
-              GB: '/en',
-              AU: '/en',
-              CA: '/en',
-              IE: '/en',
-              NZ: '/en',
-              JM: '/en',
-              BZ: '/en',
-              // French-speaking countries → /fr
-              FR: '/fr',
-              BE: '/fr',
-              CH: '/fr',
-              LU: '/fr',
-              HT: '/fr',
-              MC: '/fr',
-              // Spanish-speaking countries → /en (no Spanish yet, fallback English)
-              MX: '/en',
-              GT: '/en',
-              CR: '/en',
-              PA: '/en',
-              DO: '/en',
-              NI: '/en',
-              HN: '/en',
-              SV: '/en',
-              // Italian stays default (no prefix)
-              IT: null,
-            };
-
-            const targetPrefix = countryLangMap.hasOwnProperty(country) ? countryLangMap[country] : '/en'; // Default to English for unknown countries
-
-            if (targetPrefix && !currentPath.startsWith(targetPrefix)) {
-              sessionStorage.setItem('geo_redirected', 'true');
-              window.location.replace(targetPrefix + currentPath);
-            }
-          })
-          .catch(() => {}); // Fail silently if fetch fails
-      })();
-    </script>
-    <!-- Script di Prefetching Istantaneo per Shopify -->
-    {%- comment -%} Mobile : fiche produit ouverte par-dessus la page, retour instantané (inactif sur ordinateur). {%- endcomment -%}
+    {%- comment -%}
+      Mobile : fiche produit ouverte sur place, par-dessus la page (préchargement des fiches des cartes, aperçu qui
+      glisse, retour instantané) — assets/mobile-pdp-layer.js, inactif sur ordinateur.
+    {%- endcomment -%}
     {%- unless template.name == 'product' -%}
       {%- comment -%} data-pdp-assets : adresses actuelles des fichiers propres à la fiche (la liste retenue par le
       téléphone gardait celles d'avant une mise à jour). {%- endcomment -%}
