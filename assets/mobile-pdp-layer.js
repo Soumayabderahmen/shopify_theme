@@ -75,6 +75,26 @@
   var CFG_KEY = 'pdpSwapCfg1';
   var cfg = null;
   try { cfg = JSON.parse(window.localStorage.getItem(CFG_KEY) || 'null'); } catch (error) { cfg = null; }
+  // Liste retenue lors d'une visite précédente : les fichiers du thème qu'elle cite sont remis à leur version actuelle
+  // (adresses données par layout/theme.liquid et celles de la page). Sans cela, après une mise à jour du thème, les
+  // fiches ouvertes sur place prenaient l'ancien pdp-mobile.css / pdp-mobile.js (affichage d'avant les corrections).
+  var THEME_ASSET = /\/cdn\/shop\/t\/\d+\/assets\/([^?"#\s]+)/;
+  var currentAssets = {};
+  var addAsset = function (url) {
+    var match = THEME_ASSET.exec(url || '');
+    if (match) currentAssets[match[1]] = url;
+  };
+  String((document.currentScript && document.currentScript.getAttribute('data-pdp-assets')) || '').split(/\s+/).forEach(addAsset);
+  document.querySelectorAll('link[rel="stylesheet"][href*="/cdn/shop/t/"], script[src*="/cdn/shop/t/"]').forEach(function (node) {
+    addAsset(node.getAttribute('href') || node.getAttribute('src'));
+  });
+  if (cfg && cfg.head) {
+    cfg.head = cfg.head.replace(/(href|src)="([^"]+)"/g, function (whole, attr, url) {
+      var match = THEME_ASSET.exec(url.replace(/&amp;/g, '&'));
+      var fresh = match && currentAssets[match[1]];
+      return fresh ? attr + '="' + fresh.replace(/&/g, '&amp;') + '"' : whole;
+    });
+  }
   var learn = function (doc) {
     var productMain = doc.getElementById('content');
     if (!productMain) return;
@@ -143,6 +163,41 @@
       entry.link.onerror = resolve;
     });
   };
+  // Feuilles d'une page lue par DOMParser : celles des <noscript> y deviennent de vraies balises (async-menu.css,
+  // drawer1product-style.css… comptées deux fois) et sont ignorées.
+  var sheetLinks = function (doc) {
+    return Array.prototype.filter.call(doc.querySelectorAll('link[rel="stylesheet"]'), function (link) {
+      return !link.closest('noscript');
+    });
+  };
+  // Scripts de la fiche absents de la page (pdp-mobile.js, spec-i18n.js, drower-product.js…) : téléchargés d'avance
+  // avec ses styles, ils s'exécutent dès l'ouverture au lieu d'attendre le réseau l'un après l'autre.
+  var preloaded = {};
+  // Scripts de mise en forme de la fiche (et ses textes traduits) : leur texte est gardé et exécuté directement à
+  // l'insertion, sans attendre leur tour derrière les minuteries des apps (Clarity, pixels…) : ~0,5 s de gagné.
+  var CORE = /\/(?:pdp-mobile|spec-i18n)\.js/;
+  var coreText = {};
+  var warmScripts = function (doc) {
+    doc.querySelectorAll('script[src]').forEach(function (script) {
+      var src = abs(script.getAttribute('src'));
+      var key = bare(src);
+      if (CORE.test(key) && !(src in coreText)) {
+        coreText[src] = null;
+        fetch(src, { credentials: 'same-origin' })
+          .then(function (response) { return response.ok ? response.text() : null; })
+          .then(function (text) { if (text) coreText[src] = text; else delete coreText[src]; })
+          .catch(function () { delete coreText[src]; });
+      }
+      if (preloaded[key] || ran[key]) return;
+      preloaded[key] = true;
+      if (Array.prototype.some.call(document.scripts, function (mine) { return mine.src && bare(mine.src) === key; })) return;
+      var hint = document.createElement('link');
+      hint.rel = 'preload';
+      hint.as = 'script';
+      hint.href = src;
+      document.head.appendChild(hint);
+    });
+  };
   var sheetFor = function (link) {
     var href = abs(link.getAttribute('href'));
     var mine = addedSheets.filter(function (entry) { return sheetKey(entry.link.href) === sheetKey(href); })[0];
@@ -168,18 +223,22 @@
     copy.rel = 'stylesheet';
     copy.href = href;
     copy.media = 'not all';
-    var entry = { link: copy, media: link.getAttribute('media') || 'all' };
+    // Chargement différé du thème (media « print » remis à « all » par son onload, layout/theme.liquid) : actif partout.
+    var media = link.getAttribute('media') || 'all';
+    if (media === 'print' && /media/.test(link.getAttribute('onload') || '')) media = 'all';
+    var entry = { link: copy, media: media };
     watchReady(entry);
     addedSheets.push(entry);
     document.head.appendChild(copy);
     return entry;
   };
   var warmStyles = function (doc) {
-    doc.querySelectorAll('link[rel="stylesheet"]').forEach(sheetFor);
+    sheetLinks(doc).forEach(sheetFor);
+    warmScripts(doc);
   };
   var loadStyles = function (doc) {
     var waits = [];
-    doc.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
+    sheetLinks(doc).forEach(function (link) {
       var entry = sheetFor(link);
       if (!entry) return;
       entry.link.media = entry.media;
@@ -233,6 +292,15 @@
         ran[key] = true;
       }
       var script = document.createElement('script');
+      var text = src ? coreText[abs(src)] : null;
+      if (text) {
+        // Texte déjà téléchargé (warmScripts) : exécuté tout de suite, à l'insertion.
+        script.textContent = text + '\n//# sourceURL=' + abs(src);
+        if (old.parentNode) old.parentNode.replaceChild(script, old);
+        else document.body.appendChild(script);
+        resolve();
+        return;
+      }
       Array.prototype.forEach.call(old.attributes, function (attribute) { script.setAttribute(attribute.name, attribute.value); });
       if (src) {
         // Pas de script.async = false : l'ordre est déjà tenu par la chaîne (chaque script attend la fin du précédent).
@@ -250,7 +318,8 @@
     });
   };
 
-  var runScripts = function (nodes, headScripts) {
+  // onCore : appelé dès que pdp-mobile.js a mis la fiche en forme (sans attendre les scripts des apps derrière lui).
+  var runScripts = function (nodes, headScripts, onCore) {
     var list = [];
     nodes.forEach(function (node) {
       if (node.tagName === 'SCRIPT') list.push(node);
@@ -261,10 +330,16 @@
     // derrière eux ~0,8 s avant de démarrer. Les autres gardent leur ordre (pdp-mobile.js a besoin de spec-i18n.js).
     var platform = function (script) { return /\/cdn\/shopifycloud\//.test(script.getAttribute('src') || ''); };
     list = list.filter(function (script) { return !platform(script); }).concat(list.filter(platform));
+    // pdp-mobile.js (et spec-i18n.js avant lui) en tête : la fiche est mise en forme avant les scripts des apps de la
+    // fiche (wishlist, guide des tailles, Klarna, Ali Reviews), dont il ne dépend pas.
+    var coreEnd = -1;
+    headScripts.forEach(function (script, i) { if (RERUN.test(script.getAttribute('src') || '')) coreEnd = i; });
+    var ordered = headScripts.slice(0, coreEnd + 1).concat(list, headScripts.slice(coreEnd + 1));
     var restore = patchReady();
     var chain = Promise.resolve();
-    list.concat(headScripts).forEach(function (script) {
+    ordered.forEach(function (script) {
       chain = chain.then(function () { return runScript(script); }).catch(function (error) { console.error(error); });
+      if (onCore && RERUN.test(script.getAttribute('src') || '')) chain = chain.then(onCore);
     });
     return chain.then(function () {
       // Laisse partir les fonctions « prêt » différées avant de rendre les écouteurs d'origine.
@@ -602,18 +677,30 @@
       added.some(function (node) {
         var track = node.querySelector && node.querySelector('[data-pdp-slides]');
         if (!track) return false;
-        track.scrollLeft = startIndex * track.clientWidth;
+        // Galerie pleine largeur : largeur de l'écran, sans lire la mise en page (un recalcul complet de la fiche).
+        track.scrollLeft = startIndex * window.innerWidth;
         var count = node.querySelector('[data-pdp-count]');
         if (count) count.textContent = (startIndex + 1) + ' / ' + track.children.length;
         return true;
       });
     }
-    removeSkeleton(true);
+    // L'aperçu reste par-dessus jusqu'à la mise en forme par assets/pdp-mobile.js (galerie, options, badges déplacés,
+    // textes traduits…) : sur téléphone la fiche se montrait d'abord brute, une à plusieurs secondes. 2,5 s au plus.
+    var cover = skeleton;
+    var reveal = function () {
+      var node = cover;
+      cover = null;
+      if (node && skeleton === node) window.requestAnimationFrame(function () { if (skeleton === node) removeSkeleton(true); });
+    };
+    window.setTimeout(reveal, 2500);
     var scripts = headScripts.map(function (script) { return document.importNode(script, true); });
     // Moment où la fiche apparaît : la feuille « Vantaggi esclusivi » de assets/pdp-mobile.js s'ouvre 5 s après.
     window.msheinPdpShownAt = Date.now();
     reviewsBefore();
-    return runScripts(added, scripts).then(initTheme);
+    return runScripts(added, scripts, reveal).then(function () {
+      reveal();
+      initTheme();
+    });
   };
 
   // Aperçu immédiat, dès le toucher : photo, titre et prix de la carte touchée sur une page blanche (en-tête avec
@@ -658,7 +745,8 @@
       check();
     });
   };
-  var showSkeleton = function (link) {
+  // started : appelé quand le glissement de l'aperçu est lancé (tout de suite sans animation).
+  var showSkeleton = function (link, started) {
     removeSkeleton();
     // Carte entière (le lien de la photo a lui-même « card » dans sa classe : on remonte au-dessus).
     var card = link && (link.closest('li') || link.closest('article') ||
@@ -709,17 +797,14 @@
         '</div>' +
       '</div>';
     // Retour : l'adresse du produit est déjà posée (cas normal) ou pas encore (toucher dans les premières ms).
-    skeleton.querySelector('[data-skeleton-back]').addEventListener('click', function () {
-      if (window.history.state && window.history.state.pdpSwap) window.history.back();
-      else close();
-    });
+    skeleton.querySelector('[data-skeleton-back]').addEventListener('click', goBack);
     document.body.appendChild(skeleton);
     // Glissement depuis la droite par l'API d'animation du navigateur (pas de lecture de mise en page forcée, qui
     // recalculait toute la page au toucher) ; aucun mouvement si le visiteur a demandé moins d'animations.
     skeletonUntil = 0;
     var panel = skeleton.querySelector('[data-skeleton-panel]');
     var dim = skeleton.querySelector('[data-skeleton-dim]');
-    if (!motion()) return;
+    if (!motion()) { if (started) started(); return; }
     // Hors écran à droite au premier affichage, puis glissement lancé une fois cette image affichée (sinon un travail
     // lourd juste après le toucher mangeait le début du glissement). La fiche prête attend la fin (afterSlide).
     panel.style.transform = 'translateX(100%)';
@@ -727,6 +812,8 @@
     skeletonUntil = Date.now() + 400;
     var node = skeleton;
     afterNextPaint(function () {
+      // Toujours appelé (adresse du produit), même si l'aperçu a déjà été remplacé ; son travail part au tour suivant.
+      if (started) started();
       if (skeleton !== node) return;
       skeletonUntil = Date.now() + 280;
       var easing = { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' };
@@ -749,7 +836,22 @@
     var base = Object.assign({}, state);
     delete base.pdpSwap;
     delete base.pdpY;
-    window.history.pushState(Object.assign(base, { pdpSwap: href }), '', href);
+    // pdpFrom : étape précédente = une autre fiche (produit recommandé) ; sinon la page d'origine (retour anticipé).
+    window.history.pushState(Object.assign(base, { pdpSwap: href, pdpFrom: !!saved }), '', href);
+  };
+
+  // Retour par la flèche (fiche ou aperçu). Étape précédente = la page d'origine : elle est remise et la fiche glisse
+  // dès ce toucher, puis l'adresse revient (history.back) — sans attendre l'événement « popstate », qui n'arrive
+  // qu'après le travail des apps (enregistreurs, pixels) sur un téléphone.
+  var backPending = false;
+  var goBack = function () {
+    var state = window.history.state;
+    if (!state || !state.pdpSwap) { close(); return; }
+    if (!state.pdpFrom) {
+      close();
+      backPending = true;
+    }
+    window.history.back();
   };
 
   var open = function (href, push, link) {
@@ -762,10 +864,10 @@
       closeOverlays();
       // Position de la page au toucher (sous l'aperçu, la page peut encore bouger avant l'arrivée de la fiche).
       if (!saved) openY = window.scrollY;
-      showSkeleton(link);
-      // Adresse du produit posée juste après la première image du glissement : une app (enregistreur de sessions)
-      // intercepte history.pushState / replaceState et travaille à chaque appel (~130 ms), ce qui retardait l'aperçu.
-      window.requestAnimationFrame(function () {
+      // Adresse du produit posée une fois le glissement de l'aperçu lancé (il tourne alors sur le compositeur) : une app
+      // (enregistreur de sessions) intercepte history.pushState et travaille à chaque appel (~110 ms), ce qui
+      // retardait le départ du glissement à ~340 ms.
+      showSkeleton(link, function () {
         window.setTimeout(function () { if (mine === token) pushProduct(href); }, 0);
       });
     }
@@ -795,8 +897,8 @@
     active: function () { return !!saved; },
     // Fiche ouverte, ou fermée à l'instant (même retour) : la page est remise en place ici, les onglets de l'accueil
     // (assets/mobile-home-tabs.js) n'ont pas à refaire leur défilement / mesure.
-    handlesBack: function () { return !!saved || Date.now() - closedAt < 100; },
-    back: function () { window.history.back(); }
+    handlesBack: function () { return !!saved || backPending || Date.now() - closedAt < 100; },
+    back: function () { goBack(); }
   };
 
   var productLink = function (event) {
@@ -832,7 +934,11 @@
     var budget = 24;
     var busy = false;
     var timers = new WeakMap();
-    var idle = window.requestIdleCallback || function (fn) { return window.setTimeout(fn, 200); };
+    // 1 s au plus d'attente : sur téléphone les apps occupent le navigateur sans pause, et les fiches n'étaient
+    // presque jamais préchargées (le toucher attendait alors le réseau derrière l'aperçu).
+    var idle = window.requestIdleCallback
+      ? function (fn) { return window.requestIdleCallback(fn, { timeout: 1000 }); }
+      : function (fn) { return window.setTimeout(fn, 200); };
     var pump = function () {
       if (busy || !queue.length || budget <= 0 || saved || !mobile.matches) return;
       busy = true;
@@ -877,6 +983,17 @@
     }).observe(main, { childList: true, subtree: true });
   })();
 
+  // Flèche retour de la fiche (lien vers l'accueil, snippets/pdp-mobile-top.liquid) : prise ici, avant
+  // assets/pdp-mobile.js. Touchée avant que ce script ne démarre (téléphone lent), elle rechargeait tout l'accueil
+  // (plusieurs secondes) au lieu de faire glisser la fiche sur la page d'origine.
+  document.addEventListener('click', function (event) {
+    var back = event.target.closest ? event.target.closest('[data-pdp-back]') : null;
+    if (!back || !saved) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    goBack();
+  }, true);
+
   document.addEventListener('click', function (event) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     var url = productLink(event);
@@ -888,6 +1005,11 @@
 
   // Retour / avance : l'adresse décide (le thème remplace l'état de l'étape au changement de variante).
   window.addEventListener('popstate', function () {
+    // Retour déjà fait au toucher de la flèche (goBack) : l'adresse rattrape seulement.
+    if (backPending) {
+      window.setTimeout(function () { backPending = false; }, 0);
+      return;
+    }
     var url = new URL(window.location.href);
     if (isProduct(url)) {
       if (bare(url.href) !== current) open(url.href, false);

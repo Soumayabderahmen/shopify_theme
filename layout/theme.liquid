@@ -652,7 +652,9 @@
     <!-- Script di Prefetching Istantaneo per Shopify -->
     {%- comment -%} Mobile : fiche produit ouverte par-dessus la page, retour instantané (inactif sur ordinateur). {%- endcomment -%}
     {%- unless template.name == 'product' -%}
-      <script src="{{ 'mobile-pdp-layer.js' | asset_url }}" defer></script>
+      {%- comment -%} data-pdp-assets : adresses actuelles des fichiers propres à la fiche (la liste retenue par le
+      téléphone gardait celles d'avant une mise à jour). {%- endcomment -%}
+      <script src="{{ 'mobile-pdp-layer.js' | asset_url }}" defer data-pdp-assets="{{ 'pdp-mobile.css' | asset_url }} {{ 'pdp-mobile.js' | asset_url }} {{ 'spec-i18n.js' | asset_url }} {{ 'page-product.css' | asset_url }} {{ 'size-info.js' | asset_url }}"></script>
     {%- endunless -%}
   </body>
 </html>

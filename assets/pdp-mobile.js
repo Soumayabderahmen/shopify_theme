@@ -14,6 +14,23 @@
   // Textes traduits (snippets/mobile-i18n.liquid, clés mobile.js.* des fichiers locales).
   var T = window.mobileT || function (key) { return key; };
 
+  // Mesures groupées : toutes les lectures de taille / position à l'image suivante, puis toutes les écritures. Au
+  // démarrage, chaque lecture faite entre deux changements obligeait le navigateur à recalculer toute la fiche
+  // (~30-60 ms chacune, 3 à 4 fois plus sur téléphone) : ~300 ms de calcul avant que la fiche puisse s'afficher.
+  var measureJobs = null;
+  var measure = function (read, write) {
+    if (!measureJobs) {
+      measureJobs = [];
+      window.requestAnimationFrame(function () {
+        var jobs = measureJobs;
+        measureJobs = null;
+        var values = jobs.map(function (job) { return job.read(); });
+        jobs.forEach(function (job, i) { if (job.write) job.write(values[i]); });
+      });
+    }
+    measureJobs.push({ read: read, write: write });
+  };
+
   // Marques officielles : bande « Negozio Ufficiale del Marchio » (avec sa fenêtre) et badges Official Store /
   // Star seller / Brand Official, déplacés depuis l'ancien bloc produit jusque sous les photos (snippets/pdp-mobile-top.liquid).
   (function () {
@@ -56,7 +73,9 @@
     var row = header.querySelector('.pdp-m__hdr');
     // Hauteur de la ligne de l'en-tête : barres collées dessous (puces de « Potrebbe piacerti anche »).
     var syncHeight = function () {
-      if (row.offsetHeight > 0) document.documentElement.style.setProperty('--mshein-header-h', row.offsetHeight + 'px');
+      measure(function () { return row.offsetHeight; }, function (height) {
+        if (height > 0) document.documentElement.style.setProperty('--mshein-header-h', height + 'px');
+      });
     };
     syncHeight();
     window.addEventListener('resize', syncHeight);
@@ -169,28 +188,32 @@
     var chips = root.querySelector('[data-pdp-rchips]');
     var relatedBox = root.querySelector('[data-pdp-related]');
     var ticking = false;
-    var syncTabs = function () {
-      ticking = false;
+    // Lecture des positions, puis écriture des classes (jamais l'une entre les autres).
+    var readTabs = function () {
       var rowBottom = row.getBoundingClientRect().bottom;
       var chipsStuck = chips && relatedBox && !relatedBox.hidden && relatedBox.getBoundingClientRect().top < rowBottom && chips.getBoundingClientRect().top <= rowBottom + 1;
-      header.classList.toggle('has-tabs', Boolean(gallery && gallery.getBoundingClientRect().bottom < rowBottom) && !chipsStuck);
       var line = rowBottom + 60;
       var active = 0;
       tabButtons.forEach(function (button, index) {
         var target = targetOf(button);
         if (target && !target.hidden && target.getBoundingClientRect().top <= line) active = index;
       });
-      tabButtons.forEach(function (button, index) { button.classList.toggle('is-on', index === active); });
+      return { on: Boolean(gallery && gallery.getBoundingClientRect().bottom < rowBottom) && !chipsStuck, active: active };
+    };
+    var applyTabs = function (state) {
+      ticking = false;
+      header.classList.toggle('has-tabs', state.on);
+      tabButtons.forEach(function (button, index) { button.classList.toggle('is-on', index === state.active); });
     };
     var queueSync = function () {
       if (ticking) return;
       ticking = true;
-      window.requestAnimationFrame(syncTabs);
+      measure(readTabs, applyTabs);
     };
     window.addEventListener('scroll', queueSync, { passive: true });
     // Hauteurs qui changent sans défilement (avis de l'app, produits « Consigliati » chargés après) : onglet actif recalculé.
     if ('ResizeObserver' in window) new ResizeObserver(queueSync).observe(root);
-    syncTabs();
+    queueSync();
     tabButtons.forEach(function (button) {
       button.addEventListener('click', function () {
         var target = targetOf(button);
@@ -1144,8 +1167,13 @@
      couleur choisie visible dans la rangée, aperçu de sa vraie photo quand la galerie est hors de l'écran. ---------- */
   var colorRows = optionsCard ? Array.prototype.slice.call(optionsCard.querySelectorAll('.pdp-m__sw')) : [];
   var centerChecked = function (list) {
-    var checked = list.querySelector('[aria-checked="true"]');
-    if (checked && !list.classList.contains('is-all')) list.scrollLeft = checked.offsetLeft - (list.clientWidth - checked.offsetWidth) / 2;
+    measure(function () {
+      var checked = list.querySelector('[aria-checked="true"]');
+      if (!checked || list.classList.contains('is-all')) return null;
+      return checked.offsetLeft - (list.clientWidth - checked.offsetWidth) / 2;
+    }, function (left) {
+      if (left !== null) list.scrollLeft = left;
+    });
   };
   colorRows.forEach(function (list) {
     var block = list.closest('[data-option-index]');
@@ -1425,7 +1453,10 @@
   if (firstVariant && firstVariant.media && slides) {
     var startSlide = slides.querySelector('[data-media-id="' + firstVariant.media + '"]');
     var startIndex = startSlide ? Array.prototype.indexOf.call(slides.children, startSlide) : -1;
-    if (startIndex > 0) goToSlide(startIndex, false);
+    if (startIndex > 0) measure(function () { return slides.clientWidth; }, function (width) {
+      slides.scrollLeft = startIndex * width;
+      setCurrent(startIndex);
+    });
   }
 
   /* ---------- Fidélité : textes des apps (points Honeypop, crédit boutique) ---------- */
@@ -2037,7 +2068,11 @@
     box.className = 'pdp-m__clamp';
     blocks.forEach(function (block) { box.appendChild(block); });
     section.appendChild(box);
-    if (box.scrollHeight <= 230) return;
+    measure(function () { return box.scrollHeight; }, function (height) {
+      if (height > 230) clampBox(section, box);
+    });
+  };
+  var clampBox = function (section, box) {
     box.classList.add('is-clamped');
     var more = T('read_more');
     var less = T('show_less');
@@ -2068,9 +2103,13 @@
         var on = tab.getAttribute('data-pdp-tab') === key;
         tab.setAttribute('aria-selected', on ? 'true' : 'false');
         if (on) {
-          indicator.style.width = tab.offsetWidth + 'px';
-          indicator.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
-          tabsIn.scrollTo({ left: tab.offsetLeft - (tabsIn.clientWidth - tab.offsetWidth) / 2, behavior: 'smooth' });
+          measure(function () {
+            return { width: tab.offsetWidth, left: tab.offsetLeft, box: tabsIn.clientWidth };
+          }, function (size) {
+            indicator.style.width = size.width + 'px';
+            indicator.style.transform = 'translateX(' + size.left + 'px)';
+            tabsIn.scrollTo({ left: size.left - (size.box - size.width) / 2, behavior: 'smooth' });
+          });
         }
       });
     };
