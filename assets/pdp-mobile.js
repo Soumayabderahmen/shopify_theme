@@ -7,6 +7,10 @@
 
   var root = document.querySelector('[data-pdp-mobile]');
   if (!root || !window.matchMedia('(max-width: 760px)').matches) return;
+  // Apparition de la fiche : la feuille « Vantaggi esclusivi » s'ouvre 5 s après. Fiche ouverte sur place : moment où
+  // assets/mobile-pdp-layer.js l'a affichée (ce script ne démarre qu'après d'autres) ; page chargée : maintenant.
+  var pdpStart = window.msheinPdpShownAt || Date.now();
+  window.msheinPdpShownAt = 0;
   // Textes traduits (snippets/mobile-i18n.liquid, clés mobile.js.* des fichiers locales).
   var T = window.mobileT || function (key) { return key; };
 
@@ -1356,14 +1360,14 @@
       });
     });
   });
-  // Feuille « Vantaggi esclusivi » ouverte d'elle-même 2 s après l'ouverture de chaque fiche ; pas si une autre feuille
+  // Feuille « Vantaggi esclusivi » ouverte d'elle-même 5 s après l'ouverture de chaque fiche ; pas si une autre feuille
   // est déjà ouverte, si l'onglet est caché ou si le client a quitté la fiche entre-temps (fiche ouverte sur place).
   var vantButton = root.querySelector('.pdp-m__vant');
   if (vantButton) {
     window.setTimeout(function () {
       if (!document.body.contains(vantButton) || document.hidden || document.querySelector('dialog[open]')) return;
       vantButton.click();
-    }, 2000);
+    }, Math.max(0, 5000 - (Date.now() - pdpStart)));
   }
   /* ---------- Livraison gratuite : seuil des réglages du thème dans la devise du client ----------
      En euros (devise de la boutique) : seuil du Liquid (data-threshold). Autres devises (data-threshold = 0) : Shopify
@@ -1416,6 +1420,13 @@
   });
   var firstVariant = variants.find(function (item) { return String(item.id) === lastVariantId; }) || variants[0];
   if (firstVariant) updateShipping(firstVariant.price);
+  // Galerie ouverte sur la photo de la variante affichée (celle de la carte touchée : première variante disponible),
+  // comme SHEIN ; elle partait toujours de la photo 1 (carte verte, fiche ouverte sur la photo beige).
+  if (firstVariant && firstVariant.media && slides) {
+    var startSlide = slides.querySelector('[data-media-id="' + firstVariant.media + '"]');
+    var startIndex = startSlide ? Array.prototype.indexOf.call(slides.children, startSlide) : -1;
+    if (startIndex > 0) goToSlide(startIndex, false);
+  }
 
   /* ---------- Fidélité : textes des apps (points Honeypop, crédit boutique) ---------- */
   var rewards = root.querySelector('[data-pdp-rewards]');

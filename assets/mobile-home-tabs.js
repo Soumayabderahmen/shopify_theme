@@ -1430,6 +1430,9 @@
     return baseIndex;
   };
   window.addEventListener('popstate', function (event) {
+    // Retour depuis une fiche ouverte sur place : assets/mobile-pdp-layer.js remet la page à sa position (et la fait
+    // glisser) ; refaire ici le défilement et la mesure de la page retardait le glissement.
+    if (window.__pdpSwap && window.__pdpSwap.handlesBack && window.__pdpSwap.handlesBack()) return;
     var state = event.state;
     var index = state && typeof state.mshTab === 'number' ? state.mshTab : tabFromHash();
     var y = state && state.mshY ? state.mshY : 0;

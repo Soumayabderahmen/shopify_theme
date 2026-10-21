@@ -126,32 +126,56 @@
     if (hit && Date.now() - hit.time < 180000) return hit.promise;
     var promise = (cfg ? fetchSections(href).catch(function () { return fetchFull(href); }) : fetchFull(href));
     cache[key] = { time: Date.now(), promise: promise };
-    promise.catch(function () { delete cache[key]; });
+    promise.then(warmStyles, function () { delete cache[key]; });
     return promise;
   };
 
-  // Styles de la fiche absents de la page : ajoutés (puis coupés à la fermeture, réactivés à la suivante).
+  // Styles de la fiche absents de la page : téléchargés D'AVANCE, inactifs (media « not all » : le navigateur les
+  // télécharge sans les appliquer), dès qu'une fiche est connue (préchargement des cartes, liste retenue des styles
+  // d'en-tête). À l'ouverture ils sont activés ; la fiche n'apparaît qu'une fois ses styles arrivés (l'aperçu reste
+  // affiché en attendant), sinon elle se montrait un instant sans mise en forme sur un téléphone lent.
+  var watchReady = function (entry) {
+    entry.ready = new Promise(function (resolve) {
+      entry.link.onload = resolve;
+      entry.link.onerror = resolve;
+    });
+  };
+  var sheetFor = function (link) {
+    var href = abs(link.getAttribute('href'));
+    var mine = addedSheets.filter(function (entry) { return bare(entry.link.href) === bare(href); })[0];
+    if (mine) {
+      // Liste retenue d'une version précédente du thème (?v= différent) : la version demandée par la fiche gagne.
+      if (mine.link.href !== href) {
+        mine.link.href = href;
+        watchReady(mine);
+      }
+      return mine;
+    }
+    var inPage = Array.prototype.some.call(document.querySelectorAll('link[rel="stylesheet"]'), function (node) {
+      return bare(node.href) === bare(href);
+    });
+    if (inPage) return null;
+    var copy = document.createElement('link');
+    copy.rel = 'stylesheet';
+    copy.href = href;
+    copy.media = 'not all';
+    var entry = { link: copy, media: link.getAttribute('media') || 'all' };
+    watchReady(entry);
+    addedSheets.push(entry);
+    document.head.appendChild(copy);
+    return entry;
+  };
+  var warmStyles = function (doc) {
+    doc.querySelectorAll('link[rel="stylesheet"]').forEach(sheetFor);
+  };
   var loadStyles = function (doc) {
-    var have = {};
-    document.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) { have[bare(link.href)] = link; });
     var waits = [];
     doc.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
-      var href = abs(link.getAttribute('href'));
-      var mine = addedSheets.filter(function (entry) { return bare(entry.link.href) === bare(href); })[0];
-      if (mine) { mine.link.media = mine.media; return; }
-      if (have[bare(href)]) return;
-      var copy = document.createElement('link');
-      copy.rel = 'stylesheet';
-      copy.href = href;
-      var media = link.getAttribute('media') || 'all';
-      copy.media = media;
-      addedSheets.push({ link: copy, media: media });
-      waits.push(new Promise(function (resolve) {
-        copy.onload = resolve;
-        copy.onerror = resolve;
-        window.setTimeout(resolve, 3000);
-      }));
-      document.head.appendChild(copy);
+      var entry = sheetFor(link);
+      if (!entry) return;
+      entry.link.media = entry.media;
+      // 8 s au plus : au-delà, la fiche s'affiche quand même (réseau très lent).
+      waits.push(Promise.race([entry.ready, new Promise(function (resolve) { window.setTimeout(resolve, 8000); })]));
     });
     return Promise.all(waits);
   };
@@ -202,7 +226,10 @@
       var script = document.createElement('script');
       Array.prototype.forEach.call(old.attributes, function (attribute) { script.setAttribute(attribute.name, attribute.value); });
       if (src) {
-        script.async = false;
+        // Pas de script.async = false : l'ordre est déjà tenu par la chaîne (chaque script attend la fin du précédent).
+        // En mode « ordonné », le navigateur faisait attendre la fiche derrière tous les scripts ordonnés encore en
+        // téléchargement (morceaux alr-*.min.js d'Ali Reviews de la fiche précédente) : pdp-mobile.js démarrait 5 à
+        // 10 s après l'affichage de la fiche.
         script.onload = resolve;
         script.onerror = resolve;
       } else {
@@ -220,6 +247,11 @@
       if (node.tagName === 'SCRIPT') list.push(node);
       node.querySelectorAll && node.querySelectorAll('script').forEach(function (script) { list.push(script); });
     });
+    // Scripts de la plateforme Shopify (/cdn/shopifycloud/ : boutons de paiement portable-wallets, 406 Ko…) en fin de
+    // chaîne : ils ne dépendent pas des scripts de la fiche, et pdp-mobile.js (tailles, prix, ajout au panier) attendait
+    // derrière eux ~0,8 s avant de démarrer. Les autres gardent leur ordre (pdp-mobile.js a besoin de spec-i18n.js).
+    var platform = function (script) { return /\/cdn\/shopifycloud\//.test(script.getAttribute('src') || ''); };
+    list = list.filter(function (script) { return !platform(script); }).concat(list.filter(platform));
     var restore = patchReady();
     var chain = Promise.resolve();
     list.concat(headScripts).forEach(function (script) {
@@ -378,22 +410,86 @@
     marked = [];
   };
 
+  // Sections de la page cachées pendant la fiche. content-visibility: hidden (hauteur 0) garde leur mise en page en
+  // mémoire sans la dessiner : au retour la page réapparaît presque sans calcul (display: none la jetait, et toute la
+  // page — 100+ cartes — était recalculée, ~1 s avant que le retour ne commence à glisser). Navigateurs sans
+  // content-visibility (anciens iPhone) : display: none comme avant.
+  var KEEP_LAYOUT = !!(window.CSS && CSS.supports && CSS.supports('content-visibility', 'hidden'));
+  var hidePageSection = function (node) {
+    if (!KEEP_LAYOUT) { node.style.display = 'none'; return; }
+    ['content-visibility:hidden', 'height:0', 'min-height:0', 'margin:0', 'padding:0', 'border:0'].forEach(function (rule) {
+      var parts = rule.split(':');
+      node.style.setProperty(parts[0], parts[1], 'important');
+    });
+  };
+
+  // Retour comme SHEIN : la fiche, figée en place (position fixe, plein écran, à sa position de défilement — sans la
+  // déplacer dans la page, ce qui rechargeait ses éléments : 2 fois plus lent), glisse vers la droite et découvre la
+  // page déjà remise en place dessous ; elle n'est retirée (avec ses styles) qu'à la fin du glissement.
+  var motion = function () {
+    return typeof Element.prototype.animate === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  };
+  // Après l'affichage de la prochaine image (deux requestAnimationFrame) : une animation de glissement démarre alors
+  // sur des images légères et se voit en entier.
+  var afterNextPaint = function (callback) {
+    window.requestAnimationFrame(function () { window.requestAnimationFrame(callback); });
+  };
+  var slideOut = function () {
+    if (!motion()) return false;
+    var sheet = added.filter(function (node) { return node.querySelector && node.querySelector('[data-pdp-mobile]'); })[0];
+    if (!sheet) return false;
+    var y = window.scrollY;
+    var nodes = added;
+    var extras = marked;
+    added = [];
+    marked = [];
+    nodes.forEach(function (node) { if (node !== sheet && node.style) node.style.display = 'none'; });
+    sheet.style.cssText += ';position:fixed;inset:0;z-index:2147480000;overflow:hidden;background:#fff;' +
+      'box-shadow:-8px 0 24px rgba(22,18,63,.12);pointer-events:none;will-change:transform';
+    sheet.scrollTop = y;
+    var dim = document.createElement('div');
+    dim.setAttribute('aria-hidden', 'true');
+    dim.style.cssText = 'position:fixed;inset:0;z-index:2147479999;background:rgba(22,18,63,.18);pointer-events:none';
+    pageRoot.appendChild(dim);
+    var finish = function () {
+      nodes.forEach(function (node) { if (node.parentNode) node.parentNode.removeChild(node); });
+      if (dim.parentNode) dim.parentNode.removeChild(dim);
+      extras.forEach(function (node) { if (node.isConnected && node.parentNode) node.parentNode.removeChild(node); });
+      // Styles de la fiche coupés, sauf si une autre fiche a été ouverte pendant le glissement.
+      if (!saved) addedSheets.forEach(function (entry) { entry.link.media = 'not all'; });
+    };
+    // Départ à l'image suivante, celle qui redessine la page remise dessous (~300 ms sur téléphone) : le glissement
+    // tourne sur le compositeur, son départ est compté à l'affichage de cette image (mesuré : départ 190 ms plus tôt
+    // qu'en attendant une image de plus, où les minuteries des apps — Clarity, pixels — le retardaient encore). La
+    // fiche reste en place au-dessus pendant ce travail et le cache.
+    window.requestAnimationFrame(function () {
+      var easing = { duration: 260, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' };
+      var animation = sheet.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(100%)' }], easing);
+      dim.animate([{ opacity: 1 }, { opacity: 0 }], easing);
+      animation.finished.then(finish, finish);
+    });
+    return true;
+  };
+
+  var closedAt = 0;
   var close = function () {
     token += 1;
+    closedAt = Date.now();
     progress(false);
-    removeSkeleton();
+    removeSkeleton(saved ? false : 'slide');
     openY = null;
     if (!saved) return;
     closeOverlays();
-    removeProduct();
-    saved.hidden.forEach(function (entry) { entry.node.style.display = entry.display; });
+    var sliding = slideOut();
+    if (!sliding) removeProduct();
+    saved.hidden.forEach(function (entry) { entry.node.style.cssText = entry.css; });
     document.body.className = saved.bodyClass;
     // Styles posés par la fiche (blocage du défilement d'une fenêtre restée ouverte, hauteur de son en-tête…) : ceux
     // de la page reviennent, sinon l'accueil pouvait rester bloqué (body overflow: hidden).
     document.body.style.cssText = saved.bodyStyle;
     root.style.cssText = saved.htmlStyle;
     document.title = saved.title;
-    addedSheets.forEach(function (entry) { entry.link.media = 'not all'; });
+    if (!sliding) addedSheets.forEach(function (entry) { entry.link.media = 'not all'; });
     reviewsRestore();
     var y = saved.y;
     var restoration = saved.restoration;
@@ -441,8 +537,8 @@
       };
       Array.prototype.forEach.call(main.children, function (node) {
         if (FOOTER_GROUP.test(node.className || '')) return;
-        saved.hidden.push({ node: node, display: node.style.display });
-        node.style.display = 'none';
+        saved.hidden.push({ node: node, css: node.style.cssText });
+        hidePageSection(node);
       });
       if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
       openY = null;
@@ -451,16 +547,28 @@
     }
 
     var anchor = Array.prototype.filter.call(main.children, function (node) { return FOOTER_GROUP.test(node.className || ''); })[0] || null;
-    // Première photo de la galerie : chargée en priorité, et la photo de la carte touchée (déjà téléchargée) affichée
-    // dessous en attendant, pour ne pas montrer une zone vide.
-    var firstSlide = productMain.querySelector('[data-pdp-slides] > *');
-    if (firstSlide) {
-      var firstImg = firstSlide.querySelector('img');
-      if (firstImg) {
-        firstImg.setAttribute('loading', 'eager');
-        firstImg.setAttribute('fetchpriority', 'high');
+    // Photo de départ de la galerie : celle de la carte touchée quand la fiche l'a (photo de la première variante
+    // disponible, ex. la couleur verte), comme SHEIN — sinon la première. Chargée en priorité, et la photo de la carte
+    // (déjà téléchargée) affichée dessous en attendant, pour ne pas montrer une zone vide.
+    var fileOf = function (url) { return String(url || '').split('?')[0].split('/').pop(); };
+    var slideList = productMain.querySelectorAll('[data-pdp-slides] > *');
+    var startIndex = 0;
+    if (cardImage) {
+      var cardFile = fileOf(cardImage);
+      Array.prototype.some.call(slideList, function (slide, i) {
+        var img = slide.querySelector('img');
+        if (img && fileOf(img.getAttribute('src')) === cardFile) { startIndex = i; return true; }
+        return false;
+      });
+    }
+    var startSlide = slideList[startIndex];
+    if (startSlide) {
+      var startImg = startSlide.querySelector('img');
+      if (startImg) {
+        startImg.setAttribute('loading', 'eager');
+        startImg.setAttribute('fetchpriority', 'high');
       }
-      if (cardImage) firstSlide.style.background = '#fff url("' + cardImage.replace(/"/g, '%22') + '") center / contain no-repeat';
+      if (cardImage) startSlide.style.background = '#fff url("' + cardImage.replace(/"/g, '%22') + '") center / contain no-repeat';
     }
     cardImage = '';
     sections.forEach(function (node) {
@@ -479,8 +587,22 @@
     document.title = doc.title;
     current = bare(href);
     jump(0);
-    removeSkeleton();
+    // Galerie posée sur la photo de départ avant le premier affichage (pas de photo 1 puis saut), compteur compris ;
+    // assets/pdp-mobile.js la garde ensuite (même variante).
+    if (startIndex > 0) {
+      added.some(function (node) {
+        var track = node.querySelector && node.querySelector('[data-pdp-slides]');
+        if (!track) return false;
+        track.scrollLeft = startIndex * track.clientWidth;
+        var count = node.querySelector('[data-pdp-count]');
+        if (count) count.textContent = (startIndex + 1) + ' / ' + track.children.length;
+        return true;
+      });
+    }
+    removeSkeleton(true);
     var scripts = headScripts.map(function (script) { return document.importNode(script, true); });
+    // Moment où la fiche apparaît : la feuille « Vantaggi esclusivi » de assets/pdp-mobile.js s'ouvre 5 s après.
+    window.msheinPdpShownAt = Date.now();
     reviewsBefore();
     return runScripts(added, scripts).then(initTheme);
   };
@@ -488,15 +610,45 @@
   // Aperçu immédiat, dès le toucher : photo, titre et prix de la carte touchée sur une page blanche (en-tête avec
   // flèche retour, blocs gris), comme SHEIN ; la vraie fiche le remplace dès qu'elle est prête.
   var skeleton = null;
-  var removeSkeleton = function () {
-    if (skeleton && skeleton.parentNode) skeleton.parentNode.removeChild(skeleton);
+  // mode true : la vraie fiche est en place dessous, l'aperçu s'efface en fondu (sans saut visible).
+  // mode 'slide' : retour pendant l'aperçu, il repart vers la droite comme une fiche.
+  var removeSkeleton = function (mode) {
+    var node = skeleton;
     skeleton = null;
+    if (!node || !node.parentNode) return;
+    var panel = node.querySelector('[data-skeleton-panel]');
+    if (mode === 'slide' && panel && typeof panel.animate === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var easing = { duration: 260, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' };
+      var done = function () { if (node.parentNode) node.parentNode.removeChild(node); };
+      node.style.pointerEvents = 'none';
+      panel.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(100%)' }], easing).finished.then(done, done);
+      node.querySelector('[data-skeleton-dim]').animate([{ opacity: 1 }, { opacity: 0 }], easing);
+      return;
+    }
+    if (!mode) { node.parentNode.removeChild(node); return; }
+    node.style.transition = 'opacity .18s ease-out';
+    node.style.opacity = '0';
+    window.setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 200);
   };
   var esc = function (text) {
     return String(text || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   };
   var cardImage = '';
   var openY = null;
+  // Fin du glissement de l'aperçu : une fiche déjà prête attend jusque-là (sinon elle sautait en place pendant le
+  // glissement).
+  var skeletonUntil = 0;
+  var afterSlide = function (value) {
+    // Fin relue à chaque fois : le glissement peut partir un peu plus tard que prévu (afterNextPaint).
+    return new Promise(function (resolve) {
+      var check = function () {
+        var wait = skeletonUntil - Date.now();
+        if (wait > 0) window.setTimeout(check, wait);
+        else resolve(value);
+      };
+      check();
+    });
+  };
   var showSkeleton = function (link) {
     removeSkeleton();
     // Carte entière (le lien de la photo a lui-même « card » dans sa classe : on remonte au-dessus).
@@ -512,22 +664,66 @@
     var title = titleEl ? titleEl.textContent.replace(/\s+/g, ' ').trim() : '';
     var priceMatch = priceEl ? priceEl.textContent.replace(/\s+/g, ' ').match(/[€$£]\s?\d[\d.,]*|\d[\d.,]*\s?[€$£]/) : null;
     var price = priceMatch ? priceMatch[0] : '';
+    var T = window.mobileT || function (key) { return key; };
     var grey = function (w, h, m) { return '<i style="display:block;width:' + w + ';height:' + h + 'px;margin:' + (m || '10px 14px 0') + ';border-radius:8px;background:#f0f1f5"></i>'; };
+    var dot = '<i style="flex:none;width:34px;height:34px;border-radius:50%;background:#f0f1f5"></i>';
+    var icon = function (path) {
+      return '<span style="display:grid;place-items:center;width:30px;height:32px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16123f" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg></span>';
+    };
+    // Aperçu au design de la fiche (comme SHEIN) : en-tête (retour, recherche, panier, partager, ⋯), grande photo de la
+    // carte, prix, nom, blocs gris, barre « Aggiungi al carrello » en bas. Il glisse depuis la droite en 0,28 s sur la
+    // page qui s'assombrit ; la vraie fiche le remplace en fondu (removeSkeleton).
     skeleton = document.createElement('div');
     skeleton.className = 'pdp-swap-skeleton';
     skeleton.setAttribute('aria-hidden', 'true');
-    skeleton.style.cssText = 'position:fixed;inset:0;z-index:2147480000;background:#fff;overflow:hidden;font-family:inherit';
+    skeleton.style.cssText = 'position:fixed;inset:0;z-index:2147480000;overflow:hidden;font-family:inherit';
     skeleton.innerHTML =
-      '<div style="display:flex;align-items:center;gap:10px;height:52px;padding:0 12px;border-bottom:1px solid #f0f1f5">' +
-        '<button type="button" data-skeleton-back aria-label="Indietro" style="all:unset;display:grid;place-items:center;width:32px;height:32px;cursor:pointer">' +
-          '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16123f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>' +
-        '<i style="flex:1;height:36px;border-radius:12px;background:#f2f3f7"></i></div>' +
-      '<div style="aspect-ratio:1/1;width:100%;background:#f5f5f7 center/contain no-repeat' + (src ? ' url(&quot;' + esc(src) + '&quot;)' : '') + '"></div>' +
-      (price ? '<div style="margin:14px 14px 0;font-size:24px;font-weight:800;color:#16123f">' + esc(price) + '</div>' : grey('40%', 24, '14px 14px 0')) +
-      (title ? '<div style="margin:8px 14px 0;font-size:14px;line-height:1.4;color:#16123f;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(title) + '</div>' : grey('90%', 16)) +
-      grey('100%', 44, '16px 14px 0') + grey('70%', 14) + grey('100%', 64, '16px 14px 0');
-    skeleton.querySelector('[data-skeleton-back]').addEventListener('click', function () { window.history.back(); });
+      '<div data-skeleton-dim style="position:absolute;inset:0;background:rgba(22,18,63,.18)"></div>' +
+      '<div data-skeleton-panel style="position:absolute;inset:0;background:#fff;overflow:hidden;box-shadow:-8px 0 24px rgba(22,18,63,.12);will-change:transform">' +
+        '<div style="display:flex;align-items:center;gap:2px;height:52px;padding:0 6px 0 4px;background:#fff">' +
+          '<button type="button" data-skeleton-back aria-label="Indietro" style="all:unset;display:grid;place-items:center;width:36px;height:36px;cursor:pointer">' +
+            '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16123f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>' +
+          '<span style="flex:1;min-width:0;display:flex;align-items:center;height:36px;padding:0 12px;border-radius:10px;background:#f4f5f9;color:#9a9db0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(T('search_placeholder')) + '</span>' +
+          icon('<path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/>') +
+          icon('<path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>') +
+          icon('<circle cx="5" cy="12" r="1.2" fill="#16123f"/><circle cx="12" cy="12" r="1.2" fill="#16123f"/><circle cx="19" cy="12" r="1.2" fill="#16123f"/>') +
+        '</div>' +
+        '<div style="aspect-ratio:1/1;width:100%;background:#f5f5f7 center/cover no-repeat' + (src ? ' url(&quot;' + esc(src) + '&quot;)' : '') + '"></div>' +
+        (price ? '<div style="margin:14px 14px 0;font-family:Sora,inherit;font-size:26px;font-weight:800;letter-spacing:-.5px;color:#16123f">' + esc(price) + '</div>' : grey('40%', 26, '14px 14px 0')) +
+        (title ? '<div style="margin:10px 14px 0;font-size:15px;font-weight:600;line-height:1.35;color:#16123f;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(title) + '</div>' : grey('90%', 16)) +
+        grey('35%', 14, '14px 14px 0') +
+        '<div style="display:flex;gap:10px;margin:14px 14px 0">' + dot + dot + dot + dot + dot + '</div>' +
+        grey('100%', 64, '16px 14px 0') +
+        '<div style="position:absolute;left:0;right:0;bottom:0;display:flex;gap:10px;align-items:center;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #ecebf3">' +
+          '<span style="flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:1.5px solid #ecebf3"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16123f" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span>' +
+          '<span style="flex:1;display:grid;place-items:center;height:50px;border-radius:12px;background:#16123f;color:#fff;font-family:Sora,inherit;font-size:15px;font-weight:800;letter-spacing:.5px;text-transform:uppercase">' + esc(T('pdp_add_to_cart')) + '</span>' +
+        '</div>' +
+      '</div>';
+    // Retour : l'adresse du produit est déjà posée (cas normal) ou pas encore (toucher dans les premières ms).
+    skeleton.querySelector('[data-skeleton-back]').addEventListener('click', function () {
+      if (window.history.state && window.history.state.pdpSwap) window.history.back();
+      else close();
+    });
     document.body.appendChild(skeleton);
+    // Glissement depuis la droite par l'API d'animation du navigateur (pas de lecture de mise en page forcée, qui
+    // recalculait toute la page au toucher) ; aucun mouvement si le visiteur a demandé moins d'animations.
+    skeletonUntil = 0;
+    var panel = skeleton.querySelector('[data-skeleton-panel]');
+    var dim = skeleton.querySelector('[data-skeleton-dim]');
+    if (!motion()) return;
+    // Hors écran à droite au premier affichage, puis glissement lancé une fois cette image affichée (sinon un travail
+    // lourd juste après le toucher mangeait le début du glissement). La fiche prête attend la fin (afterSlide).
+    panel.style.transform = 'translateX(100%)';
+    dim.style.opacity = '0';
+    skeletonUntil = Date.now() + 400;
+    var node = skeleton;
+    afterNextPaint(function () {
+      if (skeleton !== node) return;
+      skeletonUntil = Date.now() + 280;
+      var easing = { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' };
+      panel.animate([{ transform: 'translateX(100%)' }, { transform: 'translateX(0)' }], easing);
+      dim.animate([{ opacity: 0 }, { opacity: 1 }], easing);
+    });
   };
 
   // Nouvelle étape d'historique pour la fiche, posée dès le toucher (l'aperçu est déjà « la fiche »).
@@ -549,20 +745,26 @@
 
   var open = function (href, push, link) {
     var mine = (token += 1);
-    progress(true);
+    // Barre de chargement seulement sans aperçu (retour / avance du navigateur) : l'aperçu couvre déjà l'écran, et sa
+    // classe sur <html> faisait recalculer toute la page au toucher (~130 ms avant que l'aperçu bouge).
+    if (!push) progress(true);
     if (push) {
       // Avant d'enregistrer la position : un panneau du header ouvert la bloque (et la remet en se fermant).
       closeOverlays();
       // Position de la page au toucher (sous l'aperçu, la page peut encore bouger avant l'arrivée de la fiche).
       if (!saved) openY = window.scrollY;
       showSkeleton(link);
-      pushProduct(href);
+      // Adresse du produit posée juste après la première image du glissement : une app (enregistreur de sessions)
+      // intercepte history.pushState / replaceState et travaille à chaque appel (~130 ms), ce qui retardait l'aperçu.
+      window.requestAnimationFrame(function () {
+        window.setTimeout(function () { if (mine === token) pushProduct(href); }, 0);
+      });
     }
     var backY = !push && window.history.state && window.history.state.pdpY;
     return fetchDoc(href)
       .then(function (doc) {
         if (mine !== token) return null;
-        return loadStyles(doc).then(function () { return doc; });
+        return loadStyles(doc).then(function () { return afterSlide(doc); });
       })
       .then(function (doc) {
         if (!doc || mine !== token) return;
@@ -582,6 +784,9 @@
 
   window.__pdpSwap = {
     active: function () { return !!saved; },
+    // Fiche ouverte, ou fermée à l'instant (même retour) : la page est remise en place ici, les onglets de l'accueil
+    // (assets/mobile-home-tabs.js) n'ont pas à refaire leur défilement / mesure.
+    handlesBack: function () { return !!saved || Date.now() - closedAt < 100; },
     back: function () { window.history.back(); }
   };
 
@@ -606,6 +811,13 @@
     if (!('IntersectionObserver' in window)) return;
     var connection = navigator.connection || {};
     if (connection.saveData || /2g/.test(connection.effectiveType || '')) return;
+    // Styles des fiches (liste retenue à la première fiche) téléchargés dès que la page est au repos : la première
+    // fiche ouverte est mise en forme dès son apparition.
+    if (cfg && cfg.head && mobile.matches) {
+      (window.requestIdleCallback || function (fn) { return window.setTimeout(fn, 1500); })(function () {
+        warmStyles(parse('<!doctype html><html><head>' + cfg.head + '</head><body></body></html>'));
+      });
+    }
     var queue = [];
     var seen = {};
     var budget = 24;

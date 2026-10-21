@@ -185,7 +185,24 @@
     </ul>
 
   {%- else -%}
-    {{ 'mobile-home-shein.css' | asset_url | stylesheet_tag }}
+    {%- liquid
+      # Feuille déjà chargée dans <head> (layout/theme.liquid, mêmes conditions) sur l'accueil, les pages collection et la
+      # recherche : pas de 2e, 3e, 4e copie (chaque section l'ajoutait encore, la même feuille de 47 Ko était appliquée
+      # 4 fois à chaque recalcul de style).
+      assign msh_css_in_head = false
+      if template.name == 'index'
+        assign msh_css_in_head = true
+      elsif template.name == 'collection'
+        if template.suffix == blank or template.suffix == 'offerte'
+          assign msh_css_in_head = true
+        endif
+      elsif template.name == 'search' and template.suffix == blank
+        assign msh_css_in_head = true
+      endif
+    -%}
+    {%- unless msh_css_in_head -%}
+      {{ 'mobile-home-shein.css' | asset_url | stylesheet_tag }}
+    {%- endunless -%}
     <script src="{{ 'mobile-home-shein.js' | asset_url }}" defer></script>
     <style>
       @media only screen and (min-width: 761px) {

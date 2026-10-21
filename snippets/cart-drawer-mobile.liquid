@@ -47,6 +47,13 @@
         <h3>{{ 'mobile.cart.empty_title' | t }}</h3>
         <p>{{ 'mobile.cart.empty_text' | t }}</p>
         <a href="./" class="m6pn-close cd-pri" role="button">{{ 'mobile.cart.continue' | t }}</a>
+        {%- comment -%}
+          Place de l'app de fidélité (Honeypop, bandeau « cart progress », caché dans ce tiroir) quand le panier est vide :
+          sans bouton « checkout » elle relançait sa recherche toutes les 600 ms en ajoutant une boucle à chaque
+          changement de la page (comptes à rebours…), jusqu'à prendre la moitié du temps du téléphone après quelques
+          fiches ouvertes. Caché et inerte ; le tiroir redessiné avec des articles lui rend le vrai bouton.
+        {%- endcomment -%}
+        <div hidden><button type="button" name="checkout" disabled tabindex="-1" aria-hidden="true"></button></div>
       </section>
     {%- else -%}
       <a href="./" class="m6pn-close cd-back" role="button">
