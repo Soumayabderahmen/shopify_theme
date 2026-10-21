@@ -148,9 +148,14 @@
     var hit = cache[key];
     if (hit && Date.now() - hit.time < 180000) return hit.promise;
     var promise = (cfg ? fetchSections(href).catch(function () { return fetchFull(href); }) : fetchFull(href));
-    cache[key] = { time: Date.now(), promise: promise };
-    promise.then(warmStyles, function () { delete cache[key]; });
+    var entry = cache[key] = { time: Date.now(), promise: promise };
+    promise.then(function (doc) { entry.doc = doc; warmStyles(doc); }, function () { delete cache[key]; });
     return promise;
+  };
+  // Fiche déjà téléchargée (préchargement des cartes) : elle peut être mise en forme avant le glissement.
+  var cachedDoc = function (href) {
+    var hit = cache[bare(href)];
+    return !!(hit && hit.doc && Date.now() - hit.time < 180000);
   };
 
   // Styles de la fiche absents de la page : téléchargés D'AVANCE, inactifs (media « not all » : le navigateur les
@@ -158,9 +163,12 @@
   // d'en-tête). À l'ouverture ils sont activés ; la fiche n'apparaît qu'une fois ses styles arrivés (l'aperçu reste
   // affiché en attendant), sinon elle se montrait un instant sans mise en forme sur un téléphone lent.
   var watchReady = function (entry) {
+    entry.loaded = false;
     entry.ready = new Promise(function (resolve) {
-      entry.link.onload = resolve;
-      entry.link.onerror = resolve;
+      entry.link.onload = entry.link.onerror = function () {
+        entry.loaded = true;
+        resolve();
+      };
     });
   };
   // Feuilles d'une page lue par DOMParser : celles des <noscript> y deviennent de vraies balises (async-menu.css,
@@ -319,7 +327,9 @@
   };
 
   // onCore : appelé dès que pdp-mobile.js a mis la fiche en forme (sans attendre les scripts des apps derrière lui).
-  var runScripts = function (nodes, headScripts, onCore) {
+  // gate (fiche construite dans le panneau qui glisse, makeLive) : les scripts suivants attendent qu'elle soit posée
+  // dans la page ; abandonnés si l'on revient avant.
+  var runScripts = function (nodes, headScripts, onCore, gate) {
     var list = [];
     nodes.forEach(function (node) {
       if (node.tagName === 'SCRIPT') list.push(node);
@@ -337,9 +347,13 @@
     var ordered = headScripts.slice(0, coreEnd + 1).concat(list, headScripts.slice(coreEnd + 1));
     var restore = patchReady();
     var chain = Promise.resolve();
-    ordered.forEach(function (script) {
-      chain = chain.then(function () { return runScript(script); }).catch(function (error) { console.error(error); });
+    ordered.forEach(function (script, i) {
+      chain = chain.then(function () {
+        if (gate && gate.cancelled) return null;
+        return runScript(script);
+      }).catch(function (error) { console.error(error); });
       if (onCore && RERUN.test(script.getAttribute('src') || '')) chain = chain.then(onCore);
+      if (gate && i === coreEnd) chain = chain.then(function () { return gate.promise; });
     });
     return chain.then(function () {
       // Laisse partir les fonctions « prêt » différées avant de rendre les écouteurs d'origine.
@@ -518,6 +532,33 @@
   var afterNextPaint = function (callback) {
     window.requestAnimationFrame(function () { window.requestAnimationFrame(callback); });
   };
+  // Arrivée de la fiche mesurée image par image sur la vidéo de SHEIN (45 images/s) : 420 ms, très rapide au départ
+  // (56 % du chemin à 90 ms, 78 % à 180 ms, 96 % à 310 ms).
+  var SLIDE_IN = { duration: 420, easing: 'cubic-bezier(.05,.4,.4,1)', fill: 'forwards' };
+  // Parallaxe, comme SHEIN : la page d'origine part de 30 % vers la gauche sous la fiche qui arrive (même courbe), et
+  // revient si l'on fait retour pendant l'arrivée. En-tête et barre du bas compris (ils sont en position fixe).
+  var parallax = [];
+  var stopParallax = function () {
+    parallax.forEach(function (entry) { entry.animation.cancel(); });
+    parallax = [];
+  };
+  var startParallax = function () {
+    stopParallax();
+    var nodes = [main].concat(Array.prototype.slice.call(document.querySelectorAll(
+      '#root > [id$="__announcement"], #root > [id$="__header"], .mobile-bottom-navigation')));
+    nodes.forEach(function (node) {
+      parallax.push({ node: node, animation: node.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-30%)' }], SLIDE_IN) });
+    });
+  };
+  var undoParallax = function (easing) {
+    var running = parallax;
+    parallax = [];
+    running.forEach(function (entry) {
+      var back = entry.node.animate([{ transform: 'translateX(-30%)' }, { transform: 'translateX(0)' }], easing);
+      var done = function () { entry.animation.cancel(); back.cancel(); };
+      back.finished.then(done, done);
+    });
+  };
   var slideOut = function () {
     if (!motion()) return false;
     var sheet = added.filter(function (node) { return node.querySelector && node.querySelector('[data-pdp-mobile]'); })[0];
@@ -535,9 +576,11 @@
     dim.setAttribute('aria-hidden', 'true');
     dim.style.cssText = 'position:fixed;inset:0;z-index:2147479999;background:rgba(22,18,63,.18);pointer-events:none';
     pageRoot.appendChild(dim);
+    overNav(true);
     var finish = function () {
       nodes.forEach(function (node) { if (node.parentNode) node.parentNode.removeChild(node); });
       if (dim.parentNode) dim.parentNode.removeChild(dim);
+      if (!skeleton) overNav(false);
       extras.forEach(function (node) { if (node.isConnected && node.parentNode) node.parentNode.removeChild(node); });
       // Styles de la fiche coupés, sauf si une autre fiche a été ouverte pendant le glissement.
       if (!saved) addedSheets.forEach(function (entry) { entry.link.media = 'not all'; });
@@ -560,9 +603,29 @@
     token += 1;
     closedAt = Date.now();
     progress(false);
-    removeSkeleton(saved ? false : 'slide');
+    if (!saved) {
+      // Retour pendant l'arrivée : l'aperçu (et la fiche en construction dedans) repart vers la droite, la page revient
+      // de la parallaxe ; ce que la fiche a mis ailleurs (fenêtres déplacées dans <body>) et ses styles sont retirés.
+      var live = skeleton && skeleton.querySelector('[data-skeleton-panel] > .template-product');
+      if (live && live.gate) {
+        live.gate.cancelled = true;
+        live.gate.open();
+      }
+      var leftovers = added.concat(marked);
+      added = [];
+      marked = [];
+      removeSkeleton('slide', function () {
+        leftovers.forEach(function (node) { if (node.isConnected && node.parentNode) node.parentNode.removeChild(node); });
+        if (live && !saved) {
+          addedSheets.forEach(function (entry) { entry.link.media = 'not all'; });
+          reviewsRestore();
+        }
+      });
+      openY = null;
+      return;
+    }
+    removeSkeleton(false);
     openY = null;
-    if (!saved) return;
     closeOverlays();
     var sliding = slideOut();
     if (!sliding) removeProduct();
@@ -595,7 +658,9 @@
     syncCart();
   };
 
-  var show = function (doc, href) {
+  // live (makeLive) : fiche construite dans le panneau qui glisse, la page d'origine reste affichée dessous ;
+  // settleLive la pose ensuite dans la page. Sans live : directement dans la page (retour / avance, fiche → fiche).
+  var show = function (doc, href, live) {
     var productMain = doc.getElementById('content');
     if (!productMain || !productMain.querySelector('[data-pdp-mobile]')) throw new Error('Mobile product page not found');
     var sections = Array.prototype.filter.call(productMain.children, function (node) {
@@ -609,37 +674,24 @@
       return !Array.prototype.some.call(document.scripts, function (mine) { return mine.src && bare(mine.src) === src; });
     });
 
-    if (!saved) {
-      saved = {
-        y: openY !== null ? openY : window.scrollY,
-        bodyClass: document.body.className,
-        bodyStyle: document.body.style.cssText,
-        htmlStyle: root.style.cssText,
-        title: document.title,
-        restoration: 'scrollRestoration' in window.history ? window.history.scrollRestoration : 'auto',
-        hidden: []
-      };
-      Array.prototype.forEach.call(main.children, function (node) {
-        if (FOOTER_GROUP.test(node.className || '')) return;
-        saved.hidden.push({ node: node, css: node.style.cssText });
-        hidePageSection(node);
-      });
-      if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
-      openY = null;
+    if (live) {
+      // Rien à retirer : la page d'origine reste en place jusqu'à settleLive.
+    } else if (!saved) {
+      hideOrigin();
     } else {
       removeProduct();
     }
 
-    var anchor = Array.prototype.filter.call(main.children, function (node) { return FOOTER_GROUP.test(node.className || ''); })[0] || null;
+    var anchor = footerAnchor();
     // Photo de départ de la galerie : celle de la carte touchée quand la fiche l'a (photo de la première variante
     // disponible, ex. la couleur verte), comme SHEIN — sinon la première. Chargée en priorité, et la photo de la carte
     // (déjà téléchargée) affichée dessous en attendant, pour ne pas montrer une zone vide.
-    var fileOf = function (url) { return String(url || '').split('?')[0].split('/').pop(); };
     var slideList = productMain.querySelectorAll('[data-pdp-slides] > *');
     var startIndex = 0;
+    var cardMatched = false;
     if (cardImage) {
       var cardFile = fileOf(cardImage);
-      Array.prototype.some.call(slideList, function (slide, i) {
+      cardMatched = Array.prototype.some.call(slideList, function (slide, i) {
         var img = slide.querySelector('img');
         if (img && fileOf(img.getAttribute('src')) === cardFile) { startIndex = i; return true; }
         return false;
@@ -658,22 +710,28 @@
     sections.forEach(function (node) {
       var copy = document.importNode(node, true);
       mark(copy);
-      main.insertBefore(copy, anchor);
+      if (live) live.appendChild(copy);
+      else main.insertBefore(copy, anchor);
       added.push(copy);
     });
     if (sticky) {
       var stickyCopy = document.importNode(sticky, true);
       mark(stickyCopy);
-      pageRoot.insertBefore(stickyCopy, document.getElementById('quickshop'));
+      if (live) live.appendChild(stickyCopy);
+      else pageRoot.insertBefore(stickyCopy, document.getElementById('quickshop'));
       added.push(stickyCopy);
     }
-    document.body.className = doc.body.className;
-    document.title = doc.title;
-    current = bare(href);
-    jump(0);
+    if (!live) {
+      document.body.className = doc.body.className;
+      document.title = doc.title;
+      current = bare(href);
+      jump(0);
+      stopParallax();
+    }
     // Galerie posée sur la photo de départ avant le premier affichage (pas de photo 1 puis saut), compteur compris ;
     // assets/pdp-mobile.js la garde ensuite (même variante).
-    if (startIndex > 0) {
+    // Dans le panneau : à l'image suivante, avec la mise en page qu'elle fait de toute façon (pas un calcul de plus).
+    var placeGallery = function () {
       added.some(function (node) {
         var track = node.querySelector && node.querySelector('[data-pdp-slides]');
         if (!track) return false;
@@ -683,48 +741,151 @@
         if (count) count.textContent = (startIndex + 1) + ' / ' + track.children.length;
         return true;
       });
-    }
+    };
+    // Photo de la carte transmise à assets/pdp-mobile.js, qui place la galerie dans ses mesures groupées (avant le
+    // premier affichage) ; hors panneau, placée tout de suite ici aussi.
+    window.msheinPdpStartSlide = cardMatched ? startIndex : null;
+    if (startIndex > 0 && !live) placeGallery();
     // L'aperçu reste par-dessus jusqu'à la mise en forme par assets/pdp-mobile.js (galerie, options, badges déplacés,
     // textes traduits…) : sur téléphone la fiche se montrait d'abord brute, une à plusieurs secondes. 2,5 s au plus.
+    // Dans le panneau : la couche de l'aperçu est retirée (la fiche mise en forme est dessous, au même endroit).
     var cover = skeleton;
     var reveal = function () {
       var node = cover;
       cover = null;
-      if (node && skeleton === node) window.requestAnimationFrame(function () { if (skeleton === node) removeSkeleton(true); });
+      if (!node || skeleton !== node) return;
+      window.requestAnimationFrame(function () {
+        if (skeleton !== node) return;
+        if (live) {
+          var preview = node.querySelector('[data-skeleton-preview]');
+          if (preview) preview.remove();
+          live.markReady();
+        } else {
+          removeSkeleton(true);
+        }
+      });
     };
     window.setTimeout(reveal, 2500);
     var scripts = headScripts.map(function (script) { return document.importNode(script, true); });
     // Moment où la fiche apparaît : la feuille « Vantaggi esclusivi » de assets/pdp-mobile.js s'ouvre 5 s après.
     window.msheinPdpShownAt = Date.now();
     reviewsBefore();
-    return runScripts(added, scripts, reveal).then(function () {
+    return runScripts(added, scripts, reveal, live ? live.gate : null).then(function () {
+      if (live && live.gate.cancelled) return;
       reveal();
       initTheme();
     });
   };
 
+  // Page d'origine cachée (sections gardées, position retenue) pendant la fiche.
+  var hideOrigin = function () {
+    saved = {
+      y: openY !== null ? openY : window.scrollY,
+      bodyClass: document.body.className,
+      bodyStyle: document.body.style.cssText,
+      htmlStyle: root.style.cssText,
+      title: document.title,
+      restoration: 'scrollRestoration' in window.history ? window.history.scrollRestoration : 'auto',
+      hidden: []
+    };
+    Array.prototype.forEach.call(main.children, function (node) {
+      if (FOOTER_GROUP.test(node.className || '')) return;
+      saved.hidden.push({ node: node, css: node.style.cssText });
+      hidePageSection(node);
+    });
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+    openY = null;
+  };
+  var footerAnchor = function () {
+    return Array.prototype.filter.call(main.children, function (node) { return FOOTER_GROUP.test(node.className || ''); })[0] || null;
+  };
+
+  // Fiche construite DANS le panneau qui glisse (comme les onglets du header : le vrai contenu arrive avec le
+  // glissement) : la page d'origine reste affichée dessous et part en parallaxe. Classe template-product : variables de
+  // couleur de la fiche (--pm-*, assets/pdp-mobile.css), posées d'habitude sur <body>.
+  var rootPadding = function () {
+    var rootStyle = window.getComputedStyle(pageRoot);
+    return '0 ' + rootStyle.paddingRight + ' 0 ' + rootStyle.paddingLeft;
+  };
+  var fileOf = function (url) { return String(url || '').split('?')[0].split('/').pop(); };
+  var makeLive = function () {
+    var panel = skeleton.querySelector('[data-skeleton-panel]');
+    var live = document.createElement('div');
+    live.className = 'template-product';
+    // Mêmes marges intérieures que #root (6 px de chaque côté) : la fiche les compense pour sa pleine largeur
+    // (assets/pdp-mobile.css, #root .pdp-m) ; sans elles elle était 12 px trop large dans le panneau, puis sautait.
+    live.style.cssText = 'position:absolute;inset:0;z-index:0;overflow:hidden;box-sizing:border-box;background:#f5f6f8;' +
+      'padding:' + rootPadding();
+    panel.insertBefore(live, panel.firstChild);
+    var open;
+    live.gate = { cancelled: false, promise: new Promise(function (resolve) { open = resolve; }) };
+    live.gate.open = open;
+    live.ready = new Promise(function (resolve) { live.markReady = resolve; });
+    return live;
+  };
+  // Fin du glissement, fiche mise en forme : ses sections passent du panneau à la page (même image à l'écran), la page
+  // d'origine est cachée, puis les scripts des apps de la fiche partent.
+  var settleLive = function (doc, href, live) {
+    // Positions de défilement internes (galerie sur la photo de la carte, rangée des couleurs centrée) : remises à 0 par
+    // le navigateur quand un élément change de place, elles sont reprises après le déplacement.
+    var scrolled = [];
+    Array.prototype.forEach.call(live.querySelectorAll('*'), function (node) {
+      if (node.scrollLeft || node.scrollTop) scrolled.push([node, node.scrollLeft, node.scrollTop]);
+    });
+    hideOrigin();
+    var anchor = footerAnchor();
+    Array.prototype.slice.call(live.children).forEach(function (node) {
+      if (node.id === 'shopify-section-sticky-add-to-cart') pageRoot.insertBefore(node, document.getElementById('quickshop'));
+      else main.insertBefore(node, anchor);
+    });
+    scrolled.forEach(function (entry) {
+      // Sans défilement doux (la galerie en a un) : remise en place immédiate.
+      try { entry[0].scrollTo({ left: entry[1], top: entry[2], behavior: 'instant' }); } catch (error) {
+        entry[0].scrollLeft = entry[1];
+        entry[0].scrollTop = entry[2];
+      }
+    });
+    document.body.className = doc.body.className;
+    document.title = doc.title;
+    current = bare(href);
+    jump(0);
+    removeSkeleton(false);
+    live.gate.open();
+  };
+
   // Aperçu immédiat, dès le toucher : photo, titre et prix de la carte touchée sur une page blanche (en-tête avec
   // flèche retour, blocs gris), comme SHEIN ; la vraie fiche le remplace dès qu'elle est prête.
   var skeleton = null;
+  // #root a z-index 13 (assets/screen.css) : tout ce qu'il contient, aperçu compris, passait SOUS la barre du bas
+  // (z-index 1000, dans <body>) — sur téléphone elle restait affichée par-dessus l'aperçu et cachait sa barre d'achat.
+  // Le temps de l'aperçu (ou du glissement de retour), #root n'a plus de z-index : l'aperçu passe au-dessus.
+  var overNav = function (on) { pageRoot.style.zIndex = on ? 'auto' : ''; };
   // mode true : la vraie fiche est en place dessous, l'aperçu s'efface en fondu (sans saut visible).
   // mode 'slide' : retour pendant l'aperçu, il repart vers la droite comme une fiche.
-  var removeSkeleton = function (mode) {
+  // after : appelé une fois l'aperçu retiré.
+  var removeSkeleton = function (mode, after) {
     var node = skeleton;
     skeleton = null;
-    if (!node || !node.parentNode) return;
+    var finish = function () {
+      if (node && node.parentNode) node.parentNode.removeChild(node);
+      if (!skeleton) overNav(false);
+      if (after) after();
+    };
+    if (!node || !node.parentNode) { stopParallax(); finish(); return; }
     var panel = node.querySelector('[data-skeleton-panel]');
-    if (mode === 'slide' && panel && typeof panel.animate === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (mode === 'slide' && panel && motion()) {
       var easing = { duration: 260, easing: 'cubic-bezier(.4,0,.6,1)', fill: 'forwards' };
-      var done = function () { if (node.parentNode) node.parentNode.removeChild(node); };
       node.style.pointerEvents = 'none';
-      panel.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(100%)' }], easing).finished.then(done, done);
+      panel.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(100%)' }], easing).finished.then(finish, finish);
       node.querySelector('[data-skeleton-dim]').animate([{ opacity: 1 }, { opacity: 0 }], easing);
+      undoParallax(easing);
       return;
     }
-    if (!mode) { node.parentNode.removeChild(node); return; }
+    stopParallax();
+    if (!mode) { finish(); return; }
     node.style.transition = 'opacity .18s ease-out';
     node.style.opacity = '0';
-    window.setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 200);
+    window.setTimeout(finish, 200);
   };
   var esc = function (text) {
     return String(text || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
@@ -746,7 +907,73 @@
     });
   };
   // started : appelé quand le glissement de l'aperçu est lancé (tout de suite sans animation).
-  var showSkeleton = function (link, started) {
+  // Aperçu « réel » : fiche déjà téléchargée (préchargement des cartes) et ses styles arrivés → copie du haut de sa
+  // fiche (en-tête, galerie, bande Vantaggi, carte prix complète, cartes suivantes, barre d'achat). Sa mise en forme vient
+  // du CSS seul (assets/pdp-mobile.css), sans attendre assets/pdp-mobile.js : la fiche arrive complète dès le
+  // glissement, puis la vraie la remplace au même endroit. Copie inerte : sans scripts, fenêtres, éléments d'apps
+  // (Klarna…) ni identifiants (sauf #main-product, dont dépend ce CSS — la vraie fiche, construite avant elle dans le
+  // panneau, reste la première trouvée). null : aperçu simple (photo, prix, nom de la carte).
+  var realPreview = function (href) {
+    var hit = href && cachedDoc(href) ? cache[bare(href)] : null;
+    var source = hit && hit.doc.querySelector('[data-pdp-mobile]');
+    var section = source && source.closest('.shopify-section');
+    if (!section) return null;
+    var sheets = sheetLinks(hit.doc).map(sheetFor).filter(Boolean);
+    if (sheets.some(function (entry) { return !entry.loaded; })) return null;
+    sheets.forEach(function (entry) { entry.link.media = entry.media; });
+    // Taillée dans le document téléchargé (inerte : rien ne s'y charge ni ne s'y exécute), puis importée : importer
+    // toute la section (formulaires et fenêtres cachés du thème) coûtait ~0,2 s au toucher.
+    var fiche = source.cloneNode(false);
+    fiche.removeAttribute('id');
+    fiche.removeAttribute('data-pdp-mobile');
+    // Haut de la fiche seulement : jusqu'à deux cartes après la carte prix (le reste est sous l'écran) + barre d'achat.
+    var cards = 0;
+    Array.prototype.forEach.call(source.children, function (node) {
+      var keep = node.classList.contains('pdp-m__buy') ||
+        (cards < 3 && node.tagName !== 'TEMPLATE' && !/pdp-m__(share|toast|lb|kl|desc|sec|rel)\b/.test(node.className));
+      if (node.tagName === 'SECTION' && node.classList.contains('pdp-m__card')) cards += 1;
+      if (keep) fiche.appendChild(node.cloneNode(true));
+    });
+    fiche.querySelectorAll('script, noscript, template, dialog, iframe, link').forEach(function (node) { node.remove(); });
+    Array.prototype.slice.call(fiche.querySelectorAll('*')).forEach(function (node) {
+      if (node.tagName.indexOf('-') !== -1) node.remove();
+      else node.removeAttribute('id');
+    });
+    // Mêmes parents que la fiche (#root .shopify-section #main-product .pdp-m… dans assets/pdp-mobile.css).
+    var copy = section.cloneNode(false);
+    copy.removeAttribute('id');
+    var article = source.parentElement.cloneNode(false);
+    article.appendChild(fiche);
+    copy.appendChild(article);
+    return document.importNode(copy, true);
+  };
+  // Galerie de l'aperçu réel sur la photo de la carte (comme la fiche, show) : photo de la carte affichée dessous en
+  // attendant la sienne, compteur compris.
+  var placePreviewGallery = function (layer, src) {
+    var track = layer.querySelector('[data-pdp-slides]');
+    if (!track) return;
+    var slides = track.children;
+    var index = 0;
+    var cardFile = fileOf(src);
+    Array.prototype.some.call(slides, function (slide, i) {
+      var img = slide.querySelector('img');
+      if (src && img && fileOf(img.getAttribute('src')) === cardFile) { index = i; return true; }
+      return false;
+    });
+    var slide = slides[index];
+    if (!slide) return;
+    var img = slide.querySelector('img');
+    if (img) {
+      img.setAttribute('loading', 'eager');
+      img.setAttribute('fetchpriority', 'high');
+    }
+    if (src) slide.style.background = '#fff url("' + src.replace(/"/g, '%22') + '") center / contain no-repeat';
+    if (index) track.scrollLeft = index * window.innerWidth;
+    var count = layer.querySelector('[data-pdp-count]');
+    if (count) count.textContent = (index + 1) + ' / ' + slides.length;
+  };
+  // href : fiche ouverte (aperçu réel quand elle est déjà téléchargée).
+  var showSkeleton = function (link, started, href) {
     removeSkeleton();
     // Carte entière (le lien de la photo a lui-même « card » dans sa classe : on remonte au-dessus).
     var card = link && (link.closest('li') || link.closest('article') ||
@@ -757,68 +984,109 @@
     // Nom du produit seul (le titre des cartes commence parfois par l'étiquette de marque « 🏬 Pokemon › »).
     var titleEl = card && (card.querySelector('[class*="title"] a[href*="/products/"], h3 a[href*="/products/"]') ||
       card.querySelector('[class*="title"], h2, h3'));
-    var priceEl = card && card.querySelector('[class*="price"]:not([class*="old"]):not([class*="compare"])');
+    // Prix : élément « price », sinon le premier texte en forme de prix hors ancien prix barré (cartes « TOP » des
+    // rayons : <b>CHF 18.00</b>, sans classe). Nom : texte du titre, sinon le texte de la photo (alt).
+    var priceEl = card && (card.querySelector('[class*="price"]:not([class*="old"]):not([class*="compare"])') ||
+      Array.prototype.find.call(card.querySelectorAll('b, strong, span, small, div, p'), function (el) {
+        return !el.children.length && /\d[.,]\d{2}/.test(el.textContent) &&
+          !el.closest('s, del, [class*="old"], [class*="compare"]');
+      }));
     var title = titleEl ? titleEl.textContent.replace(/\s+/g, ' ').trim() : '';
-    var priceMatch = priceEl ? priceEl.textContent.replace(/\s+/g, ' ').match(/[€$£]\s?\d[\d.,]*|\d[\d.,]*\s?[€$£]/) : null;
-    var price = priceMatch ? priceMatch[0] : '';
+    if (!title && img) title = (img.getAttribute('alt') || '').trim();
+    // Prix tel qu'affiché sur la carte, toute devise (« CHF 18.00 », « 18,00 € ») : seuls « € $ £ » étaient reconnus,
+    // le prix en CHF manquait.
+    var priceMatch = priceEl ? priceEl.textContent.replace(/\s+/g, ' ').trim().match(/[^\d\s]*\s?\d[\d.,' ]*\d(?:\s?(?:[^\w\s]+|[A-Z]{3})(?!\s?\d))?|[^\d\s]*\s?\d/) : null;
+    var price = priceMatch ? priceMatch[0].trim() : '';
+    // Centimes en petit, comme la fiche (« CHF 18<small>.00</small> »).
+    var cents = price.match(/^(.*\d)([.,]\d{2})(\D*)$/);
+    var priceHtml = cents ? esc(cents[1]) + '<small style="font-size:17px">' + esc(cents[2]) + '</small>' + esc(cents[3]) : esc(price);
     var T = window.mobileT || function (key) { return key; };
-    var grey = function (w, h, m) { return '<i style="display:block;width:' + w + ';height:' + h + 'px;margin:' + (m || '10px 14px 0') + ';border-radius:8px;background:#f0f1f5"></i>'; };
-    var dot = '<i style="flex:none;width:34px;height:34px;border-radius:50%;background:#f0f1f5"></i>';
     var icon = function (path) {
       return '<span style="display:grid;place-items:center;width:30px;height:32px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16123f" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg></span>';
     };
-    // Aperçu au design de la fiche (comme SHEIN) : en-tête (retour, recherche, panier, partager, ⋯), grande photo de la
-    // carte, prix, nom, blocs gris, barre « Aggiungi al carrello » en bas. Il glisse depuis la droite en 0,28 s sur la
-    // page qui s'assombrit ; la vraie fiche le remplace en fondu (removeSkeleton).
+    // Aperçu = le haut de la vraie fiche (mêmes tailles, couleurs et polices que assets/pdp-mobile.css) : en-tête,
+    // photo carrée de la carte, bande « Vantaggi esclusivi », carte prix (prix, « IVA inclusa », nom), barre d'achat.
+    // Pas de blocs gris : la vraie fiche le remplace en fondu sans que rien ne bouge. Il glisse depuis la droite en
+    // 0,28 s sur la page qui s'assombrit (removeSkeleton).
     skeleton = document.createElement('div');
     skeleton.className = 'pdp-swap-skeleton';
     skeleton.setAttribute('aria-hidden', 'true');
     skeleton.style.cssText = 'position:fixed;inset:0;z-index:2147480000;overflow:hidden;font-family:inherit';
     skeleton.innerHTML =
-      '<div data-skeleton-dim style="position:absolute;inset:0;background:rgba(22,18,63,.18)"></div>' +
-      '<div data-skeleton-panel style="position:absolute;inset:0;background:#fff;overflow:hidden;box-shadow:-8px 0 24px rgba(22,18,63,.12);will-change:transform">' +
+      '<div data-skeleton-dim style="position:absolute;inset:0;background:rgba(22,18,63,.08)"></div>' +
+      '<div data-skeleton-panel style="position:absolute;inset:0;background:#f5f6f8;overflow:hidden;box-shadow:-8px 0 24px rgba(22,18,63,.12);will-change:transform">' +
+      // Couche de l'aperçu, au-dessus de la vraie fiche construite dessous pendant le glissement (showLive).
+      '<div data-skeleton-preview style="position:absolute;inset:0;z-index:1;background:#f5f6f8;overflow:hidden;color:#16123f;font-family:Figtree,system-ui,sans-serif">' +
         '<div style="display:flex;align-items:center;gap:2px;height:52px;padding:0 6px 0 4px;background:#fff">' +
-          '<button type="button" data-skeleton-back aria-label="Indietro" style="all:unset;display:grid;place-items:center;width:36px;height:36px;cursor:pointer">' +
-            '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16123f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>' +
+          // Pas un <button> : le thème met sur les boutons un ::before indigo en position absolue (assets/screen.css) qui,
+          // le bouton remis à « static », couvrait tout l'aperçu (bloc bleu sous le titre). L'aperçu est aria-hidden.
+          '<span data-skeleton-back style="display:grid;place-items:center;width:36px;height:36px;cursor:pointer">' +
+            '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16123f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></span>' +
           '<span style="flex:1;min-width:0;display:flex;align-items:center;height:36px;padding:0 12px;border-radius:10px;background:#f4f5f9;color:#9a9db0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(T('search_placeholder')) + '</span>' +
           icon('<path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/>') +
           icon('<path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>') +
           icon('<circle cx="5" cy="12" r="1.2" fill="#16123f"/><circle cx="12" cy="12" r="1.2" fill="#16123f"/><circle cx="19" cy="12" r="1.2" fill="#16123f"/>') +
         '</div>' +
-        '<div style="aspect-ratio:1/1;width:100%;background:#f5f5f7 center/cover no-repeat' + (src ? ' url(&quot;' + esc(src) + '&quot;)' : '') + '"></div>' +
-        (price ? '<div style="margin:14px 14px 0;font-family:Sora,inherit;font-size:26px;font-weight:800;letter-spacing:-.5px;color:#16123f">' + esc(price) + '</div>' : grey('40%', 26, '14px 14px 0')) +
-        (title ? '<div style="margin:10px 14px 0;font-size:15px;font-weight:600;line-height:1.35;color:#16123f;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(title) + '</div>' : grey('90%', 16)) +
-        grey('35%', 14, '14px 14px 0') +
-        '<div style="display:flex;gap:10px;margin:14px 14px 0">' + dot + dot + dot + dot + dot + '</div>' +
-        grey('100%', 64, '16px 14px 0') +
-        '<div style="position:absolute;left:0;right:0;bottom:0;display:flex;gap:10px;align-items:center;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #ecebf3">' +
-          '<span style="flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;border:1.5px solid #ecebf3"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16123f" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span>' +
-          '<span style="flex:1;display:grid;place-items:center;height:50px;border-radius:12px;background:#16123f;color:#fff;font-family:Sora,inherit;font-size:15px;font-weight:800;letter-spacing:.5px;text-transform:uppercase">' + esc(T('pdp_add_to_cart')) + '</span>' +
+        '<div style="width:100%;aspect-ratio:1/1;background:#fff center/contain no-repeat' + (src ? ' url(&quot;' + esc(src) + '&quot;)' : '') + '"></div>' +
+        '<div style="display:flex;align-items:center;gap:6px;height:42px;padding:0 14px;box-sizing:border-box;border-radius:16px 16px 0 0;background:linear-gradient(90deg,#dcefff 0%,#e6ecff 50%,#eeeaff 100%)">' +
+          '<b style="font-family:Sora,sans-serif;font-size:15px;font-weight:700">' + esc(T('pdp_vant_band')) + '</b>' +
+          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#6b6f80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>' +
         '</div>' +
+        '<div style="padding:14px;background:#fff">' +
+          (price ? '<div style="font-family:Sora,sans-serif;font-size:30px;font-weight:800;line-height:30px">' + priceHtml + '</div>' : '') +
+          '<div style="margin-top:4px;font-size:12px;line-height:16.8px;color:#7a7e94">' + esc(T('pdp_vat_short')) + '</div>' +
+          (title ? '<div style="margin-top:61px;font-size:16px;font-weight:600;line-height:21.6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(title) + '</div>' : '') +
+        '</div>' +
+        '<div style="position:absolute;left:0;right:0;bottom:0;display:flex;gap:12px;align-items:center;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:#fff;box-shadow:0 -4px 14px rgba(22,18,63,.1)">' +
+          '<span style="flex:none;display:grid;place-items:center;width:40px;height:46px"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#16123f" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span>' +
+          '<span style="flex:1;display:grid;place-items:center;height:46px;border-radius:10px;background:#16123f;color:#fff;font-size:14.5px;font-weight:800;letter-spacing:.3px;text-transform:uppercase">' + esc(T('pdp_add_to_cart')) + '</span>' +
+        '</div>' +
+      '</div>' +
       '</div>';
     // Retour : l'adresse du produit est déjà posée (cas normal) ou pas encore (toucher dans les premières ms).
     skeleton.querySelector('[data-skeleton-back]').addEventListener('click', goBack);
-    document.body.appendChild(skeleton);
+    var layer = skeleton.querySelector('[data-skeleton-preview]');
+    var real = realPreview(href);
+    if (real) {
+      // Sa flèche ([data-pdp-back]) est prise par la couche (écouteur plus bas) ; le reste ne réagit pas.
+      var wrap = document.createElement('div');
+      wrap.className = 'template-product';
+      wrap.style.cssText = 'height:100%;overflow:hidden;box-sizing:border-box;padding:' + rootPadding();
+      wrap.appendChild(real);
+      layer.textContent = '';
+      layer.appendChild(wrap);
+      layer.addEventListener('click', function (event) { event.preventDefault(); });
+    }
+    // Dans #root : la vraie fiche construite dans le panneau y prend ses styles (#root .pdp-m…, assets/pdp-mobile.css).
+    pageRoot.appendChild(skeleton);
+    overNav(true);
+    if (real) placePreviewGallery(layer, src);
     // Glissement depuis la droite par l'API d'animation du navigateur (pas de lecture de mise en page forcée, qui
     // recalculait toute la page au toucher) ; aucun mouvement si le visiteur a demandé moins d'animations.
     skeletonUntil = 0;
     var panel = skeleton.querySelector('[data-skeleton-panel]');
     var dim = skeleton.querySelector('[data-skeleton-dim]');
-    if (!motion()) { if (started) started(); return; }
+    // Fin RÉELLE du glissement (pas une durée estimée) : sur téléphone son départ est souvent retardé, et la fiche
+    // posée dans la page avant la fin apparaissait derrière le panneau encore en route.
+    var slid;
+    skeleton.slid = new Promise(function (resolve) { slid = resolve; });
+    if (!motion()) { slid(); if (started) started(); return; }
     // Hors écran à droite au premier affichage, puis glissement lancé une fois cette image affichée (sinon un travail
     // lourd juste après le toucher mangeait le début du glissement). La fiche prête attend la fin (afterSlide).
     panel.style.transform = 'translateX(100%)';
     dim.style.opacity = '0';
-    skeletonUntil = Date.now() + 400;
+    skeletonUntil = Date.now() + 540;
     var node = skeleton;
     afterNextPaint(function () {
-      // Toujours appelé (adresse du produit), même si l'aperçu a déjà été remplacé ; son travail part au tour suivant.
-      if (started) started();
-      if (skeleton !== node) return;
-      skeletonUntil = Date.now() + 280;
-      var easing = { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' };
-      panel.animate([{ transform: 'translateX(100%)' }, { transform: 'translateX(0)' }], easing);
-      dim.animate([{ opacity: 0 }, { opacity: 1 }], easing);
+      // started toujours appelé (adresse du produit, construction de la fiche), même si l'aperçu a déjà été remplacé.
+      if (skeleton !== node) { slid(); if (started) started(); return; }
+      skeletonUntil = Date.now() + SLIDE_IN.duration;
+      panel.animate([{ transform: 'translateX(100%)' }, { transform: 'translateX(0)' }], SLIDE_IN).finished.then(slid, slid);
+      dim.animate([{ opacity: 0 }, { opacity: 1 }], SLIDE_IN);
+      startParallax();
+      // À l'image suivante, une fois le glissement envoyé au compositeur : lancé tout de suite, le travail de started
+      // (adresse ~0,14 s, fiche ~0,4 s) passait avant cette image et retenait le départ du glissement (~0,8 s).
+      window.requestAnimationFrame(function () { if (started) started(); });
     });
   };
 
@@ -867,18 +1135,47 @@
       // Adresse du produit posée une fois le glissement de l'aperçu lancé (il tourne alors sur le compositeur) : une app
       // (enregistreur de sessions) intercepte history.pushState et travaille à chaque appel (~110 ms), ce qui
       // retardait le départ du glissement à ~340 ms.
+      var markStarted;
+      var slideStarted = new Promise(function (resolve) { markStarted = resolve; });
       showSkeleton(link, function () {
         window.setTimeout(function () { if (mine === token) pushProduct(href); }, 0);
-      });
+        markStarted();
+      }, href);
     }
+    // Depuis la page d'origine : fiche construite dans le panneau pendant qu'il glisse (le glissement est déjà parti sur
+    // le compositeur, le travail de la fiche ne le ralentit pas). Fiche → fiche, retour / avance : comme avant.
+    var inPanel = push && !saved && !!skeleton;
     var backY = !push && window.history.state && window.history.state.pdpY;
     return fetchDoc(href)
       .then(function (doc) {
         if (mine !== token) return null;
-        return loadStyles(doc).then(function () { return afterSlide(doc); });
+        return loadStyles(doc).then(function () {
+          if (inPanel) return doc;
+          return skeleton && skeleton.slid ? skeleton.slid.then(function () { return doc; }) : afterSlide(doc);
+        });
       })
       .then(function (doc) {
         if (!doc || mine !== token) return;
+        if (inPanel) {
+          return slideStarted.then(function () {
+            return new Promise(function (resolve) { window.setTimeout(resolve, 0); });
+          }).then(function () {
+            if (mine !== token || !skeleton) return;
+            var cover = skeleton;
+            var live = makeLive();
+            var shown = show(doc, href, live);
+            // Pose dans la page une image APRÈS l'affichage de la vraie fiche dans le panneau : faite dans la même image,
+            // ce travail (~0,6 s ici, plus sur téléphone ; rien ne change à l'écran) retardait l'apparition de la fiche.
+            Promise.all([live.ready, cover.slid]).then(function () {
+              afterNextPaint(function () {
+                window.setTimeout(function () {
+                  if (mine === token && skeleton === cover && cover.contains(live)) settleLive(doc, href, live);
+                }, 0);
+              });
+            });
+            return shown.then(function () { if (mine === token) progress(false); });
+          });
+        }
         return show(doc, href).then(function () {
           if (mine !== token) return;
           progress(false);
@@ -988,7 +1285,8 @@
   // (plusieurs secondes) au lieu de faire glisser la fiche sur la page d'origine.
   document.addEventListener('click', function (event) {
     var back = event.target.closest ? event.target.closest('[data-pdp-back]') : null;
-    if (!back || !saved) return;
+    // Fiche affichée, ou encore dans le panneau qui glisse (sa flèche y est déjà).
+    if (!back || !(saved || (skeleton && skeleton.contains(back)))) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     goBack();
