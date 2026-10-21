@@ -383,8 +383,15 @@ function processSmallPopupQueue() {
 	smallPopupRafId = 0;
 	if (!smallPopupQueue.size) return;
 
-	const items = Array.from(smallPopupQueue);
+	let items = Array.from(smallPopupQueue);
 	smallPopupQueue.clear();
+
+	// Mobile : éléments non affichés (arguments de la barre du haut ordinateur, #nav-top, cachée) écartés d'une seule
+	// lecture groupée, avant toute écriture. Chacun forçait 3 à 4 recalculs complets de la fiche (~8 000 éléments) :
+	// 0,6 à 0,9 s de page figée sur ordinateur, 2 à 4 s sur téléphone, pour des éléments invisibles. Ordinateur inchangé.
+	if (window.matchMedia('(max-width: 760px)').matches) {
+		items = items.filter((el) => el.isConnected && el.getClientRects().length > 0);
+	}
 
 	for (const el of items) {
 		if (!el.isConnected) continue;

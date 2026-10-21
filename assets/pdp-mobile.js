@@ -34,6 +34,12 @@
     target.addEventListener(type, handler, options);
   };
 
+  // Compte à rebours de livraison de la fiche ordinateur (ul.f8pr-shipping-timer, snippets/main-product-info.liquid) :
+  // caché sur mobile (assets/pdp-mobile.css) mais animé par le thème (plugin-countdown.js) 8 fois par seconde sans fin,
+  // avec une minuterie de plus à chaque fiche ouverte sur place. Retiré avant que le thème ne le démarre (ce script passe
+  // avant le sien) ; la fiche mobile a son propre compteur (« Spedito oggi ? », data-pdp-ship-timer).
+  document.querySelectorAll('#main-product .f8pr-shipping-timer').forEach(function (timer) { timer.remove(); });
+
   // Mesures groupées : toutes les lectures de taille / position à l'image suivante, puis toutes les écritures. Au
   // démarrage, chaque lecture faite entre deux changements obligeait le navigateur à recalculer toute la fiche
   // (~30-60 ms chacune, 3 à 4 fois plus sur téléphone) : ~300 ms de calcul avant que la fiche puisse s'afficher.
