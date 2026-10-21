@@ -1420,10 +1420,21 @@
   });
   // Feuille « Vantaggi esclusivi » ouverte d'elle-même 5 s après l'ouverture de chaque fiche ; pas si une autre feuille
   // est déjà ouverte, si l'onglet est caché ou si le client a quitté la fiche entre-temps (fiche ouverte sur place).
+  // Seulement sur la première fiche ouverte, puis en rappel 30 min après la dernière ouverture automatique (gardé dans
+  // le téléphone) ; le client peut toujours l'ouvrir lui-même par la bande « Vantaggi esclusivi ».
+  var VANT_KEY = 'pdpVantAutoAt';
+  var VANT_GAP = 30 * 60 * 1000;
+  var vantLast = 0;
+  try { vantLast = Number(window.localStorage.getItem(VANT_KEY)) || 0; } catch (error) { /* stockage indisponible */ }
   var vantButton = root.querySelector('.pdp-m__vant');
-  if (vantButton) {
+  if (vantButton && Date.now() - vantLast >= VANT_GAP) {
     window.setTimeout(function () {
       if (!document.body.contains(vantButton) || document.hidden || document.querySelector('dialog[open]')) return;
+      // Relu au moment d'ouvrir : une autre fiche (ou un autre onglet) a pu l'ouvrir entre-temps.
+      try {
+        if (Date.now() - (Number(window.localStorage.getItem(VANT_KEY)) || 0) < VANT_GAP) return;
+        window.localStorage.setItem(VANT_KEY, String(Date.now()));
+      } catch (error) { /* stockage indisponible : ouverte comme avant */ }
       vantButton.click();
     }, Math.max(0, 5000 - (Date.now() - pdpStart)));
   }
