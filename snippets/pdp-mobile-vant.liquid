@@ -20,7 +20,9 @@
 -%}
 <dialog class="pdp-m__pt pdp-m__vs" data-pdp-pt="vant" aria-labelledby="pdp-vs-title">
   <div class="pdp-m__pt-in">
-    <div class="pdp-m__pt-body" data-pdp-pt-body tabindex="-1" autofocus>
+    {%- comment -%} Pas d'autofocus : la feuille fermée est rendue sous l'écran (animation d'ouverture), Chrome lui donnait
+      le focus dès l'arrivée de la fiche et faisait glisser toute la vue vers elle. Focus posé à l'ouverture (assets/pdp-mobile.js). {%- endcomment -%}
+    <div class="pdp-m__pt-body" data-pdp-pt-body tabindex="-1">
       <div class="pdp-m__vs-hd" data-pdp-pt-card="top">
         {%- comment -%} Textes des traductions déjà échappés par Shopify (apostrophe en &#39;) : pas d'escape en plus. {%- endcomment -%}
         <h2 id="pdp-vs-title">{% if vt_half > 0 %}{{ vt_first }}<br>{{ vt_rest }}{% else %}{{ vt_title }}{% endif %}</h2>

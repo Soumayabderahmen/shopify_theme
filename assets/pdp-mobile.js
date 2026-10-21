@@ -1403,6 +1403,8 @@
       button.addEventListener('click', function () {
         if (typeof sheet.showModal !== 'function') return;
         if (!sheet.open) sheet.showModal();
+        // Focus dans la feuille ouverte, sans faire défiler la page (remplace l'autofocus de snippets/pdp-mobile-vant.liquid).
+        if (body.hasAttribute('tabindex')) body.focus({ preventScroll: true });
         body.scrollTop = 0;
         syncBar();
         showCard(button.getAttribute('data-pdp-pt-open'), 380);
