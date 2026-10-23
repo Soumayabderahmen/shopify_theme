@@ -2318,6 +2318,107 @@
     -webkit-line-clamp: 3;
   }
 
+  /* Contenu de droite au modèle SHEIN (snippets/mobile-category-sections.liquid, sections/mobile-category-browser.liquid) :
+     sections de collections (titre + « Vedi tutto » + tuiles, 3 colonnes), « Boutique di tendenza », puis
+     « Raccomandazioni » : cartes produit sur 2 colonnes avec prix rouge et réduction. */
+  .mobile-category-sec {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 14px 8px;
+    margin-top: 6px;
+    padding-top: 14px;
+    border-top: 1px solid #eceef4;
+  }
+
+  #root .mobile-category-browser .mobile-category-sec__title {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 0;
+    color: #16123f;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  #root .mobile-category-browser .mobile-category-sec__title--brands {
+    font-style: italic;
+  }
+
+  .mobile-category-sec--brands .mobile-category-card:not(.mobile-category-card--view-all) .mobile-category-card__image {
+    border-radius: 50%;
+  }
+
+  .mobile-category-sec--brands .mobile-category-card:not(.mobile-category-card--view-all) .mobile-category-card__image img {
+    border-radius: 50%;
+  }
+
+  .mobile-category-browser__panel .mobile-category-products--reco {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 8px;
+    margin-top: 6px;
+    padding-top: 14px;
+    border-top: 1px solid #eceef4;
+  }
+
+  .mobile-category-products--reco .mobile-category-products__title {
+    grid-column: 1 / -1;
+  }
+
+  .mobile-category-card--product {
+    align-items: stretch;
+    gap: 5px;
+    text-align: left;
+  }
+
+  .mobile-category-card--product .mobile-category-card__image {
+    aspect-ratio: 3 / 4;
+    border-radius: 12px;
+  }
+
+  .mobile-category-card--product .mobile-category-card__image img {
+    border-radius: 12px;
+  }
+
+  .mobile-category-card--product .mobile-category-card__title {
+    display: block;
+    overflow: hidden;
+    color: #3d4058 !important;
+    font-size: 11.5px;
+    font-weight: 500 !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-category-card__price {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .mobile-category-card__price b {
+    color: #e4323c;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .mobile-category-card__price i {
+    padding: 0 3px;
+    color: #e4323c;
+    font-size: 10.5px;
+    font-style: normal;
+    font-weight: 700;
+    border: 1px solid #e4323c;
+    border-radius: 4px;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .mobile-category-card--view-all svg .q,
     .mobile-category-card__image,

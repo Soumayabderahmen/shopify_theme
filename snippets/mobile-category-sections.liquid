@@ -1,0 +1,102 @@
+{%- comment -%}
+  Contenu de droite du panneau Categoria organisé comme SHEIN (mobile uniquement, snippets/mobile-category-browser.liquid) :
+  après « Acquista per categoria » (tuiles du menu), une section par famille (Top, Pantaloni, Capispalla…) avec
+  « Vedi tutto » puis ses collections, et « Boutique di tendenza » (marques). Les produits (« Raccomandazioni »)
+  arrivent ensuite, chargés par assets/mobile-temu-header.js (sections/mobile-category-browser.liquid).
+  Seulement des collections existantes ; une collection vide ou absente est sautée, une section vide aussi.
+  Libellés des tuiles : titre de la collection (traduit par Shopify) ; titres de section : mobile.category.sec_*.
+
+  Paramètres : handle (collection du rayon de gauche), view_all_icon (icône « Vedi tutto » du panneau).
+  Format d'une ligne : clé de titre | collection de « Vedi tutto » (vide : aucune) | collections des tuiles.
+  Clé « brands » : section des marques.
+{%- endcomment -%}
+{%- liquid
+  case handle
+    when 'bestsellers'
+      assign rows = 'sec_selection||piumini-invernale,felpe_donna,felpe-interno-pile,orologi-uomo,womens-boots,abbigliamento-estate-2025-bikini-costumi,set-uomo-estate,tacco-alto,ventilatori,hair-styling-care-appliances,bici-monopattini,animal-print-accessories;brands||nike,adidas,calvin-klein,rebok,assiesdive-watches'
+    when 'abbigliamento-donna-tutti'
+      assign rows = 'sec_tops|felpe_donna|t-shirt-carino,felpe_donna,felpe-novita,felpe-interno-pile;sec_dresses_skirts|abiti-corti|abiti-corti,gonne;sec_pants|jogger-pantaloni-donna|jogger-pantaloni-donna,pantaloncini_donna,leggings_donna;sec_outerwear|giacche-cappotti-donna|giacche_donna,giacche-cappotti-donna,pelle-e-pellicce,piumini-invernale;sec_lingerie|womens-lingerie-sets-bras-panties|womens-lingerie-sets-bras-panties,satin-babydolls,calze,animal-onesie-pajamas,slippers-cuddles;sec_beach|abbigliamento-estate-2025-bikini-costumi|abbigliamento-estate-2025-bikini-costumi,abbigliamento-mare-donna-elegante,borse-da-spiaggia;brands||calvin-klein,nike,adidas'
+    when 'scarpe-donna-tutti', 'scarpe-donna'
+      assign rows = 'sec_heels|tacco-alto|tacco-alto,tacco-a-zeppa;sec_sandals|sandali-premium|sandali-premium,ciabatte-summer;sec_sneakers|sneakers-unisex|platform-sneakers-sneakers-con-zeppa,casual-sneakers-sneakers-casual,sneakers-unisex;sec_boots|womens-boots|womens-boots,slippers-cuddles;brands||nike,adidas,rebok'
+    when 'borse-baguette'
+      assign rows = 'sec_day_bags|borse-tote|borse-tote,shoulder-bags-borse-a-spalla,crossbody-bags-borse-a-tracolla,hobo-bags-borse-hobo;sec_evening_beach_bags|clutches-evening-bags-pochette|clutches-evening-bags-pochette,borse-da-spiaggia'
+    when 'accessori-donna'
+      assign rows = 'sec_jewelry|accessori-donna|orecchini-donna,collane-donna,gioielli-religiosi,gioielli-hip-hop;sec_watches|orologi-donne|orologi-donne,assiesdive-watches,addieskin-watches'
+    when 'navita-e-tendenze_uomo'
+      assign rows = 'sec_new|navita-e-tendenze_uomo|orologi-uomo-novita,mocassini,felpe-novita,set-uomo-estate;brands||nike,adidas,calvin-klein'
+    when 'abbigliamento-uomo-tutti'
+      assign rows = 'sec_tops|magliette|magliette,felpe-novita,felpe-interno-pile,sweatshirt;sec_outerwear|giacche-uomo|giacche-uomo,piumini-invernale;sec_pants|cargo-pants|cargo-pants,leggings-uomo;sec_sets_sport|set-uomo-estate|set-uomo-estate,sport;brands||calvin-klein,nike,adidas'
+    when 'scarpe-uomo', 'scarpe_uomo'
+      assign rows = 'sec_sport_shoes|scarpe-sport-uomo|scarpe-sport-uomo,wrestling-shoes-scarpe-da-wrestling,sneakers-unisex;sec_casual|mocassini|mocassini,casual-sneakers-sneakers-casual;brands||nike,adidas,rebok'
+    when 'accessorio'
+      assign rows = 'sec_watches|orologi-uomo|orologi-uomo,orologi-uomo-novita,assiesdive-watches,addieskin-watches;sec_jewelry|accessorio|collane-uomo,orecchini-uomo,gioielli-hip-hop'
+    when 'ombrelloni-mare', 'accessori-spiaggia-bambini', 'asciugamani-summer', 'mare-spiaggia'
+      assign rows = 'sec_beach|mare-spiaggia|ombrelloni-mare,accessori-spiaggia-bambini,asciugamani-summer,borse-da-spiaggia,abbigliamento-estate-2025-bikini-costumi'
+    when 'new-trends', 'trendsi'
+      assign rows = 'sec_new|trendsi|trendsi,new-trends,sweatshirt'
+    when 'ventilatori', 'riscaldamento-casa', 'casa-giardino'
+      assign rows = 'sec_home|casa-giardino|ventilatori,riscaldamento-casa,tecnologie'
+    when 'personal-care-appliance', 'nail-hand-and-foot-care', 'beauty-health'
+      assign rows = 'sec_beauty|beauty-health|hair-styling-care-appliances,nail-tools-equipment,nail-art-e-adesivi,nail-hand-and-foot-care'
+    else
+      assign rows = ''
+  endcase
+  assign row_list = rows | split: ';'
+-%}
+{%- for row in row_list -%}
+  {%- liquid
+    assign parts = row | split: '|'
+    assign title_key = parts[0]
+    assign all_collection = blank
+    if parts[1] != blank
+      assign all_collection = collections[parts[1]]
+    endif
+    assign tile_handles = parts[2] | split: ','
+    assign tile_count = 0
+    for tile_handle in tile_handles
+      if tile_handle != handle and collections[tile_handle].products_count > 0
+        assign tile_count = tile_count | plus: 1
+      endif
+    endfor
+  -%}
+  {%- if tile_count > 0 -%}
+    <section class="mobile-category-sec{% if title_key == 'brands' %} mobile-category-sec--brands{% endif %}">
+      {%- if title_key == 'brands' -%}
+        <h3 class="mobile-category-sec__title mobile-category-sec__title--brands">{{ 'mobile.category.brands' | t }}</h3>
+      {%- else -%}
+        <h3 class="mobile-category-sec__title">{{ 'mobile.category.' | append: title_key | t }}</h3>
+      {%- endif -%}
+      {%- if all_collection != blank and all_collection.products_count > 0 -%}
+        <a href="{{ all_collection.url }}" class="mobile-category-card mobile-category-card--view-all">
+          {{ view_all_icon }}
+          <span class="mobile-category-card__title">{{ 'mobile.category.view_all' | t }}</span>
+        </a>
+      {%- endif -%}
+      {%- for tile_handle in tile_handles -%}
+        {%- assign tile = collections[tile_handle] -%}
+        {%- if tile_handle != handle and tile.products_count > 0 -%}
+          {%- liquid
+            assign tile_image = tile.featured_image
+            if tile_image == blank
+              assign tile_image = tile.image
+            endif
+            if tile_image == blank
+              assign tile_image = tile.products.first.featured_image
+            endif
+            assign tile_title = tile.title | remove: ' - Tutte' | remove: ' Watches' | replace: 'Rebok', 'Reebok'
+          -%}
+          <a href="{{ tile.url }}" class="mobile-category-card">
+            <span class="mobile-category-card__image">
+              {%- if tile_image != blank -%}
+                <img data-src="{{ tile_image | image_url: width: 184, height: 184, crop: 'center' }}" alt="" width="120" height="120">
+              {%- else -%}
+                <span aria-hidden="true">{{ tile_title | slice: 0, 1 | upcase }}</span>
+              {%- endif -%}
+            </span>
+            <span class="mobile-category-card__title">{{ tile_title | escape }}</span>
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+    </section>
+  {%- endif -%}
+{%- endfor -%}

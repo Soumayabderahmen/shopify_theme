@@ -17,7 +17,7 @@
   Paramètre : menu (menu de Categoria).
 {%- endcomment -%}
 {%- liquid
-  assign cache_epoch = 1
+  assign cache_epoch = 2
   assign cache_assets = 'mobile-temu-header.js,mobile-temu-header.css,mobile-pdp-layer.js,pdp-mobile.js,pdp-mobile.css,mobile-home-shein.js,mobile-home-shein.css,mshein-card.js,mshein-card.css,collection-mobile.js,collection-mobile.css,mobile-search.js' | split: ','
   capture cache_sign
     echo cache_epoch

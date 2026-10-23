@@ -1,11 +1,21 @@
+{%- comment -%}
+  Produits d'un rayon du panneau Categoria mobile (page « ?view=mobile-category », chargée par
+  assets/mobile-temu-header.js) : « Raccomandazioni » comme SHEIN, cartes sur 2 colonnes avec prix et réduction.
+  Titre seulement sur la 1re page et hors liste « Novità » (tri par date). Prix dans la devise du visiteur.
+{%- endcomment -%}
 {%- if collection != blank -%}
-  <div class="mobile-category-products" data-mobile-category-products>
+  {%- capture mm_cur -%}{% render 'mobile-money-suffix' %}{%- endcapture -%}
+  <div class="mobile-category-products mobile-category-products--reco" data-mobile-category-products>
     {%- paginate collection.products by 12 -%}
+      {%- if paginate.current_page == 1 and collection.sort_by != 'created-descending' -%}
+        <h3 class="mobile-category-sec__title mobile-category-products__title">{{ 'mobile.category.reco' | t }}</h3>
+      {%- endif -%}
       {%- for product in collection.products -%}
-        <a href="{{ product.url }}" class="mobile-category-card">
+        {%- assign reco_variant = product.selected_or_first_available_variant -%}
+        <a href="{{ product.url }}" class="mobile-category-card mobile-category-card--product">
           <span class="mobile-category-card__image">
             {%- if product.featured_image != blank -%}
-              <img data-src="{{ product.featured_image | image_url: width: 184, height: 184, crop: 'center' }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" width="120" height="120">
+              <img data-src="{{ product.featured_image | image_url: width: 360, height: 480, crop: 'center' }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" width="180" height="240">
             {%- else -%}
               <span aria-hidden="true">{{ product.title | slice: 0, 1 | upcase }}</span>
             {%- endif -%}
@@ -14,6 +24,13 @@
             {%- endif -%}
           </span>
           <span class="mobile-category-card__title">{{ product.title | escape }}</span>
+          <span class="mobile-category-card__price">
+            <b>{{ reco_variant.price | money }}{{ mm_cur }}</b>
+            {%- if reco_variant.compare_at_price > reco_variant.price -%}
+              {%- assign reco_off = reco_variant.compare_at_price | minus: reco_variant.price | times: 100.0 | divided_by: reco_variant.compare_at_price | floor -%}
+              <i>-{{ reco_off }}%</i>
+            {%- endif -%}
+          </span>
         </a>
       {%- endfor -%}
       {%- if paginate.next -%}
