@@ -2321,6 +2321,18 @@
   /* Contenu de droite au modèle SHEIN (snippets/mobile-category-sections.liquid, sections/mobile-category-browser.liquid) :
      sections de collections (titre + « Vedi tutto » + tuiles, 3 colonnes), « Boutique di tendenza », puis
      « Raccomandazioni » : cartes produit sur 2 colonnes avec prix rouge et réduction. */
+  /* « In evidenza » et « Novità » : pas de titre « Acquista per categoria / Novità › » (ni tuile « Vedi tutto » seule). */
+  .mobile-category-browser__main:has(#mobile-category-panel-featured.is-active, #mobile-category-panel-new.is-active) .mobile-category-browser__heading {
+    display: none;
+  }
+
+  #mobile-category-panel-featured > .mobile-category-sec:first-child,
+  #mobile-category-panel-new > .mobile-category-products--reco:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
   .mobile-category-sec {
     display: grid;
     grid-column: 1 / -1;

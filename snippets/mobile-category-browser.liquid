@@ -66,6 +66,9 @@
     <aside class="mobile-category-browser__sidebar">
       <div class="mobile-category-browser__tabs" role="tablist" aria-label="{{ featured_label }}">
         <a href="#mobile-category-panel-featured" role="tab" class="mobile-category-browser__tab mobile-category-browser__featured is-active" aria-selected="true" aria-controls="mobile-category-panel-featured" data-category-tab="mobile-category-panel-featured">{{ featured_label }}</a>
+        {%- if new_collection != blank -%}
+          <a href="#mobile-category-panel-new" role="tab" class="mobile-category-browser__tab" aria-selected="false" aria-controls="mobile-category-panel-new" data-category-tab="mobile-category-panel-new">{{ new_label }}</a>
+        {%- endif -%}
         {%- assign category_index = 0 -%}
         {%- for main_link in menu.links -%}
           {%- for category_link in main_link.links -%}
@@ -117,20 +120,10 @@
         écrits ici : ce panneau est gardé 12 h dans le téléphone, les prix doivent rester à jour et dans sa devise).
       {%- endcomment -%}
       <div id="mobile-category-panel-featured" class="mobile-category-browser__panel mobile-category-browser__panel--featured is-active" role="tabpanel"{% if hot_collection != blank %} data-category-products-endpoint="{{ hot_collection.url }}?view=mobile-category"{% else %} data-products-loaded="true"{% endif %}>
-        <a href="{% if hot_collection != blank %}{{ hot_collection.url }}{% else %}{{ routes.all_products_collection_url }}{% endif %}" class="mobile-category-card mobile-category-card--view-all">
-          {{ view_all_icon }}
-          <span class="mobile-category-card__title">{{ view_all_label }}</span>
-        </a>
         {%- render 'mobile-category-sections', handle: 'bestsellers', view_all_icon: view_all_icon -%}
       </div>
-      <div id="mobile-category-panel-new" class="mobile-category-browser__panel mobile-category-browser__panel--animated" role="tabpanel" data-deferred-products{% if new_collection != blank %} data-category-products-endpoint="{{ new_collection.url }}?view=mobile-category"{% endif %} hidden>
-        {%- if new_collection != blank -%}
-          <a href="{{ new_collection.url }}" class="mobile-category-card mobile-category-card--view-all">
-            {{ view_all_icon }}
-            <span class="mobile-category-card__title">{{ view_all_label }}</span>
-          </a>
-        {%- endif -%}
-      </div>
+      {%- comment -%} « Novità » : lien de gauche sous « In evidenza » ; produits les plus récents d'abord (sans le titre « Raccomandazioni »). {%- endcomment -%}
+      <div id="mobile-category-panel-new" class="mobile-category-browser__panel mobile-category-browser__panel--animated" role="tabpanel" data-deferred-products{% if new_collection != blank %} data-category-products-endpoint="{{ new_collection.url }}?sort_by=created-descending&view=mobile-category"{% endif %} hidden></div>
 
       {%- assign category_index = 0 -%}
       {%- for main_link in menu.links -%}
