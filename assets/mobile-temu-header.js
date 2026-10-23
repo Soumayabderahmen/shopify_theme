@@ -2760,6 +2760,13 @@ function initMobileTemuHeader() {
       categoryBrowser.replaceChildren.apply(categoryBrowser, Array.prototype.slice.call(source.childNodes));
       categoryBrowser.setAttribute('data-category-loaded', 'true');
       initCategoryPanel();
+      // Panneau remplacé pendant qu'il est ouvert (version gardée puis nouvelle version du serveur) : images et
+      // produits du rayon affiché relancés, sinon ils restaient vides (images en data-src jamais chargées).
+      if (!categoryBrowser.hidden) {
+        var activePanel = categoryBrowser.querySelector('.mobile-category-browser__panel.is-active');
+        loadPanelImages(activePanel);
+        loadCategoryProducts(activePanel);
+      }
     });
     categoryPanelRequest.catch(function () { categoryPanelRequest = null; });
     return categoryPanelRequest;

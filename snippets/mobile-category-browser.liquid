@@ -101,12 +101,7 @@
     <div class="mobile-category-browser__main">
       <div class="mobile-category-browser__heading">
         <h2>{{ shop_label }}</h2>
-        {%- comment -%}
-          « Novità › » : dans le panneau, affiche les nouveautés du rayon choisi (In evidenza : collection « Nuovi
-          arrivi » ; autres rayons : leur collection triée par date d'ajout). Nouveau toucher = retour à la liste du
-          rayon. L'adresse sert seulement si le script n'est pas chargé.
-        {%- endcomment -%}
-        <a href="{% if new_collection != blank %}{{ new_collection.url }}{% else %}{{ routes.all_products_collection_url }}?sort_by=created-descending{% endif %}" class="mobile-category-browser__deferred-note" aria-pressed="false" data-category-new-toggle>{{ new_label }} ›</a>
+        {%- comment -%} Plus de « Novità › » ici : les nouveautés ont leur lien à gauche, sous « In evidenza ». {%- endcomment -%}
       </div>
       {%- capture view_all_icon -%}<span class="mobile-category-card__image"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><rect class="q q1" x="3.4" y="3.4" width="7.4" height="7.4" rx="2.5" fill="url(#mobile-category-view-all-gradient)"></rect><rect class="q q2" x="13.2" y="3.4" width="7.4" height="7.4" rx="2.5" fill="#3a34d2" fill-opacity=".26"></rect><rect class="q q3" x="3.4" y="13.2" width="7.4" height="7.4" rx="2.5" fill="#3a34d2" fill-opacity=".26"></rect><rect class="q q4" x="13.2" y="13.2" width="7.4" height="7.4" rx="3.7" fill="url(#mobile-category-view-all-gradient)"></rect></svg></span>{%- endcapture -%}
       {%- comment -%}
