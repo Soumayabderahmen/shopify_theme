@@ -330,6 +330,9 @@
   {%- endif -%}
 </div>
 
+{%- comment -%} En-tête ordinateur au style SHEIN (snippets/desktop-header.liquid), même menu que le mobile ; caché en mobile. {%- endcomment -%}
+{%- render 'desktop-header', menu: mobile_category_menu, trends: section.settings.mobile_trending_searches, disable_cart: section.settings.disable_online_store -%}
+
 {%- comment -%} Caches du téléphone vidés quand le site change (avant les scripts qui les lisent). {%- endcomment -%}
 {%- render 'mobile-cache-version', menu: mobile_category_menu -%}
 {%- render 'mobile-bottom-navigation', menu: mobile_category_menu -%}

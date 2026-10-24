@@ -1,0 +1,219 @@
+{%- comment -%}
+  En-tête ORDINATEUR au style SHEIN (prototype validé « Platinumshop-Accueil-desktop-SHEIN-v9 »), rendu par
+  sections/header.liquid sur toutes les pages, caché jusqu'à 760px (le mobile garde son en-tête). L'ancien en-tête du
+  thème (#header-outer) et la barre d'annonces du thème sont cachés sur ordinateur (assets/desktop-header.css).
+  - bandeau d'annonces défilant : coupon (réglages « Coupon (mobile) »), Klarna, CashBack, livraison gratuite (réglages
+    « Spedizione »), cambio gratuito, paiements sécurisés (textes traduits) ;
+  - logo animé, recherche (suggestions = « ricerche di tendenza » du header mobile), pays / langue (formulaire Shopify),
+    compte, wishlist (wishlist du site, platinumshop:wishlist:v1), panier (compteur mis à jour par les scripts du panier) ;
+  - onglets = menu du header (le même que le mobile) ; « Categorie » ouvre le méga-menu : rayons → sous-liens → contenu
+    du panneau Categoria mobile (/?section_id=mobile-category-panel, chargé à la première ouverture, assets/desktop-header.js).
+  Sur l'accueil : en-tête transparent posé sur la bannière tant qu'on est en haut (comme le prototype).
+  Params : menu (linklist), trends (texte, une recherche par ligne), disable_cart
+{%- endcomment -%}
+{%- liquid
+  assign own_prefixes = shop.secure_url | append: '|https://www.' | append: shop.domain | append: '|http://' | append: shop.domain | split: '|'
+  assign trend_lines = trends | newline_to_br | replace: '<br />', '<br>' | split: '<br>'
+  assign trend_list = ''
+  for trend_line in trend_lines
+    assign trend_text = trend_line | strip_newlines | strip
+    if trend_text != blank
+      assign trend_list = trend_list | append: trend_text | append: '|'
+    endif
+  endfor
+  assign trend_first = trend_list | split: '|' | first | capitalize
+  if customer
+    assign account_url = routes.account_url
+    assign account_label = customer.first_name | default: customer.name
+  else
+    assign account_url = routes.account_login_url
+    assign account_label = 'service.login' | t
+  endif
+
+  # Annonces : textes traduits, parties en gras comme le prototype
+  assign coupon_html = ''
+  if settings.mobile_coupon_code != blank
+    capture coupon_pct
+      echo '-' | append: settings.mobile_coupon_percent | append: '%'
+    endcapture
+    assign coupon_code = settings.mobile_coupon_code | escape
+    assign coupon_html = 'mobile_pdp_hd.coupon_band' | t: percent: settings.mobile_coupon_percent, code: coupon_code
+    assign coupon_pct_b = coupon_pct | prepend: '<b>' | append: '</b>'
+    assign coupon_code_b = coupon_code | prepend: '<b>' | append: '</b>'
+    assign coupon_html = coupon_html | replace_first: coupon_pct, coupon_pct_b | replace_first: coupon_code, coupon_code_b
+  endif
+  assign klarna_text = 'mobile.home_shein.perk_klarna_text' | t
+  assign klarna_html = 'mobile.home_shein.perk_klarna' | t | append: ' ' | append: klarna_text | replace: 'Klarna', '<b>Klarna</b>'
+  assign cashback_b = 'mobile.home_shein.perk_cashback' | t | prepend: '<b>' | append: '</b>'
+  assign exchange_text_b = 'mobile.home_shein.perk_exchange_text' | t | prepend: '<b>' | append: '</b>'
+  assign shipping_html = ''
+  if settings.enable_free_shipping and settings.free_shipping_amount > 0
+    assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html | prepend: '<b>' | append: '</b>'
+    assign shipping_html = 'desktop_home.free_shipping_from_html' | t: amount: shipping_amount
+  endif
+  assign payment_names_b = 'desktop_home.payment_names' | t | prepend: '<b>' | append: '</b>'
+  assign payments_html = 'desktop_home.secure_payments_html' | t: methods: payment_names_b
+-%}
+<link rel="stylesheet" href="{{ 'desktop-header.css' | asset_url }}" media="(min-width: 761px)">
+<script src="{{ 'desktop-header.js' | asset_url }}" defer></script>
+<style>@media only screen and (max-width: 760px) { .dh-top { display: none !important; } }</style>
+
+<div class="dh-top" data-dh-top>
+  <div class="dh-ann">
+    <div class="dh-ann__track" data-dh-ann>
+      <div class="dh-ann__set">
+        {%- if coupon_html != '' -%}<span>🚀 {{ coupon_html }}</span><i></i>{%- endif -%}
+        <span>🛍️ {{ klarna_html }}</span><i></i>
+        <span>💰 {{ cashback_b }} {{ 'mobile.home_shein.perk_cashback_text' | t }}</span><i></i>
+        {%- if shipping_html != '' -%}<span>🚚 {{ shipping_html }}</span><i></i>{%- endif -%}
+        <span>↩️ {{ 'mobile.home_shein.perk_exchange' | t }} {{ exchange_text_b }}</span><i></i>
+        <span>🔒 {{ payments_html }}</span><i></i>
+      </div>
+    </div>
+  </div>
+
+  <header class="dh{% if template.name == 'index' %} is-over is-home{% endif %}" data-dh>
+    <div class="dh-wrap dh__row">
+      <a class="dh-logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}">
+        <svg class="dh-logo__svg" viewBox="0 0 185 30" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="dh-logo-grad" x1="-185" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#16123f"></stop><stop offset="30%" stop-color="#3a34d2"></stop><stop offset="45%" stop-color="#9aa2c4"></stop><stop offset="60%" stop-color="#16123f"></stop><stop offset="100%" stop-color="#3a34d2"></stop>
+              <animate attributeName="x1" values="-185;0;-185" dur="6s" repeatCount="indefinite"></animate>
+              <animate attributeName="x2" values="0;185;0" dur="6s" repeatCount="indefinite"></animate>
+            </linearGradient>
+            <linearGradient id="dh-logo-grad-light" x1="-185" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ffffff"></stop><stop offset="30%" stop-color="#9f98ff"></stop><stop offset="45%" stop-color="#ffffff"></stop><stop offset="60%" stop-color="#cfcbff"></stop><stop offset="100%" stop-color="#ffffff"></stop>
+              <animate attributeName="x1" values="-185;0;-185" dur="6s" repeatCount="indefinite"></animate>
+              <animate attributeName="x2" values="0;185;0" dur="6s" repeatCount="indefinite"></animate>
+            </linearGradient>
+          </defs>
+          <text x="0" y="23" fill="url(#dh-logo-grad)" font-family="Sora, sans-serif" font-size="23" letter-spacing="-0.6"><tspan font-weight="800">Platinum</tspan><tspan font-weight="500">shop</tspan></text>
+        </svg>
+      </a>
+
+      <form class="dh-srch" action="{{ routes.search_url }}" method="get" role="search" data-dh-search data-trends="{{ trend_list | escape }}">
+        {%- if trend_first != blank -%}<span class="dh-srch__ph" aria-hidden="true"><span data-dh-ph>{{ trend_first | escape }}</span></span>{%- endif -%}
+        <input name="q" type="search" aria-label="{{ 'search.search_form.placeholder' | t | escape }}" autocomplete="off"{% if trend_first == blank %} placeholder="{{ 'search.search_form.placeholder' | t | escape }}"{% endif %}{% if search.performed %} value="{{ search.terms | escape }}"{% endif %}>
+        <input type="hidden" name="type" value="product">
+        <button class="dh-srch__go" type="submit" aria-label="{{ 'search.search_form.submit' | t | escape }}"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button>
+      </form>
+
+      <nav class="dh__acts">
+        {%- assign show_country = false -%}
+        {%- if localization.available_countries.size > 1 -%}{%- assign show_country = true -%}{%- endif -%}
+        {%- assign show_language = false -%}
+        {%- if localization.available_languages.size > 1 -%}{%- assign show_language = true -%}{%- endif -%}
+        {%- if show_country or show_language -%}
+          <div class="dh-loc" data-dh-loc>
+            <button class="dh-act" type="button" aria-expanded="false" aria-controls="dh-loc-panel" data-dh-loc-btn>
+              <span class="dh-act__flag" aria-hidden="true">{{ localization.country | image_url: width: 48 | image_tag: alt: '', loading: 'lazy', width: 24, height: 24 }}</span>
+              <span class="dh-act__t">{{ localization.language.iso_code | upcase }} · {{ localization.country.currency.iso_code }}</span>
+            </button>
+            {%- form 'localization', id: 'dh-loc-panel', class: 'dh-loc__panel', hidden: 'hidden' -%}
+              <b>{{ 'desktop_home.country_language' | t }}</b>
+              {%- if show_country -%}
+                <label>{{ 'mobile.footer.country_currency' | t }}
+                  <select name="country_code" data-dh-autosubmit>
+                    {%- for country in localization.available_countries -%}
+                      <option value="{{ country.iso_code }}"{% if country.iso_code == localization.country.iso_code %} selected{% endif %}>{{ country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})</option>
+                    {%- endfor -%}
+                  </select>
+                </label>
+              {%- endif -%}
+              {%- if show_language -%}
+                <label>{{ 'mobile.footer.language' | t }}
+                  <select name="language_code" data-dh-autosubmit>
+                    {%- for language in localization.available_languages -%}
+                      <option value="{{ language.iso_code }}"{% if language.iso_code == localization.language.iso_code %} selected{% endif %}>{{ language.endonym_name | capitalize }}</option>
+                    {%- endfor -%}
+                  </select>
+                </label>
+              {%- endif -%}
+            {%- endform -%}
+          </div>
+        {%- endif -%}
+        <a class="dh-act" href="{{ account_url }}"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="dh-act__t">{{ account_label | escape }}</span></a>
+        <a class="dh-act" href="{{ pages['wishlist'].url | default: '/pages/wishlist' }}"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="dh-act__t">{{ 'mobile.js.wishlist' | t }}</span><em data-dh-wl>0</em></a>
+        {%- unless disable_cart -%}
+          <a class="dh-act" href="{{ routes.cart_url }}" data-panel="cart"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg><span class="dh-act__t">{{ 'header.cart' | t }}</span><em class="mobile-home-cart-count{% if cart.item_count > 0 %} is-on{% endif %}" data-dh-cart>{{ cart.item_count }}</em></a>
+        {%- endunless -%}
+      </nav>
+    </div>
+
+    <div class="dh-wrap dh-tabs">
+      {%- if menu != blank -%}
+        <button class="dh-tabs__all" type="button" aria-expanded="false" aria-controls="dh-mega" data-dh-mega-btn><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>{{ 'desktop_home.categories' | t }}</button>
+        <div class="dh-tabs__scroll">
+          {%- assign top_index = 0 -%}
+          {%- for link in menu.links -%}
+            {%- if link.url contains '/pages/wishlist' -%}{%- continue -%}{%- endif -%}
+            {%- liquid
+              assign tab_url = link.url
+              for own_prefix in own_prefixes
+                if tab_url contains own_prefix
+                  assign tab_url = tab_url | remove_first: own_prefix
+                  break
+                endif
+              endfor
+              assign tab_start = tab_url | slice: 0, 6
+              if tab_start == '/apps/' and routes.root_url != '/'
+                assign tab_url = routes.root_url | append: tab_url
+              endif
+              assign tab_top = ''
+              if link.url contains '/collections/'
+                assign tab_top = top_index
+                assign top_index = top_index | plus: 1
+              endif
+            -%}
+            {%- unless link.url contains '/collections/' or link.url contains '/pages/contatti' or link.url contains '/pages/contact' -%}{%- continue -%}{%- endunless -%}
+            <a class="dh-tab{% if link.current or link.child_active %} is-here{% endif %}" href="{{ tab_url }}"{% if tab_top != '' %} data-top="{{ tab_top }}"{% endif %}>{{ link.title | escape }}</a>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- if menu != blank -%}
+      {%- comment -%} Méga-menu : rayons (liens collection du menu) → sous-liens → contenu chargé à la 1re ouverture. {%- endcomment -%}
+      <div class="dh-mega" id="dh-mega" data-dh-mega data-src="{% if routes.root_url == '/' %}/{% else %}{{ routes.root_url }}{% endif %}?section_id=mobile-category-panel" hidden>
+        <div class="dh-wrap">
+          <div class="mm" data-dh-mm>
+            <nav class="mm__tops" aria-label="{{ 'desktop_home.categories' | t | escape }}">
+              {%- assign top_index = 0 -%}
+              {%- for link in menu.links -%}
+                {%- unless link.url contains '/collections/' -%}{%- continue -%}{%- endunless -%}
+                <a class="mm__top" href="{{ link.url }}" data-top="{{ top_index }}" data-handle="{{ link.url | split: '/collections/' | last | split: '?' | first | split: '/' | first }}"><span>{{ link.title | escape }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+                {%- assign top_index = top_index | plus: 1 -%}
+              {%- endfor -%}
+            </nav>
+            <nav class="mm__mid">
+              {%- assign top_index = 0 -%}
+              {%- for link in menu.links -%}
+                {%- unless link.url contains '/collections/' -%}{%- continue -%}{%- endunless -%}
+                {%- if link.links.size > 0 -%}
+                  <div class="mm__subs" data-subs="{{ top_index }}" hidden>
+                    <a class="mm__head" href="{{ link.url }}"><img alt="" width="32" height="32" data-dh-head hidden><b>{{ link.title | escape }}</b></a>
+                    {%- for kid in link.links -%}
+                      <a class="mm__sub" href="{{ kid.url }}" data-k="{{ forloop.index0 }}" data-handle="{{ kid.url | split: '/collections/' | last | split: '?' | first | split: '/' | first }}"><span>{{ kid.title | escape }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+                      {%- comment -%} Sous-liens du menu (3e niveau) : contenu du sous-lien quand le panneau Categoria mobile n'en a pas {%- endcomment -%}
+                      {%- if kid.links.size > 0 -%}
+                        <template data-dh-kids>
+                          {%- for grand in kid.links -%}
+                            {%- assign grand_image = grand.object.featured_image | default: grand.object.image -%}
+                            <a class="mobile-category-card" href="{{ grand.url }}">{%- if grand_image -%}<img src="{{ grand_image | image_url: width: 180 }}" alt="">{%- endif -%}<span class="mobile-category-card__title">{{ grand.title | escape }}</span></a>
+                          {%- endfor -%}
+                        </template>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                {%- endif -%}
+                {%- assign top_index = top_index | plus: 1 -%}
+              {%- endfor -%}
+            </nav>
+            <div class="mm__main" data-dh-main data-view-all="{{ 'mobile.category.view_all' | t | escape }}" data-shop-by="{{ 'mobile.category.shop_by' | t | escape }}" data-reco="{{ 'mobile.category.reco' | t | escape }}"></div>
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </header>
+</div>

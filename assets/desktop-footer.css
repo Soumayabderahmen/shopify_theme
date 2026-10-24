@@ -1,0 +1,135 @@
+/* Footer ORDINATEUR (snippets/mobile-footer.liquid, bloc .dft) — prototype Platinumshop-Accueil-desktop-SHEIN-v9.
+   Chargé à partir de 761px ; le footer mobile n'est pas touché. */
+
+/* L'ancien footer et la section newsletter séparée sont remplacés par .dft (mêmes données) */
+#root .shopify-section-footer > nav,
+#root .shopify-section-footer > .base-font,
+#root .shopify-section-group-footer-group[id*="__section_newsletter_"] {
+  display: none !important;
+}
+#root .shopify-section-footer {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+#root .shopify-section-footer::before,
+#root .shopify-section-footer::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Pleine largeur : largeur sans la barre de défilement (--dh-vw, assets/desktop-header.js), décalage du conteneur du thème (--dft-x, script du footer) */
+#root .shopify-section-footer > .dft {
+  position: relative;
+  display: block;
+  width: var(--dh-vw, 100vw);
+  max-width: none;
+  margin: 56px 0 0 calc(-1 * var(--dft-x, 0px));
+  padding: 0;
+  color: #d9d7f2;
+  font-family: 'Figtree', system-ui, sans-serif;
+  line-height: normal;
+  text-align: left;
+  background: #16123f;
+  border: 0;
+  border-radius: 0;
+  -webkit-font-smoothing: antialiased;
+}
+#root .shopify-section-footer > .dft::before,
+#root .shopify-section-footer > .dft::after { content: none; display: none; }
+.dft *, .dft *::before, .dft *::after { box-sizing: border-box; }
+.dft a { color: inherit; text-decoration: none; }
+.dft ul, .dft li { margin: 0; padding: 0; list-style: none; }
+/* « .shopify-section-footer > div p » du thème (largeur 50 %, marge à droite) */
+#root .dft p, .dft h4, .dft h5 { max-width: none; margin-right: 0; }
+.dft li::before { content: none !important; display: none !important; }
+.dft button { margin: 0; padding: 0; font: inherit; color: inherit; background: none !important; border: 0; box-shadow: none; cursor: pointer; }
+.dft button::before, .dft button::after { content: none !important; display: none !important; }
+.dft svg { display: block; }
+/* Boutons : largeurs / hauteurs minimales du thème retirées */
+.dft button { float: none !important; width: auto !important; min-width: 0 !important; height: auto !important; min-height: 0 !important; line-height: normal !important; }
+
+.dft__wrap { width: 100%; max-width: 1320px; margin: 0 auto; padding: 0 28px; }
+.dft__top { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr 1.35fr; gap: 36px; padding: 48px 0 36px; }
+.dft h4 { margin: 0 0 14px; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; line-height: normal; letter-spacing: 1px; text-transform: uppercase; }
+.dft__col a, .dft__rows a { display: block; padding: 5px 0; color: #c7c4ea; font-size: 14px; }
+.dft__col a:hover { color: #fff; }
+
+.dft__logo { display: block; line-height: 0; }
+.dft__logo svg { width: 200px; height: 33px; overflow: visible; }
+.dft__logo b { color: #fff; font-family: 'Sora', sans-serif; font-size: 23px; }
+.dft__brand p { margin: 12px 0 16px; color: #a9a5d6; font-size: 14px; line-height: 1.5; }
+.dft__rows a { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.dft__rows a:hover { color: #fff; }
+.dft__ic { flex: none; display: grid; place-items: center; width: 34px; height: 34px; color: #fff; background: rgb(255 255 255 / 10%); border-radius: 10px; }
+.dft__ic svg { width: 18px; height: 18px; fill: currentColor; }
+.dft__ic .dft__line { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.dft__ic--wa { background: #25d366; }
+.dft__ic--wa svg { width: 21px; height: 21px; }
+.dft__ic--mail { background: linear-gradient(135deg, #6b5cff, #3a34d2); }
+.dft__ic--mail svg { width: 19px; height: 19px; }
+.dft__rows b { display: block; color: #fff; font-size: 14px; }
+.dft__rows small { display: block; color: #a9a5d6; font-size: 12px; }
+
+/* Note Trustpilot */
+.dft a.dft-rate { display: flex; align-items: center; gap: 12px; padding: 10px 12px; color: #fff; background: rgb(255 255 255 / 8%); border: 1px solid rgb(255 255 255 / 14%); border-radius: 14px; transition: background .2s; }
+.dft a.dft-rate:hover { background: rgb(255 255 255 / 13%); }
+.dft-rate__ic { flex: none; display: grid; place-items: center; width: 38px; height: 38px; color: #fff; background: #00b67a; border-radius: 11px; }
+.dft-rate__ic svg { width: 21px; height: 21px; fill: currentColor; }
+.dft-rate__tx { flex: 1; min-width: 0; line-height: 1.35; }
+.dft-rate__line { display: flex; align-items: center; gap: 7px; margin-bottom: 2px; }
+.dft-rate__line b { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 800; }
+.dft-stars { display: flex; gap: 2px; }
+.dft-stars i { display: grid; place-items: center; width: 16px; height: 16px; background: linear-gradient(90deg, #00b67a var(--p, 100%), rgb(255 255 255 / 25%) var(--p, 100%)); }
+.dft-stars svg { width: 12px; height: 12px; fill: #fff; }
+.dft-rate__tx small { display: block; overflow: hidden; color: #a9a5d6; font-size: 12.5px; white-space: nowrap; text-overflow: ellipsis; }
+.dft-rate__chev { flex: none; width: 16px; height: 16px; fill: none; stroke: #a9a5d6; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Segui su shop */
+.dft button.dft-follow { display: inline-flex !important; align-items: center; gap: 8px; margin: 18px 0 4px; padding: 9px 18px; color: #fff; font-size: 15px; font-weight: 800; background: #5a31f4 !important; border-radius: 999px; }
+.dft button.dft-follow:hover { background: #4a26d6 !important; }
+.dft-follow svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+/* Newsletter */
+.dft-news { margin-top: 18px; padding: 16px; background: linear-gradient(160deg, #1d1852, #2a2380); border: 1px solid rgb(255 255 255 / 10%); border-radius: 16px; }
+.dft-news h5 { margin: 0; color: #fff; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 800; line-height: 1.25; }
+.dft-news p { margin: 4px 0 12px; color: rgb(255 255 255 / 75%); font-size: 13px; line-height: 1.4; }
+.dft-news form { margin: 0; }
+.dft-news__field { display: flex; align-items: center; height: 46px; padding: 0 4px 0 12px; background: rgb(255 255 255 / 10%); border: 1px solid rgb(255 255 255 / 22%); border-radius: 12px; transition: background .2s, border-color .2s; }
+.dft-news__field:focus-within { background: rgb(255 255 255 / 14%); border-color: #fff; }
+.dft .dft-news__field input { flex: 1; min-width: 0; height: 100%; margin: 0; padding: 0; color: #fff; font: inherit; font-size: 15px; background: transparent; border: 0; border-radius: 0; outline: 0; box-shadow: none; }
+.dft-news__field input::placeholder { color: rgb(255 255 255 / 60%); opacity: 1; }
+.dft .dft-news__field button { flex: none; display: grid !important; place-items: center; width: 38px !important; height: 38px !important; color: #16123f; background: #fff !important; border-radius: 9px; }
+.dft-news__field button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.dft-news small { display: block; margin-top: 8px; color: rgb(255 255 255 / 60%); font-size: 11.5px; }
+.dft-news small.is-error { color: #ffb4b8; }
+.dft-news__terms { display: flex; gap: 8px; margin-top: 8px; color: rgb(255 255 255 / 70%); font-size: 11.5px; }
+
+/* Bas : copyright, pays / langue, paiements */
+.dft__bot { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 18px 0 22px; color: #a9a5d6; font-size: 13px; border-top: 1px solid rgb(255 255 255 / 12%); }
+.dft__bot-l { flex: none; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.dft .dft-loc { flex: none; display: flex; align-items: center; gap: 14px; width: auto; max-width: none; margin: 0; }
+.dft-loc__btn { position: relative; display: flex; align-items: center; gap: 6px; margin: 0; padding: 8px 12px; color: #fff; font-size: 13px; font-weight: 600; background: rgb(255 255 255 / 10%); border-radius: 10px; cursor: pointer; }
+.dft-loc__btn:hover { background: rgb(255 255 255 / 16%); }
+.dft-loc__btn > svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.dft-loc__flag { display: block; width: 16px; height: 16px; --height: 16px; object-fit: cover; border-radius: 50%; }
+.dft .dft-loc__btn select { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; cursor: pointer; appearance: none; }
+.dft-pay { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; max-width: 860px; }
+.dft-pay svg { width: 38px; height: 24px; }
+
+@media (max-width: 1199px) {
+  .dft__top { grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 28px; }
+  .dft__side { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; align-items: start; }
+  .dft__side h4 { grid-column: 1 / -1; }
+  .dft__side .dft-news { grid-column: 2; grid-row: 2 / span 2; margin-top: 0; }
+  .dft__side .dft-follow { justify-self: start; }
+  .dft__bot { flex-wrap: wrap; }
+  .dft-pay { justify-content: flex-start; }
+}
+@media (max-width: 1023px) {
+  .dft__top { grid-template-columns: 1fr 1fr; gap: 28px 24px; padding-top: 36px; padding-bottom: 28px; }
+  .dft__brand { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+  .dft__brand .dft__rows { grid-column: 2; grid-row: 1 / span 2; }
+  .dft__bot { flex-direction: column; align-items: flex-start; }
+}

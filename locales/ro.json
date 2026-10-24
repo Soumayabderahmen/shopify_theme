@@ -11,7 +11,14 @@
   "desktop_home": {
     "our_deals": "Ofertele noastre",
     "show_more": "Arată mai mult",
-    "seen": "Ai văzut {{ shown }} din {{ total }} produse"
+    "seen": "Ai văzut {{ shown }} din {{ total }} produse",
+    "categories": "Categorii",
+    "free_shipping_from_html": "Livrare gratuită de la {{ amount }}",
+    "secure_payments_html": "Plăți sigure cu {{ methods }}",
+    "payment_names": "PayPal, Klarna și carduri",
+    "country_language": "Țară și limbă",
+    "footer_about": "Îmbrăcăminte pentru femei și bărbați, încălțăminte, genți și accesorii. Stiluri noi în fiecare săptămână.",
+    "verified_reviews": "Recenzii verificate"
   },
   "404": {
     "404": "404",

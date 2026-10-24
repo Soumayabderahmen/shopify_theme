@@ -11,7 +11,14 @@
   "desktop_home": {
     "our_deals": "Our deals",
     "show_more": "Show more",
-    "seen": "You have seen {{ shown }} of {{ total }} products"
+    "seen": "You have seen {{ shown }} of {{ total }} products",
+    "categories": "Categories",
+    "free_shipping_from_html": "Free shipping from {{ amount }}",
+    "secure_payments_html": "Secure payments with {{ methods }}",
+    "payment_names": "PayPal, Klarna and cards",
+    "country_language": "Country and language",
+    "footer_about": "Women's and men's clothing, shoes, bags and accessories. New styles every week.",
+    "verified_reviews": "Verified reviews"
   },
   "404": {
     "404": "404",

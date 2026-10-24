@@ -316,6 +316,179 @@
   </div>
 </div>
 
+{%- comment -%}
+  Footer ORDINATEUR (prototype Platinumshop-Accueil-desktop-SHEIN-v9) : mêmes données que le footer mobile ci-dessus
+  (liens rangés, contacts, newsletter, note Trustpilot, Segui su shop, pays / langue, paiements).
+  Caché sur mobile ; style dans assets/desktop-footer.css (chargé à partir de 761px).
+{%- endcomment -%}
+<link rel="stylesheet" href="{{ 'desktop-footer.css' | asset_url }}" media="(min-width: 761px)">
+<style>@media only screen and (max-width: 760px) { .dft { display: none !important; } }</style>
+<div class="dft" data-desktop-footer>
+  <div class="dft__wrap dft__top">
+    <div class="dft__brand">
+      <a class="dft__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}">
+        {%- if shop_name_lower == 'platinumshop' -%}
+          {%- comment -%} Dégradé clair animé de l'en-tête ordinateur (#dh-logo-grad-light, snippets/desktop-header.liquid) {%- endcomment -%}
+          <svg viewBox="0 0 185 30" aria-hidden="true" focusable="false"><text x="0" y="23" fill="url(#dh-logo-grad-light) #fff" font-family="Sora, sans-serif" font-size="23" letter-spacing="-0.6"><tspan font-weight="800">Platinum</tspan><tspan font-weight="500">shop</tspan></text></svg>
+        {%- else -%}
+          <b>{{ shop.name | escape }}</b>
+        {%- endif -%}
+      </a>
+      <p>{{ 'desktop_home.footer_about' | t }}</p>
+      <div class="dft__rows">
+        {%- if customer_block.settings.show_whatsapp_link -%}
+          <a href="https://wa.me/{{ whatsapp_number }}" rel="noopener" target="_blank"><span class="dft__ic dft__ic--wa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.2c0-.1-.2-.2-.4-.3Z"/></svg></span><div><b>WhatsApp</b><small>{{ 'mobile.footer.ask' | t }}</small></div></a>
+        {%- endif -%}
+        {%- if customer_block.settings.show_mail_link and shop.email != blank -%}
+          <a href="mailto:{{ shop.email }}"><span class="dft__ic dft__ic--mail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v.4l-10 6.3L2 7.4V7a2 2 0 0 1 2-2Zm-2 4.7 9.5 6a1 1 0 0 0 1 0l9.5-6V17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z"/></svg></span><div><b>Email</b><small>{{ shop.email }}</small></div></a>
+        {%- endif -%}
+        {%- if customer_block.settings.show_phone_link and shop.phone != blank -%}
+          <a href="tel:{{ shop.phone }}"><span class="dft__ic"><svg class="dft__line" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></span><div><b>{{ 'mobile.footer.phone' | t }}</b><small>{{ shop.phone }}</small></div></a>
+        {%- endif -%}
+        <a href="{{ tracking_url }}"><span class="dft__ic"><svg class="dft__line" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></span><div><b>{{ tracking_title | escape }}</b><small>{{ 'mobile.footer.track_order' | t }}</small></div></a>
+      </div>
+    </div>
+
+    {%- if has_submenus -%}
+      {%- for link in menu.links -%}
+        {%- if link.links != blank -%}
+          <div class="dft__col">
+            <h4>{{ link.title | escape }}</h4>
+            <ul>
+              {%- for sub in link.links -%}
+                <li><a href="{{ sub.url }}">{{ sub.title | escape }}</a></li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- else -%}
+      <div class="dft__col"><h4>Assistenza</h4><ul>{{ help_links }}</ul></div>
+      {%- if legal_links != blank -%}<div class="dft__col"><h4>Informazioni legali</h4><ul>{{ legal_links }}</ul></div>{%- endif -%}
+      <div class="dft__col"><h4>{{ shop.name | capitalize }}</h4><ul>{{ brand_links }}</ul></div>
+    {%- endif -%}
+
+    <div class="dft__side">
+      <h4>{{ 'desktop_home.verified_reviews' | t }}</h4>
+      {%- if trustpilot_url != blank -%}
+        <a class="dft-rate" href="{{ trustpilot_url }}" rel="noopener" target="_blank" data-desktop-footer-rating>
+          <span class="dft-rate__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1-6.3-4.6-6.3 4.6 2.3-7.1-6-4.5h7.6z"/></svg></span>
+          <span class="dft-rate__tx">
+            <span class="dft-rate__line">
+              <b data-desktop-footer-rating-value>{{ rating }}</b>
+              <span class="dft-stars" aria-label="{{ 'mobile.footer.rating_out_of' | t: rating: rating }}">
+                {%- for star in (1..5) -%}
+                  {%- assign star_fill = rating | minus: forloop.index0 | times: 100 | at_most: 100 | at_least: 0 -%}
+                  <i style="--p: {{ star_fill }}%;"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.5 5.6 6.1.6-4.6 4 1.4 6-5.4-3.2-5.4 3.2 1.4-6-4.6-4 6.1-.6z"/></svg></i>
+                {%- endfor -%}
+              </span>
+            </span>
+            <small>{{ 'mobile.footer.trustpilot' | t }}</small>
+          </span>
+          <svg class="dft-rate__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+      {%- endif -%}
+      {%- if show_follow -%}
+        <button type="button" class="dft-follow" data-desktop-footer-follow><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.4 12 20 12 20Z"/></svg>{{ 'mobile.footer.follow_on' | t }} shop</button>
+      {%- endif -%}
+      {%- if newsletter_block and newsletter_block.settings.show_newsletter -%}
+        <div class="dft-news">
+          <h5>{{ 'mobile.footer.newsletter_title' | t }}</h5>
+          <p>{{ 'mobile.footer.newsletter_text' | t }}</p>
+          {%- form 'customer', id: 'newsletter-footer-desktop' -%}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <div class="dft-news__field">
+              <input type="email" name="contact[email]" id="newsletter-footer-desktop-email" placeholder="{{ 'newsletter.form.email_placeholder' | t }}" aria-label="{{ 'newsletter.form.email_placeholder' | t }}" autocomplete="email" required>
+              <button type="submit" aria-label="{{ 'newsletter.form.submit_button' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            </div>
+            {%- if form.posted_successfully? -%}
+              <small role="status">{{ 'newsletter.form.success' | t }}</small>
+            {%- elsif form.errors -%}
+              <small class="is-error" role="alert">{{ form.errors.messages['email'] }}</small>
+            {%- else -%}
+              <small>{{ 'mobile.footer.unsubscribe' | t }}</small>
+            {%- endif -%}
+            {%- if newsletter_block.settings.enable_newsletter_terms_checkbox and newsletter_block.settings.newsletter_terms_text != empty -%}
+              <label class="dft-news__terms"><input type="checkbox" required> {{ newsletter_block.settings.newsletter_terms_text | remove: '<p>' | remove: '</p>' }}</label>
+            {%- endif -%}
+          {%- endform -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div class="dft__wrap dft__bot">
+    <div class="dft__bot-l">
+      <span>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}</span>
+      {%- if show_country or show_language -%}
+        {%- comment -%} Boutons du prototype ; le vrai menu déroulant les couvre (invisible) et envoie le formulaire Shopify {%- endcomment -%}
+        {%- form 'localization', id: 'desktop-footer-localization', class: 'dft-loc' -%}
+          {%- if show_country -%}
+            <label class="dft-loc__btn">
+              {{ localization.country.iso_code }} ({{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }})
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              <select name="country_code" aria-label="{{ 'mobile.footer.country_currency' | t }}" data-desktop-footer-autosubmit>
+                {%- for country in localization.available_countries -%}
+                  <option value="{{ country.iso_code }}"{% if country.iso_code == localization.country.iso_code %} selected{% endif %}>{{ country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})</option>
+                {%- endfor -%}
+              </select>
+            </label>
+          {%- endif -%}
+          {%- if show_language -%}
+            <label class="dft-loc__btn">
+              {{ localization.country | image_url: width: 32 | image_tag: class: 'dft-loc__flag', alt: '', loading: 'lazy', width: 16, height: 16 }}
+              {{ localization.language.endonym_name | capitalize }}
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              <select name="language_code" aria-label="{{ 'mobile.footer.language' | t }}" data-desktop-footer-autosubmit>
+                {%- for language in localization.available_languages -%}
+                  <option value="{{ language.iso_code }}"{% if language.iso_code == localization.language.iso_code %} selected{% endif %}>{{ language.endonym_name | capitalize }}</option>
+                {%- endfor -%}
+              </select>
+            </label>
+          {%- endif -%}
+          <noscript><button type="submit">OK</button></noscript>
+        {%- endform -%}
+      {%- endif -%}
+    </div>
+    {%- if section_settings.show_payment_methods and shop.enabled_payment_types.size > 0 -%}
+      <ul class="dft-pay" aria-label="{{ 'mobile.footer.payment_methods' | t }}">
+        {%- for payment_method in shop.enabled_payment_types -%}
+          {%- comment -%} IDs préfixés « df- » : les mêmes SVG existent dans l'ancien footer et le footer mobile {%- endcomment -%}
+          {%- capture payment_svg -%}{{ payment_method | payment_type_svg_tag }}{%- endcapture -%}
+          <li>{{ payment_svg | replace: 'id="', 'id="df-' | replace: 'url(#', 'url(#df-' | replace: 'aria-labelledby="', 'aria-labelledby="df-' | replace: 'href="#', 'href="#df-' }}</li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</div>
+
+<script>
+  // Footer ordinateur : pays / langue envoyés au choix, « Segui su shop » déclenche le vrai bouton Shopify (comme le mobile)
+  (function () {
+    const footer = document.querySelector('[data-desktop-footer]');
+    if (!footer) return;
+    // Pleine largeur : décalage du conteneur du thème (assets/desktop-footer.css)
+    const setOffset = () => {
+      const parent = footer.parentElement;
+      footer.style.setProperty('--dft-x', parent.getBoundingClientRect().left + parseFloat(getComputedStyle(parent).paddingLeft) + 'px');
+    };
+    window.addEventListener('resize', setOffset);
+    setOffset();
+    footer.querySelectorAll('[data-desktop-footer-autosubmit]').forEach((select) => {
+      select.addEventListener('change', () => select.form.submit());
+    });
+    const follow = footer.querySelector('[data-desktop-footer-follow]');
+    if (follow) {
+      follow.addEventListener('click', () => {
+        const real = document.querySelector('[data-mobile-footer-follow-real] shop-follow-button, .shopify-section-footer .follow-on-shop shop-follow-button');
+        const realButton = real && real.shadowRoot && real.shadowRoot.querySelector('button');
+        if (realButton) realButton.click();
+        else if (real) real.click();
+      });
+    }
+  })();
+</script>
+
 <script>
   (function () {
     const footer = document.querySelector('[data-mobile-footer]');

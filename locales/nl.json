@@ -11,7 +11,14 @@
   "desktop_home": {
     "our_deals": "Onze aanbiedingen",
     "show_more": "Meer tonen",
-    "seen": "Je hebt {{ shown }} van {{ total }} producten gezien"
+    "seen": "Je hebt {{ shown }} van {{ total }} producten gezien",
+    "categories": "Categorieën",
+    "free_shipping_from_html": "Gratis verzending vanaf {{ amount }}",
+    "secure_payments_html": "Veilig betalen met {{ methods }}",
+    "payment_names": "PayPal, Klarna en kaarten",
+    "country_language": "Land en taal",
+    "footer_about": "Dames- en herenkleding, schoenen, tassen en accessoires. Elke week nieuwe stijlen.",
+    "verified_reviews": "Geverifieerde beoordelingen"
   },
   "404": {
     "404": "404",

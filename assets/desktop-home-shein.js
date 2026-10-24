@@ -146,11 +146,10 @@
       }, { rootMargin: '500px' }).observe(feed.querySelector('[data-dhs-more]'));
     }
     // Onglets collés sous l'en-tête du site (hauteur réelle de l'en-tête collant)
+    // Onglets collés sous l'en-tête ordinateur (snippets/desktop-header.liquid, collé en haut sans son bandeau d'annonces)
     var stickyTop = function () {
-      var header = document.querySelector('#shopify-section-header, .shopify-section-header, header');
-      if (!header) return 0;
-      var position = window.getComputedStyle(header).position;
-      return position === 'sticky' || position === 'fixed' ? header.getBoundingClientRect().height : 0;
+      var header = document.querySelector('[data-dh]');
+      return header ? header.offsetHeight : 0;
     };
     var setSticky = function () { root.style.setProperty('--dhs-sticky', stickyTop() + 'px'); };
     window.addEventListener('resize', setSticky);

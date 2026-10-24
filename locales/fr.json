@@ -11,7 +11,14 @@
   "desktop_home": {
     "our_deals": "Nos bonnes affaires",
     "show_more": "Voir plus",
-    "seen": "Vous avez vu {{ shown }} sur {{ total }} produits"
+    "seen": "Vous avez vu {{ shown }} sur {{ total }} produits",
+    "categories": "Catégories",
+    "free_shipping_from_html": "Livraison gratuite dès {{ amount }}",
+    "secure_payments_html": "Paiements sécurisés avec {{ methods }}",
+    "payment_names": "PayPal, Klarna et cartes",
+    "country_language": "Pays et langue",
+    "footer_about": "Vêtements femme et homme, chaussures, sacs et accessoires. De nouveaux styles chaque semaine.",
+    "verified_reviews": "Avis vérifiés"
   },
   "404": {
     "404": "404",

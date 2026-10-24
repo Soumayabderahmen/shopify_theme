@@ -11,7 +11,14 @@
   "desktop_home": {
     "our_deals": "Unsere Angebote",
     "show_more": "Mehr anzeigen",
-    "seen": "Du hast {{ shown }} von {{ total }} Produkten gesehen"
+    "seen": "Du hast {{ shown }} von {{ total }} Produkten gesehen",
+    "categories": "Kategorien",
+    "free_shipping_from_html": "Kostenloser Versand ab {{ amount }}",
+    "secure_payments_html": "Sichere Zahlung mit {{ methods }}",
+    "payment_names": "PayPal, Klarna und Karten",
+    "country_language": "Land und Sprache",
+    "footer_about": "Damen- und Herrenmode, Schuhe, Taschen und Accessoires. Jede Woche neue Styles.",
+    "verified_reviews": "Verifizierte Bewertungen"
   },
   "404": {
     "404": "404",
