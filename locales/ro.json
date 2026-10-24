@@ -8,6 +8,11 @@
  * ------------------------------------------------------------
  */
 {
+  "desktop_home": {
+    "our_deals": "Ofertele noastre",
+    "show_more": "Arată mai mult",
+    "seen": "Ai văzut {{ shown }} din {{ total }} produse"
+  },
   "404": {
     "404": "404",
     "title": "Pagină negăsită",

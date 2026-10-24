@@ -8,6 +8,11 @@
  * ------------------------------------------------------------
  */
 {
+  "desktop_home": {
+    "our_deals": "Unsere Angebote",
+    "show_more": "Mehr anzeigen",
+    "seen": "Du hast {{ shown }} von {{ total }} Produkten gesehen"
+  },
   "404": {
     "404": "404",
     "title": "Nicht gefunden",

@@ -1,8 +1,10 @@
-/* Carte produit au style SHEIN (snippets/mshein-card.liquid) — MOBILE uniquement (≤ 760px), toutes les pages :
-   fil de l'accueil (sections/mobile-home-shein.liquid) et cartes du site (snippets/product-item.liquid, carte
-   mobile ajoutée dans chaque carte de grille). Chargé en tête de page par layout/theme.liquid.
-   L'ordinateur garde la carte du thème (règle de masquage dans assets/product-card.css). */
-@media only screen and (max-width: 760px) {
+/* Carte produit au style SHEIN (snippets/mshein-card.liquid), toutes les pages en mobile : fil de l'accueil
+   (sections/mobile-home-shein.liquid) et cartes du site (snippets/product-item.liquid, carte mobile ajoutée dans chaque
+   carte de grille). Sur ordinateur : accueil seulement (sections/desktop-home-shein.liquid) — feuille chargée pour tous
+   les écrans sur l'accueil, pour le mobile ailleurs (layout/theme.liquid). Les cartes des grilles restent cachées sur
+   ordinateur (règle !important de assets/product-card.css), la carte du thème y reste seule.
+   Les règles ne ciblent que les cartes .mshein-* : sans enveloppe d'écran (même rendu en mobile qu'avant). */
+@media all {
   /* Boutons du thème (assets/screen.css : bloc flottant, taille minimale, fond en pseudo-élément) remis à zéro dans
      la carte. Faible priorité (:where) : les règles de chaque bouton ci-dessous s'appliquent. */
   #root :where(.mshein-card) button {

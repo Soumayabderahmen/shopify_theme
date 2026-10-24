@@ -346,9 +346,450 @@
       "settings": {
         "part": "feed"
       }
+    },
+    "desktop_home": {
+      "type": "desktop-home-shein",
+      "blocks": {
+        "slide_1": {
+          "type": "slide",
+          "settings": {
+            "collection": "ventilatori",
+            "label": "Ventilatori"
+          }
+        },
+        "slide_2": {
+          "type": "slide",
+          "settings": {
+            "collection": "tacco-alto",
+            "label": "Tacco Alto"
+          }
+        },
+        "slide_3": {
+          "type": "slide",
+          "settings": {
+            "collection": "mocassini",
+            "label": "Mocassini"
+          }
+        },
+        "slide_4": {
+          "type": "slide",
+          "settings": {
+            "collection": "orologi-uomo-novita",
+            "label": "Orologi Uomo"
+          }
+        },
+        "slide_5": {
+          "type": "slide",
+          "settings": {
+            "collection": "adidas",
+            "label": "Sneakers"
+          }
+        },
+        "slide_6": {
+          "type": "slide",
+          "settings": {
+            "collection": "nike",
+            "label": "Nike"
+          }
+        },
+        "cat_1": {
+          "type": "category",
+          "settings": {
+            "collection": "abbigliamento-donna-tutti",
+            "label": "Donna"
+          }
+        },
+        "cat_2": {
+          "type": "category",
+          "settings": {
+            "collection": "abbigliamento-uomo-tutti",
+            "label": "Uomo"
+          }
+        },
+        "cat_3": {
+          "type": "category",
+          "settings": {
+            "collection": "new-arrivals",
+            "label": "Novità"
+          }
+        },
+        "cat_4": {
+          "type": "category",
+          "settings": {
+            "collection": "bestsellers",
+            "label": "Più venduti"
+          }
+        },
+        "cat_5": {
+          "type": "category",
+          "settings": {
+            "collection": "felpe_donna",
+            "label": "Felpe"
+          }
+        },
+        "cat_6": {
+          "type": "category",
+          "settings": {
+            "collection": "giacche-cappotti-donna",
+            "label": "Giacche & Cappotti"
+          }
+        },
+        "cat_7": {
+          "type": "category",
+          "settings": {
+            "collection": "abiti-corti",
+            "label": "Abiti"
+          }
+        },
+        "cat_8": {
+          "type": "category",
+          "settings": {
+            "collection": "gonne",
+            "label": "Gonne"
+          }
+        },
+        "cat_9": {
+          "type": "category",
+          "settings": {
+            "collection": "jogger-pantaloni-donna",
+            "label": "Jogger & Pantaloni"
+          }
+        },
+        "cat_10": {
+          "type": "category",
+          "settings": {
+            "collection": "leggings_donna",
+            "label": "Leggings"
+          }
+        },
+        "cat_11": {
+          "type": "category",
+          "settings": {
+            "collection": "womens-lingerie-sets-bras-panties",
+            "label": "Lingerie"
+          }
+        },
+        "cat_12": {
+          "type": "category",
+          "settings": {
+            "collection": "animal-onesie-pajamas",
+            "label": "Pigiami"
+          }
+        },
+        "cat_13": {
+          "type": "category",
+          "settings": {
+            "collection": "scarpe-donna-tutti",
+            "label": "Scarpe Donna"
+          }
+        },
+        "cat_14": {
+          "type": "category",
+          "settings": {
+            "collection": "womens-boots",
+            "label": "Stivali"
+          }
+        },
+        "cat_15": {
+          "type": "category",
+          "settings": {
+            "collection": "tacco-alto",
+            "label": "Tacco Alto"
+          }
+        },
+        "cat_16": {
+          "type": "category",
+          "settings": {
+            "collection": "casual-sneakers-sneakers-casual",
+            "label": "Sneakers"
+          }
+        },
+        "cat_17": {
+          "type": "category",
+          "settings": {
+            "collection": "scarpe-uomo",
+            "label": "Scarpe Uomo"
+          }
+        },
+        "cat_18": {
+          "type": "category",
+          "settings": {
+            "collection": "borse-baguette",
+            "label": "Borse"
+          }
+        },
+        "cat_19": {
+          "type": "category",
+          "settings": {
+            "collection": "borse-tote",
+            "label": "Borse Tote"
+          }
+        },
+        "cat_20": {
+          "type": "category",
+          "settings": {
+            "collection": "clutches-evening-bags-pochette",
+            "label": "Pochette"
+          }
+        },
+        "cat_21": {
+          "type": "category",
+          "settings": {
+            "collection": "accessori-donna",
+            "label": "Gioielli"
+          }
+        },
+        "cat_22": {
+          "type": "category",
+          "settings": {
+            "collection": "orologi-donne",
+            "label": "Orologi Donna"
+          }
+        },
+        "cat_23": {
+          "type": "category",
+          "settings": {
+            "collection": "orologi-uomo",
+            "label": "Orologi Uomo"
+          }
+        },
+        "cat_24": {
+          "type": "category",
+          "settings": {
+            "collection": "collane-donna",
+            "label": "Collane"
+          }
+        },
+        "cat_25": {
+          "type": "category",
+          "settings": {
+            "collection": "mare-spiaggia",
+            "label": "Mare & Spiaggia"
+          }
+        },
+        "cat_26": {
+          "type": "category",
+          "settings": {
+            "collection": "abbigliamento-estate-2025-bikini-costumi",
+            "label": "Bikini & Costumi"
+          }
+        },
+        "cat_27": {
+          "type": "category",
+          "settings": {
+            "collection": "new-trends",
+            "label": "Trendsi"
+          }
+        },
+        "cat_28": {
+          "type": "category",
+          "settings": {
+            "collection": "casa-giardino",
+            "label": "Casa & Giardino"
+          }
+        },
+        "cat_29": {
+          "type": "category",
+          "settings": {
+            "collection": "riscaldamento-casa",
+            "label": "Riscaldamento"
+          }
+        },
+        "cat_30": {
+          "type": "category",
+          "settings": {
+            "collection": "ventilatori",
+            "label": "Ventilatori"
+          }
+        },
+        "cat_31": {
+          "type": "category",
+          "settings": {
+            "collection": "beauty-health",
+            "label": "Beauty & Health"
+          }
+        },
+        "cat_32": {
+          "type": "category",
+          "settings": {
+            "collection": "nail-hand-and-foot-care",
+            "label": "Unghie"
+          }
+        },
+        "cat_33": {
+          "type": "category",
+          "settings": {
+            "collection": "abbigliamento-cinese-2026",
+            "label": "Abbigliamento Cinese"
+          }
+        },
+        "cat_34": {
+          "type": "category",
+          "settings": {
+            "collection": "animal-print-accessories",
+            "label": "Animal Print & Pet"
+          }
+        },
+        "cat_35": {
+          "type": "category",
+          "settings": {
+            "collection": "bici-monopattini",
+            "label": "Bici/Monopattini"
+          }
+        },
+        "cat_36": {
+          "type": "category",
+          "settings": {
+            "collection": "nike",
+            "label": "Nike"
+          }
+        },
+        "cat_37": {
+          "type": "category",
+          "settings": {
+            "collection": "adidas",
+            "label": "adidas"
+          }
+        },
+        "cat_38": {
+          "type": "category",
+          "settings": {
+            "collection": "rebok",
+            "label": "Reebok"
+          }
+        },
+        "cat_39": {
+          "type": "category",
+          "settings": {
+            "collection": "t-shirt-carino",
+            "label": "T-shirt"
+          }
+        },
+        "cat_40": {
+          "type": "category",
+          "settings": {
+            "collection": "pantaloncini_donna",
+            "label": "Pantaloncini"
+          }
+        },
+        "cat_41": {
+          "type": "category",
+          "settings": {
+            "collection": "piumini-invernale",
+            "label": "Maglioni invernali"
+          }
+        },
+        "cat_42": {
+          "type": "category",
+          "settings": {
+            "collection": "pelle-e-pellicce",
+            "label": "Pelle e Pellicce"
+          }
+        },
+        "cat_43": {
+          "type": "category",
+          "settings": {
+            "collection": "felpe-interno-pile",
+            "label": "Felpe in pile"
+          }
+        },
+        "cat_44": {
+          "type": "category",
+          "settings": {
+            "collection": "calze",
+            "label": "Calze"
+          }
+        },
+        "cat_45": {
+          "type": "category",
+          "settings": {
+            "collection": "sandali-premium",
+            "label": "Sandali"
+          }
+        },
+        "cat_46": {
+          "type": "category",
+          "settings": {
+            "collection": "ciabatte-summer",
+            "label": "Ciabatte"
+          }
+        },
+        "cat_47": {
+          "type": "category",
+          "settings": {
+            "collection": "tacco-a-zeppa",
+            "label": "Tacco a Zeppa"
+          }
+        },
+        "cat_48": {
+          "type": "category",
+          "settings": {
+            "collection": "mocassini",
+            "label": "Mocassini"
+          }
+        }
+      },
+      "block_order": [
+        "slide_1",
+        "slide_2",
+        "slide_3",
+        "slide_4",
+        "slide_5",
+        "slide_6",
+        "cat_1",
+        "cat_2",
+        "cat_3",
+        "cat_4",
+        "cat_5",
+        "cat_6",
+        "cat_7",
+        "cat_8",
+        "cat_9",
+        "cat_10",
+        "cat_11",
+        "cat_12",
+        "cat_13",
+        "cat_14",
+        "cat_15",
+        "cat_16",
+        "cat_17",
+        "cat_18",
+        "cat_19",
+        "cat_20",
+        "cat_21",
+        "cat_22",
+        "cat_23",
+        "cat_24",
+        "cat_25",
+        "cat_26",
+        "cat_27",
+        "cat_28",
+        "cat_29",
+        "cat_30",
+        "cat_31",
+        "cat_32",
+        "cat_33",
+        "cat_34",
+        "cat_35",
+        "cat_36",
+        "cat_37",
+        "cat_38",
+        "cat_39",
+        "cat_40",
+        "cat_41",
+        "cat_42",
+        "cat_43",
+        "cat_44",
+        "cat_45",
+        "cat_46",
+        "cat_47",
+        "cat_48"
+      ],
+      "settings": {}
     }
   },
   "order": [
+    "desktop_home",
     "section_slideshow_XNiKWa",
     "mshein_perks",
     "section_category_tiles_home",

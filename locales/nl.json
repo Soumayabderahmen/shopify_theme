@@ -8,6 +8,11 @@
  * ------------------------------------------------------------
  */
 {
+  "desktop_home": {
+    "our_deals": "Onze aanbiedingen",
+    "show_more": "Meer tonen",
+    "seen": "Je hebt {{ shown }} van {{ total }} producten gezien"
+  },
   "404": {
     "404": "404",
     "img_default_alt": "404 pagina afbeelding",
