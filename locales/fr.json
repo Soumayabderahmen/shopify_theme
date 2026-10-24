@@ -8,6 +8,57 @@
  * ------------------------------------------------------------
  */
 {
+  "desktop_collection": {
+    "collection": "Collection",
+    "hint": "Survolez un article · cliquez pour le voir de près",
+    "count_copy": {
+      "one": "{{ count }} produit dans cette collection.",
+      "other": "{{ count }} produits dans cette collection."
+    },
+    "all_copy": "Tout le catalogue {{ shop }}.",
+    "weekly": "Nouveautés chaque semaine.",
+    "see_all": "Voir tous les produits",
+    "collections": "Collections",
+    "see_all_short": "Tout voir",
+    "filter": "Filtrer",
+    "open": "Ouvrir {{ name }}",
+    "from": "De",
+    "to": "à",
+    "ok": "OK",
+    "count": {
+      "one": "{{ count }} produit",
+      "other": "{{ count }} produits"
+    },
+    "under": "Moins de {{ amount }}",
+    "grid": "Grille",
+    "list": "Liste",
+    "none": "Aucun produit avec ces filtres.",
+    "clear": "Effacer les filtres",
+    "pages": "Pages",
+    "front": "Devant",
+    "view": "Vue {{ n }}",
+    "choose_size": "Choisissez une taille",
+    "see_product": "Voir la fiche produit",
+    "product": "Produit",
+    "cart_title": "Votre panier ({{ count }})",
+    "subtotal": "Sous-total",
+    "free_included": "Livraison gratuite incluse",
+    "free_left": "Encore {{ amount }} pour la livraison gratuite",
+    "add_error": "Impossible d’ajouter au panier",
+    "tag_default": "en vitrine.",
+    "tags": {
+      "all": "en un seul endroit.",
+      "abbigliamento_donna_tutti": "pour elle.",
+      "abbigliamento_uomo_tutti": "pour lui.",
+      "mare_spiaggia": "au soleil.",
+      "trendsi": "tendance.",
+      "casa_giardino": "pour la maison.",
+      "beauty_health": "pour vous.",
+      "abbigliamento_cinese_2026": "de la tradition.",
+      "animal_print_accessories": "à quatre pattes.",
+      "bici_monopattini": "en mouvement."
+    }
+  },
   "desktop_home": {
     "our_deals": "Nos bonnes affaires",
     "show_more": "Voir plus",

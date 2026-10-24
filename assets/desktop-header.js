@@ -285,4 +285,8 @@
   document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && !mega.hidden) setMega(false); });
   // Panneau préparé dès que la souris approche des onglets (ouverture sans attente)
   header.querySelector('.dh-tabs').addEventListener('mouseenter', loadPanels, { once: true });
+  // Panneaux Categoria aussi pour l'arbre « Raccolte » de la page collection (assets/desktop-collection.js)
+  window.dhLoadPanels = loadPanels;
+  // Fermeture du méga-menu après une navigation instantanée (attente de survol annulée)
+  window.dhCloseMega = function () { clearTimeout(timer); setMega(false); };
 })();

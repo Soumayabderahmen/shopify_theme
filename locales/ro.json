@@ -8,6 +8,57 @@
  * ------------------------------------------------------------
  */
 {
+  "desktop_collection": {
+    "collection": "Colecție",
+    "hint": "Treci cu mouse-ul peste un articol · clic pentru a-l vedea de aproape",
+    "count_copy": {
+      "one": "{{ count }} produs în această colecție.",
+      "other": "{{ count }} produse în această colecție."
+    },
+    "all_copy": "Tot catalogul {{ shop }}.",
+    "weekly": "Noutăți în fiecare săptămână.",
+    "see_all": "Vezi toate produsele",
+    "collections": "Colecții",
+    "see_all_short": "Vezi toate",
+    "filter": "Filtrează",
+    "open": "Deschide {{ name }}",
+    "from": "De la",
+    "to": "la",
+    "ok": "OK",
+    "count": {
+      "one": "{{ count }} produs",
+      "other": "{{ count }} produse"
+    },
+    "under": "Sub {{ amount }}",
+    "grid": "Grilă",
+    "list": "Listă",
+    "none": "Niciun produs cu aceste filtre.",
+    "clear": "Șterge filtrele",
+    "pages": "Pagini",
+    "front": "Față",
+    "view": "Vedere {{ n }}",
+    "choose_size": "Alege o mărime",
+    "see_product": "Vezi pagina produsului",
+    "product": "Produs",
+    "cart_title": "Coșul tău ({{ count }})",
+    "subtotal": "Subtotal",
+    "free_included": "Livrare gratuită inclusă",
+    "free_left": "Încă {{ amount }} pentru livrare gratuită",
+    "add_error": "Nu s-a putut adăuga în coș",
+    "tag_default": "în vitrină.",
+    "tags": {
+      "all": "într-un singur loc.",
+      "abbigliamento_donna_tutti": "pentru ea.",
+      "abbigliamento_uomo_tutti": "pentru el.",
+      "mare_spiaggia": "la soare.",
+      "trendsi": "în tendințe.",
+      "casa_giardino": "pentru casă.",
+      "beauty_health": "pentru tine.",
+      "abbigliamento_cinese_2026": "din tradiție.",
+      "animal_print_accessories": "pe patru lăbuțe.",
+      "bici_monopattini": "în mișcare."
+    }
+  },
   "desktop_home": {
     "our_deals": "Ofertele noastre",
     "show_more": "Arată mai mult",

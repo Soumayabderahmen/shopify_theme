@@ -8,6 +8,57 @@
  * ------------------------------------------------------------
  */
 {
+  "desktop_collection": {
+    "collection": "Collezione",
+    "hint": "Passa sopra un capo · clicca per vederlo da vicino",
+    "count_copy": {
+      "one": "{{ count }} prodotto in questa collezione.",
+      "other": "{{ count }} prodotti in questa collezione."
+    },
+    "all_copy": "Tutto il catalogo {{ shop }}.",
+    "weekly": "Nuovi arrivi ogni settimana.",
+    "see_all": "Vedi tutti i prodotti",
+    "collections": "Raccolte",
+    "see_all_short": "Vedi tutte",
+    "filter": "Filtra",
+    "open": "Apri {{ name }}",
+    "from": "Da",
+    "to": "a",
+    "ok": "Ok",
+    "count": {
+      "one": "{{ count }} prodotto",
+      "other": "{{ count }} prodotti"
+    },
+    "under": "Sotto {{ amount }}",
+    "grid": "Griglia",
+    "list": "Lista",
+    "none": "Nessun prodotto con questi filtri.",
+    "clear": "Cancella i filtri",
+    "pages": "Pagine",
+    "front": "Davanti",
+    "view": "Vista {{ n }}",
+    "choose_size": "Scegli una taglia",
+    "see_product": "Vedi la scheda prodotto",
+    "product": "Prodotto",
+    "cart_title": "Il tuo carrello ({{ count }})",
+    "subtotal": "Subtotale",
+    "free_included": "Spedizione gratuita inclusa",
+    "free_left": "Ancora {{ amount }} per la spedizione gratuita",
+    "add_error": "Impossibile aggiungere al carrello",
+    "tag_default": "in vetrina.",
+    "tags": {
+      "all": "in un solo posto.",
+      "abbigliamento_donna_tutti": "per lei.",
+      "abbigliamento_uomo_tutti": "per lui.",
+      "mare_spiaggia": "al sole.",
+      "trendsi": "di tendenza.",
+      "casa_giardino": "per la casa.",
+      "beauty_health": "per te.",
+      "abbigliamento_cinese_2026": "dalla tradizione.",
+      "animal_print_accessories": "a quattro zampe.",
+      "bici_monopattini": "in movimento."
+    }
+  },
   "desktop_home": {
     "our_deals": "Le nostre offerte",
     "show_more": "Mostra altro",

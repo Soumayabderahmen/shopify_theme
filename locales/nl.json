@@ -8,6 +8,57 @@
  * ------------------------------------------------------------
  */
 {
+  "desktop_collection": {
+    "collection": "Collectie",
+    "hint": "Beweeg over een item · klik om het van dichtbij te zien",
+    "count_copy": {
+      "one": "{{ count }} product in deze collectie.",
+      "other": "{{ count }} producten in deze collectie."
+    },
+    "all_copy": "De hele {{ shop }}-catalogus.",
+    "weekly": "Elke week nieuwe items.",
+    "see_all": "Alle producten bekijken",
+    "collections": "Collecties",
+    "see_all_short": "Alles bekijken",
+    "filter": "Filteren",
+    "open": "{{ name }} openen",
+    "from": "Van",
+    "to": "tot",
+    "ok": "OK",
+    "count": {
+      "one": "{{ count }} product",
+      "other": "{{ count }} producten"
+    },
+    "under": "Onder {{ amount }}",
+    "grid": "Raster",
+    "list": "Lijst",
+    "none": "Geen producten met deze filters.",
+    "clear": "Filters wissen",
+    "pages": "Pagina’s",
+    "front": "Voorkant",
+    "view": "Weergave {{ n }}",
+    "choose_size": "Kies een maat",
+    "see_product": "Naar de productpagina",
+    "product": "Product",
+    "cart_title": "Je winkelwagen ({{ count }})",
+    "subtotal": "Subtotaal",
+    "free_included": "Gratis verzending inbegrepen",
+    "free_left": "Nog {{ amount }} voor gratis verzending",
+    "add_error": "Kon niet aan winkelwagen toevoegen",
+    "tag_default": "in de etalage.",
+    "tags": {
+      "all": "op één plek.",
+      "abbigliamento_donna_tutti": "voor haar.",
+      "abbigliamento_uomo_tutti": "voor hem.",
+      "mare_spiaggia": "in de zon.",
+      "trendsi": "trendy.",
+      "casa_giardino": "voor thuis.",
+      "beauty_health": "voor jou.",
+      "abbigliamento_cinese_2026": "uit de traditie.",
+      "animal_print_accessories": "op vier poten.",
+      "bici_monopattini": "in beweging."
+    }
+  },
   "desktop_home": {
     "our_deals": "Onze aanbiedingen",
     "show_more": "Meer tonen",

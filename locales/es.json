@@ -8,6 +8,57 @@
  * ------------------------------------------------------------
  */
 {
+  "desktop_collection": {
+    "collection": "Colección",
+    "hint": "Pasa por encima de una prenda · haz clic para verla de cerca",
+    "count_copy": {
+      "one": "{{ count }} producto en esta colección.",
+      "other": "{{ count }} productos en esta colección."
+    },
+    "all_copy": "Todo el catálogo {{ shop }}.",
+    "weekly": "Novedades cada semana.",
+    "see_all": "Ver todos los productos",
+    "collections": "Colecciones",
+    "see_all_short": "Ver todas",
+    "filter": "Filtrar",
+    "open": "Abrir {{ name }}",
+    "from": "Desde",
+    "to": "hasta",
+    "ok": "OK",
+    "count": {
+      "one": "{{ count }} producto",
+      "other": "{{ count }} productos"
+    },
+    "under": "Menos de {{ amount }}",
+    "grid": "Cuadrícula",
+    "list": "Lista",
+    "none": "Ningún producto con estos filtros.",
+    "clear": "Borrar filtros",
+    "pages": "Páginas",
+    "front": "Delante",
+    "view": "Vista {{ n }}",
+    "choose_size": "Elige una talla",
+    "see_product": "Ver la ficha del producto",
+    "product": "Producto",
+    "cart_title": "Tu carrito ({{ count }})",
+    "subtotal": "Subtotal",
+    "free_included": "Envío gratuito incluido",
+    "free_left": "Faltan {{ amount }} para el envío gratuito",
+    "add_error": "No se pudo añadir al carrito",
+    "tag_default": "en escaparate.",
+    "tags": {
+      "all": "en un solo lugar.",
+      "abbigliamento_donna_tutti": "para ella.",
+      "abbigliamento_uomo_tutti": "para él.",
+      "mare_spiaggia": "al sol.",
+      "trendsi": "en tendencia.",
+      "casa_giardino": "para el hogar.",
+      "beauty_health": "para ti.",
+      "abbigliamento_cinese_2026": "de la tradición.",
+      "animal_print_accessories": "a cuatro patas.",
+      "bici_monopattini": "en movimiento."
+    }
+  },
   "desktop_home": {
     "our_deals": "Nuestras ofertas",
     "show_more": "Ver más",

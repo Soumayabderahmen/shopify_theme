@@ -1,0 +1,15 @@
+{
+  "layout": false,
+  "sections": {
+    "main": {
+      "type": "desktop-collection",
+      "settings": {
+        "menu": "main-menu",
+        "part": "sale"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
