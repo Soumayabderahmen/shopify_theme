@@ -4,7 +4,7 @@
    - « In offerta » : produits avec prix barré de la collection (template collection.desktop-coll-sale).
    - Navigation instantanée : un lien vers une autre collection (onglets et méga-menu de l'en-tête, arbre « Raccolte », fil
      d'Ariane) remplace la page sans la recharger ; la page est préparée dès le survol du lien. Retour / Avanti fonctionnent.
-   - Vue produit (clic sur une carte) et panier latéral : vrai panier Shopify (/cart/add.js, /cart.js, /cart/change.js).
+   - Vue produit (clic sur une carte) : ajout au vrai panier (/cart/add.js) puis tiroir panier du site (le même qu'en mobile).
    Rien sur mobile (≤ 760px) : la section y est cachée. */
 (function () {
   'use strict';
@@ -586,40 +586,18 @@
     openProduct({ handle: productHandleOf(link && link.getAttribute('href')), image: null, title: card.getAttribute('data-mshein-title') || (link ? link.textContent : ''), index: index });
   };
 
-  // ---------- Panier (vrai panier Shopify) ----------
+  // ---------- Panier : tiroir du site (snippets/cart-drawer-mobile.liquid, le même qu'en mobile) ----------
   var cartBase = function () { return (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/'; };
   var setCount = function (count) {
-    document.querySelectorAll('.mobile-home-cart-count, [data-dh-cart]').forEach(function (node) { node.textContent = count; });
+    document.querySelectorAll('#cart-count, .mobile-home-cart-count, [data-dh-cart]').forEach(function (node) { node.textContent = count; });
   };
-  var renderCart = function (cart) {
-    var host = overlay();
-    if (!host) return;
-    setCount(cart.item_count);
-    ov('[data-xcd-title]').textContent = host.getAttribute('data-cart-title').replace('__N__', cart.item_count);
-    ov('[data-xcd-sub]').textContent = money(cart.total_price);
-    var freeCents = Number(host.getAttribute('data-free-cents')) || 0;
-    var note = ov('[data-xcd-note]');
-    note.hidden = !freeCents || !cart.item_count;
-    if (freeCents) note.textContent = cart.total_price >= freeCents ? host.getAttribute('data-free') : host.getAttribute('data-free-left').replace('__A__', money(freeCents - cart.total_price));
-    ov('[data-xcd-list]').innerHTML = cart.items.length ? cart.items.map(function (item, k) {
-      var variantTitle = item.variant_title && item.variant_title !== 'Default Title' ? item.variant_title : host.getAttribute('data-one-size');
-      return '<div class="xci"><a href="' + escapeHtml(item.url) + '"><img src="' + escapeHtml(sized(item.image, 160)) + '" alt=""></a><div><b>' + escapeHtml(item.product_title) + '</b><small>' + escapeHtml(variantTitle) + '</small>' +
-        '<div class="xci__ctl"><div class="xqty"><button type="button" data-line="' + (k + 1) + '" data-qty="' + (item.quantity - 1) + '">−</button><span>' + item.quantity + '</span><button type="button" data-line="' + (k + 1) + '" data-qty="' + (item.quantity + 1) + '">+</button></div>' +
-        '<button class="xci__del" type="button" data-line="' + (k + 1) + '" data-qty="0" aria-label="' + escapeHtml(host.getAttribute('data-remove')) + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></div></div><div class="xci__price">' + escapeHtml(money(item.final_line_price)) + '</div></div>';
-    }).join('') : '<p class="xcd__empty">' + escapeHtml(host.getAttribute('data-empty')) + '</p>';
-  };
-  var loadCart = function () {
-    return fetch(cartBase() + 'cart.js', { credentials: 'same-origin' }).then(function (response) { return response.json(); }).then(function (cart) { renderCart(cart); return cart; });
-  };
-  var openCart = function () {
-    ov('[data-xcd]').classList.add('is-on'); ov('[data-xcd]').setAttribute('aria-hidden', 'false');
-    ov('[data-xshade]').classList.add('is-on');
-  };
-  var closeCart = function () {
-    var cart = overlay() && ov('[data-xcd]');
-    if (!cart) return;
-    cart.classList.remove('is-on'); cart.setAttribute('aria-hidden', 'true');
-    ov('[data-xshade]').classList.remove('is-on');
+  var drawerSection = function () { var drawer = document.getElementById('cart'); return drawer && drawer.getAttribute('data-section-id'); };
+  var openSiteCart = function (sections) {
+    // Nouveau rendu du tiroir (reçu avec l'ajout, comme assets/cart-drawer-mobile.js) affiché et ouvert par le thème
+    // (assets/custom-async.js) ; sinon la page panier
+    if (window.ajaxCart && typeof window.ajaxCart.load === 'function') window.ajaxCart.load(sections ? { sections: sections } : false, true);
+    else location.href = cartBase() + 'cart';
+    fetch(cartBase() + 'cart.js', { credentials: 'same-origin' }).then(function (response) { return response.json(); }).then(function (cart) { setCount(cart.item_count); }).catch(function () {});
   };
   var addToCart = function () {
     var pv = current.pv;
@@ -638,26 +616,17 @@
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ items: [{ id: variant.id, quantity: 1 }] })
+      body: JSON.stringify({ items: [{ id: variant.id, quantity: 1 }], sections: drawerSection() ? [drawerSection()] : undefined, sections_url: location.pathname })
     }).then(function (response) {
-      if (!response.ok) return response.json().then(function (data) { throw new Error(data.description || data.message || 'add failed'); });
-      return loadCart();
-    }).then(function () {
-      closeProduct();
-      openCart();
+      return response.json().then(function (data) {
+        if (!response.ok) throw new Error(data.description || data.message || 'add failed');
+        closeProduct();
+        openSiteCart(data.sections);
+      });
     }).catch(function (error) {
       toast(error.message || overlay().getAttribute('data-error'));
     }).then(function () { button.disabled = false; });
   };
-  var changeLine = function (line, quantity) {
-    return fetch(cartBase() + 'cart/change.js', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ line: line, quantity: Math.max(0, quantity) })
-    }).then(function (response) { return response.json(); }).then(renderCart).catch(function (error) { console.error(error); });
-  };
-
   var bindOverlay = function () {
     var fresh = root.querySelector('[data-dcl-ov]');
     if (fresh) {
@@ -694,10 +663,7 @@
         if (match && match.featured_image && match.featured_image.src) { ov('[data-xpv-img]').style.transform = 'none'; ov('[data-xpv-img]').src = sized(match.featured_image.src, 1100); }
         return;
       }
-      if (target.closest('[data-xpv-add]')) { addToCart(); return; }
-      if (target.closest('[data-xcd-x]') || target.closest('[data-xshade]')) { closeCart(); return; }
-      var line = target.closest('[data-line]');
-      if (line) changeLine(Number(line.getAttribute('data-line')), Number(line.getAttribute('data-qty')));
+      if (target.closest('[data-xpv-add]')) addToCart();
     });
   };
 
@@ -848,14 +814,6 @@
     closeProduct();
     navigate(location.pathname + location.search, { push: false, full: handleOf(location.pathname) !== root.getAttribute('data-handle') });
   });
-  // Panier de l'en-tête : panier latéral de la page (comme le prototype)
-  document.addEventListener('click', function (event) {
-    var cartLink = event.target.closest('.dh-top a[data-panel="cart"]');
-    if (!cartLink || !root || !root.isConnected || !overlay()) return;
-    event.preventDefault();
-    event.stopPropagation();
-    loadCart().then(openCart);
-  }, true);
   document.addEventListener('click', function (event) {
     if (!root) return;
     var menu = root.querySelector('[data-dcl-sort-menu]');
@@ -863,7 +821,7 @@
   });
   document.addEventListener('keydown', function (event) {
     if (!current || !overlay()) return;
-    if (event.key === 'Escape') { if (ov('[data-xcd]').classList.contains('is-on')) closeCart(); else if (current.productOpen) closeProduct(); }
+    if (event.key === 'Escape' && current.productOpen) closeProduct();
     if (current.productOpen && (event.key === 'ArrowRight' || event.key === 'ArrowLeft')) stepProduct(event.key === 'ArrowRight' ? 1 : -1);
   });
   history.replaceState({ dcl: true }, '', location.href);

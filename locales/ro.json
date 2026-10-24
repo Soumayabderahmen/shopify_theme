@@ -40,10 +40,6 @@
     "choose_size": "Alege o mărime",
     "see_product": "Vezi pagina produsului",
     "product": "Produs",
-    "cart_title": "Coșul tău ({{ count }})",
-    "subtotal": "Subtotal",
-    "free_included": "Livrare gratuită inclusă",
-    "free_left": "Încă {{ amount }} pentru livrare gratuită",
     "add_error": "Nu s-a putut adăuga în coș",
     "tag_default": "în vitrină.",
     "tags": {

@@ -1,4 +1,4 @@
-/* Tiroir panier MOBILE (prototype « platinumshop-cart-drawer ») — snippets/cart-drawer-mobile.liquid, assets/cart-drawer-mobile.css.
+/* Tiroir panier MOBILE et ORDINATEUR (prototype « platinumshop-cart-drawer ») — snippets/cart-drawer-mobile.liquid, assets/cart-drawer-mobile.css.
    Le tiroir (#cart) reste celui du thème : ouverture, fermeture et nouveau rendu après chaque ajout (assets/custom-async.js).
    Ici : quantités et suppression (avec « Annulla ») via l'API panier, puis nouveau rendu par le thème (ajaxCart.load) ;
    après chaque rendu, les suggestions du thème, les points de fidélité et la livraison gratuite sont mis en place.
@@ -6,7 +6,7 @@
 (function () {
   'use strict';
 
-  if (!window.matchMedia('(max-width: 760px)').matches) return;
+  // Aussi sur ordinateur : même tiroir (#cart) au même design que le mobile.
   var drawer = document.getElementById('cart');
   if (!drawer || !drawer.querySelector('[data-cart-drawer-mobile]')) return;
 

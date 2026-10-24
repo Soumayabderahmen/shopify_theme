@@ -40,10 +40,6 @@
     "choose_size": "Elige una talla",
     "see_product": "Ver la ficha del producto",
     "product": "Producto",
-    "cart_title": "Tu carrito ({{ count }})",
-    "subtotal": "Subtotal",
-    "free_included": "Envío gratuito incluido",
-    "free_left": "Faltan {{ amount }} para el envío gratuito",
     "add_error": "No se pudo añadir al carrito",
     "tag_default": "en escaparate.",
     "tags": {

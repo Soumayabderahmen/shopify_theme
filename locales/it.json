@@ -40,10 +40,6 @@
     "choose_size": "Scegli una taglia",
     "see_product": "Vedi la scheda prodotto",
     "product": "Prodotto",
-    "cart_title": "Il tuo carrello ({{ count }})",
-    "subtotal": "Subtotale",
-    "free_included": "Spedizione gratuita inclusa",
-    "free_left": "Ancora {{ amount }} per la spedizione gratuita",
     "add_error": "Impossibile aggiungere al carrello",
     "tag_default": "in vetrina.",
     "tags": {

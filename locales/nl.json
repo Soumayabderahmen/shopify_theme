@@ -40,10 +40,6 @@
     "choose_size": "Kies een maat",
     "see_product": "Naar de productpagina",
     "product": "Product",
-    "cart_title": "Je winkelwagen ({{ count }})",
-    "subtotal": "Subtotaal",
-    "free_included": "Gratis verzending inbegrepen",
-    "free_left": "Nog {{ amount }} voor gratis verzending",
     "add_error": "Kon niet aan winkelwagen toevoegen",
     "tag_default": "in de etalage.",
     "tags": {

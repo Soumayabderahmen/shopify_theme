@@ -1,5 +1,5 @@
 /* Tiroir panier MOBILE (prototype « platinumshop-cart-drawer ») — snippets/cart-drawer-mobile.liquid, assets/cart-drawer-mobile.js.
-   Chargé en mobile seulement (media="(max-width: 760px)" dans layout/theme.liquid) : le desktop garde le tiroir Xtra.
+   Chargé sur toutes les tailles d'écran (layout/theme.liquid) : même tiroir sur ordinateur que sur mobile.
    Le tiroir lui-même (#cart, ouverture / fermeture / fond assombri) reste celui du thème ; seul son contenu change.
    Au design du prototype de l'accueil : bleu nuit (plus de violet), Figtree, en-tête blanc, fond gris clair et cartes blanches. */
 
@@ -25,7 +25,7 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   transition: opacity 0.3s;
 }
 
-/* Ancien contenu du tiroir Xtra (et son bouton fermer ajouté par le thème) : remplacé en mobile. */
+/* Ancien contenu du tiroir Xtra (et son bouton fermer ajouté par le thème) : remplacé. */
 #root #cart.m6pn > :not(.cd-m):not(style):not(script) {
   display: none !important;
 }

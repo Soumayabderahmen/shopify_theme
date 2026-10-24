@@ -120,8 +120,8 @@
     {%- endif -%}
     {%- comment -%} Barre du bas mobile : style chargé en tête de page pour qu'elle s'affiche finie dès la première image (mobile uniquement). {%- endcomment -%}
     <link rel="stylesheet" href="{{ 'mobile-bottom-nav.css' | asset_url }}" media="(max-width: 760px)">
-    {%- comment -%} Tiroir panier mobile au design du prototype (snippets/cart-drawer-mobile.liquid). {%- endcomment -%}
-    <link rel="stylesheet" href="{{ 'cart-drawer-mobile.css' | asset_url }}" media="(max-width: 760px)">
+    {%- comment -%} Tiroir panier au design du prototype mobile (snippets/cart-drawer-mobile.liquid), aussi sur ordinateur. {%- endcomment -%}
+    <link rel="stylesheet" href="{{ 'cart-drawer-mobile.css' | asset_url }}">
     <script defer src="{{ 'cart-drawer-mobile.js' | asset_url }}"></script>
     {%- comment -%} Textes traduits des scripts mobiles. {%- endcomment -%}
     {%- render 'mobile-i18n' -%}

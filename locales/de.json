@@ -40,10 +40,6 @@
     "choose_size": "Wähle eine Größe",
     "see_product": "Zur Produktseite",
     "product": "Produkt",
-    "cart_title": "Dein Warenkorb ({{ count }})",
-    "subtotal": "Zwischensumme",
-    "free_included": "Kostenloser Versand inklusive",
-    "free_left": "Noch {{ amount }} bis zum kostenlosen Versand",
     "add_error": "Konnte nicht in den Warenkorb gelegt werden",
     "tag_default": "im Schaufenster.",
     "tags": {

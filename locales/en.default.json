@@ -40,10 +40,6 @@
     "choose_size": "Choose a size",
     "see_product": "See the product page",
     "product": "Product",
-    "cart_title": "Your cart ({{ count }})",
-    "subtotal": "Subtotal",
-    "free_included": "Free shipping included",
-    "free_left": "{{ amount }} more for free shipping",
     "add_error": "Could not add to cart",
     "tag_default": "on display.",
     "tags": {

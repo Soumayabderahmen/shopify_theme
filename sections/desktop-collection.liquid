@@ -448,14 +448,10 @@
     </div>
   </main>
 
-  {%- comment -%} Vue produit + panier (déplacés dans <body> par le script : au-dessus de l'en-tête) {%- endcomment -%}
+  {%- comment -%} Vue produit (déplacée dans <body> par le script : au-dessus de l'en-tête) ; l'ajout ouvre le tiroir panier du site (snippets/cart-drawer-mobile.liquid) {%- endcomment -%}
   <div class="dcl-ov" data-dcl-ov
     data-front="{{ 'desktop_collection.front' | t | escape }}" data-view="{{ 'desktop_collection.view' | t: n: '__N__' | escape }}"
-    data-one-size="{{ 'mobile.collection.one_size' | t | escape }}" data-sold-out="{{ 'mobile.js.sold_out' | t | escape }}"
-    data-cart-title="{{ 'desktop_collection.cart_title' | t: count: '__N__' | escape }}" data-empty="{{ 'mobile.cart.empty_title' | t | escape }}"
-    data-free="{{ 'desktop_collection.free_included' | t | escape }}" data-free-left="{{ 'desktop_collection.free_left' | t: amount: '__A__' | escape }}"
-    data-free-cents="{% if settings.enable_free_shipping %}{{ settings.free_shipping_amount | times: 100 }}{% else %}0{% endif %}"
-    data-remove="{{ 'mobile.cart.remove' | t | escape }}" data-error="{{ 'desktop_collection.add_error' | t | escape }}">
+    data-one-size="{{ 'mobile.collection.one_size' | t | escape }}" data-sold-out="{{ 'mobile.js.sold_out' | t | escape }}" data-error="{{ 'desktop_collection.add_error' | t | escape }}">
     <section class="xpv" data-xpv aria-label="{{ 'desktop_collection.product' | t | escape }}" aria-hidden="true">
       <div class="xpv__stage" data-xpv-stage><img data-xpv-img alt=""></div>
       <div class="xpv__info">
@@ -471,12 +467,6 @@
       <button class="xpv__nav xpv__nav--p" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
       <button class="xpv__nav xpv__nav--n" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
     </section>
-    <div class="xshade" data-xshade></div>
-    <aside class="xcd" data-xcd aria-label="{{ 'mobile.cart.title' | t | escape }}" aria-hidden="true">
-      <div class="xcd__hd"><span data-xcd-title></span><button type="button" data-xcd-x aria-label="{{ 'general.accessibility.close' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-      <div class="xcd__list" data-xcd-list></div>
-      <div class="xcd__ft"><div class="xcd__row"><span>{{ 'desktop_collection.subtotal' | t }}</span><span data-xcd-sub></span></div><div class="xcd__note" data-xcd-note></div><a class="xcd__go" href="/checkout">{{ 'mobile.cart.checkout' | t }}</a></div>
-    </aside>
   </div>
 </div>
 {%- endif -%}
