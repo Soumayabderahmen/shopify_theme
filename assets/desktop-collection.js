@@ -4,7 +4,7 @@
    - « In offerta » : produits avec prix barré de la collection (template collection.desktop-coll-sale).
    - Navigation instantanée : un lien vers une autre collection (onglets et méga-menu de l'en-tête, arbre « Raccolte », fil
      d'Ariane) remplace la page sans la recharger ; la page est préparée dès le survol du lien. Retour / Avanti fonctionnent.
-   - Vue produit (clic sur une carte) : ajout au vrai panier (/cart/add.js) puis tiroir panier du site (le même qu'en mobile).
+   - Vue produit (icône panier d'une carte ; nom et photo : fiche produit) : ajout au vrai panier (/cart/add.js) puis tiroir panier du site (le même qu'en mobile).
    Rien sur mobile (≤ 760px) : la section y est cachée. */
 (function () {
   'use strict';
@@ -744,12 +744,12 @@
         window.scrollTo({ top: list.getBoundingClientRect().top + window.scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dh-h')) || 126), behavior: 'smooth' });
         return;
       }
-      // Cartes : cœur = wishlist ; ailleurs = vue produit (Ctrl / Cmd + clic : fiche produit dans un nouvel onglet)
+      // Cartes (comme l'accueil) : cœur = wishlist ; icône panier = vue produit ; nom et photo = fiche produit (lien normal)
       var card = target.closest('[data-dcl-grid] > .mshein-card');
       if (card) {
         var heart = target.closest('.mshein-card__fav');
         if (heart) { event.preventDefault(); event.stopPropagation(); toggleHeart(card, heart); return; }
-        if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+        if (!target.closest('.mshein-card__add')) return;
         var link = card.querySelector('.mshein-card__title a, a.mshein-card__link');
         var productHandle = productHandleOf(link && link.getAttribute('href'));
         if (!productHandle) return;
