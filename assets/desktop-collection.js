@@ -497,17 +497,49 @@
       return v.available && Object.keys(picked).every(function (k) { return Number(k) === skip || v.options[k] === picked[k]; });
     });
   };
+  var priceHtml = function (variant) {
+    var off = variant.compare_at_price > variant.price ? Math.round((variant.compare_at_price - variant.price) * 100 / variant.compare_at_price) : 0;
+    return escapeHtml(money(variant.price)) + (off ? '<s>' + escapeHtml(money(variant.compare_at_price)) + '</s><i>-' + off + '%</i>' : '');
+  };
+  var isColorOption = function (name) { return /colou?r|colore|colori|farbe|couleur|kleur|culoare/i.test(name); };
+  // Teinte d'une couleur sans photo (vignette unie, comme l'ajout rapide mobile)
+  var COLOR_TONES = [[/black|nero|noir|schwarz/i, '#1a1a1a'], [/white|bianc|blanc|ivory|cream|avorio/i, '#fafafa'], [/gr[ae]y|grigio|gris/i, '#9a9da6'],
+    [/silver|argent/i, '#c9ccd3'], [/gold|dorat/i, '#d4af37'], [/navy/i, '#1b2a4e'], [/light ?blue|sky|azzurr|celeste/i, '#8ec5e8'],
+    [/blue|blu|bleu|denim/i, '#2c4a8c'], [/wine|burgund|bordeaux/i, '#7b1e2e'], [/red|ross|rouge/i, '#c8102e'], [/pink|rosa|rose/i, '#f2a7c3'],
+    [/orange|arancio/i, '#f28b2c'], [/yellow|giall|jaune/i, '#f2c230'], [/khaki|kaki/i, '#b7a77a'], [/army|olive|militar/i, '#5b6236'],
+    [/green|verde|vert/i, '#3e6b48'], [/purple|viola|violet|lilac|lavender/i, '#8e6fa8'], [/apricot|beige|nude|sand|camel|albicocc/i, '#e3c7a6'],
+    [/brown|marron|coffee|caff|chocolate/i, '#7a4e2d']];
+  var toneOf = function (name) { for (var i = 0; i < COLOR_TONES.length; i++) if (COLOR_TONES[i][0].test(name)) return COLOR_TONES[i][1]; return ''; };
+  // Tailles dans l'ordre (XS → XXL, ou 34 → 42) quand toutes ont le même type ; sinon l'ordre de la boutique
+  var SIZE_RANK = { XXXS: 0, XXS: 1, '2XS': 1, XS: 2, S: 3, M: 4, L: 5, XL: 6, XXL: 7, '2XL': 7, XXXL: 8, '3XL': 8, XXXXL: 9, '4XL': 9, '5XL': 10, '6XL': 11 };
+  var sortValues = function (values) {
+    var keys = values.map(function (value) {
+      var upper = String(value).trim().toUpperCase();
+      if (SIZE_RANK[upper] != null) return { kind: 'rank', value: SIZE_RANK[upper] };
+      var number = upper.match(/^(\d+(?:[.,]\d+)?)/);
+      return number ? { kind: 'n', value: parseFloat(number[1].replace(',', '.')) } : null;
+    });
+    if (!keys[0] || !keys.every(function (key) { return key && key.kind === keys[0].kind; })) return values;
+    return values.map(function (value, i) { return { value: value, key: keys[i].value, i: i }; })
+      .sort(function (a, b) { return a.key - b.key || a.i - b.i; }).map(function (entry) { return entry.value; });
+  };
   var paintChoices = function (pv) {
     var wrap = ov('[data-xpv-size-wrap]');
-    wrap.querySelectorAll('[data-g]').forEach(function (list) {
-      if (!list.classList.contains('xpv__sizes')) return;
+    wrap.querySelectorAll('.xpv__sizes[data-g], .xpv__sws[data-g]').forEach(function (list) {
       var index = Number(list.getAttribute('data-g'));
-      [].forEach.call(list.children, function (button) {
-        var trial = Object.assign({}, pv.picked); trial[index] = button.textContent;
+      list.querySelectorAll('button[data-v]').forEach(function (button) {
+        var value = button.getAttribute('data-v');
+        var trial = Object.assign({}, pv.picked); trial[index] = value;
         button.disabled = !matchVariant(pv.product, trial).length;
-        button.classList.toggle('is-on', pv.picked[index] === button.textContent);
+        button.classList.toggle('is-on', pv.picked[index] === value);
+        button.setAttribute('aria-checked', String(pv.picked[index] === value));
       });
+      var chosen = wrap.querySelector('.xpv__lbl[data-g="' + index + '"] b');
+      if (chosen) chosen.textContent = pv.picked[index] != null ? pv.picked[index] : '';
     });
+    // Prix de la variante choisie (sinon de la première disponible)
+    var shown = matchVariant(pv.product, pv.picked)[0] || pv.product.variants.filter(function (v) { return v.available; })[0] || pv.product.variants[0];
+    if (shown) ov('[data-xpv-price]').innerHTML = priceHtml(shown);
   };
   var productHandleOf = function (url) { var match = String(url || '').match(/\/products\/([^/?#]+)/); return match ? decodeURIComponent(match[1]) : ''; };
   var openProduct = function (from) {
@@ -547,8 +579,7 @@
       ov('[data-xpv-link]').href = product.url || base + 'products/' + product.handle;
       ov('[data-xpv-name]').textContent = shortTitle(product.title);
       var variant = product.variants.filter(function (v) { return v.available; })[0] || product.variants[0];
-      var off = variant.compare_at_price > variant.price ? Math.round((variant.compare_at_price - variant.price) * 100 / variant.compare_at_price) : 0;
-      ov('[data-xpv-price]').innerHTML = escapeHtml(money(variant.price)) + (off ? '<s>' + escapeHtml(money(variant.compare_at_price)) + '</s><i>-' + off + '%</i>' : '');
+      ov('[data-xpv-price]').innerHTML = priceHtml(variant);
       var images = (product.images || []).slice(0, 4);
       ov('[data-xpv-views]').innerHTML = images.map(function (src, k) {
         return '<button type="button" class="' + (k ? '' : 'is-on') + '" data-k="' + k + '">' + escapeHtml(k ? host.getAttribute('data-view').replace('__N__', k + 1) : host.getAttribute('data-front')) + '</button>';
@@ -560,13 +591,36 @@
       wrap.hidden = !groups.length;
       wrap.innerHTML = groups.map(function (group) {
         var isSize = group.index === sizeIndex(product);
-        return '<div class="xpv__lbl" data-g="' + group.index + '">' + escapeHtml(group.name) + '<em>' + escapeHtml(isSize ? wrap.getAttribute('data-choose-size') : wrap.getAttribute('data-choose')) + '</em></div>' +
-          '<div class="xpv__sizes" data-g="' + group.index + '">' + group.values.map(function (value) { return '<button type="button">' + escapeHtml(value) + '</button>'; }).join('') + '</div>';
+        var label = '<div class="xpv__lbl" data-g="' + group.index + '"><span>' + escapeHtml(group.name) + '</span><b></b><em>' + escapeHtml(isSize ? wrap.getAttribute('data-choose-size') : wrap.getAttribute('data-choose')) + '</em></div>';
+        if (isColorOption(group.name)) {
+          // Couleurs en vignettes : photo de la variante de cette couleur, sinon teinte unie ; nom dessous (ajout rapide mobile)
+          return label + '<div class="xpv__sws" data-g="' + group.index + '" role="radiogroup">' + group.values.map(function (value) {
+            var withImage = product.variants.filter(function (v) { return v.options[group.index] === value && v.featured_image && v.featured_image.src; })[0];
+            var tone = toneOf(value);
+            var swatch = withImage
+              ? '<span class="im"><img src="' + escapeHtml(sized(withImage.featured_image.src, 120)) + '" alt="" loading="lazy" width="56" height="56"></span>'
+              : '<span class="im flat"' + (tone ? ' style="--sw:' + tone + '"' : '') + '></span>';
+            return '<button type="button" class="xpv__sw" role="radio" aria-checked="false" aria-label="' + escapeHtml(value) + '" data-v="' + escapeHtml(value) + '">' + swatch + '<small>' + escapeHtml(value) + '</small></button>';
+          }).join('') + '</div>';
+        }
+        return label + '<div class="xpv__sizes" data-g="' + group.index + '" role="radiogroup">' + sortValues(group.values).map(function (value) {
+          return '<button type="button" role="radio" aria-checked="false" data-v="' + escapeHtml(value) + '">' + escapeHtml(value) + '</button>';
+        }).join('') + '</div>';
       }).join('');
+      setQty(1);
       paintChoices(state.pv);
       ov('[data-xpv-add]').disabled = !product.available;
       ov('[data-xpv-add]').textContent = product.available ? ov('[data-xpv-add]').getAttribute('data-label') || ov('[data-xpv-add]').textContent : host.getAttribute('data-sold-out');
     }).catch(function (error) { console.error(error); });
+  };
+  // Quantité (« − 1 + » à côté du bouton, comme l'ajout rapide mobile)
+  var setQty = function (value) {
+    var qty = Math.max(1, Math.min(99, value));
+    if (current && current.pv) current.pv.qty = qty;
+    var output = overlay() && ov('[data-xpv-qty-value]');
+    if (output) output.textContent = qty;
+    var minus = overlay() && ov('[data-xpv-qty="-1"]');
+    if (minus) minus.disabled = qty <= 1;
   };
   var closeProduct = function () {
     if (!current) return;
@@ -616,7 +670,7 @@
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ items: [{ id: variant.id, quantity: 1 }], sections: drawerSection() ? [drawerSection()] : undefined, sections_url: location.pathname })
+      body: JSON.stringify({ items: [{ id: variant.id, quantity: pv.qty || 1 }], sections: drawerSection() ? [drawerSection()] : undefined, sections_url: location.pathname })
     }).then(function (response) {
       return response.json().then(function (data) {
         if (!response.ok) throw new Error(data.description || data.message || 'add failed');
@@ -651,10 +705,13 @@
         ov('[data-xpv-img]').src = sized(current.pv.product.images[Number(view.getAttribute('data-k'))], 1100);
         return;
       }
-      var choice = target.closest('.xpv__sizes button');
+      var qtyButton = target.closest('[data-xpv-qty]');
+      if (qtyButton && current.pv) { setQty((current.pv.qty || 1) + Number(qtyButton.getAttribute('data-xpv-qty'))); return; }
+      var choice = target.closest('[data-g] button[data-v]');
       if (choice && !choice.disabled && current.pv && current.pv.product) {
         var group = choice.parentNode.getAttribute('data-g');
-        if (current.pv.picked[group] === choice.textContent) delete current.pv.picked[group]; else current.pv.picked[group] = choice.textContent;
+        var value = choice.getAttribute('data-v');
+        if (current.pv.picked[group] === value) delete current.pv.picked[group]; else current.pv.picked[group] = value;
         paintChoices(current.pv);
         var label = ov('[data-xpv-size-wrap] .xpv__lbl[data-g="' + group + '"]');
         if (label) label.classList.remove('is-warn');

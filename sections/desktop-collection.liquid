@@ -460,7 +460,14 @@
         <div class="xpv__price" data-xpv-price></div>
         <div class="xpv__views" data-xpv-views></div>
         <div data-xpv-size-wrap data-choose-size="{{ 'desktop_collection.choose_size' | t | escape }}" data-choose="{{ 'mobile.pdp.choose_options' | t | escape }}"></div>
-        <button class="xpv__add" type="button" data-xpv-add>{{ 'mobile.pdp.add_to_cart' | t }}</button>
+        <div class="xpv__buy">
+          <div class="xpv__qty" role="group" aria-label="{{ 'mobile.quick_add.quantity' | t | escape }}">
+            <button type="button" data-xpv-qty="-1" aria-label="{{ 'mobile.quick_add.less' | t | escape }}" disabled>−</button>
+            <output data-xpv-qty-value aria-live="polite">1</output>
+            <button type="button" data-xpv-qty="1" aria-label="{{ 'mobile.quick_add.more' | t | escape }}">+</button>
+          </div>
+          <button class="xpv__add" type="button" data-xpv-add>{{ 'mobile.pdp.add_to_cart' | t }}</button>
+        </div>
         <div class="xpv__foot"><span>{{ collection.title | escape }}</span><a href="#" data-xpv-link>{{ 'desktop_collection.see_product' | t }}</a></div>
       </div>
       <button class="xpv__x" type="button" data-xpv-x aria-label="{{ 'general.accessibility.close' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>

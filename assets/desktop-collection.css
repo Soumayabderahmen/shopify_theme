@@ -311,6 +311,32 @@ html.dcl-busy, html.dcl-busy * { cursor: progress; }
 .dcl .dcl-sale-more button:hover { color: #fff; background: var(--ink); }
 /* Vue produit : boutons réels */
 .dcl-ov .xpv__lbl:first-child { margin-top: 22px; }
+/* Titre de l'option + valeur choisie (« COLOR  Black ») */
+.dcl-ov .xpv__lbl { display: flex; align-items: baseline; gap: 8px; }
+.dcl-ov .xpv__lbl b { color: #111114; font-size: 12.5px; font-weight: 700; letter-spacing: 0; text-transform: none; }
+.dcl-ov .xpv__lbl em { margin-left: 0; }
+/* Couleurs en vignettes (même modèle que l'ajout rapide mobile, assets/mobile-quick-add.css) */
+.dcl-ov .xpv__sws { display: flex; flex-wrap: wrap; gap: 12px 10px; padding-top: 6px; }
+.dcl-ov .xpv__sw { display: flex; flex: none; flex-direction: column; align-items: center; gap: 6px; width: 64px; }
+.dcl-ov .xpv__sw .im { position: relative; display: block; width: 56px; height: 56px; border-radius: 14px; background-color: var(--sw, #e6e8f2); box-shadow: inset 0 0 0 1px rgb(22 18 63 / 12%); transition: transform .15s; }
+.dcl-ov .xpv__sw .im.flat { background-image: linear-gradient(140deg, rgb(255 255 255 / 35%), rgb(255 255 255 / 0%) 42%, rgb(0 0 0 / 14%)); }
+.dcl-ov .xpv__sw .im img { --height: 100%; display: block; width: 100%; height: 100%; border-radius: 14px; object-fit: cover; mix-blend-mode: normal; }
+.dcl-ov .xpv__sw:hover .im { transform: scale(1.04); }
+.dcl-ov .xpv__sw small { max-width: 66px; overflow: hidden; color: #4a4f6b; font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.dcl-ov .xpv__sw.is-on .im::after { content: ''; position: absolute; inset: -4px; border: 2.5px solid #3a34d2; border-radius: 17px; }
+.dcl-ov .xpv__sw.is-on .im::before { content: ''; position: absolute; top: -7px; right: -7px; z-index: 1; width: 19px; height: 19px; border-radius: 50%; background: #3a34d2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 11px no-repeat; box-shadow: 0 0 0 2px #fff; }
+.dcl-ov .xpv__sw.is-on small { color: #3a34d2; font-weight: 800; }
+.dcl-ov .xpv__sw:disabled { cursor: not-allowed; }
+.dcl-ov .xpv__sw:disabled .im { opacity: .5; }
+.dcl-ov .xpv__sw:disabled .im::after { content: ''; position: absolute; inset: 0; border-radius: 14px; background: linear-gradient(135deg, transparent 47%, #7a7e94 47% 53%, transparent 53%); }
+.dcl-ov .xpv__sw:disabled small { color: #a9acbc; text-decoration: line-through; }
+/* Quantité à côté du bouton (ajout rapide mobile) */
+.dcl-ov .xpv__buy { display: flex; align-items: center; gap: 10px; margin-top: 22px; }
+.dcl-ov .xpv__buy .xpv__add { flex: 1; margin-top: 0; }
+.dcl-ov .xpv__qty { display: inline-flex; flex: none; align-items: center; height: 48px; background: #f2f3f7; border-radius: 99px; }
+.dcl-ov .xpv__qty button { width: 42px; height: 48px; font-size: 20px; font-weight: 600; border-radius: 99px; }
+.dcl-ov .xpv__qty button:disabled { color: #bfc2d1; cursor: default; }
+.dcl-ov .xpv__qty output { min-width: 22px; font-size: 15px; font-weight: 800; text-align: center; }
 .dcl-ov .xpv__lbl + .xpv__sizes + .xpv__lbl { margin-top: 18px; }
 .dcl-ov .xpv__sizes button:disabled { color: #b9b9c1; text-decoration: line-through; cursor: not-allowed; }
 .dcl-ov .xpv__add:disabled { opacity: .5; cursor: progress; }
