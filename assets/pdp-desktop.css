@@ -178,6 +178,20 @@ body.template-product #content {
   border-radius: 0 0 20px 20px;
 }
 
+/* Bande « Negozio Ufficiale del Marchio » et badges (Nike, Adidas…) : sous la carte prix et son coupon, pas au-dessus de
+   « Vantaggi esclusivi » (ordre du mobile, où elle suit la galerie). */
+#root .pdp-m__top > .pdp-m__vant,
+#root .pdp-m__top > .pdp-m__price-card {
+  order: -1;
+}
+
+#root .pdp-m__top > .pdp-m__brand {
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: #fff;
+  border-radius: 20px;
+}
+
 /* Titre entier (place suffisante), un peu plus grand. */
 #root .pdp-m .pdp-m__title {
   display: block;
