@@ -1,0 +1,266 @@
+/* Fiche produit ORDINATEUR (≥ 761 px) au design du prototype « Prototipo-Scheda-Prodotto-Desktop » : la même fiche que
+   le mobile (snippets/pdp-mobile-top.liquid, assets/pdp-mobile.css, assets/pdp-mobile.js), mise en deux colonnes —
+   galerie à gauche (vignettes, flèches, collée pendant le défilement), achat à droite (Vantaggi esclusivi, carte prix,
+   options, bouton, Premi, Protezioni, Spedizione e resi, Klarna) ; description, avis et « Potrebbe piacerti anche » en
+   pleine largeur dessous ; feuilles en panneaux à droite. Contenu seulement : l'en-tête du site et le fil d'Ariane ne
+   changent pas. Chargé avec media="(min-width: 761px)" (layout/theme.liquid). */
+
+/* ---------- Ancien rendu Xtra : galerie et colonne cachées (son formulaire reste dans la page : la fiche le pilote
+   pour les variantes et l'ajout au panier, comme sur mobile) ---------- */
+#root #main-product.m6pr {
+  display: block !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
+#root #main-product > div:not(.pdp-m):not(.l4pr-container) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+}
+
+/* Fond gris clair du contenu (comme le prototype et le mobile) : les cartes blanches s'en détachent. L'en-tête du site
+   n'est pas dans #content. */
+body.template-product #content {
+  background: var(--pm-paper, #f5f6f8);
+}
+
+/* ---------- Fiche : haut en deux colonnes (.pdp-m__top), puis description, avis et produits en pleine largeur ---------- */
+#root .pdp-m {
+  display: block;
+  margin: 0 !important;
+  padding: 8px 0 48px;
+  background: transparent;
+}
+
+/* En-tête et barre d'achat fixe du mobile : l'ordinateur garde l'en-tête du site et le bouton de la colonne. */
+#root .pdp-m > .pdp-m__hd,
+#root .pdp-m > .pdp-m__buy {
+  display: none !important;
+}
+
+#root .pdp-m .pdp-m__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 440px;
+  column-gap: 40px;
+  align-items: start;
+}
+
+/* Tout dans la colonne d'achat, sauf la galerie. */
+#root .pdp-m__top > * {
+  grid-column: 2;
+  min-width: 0;
+}
+
+/* ---------- Galerie : vignettes en colonne + grande photo, collée sous l'en-tête du site jusqu'à la fin du haut de
+   fiche (son conteneur, .pdp-m__top) ---------- */
+#root .pdp-m__top > .pdp-m__gal {
+  grid-column: 1;
+  grid-row: 1 / span 16;
+  position: sticky;
+  /* Sous l'en-tête collé du site (126 px). */
+  top: 142px;
+  padding-left: 96px;
+  background: none;
+}
+
+#root .pdp-m .pdp-m__slides {
+  max-height: calc(100vh - 166px);
+  min-height: 420px;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 20px;
+}
+
+#root .pdp-m .pdp-m__ths {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 80px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+#root .pdp-m .pdp-m__ths::-webkit-scrollbar {
+  display: none;
+}
+
+#root .pdp-m .pdp-m__th {
+  flex: none;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 12px;
+}
+
+#root .pdp-m .pdp-m__th[aria-current='true'] {
+  border-color: var(--pm-blue);
+}
+
+#root .pdp-m .pdp-m__th img {
+  display: block;
+  width: 100%;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+#root .pdp-m .pdp-m__garr {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  color: var(--pm-ink);
+  background: rgb(255 255 255 / 92%);
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgb(22 18 63 / 15%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+#root .pdp-m .pdp-m__gal:hover .pdp-m__garr,
+#root .pdp-m .pdp-m__garr:focus-visible {
+  opacity: 1;
+}
+
+#root .pdp-m .pdp-m__garr svg {
+  width: 20px;
+  height: 20px;
+}
+
+#root .pdp-m .pdp-m__garr--prev {
+  left: 112px;
+}
+
+#root .pdp-m .pdp-m__garr--next {
+  right: 16px;
+}
+
+#root .pdp-m .pdp-m__cnt {
+  right: 16px;
+  bottom: 16px;
+}
+
+/* ---------- Colonne d'achat : cartes arrondies séparées ---------- */
+#root .pdp-m__top > .pdp-m__card,
+#root .pdp-m__top > .pdp-m__kl,
+#root .pdp-m__top > .pdp-m__klo {
+  margin: 12px 0 0;
+  border-radius: 20px;
+}
+
+#root .pdp-m__top > .pdp-m__card {
+  padding: 18px 20px;
+}
+
+/* Bande « Vantaggi esclusivi » en tête de colonne, collée à la carte prix. */
+#root .pdp-m__top > .pdp-m__vant {
+  margin-top: 0;
+  padding: 0 20px;
+  border-radius: 20px 20px 0 0;
+}
+
+#root .pdp-m__top > .pdp-m__vant ~ .pdp-m__price-card {
+  margin-top: 0;
+  border-radius: 0 0 20px 20px;
+}
+
+/* Titre entier (place suffisante), un peu plus grand. */
+#root .pdp-m .pdp-m__title {
+  display: block;
+  font-size: 20px;
+  line-height: 1.35;
+  -webkit-line-clamp: unset;
+}
+
+#root .pdp-m .pdp-m__tmore {
+  display: none !important;
+}
+
+#root .pdp-m .pdp-m__price {
+  font-size: 34px;
+}
+
+/* ---------- Pleine largeur : description, avis, « Potrebbe piacerti anche » ---------- */
+#root .pdp-m > .pdp-m__desc,
+#root .pdp-m > #pdp-reviews,
+#root .pdp-m > #pdp-related {
+  margin-top: 16px;
+  border-radius: 20px;
+}
+
+#root .pdp-m__top + * {
+  margin-top: 32px;
+}
+
+#root .pdp-m > #pdp-reviews {
+  padding: 24px 28px;
+}
+
+#root .pdp-m > #pdp-related {
+  padding: 24px 0 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+#root .pdp-m > #pdp-related h2 {
+  padding: 0;
+  font-size: 24px;
+}
+
+/* Puces des catégories : pas collées (l'en-tête du site prend déjà le haut de l'écran). */
+#root .pdp-m .pdp-m__rchips {
+  position: static;
+  padding-right: 0;
+  padding-left: 0;
+  background: transparent;
+}
+
+/* Cartes du site sur 5 colonnes (les deux colonnes décalées du mobile deviennent une grille). */
+#root .pdp-m .pdp-m__feed {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  padding: 0;
+  background: transparent;
+}
+
+#root .pdp-m .pdp-m__fcol {
+  display: contents;
+}
+
+/* ---------- Feuilles (Vantaggi esclusivi, Protezioni, Garanzia, Termini) : panneau à droite au lieu du bas ---------- */
+#root .pdp-m .pdp-m__pt,
+#root .pdp-m .pdp-m__pt.pdp-m__vs {
+  inset: 0 0 0 auto;
+  width: 460px;
+  max-width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  border-radius: 22px 0 0 22px;
+  box-shadow: -20px 0 40px -20px rgb(22 18 63 / 40%);
+  transform: translateX(105%);
+  transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#root .pdp-m .pdp-m__pt.is-open {
+  transform: none;
+}
+
+/* Barre de prise de la feuille mobile (à glisser au doigt) : inutile dans un panneau. */
+#root .pdp-m .pdp-m__vs .pdp-m__pt-body::before {
+  display: none;
+}

@@ -147,6 +147,11 @@
   </div>
   <div class="pdp-m__toast" data-pdp-toast role="status" aria-live="polite"></div>
 
+  {%- comment -%}
+    Haut de fiche (galerie → Klarna) : neutre sur mobile (display: contents) ; sur ordinateur, ses deux colonnes
+    (assets/pdp-desktop.css). La galerie collée s'arrête à sa fin, avant la description.
+  {%- endcomment -%}
+  <div class="pdp-m__top">
   {%- if pm_media_count > 0 -%}
     <section class="pdp-m__gal" aria-roledescription="{{ 'mobile.pdp.carousel' | t }}" aria-label="{{ 'mobile.pdp.gallery' | t }}">
       <div class="pdp-m__slides" data-pdp-slides>
@@ -169,6 +174,25 @@
         {%- endfor -%}
       </div>
       <span class="pdp-m__cnt" data-pdp-count>1 / {{ pm_media_count }}</span>
+      {%- comment -%}
+        Ordinateur seulement (assets/pdp-desktop.css ; cachés sur mobile) : flèches de la grande photo et colonne de
+        vignettes à sa gauche, branchées par assets/pdp-mobile.js (data-pdp-gal-step, data-pdp-thumbs).
+      {%- endcomment -%}
+      {%- if pm_media_count > 1 -%}
+        <button class="pdp-m__garr pdp-m__garr--prev" type="button" data-pdp-gal-step="-1" aria-label="{{ 'mobile.pdp.previous' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+        <button class="pdp-m__garr pdp-m__garr--next" type="button" data-pdp-gal-step="1" aria-label="{{ 'mobile.pdp.next' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
+        <div class="pdp-m__ths" data-pdp-thumbs>
+          {%- assign pm_thumb_index = 0 -%}
+          {%- for media in product.media -%}
+            {%- if media.preview_image -%}
+              <button class="pdp-m__th" type="button" data-index="{{ pm_thumb_index }}"{% if pm_thumb_index == 0 %} aria-current="true"{% endif %} aria-label="{{ pm_thumb_index | plus: 1 }} / {{ pm_media_count }}">
+                <img src="{{ media.preview_image | image_url: width: 160, height: 160, crop: 'center' }}" width="80" height="80" alt="" loading="lazy">
+              </button>
+              {%- assign pm_thumb_index = pm_thumb_index | plus: 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
     </section>
   {%- endif -%}
 
@@ -597,6 +621,7 @@
     <p>{%- assign pm_klarna_amount = pm_price | divided_by: 3 | money | append: mm_cur -%}
     <b data-pdp-klarna>{{ 'mobile.pdp.klarna_installments_html' | t: amount: pm_klarna_amount }}</b><br>{{ 'mobile.pdp.klarna_interest' | t }}</p>
     <a href="https://www.klarna.com/it/" target="_blank" rel="noopener">{{ 'mobile.pdp.learn_more' | t }}</a>
+  </div>
   </div>
 
   {%- comment -%}

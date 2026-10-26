@@ -1,6 +1,8 @@
-/* Fiche produit MOBILE au design du prototype « platinumshop-pdp-mobile-b » (snippets/pdp-mobile-top.liquid,
-   assets/pdp-mobile.js). Fichier chargé seulement en mobile (media="(max-width: 760px)") : desktop inchangé.
-   Les anciens blocs Xtra remplacés sont masqués ici, en mobile uniquement. */
+/* Fiche produit au design du prototype « platinumshop-pdp-mobile-b » (snippets/pdp-mobile-top.liquid,
+   assets/pdp-mobile.js). Chargé sur mobile ET ordinateur : sur ordinateur, assets/pdp-desktop.css (chargé après) met
+   la même fiche en deux colonnes. Les règles qui touchent la PAGE (en-tête du site masqué, barre du bas, place de la
+   barre d'achat fixe…) restent dans des @media (max-width: 760px) : l'en-tête ordinateur n'est jamais touché.
+   Les anciens blocs Xtra remplacés sont masqués ici (mobile et ordinateur). */
 
 .template-product {
   --pm-ink: #16123f;
@@ -34,6 +36,11 @@
   line-height: 1.4;
   background: var(--pm-paper);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Haut de fiche (galerie → Klarna) : sans effet sur mobile ; deux colonnes sur ordinateur (assets/pdp-desktop.css). */
+.pdp-m__top {
+  display: contents;
 }
 
 /* Remise à zéro des boutons (le thème leur impose flottement, tailles minimales et hauteur). */
@@ -74,6 +81,12 @@
 .pdp-m__gal {
   position: relative;
   background: #e9eaf1;
+}
+
+/* Vignettes et flèches : ordinateur seulement (assets/pdp-desktop.css). */
+#root .pdp-m .pdp-m__ths,
+#root .pdp-m .pdp-m__garr {
+  display: none;
 }
 
 .pdp-m__slides {
@@ -362,8 +375,10 @@
 }
 
 /* Bouton « haut de page » du thème : absent du prototype, il passait sur la barre d'achat. */
-html body.pdp-m-page #totop {
-  display: none !important;
+@media (max-width: 760px) {
+  html body.pdp-m-page #totop {
+    display: none !important;
+  }
 }
 
 .pdp-m__save {
@@ -578,43 +593,45 @@ html body.pdp-m-page #totop {
   margin-bottom: 0 !important;
 }
 
-/* Place pour la barre d'achat fixe en bas de l'écran. */
-body.template-product {
-  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
-}
+@media (max-width: 760px) {
+  /* Place pour la barre d'achat fixe en bas de l'écran. */
+  body.template-product {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 
-/* Comme SHEIN : pas de barre du bas du site sur la fiche (la barre d'achat prend sa place). Le tiroir panier, les bulles
-   des apps et le bouton cookie descendent d'autant (assets/mobile-bottom-nav.css les plaçait au-dessus d'elle). */
-html body.pdp-m-page .mobile-bottom-navigation {
-  display: none !important;
-}
+  /* Comme SHEIN : pas de barre du bas du site sur la fiche (la barre d'achat prend sa place). Le tiroir panier, les
+     bulles des apps et le bouton cookie descendent d'autant (assets/mobile-bottom-nav.css les plaçait au-dessus d'elle). */
+  html body.pdp-m-page .mobile-bottom-navigation {
+    display: none !important;
+  }
 
-html body.pdp-m-page #root .m6pn {
-  bottom: env(safe-area-inset-bottom, 0px);
-}
+  html body.pdp-m-page #root .m6pn {
+    bottom: env(safe-area-inset-bottom, 0px);
+  }
 
-html body.pdp-m-page #honeypop-app button[class*="BubbleLauncher"] {
-  bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
-}
+  html body.pdp-m-page #honeypop-app button[class*="BubbleLauncher"] {
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 
-html body.pdp-m-page .firepush-widget-container {
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
-}
+  html body.pdp-m-page .firepush-widget-container {
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 
-html body.pdp-m-page pandectes-cmp {
-  --mobile-cookie-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-}
+  html body.pdp-m-page pandectes-cmp {
+    --mobile-cookie-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
 
-html body:has(.pdp-m__buy:not(.is-hidden)) #honeypop-app button[class*="BubbleLauncher"] {
-  bottom: calc(70px + 12px + env(safe-area-inset-bottom, 0px)) !important;
-}
+  html body:has(.pdp-m__buy:not(.is-hidden)) #honeypop-app button[class*="BubbleLauncher"] {
+    bottom: calc(70px + 12px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 
-html body:has(.pdp-m__buy:not(.is-hidden)) .firepush-widget-container {
-  bottom: calc(70px + 14px + env(safe-area-inset-bottom, 0px)) !important;
-}
+  html body:has(.pdp-m__buy:not(.is-hidden)) .firepush-widget-container {
+    bottom: calc(70px + 14px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 
-html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
-  --mobile-cookie-bottom: calc(70px + 12px + env(safe-area-inset-bottom, 0px));
+  html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
+    --mobile-cookie-bottom: calc(70px + 12px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .pdp-m .pdp-m__card h3 {
@@ -775,6 +792,10 @@ html body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp {
 #root .pdp-m .pdp-m__pt.is-open {
   transform: none;
 }
+
+/* Pas de content-visibility sur la fiche (feuilles fermées, description, avis, recommandations) : avec la feuille
+   « Vantaggi esclusivi » ouverte d'elle-même par-dessus la page (showModal + animation), Chrome plantait
+   (STATUS_ACCESS_VIOLATION, « Uffa! » / « Aïe aïe aïe ») peu après son ouverture. */
 
 #root .pdp-m .pdp-m__pt::backdrop {
   background: rgb(0 0 0 / 45%);
@@ -3593,15 +3614,17 @@ html body:has(.pdp-m__lb:not([hidden])) .firepush-widget-container {
    Remplace l'en-tête du site sur la fiche mobile : retour, recherche (nom du produit), panier, partager, ⋯ ; onglets
    de section sous l'en-tête une fois les photos passées. L'en-tête du site reste dans la page (son lien panier ouvre
    le tiroir), seulement masqué. */
-/* « < Tornare » du fil d'Ariane : remplacé par la flèche de l'en-tête. */
-body.template-product.pdp-m-page [id$="__breadcrumbs"],
-body.template-product.pdp-m-page [id$="__header"].shopify-section {
-  display: none !important;
-}
+@media (max-width: 760px) {
+  /* « < Tornare » du fil d'Ariane : remplacé par la flèche de l'en-tête. */
+  body.template-product.pdp-m-page [id$="__breadcrumbs"],
+  body.template-product.pdp-m-page [id$="__header"].shopify-section {
+    display: none !important;
+  }
 
-/* Marge du haut de la page (espace sous l'ancien en-tête) : l'en-tête de la fiche est tout en haut. */
-body.template-product.pdp-m-page #content {
-  padding-top: 0 !important;
+  /* Marge du haut de la page (espace sous l'ancien en-tête) : l'en-tête de la fiche est tout en haut. */
+  body.template-product.pdp-m-page #content {
+    padding-top: 0 !important;
+  }
 }
 
 .pdp-m__hd {

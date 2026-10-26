@@ -51,6 +51,8 @@
   if (headerSection) {
     // Bannière visible : celle de l'accueil, ou celle de l'onglet de rayon ouvert (assets/mobile-home-tabs.js).
     var syncSolid = function () {
+      // Fiche produit ouverte sur place (assets/mobile-pdp-layer.js) : cet en-tête est caché, rien à mesurer.
+      if (document.body.classList.contains('pdp-m-page')) return;
       var activeHero = document.querySelector('[data-mshein-hero-active]') || heroSection;
       var solid = !activeHero || activeHero.getBoundingClientRect().bottom < headerSection.offsetHeight + 10;
       headerSection.classList.toggle('mshein-solid', solid);
@@ -89,16 +91,22 @@
     if (!reduceMotion && trendWords.length > 1) {
       var wordIndex = 0;
       window.setInterval(function () {
-        if (document.hidden) return;
+        // En pause sous une fiche produit ouverte sur place (assets/mobile-pdp-layer.js) : en-tête caché.
+        if (document.hidden || document.body.classList.contains('pdp-m-page') || document.querySelector('.pdp-swap-skeleton')) return;
         placeholderText.style.transform = 'translateY(-20px)';
         window.setTimeout(function () {
           wordIndex = (wordIndex + 1) % trendWords.length;
           placeholderText.textContent = trendWords[wordIndex];
           placeholderText.style.transition = 'none';
           placeholderText.style.transform = 'translateY(20px)';
-          void placeholderText.offsetWidth;
-          placeholderText.style.transition = '';
-          placeholderText.style.transform = '';
+          // Départ en bas posé à l'image suivante, sans lecture de taille (elle recalculait toute la page toutes les
+          // 2,6 s, ~70 ms ici et bien plus sur téléphone, y compris pendant l'ouverture d'une fiche).
+          window.requestAnimationFrame(function () {
+            window.requestAnimationFrame(function () {
+              placeholderText.style.transition = '';
+              placeholderText.style.transform = '';
+            });
+          });
         }, 450);
       }, 2600);
     }

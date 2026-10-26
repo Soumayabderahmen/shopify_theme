@@ -1,12 +1,12 @@
-/* Fiche produit MOBILE au design du prototype (snippets/pdp-mobile-top.liquid, assets/pdp-mobile.css).
-   Galerie (compteur, vignettes), « Mostra tutto » du titre, coupon (minuteur 2 jours et code copié, mêmes
-   règles que snippets/copons.liquid), prix et photo mis à jour quand la variante change dans le formulaire
-   du thème. Mobile uniquement. */
+/* Fiche produit au design du prototype (snippets/pdp-mobile-top.liquid, assets/pdp-mobile.css ; sur ordinateur la
+   même fiche en deux colonnes, assets/pdp-desktop.css). Galerie (compteur, vignettes, flèches), « Mostra tutto » du
+   titre, coupon (minuteur 2 jours et code copié, mêmes règles que snippets/copons.liquid), prix et photo mis à jour
+   quand la variante change dans le formulaire du thème. Mobile et ordinateur. */
 (function () {
   'use strict';
 
   var root = document.querySelector('[data-pdp-mobile]');
-  if (!root || !window.matchMedia('(max-width: 760px)').matches) return;
+  if (!root) return;
   // Apparition de la fiche : la feuille « Vantaggi esclusivi » s'ouvre 5 s après. Fiche ouverte sur place : moment où
   // assets/mobile-pdp-layer.js l'a affichée (ce script ne démarre qu'après d'autres) ; page chargée : maintenant.
   var pdpStart = window.msheinPdpShownAt || Date.now();
@@ -43,18 +43,21 @@
   // Mesures groupées : toutes les lectures de taille / position à l'image suivante, puis toutes les écritures. Au
   // démarrage, chaque lecture faite entre deux changements obligeait le navigateur à recalculer toute la fiche
   // (~30-60 ms chacune, 3 à 4 fois plus sur téléphone) : ~300 ms de calcul avant que la fiche puisse s'afficher.
+  // scroll : l'écriture ne fait que défiler (galerie, rangée des couleurs) ; passée avant les autres, qui changent des
+  // styles : un défilement posé après un changement de style recalculait encore toute la fiche (~60 ms ici).
   var measureJobs = null;
-  var measure = function (read, write) {
+  var measure = function (read, write, scroll) {
     if (!measureJobs) {
       measureJobs = [];
       window.requestAnimationFrame(function () {
         var jobs = measureJobs;
         measureJobs = null;
         var values = jobs.map(function (job) { return job.read(); });
-        jobs.forEach(function (job, i) { if (job.write) job.write(values[i]); });
+        jobs.forEach(function (job, i) { if (job.write && job.scroll) job.write(values[i]); });
+        jobs.forEach(function (job, i) { if (job.write && !job.scroll) job.write(values[i]); });
       });
     }
-    measureJobs.push({ read: read, write: write });
+    measureJobs.push({ read: read, write: write, scroll: !!scroll });
   };
 
   // Marques officielles : bande « Negozio Ufficiale del Marchio » (avec sa fenêtre) et badges Official Store /
@@ -256,7 +259,8 @@
   /* ---------- Galerie ---------- */
   var slides = root.querySelector('[data-pdp-slides]');
   var counter = root.querySelector('[data-pdp-count]');
-  var thumbsBox = root.querySelector('[data-pdp-thumbs]');
+  // Vignettes : affichées sur ordinateur seulement (assets/pdp-desktop.css) ; sur mobile, cachées et laissées de côté.
+  var thumbsBox = window.matchMedia('(min-width: 761px)').matches ? root.querySelector('[data-pdp-thumbs]') : null;
   var thumbs = thumbsBox ? Array.prototype.slice.call(thumbsBox.querySelectorAll('.pdp-m__th')) : [];
   var slideCount = slides ? slides.children.length : 0;
   var currentSlide = 0;
@@ -268,7 +272,12 @@
     thumbs.forEach(function (thumb, i) {
       if (i === index) {
         thumb.setAttribute('aria-current', 'true');
-        thumbsBox.scrollTo({ left: thumb.offsetLeft - (thumbsBox.clientWidth - thumb.offsetWidth) / 2, behavior: 'smooth' });
+        // Rangée (mobile) ou colonne (ordinateur, à gauche de la grande photo) : vignette choisie au milieu.
+        if (thumbsBox.scrollHeight > thumbsBox.clientHeight + 1) {
+          thumbsBox.scrollTo({ top: thumb.offsetTop - (thumbsBox.clientHeight - thumb.offsetHeight) / 2, behavior: 'smooth' });
+        } else {
+          thumbsBox.scrollTo({ left: thumb.offsetLeft - (thumbsBox.clientWidth - thumb.offsetWidth) / 2, behavior: 'smooth' });
+        }
       } else {
         thumb.removeAttribute('aria-current');
       }
@@ -294,6 +303,13 @@
   thumbs.forEach(function (thumb) {
     thumb.addEventListener('click', function () {
       goToSlide(Number(thumb.getAttribute('data-index')));
+    });
+  });
+  // Flèches de la grande photo (ordinateur : pas de glissement au doigt), en boucle.
+  root.querySelectorAll('[data-pdp-gal-step]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      if (!slideCount) return;
+      goToSlide((currentSlide + Number(button.getAttribute('data-pdp-gal-step')) + slideCount) % slideCount);
     });
   });
 
@@ -1201,7 +1217,7 @@
       return checked.offsetLeft - (list.clientWidth - checked.offsetWidth) / 2;
     }, function (left) {
       if (left !== null) list.scrollLeft = left;
-    });
+    }, true);
   };
   colorRows.forEach(function (list) {
     var block = list.closest('[data-option-index]');
@@ -1500,13 +1516,17 @@
   if (firstVariant) updateShipping(firstVariant.price);
   // Galerie ouverte sur la photo de la variante affichée (celle de la carte touchée : première variante disponible),
   // comme SHEIN ; elle partait toujours de la photo 1 (carte verte, fiche ouverte sur la photo beige).
-  if (firstVariant && firstVariant.media && slides) {
-    var startSlide = slides.querySelector('[data-media-id="' + firstVariant.media + '"]');
-    var startIndex = startSlide ? Array.prototype.indexOf.call(slides.children, startSlide) : -1;
+  // Fiche ouverte sur place depuis une carte : la photo de la carte touchée, trouvée par assets/mobile-pdp-layer.js,
+  // passe avant celle de la variante (la carte montre parfois une autre couleur que la première variante).
+  var cardSlide = window.msheinPdpStartSlide;
+  window.msheinPdpStartSlide = null;
+  if (slides && (typeof cardSlide === 'number' || (firstVariant && firstVariant.media))) {
+    var startSlide = typeof cardSlide === 'number' ? null : slides.querySelector('[data-media-id="' + firstVariant.media + '"]');
+    var startIndex = typeof cardSlide === 'number' ? cardSlide : startSlide ? Array.prototype.indexOf.call(slides.children, startSlide) : -1;
     if (startIndex > 0) measure(function () { return slides.clientWidth; }, function (width) {
       slides.scrollLeft = startIndex * width;
       setCurrent(startIndex);
-    });
+    }, true);
   }
 
   /* ---------- Fidélité : textes des apps (points Honeypop, crédit boutique) ---------- */

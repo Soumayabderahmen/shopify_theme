@@ -2396,10 +2396,12 @@ function initMobileTemuHeader() {
   // Requêtes en cours partagées : le préchargement et l'ouverture du menu ne téléchargent pas deux fois.
   var categoryRequests = {};
 
+  // Version gardée affichée tout de suite, puis redemandée en arrière-plan une fois par page (gardée à jour pour la
+  // fois suivante) : après une modification du thème, plus besoin de vider le cache du navigateur.
+  var revalidated = {};
   var fetchCategoryHtml = function (url, failureMessage) {
     if (categoryRequests[url]) return categoryRequests[url];
-    var request = readCategoryCache(url).then(function (cachedHtml) {
-      if (cachedHtml !== null) return cachedHtml;
+    var fromNetwork = function () {
       return fetch(url, { credentials: 'same-origin' }).then(function (response) {
         if (!response.ok) throw new Error(failureMessage);
         return response.text();
@@ -2410,6 +2412,14 @@ function initMobileTemuHeader() {
         writeCategoryCache(url, html);
         return html;
       });
+    };
+    var request = readCategoryCache(url).then(function (cachedHtml) {
+      if (cachedHtml === null) return fromNetwork();
+      if (!revalidated[url]) {
+        revalidated[url] = true;
+        fromNetwork().catch(function () {});
+      }
+      return cachedHtml;
     });
     categoryRequests[url] = request;
     request.then(function () { delete categoryRequests[url]; }, function () { delete categoryRequests[url]; });
@@ -2596,8 +2606,7 @@ function initMobileTemuHeader() {
     if (categoryBrowser.getAttribute('data-category-loaded') === 'true') return Promise.resolve();
     if (categoryPanelRequest) return categoryPanelRequest;
     if (!categoryPanelSource) return Promise.reject(new Error('Missing category panel source.'));
-    categoryPanelRequest = readCategoryCache(categoryPanelSource, CATEGORY_PANEL_MARKER).then(function (cachedHtml) {
-      if (cachedHtml !== null) return cachedHtml;
+    var panelFromNetwork = function () {
       return fetch(categoryPanelSource, { credentials: 'same-origin' }).then(function (response) {
         if (!response.ok) throw new Error('Category panel request failed: ' + response.status);
         return response.text();
@@ -2606,8 +2615,8 @@ function initMobileTemuHeader() {
         writeCategoryCache(categoryPanelSource, html, 12 * 60 * 60 * 1000);
         return html;
       });
-    }).then(function (html) {
-      if (categoryBrowser.getAttribute('data-category-loaded') === 'true') return;
+    };
+    var applyPanel = function (html) {
       var source = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-mobile-category-browser]');
       if (!source) throw new Error('Category panel markup missing');
       categoryBrowser.replaceChildren.apply(categoryBrowser, Array.prototype.slice.call(source.childNodes));
@@ -2620,6 +2629,18 @@ function initMobileTemuHeader() {
         loadPanelImages(activePanel);
         loadCategoryProducts(activePanel);
       }
+    };
+    categoryPanelRequest = readCategoryCache(categoryPanelSource, CATEGORY_PANEL_MARKER).then(function (cachedHtml) {
+      if (cachedHtml === null) return panelFromNetwork();
+      // Panneau gardé 12 h : affiché tout de suite, puis comparé à celui du serveur. Thème modifié entre-temps : le
+      // nouveau le remplace aussitôt (et pour les pages suivantes) — avant, il fallait vider le cache du navigateur.
+      panelFromNetwork().then(function (fresh) {
+        if (fresh !== cachedHtml) applyPanel(fresh);
+      }).catch(function () {});
+      return cachedHtml;
+    }).then(function (html) {
+      if (categoryBrowser.getAttribute('data-category-loaded') === 'true') return;
+      applyPanel(html);
     });
     categoryPanelRequest.catch(function () { categoryPanelRequest = null; });
     return categoryPanelRequest;

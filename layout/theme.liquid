@@ -76,8 +76,8 @@
       Carte produit au style SHEIN (snippets/mshein-card.liquid) sur toutes les pages en mobile : styles en tête de page
       (cartes affichées finies), script commun (cœur, nom de la marque, toucher sur toute la carte).
     {%- endcomment -%}
-    {%- comment -%} Accueil, pages collection et wishlist : aussi sur ordinateur (sections/desktop-home-shein.liquid, sections/desktop-collection.liquid, snippets/wishlist-page-content.liquid, mêmes cartes). {%- endcomment -%}
-    <link rel="stylesheet" href="{{ 'mshein-card.css' | asset_url }}" media="{% if template.name == 'index' or template.name == 'collection' or template.name == 'page' and page.handle == 'wishlist' %}all{% else %}(max-width: 760px){% endif %}">
+    {%- comment -%} Accueil, pages collection, wishlist et fiche produit (« Potrebbe piacerti anche ») : aussi sur ordinateur (sections/desktop-home-shein.liquid, sections/desktop-collection.liquid, snippets/wishlist-page-content.liquid, assets/pdp-desktop.css, mêmes cartes). {%- endcomment -%}
+    <link rel="stylesheet" href="{{ 'mshein-card.css' | asset_url }}" media="{% if template.name == 'index' or template.name == 'collection' or template.name == 'product' or template.name == 'page' and page.handle == 'wishlist' %}all{% else %}(max-width: 760px){% endif %}">
     {%- if template.name == 'index' -%}
       <link rel="stylesheet" href="{{ 'desktop-home-shein.css' | asset_url }}" media="(min-width: 761px)">
     {%- elsif template.name == 'collection' -%}
@@ -175,8 +175,12 @@
     {%- endif -%}
     {%- if template.name == 'product' -%}
       {{ 'page-product.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
-      {%- comment -%} Fiche produit mobile au design du prototype (mobile uniquement). {%- endcomment -%}
-      <link rel="stylesheet" href="{{ 'pdp-mobile.css' | asset_url }}" media="(max-width: 760px)">
+      {%- comment -%}
+        Fiche produit au design du prototype : la même fiche (snippets/pdp-mobile-top.liquid) sur mobile et ordinateur ;
+        sur ordinateur, assets/pdp-desktop.css la met en deux colonnes (contenu seulement, l'en-tête du site ne change pas).
+      {%- endcomment -%}
+      <link rel="stylesheet" href="{{ 'pdp-mobile.css' | asset_url }}">
+      <link rel="stylesheet" href="{{ 'pdp-desktop.css' | asset_url }}" media="(min-width: 761px)">
       {%- comment -%} Tableau des tailles « size_info » des descriptions (desktop et mobile), avant pdp-mobile.js qui l'utilise. {%- endcomment -%}
       <script defer src="{{ 'size-info.js' | asset_url }}"></script>
       {%- comment -%} Caractéristiques des fiches importées traduites (7 langues), avant pdp-mobile.js qui les utilise. {%- endcomment -%}
