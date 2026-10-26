@@ -151,7 +151,7 @@
     Haut de fiche (galerie → Klarna) : neutre sur mobile (display: contents) ; sur ordinateur, ses deux colonnes
     (assets/pdp-desktop.css). La galerie collée s'arrête à sa fin, avant la description.
   {%- endcomment -%}
-  <div class="pdp-m__top">
+  <div class="pdp-m__top" id="pdp-top">
   {%- if pm_media_count > 0 -%}
     <section class="pdp-m__gal" aria-roledescription="{{ 'mobile.pdp.carousel' | t }}" aria-label="{{ 'mobile.pdp.gallery' | t }}">
       <div class="pdp-m__slides" data-pdp-slides>
@@ -193,6 +193,9 @@
           {%- endfor -%}
         </div>
       {%- endif -%}
+      {%- comment -%} Ordinateur seulement : « Ingrandisci » (visionneuse de la photo affichée) et cœur de la wishlist (même favori que la barre d'achat). {%- endcomment -%}
+      <button class="pdp-m__gzoom" type="button" data-pdp-gal-zoom><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>{{ 'mobile.pdp.zoom' | t }}</button>
+      <button class="pdp-m__gfav" type="button" data-pdp-fav-mirror aria-pressed="false" aria-label="{{ 'mobile.js.add_to_wishlist' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
     </section>
   {%- endif -%}
 
@@ -516,6 +519,13 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
       <span data-pdp-cta-text>{{ 'mobile.pdp.add_to_cart' | t }} · {{ pm_price | money }}{{ mm_cur }}</span>
     </button>
+    {%- comment -%} Ordinateur seulement (prototype) : cœur à côté du bouton, puis garanties du site sous les paiements. {%- endcomment -%}
+    <button class="pdp-m__qfav" type="button" data-pdp-fav-mirror aria-pressed="false" aria-label="{{ 'mobile.js.add_to_wishlist' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+    <div class="pdp-m__dtrust" aria-hidden="true">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>{{ 'mobile.home_shein.perk_exchange' | t }}</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>{{ 'protezioni.pagamenti.title' | t }}</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.2 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.6-.6-3-1.6M12 6.5v11"/></svg>{{ 'mobile.home_shein.perk_cashback' | t }}</span>
+    </div>
   </section>
 
   {%- comment -%}
@@ -736,6 +746,18 @@
     assign buy_off_text = 'mobile_pdp_hd.buy_off' | t: percent: buy_off
   -%}
   <div class="pdp-m__buy" data-pdp-buy>
+    {%- comment -%}
+      Ordinateur seulement (prototype) : la barre devient une bande sous l'en-tête du site quand le gros bouton est passé —
+      photo, nom, variante choisie, onglets Articolo / Recensioni / Consigliati, prix (assets/pdp-mobile.js, assets/pdp-desktop.css).
+    {%- endcomment -%}
+    <img class="pdp-m__bimg" src="{{ product.featured_image | image_url: width: 120, height: 120, crop: 'center' }}" width="60" height="60" alt="" loading="lazy">
+    <span class="pdp-m__btxt"><b>{{ product.title | escape }}</b><small data-pdp-buy-variant>{% unless product.has_only_default_variant %}{{ pm_variant.title | escape }}{% endunless %}</small></span>
+    <nav class="pdp-m__btabs" aria-label="{{ product.title | escape }}">
+      <a href="#pdp-top" class="is-on" data-pdp-jump="pdp-top">{{ 'mobile_pdp_hd.tab_item' | t }}</a>
+      <a href="#pdp-reviews" data-pdp-jump="pdp-reviews">{{ 'mobile_pdp_hd.tab_reviews' | t }}</a>
+      <a href="#pdp-related" data-pdp-jump="pdp-related">{{ 'mobile_pdp_hd.tab_rec' | t }}</a>
+    </nav>
+    <b class="pdp-m__bprice" data-pdp-buy-price>{{ pm_price | money }}{{ mm_cur }}</b>
     <button class="pdp-m__fav" type="button" data-pdp-fav aria-pressed="false" data-add="{{ 'mobile.js.add_to_wishlist' | t | escape }}" data-remove="{{ 'mobile.js.remove_from_wishlist' | t | escape }}" data-added="{{ 'mobile.js.added_to_wishlist' | t | escape }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t | escape }}" data-product-id="{{ product.id }}" data-title="{{ product.title | escape }}" data-url="{{ product.url }}" data-image="{{ product.featured_image | image_url: width: 600 }}" aria-label="{{ 'mobile.js.add_to_wishlist' | t | escape }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
     <script>
       /* Cœur rouge dès la première image si le produit est déjà dans la wishlist (même stockage que

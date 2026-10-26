@@ -473,6 +473,14 @@
       }
       viewer.open(galleryPhotos, Array.prototype.indexOf.call(slides.children, slide), function (i) { goToSlide(i, false); });
     });
+    // « Ingrandisci » (ordinateur) : la photo affichée dans la visionneuse.
+    var zoomButton = root.querySelector('[data-pdp-gal-zoom]');
+    if (zoomButton) {
+      zoomButton.addEventListener('click', function () {
+        var shown = slides.children[currentSlide];
+        if (shown) shown.click();
+      });
+    }
   }
 
   /* ---------- Titre sur 2 lignes : flèche (comme SHEIN) seulement si le titre est coupé ---------- */
@@ -620,6 +628,9 @@
       oldEl.hidden = !sale;
       if (sale) oldEl.textContent = money(variant.compare);
     }
+    // Barre d'achat de l'ordinateur : prix et variante choisie.
+    root.querySelectorAll('[data-pdp-buy-price]').forEach(function (el) { el.textContent = money(variant.price); });
+    root.querySelectorAll('[data-pdp-buy-variant]').forEach(function (el) { el.textContent = variant.title; });
     if (saveEl) {
       saveEl.hidden = !sale;
       if (sale) saveEl.textContent = '-' + Math.floor((variant.compare - variant.price) * 100 / variant.compare) + '%';
@@ -2547,9 +2558,15 @@
     if (mainCta && 'IntersectionObserver' in window) {
       // Comme le prototype : barre toujours visible, sauf quand le gros bouton « Aggiungi al carrello » est à l'écran.
       // Dernier état reçu : un saut rapide (onglet, lien « avis ») envoie entrée et sortie dans le même lot.
+      // Ordinateur (bande sous l'en-tête, assets/pdp-desktop.css) : seulement une fois le gros bouton dépassé vers le haut,
+      // comme le prototype ; pas en haut de la fiche, quand le bouton est encore plus bas.
+      // Zone observée prolongée vers le bas : le bouton « compte » tant qu'il est à l'écran ou plus bas (sans cela, un saut
+      // direct du haut de la page à plus bas que le bouton ne signalait rien, et la bande ne venait pas).
+      var desktopBar = window.matchMedia('(min-width: 761px)').matches;
+      if (desktopBar) buy.classList.add('is-hidden');
       new IntersectionObserver(function (entries) {
         buy.classList.toggle('is-hidden', entries[entries.length - 1].isIntersecting);
-      }).observe(mainCta);
+      }, desktopBar ? { rootMargin: '0px 0px 100000px 0px' } : undefined).observe(mainCta);
     }
     // Cœur : wishlist du site (window.mobileWishlist, assets/mobile-temu-header.js, chargé après ce script). Visible et
     // déjà rouge dès le premier affichage (snippets/pdp-mobile-top.liquid lit la wishlist enregistrée) ; un toucher
@@ -2594,6 +2611,40 @@
       });
     }
   }
+  /* ---------- Ordinateur : onglets Articolo / Recensioni / Consigliati de la barre d'achat (bande sous l'en-tête du site,
+     assets/pdp-desktop.css) : saut juste sous l'en-tête et la barre, onglet de la partie visible souligné. ---------- */
+  var jumps = Array.prototype.slice.call(root.querySelectorAll('[data-pdp-jump]'));
+  if (jumps.length && window.matchMedia('(min-width: 761px)').matches) {
+    // En-tête collé du site (126 px) + barre (72 px) + marge.
+    var JUMP_OFFSET = 214;
+    var jumpTarget = function (link) { return document.getElementById(link.getAttribute('data-pdp-jump')); };
+    jumps.forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        var target = jumpTarget(link);
+        if (!target) return;
+        event.preventDefault();
+        window.scrollTo({ top: Math.max(0, target.getBoundingClientRect().top + window.scrollY - JUMP_OFFSET), behavior: 'smooth' });
+      });
+    });
+    var jumpTicking = false;
+    var syncJumps = function () {
+      if (jumpTicking) return;
+      jumpTicking = true;
+      measure(function () {
+        var active = 0;
+        jumps.forEach(function (link, index) {
+          var target = jumpTarget(link);
+          if (target && target.getBoundingClientRect().top <= JUMP_OFFSET + 40) active = index;
+        });
+        return active;
+      }, function (active) {
+        jumpTicking = false;
+        jumps.forEach(function (link, index) { link.classList.toggle('is-on', index === active); });
+      });
+    };
+    listen(window, 'scroll', syncJumps, { passive: true });
+  }
+
   // « -X% DI SCONTO! » du bouton de la barre : réduction de la variante choisie (rien sans prix barré).
   var buyOff = buy && buy.querySelector('[data-pdp-buy-off]');
   var paintBuyOff = function (variant) {

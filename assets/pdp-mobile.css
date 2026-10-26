@@ -83,9 +83,18 @@
   background: #e9eaf1;
 }
 
-/* Vignettes et flèches : ordinateur seulement (assets/pdp-desktop.css). */
+/* Éléments de la fiche ordinateur (assets/pdp-desktop.css) : vignettes, flèches, « Ingrandisci », cœurs de la photo et
+   du bouton, garanties sous les paiements, photo / nom / onglets / prix de la barre d'achat. Cachés sur mobile. */
 #root .pdp-m .pdp-m__ths,
-#root .pdp-m .pdp-m__garr {
+#root .pdp-m .pdp-m__garr,
+#root .pdp-m .pdp-m__gzoom,
+#root .pdp-m .pdp-m__gfav,
+#root .pdp-m .pdp-m__qfav,
+#root .pdp-m .pdp-m__dtrust,
+#root .pdp-m .pdp-m__bimg,
+#root .pdp-m .pdp-m__btxt,
+#root .pdp-m .pdp-m__btabs,
+#root .pdp-m .pdp-m__bprice {
   display: none;
 }
 

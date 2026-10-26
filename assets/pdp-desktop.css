@@ -37,10 +37,111 @@ body.template-product #content {
   background: transparent;
 }
 
-/* En-tête et barre d'achat fixe du mobile : l'ordinateur garde l'en-tête du site et le bouton de la colonne. */
-#root .pdp-m > .pdp-m__hd,
-#root .pdp-m > .pdp-m__buy {
+/* En-tête de la fiche mobile : l'ordinateur garde l'en-tête du site. */
+#root .pdp-m > .pdp-m__hd {
   display: none !important;
+}
+
+/* ---------- Barre d'achat (prototype) : bande sous l'en-tête collé du site (126 px, z-index 60), qui apparaît quand le
+   gros bouton est passé (classe is-hidden de assets/pdp-mobile.js) — photo, nom, variante, onglets, prix, cœur, bouton.
+   Cachée, elle passe derrière l'en-tête : l'en-tête ne change pas. ---------- */
+#root .pdp-m > .pdp-m__buy {
+  top: 126px;
+  bottom: auto;
+  z-index: 55;
+  gap: 16px;
+  height: 72px;
+  padding: 0 max(32px, calc((100vw - 1280px) / 2));
+  box-shadow: 0 8px 20px -12px rgb(22 18 63 / 30%);
+  transition: transform 0.25s, opacity 0.2s;
+}
+
+#root .pdp-m > .pdp-m__buy.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-100%);
+}
+
+#root .pdp-m .pdp-m__bimg {
+  display: block;
+  flex: none;
+  width: 48px;
+  height: 48px !important;
+  object-fit: cover;
+  background: var(--pm-paper);
+  border-radius: 10px;
+}
+
+#root .pdp-m .pdp-m__btxt {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+
+#root .pdp-m .pdp-m__btxt b {
+  display: block;
+  overflow: hidden;
+  color: var(--pm-ink);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#root .pdp-m .pdp-m__btxt small {
+  color: var(--pm-mute);
+  font-size: 12px;
+}
+
+#root .pdp-m .pdp-m__btabs {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
+#root .pdp-m .pdp-m__btabs a {
+  padding: 8px 14px;
+  color: var(--pm-mute);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 999px;
+}
+
+#root .pdp-m .pdp-m__btabs a.is-on {
+  color: var(--pm-blue);
+  background: var(--pm-blue-soft);
+}
+
+#root .pdp-m .pdp-m__bprice {
+  display: block;
+  flex: none;
+  color: var(--pm-ink);
+  font-family: 'Sora', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+#root .pdp-m > .pdp-m__buy .pdp-m__fav {
+  width: 48px;
+  height: 48px;
+  border: 1.5px solid var(--pm-line);
+  border-radius: 14px;
+}
+
+#root .pdp-m > .pdp-m__buy .pdp-m__go {
+  flex: none;
+  width: auto;
+  min-width: 240px;
+  height: 48px;
+  padding: 0 28px;
+}
+
+/* Sauts depuis les onglets (lien « avis » de la note, onglets de la barre) : sous l'en-tête et la barre. */
+#root .pdp-m #pdp-reviews,
+#root .pdp-m #pdp-related,
+#root .pdp-m #pdp-top {
+  scroll-margin-top: 214px;
 }
 
 #root .pdp-m .pdp-m__top {
@@ -66,6 +167,15 @@ body.template-product #content {
   top: 142px;
   padding-left: 96px;
   background: none;
+}
+
+/* Bande d'achat affichée : la galerie collée descend sous elle (72 px de plus). */
+body:has(.pdp-m > .pdp-m__buy:not(.is-hidden)) #root .pdp-m__top > .pdp-m__gal {
+  top: 214px;
+}
+
+body:has(.pdp-m > .pdp-m__buy:not(.is-hidden)) #root .pdp-m .pdp-m__slides {
+  max-height: calc(100vh - 238px);
 }
 
 #root .pdp-m .pdp-m__slides {
@@ -154,6 +264,59 @@ body.template-product #content {
   bottom: 16px;
 }
 
+/* « Ingrandisci » en bas à gauche et cœur en haut à droite de la grande photo (prototype). */
+#root .pdp-m .pdp-m__gzoom {
+  position: absolute;
+  bottom: 16px;
+  left: 112px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  color: var(--pm-ink);
+  font-size: 12px;
+  font-weight: 700;
+  background: rgb(255 255 255 / 92%);
+  border-radius: 999px;
+}
+
+#root .pdp-m .pdp-m__gzoom svg {
+  width: 14px;
+  height: 14px;
+}
+
+#root .pdp-m .pdp-m__gfav {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--pm-ink);
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(22 18 63 / 12%);
+}
+
+#root .pdp-m .pdp-m__gfav svg,
+#root .pdp-m .pdp-m__qfav svg {
+  width: 22px;
+  height: 22px;
+}
+
+#root .pdp-m .pdp-m__gfav.is-on,
+#root .pdp-m .pdp-m__qfav.is-on {
+  color: var(--pm-deal);
+}
+
+#root .pdp-m .pdp-m__gfav.is-on path,
+#root .pdp-m .pdp-m__qfav.is-on path {
+  fill: currentColor;
+}
+
 /* ---------- Colonne d'achat : cartes arrondies séparées ---------- */
 #root .pdp-m__top > .pdp-m__card,
 #root .pdp-m__top > .pdp-m__kl,
@@ -192,6 +355,86 @@ body.template-product #content {
   border-radius: 20px;
 }
 
+/* Options et achat dans une seule carte (prototype) : couleurs, tailles, puis quantité, bouton et cœur côte à côte,
+   paiements et garanties. */
+#root .pdp-m__top > #pdp-variants {
+  border-radius: 20px 20px 0 0;
+}
+
+#root .pdp-m__top > #pdp-variants + .pdp-m__card {
+  margin-top: 0;
+  border-top: 1px solid var(--pm-line);
+  border-radius: 0 0 20px 20px;
+}
+
+#root .pdp-m__top > .pdp-m__card:has(> .pdp-m__qrow) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: center;
+}
+
+#root .pdp-m__top > .pdp-m__card:has(> .pdp-m__qrow) > * {
+  grid-column: 1 / -1;
+}
+
+/* Rangées fixes : quantité, puis bouton + cœur ; les boutons de paiement (ajoutés après le bouton par le thème) et les
+   garanties suivent. */
+#root .pdp-m__top > .pdp-m__card:has(> .pdp-m__qrow) > .pdp-m__qrow {
+  grid-row: 1;
+}
+
+#root .pdp-m__top > .pdp-m__card:has(> .pdp-m__qrow) > .pdp-m__cta {
+  grid-row: 2;
+  grid-column: 1;
+  width: 100%;
+  height: 56px;
+  background: var(--pm-ink);
+  border-radius: 14px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+#root .pdp-m__top > .pdp-m__card:has(> .pdp-m__qrow) > .pdp-m__qfav {
+  grid-row: 2;
+  grid-column: 2;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-top: 12px;
+  color: var(--pm-ink);
+  border: 1.5px solid var(--pm-line);
+  border-radius: 14px;
+}
+
+#root .pdp-m .pdp-m__dtrust {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+#root .pdp-m .pdp-m__dtrust span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  color: #2c2f45;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  background: var(--pm-paper);
+  border-radius: 12px;
+}
+
+#root .pdp-m .pdp-m__dtrust svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--pm-blue);
+}
+
 /* Titre entier (place suffisante), un peu plus grand. */
 #root .pdp-m .pdp-m__title {
   display: block;
@@ -222,6 +465,37 @@ body.template-product #content {
 
 #root .pdp-m > #pdp-reviews {
   padding: 24px 28px;
+}
+
+/* Avis (prototype) : résumé à gauche, collé sous la barre pendant la lecture de la liste — grande note, étoiles, nombre
+   d'avis et répartition par étoiles de l'app (cachée sur mobile). */
+html #root #pdp-reviews .alr-wh-comp-review-rating-detail {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+#root #pdp-reviews .alr-wh-comp-review-rating-detail-progress {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0;
+}
+
+#root #pdp-reviews .alr-wh-comp-review-rating-detail-number {
+  flex: 0 0 auto !important;
+  width: auto !important;
+}
+
+#root #pdp-reviews .alr-template-list-left {
+  position: sticky;
+  top: 230px;
+  align-self: flex-start;
+}
+
+#root #pdp-reviews .alr-wh-rating-star-average {
+  font-size: 44px !important;
+  line-height: 1 !important;
 }
 
 #root .pdp-m > #pdp-related {
