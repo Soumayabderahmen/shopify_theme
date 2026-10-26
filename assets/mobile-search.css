@@ -1,18 +1,21 @@
 /* Recherche mobile + header intelligent (prototype "platinumshop-prototype-mobile-final (3)").
    snippets/mobile-search.liquid, assets/mobile-search.js.
-   Chargé uniquement en mobile (media="(max-width: 760px)"). */
+   Chargé sur toutes les largeurs : le panneau sert aussi à la barre du header ordinateur (menu déroulant sous la
+   barre, fin du fichier) ; le reste est limité au mobile. */
 
-/* ===== Header : défile avec la page (plus de sticky) ===== */
-#root .mobile-temu-header {
-  position: relative !important;
-  top: auto !important;
-}
+@media (max-width: 760px) {
+  /* ===== Header : défile avec la page (plus de sticky) ===== */
+  #root .mobile-temu-header {
+    position: relative !important;
+    top: auto !important;
+  }
 
-/* L'ancienne liste déroulante du thème est remplacée par le panneau de recherche. */
-#root .mobile-temu-search #livesearch,
-#root .mobile-temu-search #search.has-text #livesearch:not(:empty),
-#root .mobile-temu-search #livesearch.processing {
-  display: none !important;
+  /* L'ancienne liste déroulante du thème est remplacée par le panneau de recherche. */
+  #root .mobile-temu-search #livesearch,
+  #root .mobile-temu-search #search.has-text #livesearch:not(:empty),
+  #root .mobile-temu-search #livesearch.processing {
+    display: none !important;
+  }
 }
 
 /* ===== Panneau de recherche ===== */
@@ -59,18 +62,20 @@
   transform: none;
 }
 
-html.mobile-search-lock {
-  overflow: hidden;
-}
+@media (max-width: 760px) {
+  html.mobile-search-lock {
+    overflow: hidden;
+  }
 
-/* Le header reste visible au-dessus du voile pendant la recherche. Accueil et collections (mshein-home) : il reste
-   fixé sur la bannière (assets/mobile-temu-header.css), sinon il retombe dans la page et perd son fond violet. */
-html.mobile-search-lock #root > .shopify-section-header {
-  z-index: 993 !important;
-}
+  /* Le header reste visible au-dessus du voile pendant la recherche. Accueil et collections (mshein-home) : il reste
+     fixé sur la bannière (assets/mobile-temu-header.css), sinon il retombe dans la page et perd son fond violet. */
+  html.mobile-search-lock #root > .shopify-section-header {
+    z-index: 993 !important;
+  }
 
-html.mobile-search-lock body:not(.mshein-home) #root > .shopify-section-header {
-  position: relative;
+  html.mobile-search-lock body:not(.mshein-home) #root > .shopify-section-header {
+    position: relative;
+  }
 }
 
 .mobile-search-panel *,
@@ -595,6 +600,27 @@ html.mobile-search-lock body:not(.mshein-home) #root > .shopify-section-header {
   @keyframes mobile-mini-progress {
     from { transform: scaleX(0); }
     to { transform: scaleX(1); }
+  }
+}
+
+/* ===== Ordinateur : menu déroulant sous la barre du header (position et largeur posées par le script) ===== */
+@media (min-width: 761px) {
+  .mobile-search-panel {
+    right: auto;
+    border-radius: 16px;
+    box-shadow: 0 24px 48px -20px rgba(22, 18, 63, 0.45), 0 0 0 1px rgba(22, 18, 63, 0.08);
+  }
+
+  .mobile-search-panel .sp-head {
+    display: none;
+  }
+
+  .mobile-search-panel .sp-body {
+    padding: 8px 8px 12px;
+  }
+
+  .mobile-search-scrim {
+    background: rgba(10, 8, 30, 0.32);
   }
 }
 

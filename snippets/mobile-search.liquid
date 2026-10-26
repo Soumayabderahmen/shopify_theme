@@ -11,9 +11,9 @@
   assign trend_lines = trends | newline_to_br | replace: '<br />', '<br>' | split: '<br>'
   assign wishlist_url = pages['wishlist'].url | default: '/pages/wishlist'
 -%}
-<link rel="stylesheet" href="{{ 'mobile-search.css' | asset_url }}" media="(max-width: 760px)">
-{%- comment -%} Hors mobile : rien de visible. {%- endcomment -%}
-<style>@media (min-width: 761px) { .mobile-search-scrim, .mobile-search-panel, .mobile-mini-header { display: none !important; } }</style>
+<link rel="stylesheet" href="{{ 'mobile-search.css' | asset_url }}">
+{%- comment -%} Sur ordinateur, le même panneau s'ouvre sous la barre du header (snippets/desktop-header.liquid) ; la barre compacte reste mobile. {%- endcomment -%}
+<style>@media (min-width: 761px) { .mobile-mini-header { display: none !important; } }</style>
 
 <div
   class="mobile-search-root"

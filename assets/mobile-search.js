@@ -6,7 +6,8 @@
    - Pendant la saisie : Predictive Search API (/search/suggest.json) — suggestions, produits, pages et blog.
    - Les recherches sont comptées sur la page de résultats (/search?q=…), quelle que soit leur origine.
    - Header non sticky ; barre compacte qui glisse depuis le haut dès que le header sort de l'écran.
-   Actif uniquement sous 760px. */
+   Sous 760px ; sur ordinateur, le même panneau s'ouvre en menu déroulant sous la barre du header
+   (snippets/desktop-header.liquid, [data-dh-search]) avec le même historique. */
 (function () {
   'use strict';
 
@@ -354,6 +355,9 @@
   var nativeInput = nativeForm && nativeForm.querySelector('input[type="search"]');
   var miniForm = mini.querySelector('[data-mobile-mini-search]');
   var miniInput = miniForm.querySelector('input');
+  // Barre du header ordinateur : seule barre utilisable au-dessus de 760px.
+  var deskForm = document.querySelector('[data-dh-search]');
+  var deskInput = deskForm && deskForm.querySelector('input[type="search"]');
   var activeForm = null;
   var activeInput = null;
   var closeTimer = null;
@@ -371,9 +375,28 @@
 
   // Hauteur réellement visible : sur iPhone, 100vh inclut la zone cachée par les barres du navigateur
   // et le clavier ; on s'arrête au bas de la zone visible (visualViewport) ou au-dessus de la barre du bas.
+  function usable(form) {
+    return form === deskForm ? !mobile.matches : mobile.matches;
+  }
+
   function place() {
     var anchor = activeForm === miniForm ? mini : activeForm;
     if (!anchor) return;
+    if (anchor === deskForm) {
+      // Ordinateur : menu de la largeur de la barre, juste dessous ; voile sous l'en-tête.
+      var box = deskForm.getBoundingClientRect();
+      var deskHead = deskForm.closest('[data-dh]') || deskForm;
+      var deskTop = Math.round(box.bottom + 8);
+      scrim.style.top = Math.max(0, Math.round(deskHead.getBoundingClientRect().bottom)) + 'px';
+      panel.style.left = Math.round(box.left) + 'px';
+      panel.style.width = Math.round(box.width) + 'px';
+      panel.style.top = deskTop + 'px';
+      panel.style.maxHeight = Math.max(160, window.innerHeight - deskTop - 24) + 'px';
+      body.style.maxHeight = panel.style.maxHeight;
+      return;
+    }
+    panel.style.left = '';
+    panel.style.width = '';
     // Le voile commence sous la barre : elle reste nette au même niveau que le panneau. Sur la fiche, la barre est prise
     // dans l'empilement de la page (sous le voile) ; sur l'accueil et les collections, le fond violet de l'en-tête
     // appartient à la bannière derrière lui et serait grisé.
@@ -407,7 +430,8 @@
     window.clearTimeout(closeTimer);
     // L'ancien comportement du thème (masquer le bandeau au focus) ferait sauter la page.
     document.body.classList.remove('mobile-search-open');
-    document.documentElement.classList.add('mobile-search-lock');
+    // Ordinateur : pas de blocage du défilement (la barre de défilement disparaîtrait et la page sauterait).
+    if (activeForm !== deskForm) document.documentElement.classList.add('mobile-search-lock');
     place();
     render();
     scrim.hidden = false;
@@ -429,7 +453,7 @@
     panel.setAttribute('aria-hidden', 'true');
     document.documentElement.classList.remove('mobile-search-lock');
     document.body.classList.remove('mobile-search-open');
-    [nativeInput, miniInput].forEach(function (input) { if (input) input.setAttribute('aria-expanded', 'false'); });
+    [nativeInput, miniInput, deskInput].forEach(function (input) { if (input) input.setAttribute('aria-expanded', 'false'); });
     closeTimer = window.setTimeout(function () { if (!isOpen()) scrim.hidden = true; }, 260);
     if (!keepFocus && activeInput) activeInput.blur();
     // Pendant la recherche la barre compacte ne bouge pas : on la remet dans le bon état.
@@ -444,11 +468,12 @@
   function go(query) {
     var clean = String(query || '').trim();
     if (!clean) return;
+    var form = activeForm === deskForm ? deskForm : nativeForm;
     setValue(clean);
     close(true);
-    var params = nativeForm ? new URLSearchParams(new FormData(nativeForm)) : new URLSearchParams();
+    var params = form ? new URLSearchParams(new FormData(form)) : new URLSearchParams();
     params.set('q', clean);
-    window.location.href = (nativeForm ? nativeForm.getAttribute('action') || searchUrl : searchUrl) + '?' + params.toString();
+    window.location.href = (form ? form.getAttribute('action') || searchUrl : searchUrl) + '?' + params.toString();
   }
 
   function wire(form, input) {
@@ -457,7 +482,7 @@
     input.setAttribute('autocomplete', 'off');
     input.setAttribute('aria-controls', 'mobile-search-panel');
     function activate() {
-      if (!mobile.matches) return;
+      if (!usable(form)) return;
       activeForm = form;
       activeInput = input;
       if (!isOpen()) open();
@@ -465,7 +490,7 @@
     input.addEventListener('focus', activate);
     input.addEventListener('click', activate);
     input.addEventListener('input', function () {
-      if (!mobile.matches) return;
+      if (!usable(form)) return;
       activeForm = form;
       activeInput = input;
       setValue(input.value);
@@ -473,7 +498,7 @@
       else render();
     });
     form.addEventListener('submit', function (event) {
-      if (!mobile.matches) return;
+      if (!usable(form)) return;
       event.preventDefault();
       go(input.value);
     });
@@ -482,6 +507,7 @@
 
   wire(nativeForm, nativeInput);
   wire(miniForm, miniInput);
+  wire(deskForm, deskInput);
   // Autres barres de recherche mobiles (en-tête de la fiche produit, snippets/pdp-mobile-top.liquid) : même panneau.
   document.querySelectorAll('[data-mobile-search-extra]').forEach(function (form) {
     wire(form, form.querySelector('input[type="search"]'));
@@ -506,7 +532,14 @@
   });
   window.addEventListener('resize', function () {
     if (isOpen()) place();
-    if (!mobile.matches) close();
+    if (activeForm && !usable(activeForm)) close();
+  });
+  // Ordinateur : la page défile sous le menu (en-tête collant) ; clic ailleurs dans l'en-tête = fermeture.
+  window.addEventListener('scroll', function () {
+    if (isOpen() && activeForm === deskForm) place();
+  }, { passive: true });
+  document.addEventListener('click', function (event) {
+    if (isOpen() && activeForm === deskForm && !deskForm.contains(event.target) && !panel.contains(event.target)) close();
   });
 
   body.addEventListener('click', function (event) {
@@ -542,7 +575,6 @@
 
   /* ---------- Comptage des recherches (page de résultats) ---------- */
   (function countCurrentSearch() {
-    if (!mobile.matches) return;
     var path = window.location.pathname.replace(/\/$/, '');
     if (path !== searchUrl.replace(/\/$/, '')) return;
     var query = new URLSearchParams(window.location.search).get('q');
