@@ -190,10 +190,12 @@
       if (typeof saved === 'boolean') toast(root.getAttribute(saved ? 'data-added' : 'data-removed'));
       return;
     }
-    if (event.target.closest('.mshein-card__add') && link) {
-      // Pas de fenêtre « ajout rapide » sur ordinateur : la fiche produit (choix de la taille / couleur)
+    var add = event.target.closest('.mshein-card__add');
+    if (add && link) {
+      // Fenêtre « Aggiungi al carrello » du site, la même qu'en mobile (assets/mobile-quick-add.js) ; sinon la fiche produit
       event.preventDefault();
-      window.location.href = link.getAttribute('href');
+      var api = window.mobileQuickAdd;
+      if (!api || typeof api.openCard !== 'function' || !api.openCard(add, { desktop: true })) window.location.href = link.getAttribute('href');
     }
   });
   var toastBox = null;

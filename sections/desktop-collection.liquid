@@ -2,7 +2,8 @@
   Page collection ORDINATEUR (prototype validé « Platinumshop-Collezione-desktop ») : bannière « appendiabiti » (produits
   de la collection sur une barre courbe), fil d'Ariane, colonne de gauche « Raccolte » (arbre du menu) + « Filtra » (vrais
   filtres Shopify, couleurs et tailles regroupées comme le mobile), barre (nombre, In offerta, Sotto 20, grille / liste,
-  tri), vraies cartes snippets/mshein-card.liquid, pages numérotées ; clic sur une carte : vue produit + panier.
+  tri), vraies cartes snippets/mshein-card.liquid, pages numérotées ; icône panier d'une carte : fenêtre « Aggiungi al
+  carrello » du site (snippets/mobile-quick-add.liquid).
   Ordinateur uniquement : cachée jusqu'à 760px (la page collection mobile ne change pas) ; sur ordinateur les autres
   sections de la page collection sont cachées.
   part : page (toute la page ; aussi template collection.desktop-coll, sans layout, redemandé à chaque filtre / tri /
@@ -166,7 +167,7 @@
       {%- for product in collection.products limit: 40 -%}
         {%- if product.images.size == 0 -%}{%- continue -%}{%- endif -%}
         {%- assign rh_variant = product.selected_or_first_available_variant -%}
-        {"h":{{ product.handle | json }},"t":{{ product.title | json }},"p":{{ rh_variant.price | money | strip_html | json }},"i":[
+        {"h":{{ product.handle | json }},"id":{{ product.id }},"t":{{ product.title | json }},"p":{{ rh_variant.price | money | strip_html | json }},"c":{{ rh_variant.price }},"w":{{ rh_variant.compare_at_price | default: 0 }},"i":[
           {%- for image in product.images limit: 3 -%}{{ image | image_url: width: 700 | json }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}
         ]}{%- unless forloop.last -%},{%- endunless -%}
       {%- endfor -%}
@@ -448,33 +449,6 @@
     </div>
   </main>
 
-  {%- comment -%} Vue produit (déplacée dans <body> par le script : au-dessus de l'en-tête) ; l'ajout ouvre le tiroir panier du site (snippets/cart-drawer-mobile.liquid) {%- endcomment -%}
-  <div class="dcl-ov" data-dcl-ov
-    data-front="{{ 'desktop_collection.front' | t | escape }}" data-view="{{ 'desktop_collection.view' | t: n: '__N__' | escape }}"
-    data-one-size="{{ 'mobile.collection.one_size' | t | escape }}" data-sold-out="{{ 'mobile.js.sold_out' | t | escape }}" data-error="{{ 'desktop_collection.add_error' | t | escape }}">
-    <section class="xpv" data-xpv aria-label="{{ 'desktop_collection.product' | t | escape }}" aria-hidden="true">
-      <div class="xpv__stage" data-xpv-stage><img data-xpv-img alt=""></div>
-      <div class="xpv__info">
-        <div class="xpv__count" data-xpv-count></div>
-        <h2 data-xpv-name></h2>
-        <div class="xpv__price" data-xpv-price></div>
-        <div class="xpv__views" data-xpv-views></div>
-        <div data-xpv-size-wrap data-choose-size="{{ 'desktop_collection.choose_size' | t | escape }}" data-choose="{{ 'mobile.pdp.choose_options' | t | escape }}"></div>
-        <div class="xpv__buy">
-          <div class="xpv__qty" role="group" aria-label="{{ 'mobile.quick_add.quantity' | t | escape }}">
-            <button type="button" data-xpv-qty="-1" aria-label="{{ 'mobile.quick_add.less' | t | escape }}" disabled>−</button>
-            <output data-xpv-qty-value aria-live="polite">1</output>
-            <button type="button" data-xpv-qty="1" aria-label="{{ 'mobile.quick_add.more' | t | escape }}">+</button>
-          </div>
-          <button class="xpv__add" type="button" data-xpv-add>{{ 'mobile.pdp.add_to_cart' | t }}</button>
-        </div>
-        <div class="xpv__foot"><span>{{ collection.title | escape }}</span><a href="#" data-xpv-link>{{ 'desktop_collection.see_product' | t }}</a></div>
-      </div>
-      <button class="xpv__x" type="button" data-xpv-x aria-label="{{ 'general.accessibility.close' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-      <button class="xpv__nav xpv__nav--p" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
-      <button class="xpv__nav xpv__nav--n" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
-    </section>
-  </div>
 </div>
 {%- endif -%}
 

@@ -35,12 +35,6 @@
     "none": "No products match these filters.",
     "clear": "Clear filters",
     "pages": "Pages",
-    "front": "Front",
-    "view": "View {{ n }}",
-    "choose_size": "Choose a size",
-    "see_product": "See the product page",
-    "product": "Product",
-    "add_error": "Could not add to cart",
     "tag_default": "on display.",
     "tags": {
       "all": "all in one place.",

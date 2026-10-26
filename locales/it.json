@@ -35,12 +35,6 @@
     "none": "Nessun prodotto con questi filtri.",
     "clear": "Cancella i filtri",
     "pages": "Pagine",
-    "front": "Davanti",
-    "view": "Vista {{ n }}",
-    "choose_size": "Scegli una taglia",
-    "see_product": "Vedi la scheda prodotto",
-    "product": "Prodotto",
-    "add_error": "Impossibile aggiungere al carrello",
     "tag_default": "in vetrina.",
     "tags": {
       "all": "in un solo posto.",

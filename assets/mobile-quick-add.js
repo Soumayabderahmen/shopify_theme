@@ -1,7 +1,9 @@
 /* Quick add mobile — bouton panier des cartes produit + modale "Aggiungi al carrello" v2 (prototype "Modale quick add v2").
    Données réelles : templates/product.quick-add.liquid (options, variantes, stock, guide des tailles)
    et Product Recommendations API (produits similaires, "Completa il look"). Ajout via /cart/add.js, total via /cart.js.
-   Actif uniquement sous 760px : sur desktop le bouton n'est pas affiché (.mobile-only) et rien ne change. */
+   Sous 760px : boutons panier des cartes (bottom sheet). Sur ordinateur : ouverte seulement par les pages ordinateur
+   (window.mobileQuickAdd.openCard / open avec { desktop: true }), en grande fenêtre (assets/desktop-quick-add.css) :
+   grande photo + vignettes des photos, flèches produit précédent / suivant. */
 (function () {
   'use strict';
 
@@ -58,6 +60,8 @@
     qtyValue: $('[data-qa-qty-value]'),
     qtyMinus: $('[data-qa-qty="-1"]'),
     qtyPlus: $('[data-qa-qty="1"]'),
+    thumbs: $('[data-qa-thumbs]'),
+    count: $('[data-qa-count]'),
     add: $('[data-qa-add]')
   };
 
@@ -102,6 +106,8 @@
   var readyProducts = new Map();
   var detailsCache = new Map();
   var state = null;
+  // Ouverture ordinateur : null sur mobile ; { onStep, count } (flèches et « 4 / 40 » de la page collection) sur ordinateur.
+  var desk = null;
   var history = [];
   var closeTimer = null;
   var openRequest = null;
@@ -287,6 +293,7 @@
       url: data.url || shopRoot + 'products/' + data.handle,
       type: data.type || '',
       image: data.featured_image || null,
+      images: (data.images || []).slice(0, 8),
       collectionUrl: '',
       sizeChart: null,
       // Description : vraie longueur du pied des pointures (tableau ou size_info, window.sizeInfo.shoes).
@@ -789,7 +796,7 @@
 
     // Image : change avec la couleur.
     var image = currentImage(variant);
-    var source = sizedImage(image || product.image, 400);
+    var source = sizedImage(image || product.image, desk ? 1000 : 400);
     if (el.image.getAttribute('src') !== source) {
       if (el.image.getAttribute('src')) play(el.image, [{ opacity: 0, transform: 'scale(1.05)' }, { opacity: 1, transform: 'none' }], 300);
       el.image.src = source;
@@ -997,8 +1004,32 @@
     paint();
     paintFavorite();
     renderSimilar(product);
+    renderThumbs(product);
     el.back.hidden = history.length === 0;
     showView(false);
+  }
+
+  // Ordinateur : vignettes des photos du produit sous la grande photo (clic = photo affichée)
+  function renderThumbs(product) {
+    if (!el.thumbs) return;
+    var images = desk ? (product.images || []) : [];
+    el.thumbs.hidden = images.length < 2;
+    setHTML(el.thumbs, images.length < 2 ? '' : images.map(function (src, index) {
+      return '<button type="button" data-qa-thumb="' + index + '"' + (index ? '' : ' class="is-on"') + ' aria-label="' + escapeHtml(product.title) + ' ' + (index + 1) + '">'
+        + '<img src="' + escapeHtml(sizedImage(src, 140)) + '" alt="" loading="lazy" width="56" height="70"></button>';
+    }).join(''));
+  }
+
+  // Mode de la fenêtre : mobile (bottom sheet) ou ordinateur (grande fenêtre, flèches, « 4 / 40 »)
+  function setDesk(options) {
+    desk = options ? { onStep: options.onStep || null, count: options.count || '' } : null;
+    dialog.classList.toggle('is-desk', Boolean(desk));
+    dialog.querySelectorAll('[data-qa-step]').forEach(function (button) { button.hidden = !desk || !desk.onStep; });
+    if (el.count) {
+      el.count.hidden = !desk || !desk.count;
+      el.count.textContent = desk ? desk.count : '';
+    }
+    if (el.thumbs && !desk) el.thumbs.hidden = true;
   }
 
   function swapTo(handle, variantId, pushCurrent) {
@@ -1073,6 +1104,7 @@
     el.image.src = preview.image || '';
     el.miniImage.src = el.image.src;
     el.tag.hidden = true;
+    if (el.thumbs) el.thumbs.hidden = true;
     // Cœur visible dès l'ouverture, avec l'état réel de la wishlist.
     var productId = preview.productId;
     el.fav.hidden = !window.mobileWishlist || !productId;
@@ -1408,6 +1440,7 @@
     if (!trigger || !mobile.matches) return;
     event.preventDefault();
     event.stopPropagation();
+    setDesk(null);
     openFromCard(trigger);
   }, true);
 
@@ -1418,6 +1451,20 @@
     if (!media || event.target.closest('a, button, label, input, [data-quick-add]')) return;
     var link = media.closest('li').querySelector('.alibaba-card__title a[href]');
     if (link) link.click();
+  });
+
+  // Ordinateur : produit précédent / suivant de la page (flèches) et photos (vignettes)
+  dialog.addEventListener('click', function (event) {
+    var step = event.target.closest('[data-qa-step]');
+    if (step && desk && desk.onStep) {
+      desk.onStep(Number(step.getAttribute('data-qa-step')));
+      return;
+    }
+    var thumb = event.target.closest('[data-qa-thumb]');
+    if (thumb && state && state.product.images) {
+      el.image.src = sizedImage(state.product.images[Number(thumb.getAttribute('data-qa-thumb'))], 1000);
+      el.thumbs.querySelectorAll('[data-qa-thumb]').forEach(function (button) { button.classList.toggle('is-on', button === thumb); });
+    }
   });
 
   dialog.addEventListener('click', function (event) {
@@ -1586,12 +1633,23 @@
 
   // Ouverture par d'autres scripts mobiles : wishlist (assets/mobile-temu-header.js), pour choisir la taille avant l'ajout.
   // preview (facultatif) : { title, image, url, price, compare, productId } affichés pendant le chargement.
+  // Pages ordinateur (assets/desktop-collection.js, assets/desktop-home-shein.js) : options = { desktop: true, onStep, count }.
   window.mobileQuickAdd = {
-    open: function (handle, variantId, preview) {
-      if (!mobile.matches || !handle) return false;
+    open: function (handle, variantId, preview, options) {
+      var desktop = !mobile.matches && options && options.desktop;
+      if (!handle || (!mobile.matches && !desktop)) return false;
+      setDesk(desktop ? options : null);
       openProduct(handle, variantId, preview);
       return true;
-    }
+    },
+    // Bouton panier d'une carte (data-quick-add) : aperçu immédiat avec la photo, le titre et le prix de la carte
+    openCard: function (trigger, options) {
+      if (!trigger || !trigger.dataset.quickAdd) return false;
+      setDesk(mobile.matches ? null : (options || {}));
+      openFromCard(trigger);
+      return true;
+    },
+    isOpen: function () { return isOpen; }
   };
 
   // Cartes visibles : préchargées ; nouvelles cartes (défilement infini, filtres) : observées à leur arrivée.

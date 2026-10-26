@@ -35,12 +35,6 @@
     "none": "Geen producten met deze filters.",
     "clear": "Filters wissen",
     "pages": "Pagina’s",
-    "front": "Voorkant",
-    "view": "Weergave {{ n }}",
-    "choose_size": "Kies een maat",
-    "see_product": "Naar de productpagina",
-    "product": "Product",
-    "add_error": "Kon niet aan winkelwagen toevoegen",
     "tag_default": "in de etalage.",
     "tags": {
       "all": "op één plek.",

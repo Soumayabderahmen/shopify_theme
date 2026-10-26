@@ -35,12 +35,6 @@
     "none": "Aucun produit avec ces filtres.",
     "clear": "Effacer les filtres",
     "pages": "Pages",
-    "front": "Devant",
-    "view": "Vue {{ n }}",
-    "choose_size": "Choisissez une taille",
-    "see_product": "Voir la fiche produit",
-    "product": "Produit",
-    "add_error": "Impossible d’ajouter au panier",
     "tag_default": "en vitrine.",
     "tags": {
       "all": "en un seul endroit.",

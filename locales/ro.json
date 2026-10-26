@@ -35,12 +35,6 @@
     "none": "Niciun produs cu aceste filtre.",
     "clear": "Șterge filtrele",
     "pages": "Pagini",
-    "front": "Față",
-    "view": "Vedere {{ n }}",
-    "choose_size": "Alege o mărime",
-    "see_product": "Vezi pagina produsului",
-    "product": "Produs",
-    "add_error": "Nu s-a putut adăuga în coș",
     "tag_default": "în vitrină.",
     "tags": {
       "all": "într-un singur loc.",

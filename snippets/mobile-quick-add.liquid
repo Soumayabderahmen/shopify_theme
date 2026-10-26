@@ -1,5 +1,6 @@
 {%- comment -%}
-  Modale "Aggiungi al carrello" v2 (bottom sheet) — mobile uniquement (prototype « Modale quick add v2 »).
+  Modale "Aggiungi al carrello" v2 (bottom sheet) — prototype « Modale quick add v2 ». Aussi sur ordinateur, ouverte
+  par les pages ordinateur en grande fenêtre (assets/desktop-quick-add.css : grande photo + vignettes, flèches).
   Ouverte par le bouton panier des cartes produit (snippets/product-item.liquid, [data-quick-add]).
   Contenu rempli par assets/mobile-quick-add.js avec les vraies données du produit
   (templates/product.quick-add.liquid) et les recommandations Shopify. Textes : clés mobile.quick_add.* / mobile.js.*.
@@ -11,8 +12,8 @@
     assign qa_threshold = settings.free_shipping_amount | replace: ',', '.' | times: 100 | round
   endif
 -%}
-<link rel="stylesheet" href="{{ 'mobile-quick-add.css' | asset_url }}" media="(max-width: 760px)">
-<style>@media (min-width: 761px) { #mobile-quick-add, .mobile-quick-add-scrim, .mobile-quick-add-toast { display: none !important; } }</style>
+<link rel="stylesheet" href="{{ 'mobile-quick-add.css' | asset_url }}">
+<link rel="stylesheet" href="{{ 'desktop-quick-add.css' | asset_url }}" media="(min-width: 761px)">
 {%- comment -%}
   Fond, feuille et toast en popover (couche supérieure, au-dessus des apps) plutôt qu'en <dialog> showModal() :
   sur les pages avec beaucoup de produits, showModal() et le blocage du défilement de <html> recalculaient
@@ -39,6 +40,12 @@
   <button type="button" class="qa-x" data-qa-close aria-label="{{ 'mobile.common.close' | t }}">
     <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M6 6l12 12M18 6 6 18"></path></svg>
   </button>
+  <button type="button" class="qa-nav qa-nav--p" data-qa-step="-1" aria-label="{{ 'mobile.pdp.previous' | t | escape }}" hidden>
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m15 6-6 6 6 6"></path></svg>
+  </button>
+  <button type="button" class="qa-nav qa-nav--n" data-qa-step="1" aria-label="{{ 'mobile.pdp.next' | t | escape }}" hidden>
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m9 6 6 6-6 6"></path></svg>
+  </button>
   <button type="button" class="qa-back" data-qa-back hidden>
     <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m15 5-7 7 7 7"></path></svg>
     {{- 'mobile.quick_add.back' | t -}}
@@ -57,11 +64,13 @@
         <div class="qa-media">
           <img data-qa-image alt="" width="132" height="165">
           <span class="qa-tag" data-qa-tag hidden><i></i><span></span></span>
+          <div class="qa-thumbs" data-qa-thumbs hidden></div>
           <button type="button" class="qa-fav" data-qa-fav aria-pressed="false" hidden>
             <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
           </button>
         </div>
         <div class="qa-info">
+          <span class="qa-count" data-qa-count hidden></span>
           <div class="qa-price" data-qa-price></div>
           <div class="qa-save" data-qa-save hidden></div>
           <h3 id="mobile-quick-add-title" data-qa-title></h3>

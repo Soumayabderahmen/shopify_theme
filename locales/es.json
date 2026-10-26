@@ -35,12 +35,6 @@
     "none": "Ningún producto con estos filtros.",
     "clear": "Borrar filtros",
     "pages": "Páginas",
-    "front": "Delante",
-    "view": "Vista {{ n }}",
-    "choose_size": "Elige una talla",
-    "see_product": "Ver la ficha del producto",
-    "product": "Producto",
-    "add_error": "No se pudo añadir al carrito",
     "tag_default": "en escaparate.",
     "tags": {
       "all": "en un solo lugar.",

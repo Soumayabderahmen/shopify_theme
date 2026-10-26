@@ -1,0 +1,233 @@
+/* Fenêtre « Aggiungi al carrello » sur ORDINATEUR : la même que le mobile (snippets/mobile-quick-add.liquid,
+   assets/mobile-quick-add.js, styles de base assets/mobile-quick-add.css), ouverte par les pages ordinateur
+   (classe .is-desk). Mise en page du prototype Collezione : grande photo à gauche avec les vignettes des photos,
+   prix, options, avantages, suggestions et bouton à droite ; flèches produit précédent / suivant.
+   Chargé à partir de 761px (snippets/mobile-quick-add.liquid). */
+
+#mobile-quick-add.is-desk {
+  /* Largeur de la fenêtre et de la photo (un % de marge se calculerait sur la page) */
+  --qa-w: min(1120px, calc(100vw - 48px));
+  --qa-media-w: calc(var(--qa-w) / 2);
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  width: var(--qa-w);
+  max-width: none;
+  height: min(760px, calc(100vh - 48px));
+  max-height: none;
+  margin: 0;
+  padding-left: var(--qa-media-w);
+  border-radius: 22px;
+  box-shadow: 0 40px 90px -30px rgba(10, 8, 30, 0.6);
+  opacity: 0;
+  transform: translate(-50%, -47%) scale(0.98);
+  transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.24s;
+}
+
+#mobile-quick-add.is-desk.is-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+/* Pas de poignée de glissement */
+#mobile-quick-add.is-desk .qa-drag {
+  display: none;
+}
+
+#mobile-quick-add.is-desk .qa-x {
+  top: 18px;
+  right: 18px;
+}
+
+/* Zone de droite : la grande photo est placée par rapport à la fenêtre (zone défilante non positionnée) */
+#mobile-quick-add.is-desk .qa-scroll {
+  position: static;
+  padding-top: 64px;
+}
+
+#mobile-quick-add.is-desk .qa-hero {
+  display: block;
+  padding: 0 32px 20px;
+}
+
+/* Grande photo à gauche, fond clair, vignettes en bas */
+#mobile-quick-add.is-desk .qa-media {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--qa-media-w);
+  aspect-ratio: auto;
+  border-radius: 22px 0 0 22px;
+  background: #f6f6f8;
+}
+
+#mobile-quick-add.is-desk .qa-media > img {
+  inset: 24px 24px 104px;
+  width: calc(100% - 48px);
+  height: calc(100% - 128px);
+  --height: calc(100% - 128px);
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+#mobile-quick-add.is-desk .qa-thumbs {
+  position: absolute;
+  right: 0;
+  bottom: 18px;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+#mobile-quick-add.is-desk .qa-thumbs[hidden] {
+  display: none;
+}
+
+#mobile-quick-add .qa-thumbs button {
+  flex: none;
+  width: 56px;
+  height: 70px;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+#mobile-quick-add .qa-thumbs button:hover {
+  border-color: #c9cbe0;
+}
+
+#mobile-quick-add .qa-thumbs button.is-on {
+  border-color: var(--qa-blue);
+}
+
+#mobile-quick-add .qa-thumbs img {
+  --height: 100%;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#mobile-quick-add.is-desk .qa-fav {
+  top: 18px;
+  left: 18px;
+  width: 42px;
+  height: 42px;
+}
+
+#mobile-quick-add.is-desk .qa-tag {
+  bottom: 104px;
+  left: 18px;
+}
+
+/* Produit précédent / suivant (page collection) */
+#mobile-quick-add .qa-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-top: -21px;
+  border: 1px solid #ececf0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 6px 16px -8px rgba(22, 18, 63, 0.35);
+  cursor: pointer;
+}
+
+#mobile-quick-add .qa-nav[hidden] {
+  display: none;
+}
+
+#mobile-quick-add .qa-nav svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#mobile-quick-add .qa-nav--p {
+  left: 16px;
+}
+
+#mobile-quick-add .qa-nav--n {
+  left: calc(var(--qa-media-w) - 58px);
+}
+
+/* Retour au produit précédent (suggestions) : en haut de la colonne de droite */
+#mobile-quick-add.is-desk .qa-back {
+  top: 18px;
+  left: calc(var(--qa-media-w) + 24px);
+}
+
+/* Barre compacte en défilant : dans la colonne de droite */
+#mobile-quick-add.is-desk .qa-mini {
+  left: var(--qa-media-w);
+}
+
+/* Infos : « 4 / 40 », prix, titre plus grands */
+#mobile-quick-add .qa-count {
+  display: block;
+  margin-bottom: 8px;
+  color: #9b9ba3;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+#mobile-quick-add .qa-count[hidden] {
+  display: none;
+}
+
+#mobile-quick-add.is-desk .qa-price {
+  padding-right: 0;
+}
+
+#mobile-quick-add.is-desk .qa-price b {
+  font-size: 28px;
+}
+
+#mobile-quick-add.is-desk .qa-info h3 {
+  margin-top: 10px;
+  color: var(--qa-ink);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  -webkit-line-clamp: 3;
+}
+
+#mobile-quick-add.is-desk .qa-grp {
+  padding-right: 32px;
+  padding-left: 32px;
+}
+
+#mobile-quick-add.is-desk .qa-foot {
+  padding: 14px 32px 18px;
+}
+
+/* Confirmation après l'ajout (pas de photo à gauche) : fenêtre plus étroite */
+#mobile-quick-add.is-desk:has([data-qa-done]:not([hidden])) {
+  --qa-w: min(560px, calc(100vw - 48px));
+  --qa-media-w: 0px;
+  height: auto;
+  max-height: calc(100vh - 48px);
+}
+
+#mobile-quick-add.is-desk:has([data-qa-done]:not([hidden])) .qa-nav {
+  display: none;
+}
