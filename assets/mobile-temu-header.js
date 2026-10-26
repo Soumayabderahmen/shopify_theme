@@ -161,7 +161,8 @@ function initMobileTemuHeader() {
       themeStyle.textContent = css;
       document.head.appendChild(themeStyle);
     });
-    var card = parsed.querySelector('li.alibaba-product-card');
+    // Carte des pages collection (templates/product.wishlist-card.liquid → snippets/mshein-card.liquid)
+    var card = parsed.querySelector('li.mshein-card, li.alibaba-product-card');
     if (!card) throw new Error('Wishlist card response did not contain a product-item card for ' + item.url);
     var importedCard = document.importNode(card, true);
     var productButton = importedCard.querySelector('.alibaba-card__wishlist');
@@ -197,7 +198,8 @@ function initMobileTemuHeader() {
     return {
       priceCents: Number(data.priceCents) || readWishlistCardPrice(card.querySelector('.alibaba-card__price-main')),
       compareAtCents: Number(data.compareAtPriceCents) || 0,
-      available: !card.classList.contains('unavailable'),
+      // Carte collection : bouton panier seulement pour un produit disponible
+      available: card.classList.contains('mshein-card') ? Boolean(card.querySelector('[data-quick-add]')) : !card.classList.contains('unavailable'),
       variantId: data.variantId || card.dataset.wishlistVariantId || '',
       variantTitle: data.variantTitle && data.variantTitle !== 'Default Title' ? data.variantTitle : ''
     };
@@ -209,8 +211,8 @@ function initMobileTemuHeader() {
     var current = wishlistItemCurrent(item) || readWishlistCardCurrent(card);
     var available = isWishlistItemAvailable(item);
     var down = isWishlistItemDown(item);
-    var media = card.querySelector('.alibaba-card__media');
-    var body = card.querySelector('.alibaba-card__body');
+    var media = card.querySelector('.mshein-card__img, .alibaba-card__media');
+    var body = card.querySelector('.mshein-card__body, .alibaba-card__body');
     card.classList.add('wishlist-page-card');
     card.classList.toggle('is-sold-out', !available);
 
@@ -241,7 +243,7 @@ function initMobileTemuHeader() {
       var variant = document.createElement('p');
       variant.className = 'wishlist-page-card__variant';
       variant.textContent = variantTitle;
-      var header = body.querySelector('.alibaba-card__header');
+      var header = body.querySelector('.mshein-card__title, .alibaba-card__header');
       if (header) header.after(variant);
       else body.prepend(variant);
     }
@@ -253,6 +255,8 @@ function initMobileTemuHeader() {
       body.appendChild(was);
     }
 
+    // Carte collection : son propre bouton panier (fenêtre « Aggiungi al carrello »), pas de bouton en plus
+    if (card.classList.contains('mshein-card')) return;
     var action = document.createElement('div');
     action.className = 'wishlist-page-card__act';
     var add = document.createElement('button');
@@ -588,7 +592,7 @@ function initMobileTemuHeader() {
       button.setAttribute('aria-pressed', String(isSaved));
     });
     if (wishlistPage) {
-      wishlistPage.querySelectorAll('[data-wishlist-recommendations] .alibaba-product-card').forEach(function (card) {
+      wishlistPage.querySelectorAll('[data-wishlist-recommendations] li').forEach(function (card) {
         var recommendationButton = card.querySelector('.alibaba-card__wishlist');
         card.hidden = Boolean(recommendationButton && wishlistItems.some(function (item) {
           return item.id === recommendationButton.dataset.productId;

@@ -69,41 +69,33 @@
     <section class="wishlist-page__recommendations" data-wishlist-recommendations>
       <h2>{{ 'mobile.common.you_may_like' | t }}</h2>
       <ul>
+        {%- comment -%} Mêmes cartes que les pages collection (snippets/mshein-card.liquid) {%- endcomment -%}
+        {%- liquid
+          assign best = collections['bestsellers']
+          assign best_ids = best.products | map: 'id' | join: ','
+          capture flag
+            render 'country-flag-emoji'
+          endcapture
+        -%}
         {%- for recommendation in wishlist_recommendations limit: 16 -%}
-          {%- assign recommendation_variant = recommendation.selected_or_first_available_variant -%}
-          <li class="alibaba-product-card wishlist-recommendation-card">
-            <figure class="alibaba-card__media">
-              <a class="alibaba-card__media-link" href="{{ recommendation.url }}">
-                <picture class="alibaba-card__picture">
-                  {%- if recommendation.featured_image -%}
-                    {{ recommendation.featured_image | image_url: width: 360 | image_tag: loading: 'lazy', widths: '180,270,360', sizes: '40vw', alt: recommendation.featured_image.alt | default: recommendation.title }}
-                  {%- endif -%}
-                </picture>
-              </a>
-              <button
-                type="button"
-                class="wishlist-productcard alibaba-card__wishlist"
-                data-product-id="{{ recommendation.id }}"
-                data-variant-id="{{ recommendation_variant.id }}"
-                data-variant-title="{{ recommendation_variant.title | escape }}"
-                data-price-cents="{{ recommendation_variant.price }}"
-                data-compare-at-price-cents="{{ recommendation_variant.compare_at_price }}"
-                aria-label="Wishlist"
-              >
-                <svg class="alibaba-card__wishlist-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
-              </button>
-            </figure>
-            <div class="alibaba-card__body">
-              <h3 class="alibaba-card__title"><a href="{{ recommendation.url }}">{{ recommendation.title | escape }}</a></h3>
-              <p class="alibaba-card__price-main">{{ recommendation_variant.price | money }}</p>
-            </div>
-          </li>
+          {%- render 'mshein-card', product: recommendation, best: best, best_ids: best_ids, flag: flag -%}
         {%- endfor -%}
       </ul>
     </section>
   {%- endif -%}
 
 </section>
+
+<script>
+  document.addEventListener('click', function (event) {
+    var add = event.target.closest && event.target.closest('[data-wishlist-page] .mshein-card__add');
+    if (!add || window.matchMedia('(max-width: 760px)').matches) return;
+    var api = window.mobileQuickAdd;
+    if (!api || typeof api.openCard !== 'function' || !api.openCard(add, { desktop: true })) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }, true);
+</script>
 
 <style>
   [data-wishlist-page]{max-width:1200px;margin:0 auto 40px;padding:24px 16px}
@@ -131,6 +123,14 @@
   [data-wishlist-page] .wishlist-page__error{color:#b3261e}
   [data-wishlist-page] [hidden]{display:none!important}
   [data-wishlist-page] .wishlist-page__side,[data-wishlist-page] .wishlist-page__main{display:contents}
+  /* Cartes des pages collection (assets/mshein-card.css) : grille, étiquette de statut et infos de la wishlist */
+  [data-wishlist-page] .wishlist-page__list>.mshein-card,[data-wishlist-page] .wishlist-page__recommendations>ul>.mshein-card{position:relative;min-width:0;margin:0}
+  [data-wishlist-page] .mshein-card .mshein-card__link img{--height:100%}
+  [data-wishlist-page] .mshein-card .wishlist-page-card__tag{position:absolute;z-index:3;bottom:8px;left:8px}
+  [data-wishlist-page] .mshein-card .wishlist-page-card__variant{margin:2px 0 0;padding:0 8px;overflow:hidden;color:#4a4f6b;font-size:11.5px;line-height:1.3;white-space:nowrap;text-overflow:ellipsis}
+  [data-wishlist-page] .mshein-card .wishlist-page-card__was{margin:2px 0 0;padding:0 8px;color:#1f8a4c;font-size:11px;font-weight:700}
+  [data-wishlist-page] .mshein-card.is-sold-out .mshein-card__link img{filter:grayscale(1);opacity:.55}
+  [data-wishlist-page] .wishlist-page__recommendations>ul>.mshein-card[hidden]{display:none!important}
   [data-wishlist-page] .wishlist-page__side-title{display:none}
 
   @media only screen and (max-width:760px){
@@ -165,17 +165,17 @@
     [data-wishlist-page] .wishlist-page__edit{width:auto!important;min-width:0!important;height:auto!important;padding:0!important;border:0!important;background:none!important;color:var(--wl-blue)!important;font-weight:800!important}
     [data-wishlist-page] .wishlist-page__list{margin:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px}
     [data-wishlist-page] .wishlist-page__list>.alibaba-product-card{min-width:0!important;margin:0!important;border:0!important;border-radius:12px!important;background:#fff!important;box-shadow:0 1px 3px rgba(20,20,40,.06),0 6px 18px -10px rgba(20,20,40,.18)!important;overflow:hidden!important}
-    [data-wishlist-page] .wishlist-page__list .alibaba-card__media{width:100%!important;margin:0!important;aspect-ratio:1/1!important;border-radius:0!important;background:#f4f4f4!important;overflow:hidden!important}
-    [data-wishlist-page] .wishlist-page__list .alibaba-card__picture,[data-wishlist-page] .wishlist-page__list .alibaba-card__picture img{width:100%!important;height:100%!important}
-    [data-wishlist-page] .wishlist-page__list .alibaba-card__picture img{object-fit:cover!important}
-    [data-wishlist-page] .wishlist-page__list .alibaba-card__wishlist{display:grid!important;place-items:center!important;top:8px!important;right:8px!important;width:32px!important;min-width:32px!important;height:32px!important;min-height:32px!important;margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;background:rgba(255,255,255,.95)!important;color:#e53935!important;box-shadow:0 2px 6px rgba(0,0,0,.12)!important}
-    [data-wishlist-page] .wishlist-page__list .alibaba-card__wishlist:before,[data-wishlist-page] .wishlist-page__list .alibaba-card__wishlist i{display:none!important}
-    [data-wishlist-page] .wishlist-page__list .alibaba-card__wishlist-icon{display:block!important;position:static!important;width:17px!important;height:17px!important;fill:currentColor!important;stroke:currentColor!important;stroke-width:2!important}
-    [data-wishlist-page] .wishlist-page__list .alibaba-card__body{min-width:0!important;padding:9px 9px 10px!important;gap:5px!important}
-    [data-wishlist-page] .wishlist-page__list .alibaba-card__title,[data-wishlist-page] .wishlist-page__list .alibaba-card__title a{margin:0!important;color:var(--wl-ink)!important;font-size:13.5px!important;font-weight:700!important;line-height:1.3!important}
-    [data-wishlist-page] .wishlist-page__list .alibaba-card__price-main{margin:0!important;color:var(--wl-ink)!important;font-size:17px!important;font-weight:800!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__media{width:100%!important;margin:0!important;aspect-ratio:1/1!important;border-radius:0!important;background:#f4f4f4!important;overflow:hidden!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__picture,[data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__picture img{width:100%!important;height:100%!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__picture img{object-fit:cover!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__wishlist{display:grid!important;place-items:center!important;top:8px!important;right:8px!important;width:32px!important;min-width:32px!important;height:32px!important;min-height:32px!important;margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;background:rgba(255,255,255,.95)!important;color:#e53935!important;box-shadow:0 2px 6px rgba(0,0,0,.12)!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__wishlist:before,[data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__wishlist i{display:none!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__wishlist-icon{display:block!important;position:static!important;width:17px!important;height:17px!important;fill:currentColor!important;stroke:currentColor!important;stroke-width:2!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__body{min-width:0!important;padding:9px 9px 10px!important;gap:5px!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__title,[data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__title a{margin:0!important;color:var(--wl-ink)!important;font-size:13.5px!important;font-weight:700!important;line-height:1.3!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__price-main{margin:0!important;color:var(--wl-ink)!important;font-size:17px!important;font-weight:800!important}
     [data-wishlist-page] .wishlist-page__list .old-price{color:#8a8a8a!important;font-size:11.5px!important}
-    [data-wishlist-page] .wishlist-page__list :is(.alibaba-card__rotator,.alibaba-card__badges-row,.alibaba-card__rating,.alibaba-card__stock,.alibaba-card__stock-list,.alibaba-card__description,.alibaba-card__colors,.alibaba-card__moq){display:none!important}
+    [data-wishlist-page] .wishlist-page__list .alibaba-product-card :is(.alibaba-card__rotator,.alibaba-card__badges-row,.alibaba-card__rating,.alibaba-card__stock,.alibaba-card__stock-list,.alibaba-card__description,.alibaba-card__colors,.alibaba-card__moq){display:none!important}
     [data-wishlist-page] .wishlist-page__empty{margin:12px 0 0;padding:36px 20px;border:0;border-radius:16px}
     [data-wishlist-page] .wishlist-page__empty h2{margin:0;color:var(--wl-ink);font-family:'Sora','Figtree',system-ui,sans-serif;font-size:19px}
     [data-wishlist-page] .wishlist-page__empty p{max-width:30ch;margin:6px auto 16px;color:var(--wl-muted);font-size:13.5px}
@@ -215,7 +215,7 @@
     #root [data-wishlist-page] .wishlist-page__editbar input{width:15px!important;height:15px!important;margin:0!important;accent-color:#16123f}
     #root [data-wishlist-page] [data-wishlist-remove-selected]{width:auto!important;min-width:0!important;height:32px!important;margin:0!important;padding:0 14px!important;border:0!important;border-radius:999px!important;background:#e53935!important;color:#fff!important;font-size:13px!important;font-weight:800!important}
     #root [data-wishlist-page] [data-wishlist-remove-selected]:disabled{background:#f4adad!important;opacity:1!important}
-    #root [data-wishlist-page] .wishlist-page__list>.alibaba-product-card{position:relative!important}
+    #root [data-wishlist-page] .wishlist-page__list>.alibaba-product-card,#root [data-wishlist-page] .wishlist-page__list>.mshein-card{position:relative!important}
     #root [data-wishlist-page] .wishlist-page__select{position:absolute!important;z-index:8!important;top:8px!important;left:8px!important;display:grid!important;width:24px!important;min-width:24px!important;height:24px!important;min-height:24px!important;margin:0!important;padding:0!important;place-items:center!important;border:2px solid #fff!important;border-radius:7px!important;background:rgba(22,18,63,.35)!important;color:#fff!important;box-shadow:0 1px 4px rgba(0,0,0,.15)!important}
     #root [data-wishlist-page] .wishlist-page__select[aria-checked=true]{border-color:#16123f!important;background:#16123f!important}
     #root [data-wishlist-page] .wishlist-page__select svg{width:14px!important;height:14px!important;fill:none!important;stroke:currentColor!important;stroke-width:3!important;stroke-linecap:round!important;stroke-linejoin:round!important;opacity:0}
@@ -226,48 +226,49 @@
     #root [data-wishlist-page] .wishlist-page__recommendations>ul{display:grid!important;grid-auto-flow:column!important;grid-auto-columns:40%!important;grid-template-columns:none!important;gap:10px!important;width:auto!important;margin:0!important;padding:0 12px 4px 0!important;overflow-x:auto!important;overflow-y:hidden!important;list-style:none!important;scroll-snap-type:x mandatory!important;scrollbar-width:none!important}
     #root [data-wishlist-page] .wishlist-page__recommendations>ul::-webkit-scrollbar{display:none!important}
     #root [data-wishlist-page] .wishlist-page__recommendations>ul>.alibaba-product-card[hidden]{display:none!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations>ul>.mshein-card{scroll-snap-align:start}
     #root [data-wishlist-page] .wishlist-page__recommendations>ul>.alibaba-product-card{display:flex!important;min-width:0!important;width:auto!important;margin:0!important;padding:0!important;scroll-snap-align:start!important;border:0!important;border-radius:12px!important;background:#fff!important;box-shadow:none!important;overflow:hidden!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__media{width:100%!important;margin:0!important;aspect-ratio:1/1!important;border-radius:0!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__media-link,
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__picture,
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__picture img{display:block!important;width:100%!important;height:100%!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__picture img{object-fit:cover!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__body{padding:7px 8px 9px!important;gap:3px!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__title,
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__title a{font-size:12px!important;font-weight:600!important;line-height:1.25!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__price-main{font-size:14px!important;font-weight:800!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist{position:absolute!important;z-index:3!important;top:8px!important;right:8px!important;left:auto!important;display:grid!important;width:32px!important;min-width:32px!important;max-width:32px!important;height:32px!important;min-height:32px!important;max-height:32px!important;margin:0!important;padding:0!important;place-items:center!important;border:0!important;border-radius:50%!important;background:#fff!important;background-image:none!important;color:#222!important;box-shadow:0 2px 6px rgba(0,0,0,.12)!important;transform:none!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist::before,
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist::after{display:none!important;content:none!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist[aria-pressed=true]{background:#fff!important;color:#e53935!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist-icon{display:block!important;position:static!important;inset:auto!important;width:17px!important;height:17px!important;margin:0!important;fill:none!important;stroke:currentColor!important;stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important;transform:none!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist-icon path{fill:none!important;stroke:currentColor!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist[aria-pressed=true] .alibaba-card__wishlist-icon,
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__wishlist[aria-pressed=true] .alibaba-card__wishlist-icon path{fill:#e53935!important;stroke:#e53935!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations :is(.alibaba-card__rotator,.alibaba-card__badges-row,.alibaba-card__rating,.alibaba-card__stock,.alibaba-card__stock-list,.alibaba-card__description,.alibaba-card__colors,.alibaba-card__moq,.alibaba-card__footer){display:none!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__media{width:100%!important;margin:0!important;aspect-ratio:1/1!important;border-radius:0!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__media-link,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__picture,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__picture img{display:block!important;width:100%!important;height:100%!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__picture img{object-fit:cover!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__body{padding:7px 8px 9px!important;gap:3px!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__title,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__title a{font-size:12px!important;font-weight:600!important;line-height:1.25!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__price-main{font-size:14px!important;font-weight:800!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__wishlist{position:absolute!important;z-index:3!important;top:8px!important;right:8px!important;left:auto!important;display:grid!important;width:32px!important;min-width:32px!important;max-width:32px!important;height:32px!important;min-height:32px!important;max-height:32px!important;margin:0!important;padding:0!important;place-items:center!important;border:0!important;border-radius:50%!important;background:#fff!important;background-image:none!important;color:#222!important;box-shadow:0 2px 6px rgba(0,0,0,.12)!important;transform:none!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__wishlist::before,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__wishlist::after{display:none!important;content:none!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__wishlist[aria-pressed=true]{background:#fff!important;color:#e53935!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__wishlist-icon{display:block!important;position:static!important;inset:auto!important;width:17px!important;height:17px!important;margin:0!important;fill:none!important;stroke:currentColor!important;stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important;transform:none!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__wishlist-icon path{fill:none!important;stroke:currentColor!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__wishlist[aria-pressed=true] .alibaba-card__wishlist-icon,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__wishlist[aria-pressed=true] .alibaba-card__wishlist-icon path{fill:#e53935!important;stroke:#e53935!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card :is(.alibaba-card__rotator,.alibaba-card__badges-row,.alibaba-card__rating,.alibaba-card__stock,.alibaba-card__stock-list,.alibaba-card__description,.alibaba-card__colors,.alibaba-card__moq,.alibaba-card__footer){display:none!important}
 
     /* Cartes de la grille wishlist alignées sur le prototype : badge de statut, variante,
        prix actuel -> prix barré -> -X %, "Era … al salvataggio" et bouton "Aggiungi". */
     #root [data-wishlist-page] .wishlist-page__list>.wishlist-page-card{display:flex!important;flex-direction:column!important}
     #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card :is(.alibaba-card__trust,.alibaba-card__meta,.badge-wrap-3d,.discount-combined-group){display:none!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .s1lb{position:absolute!important;z-index:4!important;top:10px!important;left:10px!important;right:auto!important;max-width:calc(100% - 56px)!important;margin:0!important;padding:0!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .s1lb>span{display:inline-block!important;margin:0!important;padding:4px 10px!important;border:0!important;border-radius:6px!important;background:#e53935!important;color:#fff!important;font-family:'Figtree',system-ui,sans-serif!important;font-size:12.5px!important;font-weight:700!important;line-height:1!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__media{position:relative!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card.is-sold-out .alibaba-card__picture img{filter:grayscale(1)!important;opacity:.55!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card.has-status-tag .alibaba-top-selling-ribbon{display:none!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .s1lb{position:absolute!important;z-index:4!important;top:10px!important;left:10px!important;right:auto!important;max-width:calc(100% - 56px)!important;margin:0!important;padding:0!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .s1lb>span{display:inline-block!important;margin:0!important;padding:4px 10px!important;border:0!important;border-radius:6px!important;background:#e53935!important;color:#fff!important;font-family:'Figtree',system-ui,sans-serif!important;font-size:12.5px!important;font-weight:700!important;line-height:1!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__media{position:relative!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card.is-sold-out .alibaba-card__picture img{filter:grayscale(1)!important;opacity:.55!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card.has-status-tag .alibaba-top-selling-ribbon{display:none!important}
     #root [data-wishlist-page] .wishlist-page-card__tag{position:absolute;z-index:3;bottom:8px;left:8px;padding:3px 7px;border-radius:5px;color:#fff;font-size:10.5px;font-weight:800;line-height:1.2}
     #root [data-wishlist-page] .wishlist-page-card__tag--down{background:#1f8a4c}
     #root [data-wishlist-page] .wishlist-page-card__tag--soldout{background:#44475a}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__body{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;gap:0!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__title{display:-webkit-box!important;overflow:hidden!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__body{display:flex!important;flex:1 1 auto!important;flex-direction:column!important;gap:0!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__title{display:-webkit-box!important;overflow:hidden!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important}
     #root [data-wishlist-page] .wishlist-page-card__variant{margin:4px 0 0!important;overflow:hidden;color:#4a4f6b;font-size:11.5px;line-height:1.3;white-space:nowrap;text-overflow:ellipsis}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__price-wrapper{display:block!important;margin:5px 0 0!important;padding:0!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__price-main{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:5px!important;color:#16123f!important;font-size:17px!important;font-weight:800!important;line-height:1.15!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__price-main:has(.old-price){color:#e53935!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__price-main>.money{order:1}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__price-main .old-price{order:2;margin:0!important;color:#8a8a8a!important;font-size:11.5px!important;font-weight:500!important;text-decoration:line-through}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__discount-badge{order:3;display:inline-flex!important;align-items:center;margin:0!important;padding:1px 5px!important;border:0!important;border-radius:5px!important;background:#ff6a00!important;box-shadow:none!important;color:#fff!important;font-size:10.5px!important;font-weight:800!important;line-height:1.3!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__price-main .small{display:none!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__price-wrapper{display:block!important;margin:5px 0 0!important;padding:0!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__price-main{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:5px!important;color:#16123f!important;font-size:17px!important;font-weight:800!important;line-height:1.15!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__price-main:has(.old-price){color:#e53935!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__price-main>.money{order:1}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__price-main .old-price{order:2;margin:0!important;color:#8a8a8a!important;font-size:11.5px!important;font-weight:500!important;text-decoration:line-through}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__discount-badge{order:3;display:inline-flex!important;align-items:center;margin:0!important;padding:1px 5px!important;border:0!important;border-radius:5px!important;background:#ff6a00!important;box-shadow:none!important;color:#fff!important;font-size:10.5px!important;font-weight:800!important;line-height:1.3!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__price-main .small{display:none!important}
     #root [data-wishlist-page] .wishlist-page-card__was{margin:2px 0 0!important;color:#1f8a4c;font-size:11px;font-weight:700}
     #root [data-wishlist-page] .wishlist-page-card__act{margin-top:auto;padding-top:9px}
     #root [data-wishlist-page] .wishlist-page-card__add{display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;width:100%!important;min-width:0!important;height:36px!important;min-height:36px!important;margin:0!important;padding:0 6px!important;border:0!important;border-radius:9px!important;background:#16123f!important;box-shadow:none!important;color:#fff!important;font-size:13px!important;font-weight:800!important;line-height:1!important;white-space:nowrap!important}
@@ -316,12 +317,14 @@
     [data-wishlist-page] .wishlist-page__list{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 16px}
     #root [data-wishlist-page] .wishlist-page__list>.alibaba-product-card{border-radius:14px!important;transition:transform .2s,box-shadow .2s}
     #root [data-wishlist-page] .wishlist-page__list>.alibaba-product-card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(20,20,40,.06),0 16px 30px -16px rgba(20,20,40,.35)!important}
-    #root [data-wishlist-page] .wishlist-page__list .alibaba-card__media{aspect-ratio:3/4!important}
-    #root [data-wishlist-page] .wishlist-page__list .alibaba-card__body{padding:12px 12px 14px!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__title,
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__title a{font-size:14px!important}
-    #root [data-wishlist-page] .wishlist-page__list .wishlist-page-card .alibaba-card__price-main{font-size:18px!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__media{aspect-ratio:3/4!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card .alibaba-card__body{padding:12px 12px 14px!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__title,
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__title a{font-size:14px!important}
+    #root [data-wishlist-page] .wishlist-page__list .alibaba-product-card.wishlist-page-card .alibaba-card__price-main{font-size:18px!important}
     #root [data-wishlist-page] .wishlist-page-card__add{height:40px!important;border-radius:999px!important;font-size:13.5px!important}
+    [data-wishlist-page] .wishlist-page__list>.mshein-card,[data-wishlist-page] .wishlist-page__recommendations>ul>.mshein-card{font-size:14px}
+    [data-wishlist-page] .wishlist-page__list>.mshein-card .mshein-card__img,[data-wishlist-page] .wishlist-page__recommendations>ul>.mshein-card .mshein-card__img{aspect-ratio:3/4!important}
     [data-wishlist-page] .wishlist-page__empty{margin:0;padding:56px 24px;border-radius:16px}
     [data-wishlist-page] .wishlist-page__empty>svg{width:64px;height:64px}
 
@@ -331,11 +334,11 @@
     #root [data-wishlist-page] .wishlist-page__recommendations>ul{grid-auto-flow:row!important;grid-auto-columns:auto!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:16px 14px!important;padding:0!important;overflow:visible!important}
     #root [data-wishlist-page] .wishlist-page__recommendations>ul>.alibaba-product-card{border-radius:14px!important;transition:transform .2s,box-shadow .2s}
     #root [data-wishlist-page] .wishlist-page__recommendations>ul>.alibaba-product-card:hover{transform:translateY(-3px);box-shadow:0 16px 30px -16px rgba(20,20,40,.35)!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__media{aspect-ratio:3/4!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__body{padding:10px 10px 12px!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__title,
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__title a{font-size:13px!important}
-    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-card__price-main{font-size:15px!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__media{aspect-ratio:3/4!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__body{padding:10px 10px 12px!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__title,
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__title a{font-size:13px!important}
+    #root [data-wishlist-page] .wishlist-page__recommendations .alibaba-product-card .alibaba-card__price-main{font-size:15px!important}
   }
   @media only screen and (min-width:761px) and (max-width:1199px){
     [data-wishlist-page]{grid-template-columns:236px minmax(0,1fr);gap:0 22px}
@@ -344,6 +347,13 @@
   }
   @media only screen and (min-width:761px) and (max-width:1023px){
     [data-wishlist-page]{grid-template-columns:minmax(0,1fr)}
+    /* Tablette : colonne de gauche au-dessus, filtres en pastilles sur une ligne, connexion sur une rangée */
+    [data-wishlist-page] .wishlist-page__side{gap:12px;margin-bottom:16px}
+    [data-wishlist-page] .wishlist-page__side .wishlist-page__side-title{display:none}
+    #root [data-wishlist-page] .wishlist-page__filters{flex-direction:row!important;flex-wrap:wrap!important;gap:8px!important;padding:0!important;border-radius:0;background:none}
+    #root [data-wishlist-page] .wishlist-page__filters button{width:auto!important;height:38px!important;min-height:38px!important;padding:0 14px!important;border:1px solid #e4e6ee!important;border-radius:999px!important;background-color:#fff!important}
+    [data-wishlist-page] .wishlist-page__guest{flex-direction:row;align-items:center}
+    [data-wishlist-page] .wishlist-page__guest>a{align-self:auto}
     [data-wishlist-page] .wishlist-page__list{grid-template-columns:repeat(3,minmax(0,1fr))}
     #root [data-wishlist-page] .wishlist-page__recommendations>ul{grid-template-columns:repeat(4,minmax(0,1fr))!important}
   }

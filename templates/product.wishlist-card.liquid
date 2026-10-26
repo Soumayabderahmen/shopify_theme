@@ -1,4 +1,15 @@
 {%- layout none -%}
-<ul class="featured-collection-mobile">
-  {%- render 'product-item', product: product -%}
+{%- comment -%}
+  Carte d'un produit de la page wishlist (lue par assets/mobile-temu-header.js) : la même carte que les pages
+  collection et l'accueil (snippets/mshein-card.liquid), variante enregistrée (?variant=…) affichée.
+{%- endcomment -%}
+{%- liquid
+  assign best = collections['bestsellers']
+  assign best_ids = best.products | map: 'id' | join: ','
+  capture flag
+    render 'country-flag-emoji'
+  endcapture
+-%}
+<ul class="wishlist-card">
+  {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
 </ul>
