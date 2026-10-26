@@ -90,6 +90,19 @@
     paintCart();
   }
 
+  // ---------- « Accedi » : fenêtre du compte Shopify (<shopify-account>) ouverte au survol, comme au clic ----------
+  var account = header.querySelector('[data-dh-account]');
+  if (account) {
+    var accountTimer = null;
+    account.addEventListener('mouseenter', function () {
+      clearTimeout(accountTimer);
+      accountTimer = setTimeout(function () {
+        if (typeof account.showModal === 'function') account.showModal();
+      }, 150);
+    });
+    account.addEventListener('mouseleave', function () { clearTimeout(accountTimer); });
+  }
+
   // ---------- Pays et langue ----------
   var loc = header.querySelector('[data-dh-loc]');
   if (loc) {

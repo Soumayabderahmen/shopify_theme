@@ -133,7 +133,14 @@
             {%- endform -%}
           </div>
         {%- endif -%}
-        <a class="dh-act" href="{{ account_url }}"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="dh-act__t">{{ account_label | escape }}</span></a>
+        {%- if customer -%}
+          <a class="dh-act" href="{{ account_url }}"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="dh-act__t">{{ account_label | escape }}</span></a>
+        {%- else -%}
+          {%- comment -%} Fenêtre « Accedi o crea un account » de Shopify (comme l'ancien en-tête), ouverte au survol (assets/desktop-header.js). {%- endcomment -%}
+          <shopify-account class="dh-acc" menu="customer-account-main-menu" data-dh-account>
+            <div slot="signed-out-avatar" class="dh-act"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="dh-act__t">{{ account_label | escape }}</span></div>
+          </shopify-account>
+        {%- endif -%}
         <a class="dh-act" href="{{ pages['wishlist'].url | default: '/pages/wishlist' }}"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="dh-act__t">{{ 'mobile.js.wishlist' | t }}</span><em data-dh-wl>0</em></a>
         {%- unless disable_cart -%}
           <a class="dh-act" href="{{ routes.cart_url }}" data-panel="cart"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg><span class="dh-act__t">{{ 'header.cart' | t }}</span><em class="mobile-home-cart-count{% if cart.item_count > 0 %} is-on{% endif %}" data-dh-cart>{{ cart.item_count }}</em></a>
