@@ -1440,15 +1440,16 @@
   document.addEventListener('pointerover', prefetch, { passive: true });
   document.addEventListener('pointerdown', prefetch, { passive: true });
 
-  // Recherche sur ordinateur (même page qu'en mobile, snippets/mshein-search.liquid) : grande fenêtre, flèches = cartes
-  // voisines de la grille, « 4 / 40 ».
-  function openSearchCard(trigger) {
-    var triggers = Array.prototype.slice.call(document.querySelectorAll('[data-mshein-search] .mshein-card [data-quick-add]'));
+  // Ordinateur, pages au design mobile (recherche : snippets/mshein-search.liquid ; fiche produit : snippets/
+  // pdp-mobile-top.liquid, « Potrebbe piacerti anche ») : grande fenêtre, flèches = cartes voisines, « 4 / 40 ».
+  var DESK_SCOPES = '[data-mshein-search], .pdp-m';
+  function openDeskCard(trigger, scope) {
+    var triggers = Array.prototype.slice.call(scope.querySelectorAll('.mshein-card [data-quick-add]'));
     var index = triggers.indexOf(trigger);
     if (index < 0) return;
     setDesk({
       count: (index + 1) + ' / ' + triggers.length,
-      onStep: function (step) { openSearchCard(triggers[(index + step + triggers.length) % triggers.length]); }
+      onStep: function (step) { openDeskCard(triggers[(index + step + triggers.length) % triggers.length], scope); }
     });
     openFromCard(trigger);
   }
@@ -1457,12 +1458,12 @@
   document.addEventListener('click', function (event) {
     var trigger = event.target.closest && event.target.closest('[data-quick-add]');
     if (!trigger) return;
-    var searchDesk = !mobile.matches && Boolean(trigger.closest('[data-mshein-search]'));
-    if (!mobile.matches && !searchDesk) return;
+    var deskScope = !mobile.matches && trigger.closest('.mshein-card') && trigger.closest(DESK_SCOPES);
+    if (!mobile.matches && !deskScope) return;
     event.preventDefault();
     event.stopPropagation();
-    if (searchDesk) {
-      openSearchCard(trigger);
+    if (deskScope) {
+      openDeskCard(trigger, deskScope);
       return;
     }
     setDesk(null);
