@@ -1,5 +1,5 @@
 /* En-tête ORDINATEUR au style SHEIN (snippets/desktop-header.liquid) : bandeau d'annonces, suggestions de recherche,
-   en-tête transparent sur la bannière de l'accueil, compteurs wishlist / panier, pays et langue, méga-menu
+   compteurs wishlist / panier, pays et langue, fenêtre du compte, méga-menu
    « Categorie » rempli avec le panneau Categoria mobile (/?section_id=mobile-category-panel, chargé une fois).
    Rien sur mobile (≤ 760px). */
 (function () {
@@ -47,9 +47,8 @@
     }
   }
 
-  // ---------- Hauteur de l'en-tête (bannière de l'accueil remontée dessous) et état au défilement ----------
+  // ---------- Hauteur de l'en-tête (barres collées dessous) et état au défilement ----------
   var mega = header.querySelector('[data-dh-mega]');
-  var isHome = header.classList.contains('is-home');
   var top = header.closest('[data-dh-top]');
   var setHeight = function () {
     document.documentElement.style.setProperty('--dh-h', header.offsetHeight + 'px');
@@ -58,7 +57,6 @@
     document.documentElement.style.setProperty('--dh-vw', document.documentElement.clientWidth + 'px'); // aussi pour le footer (assets/desktop-footer.css)
   };
   var paint = function () {
-    if (isHome) header.classList.toggle('is-over', window.scrollY < 30 && (!mega || mega.hidden));
     header.classList.toggle('is-stuck', window.scrollY > 40);
   };
   window.addEventListener('scroll', paint, { passive: true });

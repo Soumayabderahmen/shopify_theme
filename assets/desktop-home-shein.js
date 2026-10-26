@@ -32,7 +32,7 @@
       slides.forEach(function (slide, k) { slide.classList.toggle('is-on', k === current); slide.setAttribute('aria-hidden', String(k !== current)); slide.tabIndex = k === current ? 0 : -1; });
       dots.forEach(function (dot, k) { dot.classList.toggle('is-on', k === current); dot.setAttribute('aria-current', String(k === current)); });
       clearInterval(timer);
-      timer = setInterval(function () { go(current + 1); }, 5500);
+      timer = setInterval(function () { go(current + 1); }, 5000);
     };
     dots.forEach(function (dot, index) { dot.addEventListener('click', function () { go(index); }); });
     hero.querySelectorAll('.dhs-arw').forEach(function (button) {
@@ -40,7 +40,7 @@
     });
     // Produits de la diapositive : leur fiche (pas la collection de la diapositive)
     hero.addEventListener('click', function (event) {
-      var pick = event.target.closest('.dhs-pick');
+      var pick = event.target.closest('.dhs-slide__item');
       if (!pick) return;
       event.preventDefault();
       window.location.href = pick.getAttribute('data-href');

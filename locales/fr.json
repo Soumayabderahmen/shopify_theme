@@ -51,6 +51,13 @@
   },
   "desktop_home": {
     "our_deals": "Nos bonnes affaires",
+    "hero_sale_kicker": "Offres Platinum",
+    "hero_sale_title_html": "Jusqu'à -{{ percent }}%<br>sur des centaines d'articles",
+    "hero_sale_cta": "J'en profite",
+    "hero_new_kicker": "Nouveautés",
+    "hero_new_title_html": "Les nouveautés<br>de la semaine",
+    "hero_new_cta": "Découvrir",
+    "hero_cta": "Acheter",
     "show_more": "Voir plus",
     "seen": "Vous avez vu {{ shown }} sur {{ total }} produits",
     "categories": "Catégories",

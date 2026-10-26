@@ -10,7 +10,7 @@
 /* Section de l'en-tête collée en haut : le bandeau d'annonces (34px) défile, l'en-tête reste */
 .shopify-section:has(> .dh-top) { position: sticky; top: -34px; z-index: 60; }
 .dh-top { width: var(--dh-vw, 100%); margin-left: calc(-1 * var(--dh-x, 0px)); line-height: normal; }
-/* Fond foncé que le thème peint sous la section d'en-tête : l'en-tête ordinateur a le sien (transparent sur la bannière de l'accueil) */
+/* Fond foncé que le thème peint sous la section d'en-tête : l'en-tête ordinateur a le sien */
 .shopify-section:has(> .dh-top)::before { display: none !important; }
 
 .dh-top {
@@ -85,20 +85,8 @@
 .dh-loc__panel label { display: flex; flex-direction: column; gap: 6px; color: #6b6f86; font-size: 12px; font-weight: 600; }
 .dh-loc__panel select { width: 100%; height: 40px; padding: 0 10px; color: var(--dh-ink); font: inherit; font-size: 14px; background: #fff; border: 1px solid #dcdfe8; border-radius: 10px; }
 
-/* Accueil, en haut de page : en-tête transparent posé sur la bannière, textes blancs, logo blanc / lavande */
-.dh.is-over { background: transparent; box-shadow: none; }
-.dh.is-over .dh-logo__svg text { fill: url(#dh-logo-grad-light); }
-.dh.is-over .dh-srch { border-color: transparent; box-shadow: 0 10px 30px -12px rgb(0 0 0 / 45%); }
-.dh-top .dh.is-over .dh-act, .dh-top .dh.is-over .dh-tab { color: #fff; }
-.dh-top .dh.is-over .dh-act:hover { background: rgb(255 255 255 / 14%); }
-.dh-top .dh.is-over .dh-tab:hover { color: #fff; opacity: .85; }
-.dh.is-over .dh-tab.is-on::after, .dh.is-over .dh-tab.is-here::after { background: #fff; }
-.dh-top .dh.is-over .dh-tabs__all { color: var(--dh-ink); background: #fff !important; }
-.dh.is-over .dh-act__flag { box-shadow: 0 0 0 2px #fff; }
-/* La bannière de l'accueil remonte sous l'en-tête (hauteur de l'en-tête : --dh-h, assets/desktop-header.js) */
+/* Accueil : la section commence juste sous l'en-tête (bannière du prototype v8, assets/desktop-home-shein.css) */
 .template-index #content { padding-top: 0; }
-.template-index .dhs { margin-top: calc(-1 * var(--dh-h, 126px)); }
-.template-index .dhs-hero::before { content: ''; position: absolute; inset: 0 0 auto; z-index: 2; height: 240px; background: linear-gradient(180deg, rgb(10 8 30 / 72%), rgb(10 8 30 / 30%) 55%, transparent); pointer-events: none; }
 
 /* ---------- Onglets : « Categorie » fixe, liens qui défilent (fondu à droite) ---------- */
 .dh-tabs { display: flex; align-items: center; gap: 4px; height: 50px; }

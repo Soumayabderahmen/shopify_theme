@@ -353,43 +353,35 @@
         "slide_1": {
           "type": "slide",
           "settings": {
-            "collection": "ventilatori",
-            "label": "Ventilatori"
+            "kind": "sale",
+            "colors": "coral"
           }
         },
         "slide_2": {
           "type": "slide",
           "settings": {
-            "collection": "tacco-alto",
-            "label": "Tacco Alto"
+            "kind": "new",
+            "colors": "indigo"
           }
         },
         "slide_3": {
           "type": "slide",
           "settings": {
-            "collection": "mocassini",
-            "label": "Mocassini"
+            "kind": "collection",
+            "collection": "riscaldamento-casa",
+            "colors": "amber",
+            "label": "Casa & Giardino",
+            "title": "Caldo e comfort|per la tua casa"
           }
         },
         "slide_4": {
           "type": "slide",
           "settings": {
-            "collection": "orologi-uomo-novita",
-            "label": "Orologi Uomo"
-          }
-        },
-        "slide_5": {
-          "type": "slide",
-          "settings": {
-            "collection": "adidas",
-            "label": "Sneakers"
-          }
-        },
-        "slide_6": {
-          "type": "slide",
-          "settings": {
-            "collection": "nike",
-            "label": "Nike"
+            "kind": "collection",
+            "collection": "abbigliamento-uomo-tutti",
+            "colors": "navy",
+            "label": "Moda Uomo",
+            "title": "Il nuovo stile|uomo d'autunno"
           }
         },
         "cat_1": {
@@ -734,8 +726,6 @@
         "slide_2",
         "slide_3",
         "slide_4",
-        "slide_5",
-        "slide_6",
         "cat_1",
         "cat_2",
         "cat_3",

@@ -51,6 +51,13 @@
   },
   "desktop_home": {
     "our_deals": "Ofertele noastre",
+    "hero_sale_kicker": "Oferte Platinum",
+    "hero_sale_title_html": "Până la -{{ percent }}%<br>la sute de articole",
+    "hero_sale_cta": "Profită acum",
+    "hero_new_kicker": "Noutăți",
+    "hero_new_title_html": "Noutățile<br>săptămânii",
+    "hero_new_cta": "Descoperă acum",
+    "hero_cta": "Cumpără acum",
     "show_more": "Arată mai mult",
     "seen": "Ai văzut {{ shown }} din {{ total }} produse",
     "categories": "Categorii",

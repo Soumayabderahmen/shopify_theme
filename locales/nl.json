@@ -51,6 +51,13 @@
   },
   "desktop_home": {
     "our_deals": "Onze aanbiedingen",
+    "hero_sale_kicker": "Platinum-aanbiedingen",
+    "hero_sale_title_html": "Tot -{{ percent }}%<br>op honderden artikelen",
+    "hero_sale_cta": "Profiteer nu",
+    "hero_new_kicker": "Nieuw binnen",
+    "hero_new_title_html": "De nieuwkomers<br>van de week",
+    "hero_new_cta": "Ontdek nu",
+    "hero_cta": "Shop nu",
     "show_more": "Meer tonen",
     "seen": "Je hebt {{ shown }} van {{ total }} producten gezien",
     "categories": "Categorieën",

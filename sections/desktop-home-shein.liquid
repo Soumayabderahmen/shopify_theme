@@ -2,8 +2,8 @@
   Page d'accueil ORDINATEUR au style SHEIN (prototype validé « Platinumshop-Accueil-desktop-SHEIN-v9 »). Ordinateur
   uniquement : la section est cachée jusqu'à 760px, l'accueil mobile (sections/mobile-home-shein.liquid) ne change pas.
   Sur ordinateur, les autres sections de l'accueil sont cachées : cette section est toute la page.
-  - bannière pleine largeur : une diapositive par bloc « slide » (collection, photo = réglage ou 1re photo de la
-    collection), nom de la collection en bas à gauche, ses 2 premiers produits avec leur prix en bas à droite ;
+  - bannière du prototype v8 (300px, coins arrondis) : une diapositive par bloc « slide » (type Offerte / Novità /
+    Collezione, couleur du dégradé, titres), 3 vrais produits avec prix et remise, flèches, points, défilement ;
   - catégories : un carré par bloc « category », pages de 3 lignes × 8 avec flèches ;
   - « Le nostre offerte » (3 plus fortes remises des « Più venduti ») et « Tendenze » (collection new-trends) ;
   - fil à onglets (Per te / In offerta / Novità) : vraies cartes snippets/mshein-card.liquid (les mêmes qu'en mobile,
@@ -32,6 +32,18 @@
   if request.locale.iso_code == 'it'
     assign is_it = true
   endif
+  # 3 plus fortes remises parmi les 50 premiers « Più venduti » : « 090|id » triés (remise sur 3 chiffres). Bannière
+  # (diapositive « Offerte ») et « Le nostre offerte ».
+  assign deal_keys = ''
+  for candidate in best.products limit: 50
+    assign candidate_variant = candidate.selected_or_first_available_variant
+    if candidate_variant.compare_at_price > candidate_variant.price
+      assign candidate_pct = candidate_variant.compare_at_price | minus: candidate_variant.price | times: 100 | divided_by: candidate_variant.compare_at_price
+      assign candidate_key = candidate_pct | prepend: '00' | slice: -3, 3
+      assign deal_keys = deal_keys | append: candidate_key | append: '|' | append: candidate.id | append: ','
+    endif
+  endfor
+  assign deal_keys = deal_keys | split: ',' | sort | reverse
 -%}
 <script src="{{ 'desktop-home-shein.js' | asset_url }}" defer></script>
 <style>
@@ -52,49 +64,83 @@
       root.style.setProperty('--dhs-w', document.documentElement.clientWidth + 'px');
     })(document.currentScript.parentElement);
   </script>
-  {%- comment -%} ---------- Bannière ---------- {%- endcomment -%}
-  {%- assign slides = section.blocks | where: 'type', 'slide' -%}
-  {%- if slides.size > 0 -%}
-    <section class="dhs-hero" data-dhs-hero aria-roledescription="carousel">
-      {%- for block in slides -%}
-        {%- liquid
-          assign slide_collection = block.settings.collection
-          if slide_collection == blank
-            continue
-          endif
-          assign slide_image = block.settings.image
-          if slide_image == blank
-            assign slide_image = slide_collection.products.first.featured_image | default: slide_collection.image
-          endif
-          assign slide_label = block.settings.label
-          if slide_label == blank or is_it == false
-            assign slide_label = slide_collection.title | remove: ' - Tutte' | remove: ' - Tutti'
-          endif
-        -%}
-        <a class="dhs-slide{% if forloop.first %} is-on{% endif %}" href="{{ slide_collection.url }}" data-name="{{ slide_label | escape }}" {{ block.shopify_attributes }}>
-          {%- if slide_image != blank -%}
-            {{ slide_image | image_url: width: 2400 | image_tag: widths: '1200, 1600, 2000, 2400', sizes: '100vw', alt: slide_label, loading: 'eager', fetchpriority: 'low' }}
-          {%- endif -%}
-          <span class="dhs-slide__cap">{{ slide_label | escape }}<i aria-hidden="true">›</i></span>
-          <span class="dhs-picks">
-            {%- for pick in slide_collection.products limit: 2 -%}
-              {%- assign pick_variant = pick.selected_or_first_available_variant -%}
-              {%- assign pick_image = pick_variant.featured_image | default: pick.featured_image -%}
-              <span class="dhs-pick" data-href="{{ pick.url }}" title="{{ pick.title | escape }}">
-                {%- if pick_image != blank -%}<img src="{{ pick_image | image_url: width: 320, height: 360, crop: 'center' }}" alt="{{ pick.title | escape }}" width="160" height="180" loading="lazy">{%- endif -%}
-                <b>{{ pick_variant.price | money }}</b>
-              </span>
-            {%- endfor -%}
-          </span>
-        </a>
-      {%- endfor -%}
-      <div class="dhs-dots" data-dhs-dots></div>
-      <button class="dhs-arw dhs-arw--p" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
-      <button class="dhs-arw dhs-arw--n" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
-    </section>
-  {%- endif -%}
-
   <div class="dhs-wrap">
+    {%- comment -%}
+      ---------- Bannière (prototype v8) : une diapositive par bloc « slide », dégradé de couleur, petit titre, grand
+      titre, bouton, 3 vrais produits (prix, remise). Type « Offerte » : les 3 plus fortes remises, « Fino al -X% » ;
+      « Novità » : collection des nouveautés ; « Collezione » : titres des réglages (italien), sinon nom de la collection.
+    {%- endcomment -%}
+    {%- assign slides = section.blocks | where: 'type', 'slide' -%}
+    {%- if slides.size > 0 -%}
+      <section class="dhs-hero" data-dhs-hero aria-roledescription="carousel">
+        {%- for block in slides -%}
+          {%- liquid
+            assign slide_kind = block.settings.kind | default: 'collection'
+            assign slide_collection = block.settings.collection
+            assign slide_kicker = ''
+            assign slide_title = ''
+            assign slide_cta = 'desktop_home.hero_cta' | t
+            case slide_kind
+              when 'sale'
+                assign slide_url = sale_url
+                assign top_pct = deal_keys.first | split: '|' | first | plus: 0
+                assign slide_kicker = 'desktop_home.hero_sale_kicker' | t
+                assign slide_title = 'desktop_home.hero_sale_title_html' | t: percent: top_pct
+                assign slide_cta = 'desktop_home.hero_sale_cta' | t
+              when 'new'
+                if slide_collection == blank
+                  assign slide_collection = new_collection
+                endif
+                assign slide_url = slide_collection.url | append: '?sort_by=created-descending'
+                assign slide_kicker = 'desktop_home.hero_new_kicker' | t
+                assign slide_title = 'desktop_home.hero_new_title_html' | t
+                assign slide_cta = 'desktop_home.hero_new_cta' | t
+              else
+                if slide_collection == blank
+                  continue
+                endif
+                assign slide_url = slide_collection.url
+                if is_it and block.settings.label != blank
+                  assign slide_kicker = block.settings.label | escape
+                endif
+                if is_it and block.settings.title != blank
+                  assign slide_title = block.settings.title | escape | replace: '|', '<br>'
+                else
+                  assign slide_title = slide_collection.title | remove: ' - Tutte' | remove: ' - Tutti' | escape
+                endif
+            endcase
+          -%}
+          <a class="dhs-slide dhs-slide--{{ block.settings.colors | default: 'indigo' }}{% if forloop.first %} is-on{% endif %}" href="{{ slide_url }}" data-name="{{ slide_kicker | default: slide_title | strip_html | escape }}" {{ block.shopify_attributes }}>
+            <span class="dhs-slide__txt">
+              {%- if slide_kicker != blank -%}<small>{{ slide_kicker }}</small>{%- endif -%}
+              <b>{{ slide_title }}</b>
+              <em>{{ slide_cta }}</em>
+            </span>
+            <span class="dhs-slide__items">
+              {%- if slide_kind == 'sale' -%}
+                {%- assign deal_shown = 0 -%}
+                {%- for deal_key in deal_keys -%}
+                  {%- assign deal_id = deal_key | split: '|' | last | plus: 0 -%}
+                  {%- assign deal = best.products | where: 'id', deal_id | first -%}
+                  {%- if deal == blank -%}{%- continue -%}{%- endif -%}
+                  {%- render 'desktop-home-hero-item', product: deal -%}
+                  {%- assign deal_shown = deal_shown | plus: 1 -%}
+                  {%- if deal_shown == 3 -%}{%- break -%}{%- endif -%}
+                {%- endfor -%}
+              {%- else -%}
+                {%- for pick in slide_collection.products limit: 3 -%}
+                  {%- render 'desktop-home-hero-item', product: pick -%}
+                {%- endfor -%}
+              {%- endif -%}
+            </span>
+          </a>
+        {%- endfor -%}
+        <div class="dhs-dots" data-dhs-dots></div>
+        <button class="dhs-arw dhs-arw--p" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+        <button class="dhs-arw dhs-arw--n" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+      </section>
+    {%- endif -%}
+
     {%- comment -%} ---------- Catégories : carrés arrondis, pages de 3 lignes × 8 ---------- {%- endcomment -%}
     {%- assign cats = section.blocks | where: 'type', 'category' -%}
     {%- if cats.size > 0 -%}
@@ -130,19 +176,6 @@
     {%- endif -%}
 
     {%- comment -%} ---------- « Le nostre offerte » + « Tendenze » ---------- {%- endcomment -%}
-    {%- liquid
-      # 3 plus fortes remises parmi les 50 premiers « Più venduti » : « 090|id » triés (remise sur 3 chiffres).
-      assign deal_keys = ''
-      for candidate in best.products limit: 50
-        assign candidate_variant = candidate.selected_or_first_available_variant
-        if candidate_variant.compare_at_price > candidate_variant.price
-          assign candidate_pct = candidate_variant.compare_at_price | minus: candidate_variant.price | times: 100 | divided_by: candidate_variant.compare_at_price
-          assign candidate_key = candidate_pct | prepend: '00' | slice: -3, 3
-          assign deal_keys = deal_keys | append: candidate_key | append: '|' | append: candidate.id | append: ','
-        endif
-      endfor
-      assign deal_keys = deal_keys | split: ',' | sort | reverse
-    -%}
     <section class="dhs-dl">
       <a class="dhs-dl__card" href="{{ sale_url }}">
         <span class="dhs-dl__hd"><b>{{ 'desktop_home.our_deals' | t }}</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
@@ -212,9 +245,28 @@
       "type": "slide",
       "name": "Diapositiva",
       "settings": [
-        { "type": "collection", "id": "collection", "label": "Collezione" },
-        { "type": "text", "id": "label", "label": "Nome (italiano)", "info": "Vuoto o altra lingua: nome della collezione" },
-        { "type": "image_picker", "id": "image", "label": "Foto", "info": "Vuota: prima foto della collezione" }
+        {
+          "type": "select", "id": "kind", "label": "Tipo", "default": "collection",
+          "options": [
+            { "value": "sale", "label": "Offerte (3 sconti più forti dei Più venduti)" },
+            { "value": "new", "label": "Novità (collezione nuovi arrivi)" },
+            { "value": "collection", "label": "Collezione" }
+          ]
+        },
+        { "type": "collection", "id": "collection", "label": "Collezione", "info": "Tipo Collezione (o Novità: altra collezione)" },
+        {
+          "type": "select", "id": "colors", "label": "Colore", "default": "indigo",
+          "options": [
+            { "value": "coral", "label": "Corallo" },
+            { "value": "indigo", "label": "Indaco" },
+            { "value": "amber", "label": "Ambra" },
+            { "value": "navy", "label": "Blu notte" },
+            { "value": "emerald", "label": "Smeraldo" },
+            { "value": "rose", "label": "Rosa" }
+          ]
+        },
+        { "type": "text", "id": "label", "label": "Piccolo titolo (italiano)", "info": "Tipo Collezione ; altra lingua: senza" },
+        { "type": "text", "id": "title", "label": "Grande titolo (italiano)", "info": "Tipo Collezione ; | = a capo ; vuoto o altra lingua: nome della collezione" }
       ]
     },
     {

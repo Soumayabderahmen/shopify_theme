@@ -72,18 +72,13 @@
     </div>
   </div>
 
-  <header class="dh{% if template.name == 'index' %} is-over is-home{% endif %}" data-dh>
+  <header class="dh" data-dh>
     <div class="dh-wrap dh__row">
       <a class="dh-logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}">
         <svg class="dh-logo__svg" viewBox="0 0 185 30" aria-hidden="true" focusable="false">
           <defs>
             <linearGradient id="dh-logo-grad" x1="-185" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stop-color="#16123f"></stop><stop offset="30%" stop-color="#3a34d2"></stop><stop offset="45%" stop-color="#9aa2c4"></stop><stop offset="60%" stop-color="#16123f"></stop><stop offset="100%" stop-color="#3a34d2"></stop>
-              <animate attributeName="x1" values="-185;0;-185" dur="6s" repeatCount="indefinite"></animate>
-              <animate attributeName="x2" values="0;185;0" dur="6s" repeatCount="indefinite"></animate>
-            </linearGradient>
-            <linearGradient id="dh-logo-grad-light" x1="-185" y1="0" x2="0" y2="0" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#ffffff"></stop><stop offset="30%" stop-color="#9f98ff"></stop><stop offset="45%" stop-color="#ffffff"></stop><stop offset="60%" stop-color="#cfcbff"></stop><stop offset="100%" stop-color="#ffffff"></stop>
               <animate attributeName="x1" values="-185;0;-185" dur="6s" repeatCount="indefinite"></animate>
               <animate attributeName="x2" values="0;185;0" dur="6s" repeatCount="indefinite"></animate>
             </linearGradient>
