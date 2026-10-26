@@ -1342,7 +1342,8 @@ function initMobileTemuHeader() {
       openWishlistDrawer(drawerTrigger);
       return;
     }
-    var wishlistButton = (mobileViewport || (wishlistPage && wishlistPage.contains(target)))
+    // Cœurs : mobile, page wishlist et recherche sur ordinateur (même page qu'en mobile, snippets/mshein-search.liquid).
+    var wishlistButton = (mobileViewport || (wishlistPage && wishlistPage.contains(target)) || target.closest('[data-mshein-search]'))
       && target.closest('.alibaba-card__wishlist');
     if (wishlistButton) {
       event.preventDefault();

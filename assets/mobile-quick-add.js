@@ -1440,12 +1440,31 @@
   document.addEventListener('pointerover', prefetch, { passive: true });
   document.addEventListener('pointerdown', prefetch, { passive: true });
 
+  // Recherche sur ordinateur (même page qu'en mobile, snippets/mshein-search.liquid) : grande fenêtre, flèches = cartes
+  // voisines de la grille, « 4 / 40 ».
+  function openSearchCard(trigger) {
+    var triggers = Array.prototype.slice.call(document.querySelectorAll('[data-mshein-search] .mshein-card [data-quick-add]'));
+    var index = triggers.indexOf(trigger);
+    if (index < 0) return;
+    setDesk({
+      count: (index + 1) + ' / ' + triggers.length,
+      onStep: function (step) { openSearchCard(triggers[(index + step + triggers.length) % triggers.length]); }
+    });
+    openFromCard(trigger);
+  }
+
   // Phase de capture : le clic sur le bouton panier ne doit pas ouvrir la fiche produit de la carte.
   document.addEventListener('click', function (event) {
     var trigger = event.target.closest && event.target.closest('[data-quick-add]');
-    if (!trigger || !mobile.matches) return;
+    if (!trigger) return;
+    var searchDesk = !mobile.matches && Boolean(trigger.closest('[data-mshein-search]'));
+    if (!mobile.matches && !searchDesk) return;
     event.preventDefault();
     event.stopPropagation();
+    if (searchDesk) {
+      openSearchCard(trigger);
+      return;
+    }
     setDesk(null);
     openFromCard(trigger);
   }, true);

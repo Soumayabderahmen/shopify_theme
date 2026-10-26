@@ -201,14 +201,18 @@
       endif
     -%}
     {%- unless msh_css_in_head -%}
+      {{ 'mshein-results.css' | asset_url | stylesheet_tag }}
       {{ 'mobile-home-shein.css' | asset_url | stylesheet_tag }}
     {%- endunless -%}
     <script src="{{ 'mobile-home-shein.js' | asset_url }}" defer></script>
-    <style>
-      @media only screen and (min-width: 761px) {
-        #shopify-section-{{ section.id }} { display: none !important; }
-      }
-    </style>
+    {%- comment -%} Ordinateur : section cachée, sauf la recherche (même page qu'en mobile, assets/desktop-search.css). {%- endcomment -%}
+    {%- unless part == 'search' -%}
+      <style>
+        @media only screen and (min-width: 761px) {
+          #shopify-section-{{ section.id }} { display: none !important; }
+        }
+      </style>
+    {%- endunless -%}
 
     {%- case part -%}
       {%- when 'perks' -%}

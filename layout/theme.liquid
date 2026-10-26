@@ -77,7 +77,7 @@
       (cartes affichées finies), script commun (cœur, nom de la marque, toucher sur toute la carte).
     {%- endcomment -%}
     {%- comment -%} Accueil, pages collection, wishlist et fiche produit (« Potrebbe piacerti anche ») : aussi sur ordinateur (sections/desktop-home-shein.liquid, sections/desktop-collection.liquid, snippets/wishlist-page-content.liquid, assets/pdp-desktop.css, mêmes cartes). {%- endcomment -%}
-    <link rel="stylesheet" href="{{ 'mshein-card.css' | asset_url }}" media="{% if template.name == 'index' or template.name == 'collection' or template.name == 'product' or template.name == 'page' and page.handle == 'wishlist' %}all{% else %}(max-width: 760px){% endif %}">
+    <link rel="stylesheet" href="{{ 'mshein-card.css' | asset_url }}" media="{% if template.name == 'index' or template.name == 'collection' or template.name == 'product' or template.name == 'search' or template.name == 'page' and page.handle == 'wishlist' %}all{% else %}(max-width: 760px){% endif %}">
     {%- if template.name == 'index' -%}
       <link rel="stylesheet" href="{{ 'desktop-home-shein.css' | asset_url }}" media="(min-width: 761px)">
     {%- elsif template.name == 'collection' -%}
@@ -115,8 +115,16 @@
       endif
     -%}
     {%- if template.name == 'index' or mshein_coll or mshein_search -%}
-      {%- comment -%} Accueil, pages collection et recherche mobile style SHEIN : styles chargés en tête, pas d'ancien design avant le nouveau. {%- endcomment -%}
+      {%- comment -%}
+        Accueil, pages collection et recherche mobile style SHEIN : styles chargés en tête, pas d'ancien design avant le nouveau.
+        Bloc des résultats juste avant (même ordre qu'avant sa sortie de mobile-home-shein.css) ; la recherche l'utilise aussi
+        sur ordinateur, mise en page par desktop-search.css.
+      {%- endcomment -%}
+      <link rel="stylesheet" href="{{ 'mshein-results.css' | asset_url }}" media="{% if mshein_search %}all{% else %}(max-width: 760px){% endif %}">
       <link rel="stylesheet" href="{{ 'mobile-home-shein.css' | asset_url }}" media="(max-width: 760px)">
+      {%- if mshein_search -%}
+        <link rel="stylesheet" href="{{ 'desktop-search.css' | asset_url }}" media="(min-width: 761px)">
+      {%- endif -%}
     {%- endif -%}
     {%- comment -%} Barre du bas mobile : style chargé en tête de page pour qu'elle s'affiche finie dès la première image (mobile uniquement). {%- endcomment -%}
     <link rel="stylesheet" href="{{ 'mobile-bottom-nav.css' | asset_url }}" media="(max-width: 760px)">

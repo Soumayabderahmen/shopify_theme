@@ -3,20 +3,22 @@
    - apparition des cartes / modules / tuiles au défilement ;
    - fil « Per te » : 2 colonnes décalées, onglets, pages suivantes chargées au défilement (3 points du site) ;
    - cartes : cœur, nom de la marque et toucher sur toute la carte dans assets/mshein-card.js (commun au site).
-   Mobile uniquement (≤ 760px). */
+   Mobile uniquement (≤ 760px) ; sur ordinateur, seulement la grille des produits de la recherche (createMasonry,
+   option flat, assets/mobile-home-tabs.js). */
 (function () {
   'use strict';
 
   if (window.msheinHomeInit) return;
   window.msheinHomeInit = true;
   var mobile = window.matchMedia('(max-width: 760px)');
-  if (!mobile.matches) return;
-  document.documentElement.classList.add('mshein-js');
+  var desktopSearch = !mobile.matches && Boolean(document.querySelector('[data-mshein-search]'));
+  if (!mobile.matches && !desktopSearch) return;
+  if (mobile.matches) document.documentElement.classList.add('mshein-js');
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- En-tête posé sur la bannière ---------- */
-  var headerSection = document.querySelector('[id$="__header"].shopify-section');
+  /* ---------- En-tête posé sur la bannière (mobile) ---------- */
+  var headerSection = desktopSearch ? null : document.querySelector('[id$="__header"].shopify-section');
   var hero = document.querySelector('[data-mshein-hero]');
   var heroSection = hero && hero.closest('.shopify-section');
 
@@ -64,7 +66,7 @@
   }
 
   // Recherche : texte qui défile avec les vraies « Di tendenza » des réglages du header (même liste que la recherche).
-  var searchBox = document.querySelector('.mobile-temu-header .mobile-temu-search');
+  var searchBox = !desktopSearch && document.querySelector('.mobile-temu-header .mobile-temu-search');
   var trendsScript = document.querySelector('[data-mobile-search-trends]');
   var trendWords = [];
   try {
@@ -140,11 +142,14 @@
      createMasonry({ grid, sentinel, loader }) : les cartes déjà écrites dans grid passent dans 2 colonnes (chaque carte
      dans la moins haute, ou une seule colonne : setOneColumn), la suite se charge au défilement depuis l'adresse donnée
      (setSource ; plusieurs adresses séparées par des espaces = collections à la suite) puis le lien « page suivante »
-     de chaque page (data-mshein-next). Utilisé aussi par assets/mobile-home-tabs.js. */
+     de chaque page (data-mshein-next). Utilisé aussi par assets/mobile-home-tabs.js.
+     flat (ordinateur) : toutes les cartes dans l'ordre dans la 1re colonne, mise en grille par le CSS de la page ;
+     setOneColumn ne fait alors que basculer la classe is-one (vue liste). */
   var createMasonry = function (options) {
     var grid = options.grid;
     var sentinel = options.sentinel;
     var loader = options.loader;
+    var flat = Boolean(options.flat);
     var columnsWrap = document.createElement('div');
     columnsWrap.className = 'mshein-feed__grid';
     var columns = [0, 1].map(function (index) {
@@ -154,7 +159,7 @@
       columnsWrap.appendChild(column);
       return column;
     });
-    var oneColumn = false;
+    var oneColumn = flat;
     var cardIndex = 0;
     // Hauteur de chaque colonne en « largeurs de carte », calculée sans mesurer la page (avant : offsetHeight après
     // chaque carte = mise en page de toute la page 20 fois, ~0,7 s à chaque onglet de rayon).
@@ -288,6 +293,10 @@
       },
       // « 1 colonna » : les cartes affichées sont remises dans l'ordre, dans une seule colonne (ou de nouveau 2).
       setOneColumn: function (one) {
+        if (flat) {
+          columnsWrap.classList.toggle('is-one', one);
+          return;
+        }
         if (one === oneColumn) return;
         var cards = Array.prototype.slice.call(columnsWrap.querySelectorAll('.mshein-card'))
           .sort(function (a, b) { return Number(a.getAttribute('data-mshein-index') || 0) - Number(b.getAttribute('data-mshein-index') || 0); });
@@ -304,6 +313,7 @@
     };
   };
   window.msheinMasonry = { create: createMasonry, watchReveal: watchReveal };
+  if (desktopSearch) return;
 
   /* ---------- Fil « Per te » ---------- */
   /* ---------- Barres collées sous l'en-tête (onglets « Per te », Filtri / tri des rayons et de la recherche) ---------- */

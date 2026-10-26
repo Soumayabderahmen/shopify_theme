@@ -60,7 +60,9 @@
         sentinel: sentinel,
         loader: results.querySelector('[data-mshein-loader]'),
         onCards: updateCount,
-        random: Boolean(random)
+        random: Boolean(random),
+        // Ordinateur (recherche) : grille de la page (assets/desktop-search.css) au lieu des 2 colonnes décalées.
+        flat: !window.matchMedia('(max-width: 760px)').matches
       });
       masonry.setSource(sentinel && sentinel.getAttribute('data-next'), true, random);
       if (oneColumn) masonry.setOneColumn(true);
@@ -72,7 +74,8 @@
     var scrollToBlock = function () {
       var block = slot.querySelector('[data-dept-block]');
       var rootStyle = getComputedStyle(document.documentElement);
-      var top = block.getBoundingClientRect().top + window.scrollY - (parseFloat(rootStyle.getPropertyValue('--mshein-tabs-top')) || parseFloat(rootStyle.getPropertyValue('--mshein-header-h')) || 0);
+      // Ordinateur : sous l'en-tête collant (--dh-h, assets/desktop-header.js).
+      var top = block.getBoundingClientRect().top + window.scrollY - (parseFloat(rootStyle.getPropertyValue('--mshein-tabs-top')) || parseFloat(rootStyle.getPropertyValue('--mshein-header-h')) || parseFloat(rootStyle.getPropertyValue('--dh-h')) || 0);
       if (window.scrollY > top) window.scrollTo({ top: top });
     };
     // Bloc des résultats seul (collection.mshein-dept-results : sans bannière ni cartes du rayon, plus léger). Une même
@@ -780,9 +783,9 @@
 
   window.msheinResults = { create: createProducts };
 
-  // Recherche mobile (sections/mobile-home-shein.liquid, partie « search ») : mêmes Filtri / tri / colonnes que les rayons,
-  // pages suivantes au défilement ; la recherche garde ses mots (?q=…) à chaque tri ou filtre.
-  var searchBlock = window.matchMedia('(max-width: 760px)').matches && window.msheinMasonry && document.querySelector('[data-mshein-search]');
+  // Recherche (sections/mobile-home-shein.liquid, partie « search ») : mêmes Filtri / tri / colonnes que les rayons,
+  // pages suivantes au défilement ; la recherche garde ses mots (?q=…) à chaque tri ou filtre. Aussi sur ordinateur.
+  var searchBlock = window.msheinMasonry && document.querySelector('[data-mshein-search]');
   if (searchBlock) {
     createProducts(searchBlock, searchBlock.getAttribute('data-path') || '/search', window.location.search.slice(1), 'mshein-search');
     window.msheinMasonry.watchReveal(searchBlock);
