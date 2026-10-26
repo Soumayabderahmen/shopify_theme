@@ -973,13 +973,19 @@
   }
 
   function showView(done) {
+    var changed = el.pick.hidden !== done;
     el.pick.hidden = done;
     el.done.hidden = !done;
     el.foot.hidden = done;
     el.mini.classList.remove('is-shown');
     // À l'ouverture la feuille glisse déjà : la vue n'est animée qu'en changeant de vue ou de produit.
-    if (dialog.classList.contains('is-visible')) {
-      play(done ? el.done : el.pick, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], 300);
+    // Ordinateur : fondu seulement, et seulement en changeant de vue — un transform sur la vue en ferait le repère
+    // de la grande photo (position: absolute), qui sauterait dans la colonne de droite pendant l'animation ;
+    // le contenu chargé apparaît déjà en fondu (assets/desktop-quick-add.css, .is-pending).
+    if (dialog.classList.contains('is-visible') && (!desk || changed)) {
+      play(done ? el.done : el.pick, desk
+        ? [{ opacity: 0 }, { opacity: 1 }]
+        : [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], 300);
     }
     resetScroll();
   }
