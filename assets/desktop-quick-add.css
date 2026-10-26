@@ -21,9 +21,15 @@
   border-radius: 22px;
   box-shadow: 0 40px 90px -30px rgba(10, 8, 30, 0.6);
   opacity: 0;
-  /* Ouverture : la fenêtre monte légèrement en grandissant et apparaît en fondu (fermeture : plus rapide, ci-dessous) */
+  /* Fermeture : fondu court seulement (la fenêtre ne reste pas à moitié visible pendant qu'elle rétrécit) */
+  transform: translate(-50%, -50%) scale(0.98);
+  transition: opacity 0.14s ease-in, transform 0s 0.14s;
+  will-change: opacity, transform;
+}
+
+/* Ouverture : la fenêtre monte légèrement en grandissant et apparaît en fondu */
+#mobile-quick-add.is-desk.is-open:not(.is-visible) {
   transform: translate(-50%, -46%) scale(0.96);
-  transition: transform 0.22s ease-in, opacity 0.18s ease-in;
 }
 
 #mobile-quick-add.is-desk.is-visible {
@@ -32,15 +38,13 @@
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s ease-out;
 }
 
-/* Fond assombri et légèrement flou derrière la fenêtre */
+/* Fond assombri derrière la fenêtre (sans flou : flouter toute la page figeait la fermeture) */
 .mobile-quick-add-scrim:has(+ #mobile-quick-add.is-desk) {
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-  transition: opacity 0.35s ease, visibility 0s 0.35s;
+  transition: opacity 0.18s ease, visibility 0s 0.18s;
 }
 
 .mobile-quick-add-scrim.is-visible:has(+ #mobile-quick-add.is-desk) {
-  transition: opacity 0.35s ease;
+  transition: opacity 0.3s ease;
 }
 
 /* Pendant le chargement du produit : pas de barres grises ni de « Caricamento… » ; options, avantages, stock et
