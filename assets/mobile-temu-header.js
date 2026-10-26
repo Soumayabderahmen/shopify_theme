@@ -1342,8 +1342,9 @@ function initMobileTemuHeader() {
       openWishlistDrawer(drawerTrigger);
       return;
     }
-    // Cœurs : mobile, page wishlist et recherche sur ordinateur (même page qu'en mobile, snippets/mshein-search.liquid).
-    var wishlistButton = (mobileViewport || (wishlistPage && wishlistPage.contains(target)) || target.closest('[data-mshein-search]'))
+    // Cœurs : mobile, page wishlist ; sur ordinateur, recherche et fiche produit (mêmes pages qu'en mobile,
+    // snippets/mshein-search.liquid et snippets/pdp-mobile-top.liquid).
+    var wishlistButton = (mobileViewport || (wishlistPage && wishlistPage.contains(target)) || target.closest('[data-mshein-search], .pdp-m'))
       && target.closest('.alibaba-card__wishlist');
     if (wishlistButton) {
       event.preventDefault();
