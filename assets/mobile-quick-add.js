@@ -1441,8 +1441,9 @@
   document.addEventListener('pointerdown', prefetch, { passive: true });
 
   // Ordinateur, pages au design mobile (recherche : snippets/mshein-search.liquid ; fiche produit : snippets/
-  // pdp-mobile-top.liquid, « Potrebbe piacerti anche ») : grande fenêtre, flèches = cartes voisines, « 4 / 40 ».
-  var DESK_SCOPES = '[data-mshein-search], .pdp-m';
+  // pdp-mobile-top.liquid, « Potrebbe piacerti anche » ; produits vus, page panier) : grande fenêtre, flèches = cartes
+  // voisines, « 4 / 40 ».
+  var DESK_SCOPES = '[data-mshein-search], .pdp-m, .recently-viewed-products';
   function openDeskCard(trigger, scope) {
     var triggers = Array.prototype.slice.call(scope.querySelectorAll('.mshein-card [data-quick-add]'));
     var index = triggers.indexOf(trigger);

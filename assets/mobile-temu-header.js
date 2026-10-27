@@ -1342,9 +1342,9 @@ function initMobileTemuHeader() {
       openWishlistDrawer(drawerTrigger);
       return;
     }
-    // Cœurs : mobile, page wishlist ; sur ordinateur, recherche et fiche produit (mêmes pages qu'en mobile,
-    // snippets/mshein-search.liquid et snippets/pdp-mobile-top.liquid).
-    var wishlistButton = (mobileViewport || (wishlistPage && wishlistPage.contains(target)) || target.closest('[data-mshein-search], .pdp-m'))
+    // Cœurs : mobile, page wishlist ; sur ordinateur, recherche, fiche produit et produits vus (mêmes cartes qu'en
+    // mobile, snippets/mshein-search.liquid, snippets/pdp-mobile-top.liquid, section produits vus).
+    var wishlistButton = (mobileViewport || (wishlistPage && wishlistPage.contains(target)) || target.closest('[data-mshein-search], .pdp-m, .recently-viewed-products'))
       && target.closest('.alibaba-card__wishlist');
     if (wishlistButton) {
       event.preventDefault();
