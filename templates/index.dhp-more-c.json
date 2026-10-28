@@ -3,6 +3,10 @@
   "sections": {
     "main": {
       "type": "desktop-home-shop",
+      "settings": {
+        "part": "more-c",
+        "menu": "main-menu"
+      },
       "blocks": {
         "occasion_1": {
           "type": "occasion",
@@ -134,11 +138,7 @@
         "featured_6",
         "featured_7",
         "featured_8"
-      ],
-      "settings": {
-        "part": "more",
-        "menu": "main-menu"
-      }
+      ]
     }
   },
   "order": [

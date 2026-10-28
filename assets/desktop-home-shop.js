@@ -295,12 +295,18 @@
   });
   syncHearts(root);
 
-  // ---------- Suite de la page (partie « more » de la section, modèle index.dhp-more) : chargée juste après ----------
+  // ---------- Suite de la page (parties « more-a / -b / -c » de la section) : lancée après l'arrivée de chaque partie,
+  // chaque élément une seule fois (attribut data-ready) ----------
+  var once = function (el) {
+    if (!el || el.hasAttribute('data-ready')) return false;
+    el.setAttribute('data-ready', '');
+    return true;
+  };
   var initMore = function () {
   // ---------- Mot géant : le rayon choisi (clic ou toutes les 4,5 s) et ses 10 produits ----------
   var marq = root.querySelector('[data-dhp-marq]');
   var prods = root.querySelector('[data-dhp-prods]');
-  if (marq && prods) {
+  if (marq && prods && once(marq)) {
     var list = [].slice.call(marq.querySelector('[data-dhp-marq-depts]').content.querySelectorAll('i')).map(function (i) {
       return { title: i.getAttribute('data-title'), src: i.getAttribute('data-src'), img: i.getAttribute('data-img'), cards: '' };
     });
@@ -351,7 +357,8 @@
   }
 
   // ---------- Collezioni da scoprire : produits 3 par 3 (flèches, automatique toutes les 3,5 s, pause au survol) ----------
-  root.querySelectorAll('.dhp-coll').forEach(function (coll, index) {
+  root.querySelectorAll('.dhp-coll:not([data-ready])').forEach(function (coll, index) {
+    once(coll);
     var rail = coll.querySelector('.dhp-coll__rail');
     var dotsBox = coll.querySelector('.dhp-coll__dots');
     var pages = Math.max(1, Math.ceil(rail.children.length / 3));
@@ -391,7 +398,8 @@
   });
 
   // ---------- Occasioni « recherche » : 2 photos des produits trouvés (recherche prédictive de Shopify) ----------
-  root.querySelectorAll('.dhp-occ[data-occ-q]').forEach(function (tile) {
+  root.querySelectorAll('.dhp-occ[data-occ-q]:not([data-ready])').forEach(function (tile) {
+    once(tile);
     var box = tile.querySelector('.dhp-occ__img');
     var base = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
     fetch(base + 'search/suggest.json?q=' + encodeURIComponent(tile.getAttribute('data-occ-q')) + '&resources[type]=product&resources[limit]=4', { credentials: 'same-origin' })
@@ -409,7 +417,7 @@
   // ---------- Photo du titre « colpo di fulmine » : un produit différent toutes les 2,4 s, qui se retourne ----------
   var chip = root.querySelector('[data-dhp-chip]');
   var chipPics = root.querySelector('[data-dhp-chip-pics]');
-  if (chip && chipPics) {
+  if (chip && chipPics && once(chip)) {
     var pics = [].slice.call(chipPics.content.querySelectorAll('i')).map(function (i) { return i.getAttribute('data-src'); });
     if (pics.length) {
       var n = 0;
@@ -433,7 +441,7 @@
 
   // ---------- Catégories phares : pages de 4, chaque carte se retourne l'une après l'autre (4,5 s, flèches, points) ----------
   var ed = root.querySelector('[data-dhp-ed]');
-  if (ed) {
+  if (ed && once(ed)) {
     var grid = ed.querySelector('[data-dhp-ed-grid]');
     var edDotsBox = ed.querySelector('[data-dhp-ed-dots]');
     var edArrows = ed.querySelector('[data-dhp-ed-arws]');
@@ -508,29 +516,29 @@
 
   // Chargement : la suite est rendue par Shopify dans une 2e requête (sans en-tête ni pied de page), insérée ici, puis
   // ses rangées, animations et cartes sont lancées comme avant
-  var more = root.querySelector('[data-dhp-more]');
-  if (more) {
-    fetch(more.getAttribute('data-src'), { credentials: 'same-origin' })
-      .then(function (response) {
-        if (!response.ok) throw new Error('dhp-more ' + response.status);
-        return response.text();
-      })
+  // 3 morceaux demandés en même temps par le petit script de la section (window.dhpMore, dès l'arrivée de la page) :
+  // chacun est inséré dès qu'il arrive, puis ses rangées, animations et cartes sont lancées
+  root.querySelectorAll('[data-dhp-more-part]').forEach(function (box) {
+    var key = box.getAttribute('data-dhp-more-part');
+    var request = window.dhpMore && window.dhpMore[key];
+    if (!request) return;
+    request
       .then(function (html) {
         var part = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-dhp-more-in]');
-        if (!part) return;
-        more.innerHTML = part.innerHTML;
-        more.removeAttribute('aria-busy');
+        if (!part) throw new Error('dhp-more-' + key + ' vide');
+        box.innerHTML = part.innerHTML;
+        box.removeAttribute('aria-busy');
         if (bfOn) {
-          more.querySelectorAll('[data-bf-only]').forEach(function (el) { el.hidden = false; });
+          box.querySelectorAll('[data-bf-only]').forEach(function (el) { el.hidden = false; });
           toStart();
         }
-        decorate(more);
+        decorate(box);
         initArrows();
         initMore();
       })
       .catch(function (error) {
-        more.removeAttribute('aria-busy');
+        box.removeAttribute('aria-busy');
         console.error(error);
       });
-  }
+  });
 })();

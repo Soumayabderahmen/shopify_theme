@@ -16,11 +16,12 @@
   Styles : assets/desktop-home-shop.css (chargé en tête par layout/theme.liquid) ; script : assets/desktop-home-shop.js.
 {%- endcomment -%}
 {%- comment -%}
-  Deux parties (réglage « part »), pour rester sous le temps limite de Shopify (page d'erreur sinon) :
-  - « top » (templates/index.json) : bande des paiements, grande carte, Black Friday ; la suite est chargée juste après ;
-  - « more » (templates/index.dhp-more.json, sans en-tête ni pied de page, adresse /?view=dhp-more) : reparti, marques,
-    mot géant, offres, collections, Occasioni et colpo di fulmine (blocs « occasion » et « featured » de ce modèle),
-    insérés dans la page par assets/desktop-home-shop.js.
+  Plusieurs parties (réglage « part »), pour rester sous le temps limite de Shopify et afficher vite :
+  - « top » (templates/index.json) : bande des paiements, grande carte, Black Friday ; la suite est demandée dès
+    l'arrivée de la page, en 3 morceaux en même temps (modèles sans en-tête ni pied de page, /?view=dhp-more-a/-b/-c) :
+  - « more-a » : reparti di tendenza, Shop per brand ; « more-b » : mot géant et ses produits, offres du moment ;
+  - « more-c » : collections, Occasioni et colpo di fulmine (blocs « occasion » et « featured » de ce modèle) ;
+  insérés dans la page par assets/desktop-home-shop.js.
 {%- endcomment -%}
 {%- liquid
   assign part = section.settings.part | default: 'top'
@@ -71,7 +72,7 @@
   # Données des cartes produit (snippets/mshein-card.liquid) : seulement là où il y a des cartes
   assign best_ids = ''
   assign flag = ''
-  if part == 'more' or bf_render
+  if part == 'more-b' or part == 'top' and bf_render
     assign best_ids = best.products | map: 'id' | join: ','
     capture flag
       render 'country-flag-emoji'
@@ -89,9 +90,10 @@
   assign deal_keys = ''
   assign deal_seen = ','
   assign deal_handles = dept_handles
-  if part == 'top' and bf_render == false
+  # (offres : more-b ; Black Friday : partie haute et tuile Occasioni de more-c pendant la période)
+  unless part == 'more-b' or bf_render
     assign deal_handles = ''
-  endif
+  endunless
   for dept_handle in deal_handles
     assign dept_index = forloop.index0
     for candidate in collections[dept_handle].products limit: 14
@@ -357,15 +359,43 @@
       </section>
     {%- endif -%}
 
-    {%- comment -%} La suite de la page, chargée juste après (partie « more ») {%- endcomment -%}
-    <div class="dhp-more" data-dhp-more data-src="{{ routes.root_url }}{% unless routes.root_url contains '?' %}?{% else %}&{% endunless %}view=dhp-more" aria-busy="true"></div>
+    {%- comment -%}
+      La suite de la page en 3 morceaux demandés en même temps (modèles index.dhp-more-a / -b / -c), dès que la page
+      arrive (petit script ci-dessous, sans attendre les scripts du site) ; blocs gris animés en attendant.
+    {%- endcomment -%}
+    {%- capture more_base -%}{{ routes.root_url }}{% unless routes.root_url contains '?' %}?{% else %}&{% endunless %}view=dhp-more-{%- endcapture -%}
+    <div class="dhp-rest" data-dhp-more>
+      <div class="dhp-rest__part dhp-rest__part--a" data-dhp-more-part="a" aria-busy="true"></div>
+      <div class="dhp-rest__part dhp-rest__part--b" data-dhp-more-part="b" aria-busy="true"></div>
+      <div class="dhp-rest__part dhp-rest__part--c" data-dhp-more-part="c" aria-busy="true"></div>
+    </div>
+    <script>
+      (function () {
+        if (window.matchMedia('(max-width: 760px)').matches) return;
+        var base = {{ more_base | json }};
+        window.dhpMore = {};
+        ['a', 'b', 'c'].forEach(function (key) {
+          window.dhpMore[key] = fetch(base + key, { credentials: 'same-origin' }).then(function (response) {
+            if (!response.ok) throw new Error('dhp-more-' + key + ' ' + response.status);
+            return response.text();
+          });
+        });
+      })();
+    </script>
   </div>
 </div>
 {%- else -%}
-  {%- comment -%} Partie « more » : note moyenne de chaque rayon (avis Ali Reviews), puis les sections {%- endcomment -%}
+  {%- comment -%}
+    Parties « more-a » (reparti, marques), « more-b » (mot géant, offres), « more-c » (collections, Occasioni, colpo di
+    fulmine) : chacune n'affiche (et ne calcule) que ses sections. Note moyenne des rayons (avis Ali Reviews) : more-a.
+  {%- endcomment -%}
   {%- liquid
     assign dept_rates = ''
-    for dept_handle in dept_handles
+    assign rate_handles = dept_handles
+    if part != 'more-a'
+      assign rate_handles = ''
+    endif
+    for dept_handle in rate_handles
       assign rate_sum = 0.0
       assign rate_n = 0
       for rated in collections[dept_handle].products limit: 14
@@ -389,7 +419,8 @@
     endfor
     assign dept_rates_list = dept_rates | split: '|~|'
   -%}
-  <div class="dhp-more__in" data-dhp-more-in>
+  <div class="dhp-rest__in" data-dhp-more-in>
+    {%- if part == 'more-a' -%}
     {%- comment -%} ---------- Reparti di tendenza : photo du rayon, note moyenne, 2 produits ---------- {%- endcomment -%}
     <section class="dhp-sec" id="dhp-reparti">
       <div class="dhp-hd">
@@ -502,7 +533,9 @@
         <a class="dhp-brand dhp-brand--more" href="{{ routes.collections_url }}"><strong>{{ 'mobile.explore.see_more_brands' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></strong></a>
       </div>
     </section>
+    {%- endif -%}
 
+    {%- if part == 'more-b' -%}
     {%- comment -%}
       ---------- Mot géant : nom du rayon (clic ou toutes les 4,5 s) et ses 10 produits ; le 1er rayon est rendu ici,
       les autres sont chargés à leur tour (modèle collection.mshein-dept-page, mêmes cartes) ----------
@@ -548,7 +581,9 @@
         {%- endfor -%}
       </ul>
     </section>
+    {%- endif -%}
 
+    {%- if part == 'more-c' -%}
     {%- comment -%}
       ---------- Collezioni da scoprire : sous-liens collection du menu (un par rayon, puis le suivant…), photo de la
       collection, ses produits 3 par 3 (flèches, défilement automatique) ----------
@@ -734,6 +769,7 @@
         </template>
       </section>
     {%- endif -%}
+    {%- endif -%}
   </div>
 {%- endif -%}
 
@@ -745,10 +781,12 @@
   "settings": [
     {
       "type": "select", "id": "part", "label": "Parte", "default": "top",
-      "info": "Home: Parte alta. Il resto (reparti, brand, offerte, collezioni, occasioni, categorie in evidenza) è nel modello « index.dhp-more ».",
+      "info": "Home: Parte alta. Il resto è caricato dopo dai modelli « index.dhp-more-a » (reparti, brand), « -b » (parola gigante, offerte), « -c » (collezioni, occasioni, categorie in evidenza: blocchi qui).",
       "options": [
         { "value": "top", "label": "Parte alta (pagamenti, banner, Black Friday)" },
-        { "value": "more", "label": "Resto della pagina (caricato dopo)" }
+        { "value": "more-a", "label": "Reparti di tendenza e Shop per brand" },
+        { "value": "more-b", "label": "Parola gigante dei reparti e offerte del momento" },
+        { "value": "more-c", "label": "Collezioni, Occasioni e categorie in evidenza" }
       ]
     },
     { "type": "link_list", "id": "menu", "label": "Menu dei reparti", "info": "Lo stesso dell'intestazione: un reparto per ogni collezione del menu.", "default": "main-menu" },

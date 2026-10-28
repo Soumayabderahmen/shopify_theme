@@ -67,8 +67,13 @@
 .dhp svg { display: block; }
 .dhp-wrap { width: 100%; padding: 0 16px; }
 
-/* Suite de la page, chargée juste après la grande carte : place réservée pour que le pied de page ne remonte pas */
-.dhp-more[aria-busy="true"] { min-height: 2400px; }
+/* Suite de la page en 3 parties (classe dhp-rest : « dhp-more » est le lien « Vedi altri », souligné au survol) chargées juste après la grande carte : en attendant, blocs gris animés de la taille
+   des sections (le pied de page ne remonte pas) */
+.dhp-rest__part[aria-busy="true"] { margin-top: 44px; border-radius: 26px; background: linear-gradient(90deg, #f4f5f9 25%, #eaebf2 37%, #f4f5f9 63%); background-size: 400% 100%; animation: dhp-shimmer 1.4s ease infinite; }
+.dhp-rest__part--a[aria-busy="true"] { height: 760px; }
+.dhp-rest__part--b[aria-busy="true"] { height: 2300px; }
+.dhp-rest__part--c[aria-busy="true"] { height: 1900px; }
+@keyframes dhp-shimmer { from { background-position: 100% 50%; } to { background-position: 0 50%; } }
 
 /* ---------- Titres de section, flèches, rangées qui défilent ---------- */
 .dhp-sec { margin-top: 44px; }
