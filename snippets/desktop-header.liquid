@@ -2,8 +2,10 @@
   En-tête ORDINATEUR au style SHEIN (prototype validé « Platinumshop-Accueil-desktop-SHEIN-v9 »), rendu par
   sections/header.liquid sur toutes les pages, caché jusqu'à 760px (le mobile garde son en-tête). L'ancien en-tête du
   thème (#header-outer) et la barre d'annonces du thème sont cachés sur ordinateur (assets/desktop-header.css).
-  - bandeau d'annonces défilant : coupon (réglages « Coupon (mobile) »), Klarna, CashBack, livraison gratuite (réglages
-    « Spedizione »), cambio gratuito, paiements sécurisés (textes traduits) ;
+  - barre du haut comme Temu (couleurs du site) : livraison gratuite (réglages « Spedizione »), message qui change
+    (CashBack, cambio gratuito, Klarna, paiements sécurisés ; Black Friday et son compte à rebours pendant la période),
+    coupon à copier (réglages « Coupon (mobile) »), offre du moment (« In offerta » ; Black Friday pendant la période,
+    réglages du thème « Black Friday ») ;
   - logo animé, recherche (suggestions = « ricerche di tendenza » du header mobile), pays / langue (formulaire Shopify),
     compte, wishlist (wishlist du site, platinumshop:wishlist:v1), panier (compteur mis à jour par les scripts du panier) ;
   - onglets = menu du header (le même que le mobile) ; « Categorie » ouvre le méga-menu : rayons → sous-liens → contenu
@@ -30,45 +32,81 @@
     assign account_label = 'service.login' | t
   endif
 
-  # Annonces : textes traduits, parties en gras comme le prototype
-  assign coupon_html = ''
-  if settings.mobile_coupon_code != blank
-    capture coupon_pct
-      echo '-' | append: settings.mobile_coupon_percent | append: '%'
-    endcapture
-    assign coupon_code = settings.mobile_coupon_code | escape
-    assign coupon_html = 'mobile_pdp_hd.coupon_band' | t: percent: settings.mobile_coupon_percent, code: coupon_code
-    assign coupon_pct_b = coupon_pct | prepend: '<b>' | append: '</b>'
-    assign coupon_code_b = coupon_code | prepend: '<b>' | append: '</b>'
-    assign coupon_html = coupon_html | replace_first: coupon_pct, coupon_pct_b | replace_first: coupon_code, coupon_code_b
-  endif
-  assign klarna_text = 'mobile.home_shein.perk_klarna_text' | t
-  assign klarna_html = 'mobile.home_shein.perk_klarna' | t | append: ' ' | append: klarna_text | replace: 'Klarna', '<b>Klarna</b>'
-  assign cashback_b = 'mobile.home_shein.perk_cashback' | t | prepend: '<b>' | append: '</b>'
-  assign exchange_text_b = 'mobile.home_shein.perk_exchange_text' | t | prepend: '<b>' | append: '</b>'
+  # Livraison gratuite (réglages « Spedizione ») pour la barre du haut
   assign shipping_html = ''
   if settings.enable_free_shipping and settings.free_shipping_amount > 0
-    assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html | prepend: '<b>' | append: '</b>'
+    assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
     assign shipping_html = 'desktop_home.free_shipping_from_html' | t: amount: shipping_amount
   endif
-  assign payment_names_b = 'desktop_home.payment_names' | t | prepend: '<b>' | append: '</b>'
-  assign payments_html = 'desktop_home.secure_payments_html' | t: methods: payment_names_b
 -%}
 <link rel="stylesheet" href="{{ 'desktop-header.css' | asset_url }}" media="(min-width: 761px)">
 <script src="{{ 'desktop-header.js' | asset_url }}" defer></script>
 <style>@media only screen and (max-width: 760px) { .dh-top { display: none !important; } }</style>
 
+{%- liquid
+  # Barre du haut (comme Temu, couleurs du site) : livraison gratuite, message qui change, coupon à copier, offre du
+  # moment ; pendant le Black Friday (réglages du thème « Black Friday », entre les deux dates) : message et offre BF.
+  assign tbar_sale = collections['in-offerta']
+  if tbar_sale != blank and tbar_sale.products_count > 0
+    assign tbar_sale_url = tbar_sale.url
+  else
+    assign tbar_sale = collections['bestsellers']
+    assign tbar_sale_url = routes.all_products_collection_url | append: '?view=offerte&sort_by=best-selling'
+  endif
+  assign tbar_sale_image = tbar_sale.products.first.featured_image
+  assign tbar_bf = false
+  assign tbar_bf_end = settings.bf_end | date: '%s' | plus: 0
+  assign tbar_now = 'now' | date: '%s' | plus: 0
+  if settings.bf_enable and tbar_bf_end > tbar_now
+    assign tbar_bf = true
+    if settings.bf_collection != blank
+      assign tbar_bf_url = settings.bf_collection.url
+      assign tbar_bf_image = settings.bf_collection.products.first.featured_image | default: tbar_sale_image
+    else
+      assign tbar_bf_url = routes.root_url | append: '#dhp-bf'
+      assign tbar_bf_image = tbar_sale_image
+    endif
+  endif
+  assign tbar_ic_truck = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>'
+-%}
 <div class="dh-top" data-dh-top>
-  <div class="dh-ann">
-    <div class="dh-ann__track" data-dh-ann>
-      <div class="dh-ann__set">
-        {%- if coupon_html != '' -%}<span>🚀 {{ coupon_html }}</span><i></i>{%- endif -%}
-        <span>🛍️ {{ klarna_html }}</span><i></i>
-        <span>💰 {{ cashback_b }} {{ 'mobile.home_shein.perk_cashback_text' | t }}</span><i></i>
-        {%- if shipping_html != '' -%}<span>🚚 {{ shipping_html }}</span><i></i>{%- endif -%}
-        <span>↩️ {{ 'mobile.home_shein.perk_exchange' | t }} {{ exchange_text_b }}</span><i></i>
-        <span>🔒 {{ payments_html }}</span><i></i>
+  <div class="dh-tbar" data-dh-tbar{% if tbar_bf %} data-bf-start="{{ settings.bf_start | date: '%s' }}" data-bf-end="{{ tbar_bf_end }}" data-bf-preview="{{ request.design_mode }}"{% endif %}>
+    <div class="dh-tbar__in">
+      {%- if shipping_html != '' -%}
+        <a class="dh-tbar__c dh-tbar__c--ship" href="{{ shop.shipping_policy.url | default: routes.root_url }}">
+          {{- tbar_ic_truck -}}
+          <span><b>{{ 'desktop_home_shop.tbar_shipping' | t }}</b><small>{{ 'desktop_home_shop.tbar_shipping_from' | t: amount: shipping_amount | strip_html }}</small></span>
+        </a>
+      {%- endif -%}
+      <div class="dh-tbar__c dh-tbar__rot">
+        <div class="dh-tbar__list" data-dh-tbar-list>
+          {%- if tbar_bf -%}
+            <span class="dh-tbar__it" data-bf-only hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg><span><b>{{ 'desktop_home_shop.bf_name' | t }}</b><small data-dh-bf-ends="{{ 'desktop_home_shop.tbar_bf_ends' | t: time: '__T__' | escape }}" data-day="{{ 'desktop_home_shop.bf_day_short' | t | escape }}"></small></span></span>
+          {%- endif -%}
+          <span class="dh-tbar__it"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.4 0-2.5.8-2.5 2s1 1.6 2.5 2 2.5.9 2.5 2-1.1 2-2.5 2c-1.1 0-2.1-.5-2.6-1.5M12 6.5V8m0 8v1.5"/></svg><span><b>{{ 'mobile.home_shein.perk_cashback' | t }}</b><small>{{ 'mobile.home_shein.perk_cashback_text' | t | capitalize }}</small></span></span>
+          <span class="dh-tbar__it"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v13H4zM3 4h18v3H3z"/><path d="M14 13H9.5m0 0 2-2m-2 2 2 2"/></svg><span><b>{{ 'mobile.home_shein.perk_exchange' | t }}</b><small>{{ 'mobile.home_shein.perk_exchange_text' | t | capitalize }}</small></span></span>
+          <span class="dh-tbar__it"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg><span><b>{{ 'desktop_home_shop.tbar_klarna' | t }}</b><small>{{ 'desktop_home_shop.tbar_klarna_text' | t }}</small></span></span>
+          <span class="dh-tbar__it"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span><b>{{ 'desktop_home_shop.tbar_secure' | t }}</b><small>{{ 'desktop_home.payment_names' | t }}</small></span></span>
+        </div>
       </div>
+      {%- if settings.mobile_coupon_code != blank -%}
+        <button class="dh-tbar__c dh-tbar__code" type="button" data-dh-code="{{ settings.mobile_coupon_code | escape }}" data-copied="{{ 'desktop_home_shop.tbar_copied' | t | escape }}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4 2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 1 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>
+          <span><b>{{ 'desktop_home_shop.tbar_coupon' | t: percent: settings.mobile_coupon_percent, code: settings.mobile_coupon_code | escape }}</b><small>{{ 'desktop_home_shop.tbar_copy' | t }}</small></span>
+        </button>
+      {%- endif -%}
+      <a class="dh-tbar__promo" href="{{ tbar_sale_url }}" data-bf-not>
+        <span>{{ 'desktop_home_shop.tbar_promo_html' | t }}</span>
+        {%- if tbar_sale_image != blank -%}<img src="{{ tbar_sale_image | image_url: width: 160 }}" alt="" width="70" height="52" loading="lazy">{%- endif -%}
+        <em>{{ 'desktop_home_shop.tbar_discover' | t }}</em>
+      </a>
+      {%- if tbar_bf -%}
+        <a class="dh-tbar__promo dh-tbar__promo--bf" href="{{ tbar_bf_url }}" data-bf-only hidden>
+          <span>{{ 'desktop_home_shop.tbar_bf_html' | t }}</span>
+          {%- if tbar_bf_image != blank -%}<img src="{{ tbar_bf_image | image_url: width: 160 }}" alt="" width="70" height="52" loading="lazy">{%- endif -%}
+          <em>{{ 'desktop_home_shop.tbar_discover' | t }}</em>
+        </a>
+      {%- endif -%}
     </div>
   </div>
 

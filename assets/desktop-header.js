@@ -1,4 +1,4 @@
-/* En-tête ORDINATEUR au style SHEIN (snippets/desktop-header.liquid) : bandeau d'annonces, suggestions de recherche,
+/* En-tête ORDINATEUR au style SHEIN (snippets/desktop-header.liquid) : barre du haut, suggestions de recherche,
    compteurs wishlist / panier, pays et langue, fenêtre du compte, méga-menu
    « Categorie » rempli avec le panneau Categoria mobile (/?section_id=mobile-category-panel, chargé une fois).
    Rien sur mobile (≤ 760px). */
@@ -9,12 +9,66 @@
   var header = top && top.querySelector('[data-dh]');
   if (!header || window.matchMedia('(max-width: 760px)').matches) return;
 
-  // ---------- Bandeau d'annonces : seconde copie pour une boucle sans saut ----------
-  var annTrack = top.querySelector('[data-dh-ann]');
-  if (annTrack && annTrack.firstElementChild) {
-    var annCopy = annTrack.firstElementChild.cloneNode(true);
-    annCopy.setAttribute('aria-hidden', 'true');
-    annTrack.appendChild(annCopy);
+  // ---------- Barre du haut : Black Friday (entre les dates), message qui change, coupon à copier ----------
+  var tbar = top.querySelector('[data-dh-tbar]');
+  if (tbar) {
+    if (tbar.hasAttribute('data-bf-end')) {
+      var bfStart = Number(tbar.getAttribute('data-bf-start')) * 1000;
+      var bfEnd = Number(tbar.getAttribute('data-bf-end')) * 1000;
+      var bfNow = Date.now();
+      var bfOn = (bfNow >= bfStart && bfNow <= bfEnd) || tbar.getAttribute('data-bf-preview') === 'true' || /[?&]bf-preview/.test(location.search);
+      if (bfOn) {
+        tbar.querySelectorAll('[data-bf-only]').forEach(function (el) { el.hidden = false; });
+        tbar.querySelectorAll('[data-bf-not]').forEach(function (el) { el.hidden = true; });
+        // Compte à rebours dans le message Black Friday
+        var ends = tbar.querySelector('[data-dh-bf-ends]');
+        if (ends) {
+          var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+          var tick = function () {
+            // Sur l'accueil, assets/desktop-home-shop.js remplace le compte à rebours par la remise et le nombre d'offres
+            if (!ends.hasAttribute('data-dh-bf-ends')) return;
+            var left = Math.max(0, bfEnd - Date.now()) / 1000 | 0;
+            ends.textContent = ends.getAttribute('data-dh-bf-ends').replace('__T__', (left / 86400 | 0) + (ends.getAttribute('data-day') || 'd') + ' ' + pad(left % 86400 / 3600 | 0) + ':' + pad(left % 3600 / 60 | 0) + ':' + pad(left % 60));
+          };
+          tick();
+          setInterval(tick, 1000);
+        }
+      } else {
+        tbar.querySelectorAll('[data-bf-only]').forEach(function (el) { el.remove(); });
+      }
+    }
+    // Message qui change toutes les 3 s en glissant vers le haut ; la 1re ligne est recopiée à la fin pour boucler
+    var list = tbar.querySelector('[data-dh-tbar-list]');
+    var rows = list ? [].slice.call(list.children).filter(function (row) { return !row.hidden; }) : [];
+    if (rows.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var first = rows[0].cloneNode(true);
+      first.setAttribute('aria-hidden', 'true');
+      list.appendChild(first);
+      var step = 0;
+      var stepHeight = rows[0].offsetHeight || 40;
+      setInterval(function () {
+        if (document.hidden) return;
+        step += 1;
+        list.style.transition = '';
+        list.style.transform = 'translateY(' + (-stepHeight * step) + 'px)';
+        if (step === rows.length) {
+          setTimeout(function () { list.style.transition = 'none'; list.style.transform = 'translateY(0)'; step = 0; }, 700);
+        }
+      }, 3000);
+    }
+    var code = tbar.querySelector('[data-dh-code]');
+    if (code) {
+      var note = code.querySelector('small');
+      var noteText = note.textContent;
+      code.addEventListener('click', function () {
+        var done = function () {
+          code.classList.add('is-copied');
+          note.textContent = code.getAttribute('data-copied');
+          setTimeout(function () { code.classList.remove('is-copied'); note.textContent = noteText; }, 1800);
+        };
+        if (navigator.clipboard) navigator.clipboard.writeText(code.getAttribute('data-dh-code')).then(done, done); else done();
+      });
+    }
   }
 
   // ---------- Recherche : « ricerche di tendenza » qui défilent dans le champ ----------

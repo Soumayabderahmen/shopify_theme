@@ -1,0 +1,394 @@
+/* Accueil ORDINATEUR au style shop.com (sections/desktop-home-shop.liquid), d'après le prototype validé
+   « Platinumshop-Accueil-desktop-SHOP-v11-BlackFriday ». Chargé en tête de page sur l'accueil pour les écrans de plus de
+   760px (layout/theme.liquid). Cartes produit : assets/mshein-card.css (les mêmes que partout sur le site). */
+.dhp {
+  --dhp-ink: #16123f;
+  --dhp-ink-2: #4a4f6b;
+  --dhp-muted: #7a7f95;
+  --dhp-brand: #3a34d2;
+  --dhp-brand-2: #6b5cff;
+  --dhp-lav: #ecebfd;
+  --dhp-line: #eceef4;
+  --dhp-soft: #f4f5f9;
+  --dhp-bf: #0d0b1a;
+  --dhp-bf-red: #ff3b4a;
+  /* Pleine largeur malgré la marge du contenu du thème (#content) : position et largeur de la fenêtre calculées par
+     assets/desktop-home-shop.js (--dhp-x, --dhp-w), sans défilement horizontal. */
+  width: var(--dhp-w, 100%);
+  margin-left: calc(-1 * var(--dhp-x, 0px));
+  padding-bottom: 80px;
+  color: #171717;
+  /* Comme le prototype : texte de base 16px, interligne normal (le thème met 14px et 1,85 sur toute la page) */
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: normal;
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+.dhp a { color: inherit; text-decoration: none; }
+/* Coins carrés comme le prototype (assets/screen.css arrondit toutes les images de 4px) ; les images arrondies
+   ont leur propre règle plus bas */
+.dhp img { display: block; max-width: 100%; border-radius: 0; }
+/* Titres seulement : les paragraphes des cartes gardent leurs marges (assets/mshein-card.css) */
+.dhp h1, .dhp h2 { max-width: none; margin: 0; padding: 0; }
+.dhp-hero__txt p { padding: 0; }
+/* Cartes comme le prototype : sans les règles des cartes du thème qui visent les mêmes éléments (titre h3 #212121,
+   prix .alibaba-card__price-main de assets/product-card.css en 16px foncé, prix barré #root .old-price) */
+#root .dhp .mshein-card__title { color: #171717; }
+#root .dhp .mshein-card__price .mshein-card__now { color: inherit; font-size: inherit; font-weight: inherit; letter-spacing: normal; }
+#root .dhp .mshein-card__price s.old-price { color: #7a7f95; font-weight: 500; }
+/* Mots en gras des cartes (note, « #1 Più venduto ») : plus gras que leur ligne, comme le prototype (le thème met 700) */
+#root .dhp .mshein-card b { font-weight: bolder; }
+.dhp ul { margin: 0; padding: 0; list-style: none; }
+/* Boutons du thème (assets/screen.css : bloc flottant, taille minimale, fond en pseudo-élément) remis à zéro dans la
+   section ; faible priorité (:where) : les règles de chaque bouton ci-dessous s'appliquent. */
+:where(.dhp) button:not(.mshein-card button) {
+  float: none;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+:where(.dhp) button:not(.mshein-card button)::before,
+:where(.dhp) button:not(.mshein-card button)::after { content: none; display: none; }
+/* assets/screen.css impose « height: var(--height, auto) !important » aux images : photos qui remplissent leur cadre */
+.dhp img { --height: 100%; }
+.dhp svg { display: block; }
+.dhp-wrap { width: 100%; padding: 0 16px; }
+
+/* ---------- Titres de section, flèches, rangées qui défilent ---------- */
+.dhp-sec { margin-top: 44px; }
+.dhp-hd { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 14px; }
+.dhp-hd h2 { display: flex; align-items: center; gap: 6px; color: var(--dhp-ink); font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: -.4px; line-height: normal; text-transform: none; }
+.dhp-hd h2 a { display: flex; align-items: center; gap: 6px; }
+.dhp-hd h2 svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dhp-hd__end { display: flex; align-items: center; gap: 14px; }
+.dhp-hd--end { justify-content: flex-end; }
+.dhp .dhp-more { color: var(--dhp-brand); font-size: 14px; font-weight: 700; }
+.dhp-more:hover { text-decoration: underline; }
+#root .dhp-arws { display: flex; gap: 8px; }
+#root .dhp .dhp-arw { display: grid; place-items: center; width: 38px; height: 38px; color: var(--dhp-ink); background: #fff; border-radius: 50%; box-shadow: 0 0 0 1px var(--dhp-line), 0 6px 14px -10px rgb(22 18 63 / 40%); transition: opacity .2s; }
+#root .dhp .dhp-arw:disabled { opacity: .35; cursor: default; }
+#root .dhp-arw svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dhp-track { display: grid; grid-auto-flow: column; gap: 16px; overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.dhp-track::-webkit-scrollbar { display: none; }
+.dhp-track > * { scroll-snap-align: start; }
+
+/* ---------- Boutons ---------- */
+.dhp-btn { display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 22px; font-size: 15px; font-weight: 700; border-radius: 999px; transition: transform .15s, box-shadow .15s; }
+.dhp-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dhp .dhp-btn--brand { color: #fff; background: linear-gradient(180deg, #4a44e6, var(--dhp-brand)); box-shadow: 0 12px 24px -12px rgb(58 52 210 / 90%); }
+.dhp-btn--brand:hover, .dhp-btn--bf:hover { transform: translateY(-1px); }
+.dhp .dhp-btn--soft { color: var(--dhp-ink); background: #fff; box-shadow: 0 0 0 1px var(--dhp-line), 0 6px 14px -10px rgb(22 18 63 / 40%); }
+.dhp-btn--soft:hover { box-shadow: 0 0 0 1px #d9dbe6, 0 8px 18px -10px rgb(22 18 63 / 45%); }
+.dhp .dhp-btn--bf { color: var(--dhp-bf); background: #fff; box-shadow: 0 12px 26px -12px rgb(255 59 74 / 80%); }
+.dhp .dhp-btn--ghost { color: #fff; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 30%); }
+
+/* ---------- Moyens de paiement : bande au contour dégradé qui tourne, cadenas qui pulse, logos qui défilent,
+   reflet qui traverse la bande, coche du bouclier qui se dessine ---------- */
+@property --dhp-pb-a { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+.dhp-pay { position: relative; display: flex; align-items: center; gap: 22px; margin-top: 16px; padding: 10px 10px 10px 14px; overflow: hidden; background: linear-gradient(#fff, #fff) padding-box, conic-gradient(from var(--dhp-pb-a), #6b5cff, #c9c4ff, #ffd166, #3a34d2, #c9c4ff, #6b5cff) border-box; border: 1.5px solid transparent; border-radius: 20px; box-shadow: 0 14px 30px -22px rgb(58 52 210 / 60%); animation: dhp-pb-turn 8s linear infinite; }
+@keyframes dhp-pb-turn { to { --dhp-pb-a: 360deg; } }
+.dhp-pay::after { content: ''; position: absolute; top: 0; bottom: 0; left: -30%; width: 22%; background: linear-gradient(100deg, transparent, rgb(107 92 255 / 10%), transparent); transform: skewX(-20deg); pointer-events: none; animation: dhp-pb-shine 6s ease-in-out infinite; }
+@keyframes dhp-pb-shine { 0%, 55% { left: -30%; } 100% { left: 120%; } }
+.dhp-pay__t { position: relative; z-index: 1; flex: none; display: flex; align-items: center; gap: 12px; color: var(--dhp-ink); }
+.dhp-pay__lock { position: relative; flex: none; display: grid; place-items: center; width: 40px; height: 40px; color: #fff; background: linear-gradient(180deg, #6b5cff, #3a34d2); border-radius: 12px; box-shadow: 0 8px 16px -8px rgb(58 52 210 / 90%); }
+.dhp-pay__lock::before { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 0 rgb(107 92 255 / 45%); animation: dhp-pb-pulse 2.4s ease-out infinite; }
+@keyframes dhp-pb-pulse { 70%, 100% { box-shadow: 0 0 0 10px rgb(107 92 255 / 0%); } }
+.dhp-pay__lock svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.dhp-pay__shackle { animation: dhp-pb-lock 4.8s ease-in-out infinite; }
+@keyframes dhp-pb-lock { 0%, 70%, 100% { transform: none; } 78%, 88% { transform: translateY(-2.5px); } }
+.dhp-pay__t b { display: block; font-family: 'Sora', sans-serif; font-size: 14.5px; font-weight: 700; }
+.dhp-pay__t small { display: flex; align-items: center; gap: 6px; color: var(--dhp-ink-2); font-size: 12px; font-weight: 500; }
+.dhp-pay__t small i { width: 6px; height: 6px; background: #0e9f6e; border-radius: 50%; box-shadow: 0 0 0 3px rgb(14 159 110 / 18%); }
+.dhp-pay__view { position: relative; z-index: 1; flex: 1; min-width: 0; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+.dhp .dhp-pay__ic { display: flex; gap: 10px; width: max-content; padding: 6px 0; animation: dhp-pb-run 38s linear infinite; }
+.dhp-pay:hover .dhp-pay__ic { animation-play-state: paused; }
+@keyframes dhp-pb-run { to { transform: translateX(calc(-50% - 5px)); } }
+.dhp-pay__ic li { flex: none; display: block; line-height: 0; border-radius: 6px; box-shadow: 0 3px 8px -4px rgb(22 18 63 / 40%); transition: transform .2s, box-shadow .2s; }
+.dhp-pay__ic li::before { content: none !important; }
+.dhp-pay__ic li:hover { transform: translateY(-3px) scale(1.08); box-shadow: 0 8px 14px -6px rgb(22 18 63 / 45%); }
+.dhp-pay__ic svg { width: 46px; height: 29px; }
+.dhp-pay__r { position: relative; z-index: 1; flex: none; display: flex; align-items: center; gap: 8px; padding: 9px 14px 9px 10px; color: #fff; font-size: 12.5px; font-weight: 700; background: linear-gradient(135deg, #16123f, #2a2290); border-radius: 14px; }
+.dhp-pay__r svg { width: 22px; height: 22px; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.dhp-pay__shield { fill: rgb(14 159 110 / 22%); stroke: #3ddc97; stroke-width: 1.8; }
+.dhp-pay__tick { stroke: #3ddc97; stroke-width: 2.4; stroke-dasharray: 12; stroke-dashoffset: 12; animation: dhp-pb-tick 4s ease-in-out infinite; }
+@keyframes dhp-pb-tick { 15%, 80% { stroke-dashoffset: 0; } 95%, 100% { stroke-dashoffset: 12; } }
+.dhp-pay__r small { display: block; color: #b9b4ff; font-size: 11px; font-weight: 600; }
+
+/* ---------- Grande carte animée (comme shop.com) : texte à gauche, scènes de produits à droite ---------- */
+.dhp-hero { position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: center; min-height: 420px; margin-top: 14px; overflow: hidden; overflow: clip; background: radial-gradient(120% 140% at 85% 20%, #e9e6ff 0%, #f6f5ff 45%, #fff 75%); border-radius: 36px; box-shadow: 0 1px 2px rgb(22 18 63 / 5%), 0 30px 60px -36px rgb(22 18 63 / 35%); }
+.dhp-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(110% 130% at 80% 15%, #3a1a5c 0%, #17122e 42%, #07060d 80%); opacity: 0; transition: opacity .9s ease; }
+.dhp-hero.is-bf::before { opacity: 1; }
+.dhp-hero__txt { position: relative; z-index: 1; grid-area: 1 / 1; padding: 56px 0 56px 64px; transition: opacity .6s ease, transform .7s cubic-bezier(.2, .8, .2, 1); }
+.dhp-hero h1 { color: #0f0d26; font-family: 'Sora', sans-serif; font-size: 60px; font-weight: 800; letter-spacing: -2.4px; line-height: .98; text-transform: none; }
+.dhp-hero h1 span { background: linear-gradient(90deg, var(--dhp-brand), #9b8cff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.dhp-hero__txt p { max-width: 430px; margin: 18px 0 26px; color: var(--dhp-ink-2); font-size: 17px; line-height: 1.5; }
+.dhp-hero__cta { display: flex; gap: 12px; }
+.dhp-hero__usp { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 26px; color: var(--dhp-ink-2); font-size: 13.5px; font-weight: 600; }
+.dhp-hero__usp b { color: var(--dhp-ink); font-weight: 900; }
+.dhp-hero__txt--bf { opacity: 0; transform: translateY(18px); pointer-events: none; }
+.dhp-hero.is-bf .dhp-hero__txt--std { opacity: 0; transform: translateY(-18px); pointer-events: none; }
+.dhp-hero.is-bf .dhp-hero__txt--bf { opacity: 1; transform: none; pointer-events: auto; }
+.dhp-hero__txt--bf h1 { color: #fff; }
+.dhp-hero__txt--bf h1 span { background: linear-gradient(90deg, #ff3b4a, #ff8a5c); -webkit-background-clip: text; background-clip: text; }
+.dhp-hero__txt--bf p { color: #c9c6dc; }
+.dhp-bf-chip { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 6px 12px; color: #fff; font-size: 12px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; background: rgb(255 255 255 / 10%); border-radius: 999px; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 16%); }
+.dhp-bf-chip i { width: 8px; height: 8px; background: var(--dhp-bf-red); border-radius: 50%; box-shadow: 0 0 0 4px rgb(255 59 74 / 25%); animation: dhp-blink 1.4s ease-in-out infinite; }
+@keyframes dhp-blink { 50% { opacity: .35; } }
+.dhp-cd { display: flex; gap: 8px; margin: 0 0 24px; }
+.dhp-cd span { display: grid; min-width: 62px; padding: 8px 6px 6px; color: #9d98b8; font-size: 10.5px; font-weight: 700; text-align: center; text-transform: uppercase; background: rgb(255 255 255 / 8%); border-radius: 12px; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 12%); }
+.dhp-cd b { color: #fff; font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.dhp-hero__art { position: relative; z-index: 1; grid-area: 1 / 2; height: 100%; min-height: 420px; }
+/* Photos qui flottent : entrent et sortent en tournant, puis flottent doucement */
+.dhp-fl { position: absolute; z-index: var(--z, 1); width: var(--w); height: var(--h); opacity: 0; pointer-events: none; transform: translate3d(var(--ix, 0), var(--iy, 60px), 0) rotate(var(--ir, 0deg)) scale(.82); filter: blur(6px); transition: transform 1.1s cubic-bezier(.2, .8, .2, 1) var(--d, 0s), opacity .7s ease var(--d, 0s), filter .8s ease var(--d, 0s); }
+.dhp-fl.on { opacity: 1; pointer-events: auto; transform: translate3d(0, 0, 0) rotate(var(--r, 0deg)) scale(1); filter: none; }
+.dhp-fl.off { opacity: 0; transform: translate3d(var(--ox, 0), var(--oy, -60px), 0) rotate(var(--or, 0deg)) scale(.9); filter: blur(6px); transition-duration: .9s, .6s, .6s; transition-delay: calc(var(--d, 0s) * .5); }
+.dhp-fl__in { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; background: #fff; border-radius: 20px; box-shadow: 0 30px 50px -24px rgb(22 18 63 / 50%), 0 2px 6px rgb(22 18 63 / 8%); animation: dhp-drift 7s ease-in-out infinite alternate; animation-delay: var(--dd, 0s); }
+.dhp-fl__in img { width: 100%; height: 100%; object-fit: cover; }
+@keyframes dhp-drift { from { transform: translate3d(0, 0, 0) rotate(0deg); } to { transform: translate3d(var(--dx, 6px), var(--dy, -14px), 0) rotate(var(--dr, 2deg)); } }
+.dhp-fl--a { --w: 150px; --h: 250px; --r: -14deg; --ix: -70px; --iy: 90px; --ir: -32deg; --ox: -50px; --oy: -120px; --or: 6deg; --z: 2; left: 1%; top: 5%; }
+.dhp-fl--b { --w: 130px; --h: 132px; --r: 7deg; --ix: 30px; --iy: -90px; --ir: 28deg; --ox: 40px; --oy: -110px; --or: -14deg; --d: .12s; --dd: -3s; --dx: -8px; --z: 1; left: 27%; top: 4%; }
+.dhp-fl--c { --w: 150px; --h: 280px; --r: 5deg; --ix: 90px; --iy: 60px; --ir: 22deg; --ox: 110px; --oy: 30px; --or: 18deg; --d: .24s; --dd: -5s; --dr: -2deg; --z: 4; right: -1%; top: 30%; }
+.dhp-fl--d { --w: 140px; --h: 150px; --r: 8deg; --ix: -60px; --iy: 110px; --ir: 26deg; --ox: -70px; --oy: 90px; --or: -10deg; --d: .36s; --dd: -2s; --dx: 5px; --dy: -10px; --dr: -2deg; --z: 2; left: 5%; top: 63%; }
+.dhp-fl__pct { position: absolute; left: 10px; top: 10px; padding: 5px 10px; color: #fff; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 800; background: var(--dhp-bf-red); border-radius: 999px; box-shadow: 0 6px 14px -6px rgb(255 59 74 / 90%); }
+.dhp-fl--d .dhp-fl__pct { padding: 4px 8px; font-size: 12px; }
+/* Téléphone : suivi de livraison et fiche du produit, qui défile */
+.dhp-phone { position: absolute; z-index: 3; right: 15%; top: 26px; width: 214px; height: 450px; overflow: hidden; background: #fff; border-radius: 34px; box-shadow: 0 0 0 7px #121212, 0 0 0 8px #3a3a3a, 0 50px 80px -30px rgb(22 18 63 / 60%); }
+.dhp-phone::before { content: ''; position: absolute; z-index: 3; top: 8px; left: 50%; width: 70px; height: 20px; background: #121212; border-radius: 12px; transform: translateX(-50%); }
+.dhp-scr { position: absolute; inset: 0; opacity: 0; transform: translateY(24px) scale(.98); transition: opacity .6s ease, transform .8s cubic-bezier(.2, .8, .2, 1); }
+.dhp-scr.on { opacity: 1; transform: none; }
+.dhp-scr.on .dhp-scr__in { animation: dhp-scroll 5.5s cubic-bezier(.6, 0, .3, 1) .6s both; }
+@keyframes dhp-scroll { 0%, 22% { transform: translateY(0); } 62%, 100% { transform: translateY(-168px); } }
+.dhp-scr__bar { display: flex; justify-content: space-between; padding: 11px 20px 0; color: #111; font-size: 11px; font-weight: 800; }
+.dhp-scr__map { position: relative; height: 150px; margin-top: 10px; overflow: hidden; background: #e9eef3; }
+.dhp-scr__map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.dhp-scr__pin { position: absolute; left: 42%; top: 30%; width: 38px; height: 38px; overflow: hidden; background: #fff; border-radius: 10px; box-shadow: 0 6px 14px rgb(0 0 0 / 22%); }
+.dhp-scr__pin img { width: 100%; height: 100%; object-fit: cover; }
+.dhp-trk { padding: 10px 12px; background: #fff; border-radius: 14px; }
+.dhp-trk small { display: block; color: var(--dhp-ink-2); font-size: 9.5px; font-weight: 700; }
+.dhp-trk b { display: block; margin: 1px 0 7px; color: #111; font-size: 12.5px; font-weight: 800; }
+.dhp-trk__bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+.dhp-trk__bar i { height: 4px; background: #e3e2f5; border-radius: 4px; }
+.dhp-trk__bar i.ok { background: var(--dhp-brand-2); }
+.dhp-trk em { display: block; margin-top: 6px; color: var(--dhp-brand-2); font-size: 9.5px; font-style: normal; font-weight: 700; }
+.dhp-scr .dhp-trk { position: relative; margin: -14px 8px 0; box-shadow: 0 4px 14px rgb(22 18 63 / 10%); }
+.dhp-scr__ship { margin: 8px; padding: 9px 11px; font-size: 10px; border: 1px solid var(--dhp-line); border-radius: 12px; }
+.dhp-scr__ship b { display: block; color: #111; font-size: 10.5px; }
+.dhp-scr__ship span { color: var(--dhp-muted); }
+.dhp-scr__prod { margin: 0 8px; padding: 8px; background: linear-gradient(180deg, var(--dhp-lav), #fff); border-radius: 16px; }
+.dhp-scr__prod img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; }
+.dhp-scr__prod p { display: -webkit-box; margin: 7px 2px 3px; overflow: hidden; color: #111; font-size: 10.5px; font-weight: 700; line-height: 1.3; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.dhp-scr__row { display: flex; align-items: center; justify-content: space-between; margin: 0 2px; font-size: 10px; }
+.dhp-scr__row b { color: #111; font-family: 'Sora', sans-serif; font-size: 13px; }
+.dhp-scr__row s { margin-left: 4px; color: var(--dhp-muted); font-size: 9.5px; }
+.dhp-scr__rate { display: flex; align-items: center; gap: 4px; color: var(--dhp-muted); font-size: 10px; }
+.dhp-scr__rate i { color: #f5a524; font-style: normal; letter-spacing: -1px; }
+.dhp-scr__go { display: block; margin-top: 7px; padding: 8px; color: #fff; font-size: 10.5px; font-weight: 800; text-align: center; background: var(--dhp-brand); border-radius: 10px; }
+.dhp-scrbf__hd { margin: 10px 8px 8px; padding: 12px; color: #fff; background: linear-gradient(135deg, #17122e, #07060d); border-radius: 14px; }
+.dhp-scrbf__hd small { display: block; color: #ff8a93; font-size: 9.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.dhp-scrbf__hd b { display: block; margin: 2px 0 4px; font-family: 'Sora', sans-serif; font-size: 17px; }
+.dhp-scrbf__hd span { color: #c9c6dc; font-size: 10px; font-variant-numeric: tabular-nums; }
+.dhp-scrbf__row { display: flex; align-items: center; gap: 8px; margin: 0 8px 6px; padding: 6px; border: 1px solid var(--dhp-line); border-radius: 12px; }
+.dhp-scrbf__row img { flex: none; width: 46px; height: 46px; object-fit: cover; border-radius: 8px; }
+.dhp-scrbf__row span { flex: 1; min-width: 0; font-size: 9.5px; }
+/* Titre en 17px coupé « … », comme le prototype */
+.dhp-scrbf__row p { margin: 0 0 2px; overflow: hidden; color: #111; font-size: 17px; font-weight: 700; line-height: 1.5; white-space: nowrap; text-overflow: ellipsis; }
+.dhp-scrbf__row b { color: var(--dhp-bf-red); font-size: 11px; }
+.dhp-scrbf__row s { margin-left: 3px; color: var(--dhp-muted); }
+.dhp-scrbf__row em { flex: none; padding: 3px 6px; color: #fff; font-size: 9.5px; font-style: normal; font-weight: 800; background: var(--dhp-bf-red); border-radius: 6px; }
+/* Carte « Arriva … » au centre, qui sort du téléphone puis y rentre */
+.dhp-hn { position: absolute; z-index: 6; left: calc(50% - 150px); top: calc(50% - 20px); width: 270px; opacity: 0; pointer-events: none; transform: translate(150px, -40px) scale(.86); filter: blur(4px); }
+.dhp-hn .dhp-trk { padding: 13px 15px; background: rgb(255 255 255 / 92%); box-shadow: 0 28px 50px -18px rgb(22 18 63 / 50%), 0 0 0 1px rgb(22 18 63 / 7%); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.dhp-hn .dhp-trk small { font-size: 11px; }
+.dhp-hn .dhp-trk b { font-size: 16px; }
+.dhp-hn .dhp-trk__bar i { height: 5px; }
+.dhp-hn .dhp-trk em { font-size: 11px; }
+.dhp-hn.on { animation: dhp-pop 5.5s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes dhp-pop {
+  0%, 14% { opacity: 0; transform: translate(150px, -40px) scale(.86); filter: blur(4px); }
+  26%, 66% { opacity: 1; transform: none; filter: none; }
+  80%, 100% { opacity: 0; transform: translate(140px, -30px) scale(.9); filter: blur(4px); }
+}
+.dhp .dhp-trk--bf { background: #0d0b1a; box-shadow: 0 28px 50px -18px rgb(0 0 0 / 70%), 0 0 0 1px rgb(255 255 255 / 14%); }
+.dhp .dhp-trk--bf small { color: #ff8a93; }
+.dhp .dhp-trk--bf b { color: #fff; font-variant-numeric: tabular-nums; }
+.dhp .dhp-trk--bf em { color: #c9c6dc; }
+/* Points des scènes (un par rayon, le rouge = Black Friday) */
+.dhp-hdots { position: absolute; z-index: 6; left: 50%; bottom: 14px; display: flex; gap: 6px; transform: translateX(-50%); }
+#root .dhp .dhp-hdots button { width: 7px; height: 7px; background: rgb(22 18 63 / 18%); border-radius: 7px; transition: width .4s, background .4s; }
+#root .dhp .dhp-hdots button.on { width: 22px; background: var(--dhp-brand); }
+#root .dhp-hero.is-bf .dhp-hdots button { background: rgb(255 255 255 / 28%); }
+#root .dhp-hero.is-bf .dhp-hdots button.on { background: #fff; }
+#root .dhp .dhp-hdots button.is-bf { background: var(--dhp-bf-red); opacity: .55; }
+#root .dhp .dhp-hdots button.is-bf.on { opacity: 1; }
+
+/* ---------- Black Friday : bloc noir (mot qui défile, compte à rebours, onglets) + vraies cartes ---------- */
+.dhp-bf { margin-top: 28px; overflow: hidden; overflow: clip; color: #fff; background: var(--dhp-bf); border-radius: 30px; }
+.dhp-bf__marq { overflow: hidden; padding: 14px 0; background: var(--dhp-bf-red); }
+.dhp-bf__track { display: flex; width: max-content; animation: dhp-marquee 26s linear infinite; }
+.dhp-bf__track span { padding-right: 40px; font-family: 'Sora', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -.5px; white-space: nowrap; }
+.dhp-bf__track span i { margin-left: 40px; font-style: normal; opacity: .6; }
+@keyframes dhp-marquee { to { transform: translateX(-50%); } }
+.dhp-bf__in { padding: 26px 28px 22px; }
+.dhp-bf .dhp-hd small { display: block; margin-bottom: 4px; color: #ff8a93; font-size: 12.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.dhp-bf .dhp-hd h2 { color: #fff; font-size: 32px; letter-spacing: -1px; }
+.dhp-bf .dhp-cd { margin: 0 0 0 auto; }
+.dhp-bf .dhp-cd span { min-width: 56px; }
+.dhp-bf .dhp-cd b { font-size: 21px; }
+#root .dhp .dhp-bf .dhp-arw { color: #fff; background: rgb(255 255 255 / 10%); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 18%); }
+.dhp-bf__tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0; }
+#root .dhp .dhp-bf__tabs button { padding: 8px 14px; color: #d8d5ea; font-size: 13.5px; font-weight: 700; background: rgb(255 255 255 / 8%); border-radius: 999px; box-shadow: inset 0 0 0 1px rgb(255 255 255 / 12%); transition: background .2s, color .2s; }
+#root .dhp-bf__tabs button em { margin-left: 5px; color: #9d98b8; font-style: normal; font-weight: 600; }
+#root .dhp .dhp-bf__tabs button:hover { background: rgb(255 255 255 / 14%); }
+#root .dhp .dhp-bf__tabs button.is-on { color: var(--dhp-bf); background: #fff; }
+#root .dhp-bf__tabs button.is-on em { color: var(--dhp-bf-red); }
+.dhp .dhp-bf__rail { grid-auto-columns: calc((100% - 64px) / 5); gap: 16px; margin: 6px -16px 0; padding: 14px 16px 34px; scroll-padding: 0 16px; transition: opacity .25s; }
+.dhp .dhp-bf__all { display: flex; width: max-content; margin: 22px auto 0; color: #fff; background: var(--dhp-bf); box-shadow: 0 12px 24px -12px rgb(13 11 26 / 70%); }
+/* Petit badge sur les cartes en promo de la page, pendant le Black Friday */
+.dhp.bf-on .mshein-card:has(.mshein-card__price.is-sale) .mshein-card__img::after { content: 'BLACK FRIDAY'; position: absolute; z-index: 2; left: 6px; bottom: 6px; padding: 3px 7px; color: #fff; font-size: 9.5px; font-weight: 800; letter-spacing: .6px; background: var(--dhp-bf); border-radius: 6px; pointer-events: none; transition: opacity .2s; }
+
+/* ---------- Grilles de cartes : les cartes du site, 5 par ligne, photo 3 / 4 ; au survol (comme Temu) la carte se
+   soulève dans un cadre blanc avec ombre et le bouton « Anteprima » apparaît ---------- */
+.dhp .dhp-prods { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; margin-top: 28px; transition: opacity .25s, transform .25s; }
+.dhp-prods.is-swap { opacity: 0; transform: translateY(8px); }
+.dhp-prods > .mshein-card, .dhp-bf__rail > .mshein-card { min-width: 0; font-size: 14px; }
+#root .dhp .mshein-card .mshein-card__img { position: relative; aspect-ratio: 3 / 4 !important; }
+#root .dhp .mshein-card { border-radius: 12px; transition: box-shadow .2s ease; }
+#root .dhp .dhp-prods > .mshein-card:hover, #root .dhp .dhp-bf__rail > .mshein-card:hover { position: relative; z-index: 3; background: #fff; box-shadow: 0 0 0 10px #fff, 0 8px 34px 10px rgb(22 18 63 / 15%); }
+.dhp .dhp-qv { position: absolute; z-index: 4; left: 8px; bottom: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; color: #111; font-size: 13px; font-weight: 700; background: rgb(255 255 255 / 94%); border-radius: 999px; box-shadow: 0 4px 12px -4px rgb(0 0 0 / 30%); opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .2s; }
+.dhp-qv svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dhp .mshein-card:hover .dhp-qv { opacity: 1; transform: none; }
+.dhp.bf-on .mshein-card:hover .mshein-card__img::after { opacity: 0; }
+
+/* ---------- Reparti di tendenza ---------- */
+.dhp .dhp-dept { position: relative; display: flex; flex-direction: column; justify-content: space-between; width: 252px; height: 340px; padding: 18px; overflow: hidden; color: #fff; border-radius: 26px; isolation: isolate; }
+.dhp-dept__bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+.dhp-dept::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgb(10 8 30 / 30%), rgb(10 8 30 / 60%) 45%, rgb(10 8 30 / 78%)); }
+.dhp-dept:hover .dhp-dept__bg { transform: scale(1.05); }
+.dhp-dept__name { display: block; margin-top: 70px; font-family: 'Sora', sans-serif; font-size: 27px; font-weight: 800; letter-spacing: -.8px; line-height: 1.05; text-align: center; text-shadow: 0 2px 14px rgb(0 0 0 / 35%); }
+.dhp-dept__rate { display: block; margin-top: 8px; font-size: 13px; font-weight: 600; text-align: center; opacity: .95; }
+.dhp-dept__items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dhp-thumb { position: relative; display: block; aspect-ratio: 1; overflow: hidden; background: #fff; border-radius: 14px; }
+.dhp-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.dhp-thumb b { position: absolute; left: 6px; top: 6px; padding: 2px 7px; color: var(--dhp-ink); font-size: 11.5px; font-weight: 800; background: rgb(255 255 255 / 92%); border-radius: 999px; }
+
+/* ---------- Shop per brand : tuiles de couleur, photo penchée à droite, 2 lignes qui défilent ---------- */
+.dhp-brands { display: grid; grid-template-rows: repeat(2, 128px); grid-auto-flow: column; grid-auto-columns: calc((100% - 48px) / 5); gap: 12px; padding: 4px 0; overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.dhp-brands::-webkit-scrollbar { display: none; }
+.dhp-brands > * { scroll-snap-align: start; }
+.dhp .dhp-brand { position: relative; display: block; overflow: hidden; color: #fff; border-radius: 20px; transition: transform .2s, box-shadow .2s; }
+.dhp-brand:hover { transform: translateY(-3px); box-shadow: 0 14px 26px -16px rgb(22 18 63 / 60%); }
+.dhp-brand img { position: absolute; right: -6%; top: 10%; width: 62%; height: 100%; object-fit: cover; background: #fff; border-radius: 16px; box-shadow: -10px 14px 26px -12px rgb(0 0 0 / 45%); transform: rotate(-6deg); transition: transform .3s; }
+.dhp-brand:hover img { transform: rotate(-2deg) scale(1.04); }
+.dhp-brand strong { position: absolute; left: 14px; bottom: 12px; max-width: 46%; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; line-height: 1.15; text-shadow: 0 1px 6px rgb(0 0 0 / 20%); }
+.dhp .dhp-brand--more { display: grid; place-items: center; color: var(--dhp-brand); background: var(--dhp-lav); border: 1.5px dashed #b9b6f3; }
+.dhp-brand--more strong { position: static; display: flex; align-items: center; gap: 4px; max-width: none; font-size: 15px; text-shadow: none; }
+.dhp-brand--more svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Mot géant (rayon) + ses produits ---------- */
+.dhp-marq { position: relative; margin-top: 64px; overflow: hidden; }
+.dhp-marq__row { display: flex; align-items: center; justify-content: center; gap: 48px; white-space: nowrap; }
+.dhp-marq__w { color: #d7d8de; font-family: 'Sora', sans-serif; font-size: 82px; font-weight: 800; letter-spacing: -3.5px; line-height: 1.1; cursor: pointer; transition: color .4s; }
+.dhp-marq__w:hover { color: #b9bbc6; }
+.dhp-marq__w.is-on { color: #0f0d26; cursor: default; }
+.dhp-marq__img { position: absolute; left: 50%; top: 50%; width: 92px; height: 120px; overflow: hidden; border-radius: 16px; box-shadow: 0 18px 30px -14px rgb(22 18 63 / 60%); transform: translate(-50%, -38%) rotate(-8deg); pointer-events: none; transition: opacity .3s; }
+.dhp-marq__img img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- Collezioni da scoprire ---------- */
+.dhp .dhp-coll { position: relative; display: flex; flex-direction: column; justify-content: space-between; width: 300px; height: 380px; padding: 18px; overflow: hidden; color: #fff; border-radius: 26px; isolation: isolate; }
+.dhp-coll__bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+.dhp-coll::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgb(10 8 30 / 5%), rgb(10 8 30 / 50%) 60%, rgb(10 8 30 / 70%)); }
+.dhp-coll:hover .dhp-coll__bg { transform: scale(1.05); }
+.dhp-coll__name { display: block; margin-top: 90px; font-family: 'Sora', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -1px; line-height: 1.05; text-align: center; text-transform: uppercase; text-shadow: 0 2px 14px rgb(0 0 0 / 35%); }
+.dhp-coll__sub { display: block; margin-top: 6px; font-size: 13px; font-weight: 600; text-align: center; opacity: .92; }
+.dhp-coll__items { position: relative; display: block; }
+.dhp-coll__rail { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 16px) / 3); gap: 8px; overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.dhp-coll__rail::-webkit-scrollbar { display: none; }
+.dhp-coll__rail > .dhp-thumb { scroll-snap-align: start; cursor: pointer; transition: transform .2s; }
+.dhp-coll__rail > .dhp-thumb:hover { transform: translateY(-2px); }
+#root .dhp .dhp-coll__arw { position: absolute; top: 50%; z-index: 2; display: grid; place-items: center; width: 30px; height: 30px; margin-top: -15px; color: var(--dhp-ink); background: #fff; border-radius: 50%; box-shadow: 0 4px 12px rgb(0 0 0 / 30%); opacity: 0; transition: opacity .2s, transform .15s; }
+#root .dhp-coll__arw svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#root .dhp .dhp-coll:hover .dhp-coll__arw, #root .dhp .dhp-coll__arw:focus-visible { opacity: 1; }
+#root .dhp .dhp-coll__arw:hover { transform: scale(1.08); }
+#root .dhp .dhp-coll__arw--p { left: -10px; }
+#root .dhp .dhp-coll__arw--n { right: -10px; }
+.dhp-coll__dots { display: flex; justify-content: center; gap: 4px; margin-top: 8px; }
+.dhp-coll__dots i { width: 5px; height: 5px; background: rgb(255 255 255 / 45%); border-radius: 99px; transition: width .25s, background .25s; }
+.dhp-coll__dots i.is-on { width: 14px; background: #fff; }
+
+/* ---------- Occasioni ---------- */
+.dhp-hd--occ { align-items: flex-end; }
+.dhp-hd--occ small { display: block; margin-bottom: 4px; color: var(--dhp-ink-2); font-size: 13px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; }
+.dhp-hd--occ h2 { font-size: 34px; letter-spacing: -1px; }
+#dhp-t-occ { grid-auto-columns: calc((100% - 48px) / 4); }
+.dhp-occ { display: block; min-width: 0; }
+.dhp-occ[hidden] { display: none; }
+.dhp-occ__img { position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; background: var(--dhp-soft); border-radius: 14px; }
+.dhp-occ__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .45s, transform .6s; }
+.dhp-occ__img img + img { opacity: 0; }
+.dhp-occ:hover .dhp-occ__img img:first-child { opacity: 0; }
+.dhp-occ:hover .dhp-occ__img img + img { opacity: 1; transform: scale(1.03); }
+.dhp-occ__t { display: block; margin-top: 12px; color: #111; font-size: 17px; font-weight: 600; }
+.dhp-occ:hover .dhp-occ__t { text-decoration: underline; }
+.dhp-occ__s { display: block; margin-top: 2px; color: var(--dhp-muted); font-size: 13px; }
+.dhp-occ--bf .dhp-occ__img::after { content: 'BLACK FRIDAY'; position: absolute; left: 12px; top: 12px; padding: 6px 10px; color: #fff; font-size: 12px; font-weight: 800; letter-spacing: 1px; background: var(--dhp-bf); border-radius: 8px; }
+.dhp-occ--bf .dhp-occ__s { color: var(--dhp-bf-red); font-weight: 700; }
+
+/* ---------- « Scopri il tuo prossimo colpo di fulmine » ---------- */
+.dhp .dhp-ed__hd { margin: 80px 0 30px; color: #0f0d26; font-family: 'Sora', sans-serif; font-size: 58px; font-weight: 800; letter-spacing: -2.4px; line-height: 1.02; text-align: center; text-transform: none; }
+.dhp-chip { display: inline-block; width: 64px; height: 64px; margin: 0 6px; overflow: hidden; vertical-align: -10px; border-radius: 18px; box-shadow: 0 12px 24px -12px rgb(22 18 63 / 55%); transform: rotate(-6deg); transition: transform .26s ease-in, opacity .26s; }
+.dhp-chip.is-out { opacity: .2; transform: rotate(-6deg) perspective(300px) rotateY(90deg) scale(.9); }
+.dhp-chip img { width: 100%; height: 100%; object-fit: cover; }
+.dhp-fcgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.dhp-fc-slot { min-width: 0; perspective: 1400px; }
+.dhp-fc-slot .dhp-fc { transform-origin: 50% 50%; transition: transform .38s cubic-bezier(.5, 0, .75, .3), opacity .38s; backface-visibility: hidden; }
+.dhp-fc-slot.is-out .dhp-fc { opacity: .35; transform: rotateY(90deg); }
+.dhp-fc-slot.is-in .dhp-fc { animation: dhp-fc-in .5s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes dhp-fc-in { from { opacity: .35; transform: rotateY(-90deg); } to { opacity: 1; transform: none; } }
+.dhp-fcdots { display: flex; justify-content: center; gap: 6px; margin-top: 18px; }
+#root .dhp .dhp-fcdots button { width: 8px; height: 8px; background: #d4d5de; border-radius: 99px; transition: width .3s, background .3s; }
+#root .dhp .dhp-fcdots button.is-on { width: 24px; background: var(--dhp-ink); }
+.dhp-fc { display: block; min-width: 0; overflow: hidden; background: #fff; border: 1px solid #e4e5ea; border-radius: 12px; }
+.dhp-fc__top { position: relative; display: block; aspect-ratio: 1; overflow: hidden; isolation: isolate; }
+.dhp-fc__top img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; transition: transform .6s; }
+.dhp-fc__top::after { content: ''; position: absolute; inset: auto 0 0; z-index: -1; height: 30%; background: linear-gradient(180deg, transparent, rgb(0 0 0 / 55%)); }
+.dhp-fc:hover .dhp-fc__top img { transform: scale(1.04); }
+.dhp-fc__btn { position: absolute; left: 20px; right: 20px; bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; height: 58px; color: #fff; font-size: 17px; font-weight: 700; background: rgb(255 255 255 / 18%); border: 1.5px solid rgb(255 255 255 / 75%); border-radius: 4px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: background .2s; }
+.dhp-fc__btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s; }
+.dhp-fc__top:hover .dhp-fc__btn { background: rgb(255 255 255 / 30%); }
+.dhp-fc__top:hover .dhp-fc__btn svg { transform: translateX(3px); }
+.dhp-fc__items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: #fff; }
+.dhp-fc__items a { display: block; aspect-ratio: 3 / 4; overflow: hidden; background: #f4f4f6; }
+.dhp-fc__items img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; transition: transform .35s; }
+.dhp-fc__items a:hover img { transform: scale(1.06); }
+
+/* Toast (cœur des cartes) */
+.dhp-toast { position: fixed; left: 50%; bottom: 32px; z-index: 50; padding: 12px 20px; color: #fff; font-size: 14px; font-weight: 700; background: rgb(22 18 63 / 92%); border-radius: 999px; opacity: 0; transform: translate(-50%, 10px); pointer-events: none; transition: opacity .2s, transform .2s; }
+.dhp-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 1199px) {
+  .dhp-hero h1 { font-size: 48px; }
+  .dhp .dhp-prods { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .dhp-prods > :nth-child(n + 9) { display: none; }
+  .dhp .dhp-bf__rail { grid-auto-columns: calc((100% - 48px) / 4); }
+  .dhp-marq__w { font-size: 64px; }
+  .dhp .dhp-ed__hd { font-size: 46px; }
+  .dhp-pay__r { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dhp *, .dhp *::before, .dhp *::after { animation: none !important; transition: none !important; }
+  .dhp-pay__ic li[aria-hidden] { display: none; }
+  .dhp .dhp-pay__ic { flex-wrap: wrap; width: auto; }
+}

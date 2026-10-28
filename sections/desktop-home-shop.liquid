@@ -1,0 +1,743 @@
+{%- comment -%}
+  Page d'accueil ORDINATEUR au style shop.com (prototype validé « Platinumshop-Accueil-desktop-SHOP-v11-BlackFriday »).
+  Ordinateur uniquement : la section est cachée jusqu'à 760px, l'accueil mobile (sections/mobile-home-shein.liquid) ne
+  change pas. Sur ordinateur, les autres sections de l'accueil sont cachées : cette section est toute la page.
+  Vraies données de la boutique :
+  - rayons = liens collection du menu de l'en-tête (réglage « menu », le même que l'en-tête) et leurs produits ;
+  - bande des moyens de paiement (les mêmes logos que le pied de page : shop.enabled_payment_types) ;
+  - grande carte animée : une scène par groupe de 3 produits d'un rayon (photos qui flottent, téléphone avec le suivi
+    et la fiche du produit, carte « Arriva … »), données en JSON lues par assets/desktop-home-shop.js ;
+  - Black Friday (réglages du thème « Black Friday ») : scène sur fond noir, section « Offerte Black Friday », tuile
+    Occasioni ; rendu jusqu'à la date de fin, affiché par le script seulement entre les deux dates (ou dans l'éditeur,
+    ou avec ?bf-preview dans l'adresse) ;
+  - reparti di tendenza, Shop per brand (même liste que le panneau Categoria mobile), mot géant + produits du rayon,
+    « Le offerte del momento », collezioni da scoprire (sous-liens du menu), Occasioni (blocs), colpo di fulmine (blocs).
+  Cartes produit : snippets/mshein-card.liquid (les mêmes que partout sur le site), styles assets/mshein-card.css.
+  Styles : assets/desktop-home-shop.css (chargé en tête par layout/theme.liquid) ; script : assets/desktop-home-shop.js.
+{%- endcomment -%}
+{%- liquid
+  assign menu = linklists[section.settings.menu]
+  # Nom de la boutique avec la majuscule (« Platinumshop », comme le logo)
+  assign shop_name = shop.name | capitalize | escape
+  assign best = collections['bestsellers']
+  assign best_ids = best.products | map: 'id' | join: ','
+  capture flag
+    render 'country-flag-emoji'
+  endcapture
+  assign is_it = false
+  if request.locale.iso_code == 'it'
+    assign is_it = true
+  endif
+  assign sale_collection = collections['in-offerta']
+  if sale_collection != blank and sale_collection.products_count > 0
+    assign sale_url = sale_collection.url
+  else
+    assign sale_url = routes.all_products_collection_url | append: '?view=offerte&sort_by=best-selling'
+  endif
+  assign shipping_amount = ''
+  if settings.enable_free_shipping and settings.free_shipping_amount > 0
+    assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
+  endif
+
+  # Rayons : liens collection du menu (sans « Tutti i prodotti »), dans l'ordre de l'en-tête, avec le nom de l'onglet
+  # (« Donna », pas le titre complet de la collection)
+  assign dept_handles = ''
+  assign dept_titles = ''
+  for link in menu.links
+    if link.type == 'collection_link' and link.object.handle != 'all' and link.object.products_count > 0
+      assign dept_handles = dept_handles | append: link.object.handle | append: ','
+      assign dept_titles = dept_titles | append: link.title | append: '|~|'
+    endif
+  endfor
+  assign dept_handles = dept_handles | split: ','
+  assign dept_titles = dept_titles | split: '|~|'
+
+  # Black Friday : réglages du thème. Rendu tant que la date de fin n'est pas passée ; le script l'affiche entre les dates.
+  assign bf_render = false
+  assign bf_start_s = settings.bf_start | date: '%s' | plus: 0
+  assign bf_end_s = settings.bf_end | date: '%s' | plus: 0
+  assign now_s = 'now' | date: '%s' | plus: 0
+  if settings.bf_enable and bf_end_s > now_s
+    assign bf_render = true
+  endif
+  assign bf_collection = settings.bf_collection
+  if bf_collection != blank
+    assign bf_url = bf_collection.url
+  else
+    assign bf_url = sale_url
+  endif
+
+  # Remises de tous les rayons (« 021|rayon|handle|id », triées) : « Le offerte del momento » et Black Friday
+  assign deal_keys = ''
+  assign deal_seen = ','
+  for dept_handle in dept_handles
+    assign dept_index = forloop.index0
+    for candidate in collections[dept_handle].products limit: 14
+      assign candidate_variant = candidate.selected_or_first_available_variant
+      if candidate_variant.compare_at_price > candidate_variant.price
+        assign candidate_key = ',' | append: candidate.id | append: ','
+        if deal_seen contains candidate_key
+          continue
+        endif
+        assign deal_seen = deal_seen | append: candidate.id | append: ','
+        assign candidate_pct = candidate_variant.compare_at_price | minus: candidate_variant.price | times: 100 | divided_by: candidate_variant.compare_at_price
+        assign candidate_sort = candidate_pct | prepend: '00' | slice: -3, 3
+        assign deal_keys = deal_keys | append: candidate_sort | append: '|' | append: dept_index | append: '|' | append: dept_handle | append: '|' | append: candidate.id | append: ';'
+      endif
+    endfor
+  endfor
+  assign deal_keys = deal_keys | split: ';' | sort | reverse
+
+  # Black Friday avec une collection dédiée : ses produits en promo (rayon -1 = sans onglet de rayon)
+  assign bf_keys = deal_keys
+  if bf_render and bf_collection != blank
+    assign bf_keys = ''
+    for candidate in bf_collection.products limit: 60
+      assign candidate_variant = candidate.selected_or_first_available_variant
+      if candidate_variant.compare_at_price > candidate_variant.price
+        assign candidate_pct = candidate_variant.compare_at_price | minus: candidate_variant.price | times: 100 | divided_by: candidate_variant.compare_at_price
+        assign candidate_sort = candidate_pct | prepend: '00' | slice: -3, 3
+        assign candidate_dept = -1
+        for dept_handle in dept_handles
+          for candidate_collection in candidate.collections
+            if candidate_collection.handle == dept_handle
+              assign candidate_dept = forloop.parentloop.index0
+              break
+            endif
+          endfor
+          if candidate_dept != -1
+            break
+          endif
+        endfor
+        assign bf_keys = bf_keys | append: candidate_sort | append: '|' | append: candidate_dept | append: '|' | append: bf_collection.handle | append: '|' | append: candidate.id | append: ';'
+      endif
+    endfor
+    assign bf_keys = bf_keys | split: ';' | sort | reverse
+  endif
+  assign bf_max = bf_keys.first | split: '|' | first | plus: 0
+  assign bf_count = bf_keys.size
+  if bf_count == 0
+    assign bf_render = false
+  endif
+  assign bf_max_text = '-' | append: bf_max | append: '%'
+  # Dates comme le prototype : « 20 nov – 30 nov » (mois traduits)
+  assign months = 'desktop_home_shop.months_short' | t | split: ','
+  assign bf_start_month = settings.bf_start | date: '%m' | minus: 1
+  assign bf_end_month = settings.bf_end | date: '%m' | minus: 1
+  capture bf_dates
+    echo settings.bf_start | date: '%-d'
+    echo ' '
+    echo months[bf_start_month]
+    echo ' – '
+    echo settings.bf_end | date: '%-d'
+    echo ' '
+    echo months[bf_end_month]
+  endcapture
+-%}
+<script src="{{ 'desktop-home-shop.js' | asset_url }}" defer></script>
+<style>
+  @media only screen and (max-width: 760px) {
+    #shopify-section-{{ section.id }} { display: none !important; }
+  }
+  @media only screen and (min-width: 761px) {
+    .template-index #content > .shopify-section:not(#shopify-section-{{ section.id }}):not(.shopify-section-footer) { display: none !important; }
+  }
+</style>
+
+{%- capture i18n -%}
+  {
+    "arriveToday": {{ 'desktop_home_shop.arrive_today' | t: hours: '__H__' | json }},
+    "arriveTomorrow": {{ 'desktop_home_shop.arrive_tomorrow' | t: hours: '__H__' | json }},
+    "inDelivery": {{ 'desktop_home_shop.in_delivery' | t | json }},
+    "express": {{ 'desktop_home_shop.express' | t | json }},
+    "tracking": {{ 'desktop_home_shop.tracking' | t | json }},
+    "addToCart": {{ 'desktop_home_shop.add_to_cart' | t | json }},
+    "preview": {{ 'desktop_home_shop.preview' | t | json }},
+    "bfName": {{ 'desktop_home_shop.bf_name' | t | json }},
+    "bfEndsIn": {{ 'desktop_home_shop.bf_ends_in' | t | json }},
+    "bfUpTo": {{ 'desktop_home_shop.bf_up_to' | t: percent: bf_max_text | json }},
+    "bfUpToProducts": {{ 'desktop_home_shop.bf_up_to_products' | t: percent: bf_max_text, count: bf_count | json }},
+    "bfUpToOffers": {{ 'desktop_home_shop.bf_up_to_offers' | t: percent: bf_max_text, count: bf_count | json }},
+    "tbarBfPromo": {{ 'desktop_home_shop.tbar_bf_promo_html' | t: percent: bf_max_text, count: bf_count | json }},
+    "days": {{ 'desktop_home_shop.bf_days' | t | json }},
+    "hours": {{ 'desktop_home_shop.bf_hours' | t | json }},
+    "minutes": {{ 'desktop_home_shop.bf_minutes' | t | json }},
+    "seconds": {{ 'desktop_home_shop.bf_seconds' | t | json }},
+    "dayShort": {{ 'desktop_home_shop.bf_day_short' | t | json }},
+    "shop": {{ shop.name | capitalize | json }}
+  }
+{%- endcapture -%}
+
+<div class="dhp{% if bf_render %} has-bf{% endif %}" data-dhp
+  data-i18n="{{ i18n | strip_newlines | escape }}"
+  data-added="{{ 'mobile.js.added_to_wishlist' | t | escape }}"
+  data-removed="{{ 'mobile.js.removed_from_wishlist' | t | escape }}"
+  {%- if bf_render %}
+    data-bf-start="{{ bf_start_s }}"
+    data-bf-end="{{ bf_end_s }}"
+    data-bf-preview="{{ request.design_mode }}"
+  {%- endif %}>
+  {%- comment -%} Pleine largeur dès le premier affichage (même calcul que assets/desktop-home-shop.js au redimensionnement). {%- endcomment -%}
+  <script>
+    (function (root) {
+      if (!root || window.matchMedia('(max-width: 760px)').matches) return;
+      root.style.setProperty('--dhp-x', root.parentElement.getBoundingClientRect().left + 'px');
+      root.style.setProperty('--dhp-w', document.documentElement.clientWidth + 'px');
+    })(document.currentScript.parentElement);
+  </script>
+
+  {%- comment -%} Données de la grande carte : rayons et leurs produits (photo, prix, remise, note) {%- endcomment -%}
+  <script type="application/json" data-dhp-data>
+    [
+      {%- for dept_handle in dept_handles -%}
+        {%- assign dept = collections[dept_handle] -%}
+        {%- unless forloop.first -%},{%- endunless -%}
+        {"t": {{ dept_titles[forloop.index0] | json }}, "u": {{ dept.url | json }}, "p": [
+          {%- assign dept_first = true -%}
+          {%- for item in dept.products limit: 14 -%}
+            {%- liquid
+              assign item_variant = item.selected_or_first_available_variant
+              assign item_image = item_variant.featured_image | default: item.featured_image
+              if item_image == blank
+                continue
+              endif
+              assign item_old = ''
+              assign item_pct = ''
+              if item_variant.compare_at_price > item_variant.price
+                assign item_old = item_variant.compare_at_price | money | strip_html
+                assign item_pct = item_variant.compare_at_price | minus: item_variant.price | times: 100 | divided_by: item_variant.compare_at_price | prepend: '-' | append: '%'
+              endif
+              assign item_rating = ''
+              assign item_ali = item.metafields.alireviews.seo_rating_review_key_script | append: '' | strip_newlines | remove: ' '
+              if item_ali contains '"ratingValue":"'
+                assign item_rating = item_ali | split: '"ratingValue":"' | last | split: '"' | first | times: 1.0 | round: 1 | append: ''
+              elsif item.metafields.reviews.rating
+                assign item_rating = item.metafields.reviews.rating.value.rating | times: 1.0 | round: 1 | append: ''
+              endif
+              unless request.locale.iso_code contains 'en'
+                assign item_rating = item_rating | replace: '.', ','
+              endunless
+            -%}
+            {%- unless dept_first -%},{%- endunless -%}
+            {%- assign dept_first = false -%}
+            {"t": {{ item.title | json }}, "u": {{ item.url | json }}, "i": {{ item_image | image_url: width: 600 | json }}, "p": {{ item_variant.price | money | strip_html | json }}, "o": {{ item_old | json }}, "c": {{ item_pct | json }}, "r": {{ item_rating | json }}}
+          {%- endfor -%}
+        ]}
+      {%- endfor -%}
+    ]
+  </script>
+
+  <div class="dhp-wrap">
+    {%- comment -%} ---------- Moyens de paiement (mêmes logos que le pied de page), logos qui défilent ---------- {%- endcomment -%}
+    {%- if shop.enabled_payment_types.size > 0 -%}
+      {%- capture pay_items -%}
+        {%- for payment_method in shop.enabled_payment_types -%}
+          {%- capture payment_svg -%}{{ payment_method | payment_type_svg_tag }}{%- endcapture -%}
+          <li>{{ payment_svg | replace: 'id="', 'id="dhp-' | replace: 'url(#', 'url(#dhp-' | replace: 'aria-labelledby="', 'aria-labelledby="dhp-' | replace: 'href="#', 'href="#dhp-' }}</li>
+        {%- endfor -%}
+      {%- endcapture -%}
+      <div class="dhp-pay" role="region" aria-label="{{ 'desktop_home_shop.pay_aria' | t }}">
+        <div class="dhp-pay__t">
+          <span class="dhp-pay__lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path class="dhp-pay__shackle" d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v2"/></svg></span>
+          <span><b>{{ 'desktop_home_shop.pay_title' | t }}</b><small><i></i>{{ 'desktop_home_shop.pay_count' | t: count: shop.enabled_payment_types.size }}</small></span>
+        </div>
+        <div class="dhp-pay__view">
+          <ul class="dhp-pay__ic">
+            {{- pay_items -}}
+            {{- pay_items | replace: '<li>', '<li aria-hidden="true">' | replace: 'id="dhp-', 'data-id="dhp-' | replace: 'aria-labelledby="dhp-', 'data-l="dhp-' -}}
+          </ul>
+        </div>
+        <div class="dhp-pay__r"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="dhp-pay__shield" d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><path class="dhp-pay__tick" d="m8.5 12 2.5 2.5 4.5-5"/></svg><span>{{ 'desktop_home_shop.pay_protected' | t }}<small>{{ 'desktop_home_shop.pay_ssl' | t }}</small></span></div>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} ---------- Grande carte animée (scènes remplies par le script) ---------- {%- endcomment -%}
+    <section class="dhp-hero" data-dhp-hero>
+      {%- if bf_render -%}
+        <div class="dhp-hero__txt dhp-hero__txt--bf" hidden data-bf-only>
+          <span class="dhp-bf-chip"><i></i>{{ 'desktop_home_shop.bf_name' | t }} · {{ bf_dates }}</span>
+          <h1>{{ 'desktop_home_shop.bf_title_html' | t: percent: bf_max_text }}</h1>
+          <p>{{ 'desktop_home_shop.bf_text' | t }}</p>
+          <div class="dhp-cd" data-bf-cd="boxes"></div>
+          <div class="dhp-hero__cta">
+            <a class="dhp-btn dhp-btn--bf" href="#dhp-bf">{{ 'desktop_home_shop.bf_cta' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+            <a class="dhp-btn dhp-btn--ghost" href="{{ bf_url }}">{{ 'desktop_home_shop.bf_all' | t }}</a>
+          </div>
+        </div>
+      {%- endif -%}
+      <div class="dhp-hero__txt dhp-hero__txt--std">
+        <h1>{{ 'desktop_home_shop.hero_title_html' | t: shop: shop_name }}</h1>
+        <p>{{ 'desktop_home_shop.hero_text' | t }}</p>
+        <div class="dhp-hero__cta">
+          <a class="dhp-btn dhp-btn--brand" href="#dhp-reparti">{{ 'desktop_home_shop.hero_cta_shop' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+          <a class="dhp-btn dhp-btn--soft" href="#dhp-offerte">{{ 'desktop_home_shop.hero_cta_deals' | t }}</a>
+        </div>
+        <div class="dhp-hero__usp">
+          {%- if shipping_amount != '' -%}<span>🚚 {{ 'desktop_home_shop.usp_shipping_html' | t: amount: shipping_amount }}</span>{%- endif -%}
+          <span>↩ {{ 'desktop_home_shop.usp_return_html' | t }}</span>
+          <span>💳 {{ 'desktop_home_shop.usp_klarna_html' | t }}</span>
+        </div>
+      </div>
+      <div class="dhp-hero__art" data-dhp-art></div>
+    </section>
+
+    {%- comment -%} ---------- Black Friday : bloc noir (mot qui défile, compte à rebours, onglets) + vraies cartes ---------- {%- endcomment -%}
+    {%- if bf_render -%}
+      <section class="dhp-bfs" id="dhp-bf" hidden data-bf-only>
+        <div class="dhp-bf">
+          {%- capture bf_word -%}<span>{{ 'desktop_home_shop.bf_name' | t | upcase }}<i>✦</i>{{ 'desktop_home_shop.bf_up_to' | t: percent: bf_max_text | upcase }}<i>✦</i>{{ 'desktop_home_shop.bf_offers' | t: count: bf_count | upcase }}<i>✦</i></span>{%- endcapture -%}
+          <div class="dhp-bf__marq" aria-hidden="true"><div class="dhp-bf__track">{{ bf_word }}{{ bf_word }}{{ bf_word }}{{ bf_word }}</div></div>
+          <div class="dhp-bf__in">
+            <div class="dhp-hd">
+              <div><small>{{ bf_dates }}</small><h2>{{ 'desktop_home_shop.bf_section' | t }}</h2></div>
+              <div class="dhp-cd" data-bf-cd="boxes"></div>
+              <div class="dhp-arws" data-for="dhp-t-bf">
+                <button class="dhp-arw" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+                <button class="dhp-arw" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+              </div>
+            </div>
+            <div class="dhp-bf__tabs" data-dhp-bf-tabs>
+              <button type="button" class="is-on" data-di="-1">{{ 'desktop_home_shop.bf_all_tab' | t }}<em>{{ bf_count }}</em></button>
+              {%- for dept_handle in dept_handles -%}
+                {%- assign dept_key = '|' | append: forloop.index0 | append: '|' -%}
+                {%- assign dept_count = 0 -%}
+                {%- for bf_key in bf_keys -%}{%- if bf_key contains dept_key -%}{%- assign dept_count = dept_count | plus: 1 -%}{%- endif -%}{%- endfor -%}
+                {%- if dept_count > 0 -%}
+                  <button type="button" data-di="{{ forloop.index0 }}">{{ dept_titles[forloop.index0] | escape }}<em>{{ dept_count }}</em></button>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        </div>
+        <ul class="dhp-track dhp-bf__rail" id="dhp-t-bf" data-dhp-bf-rail>
+          {%- for bf_key in bf_keys limit: 60 -%}
+            {%- liquid
+              assign bf_parts = bf_key | split: '|'
+              assign bf_id = bf_parts[3] | plus: 0
+              assign bf_product = collections[bf_parts[2]].products | where: 'id', bf_id | first
+              if bf_product == blank
+                continue
+              endif
+              capture bf_card
+                render 'mshein-card', product: bf_product, best: best, best_ids: best_ids, flag: flag, uniform: true
+              endcapture
+              assign bf_attr = '<li data-di="' | append: bf_parts[1] | append: '" class="mshein-card'
+            -%}
+            {{ bf_card | replace_first: '<li class="mshein-card', bf_attr }}
+          {%- endfor -%}
+        </ul>
+        <a class="dhp-btn dhp-bf__all" href="{{ bf_url }}">{{ 'desktop_home_shop.bf_see_all' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+      </section>
+    {%- endif -%}
+
+    {%- comment -%} ---------- Reparti di tendenza : photo du rayon, note moyenne, 2 produits ---------- {%- endcomment -%}
+    <section class="dhp-sec" id="dhp-reparti">
+      <div class="dhp-hd">
+        <h2>{{ 'desktop_home_shop.trending_depts' | t }}</h2>
+        <div class="dhp-arws" data-for="dhp-t-dept">
+          <button class="dhp-arw" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+          <button class="dhp-arw" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </div>
+      </div>
+      <div class="dhp-track" id="dhp-t-dept">
+        {%- for dept_handle in dept_handles -%}
+          {%- liquid
+            assign dept = collections[dept_handle]
+            assign dept_image = dept.image
+            if dept_image == blank
+              assign dept_image = dept.products[3].featured_image | default: dept.featured_image
+            endif
+            assign rate_sum = 0.0
+            assign rate_n = 0
+            for rated in dept.products limit: 14
+              assign rated_ali = rated.metafields.alireviews.seo_rating_review_key_script | append: '' | strip_newlines | remove: ' '
+              if rated_ali contains '"ratingValue":"'
+                assign rated_value = rated_ali | split: '"ratingValue":"' | last | split: '"' | first | times: 1.0
+                if rated_value > 0
+                  assign rate_sum = rate_sum | plus: rated_value
+                  assign rate_n = rate_n | plus: 1
+                endif
+              endif
+            endfor
+            assign rate_text = ''
+            if rate_n > 0
+              assign rate_text = rate_sum | divided_by: rate_n | round: 1 | append: ''
+              unless request.locale.iso_code contains 'en'
+                assign rate_text = rate_text | replace: '.', ','
+              endunless
+            endif
+          -%}
+          <a class="dhp-dept" href="{{ dept.url }}">
+            {%- if dept_image != blank -%}<img class="dhp-dept__bg" src="{{ dept_image | image_url: width: 700 }}" alt="" loading="lazy" width="350" height="470">{%- endif -%}
+            <span>
+              <span class="dhp-dept__name">{{ dept_titles[forloop.index0] | escape }}</span>
+              <span class="dhp-dept__rate">
+                {%- if rate_text != '' -%}★ {{ rate_text }} · {{ 'desktop_home.verified_reviews' | t }}{%- elsif shipping_amount != '' -%}{{ 'desktop_home.free_shipping_from_html' | t: amount: shipping_amount }}{%- endif -%}
+              </span>
+            </span>
+            <span class="dhp-dept__items">
+              {%- for item in dept.products limit: 2 -%}
+                {%- assign item_variant = item.selected_or_first_available_variant -%}
+                <span class="dhp-thumb">{%- if item.featured_image != blank -%}<img src="{{ item.featured_image | image_url: width: 240 }}" alt="" loading="lazy" width="120" height="120">{%- endif -%}<b>{{ item_variant.price | money | strip_html }}</b></span>
+              {%- endfor -%}
+            </span>
+          </a>
+        {%- endfor -%}
+      </div>
+    </section>
+
+    {%- comment -%}
+      ---------- Shop per brand : même liste que le panneau Categoria mobile (snippets/mobile-category-browser.liquid,
+      Nom|recherche|collection(s)|photo) ; tuiles de couleur, photo penchée, 2 lignes qui défilent ----------
+    {%- endcomment -%}
+    {%- capture brand_list -%}
+      Nike|Nike|nike|https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8ae372f4eb054239af3a39d4ab0519c9c.webp?v=1789041250;
+      Adidas|Adidas|adidas|https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sb2a7e163022348678537978674dc3b70O.webp?v=1787106256;
+      Pagani Design|Pagani||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S494ed60da18945f6bb26fa6fec9215a0h.webp?v=1786155997;
+      Trendsi|Trendsi|trendsi|https://cdn.shopify.com/s/files/1/0942/1570/0821/files/b8948d205ec24624946946ea202d0cdd-Max-Origin.webp?v=1788908801;
+      Onemix|Onemix||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8c461582ea554035af236b0384985f7ca.webp?v=1787106240;
+      Zadorin|Zadorin||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S6992ddc59d5d4c4cb796da09b202c7cfE.webp?v=1789457559;
+      Jordan|Jordan||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S3593772eb42c40448289dde1bdc0be8fw.webp?v=1786839410;
+      Skechers|Skechers||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E13183651770342249d0781f12861a4ddq.webp?v=1790629864;
+      Reebok|Reebok|reebok,rebok|https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S30566c6a807047c2a5ab2e9484c887bc0.webp?v=1788907538;
+      Misako|Misako||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Ecc50eb0b55954a2baa82c709411fe2f5B.webp?v=1786849291;
+      Olevs|Olevs||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sb90a3a8249024123b43ad4e7985c9050F.webp?v=1779607883;
+      Poedagar|Poedagar||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S33c965aa1b0348f1a470f476e74c34e4L.webp?v=1790623750;
+      Xti|Xti||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E5873467178854783a86ec3a9017fd10bn.webp?v=1790629831;
+      Joma|Joma||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E84f5c97d947440888060bd6251d31237t.webp?v=1790629474;
+      Addiesdive|Addiesdive||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sf406106133044cf6b0a1b8d54ed05457t.webp?v=1790623677;
+      Mustang|Mustang||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Eaf21cc09fc7c48ca8de4ff148a1ebd80R.webp?v=1790629686;
+      AddiesKin|AddiesKin||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sd4a0e061117341aaa58b55f18da4aacb9.webp?v=1790623676;
+      Xtep|Xtep||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sfb6b6f82cd2149398ec16f0d84729e37P.webp?v=1787106229;
+      Liyke|Liyke||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sb448ffb35ef64938aaa2fcd0f7f3521dK.webp?v=1778891350;
+      Tous|Tous||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E84fa3a6652534ff8a638cd4c4023f5d19.webp?v=1786930592;
+      Lige|Lige||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8738fe98c50142dd8c1dd35ab4d74fe9u.webp?v=1779602758
+    {%- endcapture -%}
+    {%- assign brand_entries = brand_list | split: ';' -%}
+    {%- assign brand_colors = '#e8547a,#c8102e,#2f2a6b,#0e7c66,#f08c2e,#e2506b,#b23a48,#7a4e2d,#3a74c4,#5b5799' | split: ',' -%}
+    <section class="dhp-sec" id="dhp-brand">
+      <div class="dhp-hd">
+        <h2>{{ 'desktop_home_shop.shop_by_brand' | t }}</h2>
+        <div class="dhp-hd__end">
+          <a class="dhp-more" href="{{ routes.collections_url }}">{{ 'mobile.explore.see_more_brands' | t }}</a>
+          <div class="dhp-arws" data-for="dhp-brands">
+            <button class="dhp-arw" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+            <button class="dhp-arw" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <div class="dhp-brands" id="dhp-brands">
+        {%- for brand_entry in brand_entries -%}
+          {%- liquid
+            assign brand_parts = brand_entry | strip | split: '|'
+            assign brand_label = brand_parts[0]
+            assign brand_query = brand_parts[1] | url_encode
+            assign brand_collection = blank
+            assign brand_collection_handles = brand_parts[2] | split: ','
+            for brand_collection_handle in brand_collection_handles
+              if brand_collection == blank and collections[brand_collection_handle].products_count > 0
+                assign brand_collection = collections[brand_collection_handle]
+              endif
+            endfor
+            assign brand_url = routes.search_url | append: '?q=' | append: brand_query | append: '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type'
+            assign brand_image = blank
+            if brand_collection != blank
+              assign brand_url = brand_collection.url
+              assign brand_image = brand_collection.featured_image | default: brand_collection.image
+            endif
+            assign brand_color_index = forloop.index0 | modulo: brand_colors.size
+          -%}
+          <a class="dhp-brand" href="{{ brand_url }}" style="background: {{ brand_colors[brand_color_index] }}">
+            {%- if brand_image != blank -%}
+              <img src="{{ brand_image | image_url: width: 300 }}" alt="" loading="lazy" width="150" height="150">
+            {%- elsif brand_parts[3] != blank -%}
+              <img src="{{ brand_parts[3] | strip }}&width=300" alt="" loading="lazy" width="150" height="150" onerror="this.remove()">
+            {%- endif -%}
+            <strong>{{ brand_label | escape }}</strong>
+          </a>
+        {%- endfor -%}
+        <a class="dhp-brand dhp-brand--more" href="{{ routes.collections_url }}"><strong>{{ 'mobile.explore.see_more_brands' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></strong></a>
+      </div>
+    </section>
+
+    {%- comment -%}
+      ---------- Mot géant : nom du rayon (clic ou toutes les 4,5 s) et ses 10 produits ; le 1er rayon est rendu ici,
+      les autres sont chargés à leur tour (modèle collection.mshein-dept-page, mêmes cartes) ----------
+    {%- endcomment -%}
+    {%- if dept_handles.size > 0 -%}
+      {%- comment -%} Départ sur le 6e rayon, comme le prototype {%- endcomment -%}
+      {%- assign marq_start = 5 -%}
+      {%- if marq_start >= dept_handles.size -%}{%- assign marq_start = 0 -%}{%- endif -%}
+      <section class="dhp-marq" aria-label="{{ 'desktop_home_shop.products_by_dept' | t }}" data-dhp-marq data-start="{{ marq_start }}">
+        <div class="dhp-marq__row" data-dhp-marq-row></div>
+        <div class="dhp-marq__img" data-dhp-marq-img></div>
+        <template data-dhp-marq-depts>
+          {%- for dept_handle in dept_handles -%}
+            {%- assign dept = collections[dept_handle] -%}
+            <i data-title="{{ dept_titles[forloop.index0] | escape }}" data-src="{{ dept.url }}?view=mshein-dept-page" data-img="{{ dept.products.first.featured_image | image_url: width: 240 }}"></i>
+          {%- endfor -%}
+        </template>
+      </section>
+      <ul class="dhp-prods" data-dhp-prods>
+        {%- for product in collections[dept_handles[marq_start]].products limit: 10 -%}
+          {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag, uniform: true -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- comment -%} ---------- Le offerte del momento : les 10 plus fortes remises des rayons ---------- {%- endcomment -%}
+    <section class="dhp-sec" id="dhp-offerte">
+      <div class="dhp-hd"><h2><a href="{{ sale_url }}">{{ 'desktop_home_shop.deals_now' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a></h2></div>
+      <ul class="dhp-prods">
+        {%- assign deal_shown = 0 -%}
+        {%- for deal_key in deal_keys -%}
+          {%- liquid
+            assign deal_parts = deal_key | split: '|'
+            assign deal_id = deal_parts[3] | plus: 0
+            assign deal = collections[deal_parts[2]].products | where: 'id', deal_id | first
+            if deal == blank
+              continue
+            endif
+          -%}
+          {%- render 'mshein-card', product: deal, best: best, best_ids: best_ids, flag: flag, uniform: true -%}
+          {%- assign deal_shown = deal_shown | plus: 1 -%}
+          {%- if deal_shown == 10 -%}{%- break -%}{%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </section>
+
+    {%- comment -%}
+      ---------- Collezioni da scoprire : sous-liens collection du menu (un par rayon, puis le suivant…), photo de la
+      collection, ses produits 3 par 3 (flèches, défilement automatique) ----------
+    {%- endcomment -%}
+    {%- capture coll_cards -%}
+      {%- assign coll_shown = 0 -%}
+      {%- assign coll_seen = ',' -%}
+      {%- for round in (0..3) -%}
+        {%- for link in menu.links -%}
+          {%- if link.type != 'collection_link' or link.object.handle == 'all' -%}{%- continue -%}{%- endif -%}
+          {%- assign sub_link = link.links[round] -%}
+          {%- if sub_link == blank or sub_link.type != 'collection_link' -%}{%- continue -%}{%- endif -%}
+          {%- assign sub = sub_link.object -%}
+          {%- assign sub_key = ',' | append: sub.handle | append: ',' -%}
+          {%- if coll_seen contains sub_key or sub.products_count < 3 -%}{%- continue -%}{%- endif -%}
+          {%- assign coll_seen = coll_seen | append: sub.handle | append: ',' -%}
+          {%- assign sub_image = sub.image | default: sub.products.first.featured_image -%}
+          <a class="dhp-coll" href="{{ sub.url }}">
+            {%- if sub_image != blank -%}<img class="dhp-coll__bg" src="{{ sub_image | image_url: width: 800 }}" alt="" loading="lazy" width="400" height="500">{%- endif -%}
+            <span>
+              <span class="dhp-coll__name">{{ sub_link.title | escape }}</span>
+              <span class="dhp-coll__sub">{{ link.title | escape }}</span>
+            </span>
+            <span class="dhp-coll__items">
+              <span class="dhp-coll__rail">
+                {%- for item in sub.products limit: 9 -%}
+                  {%- assign item_variant = item.selected_or_first_available_variant -%}
+                  <span class="dhp-thumb" data-href="{{ item.url }}" title="{{ item.title | escape }}">{%- if item.featured_image != blank -%}<img src="{{ item.featured_image | image_url: width: 220 }}" alt="" loading="lazy" width="110" height="110">{%- endif -%}<b>{{ item_variant.price | money | strip_html }}</b></span>
+                {%- endfor -%}
+              </span>
+              <button class="dhp-coll__arw dhp-coll__arw--p" type="button" data-coll-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+              <button class="dhp-coll__arw dhp-coll__arw--n" type="button" data-coll-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+              <span class="dhp-coll__dots"></span>
+            </span>
+          </a>
+          {%- assign coll_shown = coll_shown | plus: 1 -%}
+          {%- if coll_shown >= 12 -%}{%- break -%}{%- endif -%}
+        {%- endfor -%}
+        {%- if coll_shown >= 12 -%}{%- break -%}{%- endif -%}
+      {%- endfor -%}
+    {%- endcapture -%}
+    {%- if coll_cards != blank -%}
+      <section class="dhp-sec">
+        <div class="dhp-hd">
+          <h2>{{ 'desktop_home_shop.collections_discover' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></h2>
+          <div class="dhp-arws" data-for="dhp-t-coll">
+            <button class="dhp-arw" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+            <button class="dhp-arw" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+        <div class="dhp-track" id="dhp-t-coll">{{ coll_cards }}</div>
+      </section>
+    {%- endif -%}
+
+    {%- comment -%}
+      ---------- Occasioni : un bloc « occasion » par tuile (collection, ou recherche dont les photos sont lues par le
+      script) ; nom traduit selon le thème choisi ; Black Friday en premier pendant la période ----------
+    {%- endcomment -%}
+    {%- assign occasions = section.blocks | where: 'type', 'occasion' -%}
+    {%- if occasions.size > 0 or bf_render -%}
+      <section class="dhp-sec" id="dhp-occasioni">
+        <div class="dhp-hd dhp-hd--occ">
+          <div><small>{{ 'desktop_home_shop.occ_kicker' | t }}</small><h2>{{ 'desktop_home_shop.occasions' | t }}</h2></div>
+          <div class="dhp-arws" data-for="dhp-t-occ">
+            <button class="dhp-arw" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+            <button class="dhp-arw" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+        <div class="dhp-track" id="dhp-t-occ">
+          {%- if bf_render -%}
+            {%- liquid
+              assign bf_first = bf_keys[0] | split: '|'
+              assign bf_first_id = bf_first[3] | plus: 0
+              assign bf_photo_1 = collections[bf_first[2]].products | where: 'id', bf_first_id | first
+              assign bf_second = bf_keys[1] | split: '|'
+              assign bf_second_id = bf_second[3] | plus: 0
+              assign bf_photo_2 = collections[bf_second[2]].products | where: 'id', bf_second_id | first
+            -%}
+            <a class="dhp-occ dhp-occ--bf" href="{{ bf_url }}" hidden data-bf-only>
+              <span class="dhp-occ__img">
+                {%- if bf_photo_1 != blank -%}<img src="{{ bf_photo_1.featured_image | image_url: width: 700 }}" alt="" loading="lazy" width="350" height="467">{%- endif -%}
+                {%- if bf_photo_2 != blank -%}<img src="{{ bf_photo_2.featured_image | image_url: width: 700 }}" alt="" loading="lazy" width="350" height="467">{%- endif -%}
+              </span>
+              <span class="dhp-occ__t">{{ 'desktop_home_shop.bf_name' | t }}</span>
+              <span class="dhp-occ__s">{{ 'desktop_home_shop.bf_up_to' | t: percent: bf_max_text }} · {{ 'desktop_home_shop.bf_offers' | t: count: bf_count }}</span>
+            </a>
+          {%- endif -%}
+          {%- for block in occasions -%}
+            {%- liquid
+              assign occ_collection = block.settings.collection
+              assign occ_query = block.settings.query | strip
+              if occ_collection == blank and occ_query == blank
+                continue
+              endif
+              assign occ_theme = block.settings.theme
+              assign occ_label_key = 'desktop_home_shop.occ_' | append: occ_theme
+              # Texte traduit déjà échappé par « t » ; le nom saisi dans le bloc est échappé ici
+              assign occ_label = occ_label_key | t
+              if is_it and block.settings.label != blank
+                assign occ_label = block.settings.label | escape
+              endif
+              if occ_collection != blank
+                assign occ_url = occ_collection.url
+                assign occ_sub = occ_collection.title | remove: ' - Tutte' | remove: ' - Tutti'
+                assign occ_main = occ_collection.image | default: occ_collection.products.first.featured_image
+                if occ_collection.image != blank
+                  assign occ_hover = occ_collection.products.first.featured_image
+                else
+                  assign occ_hover = occ_collection.products[1].featured_image
+                endif
+              else
+                assign occ_query_url = occ_query | url_encode
+                assign occ_url = routes.search_url | append: '?q=' | append: occ_query_url | append: '&type=product'
+                assign occ_sub_key = 'desktop_home_shop.occ_' | append: occ_theme | append: '_sub'
+                assign occ_sub = occ_sub_key | t
+              endif
+            -%}
+            <a class="dhp-occ" href="{{ occ_url }}"{% if occ_collection == blank %} data-occ-q="{{ occ_query | escape }}"{% endif %} {{ block.shopify_attributes }}>
+              <span class="dhp-occ__img">
+                {%- if occ_collection != blank -%}
+                  {%- if occ_main != blank -%}<img src="{{ occ_main | image_url: width: 700 }}" alt="" loading="lazy" width="350" height="467">{%- endif -%}
+                  {%- if occ_hover != blank -%}<img src="{{ occ_hover | image_url: width: 700 }}" alt="" loading="lazy" width="350" height="467">{%- endif -%}
+                {%- endif -%}
+              </span>
+              <span class="dhp-occ__t">{{ occ_label }}</span>
+              <span class="dhp-occ__s">{% if occ_collection != blank %}{{ occ_sub | escape }}{% else %}{{ occ_sub }}{% endif %}</span>
+            </a>
+          {%- endfor -%}
+        </div>
+      </section>
+    {%- endif -%}
+
+    {%- comment -%}
+      ---------- « Scopri il tuo prossimo colpo di fulmine » : photo du titre qui change, catégories phares (blocs
+      « featured » : collection, photo, 3 produits) par pages de 4 qui se retournent ----------
+    {%- endcomment -%}
+    {%- assign featured = section.blocks | where: 'type', 'featured' -%}
+    {%- if featured.size > 0 -%}
+      <section class="dhp-ed" data-dhp-ed>
+        {%- capture chip -%}<span class="dhp-chip" data-dhp-chip></span>{%- endcapture -%}
+        <h2 class="dhp-ed__hd">{{ 'desktop_home_shop.crush_title_html' | t: chip: chip }}</h2>
+        <template data-dhp-chip-pics>
+          {%- for round in (0..5) -%}
+            {%- for dept_handle in dept_handles -%}
+              {%- assign chip_product = collections[dept_handle].products[round] -%}
+              {%- if chip_product.featured_image != blank -%}<i data-src="{{ chip_product.featured_image | image_url: width: 160 }}"></i>{%- endif -%}
+            {%- endfor -%}
+          {%- endfor -%}
+        </template>
+        <div class="dhp-hd dhp-hd--end">
+          <div class="dhp-arws" data-dhp-ed-arws>
+            <button class="dhp-arw" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+            <button class="dhp-arw" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+        <div class="dhp-fcgrid" data-dhp-ed-grid></div>
+        <div class="dhp-fcdots" data-dhp-ed-dots></div>
+        <template data-dhp-ed-cards>
+          {%- for block in featured -%}
+            {%- liquid
+              assign fc_collection = block.settings.collection
+              if fc_collection == blank or fc_collection.products_count < 3
+                continue
+              endif
+              assign fc_label = fc_collection.title | remove: ' - Tutte' | remove: ' - Tutti'
+              if is_it and block.settings.label != blank
+                assign fc_label = block.settings.label
+              endif
+              assign fc_image = block.settings.image | default: fc_collection.image | default: fc_collection.products[3].featured_image | default: fc_collection.products.first.featured_image
+            -%}
+            <div class="dhp-fc" {{ block.shopify_attributes }}>
+              <a class="dhp-fc__top" href="{{ fc_collection.url }}">
+                {%- if fc_image != blank -%}<img src="{{ fc_image | image_url: width: 800 }}" alt="" loading="lazy" width="400" height="400">{%- endif -%}
+                <span class="dhp-fc__btn">{{ fc_label | escape }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+              </a>
+              <div class="dhp-fc__items">
+                {%- for item in fc_collection.products limit: 3 -%}
+                  <a href="{{ item.url }}" title="{{ item.title | escape }}">{%- if item.featured_image != blank -%}<img src="{{ item.featured_image | image_url: width: 300 }}" alt="" loading="lazy" width="150" height="200">{%- endif -%}</a>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        </template>
+      </section>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Home desktop Shop",
+  "class": "desktop-home-shop",
+  "max_blocks": 40,
+  "settings": [
+    { "type": "link_list", "id": "menu", "label": "Menu dei reparti", "info": "Lo stesso dell'intestazione: un reparto per ogni collezione del menu.", "default": "main-menu" },
+    { "type": "paragraph", "content": "Black Friday: Impostazioni tema > Black Friday." }
+  ],
+  "blocks": [
+    {
+      "type": "occasion",
+      "name": "Occasione",
+      "settings": [
+        {
+          "type": "select", "id": "theme", "label": "Nome (tradotto)", "default": "home",
+          "options": [
+            { "value": "home", "label": "Gli indispensabili per stare a casa" },
+            { "value": "halloween", "label": "I tuoi look di Halloween" },
+            { "value": "cocooning", "label": "Le tue sfumature cocooning" },
+            { "value": "party", "label": "Il periodo delle feste" },
+            { "value": "autumn", "label": "L'autunno è nel pieno" },
+            { "value": "boots", "label": "Stivali di stagione" },
+            { "value": "elegance", "label": "Un tocco di eleganza" },
+            { "value": "sport", "label": "Pronti per lo sport" }
+          ]
+        },
+        { "type": "collection", "id": "collection", "label": "Collezione" },
+        { "type": "text", "id": "query", "label": "Oppure ricerca", "info": "Senza collezione: prodotti della ricerca (es. pigiama)" },
+        { "type": "text", "id": "label", "label": "Nome (italiano)", "info": "Vuoto o altra lingua: nome tradotto scelto sopra" }
+      ]
+    },
+    {
+      "type": "featured",
+      "name": "Categoria in evidenza",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collezione" },
+        { "type": "text", "id": "label", "label": "Nome (italiano)", "info": "Vuoto o altra lingua: nome della collezione" },
+        { "type": "image_picker", "id": "image", "label": "Foto", "info": "Vuota: foto della collezione" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Home desktop Shop" }
+  ]
+}
+{% endschema %}

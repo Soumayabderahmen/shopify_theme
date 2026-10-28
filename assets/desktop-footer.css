@@ -50,9 +50,12 @@
 /* Boutons : largeurs / hauteurs minimales du thème retirées */
 .dft button { float: none !important; width: auto !important; min-width: 0 !important; height: auto !important; min-height: 0 !important; line-height: normal !important; }
 
-.dft__wrap { width: 100%; max-width: 1320px; margin: 0 auto; padding: 0 28px; }
-.dft__top { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr 1.35fr; gap: 36px; padding: 48px 0 36px; }
-.dft h4 { margin: 0 0 14px; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; line-height: normal; letter-spacing: 1px; text-transform: uppercase; }
+/* Contenu centré (1600px au plus), mêmes bords que l'en-tête (assets/desktop-header.css) ; seulement les côtés ici,
+   .dft__top et .dft__bot (aussi des .dft__wrap) gardent leur haut et leur bas */
+.dft__wrap { width: 100%; max-width: 1600px; margin: 0 auto; padding-right: 48px; padding-left: 48px; }
+.dft__top { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr 1.35fr; gap: 36px; padding-top: 52px; padding-bottom: 40px; }
+/* #root : le thème met ses titres h4 en 16px */
+#root .dft h4 { margin: 0 0 14px; color: #fff; font-family: inherit; font-size: 14px; font-weight: 800; line-height: normal; letter-spacing: 1px; text-transform: uppercase; }
 .dft__col a, .dft__rows a { display: block; padding: 5px 0; color: #c7c4ea; font-size: 14px; }
 .dft__col a:hover { color: #fff; }
 
@@ -107,18 +110,33 @@
 .dft-news__terms { display: flex; gap: 8px; margin-top: 8px; color: rgb(255 255 255 / 70%); font-size: 11.5px; }
 
 /* Bas : copyright, pays / langue, paiements */
-.dft__bot { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 18px 0 22px; color: #a9a5d6; font-size: 13px; border-top: 1px solid rgb(255 255 255 / 12%); }
-.dft__bot-l { flex: none; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.dft__bot { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 20px 32px; padding-top: 22px; padding-bottom: 30px; color: #a9a5d6; font-size: 13px; }
+/* Ligne au-dessus du copyright : alignée sur le contenu (pas dans les marges du conteneur) */
+.dft__bot::before { content: ''; position: absolute; top: 0; left: 48px; right: 48px; height: 1px; background: rgb(255 255 255 / 12%); }
+.dft__bot-l { flex: none; display: flex; align-items: center; gap: 10px 12px; flex-wrap: wrap; }
 .dft .dft-loc { flex: none; display: flex; align-items: center; gap: 14px; width: auto; max-width: none; margin: 0; }
 .dft-loc__btn { position: relative; display: flex; align-items: center; gap: 6px; margin: 0; padding: 8px 12px; color: #fff; font-size: 13px; font-weight: 600; background: rgb(255 255 255 / 10%); border-radius: 10px; cursor: pointer; }
 .dft-loc__btn:hover { background: rgb(255 255 255 / 16%); }
 .dft-loc__btn > svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .dft-loc__flag { display: block; width: 16px; height: 16px; --height: 16px; object-fit: cover; border-radius: 50%; }
 .dft .dft-loc__btn select { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; cursor: pointer; appearance: none; }
-.dft-pay { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; max-width: 860px; }
+.dft-pay { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.dft-pay li { line-height: 0; border-radius: 5px; box-shadow: 0 2px 6px -3px rgb(0 0 0 / 50%); }
 .dft-pay svg { width: 38px; height: 24px; }
+/* Sous le pied de page : même bleu nuit (pas de fine bande claire en bas de page) */
+html { background: #16123f; }
 
+/* Logos de paiement sur une seule ligne : un peu plus petits sous 1500px, et sous 1200px sur leur propre ligne */
+@media (max-width: 1499px) {
+  .dft-pay { gap: 4px; }
+  .dft-pay svg { width: 32px; height: 21px; }
+  /* Colonnes plus étroites : titres coupés seulement entre deux mots (pas « PLATINUMSHO / P ») */
+  #root .dft h4 { overflow-wrap: normal; word-break: normal; }
+}
 @media (max-width: 1199px) {
+  .dft__wrap { padding-right: 32px; padding-left: 32px; }
+  .dft__bot::before { left: 32px; right: 32px; }
+  .dft-pay { flex-basis: 100%; }
   .dft__top { grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 28px; }
   .dft__side { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; align-items: start; }
   .dft__side h4 { grid-column: 1 / -1; }

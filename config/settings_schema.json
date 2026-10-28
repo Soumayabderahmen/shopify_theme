@@ -2172,6 +2172,16 @@
     { "type": "color", "id": "badge_soldout_bg", "label": "Colore sfondo", "default": "#444444" },
     { "type": "color", "id": "badge_soldout_color", "label": "Colore testo", "default": "#ffffff" }
   ]
+},
+{
+  "name": "Black Friday",
+  "settings": [
+    { "type": "paragraph", "content": "Home ordinatore e barra in alto: scena Black Friday, sezione « Offerte Black Friday », conto alla rovescia. Visibile solo tra le due date (fuso orario del negozio); nell'editor del tema sempre visibile. Dopo la fine sparisce da solo." },
+    { "type": "checkbox", "id": "bf_enable", "label": "Attiva il Black Friday", "default": true },
+    { "type": "text", "id": "bf_start", "label": "Inizio", "info": "Formato AAAA-MM-GG HH:MM", "default": "2026-11-20 00:00" },
+    { "type": "text", "id": "bf_end", "label": "Fine", "info": "Formato AAAA-MM-GG HH:MM", "default": "2026-11-30 23:59" },
+    { "type": "collection", "id": "bf_collection", "label": "Collezione Black Friday", "info": "Vuota: i prodotti in offerta dei reparti del menu (sconto più forte prima)" }
+  ]
 }
 
 ]
