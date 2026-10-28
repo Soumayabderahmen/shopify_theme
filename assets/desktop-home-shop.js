@@ -10,6 +10,14 @@
   var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var t = {};
   try { t = JSON.parse(root.getAttribute('data-i18n') || '{}'); } catch (error) { t = {}; }
+  // Les textes traduits arrivent déjà échappés (« aujourd&#39;hui ») : décodés ici, ils sont échappés une seule fois à
+  // l'affichage (sinon « Arrive aujourd&#39;hui » en français)
+  var decoder = document.createElement('textarea');
+  Object.keys(t).forEach(function (key) {
+    if (typeof t[key] !== 'string' || t[key].indexOf('&') < 0) return;
+    decoder.innerHTML = t[key];
+    t[key] = decoder.value;
+  });
   var esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
   var sized = function (src, w) { return String(src).replace(/([?&])width=\d+/, '$1width=' + w); };
 

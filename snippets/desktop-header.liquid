@@ -26,9 +26,10 @@
   assign trend_first = trend_list | split: '|' | first | capitalize
   if customer
     assign account_url = routes.account_url
-    assign account_label = customer.first_name | default: customer.name
+    assign account_label = customer.first_name | default: customer.name | escape
   else
     assign account_url = routes.account_login_url
+    # Texte traduit déjà échappé par « t » (« S&#39;identifier » s'affichait en français avec un 2e échappement)
     assign account_label = 'service.login' | t
   endif
 
@@ -173,11 +174,11 @@
           </div>
         {%- endif -%}
         {%- if customer -%}
-          <a class="dh-act" href="{{ account_url }}"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="dh-act__t">{{ account_label | escape }}</span></a>
+          <a class="dh-act" href="{{ account_url }}"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="dh-act__t">{{ account_label }}</span></a>
         {%- else -%}
           {%- comment -%} Fenêtre « Accedi o crea un account » de Shopify (comme l'ancien en-tête), ouverte au survol (assets/desktop-header.js). {%- endcomment -%}
           <shopify-account class="dh-acc" menu="customer-account-main-menu" data-dh-account>
-            <div slot="signed-out-avatar" class="dh-act"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="dh-act__t">{{ account_label | escape }}</span></div>
+            <div slot="signed-out-avatar" class="dh-act"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="dh-act__t">{{ account_label }}</span></div>
           </shopify-account>
         {%- endif -%}
         <a class="dh-act" href="{{ pages['wishlist'].url | default: '/pages/wishlist' }}"><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span class="dh-act__t">{{ 'mobile.js.wishlist' | t }}</span><em data-dh-wl>0</em></a>
