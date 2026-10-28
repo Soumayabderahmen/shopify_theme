@@ -493,7 +493,7 @@
       <div class="dhp-hd">
         <h2>{{ 'desktop_home_shop.shop_by_brand' | t }}</h2>
         <div class="dhp-hd__end">
-          <a class="dhp-more" href="{{ routes.collections_url }}">{{ 'mobile.explore.see_more_brands' | t }}</a>
+          <button class="dhp-more" type="button" aria-haspopup="dialog" data-dhp-brands-open>{{ 'mobile.explore.see_more_brands' | t }}</button>
           <div class="dhp-arws" data-for="dhp-brands">
             <button class="dhp-arw" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
             <button class="dhp-arw" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
@@ -530,8 +530,26 @@
             <strong>{{ brand_label | escape }}</strong>
           </a>
         {%- endfor -%}
-        <a class="dhp-brand dhp-brand--more" href="{{ routes.collections_url }}"><strong>{{ 'mobile.explore.see_more_brands' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></strong></a>
+        <button class="dhp-brand dhp-brand--more" type="button" aria-haspopup="dialog" data-dhp-brands-open><strong>{{ 'mobile.explore.see_more_brands' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></strong></button>
       </div>
+
+      {%- comment -%}
+        « Vedi altri » : fenêtre de toutes les marques, comme « Tutti i brand » du mobile (même liste assets/mobile-brands.json,
+        relevé réel du catalogue, remplie à la 1re ouverture par assets/desktop-home-shop.js) : tuiles de couleur de la
+        rangée, recherche, nombre de marques.
+      {%- endcomment -%}
+      <dialog class="dhp-bm" aria-labelledby="dhp-bm-title" data-dhp-brands data-brands-url="{{ 'mobile-brands.json' | asset_url }}">
+        <div class="dhp-bm__head">
+          <h2 id="dhp-bm-title">{{ 'mobile.explore.all_brands' | t }} <span class="dhp-bm__count" data-dhp-brands-count></span></h2>
+          <label class="dhp-bm__search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" placeholder="{{ 'mobile.explore.search_brands' | t }}" aria-label="{{ 'mobile.explore.search_brands' | t }}" autocomplete="off" data-dhp-brands-filter>
+          </label>
+          <button class="dhp-bm__close" type="button" aria-label="{{ 'mobile.common.close' | t }}" data-dhp-brands-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+        </div>
+        <div class="dhp-bm__grid" data-dhp-brands-grid></div>
+        <p class="dhp-bm__empty" data-dhp-brands-empty hidden>{{ 'mobile.explore.no_brands' | t }}</p>
+      </dialog>
     </section>
     {%- endif -%}
 

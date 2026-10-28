@@ -83,7 +83,7 @@
 .dhp-hd h2 svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .dhp-hd__end { display: flex; align-items: center; gap: 14px; }
 .dhp-hd--end { justify-content: flex-end; }
-.dhp .dhp-more { color: var(--dhp-brand); font-size: 14px; font-weight: 700; }
+#root .dhp .dhp-more { color: var(--dhp-brand); font-size: 14px; font-weight: 700; background: none; cursor: pointer; }
 .dhp-more:hover { text-decoration: underline; }
 #root .dhp-arws { display: flex; gap: 8px; }
 #root .dhp .dhp-arw { display: grid; place-items: center; width: 38px; height: 38px; color: var(--dhp-ink); background: #fff; border-radius: 50%; box-shadow: 0 0 0 1px var(--dhp-line), 0 6px 14px -10px rgb(22 18 63 / 40%); transition: opacity .2s; }
@@ -301,7 +301,37 @@
 .dhp-brand img { position: absolute; right: -6%; top: 10%; width: 62%; height: 100%; object-fit: cover; background: #fff; border-radius: 16px; box-shadow: -10px 14px 26px -12px rgb(0 0 0 / 45%); transform: rotate(-6deg); transition: transform .3s; }
 .dhp-brand:hover img { transform: rotate(-2deg) scale(1.04); }
 .dhp-brand strong { position: absolute; left: 14px; bottom: 12px; max-width: 46%; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 700; line-height: 1.15; text-shadow: 0 1px 6px rgb(0 0 0 / 20%); }
-.dhp .dhp-brand--more { display: grid; place-items: center; color: var(--dhp-brand); background: var(--dhp-lav); border: 1.5px dashed #b9b6f3; }
+#root .dhp .dhp-brand--more { display: grid; place-items: center; width: 100%; height: 100%; color: var(--dhp-brand); font: inherit; background: var(--dhp-lav); border: 1.5px dashed #b9b6f3; border-radius: 20px; cursor: pointer; }
+
+/* ---------- Fenêtre « Tutti i brand » (« Vedi altri ») : centrée, coins arrondis, tuiles de couleur de la rangée,
+   recherche arrondie comme celle de l'en-tête ---------- */
+.dhp-bm { position: fixed; inset: 0; width: min(1120px, 92vw); max-width: none; height: min(780px, 88vh); max-height: none; margin: auto; padding: 0; overflow: hidden; color: #171717; font-family: 'Figtree', system-ui, sans-serif; background: #fff; border: 0; border-radius: 28px; box-shadow: 0 40px 90px -30px rgb(22 18 63 / 55%); }
+/* Le thème affiche les <dialog> même fermées : cachée tant qu'elle n'est pas ouverte */
+#root .dhp-bm:not([open]) { display: none; }
+.dhp-bm[open] { display: flex; flex-direction: column; animation: dhp-bm-in .32s cubic-bezier(.2, .8, .2, 1); }
+.dhp-bm.is-closing { animation: dhp-bm-out .2s ease-in forwards; }
+.dhp-bm::backdrop { background: rgb(22 18 63 / 45%); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); animation: dhp-bm-fade .3s ease; }
+.dhp-bm.is-closing::backdrop { animation: dhp-bm-fade .2s ease reverse forwards; }
+@keyframes dhp-bm-in { from { opacity: 0; transform: translateY(18px) scale(.97); } }
+@keyframes dhp-bm-out { to { opacity: 0; transform: translateY(12px) scale(.98); } }
+@keyframes dhp-bm-fade { from { opacity: 0; } }
+.dhp-bm__head { display: flex; align-items: center; gap: 18px; padding: 22px 24px 18px 28px; border-bottom: 1px solid var(--dhp-line); }
+.dhp .dhp-bm__head h2 { display: flex; align-items: center; gap: 10px; flex: none; color: var(--dhp-ink); font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -.5px; }
+.dhp-bm__count:not(:empty) { padding: 3px 10px; color: var(--dhp-brand); font-family: 'Figtree', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 0; background: var(--dhp-lav); border-radius: 999px; }
+.dhp-bm__search { flex: 1; display: flex; align-items: center; gap: 10px; max-width: 520px; height: 46px; margin-left: auto; padding: 0 16px; background: var(--dhp-soft); border: 1px solid transparent; border-radius: 999px; transition: border-color .2s, background .2s; }
+.dhp-bm__search:focus-within { background: #fff; border-color: var(--dhp-brand); }
+.dhp-bm__search svg { flex: none; width: 18px; height: 18px; fill: none; stroke: var(--dhp-muted); stroke-width: 2; stroke-linecap: round; }
+#root .dhp-bm__search input { flex: 1; min-width: 0; height: 100%; margin: 0; padding: 0; color: var(--dhp-ink); font: inherit; font-size: 15px; background: none; border: 0; border-radius: 0; outline: 0; box-shadow: none; }
+#root .dhp .dhp-bm__close { flex: none; display: grid; place-items: center; width: 42px; height: 42px; color: var(--dhp-ink); background: var(--dhp-soft); border-radius: 50%; cursor: pointer; transition: background .2s, transform .2s; }
+#root .dhp .dhp-bm__close:hover { background: var(--dhp-lav); transform: rotate(90deg); }
+.dhp-bm__close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.dhp-bm__grid { flex: 0 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 112px; gap: 12px; padding: 20px 24px 28px 28px; overflow-y: auto; overscroll-behavior: contain; }
+.dhp-bm__grid .dhp-brand { animation: dhp-bm-tile .4s cubic-bezier(.2, .8, .2, 1) both; animation-delay: var(--i, 0s); }
+@keyframes dhp-bm-tile { from { opacity: 0; transform: translateY(10px); } }
+.dhp-bm__grid .dhp-brand[hidden] { display: none; }
+.dhp .dhp-bm__empty { padding: 40px 0 60px; color: var(--dhp-muted); font-size: 15px; text-align: center; }
+html.dhp-modal-open { overflow: hidden; }
+@media (max-width: 1199px) { .dhp-bm__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .dhp-brand--more strong { position: static; display: flex; align-items: center; gap: 4px; max-width: none; font-size: 15px; text-shadow: none; }
 .dhp-brand--more svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 

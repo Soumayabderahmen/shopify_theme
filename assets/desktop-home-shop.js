@@ -356,6 +356,83 @@
     if (list.length) { showDept(current, true); runMarq(); }
   }
 
+  // ---------- « Vedi altri » des marques : fenêtre de toutes les marques (assets/mobile-brands.json, la même liste que
+  // « Tutti i brand » du mobile), remplie à la 1re ouverture ; recherche, fermeture (×, Échap, clic à côté) ----------
+  var brandsBox = root.querySelector('[data-dhp-brands]');
+  if (brandsBox && once(brandsBox)) {
+    var brandsGrid = brandsBox.querySelector('[data-dhp-brands-grid]');
+    var brandsFilter = brandsBox.querySelector('[data-dhp-brands-filter]');
+    var brandsEmpty = brandsBox.querySelector('[data-dhp-brands-empty]');
+    var brandsLoaded = false;
+    var colors = ['#e8547a', '#c8102e', '#2f2a6b', '#0e7c66', '#f08c2e', '#e2506b', '#b23a48', '#7a4e2d', '#3a74c4', '#5b5799'];
+    var normalize = function (value) { return String(value).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim(); };
+    var filterBrands = function () {
+      var query = normalize(brandsFilter.value);
+      var visible = 0;
+      brandsGrid.querySelectorAll('.dhp-brand').forEach(function (tile) {
+        var match = !query || tile.getAttribute('data-brand-name').indexOf(query) !== -1;
+        tile.hidden = !match;
+        if (match) visible += 1;
+      });
+      brandsEmpty.hidden = visible > 0 || !brandsLoaded;
+    };
+    var fillBrands = function () {
+      if (brandsLoaded) return;
+      brandsLoaded = true;
+      // Les marques de la rangée gardent leur lien et leur photo (Nike, Adidas… vont vers leur collection)
+      var shown = {};
+      root.querySelectorAll('#dhp-brands a.dhp-brand').forEach(function (tile) {
+        var label = tile.querySelector('strong');
+        var image = tile.querySelector('img');
+        if (label) shown[label.textContent.trim().toLowerCase()] = { href: tile.getAttribute('href'), image: image ? image.getAttribute('src') : '' };
+      });
+      var base = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+      fetch(brandsBox.getAttribute('data-brands-url'), { credentials: 'same-origin' })
+        .then(function (response) {
+          if (!response.ok) throw new Error('Brand list request failed: ' + response.status);
+          return response.json();
+        })
+        .then(function (data) {
+          brandsGrid.innerHTML = data.brands.map(function (brand, i) {
+            var known = shown[String(brand[0]).toLowerCase()];
+            var href = known ? known.href : base + 'search?q=' + encodeURIComponent(brand[1]) + '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type';
+            var image = known ? known.image : (brand[3] ? (/^https?:/.test(brand[3]) ? brand[3] : data.cdn + brand[3]) + '&width=300' : '');
+            return '<a class="dhp-brand" href="' + esc(href) + '" data-brand-name="' + esc(normalize(brand[0])) + '" style="background:' + colors[i % colors.length] + ';--i:' + (Math.min(i, 30) * 0.015).toFixed(3) + 's">' +
+              (image ? '<img src="' + esc(image) + '" alt="" loading="lazy" width="150" height="150" onerror="this.remove()">' : '') +
+              '<strong>' + esc(brand[0]) + '</strong></a>';
+          }).join('');
+          brandsBox.querySelector('[data-dhp-brands-count]').textContent = data.brands.length;
+          filterBrands();
+        })
+        .catch(function (error) {
+          brandsLoaded = false;
+          console.error(error);
+        });
+    };
+    var closeBrands = function () {
+      if (!brandsBox.open || brandsBox.classList.contains('is-closing')) return;
+      brandsBox.classList.add('is-closing');
+      setTimeout(function () {
+        brandsBox.classList.remove('is-closing');
+        brandsBox.close();
+        document.documentElement.classList.remove('dhp-modal-open');
+      }, still ? 0 : 190);
+    };
+    root.querySelectorAll('[data-dhp-brands-open]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        fillBrands();
+        if (!brandsBox.open) brandsBox.showModal();
+        document.documentElement.classList.add('dhp-modal-open');
+        brandsFilter.focus();
+      });
+    });
+    brandsBox.querySelector('[data-dhp-brands-close]').addEventListener('click', closeBrands);
+    // Clic sur le fond assombri (en dehors de la fenêtre)
+    brandsBox.addEventListener('click', function (event) { if (event.target === brandsBox) closeBrands(); });
+    brandsBox.addEventListener('cancel', function (event) { event.preventDefault(); closeBrands(); });
+    brandsFilter.addEventListener('input', filterBrands);
+  }
+
   // ---------- Collezioni da scoprire : produits 3 par 3 (flèches, automatique toutes les 3,5 s, pause au survol) ----------
   root.querySelectorAll('.dhp-coll:not([data-ready])').forEach(function (coll, index) {
     once(coll);
