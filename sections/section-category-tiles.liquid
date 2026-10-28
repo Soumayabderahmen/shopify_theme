@@ -56,7 +56,10 @@
           if excluded contains handle_key
             continue
           endif
-          assign tile_image = tile_collection.image | default: tile_collection.products.first.featured_image
+          # featured_image = photo de la collection, sinon celle du 1er produit (même résultat qu'avant) sans charger les
+          # produits de chaque collection : avant, jusqu'à 250 listes de produits lues, ~10 s au premier affichage
+          # (cache de Shopify vide) et page d'erreur de Shopify sur l'accueil.
+          assign tile_image = tile_collection.featured_image
           if tile_image == blank
             continue
           endif

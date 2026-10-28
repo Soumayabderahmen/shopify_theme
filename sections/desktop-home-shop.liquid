@@ -186,16 +186,31 @@
     })(document.currentScript.parentElement);
   </script>
 
-  {%- comment -%} Données de la grande carte : rayons et leurs produits (photo, prix, remise, note) {%- endcomment -%}
+  {%- comment -%}
+    Données de la grande carte : rayons et leurs produits (photo, prix, remise, note). La note moyenne de chaque rayon
+    (« Reparti di tendenza ») est calculée dans la même boucle : les avis de chaque produit ne sont lus qu'une fois.
+  {%- endcomment -%}
+  {%- assign dept_rates = '' -%}
   <script type="application/json" data-dhp-data>
     [
       {%- for dept_handle in dept_handles -%}
         {%- assign dept = collections[dept_handle] -%}
+        {%- assign rate_sum = 0.0 -%}
+        {%- assign rate_n = 0 -%}
         {%- unless forloop.first -%},{%- endunless -%}
         {"t": {{ dept_titles[forloop.index0] | json }}, "u": {{ dept.url | json }}, "p": [
           {%- assign dept_first = true -%}
           {%- for item in dept.products limit: 14 -%}
             {%- liquid
+              assign item_ali = item.metafields.alireviews.seo_rating_review_key_script | append: '' | strip_newlines | remove: ' '
+              assign item_ali_value = 0
+              if item_ali contains '"ratingValue":"'
+                assign item_ali_value = item_ali | split: '"ratingValue":"' | last | split: '"' | first | times: 1.0
+                if item_ali_value > 0
+                  assign rate_sum = rate_sum | plus: item_ali_value
+                  assign rate_n = rate_n | plus: 1
+                endif
+              endif
               assign item_variant = item.selected_or_first_available_variant
               assign item_image = item_variant.featured_image | default: item.featured_image
               if item_image == blank
@@ -208,9 +223,8 @@
                 assign item_pct = item_variant.compare_at_price | minus: item_variant.price | times: 100 | divided_by: item_variant.compare_at_price | prepend: '-' | append: '%'
               endif
               assign item_rating = ''
-              assign item_ali = item.metafields.alireviews.seo_rating_review_key_script | append: '' | strip_newlines | remove: ' '
               if item_ali contains '"ratingValue":"'
-                assign item_rating = item_ali | split: '"ratingValue":"' | last | split: '"' | first | times: 1.0 | round: 1 | append: ''
+                assign item_rating = item_ali_value | round: 1 | append: ''
               elsif item.metafields.reviews.rating
                 assign item_rating = item.metafields.reviews.rating.value.rating | times: 1.0 | round: 1 | append: ''
               endif
@@ -223,9 +237,20 @@
             {"t": {{ item.title | json }}, "u": {{ item.url | json }}, "i": {{ item_image | image_url: width: 600 | json }}, "p": {{ item_variant.price | money | strip_html | json }}, "o": {{ item_old | json }}, "c": {{ item_pct | json }}, "r": {{ item_rating | json }}}
           {%- endfor -%}
         ]}
+        {%- liquid
+          assign rate_text = ''
+          if rate_n > 0
+            assign rate_text = rate_sum | divided_by: rate_n | round: 1 | append: ''
+            unless request.locale.iso_code contains 'en'
+              assign rate_text = rate_text | replace: '.', ','
+            endunless
+          endif
+          assign dept_rates = dept_rates | append: rate_text | append: '|~|'
+        -%}
       {%- endfor -%}
     ]
   </script>
+  {%- assign dept_rates_list = dept_rates | split: '|~|' -%}
 
   <div class="dhp-wrap">
     {%- comment -%} ---------- Moyens de paiement (mêmes logos que le pied de page), logos qui défilent ---------- {%- endcomment -%}
@@ -347,25 +372,8 @@
             if dept_image == blank
               assign dept_image = dept.products[3].featured_image | default: dept.featured_image
             endif
-            assign rate_sum = 0.0
-            assign rate_n = 0
-            for rated in dept.products limit: 14
-              assign rated_ali = rated.metafields.alireviews.seo_rating_review_key_script | append: '' | strip_newlines | remove: ' '
-              if rated_ali contains '"ratingValue":"'
-                assign rated_value = rated_ali | split: '"ratingValue":"' | last | split: '"' | first | times: 1.0
-                if rated_value > 0
-                  assign rate_sum = rate_sum | plus: rated_value
-                  assign rate_n = rate_n | plus: 1
-                endif
-              endif
-            endfor
-            assign rate_text = ''
-            if rate_n > 0
-              assign rate_text = rate_sum | divided_by: rate_n | round: 1 | append: ''
-              unless request.locale.iso_code contains 'en'
-                assign rate_text = rate_text | replace: '.', ','
-              endunless
-            endif
+            # Note moyenne calculée avec les données de la grande carte (plus haut)
+            assign rate_text = dept_rates_list[forloop.index0]
           -%}
           <a class="dhp-dept" href="{{ dept.url }}">
             {%- if dept_image != blank -%}<img class="dhp-dept__bg" src="{{ dept_image | image_url: width: 700 }}" alt="" loading="lazy" width="350" height="470">{%- endif -%}
