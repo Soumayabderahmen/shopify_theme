@@ -292,7 +292,7 @@
     <p class="pdp-m__shipl"{% if pm_ship_base > 0 %} {{ pm_ship_attrs }}{% endif %}>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 6h13v10H1zM14 10h4l3 3v3h-7"/><circle cx="5.5" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>
       {%- if pm_ship_base > 0 -%}<b data-pdp-ship-text>{{ pm_ship_text | default: pm_ship_text_free }}</b>{%- endif -%}
-      <span data-pdp-eta="{{ pm_eta_days }}" data-template="{{ pm_eta_tpl | escape }}"></span>
+      <span data-pdp-eta="{{ pm_eta_days }}" data-template="{{ pm_eta_tpl }}"></span>
     </p>
 
     <div class="pdp-m__trow">
@@ -367,7 +367,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 0 4 2 2 0 0 1 0 4v2h18v-2a2 2 0 0 1 0-4 2 2 0 0 0 0-4V6H3z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>
         <span>
           {{- 'mobile_pdp_hd.coupon_band' | t: percent: pm_coupon_percent, code: pm_coupon_code -}}
-          <small class="pdp-m__wc" data-pdp-with-coupon data-percent="{{ pm_coupon_percent }}" data-template="{{ pm_with_coupon_tpl | escape }}">{{ pm_with_coupon_tpl | replace: '__PRICE__', pm_with_coupon_money }}</small>
+          <small class="pdp-m__wc" data-pdp-with-coupon data-percent="{{ pm_coupon_percent }}" data-template="{{ pm_with_coupon_tpl }}">{{ pm_with_coupon_tpl | replace: '__PRICE__', pm_with_coupon_money }}</small>
         </span>
         <button class="pdp-m__claim" type="button" data-pdp-claim>{{ 'mobile.pdp.claim' | t }}</button>
       </div>
@@ -609,7 +609,7 @@
         {%- else -%}
           <b>{{ 'protezioni.consegna.title' | t }}</b>
         {%- endif -%}
-        <small><span data-pdp-eta="{{ pm_eta_days }}" data-template="{{ pm_eta_est_tpl | escape }}"></span><br>{{ 'mobile.pdp.tracking_included' | t }}</small>
+        <small><span data-pdp-eta="{{ pm_eta_days }}" data-template="{{ pm_eta_est_tpl }}"></span><br>{{ 'mobile.pdp.tracking_included' | t }}</small>
       </span>
       {{- pm_go -}}
     </button>
@@ -776,7 +776,7 @@
       })();
     </script>
     <button class="pdp-m__go" type="button" data-pdp-add>
-      <small data-pdp-buy-off data-template="{{ buy_off_template | escape }}"{% if buy_off < 1 %} hidden{% endif %}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"/></svg><span>{{ buy_off_text }}</span></small>
+      <small data-pdp-buy-off data-template="{{ buy_off_template }}"{% if buy_off < 1 %} hidden{% endif %}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 9 11l4 4 8-8"/></svg><span>{{ buy_off_text }}</span></small>
       <b>{{ 'mobile.pdp.add_to_cart' | t }}</b>
     </button>
   </div>

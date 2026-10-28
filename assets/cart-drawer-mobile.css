@@ -806,6 +806,13 @@ html.m6pn-open:has(#cart.toggle) #root::after {
   box-shadow: 0 10px 18px -12px rgba(22, 18, 63, 0.8);
 }
 
+/* Boutons qui ferment le tiroir (classe m6pn-close du thème) : le thème tourne .m6pn-close:hover de 90° (prévu pour la croix),
+   ce qui mettait « Continuer mes achats » à la verticale au survol de la souris. */
+#root .cd-m .cd-sec.m6pn-close:hover,
+#root .cd-m .cd-pri.m6pn-close:hover {
+  transform: none;
+}
+
 /* Message (article supprimé + Annulla) */
 .cd-m .cd-toast {
   position: absolute;
