@@ -381,6 +381,9 @@
   var navigate = function (url, options) {
     options = options || {};
     var target = new URL(url, location.href);
+    // Liens de la page reçue (pager…) : « view=desktop-coll » retiré de l'adresse affichée (rechargée, la page
+    // s'afficherait sans en-tête ni pied de page)
+    target.searchParams.delete('view');
     var sameCollection = handleOf(target.pathname) === root.getAttribute('data-handle');
     var token = ++navToken;
     var grid = root.querySelector('[data-dcl-grid]');

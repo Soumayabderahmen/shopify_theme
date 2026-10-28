@@ -48,19 +48,6 @@
         "layout": "scroll"
       }
     },
-    "section_flash_deals_home": {
-      "type": "section-flash-deals",
-      "settings": {
-        "title": "Offerte lampo",
-        "collection": "bestsellers",
-        "only_on_sale": true,
-        "limit": 8,
-        "link_text": "Vedi tutte",
-        "show_timer": true,
-        "end_date": "",
-        "mobile_only": true
-      }
-    },
     "section_slideshow_XNiKWa": {
       "type": "section-slideshow",
       "blocks": {
@@ -258,35 +245,6 @@
         "fix_zindex": 0
       }
     },
-    "section_featured_collection_ekApHt": {
-      "type": "section-featured-collection",
-      "name": "t:sections.featured_collection.presets.name",
-      "settings": {
-        "collection": "globofilter-best-selling-products-index",
-        "layout": "grid",
-        "limit": 24,
-        "number_of_items": 5,
-        "text_alignment": "center",
-        "width": "wide",
-        "show_mobile_filters": true,
-        "title": "<h2>Featured collection</h2>",
-        "title_underline_style": "none",
-        "text": "",
-        "show_link": false,
-        "link_text": "Button",
-        "button_style": "primary plain",
-        "enable_quick_buy_desktop": false,
-        "enable_quick_buy_mobile": false,
-        "enable_quick_buy_drawer": false,
-        "enable_quick_buy_qty_selector": true,
-        "enable_color_picker": false,
-        "enable_quick_buy_compact": false,
-        "mobile_layout": "grid",
-        "spacing_desktop": 50,
-        "spacing_mobile": 30,
-        "fix_zindex": 0
-      }
-    },
     "165346832322a4db6f": {
       "type": "section-usp-bar",
       "blocks": {
@@ -362,10 +320,8 @@
     "section_category_tiles_home",
     "section_coupons_home",
     "mshein_modules",
-    "section_flash_deals_home",
     "78836e0a-6131-4f01-afff-dbdd186d0914",
     "mshein_feed",
-    "section_featured_collection_ekApHt",
     "165346832322a4db6f"
   ]
 }

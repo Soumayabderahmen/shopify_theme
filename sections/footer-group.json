@@ -11,26 +11,6 @@
   "type": "footer",
   "name": "t:static_sections.footer.name",
   "sections": {
-    "section_newsletter_E9NdTg": {
-      "type": "section-newsletter",
-      "name": "t:sections.newsletter.presets.name",
-      "settings": {
-        "overlay_opacity": 0,
-        "color_palette": "scheme-2",
-        "width_banner": "wide",
-        "width": "wide",
-        "title": "<h2>Subscribe to our emails</h2>",
-        "title_underline_style": "none",
-        "text": "<p>Never miss any news and be the first to know about sale and offers</p>",
-        "link_text": "Subscribe",
-        "button_style": "primary plain",
-        "enable_newsletter_terms_checkbox": false,
-        "newsletter_terms_text": "",
-        "spacing_desktop": 50,
-        "spacing_mobile": 30,
-        "fix_zindex": 0
-      }
-    },
     "footer": {
       "type": "footer",
       "blocks": {
@@ -116,7 +96,6 @@
     }
   },
   "order": [
-    "section_newsletter_E9NdTg",
     "footer"
   ]
 }
