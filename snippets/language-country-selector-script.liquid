@@ -1,7 +1,11 @@
 {%- comment -%}
   Choix automatique langue / pays (géolocalisation) des sélecteurs de snippets/language-country-selector.liquid.
-  Rendu une seule fois par page dans layout/theme.liquid (avant : une copie par sélecteur, 4 par page).
+  Rendu une seule fois par page, au début de <head> (layout/theme.liquid) : la vérification part dès le début du
+  chargement et, si la langue ou le pays doit changer, la page est envoyée tout de suite vers la bonne version (avant :
+  attente de la lecture de toute la page, ~6 s, puis 2e chargement complet ; la page s'affichait d'abord en italien).
+  Pendant la vérification (1re visite seulement), la page reste cachée (au plus 2,5 s).
 {%- endcomment -%}
+<style>html.geo-pending body { visibility: hidden; }</style>
 <script>
   (function () {
     if (window.__geoLanguageSelectorInitialized) return;
@@ -11,6 +15,12 @@
     var manualCountryChoiceKey = 'shopify_manual_country_choice';
     var autoAttemptKey = 'shopify_geo_language_attempted';
     var detectedCountryKey = 'shopify_geo_detected_country';
+    var html = document.documentElement;
+    var revealTimer = null;
+    var reveal = function () {
+      window.clearTimeout(revealTimer);
+      html.classList.remove('geo-pending');
+    };
 
     // L'ancien script de theme.liquid reste présent, mais cette nouvelle logique le remplace.
     try { window.sessionStorage.setItem('geo_redirected', 'true'); } catch (error) {}
@@ -42,6 +52,9 @@
         window.__geoDetectedCountry = storageGet(window.sessionStorage, detectedCountryKey);
         return;
       }
+      // 1re visite de la session : page cachée le temps de la vérification (sécurité : affichée après 2,5 s)
+      html.classList.add('geo-pending');
+      revealTimer = window.setTimeout(reveal, 2500);
 
     var currentCountry = {{ localization.country.iso_code | json }}.toUpperCase();
     var country = currentCountry;
@@ -50,10 +63,7 @@
     // localization.country est le pays déjà sélectionné (par exemple le cookie IT).
     // Cette API Shopify détecte le pays réel conseillé à partir de l'IP et du navigateur.
     try {
-      var suggestionsUrl = (window.Shopify.routes && window.Shopify.routes.root
-        ? window.Shopify.routes.root
-        : '/'
-      ) + 'browsing_context_suggestions.json?country[enabled]=true&language[enabled]=true';
+      var suggestionsUrl = {{ routes.root_url | json }}.replace(/\/$/, '') + '/browsing_context_suggestions.json?country[enabled]=true&language[enabled]=true';
       var suggestionsResponse = await fetch(suggestionsUrl, {
         credentials: 'same-origin',
         headers: { Accept: 'application/json' }
@@ -181,55 +191,40 @@
     var needsLanguageChange = targetLocale && targetLocale !== currentLocale;
     var needsCountryChange = targetCountry !== currentCountry;
 
-    if (!needsLanguageChange && !needsCountryChange) return;
-
-    var forms = document.querySelectorAll('form.localization-form');
-    var localizationForm = null;
-    for (var formIndex = 0; formIndex < forms.length; formIndex += 1) {
-      if (forms[formIndex].querySelector('[name="locale_code"], [name="country_code"]')) {
-        localizationForm = forms[formIndex];
-        break;
-      }
-    }
-    if (!localizationForm) return;
-
-    storageSet(window.sessionStorage, autoAttemptKey, targetCountry + '|' + (targetLocale || currentLocale));
     storageSet(window.sessionStorage, detectedCountryKey, country);
-
-    var localeInput = localizationForm.querySelector('input[name="locale_code"]');
-    if (!localeInput) {
-      localeInput = document.createElement('input');
-      localeInput.type = 'hidden';
-      localeInput.name = 'locale_code';
-      localizationForm.appendChild(localeInput);
+    if (!needsLanguageChange && !needsCountryChange) {
+      storageSet(window.sessionStorage, autoAttemptKey, currentCountry + '|' + currentLocale);
+      reveal();
+      return;
     }
-    localeInput.value = targetLocale || currentLocale;
+    storageSet(window.sessionStorage, autoAttemptKey, targetCountry + '|' + (targetLocale || currentLocale));
 
-    var countryInput = localizationForm.querySelector('input[name="country_code"]');
-    if (!countryInput) {
-      countryInput = document.createElement('input');
-      countryInput.type = 'hidden';
-      countryInput.name = 'country_code';
-      localizationForm.appendChild(countryInput);
+    // Même formulaire que {% raw %}{% form 'localization' %}{% endraw %} (snippets/language-country-selector.liquid), créé ici pour partir
+    // sans attendre que la page soit lue ; adresse de la langue actuelle (/localization, /fr/localization…).
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = {{ routes.root_url | json }}.replace(/\/$/, '') + '/localization';
+    form.acceptCharset = 'UTF-8';
+    form.enctype = 'multipart/form-data';
+    form.hidden = true;
+    [
+      ['form_type', 'localization'],
+      ['utf8', '✓'],
+      ['_method', 'put'],
+      ['locale_code', targetLocale || currentLocale],
+      ['country_code', targetCountry],
+      ['return_to', window.location.pathname + window.location.search + window.location.hash]
+    ].forEach(function (field) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = field[0];
+      input.value = field[1];
+      form.appendChild(input);
+    });
+    html.appendChild(form);
+    form.submit();
     }
-    countryInput.value = targetCountry;
 
-    var returnToInput = localizationForm.querySelector('input[name="return_to"]');
-    if (!returnToInput) {
-      returnToInput = document.createElement('input');
-      returnToInput.type = 'hidden';
-      returnToInput.name = 'return_to';
-      localizationForm.appendChild(returnToInput);
-    }
-    returnToInput.value = window.location.pathname + window.location.search + window.location.hash;
-
-      localizationForm.submit();
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', applyAutomaticLanguage, { once: true });
-    } else {
-      applyAutomaticLanguage();
-    }
+    applyAutomaticLanguage().catch(reveal);
   })();
 </script>

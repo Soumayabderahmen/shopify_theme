@@ -21,6 +21,11 @@
     <link rel="dns-prefetch" href="https://cdn.alireviews.io">
 
     <meta charset="utf-8">
+    {%- comment -%}
+      Choix automatique langue / pays : au tout début de la page, pour envoyer tout de suite le visiteur vers la bonne
+      langue et la bonne devise (avant : en fin de page, après la lecture de toute la page, puis 2e chargement).
+    {%- endcomment -%}
+    {%- render 'language-country-selector-script' -%}
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
     {%- liquid
@@ -454,8 +459,6 @@
         });
       })();
     </script>
-    {%- comment -%} Choix automatique langue / pays : une seule fois par page (avant : 4 copies dans le header et le footer). {%- endcomment -%}
-    {%- render 'language-country-selector-script' -%}
     <div id="root">
       {%- render 'accessible-nav' -%}
       {%- sections 'header-group' -%}
