@@ -54,7 +54,9 @@
     assign tile_handles = parts[2] | split: ','
     assign tile_count = 0
     for tile_handle in tile_handles
-      if tile_handle != handle and collections[tile_handle].products_count > 0
+      # Nombre de produits en nombre (une collection peut le renvoyer en texte : comparaison impossible)
+      assign tile_products = collections[tile_handle].products_count | plus: 0
+      if tile_handle != handle and tile_products > 0
         assign tile_count = tile_count | plus: 1
       endif
     endfor
@@ -74,7 +76,8 @@
       {%- endif -%}
       {%- for tile_handle in tile_handles -%}
         {%- assign tile = collections[tile_handle] -%}
-        {%- if tile_handle != handle and tile.products_count > 0 -%}
+        {%- assign tile_products = tile.products_count | plus: 0 -%}
+        {%- if tile_handle != handle and tile_products > 0 -%}
           {%- liquid
             assign tile_image = tile.featured_image
             if tile_image == blank
