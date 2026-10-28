@@ -13,10 +13,11 @@
     {% include 'avada-seo' %}
     <!-- /Added by AVADA SEO Suite -->
     
-    <link rel="stylesheet" href="{{ 'drawer1product-style.css' | asset_url }}" media="print" onload="this.media='all'">
-    <noscript>{{ 'drawer1product-style.css' | asset_url | stylesheet_tag }}</noscript>
-    <link rel="stylesheet" href="{{ 'producttext-style.css' | asset_url }}" media="print" onload="this.media='all'">
-    <noscript>{{ 'producttext-style.css' | asset_url | stylesheet_tag }}</noscript>
+    {%- comment -%} Badge « price match » de la fiche produit (drawer1product-style.css retiré : bandeau de marque caché par la fiche). {%- endcomment -%}
+    {%- if template.name == 'product' -%}
+      <link rel="stylesheet" href="{{ 'producttext-style.css' | asset_url }}" media="print" onload="this.media='all'">
+      <noscript>{{ 'producttext-style.css' | asset_url | stylesheet_tag }}</noscript>
+    {%- endif -%}
     <link rel="preconnect" href="https://cdn.alireviews.io" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.alireviews.io">
 
@@ -180,7 +181,16 @@
     {%- if template.name == 'cart' -%}
       <link media="screen" rel="stylesheet" href="{{ 'page-cart.css' | asset_url }}" id="cart-css">
     {%- endif -%}
-    {%- if template.name == 'collection' or template.name == 'search' -%}
+    {%- liquid
+      # Ancienne grille (main-collection / main-search) : absente de collection.json et search.json (pages au nouveau design)
+      assign old_grid = false
+      if template.name == 'collection' or template.name == 'search'
+        if template.suffix != blank
+          assign old_grid = true
+        endif
+      endif
+    -%}
+    {%- if old_grid -%}
       {{ 'page-collection.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
     {%- endif -%}
     {%- if template.name == '404' -%}
@@ -200,8 +210,8 @@
       <script defer src="{{ 'spec-i18n.js' | asset_url }}"></script>
       <script defer src="{{ 'pdp-mobile.js' | asset_url }}"></script>
     {%- endif -%}
-    {%- if template.name == 'collection' -%}
-      {%- comment -%} Page collection mobile au design du prototype (mobile uniquement). {%- endcomment -%}
+    {%- if template.name == 'collection' and old_grid -%}
+      {%- comment -%} Page collection mobile au design du prototype (mobile uniquement), pour l'ancienne grille. {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'collection-mobile.css' | asset_url }}" media="(max-width: 760px)">
       <script defer src="{{ 'collection-mobile.js' | asset_url }}"></script>
     {%- endif -%}
@@ -603,7 +613,7 @@
     {% render 'color-swatches' %}
     <script defer src="{{ 'scripts.js' | asset_url }}"></script>
     <script defer src="{{ 'custom.js' | asset_url }}"></script>
-    {%- if template.name == 'collection' or template.name == 'search' -%}
+    {%- if old_grid -%}
       <script defer src="{{ 'page-collection.js' | asset_url }}"></script>
       {%- comment -%} Mobile : produits suivants préparés et ajoutés pendant le défilement (s'arrête sur desktop). {%- endcomment -%}
       <script defer src="{{ 'mobile-auto-load.js' | asset_url }}"></script>

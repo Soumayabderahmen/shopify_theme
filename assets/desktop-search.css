@@ -23,7 +23,9 @@ body.mshein-search:has([data-mshein-search]) #content {
   padding-bottom: 0;
 }
 
-.mshein-search {
+/* div : le <body> de la page porte aussi la classe mshein-search (layout/theme.liquid) — sans cela toute la page
+   prenait cette largeur et ces marges (fond bleu nuit visible sur les côtés) */
+div.mshein-search {
   max-width: 1320px;
   min-height: 70vh;
   margin: 0 auto;
@@ -161,7 +163,7 @@ body.mshein-search:has([data-mshein-search]) #content {
 }
 
 @media (max-width: 1023px) {
-  .mshein-search {
+  div.mshein-search {
     padding-right: 20px;
     padding-left: 20px;
   }

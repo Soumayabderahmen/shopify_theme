@@ -167,7 +167,6 @@
 @media (max-width: 1199px) {
   .dh-wrap, .dh-tbar__in { padding: 0 32px; }
   .dh-top .dh-tbar__code { display: none; }
-  .dh-tbar__promo { width: 300px; }
   .dh__row { gap: 18px; }
   .dh-top .dh-act { min-width: 56px; padding: 6px; }
   .dh-mega .mm { grid-template-columns: 200px 200px 1fr; }
@@ -181,8 +180,6 @@
 @media (max-width: 1023px) {
   .dh-wrap, .dh-tbar__in { padding: 0 20px; }
   .dh-top .dh-tbar__c { padding: 0 12px; }
-  .dh-tbar__promo { width: 250px; }
-  .dh-tbar__promo img { display: none; }
   .dh__row { gap: 14px; height: 64px; }
   .dh-logo__svg { width: 160px; height: 27px; }
   .dh-srch { height: 40px; }
@@ -195,6 +192,11 @@
   .dh-mega .mm { grid-template-columns: 170px 180px 1fr; }
   .dh-mega .mm.is-flat { grid-template-columns: 170px 1fr; }
   .dh-mega .mm__sec h3 { font-size: 13px; }
+}
+/* Carte « Le offerte del momento » : taille et photo gardées tant qu'il y a la place (texte sur 2 lignes) */
+@media (max-width: 899px) {
+  .dh-tbar__promo { width: 250px; }
+  .dh-tbar__promo img { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .dh-tbar__list { transition: none; }
