@@ -57,7 +57,13 @@
   assign tbar_bf = false
   assign tbar_bf_end = settings.bf_end | date: '%s' | plus: 0
   assign tbar_now = 'now' | date: '%s' | plus: 0
-  if settings.bf_enable and tbar_bf_end > tbar_now
+  # Seulement pendant la période (ou dans l'éditeur du thème pour le voir avant)
+  assign tbar_bf_start = settings.bf_start | date: '%s' | plus: 0
+  assign tbar_bf_window = false
+  if tbar_bf_start <= tbar_now or request.design_mode
+    assign tbar_bf_window = true
+  endif
+  if settings.bf_enable and tbar_bf_end > tbar_now and tbar_bf_window
     assign tbar_bf = true
     if settings.bf_collection != blank
       assign tbar_bf_url = settings.bf_collection.url

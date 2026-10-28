@@ -15,15 +15,19 @@
   Cartes produit : snippets/mshein-card.liquid (les mêmes que partout sur le site), styles assets/mshein-card.css.
   Styles : assets/desktop-home-shop.css (chargé en tête par layout/theme.liquid) ; script : assets/desktop-home-shop.js.
 {%- endcomment -%}
+{%- comment -%}
+  Deux parties (réglage « part »), pour rester sous le temps limite de Shopify (page d'erreur sinon) :
+  - « top » (templates/index.json) : bande des paiements, grande carte, Black Friday ; la suite est chargée juste après ;
+  - « more » (templates/index.dhp-more.json, sans en-tête ni pied de page, adresse /?view=dhp-more) : reparti, marques,
+    mot géant, offres, collections, Occasioni et colpo di fulmine (blocs « occasion » et « featured » de ce modèle),
+    insérés dans la page par assets/desktop-home-shop.js.
+{%- endcomment -%}
 {%- liquid
+  assign part = section.settings.part | default: 'top'
   assign menu = linklists[section.settings.menu]
   # Nom de la boutique avec la majuscule (« Platinumshop », comme le logo)
   assign shop_name = shop.name | capitalize | escape
   assign best = collections['bestsellers']
-  assign best_ids = best.products | map: 'id' | join: ','
-  capture flag
-    render 'country-flag-emoji'
-  endcapture
   assign is_it = false
   if request.locale.iso_code == 'it'
     assign is_it = true
@@ -57,8 +61,21 @@
   assign bf_start_s = settings.bf_start | date: '%s' | plus: 0
   assign bf_end_s = settings.bf_end | date: '%s' | plus: 0
   assign now_s = 'now' | date: '%s' | plus: 0
-  if settings.bf_enable and bf_end_s > now_s
+  # Calculé seulement pendant la période (ou dans l'éditeur du thème pour le voir avant) : avant, les 52 cartes du
+  # Black Friday étaient calculées à chaque visite même cachées, et l'accueil dépassait le temps limite de Shopify.
+  if settings.bf_enable and bf_end_s > now_s and bf_start_s <= now_s
     assign bf_render = true
+  elsif settings.bf_enable and bf_end_s > now_s and request.design_mode
+    assign bf_render = true
+  endif
+  # Données des cartes produit (snippets/mshein-card.liquid) : seulement là où il y a des cartes
+  assign best_ids = ''
+  assign flag = ''
+  if part == 'more' or bf_render
+    assign best_ids = best.products | map: 'id' | join: ','
+    capture flag
+      render 'country-flag-emoji'
+    endcapture
   endif
   assign bf_collection = settings.bf_collection
   if bf_collection != blank
@@ -68,9 +85,14 @@
   endif
 
   # Remises de tous les rayons (« 021|rayon|handle|id », triées) : « Le offerte del momento » et Black Friday
+  # (dans la 1re partie seulement pendant le Black Friday)
   assign deal_keys = ''
   assign deal_seen = ','
-  for dept_handle in dept_handles
+  assign deal_handles = dept_handles
+  if part == 'top' and bf_render == false
+    assign deal_handles = ''
+  endif
+  for dept_handle in deal_handles
     assign dept_index = forloop.index0
     for candidate in collections[dept_handle].products limit: 14
       assign candidate_variant = candidate.selected_or_first_available_variant
@@ -134,6 +156,7 @@
     echo months[bf_end_month]
   endcapture
 -%}
+{%- if part == 'top' -%}
 <script src="{{ 'desktop-home-shop.js' | asset_url }}" defer></script>
 <style>
   @media only screen and (max-width: 760px) {
@@ -186,17 +209,11 @@
     })(document.currentScript.parentElement);
   </script>
 
-  {%- comment -%}
-    Données de la grande carte : rayons et leurs produits (photo, prix, remise, note). La note moyenne de chaque rayon
-    (« Reparti di tendenza ») est calculée dans la même boucle : les avis de chaque produit ne sont lus qu'une fois.
-  {%- endcomment -%}
-  {%- assign dept_rates = '' -%}
+  {%- comment -%} Données de la grande carte : rayons et leurs produits (photo, prix, remise, note) {%- endcomment -%}
   <script type="application/json" data-dhp-data>
     [
       {%- for dept_handle in dept_handles -%}
         {%- assign dept = collections[dept_handle] -%}
-        {%- assign rate_sum = 0.0 -%}
-        {%- assign rate_n = 0 -%}
         {%- unless forloop.first -%},{%- endunless -%}
         {"t": {{ dept_titles[forloop.index0] | json }}, "u": {{ dept.url | json }}, "p": [
           {%- assign dept_first = true -%}
@@ -206,10 +223,6 @@
               assign item_ali_value = 0
               if item_ali contains '"ratingValue":"'
                 assign item_ali_value = item_ali | split: '"ratingValue":"' | last | split: '"' | first | times: 1.0
-                if item_ali_value > 0
-                  assign rate_sum = rate_sum | plus: item_ali_value
-                  assign rate_n = rate_n | plus: 1
-                endif
               endif
               assign item_variant = item.selected_or_first_available_variant
               assign item_image = item_variant.featured_image | default: item.featured_image
@@ -237,20 +250,9 @@
             {"t": {{ item.title | json }}, "u": {{ item.url | json }}, "i": {{ item_image | image_url: width: 600 | json }}, "p": {{ item_variant.price | money | strip_html | json }}, "o": {{ item_old | json }}, "c": {{ item_pct | json }}, "r": {{ item_rating | json }}}
           {%- endfor -%}
         ]}
-        {%- liquid
-          assign rate_text = ''
-          if rate_n > 0
-            assign rate_text = rate_sum | divided_by: rate_n | round: 1 | append: ''
-            unless request.locale.iso_code contains 'en'
-              assign rate_text = rate_text | replace: '.', ','
-            endunless
-          endif
-          assign dept_rates = dept_rates | append: rate_text | append: '|~|'
-        -%}
       {%- endfor -%}
     ]
   </script>
-  {%- assign dept_rates_list = dept_rates | split: '|~|' -%}
 
   <div class="dhp-wrap">
     {%- comment -%} ---------- Moyens de paiement (mêmes logos que le pied de page), logos qui défilent ---------- {%- endcomment -%}
@@ -355,6 +357,39 @@
       </section>
     {%- endif -%}
 
+    {%- comment -%} La suite de la page, chargée juste après (partie « more ») {%- endcomment -%}
+    <div class="dhp-more" data-dhp-more data-src="{{ routes.root_url }}{% unless routes.root_url contains '?' %}?{% else %}&{% endunless %}view=dhp-more" aria-busy="true"></div>
+  </div>
+</div>
+{%- else -%}
+  {%- comment -%} Partie « more » : note moyenne de chaque rayon (avis Ali Reviews), puis les sections {%- endcomment -%}
+  {%- liquid
+    assign dept_rates = ''
+    for dept_handle in dept_handles
+      assign rate_sum = 0.0
+      assign rate_n = 0
+      for rated in collections[dept_handle].products limit: 14
+        assign rated_ali = rated.metafields.alireviews.seo_rating_review_key_script | append: '' | strip_newlines | remove: ' '
+        if rated_ali contains '"ratingValue":"'
+          assign rated_value = rated_ali | split: '"ratingValue":"' | last | split: '"' | first | times: 1.0
+          if rated_value > 0
+            assign rate_sum = rate_sum | plus: rated_value
+            assign rate_n = rate_n | plus: 1
+          endif
+        endif
+      endfor
+      assign rate_text = ''
+      if rate_n > 0
+        assign rate_text = rate_sum | divided_by: rate_n | round: 1 | append: ''
+        unless request.locale.iso_code contains 'en'
+          assign rate_text = rate_text | replace: '.', ','
+        endunless
+      endif
+      assign dept_rates = dept_rates | append: rate_text | append: '|~|'
+    endfor
+    assign dept_rates_list = dept_rates | split: '|~|'
+  -%}
+  <div class="dhp-more__in" data-dhp-more-in>
     {%- comment -%} ---------- Reparti di tendenza : photo du rayon, note moyenne, 2 produits ---------- {%- endcomment -%}
     <section class="dhp-sec" id="dhp-reparti">
       <div class="dhp-hd">
@@ -372,7 +407,7 @@
             if dept_image == blank
               assign dept_image = dept.products[3].featured_image | default: dept.featured_image
             endif
-            # Note moyenne calculée avec les données de la grande carte (plus haut)
+            # Note moyenne calculée au début de cette partie
             assign rate_text = dept_rates_list[forloop.index0]
           -%}
           <a class="dhp-dept" href="{{ dept.url }}">
@@ -700,7 +735,7 @@
       </section>
     {%- endif -%}
   </div>
-</div>
+{%- endif -%}
 
 {% schema %}
 {
@@ -708,6 +743,14 @@
   "class": "desktop-home-shop",
   "max_blocks": 40,
   "settings": [
+    {
+      "type": "select", "id": "part", "label": "Parte", "default": "top",
+      "info": "Home: Parte alta. Il resto (reparti, brand, offerte, collezioni, occasioni, categorie in evidenza) è nel modello « index.dhp-more ».",
+      "options": [
+        { "value": "top", "label": "Parte alta (pagamenti, banner, Black Friday)" },
+        { "value": "more", "label": "Resto della pagina (caricato dopo)" }
+      ]
+    },
     { "type": "link_list", "id": "menu", "label": "Menu dei reparti", "info": "Lo stesso dell'intestazione: un reparto per ogni collezione del menu.", "default": "main-menu" },
     { "type": "paragraph", "content": "Black Friday: Impostazioni tema > Black Friday." }
   ],

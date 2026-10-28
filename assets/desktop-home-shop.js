@@ -33,18 +33,18 @@
     bfOn = (now >= bfStart && now <= bfEnd) || root.getAttribute('data-bf-preview') === 'true' || /[?&]bf-preview/.test(location.search);
   }
   var bfDeals = [];
+  // Tuile ajoutée au début d'une rangée (Occasioni) : l'accroche du défilement ramènerait sinon la rangée sur la tuile
+  // d'avant (la nouvelle serait cachée à gauche) ; remise au début sans accroche
+  var toStart = function () {
+    root.querySelectorAll('.dhp-track').forEach(function (track) {
+      track.style.scrollSnapType = 'none';
+      track.scrollLeft = 0;
+      requestAnimationFrame(function () { track.style.scrollSnapType = ''; });
+    });
+  };
   if (bfOn) {
     root.classList.add('bf-on');
     root.querySelectorAll('[data-bf-only]').forEach(function (el) { el.hidden = false; });
-    // Tuile ajoutée au début d'une rangée (Occasioni) : l'accroche du défilement ramènerait sinon la rangée sur la tuile
-    // d'avant (la nouvelle serait cachée à gauche) ; remise au début sans accroche, maintenant et une fois la page chargée
-    var toStart = function () {
-      root.querySelectorAll('.dhp-track').forEach(function (track) {
-        track.style.scrollSnapType = 'none';
-        track.scrollLeft = 0;
-        requestAnimationFrame(function () { track.style.scrollSnapType = ''; });
-      });
-    };
     toStart();
     if (document.readyState === 'complete') setTimeout(toStart, 50); else window.addEventListener('load', toStart);
     var pad = function (n) { return (n < 10 ? '0' : '') + n; };
@@ -198,10 +198,12 @@
     }
   }
 
-  // ---------- Flèches des rangées qui défilent ----------
-  root.querySelectorAll('.dhp-arws[data-for]').forEach(function (box) {
+  // ---------- Flèches des rangées qui défilent (une fois par rangée : aussi pour la suite de la page chargée après) ----------
+  var initArrows = function () {
+  root.querySelectorAll('.dhp-arws[data-for]:not([data-ready])').forEach(function (box) {
     var track = document.getElementById(box.getAttribute('data-for'));
     if (!track) return;
+    box.setAttribute('data-ready', '');
     var buttons = box.querySelectorAll('.dhp-arw');
     var paint = function () {
       buttons[0].disabled = track.scrollLeft < 4;
@@ -212,6 +214,8 @@
     window.addEventListener('resize', paint);
     setTimeout(paint, 300);
   });
+  };
+  initArrows();
 
   // ---------- Cartes : cœur (wishlist du site), panier (fenêtre « Aggiungi al carrello »), bouton « Anteprima » ----------
   var syncHearts = function (scope) {
@@ -283,6 +287,8 @@
   });
   syncHearts(root);
 
+  // ---------- Suite de la page (partie « more » de la section, modèle index.dhp-more) : chargée juste après ----------
+  var initMore = function () {
   // ---------- Mot géant : le rayon choisi (clic ou toutes les 4,5 s) et ses 10 produits ----------
   var marq = root.querySelector('[data-dhp-marq]');
   var prods = root.querySelector('[data-dhp-prods]');
@@ -489,5 +495,34 @@
         showPage(edPage + 1);
       }, 500);
     }
+  }
+  };
+
+  // Chargement : la suite est rendue par Shopify dans une 2e requête (sans en-tête ni pied de page), insérée ici, puis
+  // ses rangées, animations et cartes sont lancées comme avant
+  var more = root.querySelector('[data-dhp-more]');
+  if (more) {
+    fetch(more.getAttribute('data-src'), { credentials: 'same-origin' })
+      .then(function (response) {
+        if (!response.ok) throw new Error('dhp-more ' + response.status);
+        return response.text();
+      })
+      .then(function (html) {
+        var part = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-dhp-more-in]');
+        if (!part) return;
+        more.innerHTML = part.innerHTML;
+        more.removeAttribute('aria-busy');
+        if (bfOn) {
+          more.querySelectorAll('[data-bf-only]').forEach(function (el) { el.hidden = false; });
+          toStart();
+        }
+        decorate(more);
+        initArrows();
+        initMore();
+      })
+      .catch(function (error) {
+        more.removeAttribute('aria-busy');
+        console.error(error);
+      });
   }
 })();

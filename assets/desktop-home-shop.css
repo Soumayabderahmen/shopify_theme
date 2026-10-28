@@ -67,6 +67,9 @@
 .dhp svg { display: block; }
 .dhp-wrap { width: 100%; padding: 0 16px; }
 
+/* Suite de la page, chargée juste après la grande carte : place réservée pour que le pied de page ne remonte pas */
+.dhp-more[aria-busy="true"] { min-height: 2400px; }
+
 /* ---------- Titres de section, flèches, rangées qui défilent ---------- */
 .dhp-sec { margin-top: 44px; }
 .dhp-hd { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 14px; }
