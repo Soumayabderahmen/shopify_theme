@@ -1,0 +1,28 @@
+{%- comment -%}
+  Logos des moyens de paiement, dessinés UNE fois par page (layout/theme.liquid) : chaque liste de logos (pied de page
+  mobile et ordinateur, panier, accueil ordinateur, fiche produit) y renvoie par snippets/payment-icon.liquid
+  (<svg><use href="#pm-…">). Avant : le SVG complet (≈ 51 Ko pour tous les logos) était recopié dans chaque liste.
+  Pas de display:none (les dégradés des logos ne s'afficheraient plus) : bloc de taille nulle hors de l'écran.
+{%- endcomment -%}
+{%- if shop.enabled_payment_types.size > 0 -%}
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+    {%- for payment_method in shop.enabled_payment_types -%}
+      {%- liquid
+        capture payment_svg
+          echo payment_method | payment_type_svg_tag
+        endcapture
+        assign svg_open = payment_svg | split: '>' | first | append: '>'
+        assign svg_view = svg_open | split: 'viewBox="' | last | split: '"' | first
+        assign svg_inner = payment_svg | remove_first: svg_open | remove_last: '</svg>'
+        assign svg_inner = svg_inner | replace: 'id="', 'id="pm-' | replace: 'url(#', 'url(#pm-' | replace: 'href="#', 'href="#pm-' | replace: 'aria-labelledby="', 'aria-labelledby="pm-'
+        # Couleur de remplissage posée sur la balise <svg> d'origine (fill="none" chez Klarna, AliPay…) : reportée
+        # sur un groupe, sinon les formes sans couleur propre passaient en noir
+        assign svg_fill = ''
+        if svg_open contains ' fill="'
+          assign svg_fill = svg_open | split: ' fill="' | last | split: '"' | first
+        endif
+      -%}
+      <symbol id="pm-{{ payment_method }}" viewBox="{{ svg_view }}">{% if svg_fill != '' %}<g fill="{{ svg_fill }}">{{ svg_inner }}</g>{% else %}{{ svg_inner }}{% endif %}</symbol>
+    {%- endfor -%}
+  </svg>
+{%- endif -%}

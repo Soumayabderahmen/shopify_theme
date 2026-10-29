@@ -95,7 +95,7 @@
             <p class="pdp-m__pt-cap">{{ 'mobile_protect.pay_methods' | t }}</p>
             <ul class="pdp-m__pt-pay">
               {%- for payment_method in shop.enabled_payment_types -%}
-                <li>{{ payment_method | payment_type_svg_tag }}</li>
+                <li>{%- render 'payment-icon', type: payment_method -%}</li>
               {%- endfor -%}
             </ul>
           {%- endif -%}

@@ -548,7 +548,7 @@
           {%- if section.settings.show_payment_methods -%}
             <ul class="l4pm text-center base-font">
               {% for payment_method in shop.enabled_payment_types %}
-                <li>{{ payment_method | payment_type_svg_tag }}</li>
+                <li>{%- render 'payment-icon', type: payment_method -%}</li>
               {% endfor %}
             </ul>
           {%- endif -%}

@@ -261,8 +261,7 @@
     {%- if shop.enabled_payment_types.size > 0 -%}
       {%- capture pay_items -%}
         {%- for payment_method in shop.enabled_payment_types -%}
-          {%- capture payment_svg -%}{{ payment_method | payment_type_svg_tag }}{%- endcapture -%}
-          <li>{{ payment_svg | replace: 'id="', 'id="dhp-' | replace: 'url(#', 'url(#dhp-' | replace: 'aria-labelledby="', 'aria-labelledby="dhp-' | replace: 'href="#', 'href="#dhp-' }}</li>
+          <li>{%- render 'payment-icon', type: payment_method -%}</li>
         {%- endfor -%}
       {%- endcapture -%}
       <div class="dhp-pay" role="region" aria-label="{{ 'desktop_home_shop.pay_aria' | t }}">

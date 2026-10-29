@@ -204,7 +204,7 @@
         </div>
         <ul class="cd-pay" aria-label="{{ 'mobile.cart.payment_methods' | t }}">
           {%- for payment_method in shop.enabled_payment_types -%}
-            <li>{{ payment_method | payment_type_svg_tag }}</li>
+            <li>{%- render 'payment-icon', type: payment_method -%}</li>
           {%- endfor -%}
         </ul>
       </section>

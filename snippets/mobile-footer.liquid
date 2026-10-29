@@ -299,9 +299,7 @@
       <p class="nf-h" role="heading" aria-level="3">{{ 'mobile.footer.payment_methods' | t }}</p>
       <ul class="nf-pay" aria-label="{{ 'mobile.footer.payment_methods' | t }}">
         {%- for payment_method in shop.enabled_payment_types -%}
-          {%- comment -%} IDs préfixés : les mêmes SVG existent dans l'ancien footer (masqué), sinon les dégradés ne s'affichent pas. {%- endcomment -%}
-          {%- capture payment_svg -%}{{ payment_method | payment_type_svg_tag }}{%- endcapture -%}
-          <li>{{ payment_svg | replace: 'id="', 'id="nf-' | replace: 'url(#', 'url(#nf-' | replace: 'aria-labelledby="', 'aria-labelledby="nf-' | replace: 'href="#', 'href="#nf-' }}</li>
+          <li>{%- render 'payment-icon', type: payment_method -%}</li>
         {%- endfor -%}
       </ul>
     {%- endif -%}
@@ -453,9 +451,7 @@
     {%- if section_settings.show_payment_methods and shop.enabled_payment_types.size > 0 -%}
       <ul class="dft-pay" aria-label="{{ 'mobile.footer.payment_methods' | t }}">
         {%- for payment_method in shop.enabled_payment_types -%}
-          {%- comment -%} IDs préfixés « df- » : les mêmes SVG existent dans l'ancien footer et le footer mobile {%- endcomment -%}
-          {%- capture payment_svg -%}{{ payment_method | payment_type_svg_tag }}{%- endcapture -%}
-          <li>{{ payment_svg | replace: 'id="', 'id="df-' | replace: 'url(#', 'url(#df-' | replace: 'aria-labelledby="', 'aria-labelledby="df-' | replace: 'href="#', 'href="#df-' }}</li>
+          <li>{%- render 'payment-icon', type: payment_method -%}</li>
         {%- endfor -%}
       </ul>
     {%- endif -%}

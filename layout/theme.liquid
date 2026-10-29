@@ -615,6 +615,7 @@
       {{ 'rtl.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
     {%- endif -%}
     {% render 'color-swatches' %}
+    {%- render 'payment-icons-sprite' -%}
     <script defer src="{{ 'scripts.js' | asset_url }}"></script>
     <script defer src="{{ 'custom.js' | asset_url }}"></script>
     {%- if old_grid -%}

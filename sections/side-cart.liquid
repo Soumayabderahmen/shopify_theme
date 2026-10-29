@@ -489,11 +489,7 @@
   {%- if section.settings.show_trustbadge -%}
     {%- render 'trustbadge' -%}
   {%- endif -%}
-  <ul class="l4pm text-center">
-    {%- for payment_method in shop.enabled_payment_types -%}
-      <li>{{ payment_method | payment_type_svg_tag }}</li>
-    {%- endfor -%}
-  </ul>
+  {%- comment -%} Logos de paiement du panneau d'origine (toujours caché) retirés : affichés par snippets/cart-drawer-mobile.liquid. {%- endcomment -%}
 {%- endif -%}
 </aside>
 

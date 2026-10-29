@@ -450,13 +450,7 @@
       {% # theme-check-enable %}
     </p>
   {%- endif -%}
-  {%- if section.settings.show_payment_methods -%}
-    <ul class="l4pm box">
-      {%- for payment_method in shop.enabled_payment_types -%}
-        <li>{{ payment_method | payment_type_svg_tag }}</li>
-      {%- endfor -%}
-    </ul>
-  {%- endif -%}
+  {%- comment -%} Logos de paiement de l'ancien pied de page (toujours caché) retirés : affichés par snippets/mobile-footer.liquid. {%- endcomment -%}
 </div>
 
 {%- comment -%} Footer mobile (prototype) : mêmes données, affiché uniquement sur mobile. {%- endcomment -%}

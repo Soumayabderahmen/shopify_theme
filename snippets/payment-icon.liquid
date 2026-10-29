@@ -1,0 +1,20 @@
+{%- comment -%}
+  Un logo de moyen de paiement, qui renvoie au dessin écrit une fois par page (snippets/payment-icons-sprite.liquid).
+  Mêmes taille et proportions que le SVG de Shopify (viewBox, width, height repris de payment_type_svg_tag).
+  Paramètre : type (élément de shop.enabled_payment_types)
+{%- endcomment -%}
+{%- liquid
+  capture payment_svg
+    echo type | payment_type_svg_tag
+  endcapture
+  assign svg_open = payment_svg | split: '>' | first
+  assign svg_view = svg_open | split: 'viewBox="' | last | split: '"' | first
+  assign svg_w = svg_open | split: 'width="' | last | split: '"' | first
+  assign svg_h = svg_open | split: 'height="' | last | split: '"' | first
+  assign svg_name = type | replace: '_', ' ' | capitalize
+  # Cadre partant de 0 0 : le décalage d'origine (UnionPay : « -36 25 38 24 ») est déjà dans le symbole, sinon il
+  # s'appliquerait deux fois et le logo sortirait du cadre
+  assign svg_box = svg_view | split: ' '
+  assign svg_view = '0 0 ' | append: svg_box[2] | append: ' ' | append: svg_box[3]
+-%}
+<svg class="icon icon--full-color" viewBox="{{ svg_view }}"{% if svg_open contains 'width="' %} width="{{ svg_w }}"{% endif %}{% if svg_open contains 'height="' %} height="{{ svg_h }}"{% endif %} role="img" aria-label="{{ svg_name }}"><use href="#pm-{{ type }}"></use></svg>
