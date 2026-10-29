@@ -1,4 +1,4 @@
-/* Carte produit au style SHEIN (snippets/mshein-card.liquid) — MOBILE uniquement (≤ 760px), toutes les pages.
+/* Carte produit au style SHEIN (snippets/mshein-card.liquid) — toutes les pages ; sur ordinateur aussi le bouton « Anteprima » au survol.
    - cœur : état réel des favoris (window.mobileWishlist) pour les cartes ajoutées après le chargement ;
    - nom de la marque devant le titre (« 🏬 Marque › »), relevé des titres du catalogue (assets/mobile-brands.json) ;
    - toucher n'importe où sur la carte (hors cœur / panier) : fiche produit, comme SHEIN.
@@ -120,6 +120,30 @@
       });
     }).observe(document.body, { childList: true, subtree: true });
   };
+
+  // Ordinateur : bouton « Anteprima » (fiche produit) sur la photo au survol, comme les cartes de l'accueil — sauf si la
+  // page l'ajoute déjà elle-même (accueil, collections, wishlist, panier : boutons « …-qv »).
+  var preview = script && script.getAttribute('data-preview');
+  var eye = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  if (preview) {
+    document.addEventListener('mouseover', function (event) {
+      if (mobile.matches) return;
+      var card = event.target.closest && event.target.closest('.mshein-card');
+      if (!card || card.closest('.is-list')) return;
+      // Après les boutons des pages (leurs écouteurs passent dans le même survol)
+      setTimeout(function () {
+        var media = card.querySelector('.mshein-card__img');
+        var link = card.querySelector('.mshein-card__link');
+        if (!media || !link || media.querySelector('[class*="-qv"], .mshein-card__qv')) return;
+        var button = document.createElement('a');
+        button.className = 'mshein-card__qv';
+        button.href = link.getAttribute('href');
+        button.innerHTML = eye;
+        button.appendChild(document.createTextNode(preview));
+        media.appendChild(button);
+      }, 0);
+    });
+  }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();

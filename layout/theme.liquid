@@ -98,7 +98,7 @@
       {%- comment -%} Recherche : même page que les collections sur ordinateur (sections/desktop-collection.liquid) {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'desktop-collection.css' | asset_url }}" media="(min-width: 761px)">
     {%- endif -%}
-    <script src="{{ 'mshein-card.js' | asset_url }}" defer data-brands="{{ 'mobile-brands.json' | asset_url }}"></script>
+    <script src="{{ 'mshein-card.js' | asset_url }}" defer data-brands="{{ 'mobile-brands.json' | asset_url }}" data-preview="{{ 'desktop_home_shop.preview' | t | escape }}"></script>
     {%- liquid
       # Pages collection (template collection.json) et page « In offerta » (collection.offerte.json) : en mobile, même
       # design que les onglets de rayon de l'accueil.

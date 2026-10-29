@@ -662,3 +662,83 @@
     }
   }
 }
+
+/* ---------- Ordinateur (≥ 761px) : toutes les cartes comme celles de l'accueil (sections/desktop-home-shop.liquid) —
+   coins arrondis, photo 3 / 4, au survol la carte se soulève dans un cadre blanc avec ombre et le bouton « Anteprima »
+   apparaît (ajouté par assets/mshein-card.js quand la page ne l'ajoute pas déjà). Mobile inchangé. ---------- */
+@media (min-width: 761px) {
+  .mshein-card {
+    border-radius: 12px;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .mshein-card .mshein-card__img {
+    position: relative;
+    aspect-ratio: 3 / 4 !important;
+  }
+
+  /* Photo qui remplit toute la case, quelle que soit la grille du thème autour (ex. « Potrebbe piacerti anche ») */
+  #root#root .mshein-card .mshein-card__img .mshein-card__link {
+    height: 100% !important;
+  }
+
+  #root#root .mshein-card .mshein-card__img .mshein-card__link img {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    object-fit: cover !important;
+  }
+
+  .mshein-card:hover {
+    position: relative;
+    z-index: 3;
+    background: #fff;
+    box-shadow: 0 0 0 10px #fff, 0 8px 34px 10px rgb(22 18 63 / 15%);
+  }
+
+  /* Vue liste de la page collection : pas de cadre soulevé */
+  .is-list > .mshein-card:hover {
+    box-shadow: none;
+  }
+
+  .mshein-card__qv {
+    position: absolute;
+    z-index: 4;
+    left: 8px;
+    bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    color: #111 !important;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: normal;
+    text-decoration: none !important;
+    background: rgb(255 255 255 / 94%);
+    border-radius: 999px;
+    box-shadow: 0 4px 12px -4px rgb(0 0 0 / 30%);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .mshein-card__qv svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .mshein-card:hover .mshein-card__qv {
+    opacity: 1;
+    transform: none;
+  }
+
+  .is-list .mshein-card__qv {
+    display: none;
+  }
+}
