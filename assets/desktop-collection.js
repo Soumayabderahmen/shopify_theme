@@ -616,9 +616,9 @@
   });
   window.addEventListener('popstate', function () {
     if (!root || !document.querySelector('[data-dcl]')) return;
-    // Retour vers une page qui n'est pas une collection (accueil, fiche… : collection ouverte sans recharger depuis
+    // Retour vers une page qui n'est ni une collection ni la recherche (accueil, fiche… : collection ouverte sans recharger depuis
     // celle-ci, assets/desktop-header.js) : cette page est rechargée
-    if (!handleOf(location.pathname)) { location.reload(); return; }
+    if (!handleOf(location.pathname) && location.pathname !== root.getAttribute('data-url')) { location.reload(); return; }
     navigate(location.pathname + location.search, { push: false, full: handleOf(location.pathname) !== root.getAttribute('data-handle') });
   });
   // Fenêtres des pastilles et menu de tri fermés par un clic ailleurs ; Échap ferme aussi le panneau « Filtri »

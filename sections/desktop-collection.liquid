@@ -11,6 +11,8 @@
   part : page (toute la page ; aussi template collection.desktop-coll, sans layout, redemandé à chaque filtre / tri /
   page / collection et pour les rails par assets/desktop-collection.js) ou sale (« In offerta » : produits avec prix
   barré, 48 lus à la fois, template collection.desktop-coll-sale).
+  Aussi la page de recherche ordinateur (templates search.json, search.desktop-coll, search.desktop-coll-sale) : même
+  bandeau (photos des résultats) et même liste, avec les résultats, filtres et tris de la recherche Shopify.
   Styles : assets/desktop-collection.css ; script : assets/desktop-collection.js.
 {%- endcomment -%}
 {%- liquid
@@ -24,14 +26,26 @@
 
 {%- if part == 'sale' -%}
   <ul data-dcl-sale>
-    {%- paginate collection.products by 48 -%}
-      {%- for product in collection.products -%}
-        {%- assign sale_variant = product.selected_or_first_available_variant -%}
-        {%- unless sale_variant.compare_at_price > sale_variant.price -%}{%- continue -%}{%- endunless -%}
-        {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
-      {%- endfor -%}
-      {%- if paginate.next -%}<li hidden data-dcl-next="{{ paginate.next.url }}"></li>{%- endif -%}
-    {%- endpaginate -%}
+    {%- if template.name == 'search' -%}
+      {%- paginate search.results by 48 -%}
+        {%- for product in search.results -%}
+          {%- if product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
+          {%- assign sale_variant = product.selected_or_first_available_variant -%}
+          {%- unless sale_variant.compare_at_price > sale_variant.price -%}{%- continue -%}{%- endunless -%}
+          {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
+        {%- endfor -%}
+        {%- if paginate.next -%}<li hidden data-dcl-next="{{ paginate.next.url }}"></li>{%- endif -%}
+      {%- endpaginate -%}
+    {%- else -%}
+      {%- paginate collection.products by 48 -%}
+        {%- for product in collection.products -%}
+          {%- assign sale_variant = product.selected_or_first_available_variant -%}
+          {%- unless sale_variant.compare_at_price > sale_variant.price -%}{%- continue -%}{%- endunless -%}
+          {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
+        {%- endfor -%}
+        {%- if paginate.next -%}<li hidden data-dcl-next="{{ paginate.next.url }}"></li>{%- endif -%}
+      {%- endpaginate -%}
+    {%- endif -%}
   </ul>
 {%- else -%}
 {%- liquid
@@ -41,6 +55,32 @@
   endif
   assign handle = collection.handle
   assign name = collection.title | remove: ' - Tutte' | remove: ' - Tutti' | remove: ' - tutte' | remove: ' - tutti'
+
+  # Recherche : même page, avec les résultats, filtres et tris de la recherche à la place de ceux de la collection
+  assign is_search = false
+  if template.name == 'search'
+    assign is_search = true
+    assign handle = ''
+    if search.performed
+      # Texte de la traduction déjà échappé (guillemets, terme) : remis en texte simple, échappé une fois à l'affichage
+      assign name = 'search.results_plus_term' | t: term: search.terms | replace: '&quot;', '"' | replace: '&#39;', "'" | replace: '&lt;', '<' | replace: '&gt;', '>' | replace: '&amp;', '&'
+    else
+      assign name = 'search.title' | t
+    endif
+    assign src_filters = search.filters
+    assign src_sorts = search.sort_options
+    assign sort_current = search.sort_by | default: search.default_sort_by
+    assign src_count = search.results_count
+    assign page_url = routes.search_url
+    assign page_title = name
+  else
+    assign src_filters = collection.filters
+    assign src_sorts = collection.sort_options
+    assign sort_current = collection.sort_by | default: collection.default_sort_by
+    assign src_count = collection.products_count
+    assign page_url = collection.url
+    assign page_title = collection.title
+  endif
 
   # Place de la collection dans le menu : rayon → sous-lien → sous-sous-lien (premier trouvé)
   assign top_title = ''
@@ -111,9 +151,8 @@
     assign tagline = 'desktop_collection.tag_default' | t
   endif
 
-  assign sort_current = collection.sort_by | default: collection.default_sort_by
   assign sort_label = ''
-  for option in collection.sort_options
+  for option in src_sorts
     if option.value == sort_current
       assign sort_label = option.name
     endif
@@ -122,7 +161,7 @@
   assign size_order = '3xs,xxs,xs,s,m,l,xl,2xl,3xl,4xl,5xl,6xl,one' | split: ','
   assign under_amount = 20
   assign active_count = 0
-  for filter in collection.filters
+  for filter in src_filters
     if filter.type == 'price_range'
       if filter.min_value.value != nil or filter.max_value.value != nil
         assign active_count = active_count | plus: 1
@@ -138,11 +177,12 @@
     #shopify-section-{{ section.id }} { display: none !important; }
   }
   @media only screen and (min-width: 761px) {
-    .template-collection #content > .shopify-section:not(#shopify-section-{{ section.id }}):not(.shopify-section-footer) { display: none !important; }
+    .template-collection #content > .shopify-section:not(#shopify-section-{{ section.id }}):not(.shopify-section-footer),
+    .template-search #content > .shopify-section:not(#shopify-section-{{ section.id }}):not(.shopify-section-footer) { display: none !important; }
   }
 </style>
 
-<div class="dcl" data-dcl data-handle="{{ handle }}" data-url="{{ collection.url }}" data-top="{{ top_url | split: '?' | first }}" data-title="{{ collection.title | escape }} &ndash; {{ shop.name | escape }}" data-added="{{ 'mobile.js.added_to_wishlist' | t | escape }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t | escape }}" data-preview="{{ 'desktop_home_shop.preview' | t | escape }}">
+<div class="dcl" data-dcl data-handle="{{ handle }}" data-url="{{ page_url }}" data-top="{{ top_url | split: '?' | first }}" data-title="{{ page_title | escape }} &ndash; {{ shop.name | escape }}" data-added="{{ 'mobile.js.added_to_wishlist' | t | escape }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t | escape }}" data-preview="{{ 'desktop_home_shop.preview' | t | escape }}">
   {%- comment -%} Pleine largeur dès le premier affichage (même calcul que assets/desktop-collection.js au redimensionnement). {%- endcomment -%}
   <script>
     (function (root) {
@@ -198,7 +238,7 @@
       endif
     endfor
     assign under_cents = under_amount | times: 100
-    assign under_filter = collection.filters | where: 'type', 'price_range' | first
+    assign under_filter = src_filters | where: 'type', 'price_range' | first
     assign b_under = nil
     for product in collection.products
       if product.featured_image and product.id != b_best.id and product.id != b_new.id and product.price < under_cents
@@ -220,10 +260,10 @@
         <a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a>
         {%- if top_title != '' and top_handle != handle -%}<i>›</i><a href="{{ top_url }}">{{ top_title | escape }}</a>{%- endif -%}
         {%- if kid_title != '' and kid_handle != handle -%}<i>›</i><a href="{{ kid_url }}">{{ kid_title | escape }}</a>{%- endif -%}
-        <i>›</i><b>{{ collection.title | escape }}</b>
+        <i>›</i><b>{%- if is_search -%}{{ 'search.title' | t }}{%- else -%}{{ collection.title | escape }}{%- endif -%}</b>
       </nav>
       <h1 class="cph__title">{{ name | escape }}</h1>
-      <p class="cph__copy">{%- if handle == 'all' -%}{{ 'desktop_collection.all_copy' | t: shop: shop.name }}{%- else -%}{{ 'desktop_collection.count_copy' | t: count: collection.all_products_count }}{%- endif %} {{ 'desktop_collection.weekly' | t }}</p>
+      <p class="cph__copy">{%- if is_search -%}{{ 'desktop_collection.count' | t: count: src_count }}{%- elsif handle == 'all' -%}{{ 'desktop_collection.all_copy' | t: shop: shop.name }}{%- else -%}{{ 'desktop_collection.count_copy' | t: count: collection.all_products_count }}{%- endif -%}{%- unless is_search %} {{ 'desktop_collection.weekly' | t }}{%- endunless -%}</p>
       <div class="cph__usp">
         {%- if shipping_amount != '' -%}<span>🚚 {{ 'desktop_home.free_shipping_from_html' | t: amount: shipping_amount }}</span>{%- endif -%}
         <span>↩ {{ 'desktop_collection.usp_return' | t }}</span>
@@ -234,8 +274,10 @@
     <div class="cph__art" aria-hidden="true">
       {%- assign pics = '' -%}
       {%- assign pic_count = 0 -%}
-      {%- for product in collection.products -%}
+      {%- if is_search -%}{%- assign pic_source = search.results -%}{%- else -%}{%- assign pic_source = collection.products -%}{%- endif -%}
+      {%- for product in pic_source -%}
         {%- if product.featured_image == blank -%}{%- continue -%}{%- endif -%}
+        {%- if is_search and product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
         {%- capture pic -%}{{ product.featured_image | image_url: width: 400 | json }}{%- endcapture -%}
         {%- if pics != '' -%}{%- assign pics = pics | append: ',' -%}{%- endif -%}
         {%- assign pics = pics | append: pic -%}
@@ -247,6 +289,7 @@
     </div>
   </section>
 
+  {%- unless is_search -%}
   {%- comment -%} ---------- Catégories : carrés arrondis comme les tuiles de l'accueil ---------- {%- endcomment -%}
   <div class="cpt">
     <div class="cpt__row" data-cpt-row>
@@ -287,6 +330,7 @@
       </section>
     {%- endfor -%}
   </div>
+  {%- endunless -%}
 
   <main class="wrap cl" id="dcl-list">
     <div class="cl__layout">
@@ -301,7 +345,7 @@
         <div class="cpd__pane" role="dialog" aria-modal="true" aria-label="{{ 'desktop_collection.filters' | t | escape }}">
           <div class="cpd__hd"><b>{{ 'desktop_collection.filters' | t }}</b><button type="button" class="cpd__x" data-cpd-close aria-label="{{ 'mobile.pdp.close' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
           <div class="cpd__body">
-          {%- for filter in collection.filters -%}
+          {%- for filter in src_filters -%}
             {%- liquid
               assign group_name = filter.label | downcase
               assign first_param = filter.values.first.param_name | default: '' | downcase
@@ -488,7 +532,7 @@
         data-more="{{ 'mobile.collection.show_others' | t: count: '__N__' | escape }}" data-less="{{ 'mobile.collection.show_less' | t | escape }}"
         data-price-label="{{ cart.currency.symbol }}" data-reset="{{ 'desktop_collection.reset' | t | escape }}" data-done="{{ 'desktop_collection.done' | t | escape }}">
         <h2 class="cl__title">{{ 'desktop_collection.all_products' | t }}</h2>
-        <p class="cl__found" data-dcl-found>{{ 'desktop_collection.count' | t: count: collection.products_count }}</p>
+        <p class="cl__found" data-dcl-found>{{ 'desktop_collection.count' | t: count: src_count }}</p>
         {%- comment -%} Rangée de filtres centrée (comme shop.com), collée sous l'en-tête pendant le défilement {%- endcomment -%}
         <div class="cpf">
           <button type="button" class="cpf__pill cpf__pill--ico{% if active_count > 0 %} is-on{% endif %}" data-cpd-open aria-label="{{ 'desktop_collection.all_filters' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><i data-cpf-total hidden></i></button>
@@ -502,23 +546,25 @@
           <div class="srt cpf__dd">
             <button type="button" class="cpf__pill srt__btn" aria-haspopup="listbox" aria-expanded="false" data-dcl-sort-btn>{{ 'desktop_collection.sort_short' | t }}: <b>{{ sort_label | escape }}</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>
             <div class="srt__menu" role="listbox" hidden data-dcl-sort-menu>
-              {%- for option in collection.sort_options -%}
+              {%- for option in src_sorts -%}
                 <button type="button" data-s="{{ option.value }}"{% if option.value == sort_current %} class="is-on"{% endif %}>{{ option.name | escape }}</button>
               {%- endfor -%}
             </div>
           </div>
         </div>
         <div class="act-f" data-dcl-active></div>
-        {%- paginate collection.products by 40 -%}
-          <ul class="cl__grid" data-dcl-grid>
-            {%- for product in collection.products -%}
+        {%- comment -%} Produits de la collection ou résultats de la recherche (produits seulement) {%- endcomment -%}
+        {%- if is_search -%}
+        {%- paginate search.results by 40 -%}
+          {%- assign grid_count = 0 -%}
+          {%- capture grid_cards -%}
+            {%- for product in search.results -%}
+              {%- if product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
+              {%- assign grid_count = grid_count | plus: 1 -%}
               {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
             {%- endfor -%}
-          </ul>
-          {%- if collection.products.size == 0 -%}
-            <p class="cl__none">{{ 'desktop_collection.none' | t }} {%- if active_count > 0 -%} <button type="button" data-dcl-clear>{{ 'desktop_collection.clear' | t }}</button>{%- endif -%}</p>
-          {%- endif -%}
-          <div class="dcl-sale-more" data-dcl-sale-more hidden><button type="button">{{ 'desktop_home.show_more' | t }}</button></div>
+          {%- endcapture -%}
+          {%- capture grid_pager -%}
           {%- if paginate.pages > 1 -%}
             <nav class="pager" data-dcl-pager aria-label="{{ 'desktop_collection.pages' | t | escape }}">
               {%- if paginate.previous -%}<a href="{{ paginate.previous.url }}" aria-label="{{ 'mobile.pdp.previous' | t | escape }}">‹</a>{%- else -%}<span class="is-off">‹</span>{%- endif -%}
@@ -536,7 +582,44 @@
               {%- if paginate.next -%}<a href="{{ paginate.next.url }}" aria-label="{{ 'mobile.pdp.next' | t | escape }}">›</a>{%- else -%}<span class="is-off">›</span>{%- endif -%}
             </nav>
           {%- endif -%}
+          {%- endcapture -%}
         {%- endpaginate -%}
+        {%- else -%}
+        {%- paginate collection.products by 40 -%}
+          {%- assign grid_count = 0 -%}
+          {%- capture grid_cards -%}
+            {%- for product in collection.products -%}
+              {%- assign grid_count = grid_count | plus: 1 -%}
+              {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
+            {%- endfor -%}
+          {%- endcapture -%}
+          {%- capture grid_pager -%}
+          {%- if paginate.pages > 1 -%}
+            <nav class="pager" data-dcl-pager aria-label="{{ 'desktop_collection.pages' | t | escape }}">
+              {%- if paginate.previous -%}<a href="{{ paginate.previous.url }}" aria-label="{{ 'mobile.pdp.previous' | t | escape }}">‹</a>{%- else -%}<span class="is-off">‹</span>{%- endif -%}
+              {%- assign current_page = paginate.current_page | append: '' -%}
+              {%- for part in paginate.parts -%}
+                {%- assign part_title = part.title | append: '' -%}
+                {%- if part.is_link -%}
+                  {%- if part.title == '…' or part.title == '&hellip;' -%}<span>…</span>{%- else -%}<a href="{{ part.url }}">{{ part.title }}</a>{%- endif -%}
+                {%- elsif part_title == current_page -%}
+                  <b class="is-on">{{ part.title }}</b>
+                {%- else -%}
+                  <span>…</span>
+                {%- endif -%}
+              {%- endfor -%}
+              {%- if paginate.next -%}<a href="{{ paginate.next.url }}" aria-label="{{ 'mobile.pdp.next' | t | escape }}">›</a>{%- else -%}<span class="is-off">›</span>{%- endif -%}
+            </nav>
+          {%- endif -%}
+          {%- endcapture -%}
+        {%- endpaginate -%}
+        {%- endif -%}
+        <ul class="cl__grid" data-dcl-grid>{{ grid_cards }}</ul>
+        {%- if grid_count == 0 -%}
+          <p class="cl__none">{{ 'desktop_collection.none' | t }} {%- if active_count > 0 -%} <button type="button" data-dcl-clear>{{ 'desktop_collection.clear' | t }}</button>{%- endif -%}</p>
+        {%- endif -%}
+        <div class="dcl-sale-more" data-dcl-sale-more hidden><button type="button">{{ 'desktop_home.show_more' | t }}</button></div>
+        {{ grid_pager }}
       </div>
     </div>
   </main>
@@ -561,7 +644,7 @@
       "default": "page"
     }
   ],
-  "enabled_on": { "templates": ["collection"] },
+  "enabled_on": { "templates": ["collection", "search"] },
   "presets": [{ "name": "Collezione desktop" }]
 }
 {% endschema %}

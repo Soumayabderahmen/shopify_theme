@@ -24,7 +24,7 @@
   margin-left: calc(-1 * var(--dcl-x, 0px));
   background: #fff;
 }
-.template-collection #content { padding-top: 0; }
+.template-collection #content, .template-search #content { padding-top: 0; }
 .dcl *, .dcl *::before, .dcl *::after { box-sizing: border-box; }
 .dcl a { color: inherit; text-decoration: none; }
 .dcl img { display: block; max-width: 100%; }

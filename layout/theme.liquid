@@ -94,7 +94,8 @@
     <link rel="stylesheet" href="{{ 'mshein-card.css' | asset_url }}" media="{% if template.name == 'index' or template.name == 'collection' or template.name == 'product' or template.name == 'search' or template.name == 'cart' or template.name == 'page' and page.handle == 'wishlist' %}all{% else %}(max-width: 760px){% endif %}">
     {%- if template.name == 'index' -%}
       <link rel="stylesheet" href="{{ 'desktop-home-shop.css' | asset_url }}" media="(min-width: 761px)">
-    {%- elsif template.name == 'collection' -%}
+    {%- elsif template.name == 'collection' or template.name == 'search' -%}
+      {%- comment -%} Recherche : même page que les collections sur ordinateur (sections/desktop-collection.liquid) {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'desktop-collection.css' | asset_url }}" media="(min-width: 761px)">
     {%- endif -%}
     <script src="{{ 'mshein-card.js' | asset_url }}" defer data-brands="{{ 'mobile-brands.json' | asset_url }}"></script>

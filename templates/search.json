@@ -9,6 +9,13 @@
  */
 {
   "sections": {
+    "desktop_search": {
+      "type": "desktop-collection",
+      "settings": {
+        "menu": "main-menu",
+        "part": "page"
+      }
+    },
     "mshein_search": {
       "type": "mobile-home-shein",
       "settings": {
@@ -18,6 +25,7 @@
     }
   },
   "order": [
+    "desktop_search",
     "mshein_search"
   ]
 }
