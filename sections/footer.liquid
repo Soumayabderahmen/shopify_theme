@@ -434,10 +434,12 @@
   </p>
   <ul class="l4dr">
     {%- liquid
-      if section.settings.enable_country_selector and localization.available_countries.size > 1
+      # Sélecteurs du pied de page d'origine (toujours caché) : écrits seulement dans l'éditeur ; sur le site, ceux de
+      # snippets/mobile-footer.liquid (~18 Ko de HTML en moins par page)
+      if request.design_mode and section.settings.enable_country_selector and localization.available_countries.size > 1
         render 'language-country-selector', display: 'country', origin: 'footer'
       endif
-      if section.settings.enable_language_selector and localization.available_languages.size > 1
+      if request.design_mode and section.settings.enable_language_selector and localization.available_languages.size > 1
         render 'language-country-selector', display: 'language', origin: 'footer'
       endif
     -%}

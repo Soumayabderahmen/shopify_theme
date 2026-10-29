@@ -810,14 +810,16 @@
     </li>
   {% endif %}
   {%- liquid
-    if section.settings.enable_country_selector and localization.available_countries.size > 1
+    # Sélecteurs pays / langue de l'en-tête d'origine (toujours caché) : écrits seulement dans l'éditeur. Sur le site :
+    # sélecteurs de snippets/desktop-header.liquid et snippets/mobile-footer.liquid (~17 Ko de HTML en moins par page)
+    if request.design_mode and section.settings.enable_country_selector and localization.available_countries.size > 1
       if section.settings.header_icons
         render 'language-country-selector', display: 'country', extra_classes: 'text-only'
       else
         render 'language-country-selector', display: 'country'
       endif
     endif
-    if section.settings.enable_language_selector and localization.available_languages.size > 1
+    if request.design_mode and section.settings.enable_language_selector and localization.available_languages.size > 1
       if section.settings.header_icons
         render 'language-country-selector', display: 'language', extra_classes: 'text-only'
       else
