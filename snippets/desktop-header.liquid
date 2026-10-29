@@ -76,7 +76,8 @@
   endif
   assign tbar_ic_truck = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>'
 -%}
-<div class="dh-top" data-dh-top>
+{%- comment -%} Page collection ordinateur ouverte sans recharger depuis les autres pages (assets/desktop-header.js) {%- endcomment -%}
+<div class="dh-top" data-dh-top data-dcl-css="{{ 'desktop-collection.css' | asset_url }}" data-dcl-js="{{ 'desktop-collection.js' | asset_url }}">
   <div class="dh-tbar" data-dh-tbar{% if tbar_bf %} data-bf-start="{{ settings.bf_start | date: '%s' }}" data-bf-end="{{ tbar_bf_end }}" data-bf-preview="{{ request.design_mode }}"{% endif %}>
     <div class="dh-tbar__in">
       {%- if shipping_html != '' -%}

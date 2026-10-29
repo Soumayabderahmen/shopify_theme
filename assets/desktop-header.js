@@ -1,6 +1,7 @@
 /* En-tête ORDINATEUR au style SHEIN (snippets/desktop-header.liquid) : barre du haut, suggestions de recherche,
    compteurs wishlist / panier, pays et langue, fenêtre du compte, méga-menu
-   « Categorie » rempli avec le panneau Categoria mobile (/?section_id=mobile-category-panel, chargé une fois).
+   « Categorie » rempli avec le panneau Categoria mobile (/?section_id=mobile-category-panel, chargé une fois) ;
+   collections ouvertes sans recharger depuis les autres pages (comme les onglets de rayon du mobile).
    Rien sur mobile (≤ 760px). */
 (function () {
   'use strict';
@@ -354,4 +355,100 @@
   window.dhLoadPanels = loadPanels;
   // Fermeture du méga-menu après une navigation instantanée (attente de survol annulée)
   window.dhCloseMega = function () { clearTimeout(timer); setMega(false); };
+
+  // ---------- Collection ouverte sans recharger depuis les autres pages (accueil, fiche produit…), comme les onglets de
+  // rayon du mobile : la page collection ordinateur (template collection.desktop-coll, sans layout) remplace le contenu,
+  // sa vraie adresse s'affiche ; préparée dès le survol du lien. Sur une page collection, assets/desktop-collection.js
+  // s'en charge déjà (il prend ensuite le relais). ----------
+  var dclCache = {};
+  var dclKey = function (url) {
+    var target = new URL(url, location.href);
+    target.searchParams.delete('view');
+    target.searchParams.set('view', 'desktop-coll');
+    return target.pathname + target.search;
+  };
+  var dclFetch = function (url) {
+    var key = dclKey(url);
+    if (!dclCache[key]) {
+      dclCache[key] = fetch(key, { credentials: 'same-origin' }).then(function (response) {
+        if (!response.ok) throw new Error('Collection page request failed: ' + response.status);
+        return response.text();
+      });
+      dclCache[key].catch(function () { delete dclCache[key]; });
+    }
+    return dclCache[key];
+  };
+  // Liens collection de l'en-tête (onglets, méga-menu), de l'accueil et du pied de page
+  var dclLink = function (link, event) {
+    if (!link || document.querySelector('[data-dcl]')) return null;
+    if (event && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0)) return null;
+    if (link.target && link.target !== '_self') return null;
+    if (!link.closest('.dh-top, .dhp, .dft')) return null;
+    var url;
+    try { url = new URL(link.getAttribute('href'), location.href); } catch (error) { return null; }
+    if (url.origin !== location.origin || !/\/collections\/[^/]+\/?$/.test(url.pathname) || url.searchParams.has('view')) return null;
+    return url;
+  };
+  // Feuille de la page collection (chargée seulement sur les pages collection) ; cartes : styles aussi sur ordinateur
+  var dclStyle = function () {
+    var cards = document.querySelector('link[href*="mshein-card.css"]');
+    if (cards) cards.media = 'all';
+    var href = top.getAttribute('data-dcl-css');
+    if (!href || document.querySelector('link[href*="desktop-collection.css"]')) return Promise.resolve();
+    return new Promise(function (resolve) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.media = '(min-width: 761px)';
+      link.onload = link.onerror = function () { resolve(); };
+      document.head.appendChild(link);
+    });
+  };
+  var dclOpen = function (url) {
+    var content = document.getElementById('content');
+    if (!content) { location.href = url.href; return; }
+    // Page pas encore prête : contenu estompé tout de suite (comme la forme grise du mobile)
+    var waiting = setTimeout(function () { content.classList.add('dh-loading'); }, 120);
+    Promise.all([dclFetch(url), dclStyle()]).then(function (results) {
+      var doc = new DOMParser().parseFromString(results[0], 'text/html');
+      var fresh = doc.querySelector('[data-dcl]');
+      var section = fresh && fresh.closest('.shopify-section');
+      if (!section) throw new Error('Desktop collection markup missing');
+      var footer = content.querySelector(':scope > .shopify-section-footer');
+      [].slice.call(content.children).forEach(function (node) { if (node !== footer) node.remove(); });
+      content.insertBefore(document.importNode(section, true), footer);
+      // Mêmes classes qu'une page collection chargée normalement (celles de l'accueil ou de la fiche retirées)
+      document.body.className = 'template-collection mshein-home mshein-head mshein-coll';
+      document.title = fresh.getAttribute('data-title') || document.title;
+      history.pushState({ dcl: true }, '', url.pathname + url.search);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      // Script de la page collection (une fois) : il démarre sur la page insérée
+      if (!window.dclStarted) {
+        var script = document.createElement('script');
+        script.src = top.getAttribute('data-dcl-js');
+        document.body.appendChild(script);
+      }
+    }).catch(function (error) {
+      console.error(error);
+      location.href = url.href; // secours : page normale
+    }).then(function () {
+      clearTimeout(waiting);
+      content.classList.remove('dh-loading');
+    });
+  };
+  document.addEventListener('click', function (event) {
+    if (event.defaultPrevented) return;
+    var url = dclLink(event.target.closest && event.target.closest('a[href]'), event);
+    if (!url) return;
+    event.preventDefault();
+    window.dhCloseMega();
+    dclOpen(url);
+  });
+  var dclHover = null;
+  document.addEventListener('mouseover', function (event) {
+    var url = dclLink(event.target.closest && event.target.closest('a[href]'));
+    if (!url) return;
+    clearTimeout(dclHover);
+    dclHover = setTimeout(function () { dclFetch(url).catch(function () {}); }, 70);
+  });
 })();

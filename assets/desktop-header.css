@@ -98,6 +98,10 @@
 .dh-loc__panel label { display: flex; flex-direction: column; gap: 6px; color: #6b6f86; font-size: 12px; font-weight: 600; }
 .dh-loc__panel select { width: 100%; height: 40px; padding: 0 10px; color: var(--dh-ink); font: inherit; font-size: 14px; background: #fff; border: 1px solid #dcdfe8; border-radius: 10px; }
 
+/* Collection ouverte sans recharger (assets/desktop-header.js) : contenu estompé pendant l'attente */
+#content.dh-loading > .shopify-section:not(.shopify-section-footer) { opacity: .35; pointer-events: none; transition: opacity .2s; }
+html:has(#content.dh-loading), html:has(#content.dh-loading) * { cursor: progress; }
+
 /* Accueil : la section commence juste sous l'en-tête (bannière du prototype v8, assets/desktop-home-shein.css) */
 .template-index #content { padding-top: 0; }
 
