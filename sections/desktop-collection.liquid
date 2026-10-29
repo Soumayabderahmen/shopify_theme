@@ -1,14 +1,16 @@
 {%- comment -%}
-  Page collection ORDINATEUR (prototype validé « Platinumshop-Collezione-desktop ») : bannière « appendiabiti » (produits
-  de la collection sur une barre courbe), fil d'Ariane, colonne de gauche « Raccolte » (arbre du menu) + « Filtra » (vrais
-  filtres Shopify, couleurs et tailles regroupées comme le mobile), barre (nombre, In offerta, Sotto 20, grille / liste,
-  tri), vraies cartes snippets/mshein-card.liquid, pages numérotées ; icône panier d'une carte : fenêtre « Aggiungi al
-  carrello » du site (snippets/mobile-quick-add.liquid).
+  Page collection ORDINATEUR (prototype validé « Platinumshop-Collezione-desktop-v3 », inspiré de shop.com) : bandeau aux
+  couleurs du site (fil d'Ariane, titre, avantages, photos de la collection animées comme la bannière de l'accueil),
+  catégories en carrés arrondis (sous-collections du menu), 3 bannières (meilleures ventes, nouveautés, sous 20 €), rails
+  « Preferiti per un motivo » / « Appena arrivati » ; puis « Tutti i prodotti » : rangée de filtres centrée (⇄ = panneau
+  « Filtri » à gauche avec les vrais filtres Shopify ; chaque pastille ouvre sa fenêtre ; « Fatto » applique), tri, vraies
+  cartes snippets/mshein-card.liquid 5 par ligne comme l'accueil, pages numérotées ; icône panier d'une carte : fenêtre
+  « Aggiungi al carrello » du site (snippets/mobile-quick-add.liquid).
   Ordinateur uniquement : cachée jusqu'à 760px (la page collection mobile ne change pas) ; sur ordinateur les autres
   sections de la page collection sont cachées.
   part : page (toute la page ; aussi template collection.desktop-coll, sans layout, redemandé à chaque filtre / tri /
-  page / collection par assets/desktop-collection.js) ou sale (« In offerta » : produits avec prix barré, 48 lus à la fois,
-  template collection.desktop-coll-sale).
+  page / collection et pour les rails par assets/desktop-collection.js) ou sale (« In offerta » : produits avec prix
+  barré, 48 lus à la fois, template collection.desktop-coll-sale).
   Styles : assets/desktop-collection.css ; script : assets/desktop-collection.js.
 {%- endcomment -%}
 {%- liquid
@@ -140,7 +142,7 @@
   }
 </style>
 
-<div class="dcl" data-dcl data-handle="{{ handle }}" data-url="{{ collection.url }}" data-top="{{ top_url | split: '?' | first }}" data-title="{{ collection.title | escape }} &ndash; {{ shop.name | escape }}" data-added="{{ 'mobile.js.added_to_wishlist' | t | escape }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t | escape }}">
+<div class="dcl" data-dcl data-handle="{{ handle }}" data-url="{{ collection.url }}" data-top="{{ top_url | split: '?' | first }}" data-title="{{ collection.title | escape }} &ndash; {{ shop.name | escape }}" data-added="{{ 'mobile.js.added_to_wishlist' | t | escape }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t | escape }}" data-preview="{{ 'desktop_home_shop.preview' | t | escape }}">
   {%- comment -%} Pleine largeur dès le premier affichage (même calcul que assets/desktop-collection.js au redimensionnement). {%- endcomment -%}
   <script>
     (function (root) {
@@ -150,84 +152,155 @@
     })(document.currentScript.parentElement);
   </script>
 
-  {%- comment -%} ---------- Bannière « appendiabiti » : produits de la collection sur une barre courbe ---------- {%- endcomment -%}
-  <section class="rh" data-rh aria-label="{{ 'desktop_collection.collection' | t | escape }}">
-    <div class="rh__kicker">{{ 'desktop_collection.collection' | t }}<span>{{ kicker | escape }}</span></div>
-    <h1 class="rh__title">{{ name | escape }} <span>{{ tagline | escape }}</span></h1>
-    <div class="rh__rack" data-rh-rack>
-      <svg class="rh__rail" aria-hidden="true"><defs><linearGradient id="dcl-rh-tube" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f4f7"/><stop offset=".45" stop-color="#b9b9c1"/><stop offset="1" stop-color="#75757e"/></linearGradient></defs><path data-rh-shadow fill="none" stroke="rgb(0 0 0 / 7%)" stroke-width="12" stroke-linecap="round" transform="translate(0 7)"/><path data-rh-path fill="none" stroke="url(#dcl-rh-tube)" stroke-width="7" stroke-linecap="round"/></svg>
+  {%- liquid
+    # Tuiles des catégories : sous-collections de la place de la collection dans le menu (rayon : ses catégories puis
+    # leurs sous-catégories ; catégorie : ses sous-catégories ; sous-catégorie : ses voisines ; hors menu : les rayons)
+    assign tiles_top = nil
+    assign tiles_kid = nil
+    for top in menu.links
+      if top.title == top_title and top.url == top_url
+        assign tiles_top = top
+        for kid in top.links
+          if kid.title == kid_title and kid.url == kid_url
+            assign tiles_kid = kid
+          endif
+        endfor
+        break
+      endif
+    endfor
+    if tiles_top == nil
+      assign tile_links = menu.links
+    elsif tiles_kid == nil
+      assign tile_links = tiles_top.links
+      for kid in tiles_top.links
+        assign tile_links = tile_links | concat: kid.links
+      endfor
+    elsif tiles_kid.links.size > 0
+      assign tile_links = tiles_kid.links
+    else
+      assign tile_links = tiles_top.links
+    endif
+
+    # Bannières : meilleure vente (ordre de la collection), dernier arrivé, un produit sous 20 € (trois produits différents)
+    assign b_best = nil
+    for product in collection.products
+      if product.featured_image
+        assign b_best = product
+        break
+      endif
+    endfor
+    assign by_date = collection.products | sort: 'created_at' | reverse
+    assign b_new = nil
+    for product in by_date
+      if product.featured_image and product.id != b_best.id
+        assign b_new = product
+        break
+      endif
+    endfor
+    assign under_cents = under_amount | times: 100
+    assign under_filter = collection.filters | where: 'type', 'price_range' | first
+    assign b_under = nil
+    for product in collection.products
+      if product.featured_image and product.id != b_best.id and product.id != b_new.id and product.price < under_cents
+        assign b_under = product
+        break
+      endif
+    endfor
+    assign under_money = under_cents | money_without_trailing_zeros | strip_html
+    assign shipping_amount = ''
+    if settings.enable_free_shipping and settings.free_shipping_amount > 0
+      assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
+    endif
+  -%}
+  {%- comment -%} ---------- Bandeau : fil d'Ariane, titre, nombre, avantages ; à droite photos de la collection qui
+    entrent, flottent puis laissent la place aux suivantes (comme la bannière de l'accueil) ---------- {%- endcomment -%}
+  <section class="cph" data-cph>
+    <div class="cph__txt">
+      <nav class="cph__bc" aria-label="{{ 'mobile.cart.breadcrumb' | t | escape }}">
+        <a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a>
+        {%- if top_title != '' and top_handle != handle -%}<i>›</i><a href="{{ top_url }}">{{ top_title | escape }}</a>{%- endif -%}
+        {%- if kid_title != '' and kid_handle != handle -%}<i>›</i><a href="{{ kid_url }}">{{ kid_title | escape }}</a>{%- endif -%}
+        <i>›</i><b>{{ collection.title | escape }}</b>
+      </nav>
+      <h1 class="cph__title">{{ name | escape }}</h1>
+      <p class="cph__copy">{%- if handle == 'all' -%}{{ 'desktop_collection.all_copy' | t: shop: shop.name }}{%- else -%}{{ 'desktop_collection.count_copy' | t: count: collection.all_products_count }}{%- endif %} {{ 'desktop_collection.weekly' | t }}</p>
+      <div class="cph__usp">
+        {%- if shipping_amount != '' -%}<span>🚚 {{ 'desktop_home.free_shipping_from_html' | t: amount: shipping_amount }}</span>{%- endif -%}
+        <span>↩ {{ 'desktop_collection.usp_return' | t }}</span>
+        <span>💳 {{ 'desktop_collection.usp_klarna' | t }}</span>
+      </div>
+      <a class="cph__cta" href="#dcl-list" data-rh-all>{{ 'desktop_collection.see_all' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg></a>
     </div>
-    <div class="rh__now"><b data-rh-name></b><span data-rh-price></span><small>{{ 'desktop_collection.hint' | t }}</small></div>
-    <div class="rh__prog"><i data-rh-prog></i></div>
-    <div class="rh__copy">
-      <p>{%- if handle == 'all' -%}{{ 'desktop_collection.all_copy' | t: shop: shop.name }}{%- else -%}{{ 'desktop_collection.count_copy' | t: count: collection.all_products_count }}{%- endif -%}<br>{{ 'desktop_collection.weekly' | t }}</p>
-      <a href="#dcl-list" data-rh-all>{{ 'desktop_collection.see_all' | t }} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 4v16m-6-6 6 6 6-6"/></svg></a>
-    </div>
-    <script type="application/json" data-rh-data>[
-      {%- for product in collection.products limit: 40 -%}
-        {%- if product.images.size == 0 -%}{%- continue -%}{%- endif -%}
-        {%- assign rh_variant = product.selected_or_first_available_variant -%}
-        {"h":{{ product.handle | json }},"id":{{ product.id }},"t":{{ product.title | json }},"p":{{ rh_variant.price | money | strip_html | json }},"c":{{ rh_variant.price }},"w":{{ rh_variant.compare_at_price | default: 0 }},"i":[
-          {%- for image in product.images limit: 3 -%}{{ image | image_url: width: 700 | json }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}
-        ]}{%- unless forloop.last -%},{%- endunless -%}
+    <div class="cph__art" aria-hidden="true">
+      {%- assign pics = '' -%}
+      {%- assign pic_count = 0 -%}
+      {%- for product in collection.products -%}
+        {%- if product.featured_image == blank -%}{%- continue -%}{%- endif -%}
+        {%- capture pic -%}{{ product.featured_image | image_url: width: 400 | json }}{%- endcapture -%}
+        {%- if pics != '' -%}{%- assign pics = pics | append: ',' -%}{%- endif -%}
+        {%- assign pics = pics | append: pic -%}
+        {%- assign pic_count = pic_count | plus: 1 -%}
+        {%- if pic_count == 16 -%}{%- break -%}{%- endif -%}
       {%- endfor -%}
-    ]</script>
+      {%- for slot in (1..4) -%}<span class="cph-fl cph-fl--{{ forloop.index }}"><span class="cph-fl__in"><img alt="" width="140" height="190"></span></span>{%- endfor -%}
+      <script type="application/json" data-cph-pics>[{{ pics }}]</script>
+    </div>
   </section>
 
-  <main class="wrap cl" id="dcl-list">
-    <nav class="cl__bc" aria-label="{{ 'mobile.cart.breadcrumb' | t | escape }}">
-      <a href="{{ routes.root_url }}">{{ 'general.breadcrumbs.home' | t }}</a>
-      {%- if top_title != '' and top_handle != handle -%}<span>›</span><a href="{{ top_url }}">{{ top_title | escape }}</a>{%- endif -%}
-      {%- if kid_title != '' and kid_handle != handle -%}<span>›</span><a href="{{ kid_url }}">{{ kid_title | escape }}</a>{%- endif -%}
-      <span>›</span><b>{{ collection.title | escape }}</b>
-    </nav>
-    <div class="cl__layout">
-      {%- comment -%} Colonne de gauche : « Raccolte » (arbre du menu) et « Filtra » (vrais filtres Shopify) {%- endcomment -%}
-      <aside class="side" aria-label="{{ 'desktop_collection.collections' | t | escape }}">
-        <section class="side__card">
-          <div class="side__hd"><b>{{ 'desktop_collection.collections' | t }}</b><a href="{{ routes.collections_url }}">{{ 'desktop_collection.see_all_short' | t }}</a></div>
-          <nav class="tree" data-dcl-tree>
-            <ul>
-              {%- for top in menu.links -%}
-                {%- unless top.url contains '/collections/' -%}{%- continue -%}{%- endunless -%}
-                {%- assign t_handle = top.url | split: '/collections/' | last | split: '?' | first | split: '/' | first -%}
-                {%- assign on_top = false -%}
-                {%- if top.title == top_title and top.url == top_url -%}{%- assign on_top = true -%}{%- endif -%}
-                <li class="tree__top{% if on_top %} is-open is-path{% endif %}{% if t_handle == handle %} is-current{% endif %}">
-                  <div class="tree__row"><a href="{{ top.url }}"><span>{{ top.title | escape }}</span></a>
-                    {%- if top.links.size > 0 -%}<button type="button" class="tree__tg" aria-label="{{ 'desktop_collection.open' | t: name: top.title | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>{%- endif -%}
-                  </div>
-                  {%- if top.links.size > 0 -%}
-                    <ul class="tree__kids">
-                      {%- for kid in top.links -%}
-                        {%- assign k_handle = kid.url | split: '/collections/' | last | split: '?' | first | split: '/' | first -%}
-                        {%- assign on_kid = false -%}
-                        {%- if on_top and kid.title == kid_title and kid.url == kid_url -%}{%- assign on_kid = true -%}{%- endif -%}
-                        {%- assign kid_image = kid.object.featured_image -%}
-                        <li class="{% if on_kid %}is-open is-path{% endif %}{% if k_handle == handle %} is-current{% endif %}" data-tree-kid="{{ k_handle }}">
-                          <div class="tree__row"><a href="{{ kid.url }}">{%- if kid_image -%}<img src="{{ kid_image | image_url: width: 80, height: 80, crop: 'center' }}" alt="" width="28" height="28" loading="lazy">{%- else -%}<i class="ph"></i>{%- endif -%}<span>{{ kid.title | escape }}</span></a>
-                            {%- if kid.links.size > 0 -%}<button type="button" class="tree__tg" aria-label="{{ 'desktop_collection.open' | t: name: kid.title | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>{%- endif -%}
-                          </div>
-                          {%- if kid.links.size > 0 -%}
-                            <ul class="tree__grand">
-                              {%- for grand in kid.links -%}
-                                {%- assign g_handle = grand.url | split: '/collections/' | last | split: '?' | first | split: '/' | first -%}
-                                <li><a href="{{ grand.url }}"{% if g_handle == handle %} class="is-current"{% endif %}>{{ grand.title | escape }}</a></li>
-                              {%- endfor -%}
-                            </ul>
-                          {%- endif -%}
-                        </li>
-                      {%- endfor -%}
-                    </ul>
-                  {%- endif -%}
-                </li>
-              {%- endfor -%}
-            </ul>
-          </nav>
-        </section>
+  {%- comment -%} ---------- Catégories : carrés arrondis comme les tuiles de l'accueil ---------- {%- endcomment -%}
+  <div class="cpt">
+    <div class="cpt__row" data-cpt-row>
+      {%- assign tile_count = 0 -%}
+      {%- for link in tile_links -%}
+        {%- unless link.url contains '/collections/' -%}{%- continue -%}{%- endunless -%}
+        {%- assign l_handle = link.url | split: '/collections/' | last | split: '?' | first | split: '/' | first -%}
+        {%- assign tile_image = link.object.featured_image -%}
+        {%- if tile_image == blank and link.object.products -%}{%- assign tile_image = link.object.products.first.featured_image -%}{%- endif -%}
+        <a class="cpt__tile{% if l_handle == handle %} is-on{% endif %}" href="{{ link.url }}"{% if l_handle == handle %} aria-current="page"{% endif %}>
+          <span class="cpt__img">{%- if tile_image -%}<img src="{{ tile_image | image_url: width: 200, height: 200, crop: 'center' }}" alt="" width="100" height="100" loading="lazy">{%- endif -%}</span>
+          <span class="cpt__name">{{ link.title | escape }}</span>
+        </a>
+        {%- assign tile_count = tile_count | plus: 1 -%}
+        {%- if tile_count == 30 -%}{%- break -%}{%- endif -%}
+      {%- endfor -%}
+    </div>
+    <button type="button" class="cpt__next" data-cpt-next aria-label="{{ 'desktop_collection.more_categories' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+  </div>
 
-        <section class="side__card" data-dcl-filters>
-          <div class="side__hd"><b>{{ 'desktop_collection.filter' | t }}</b><button type="button" data-dcl-clear>{{ 'mobile.collection.clear_all' | t }}</button></div>
+  {%- comment -%} ---------- 3 bannières : meilleures vendite, novità, sotto 20 € (liens = même collection triée / filtrée) ---------- {%- endcomment -%}
+  {%- assign go = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>' -%}
+  <div class="cpb">
+    {%- if b_best -%}<a class="cpb__card" href="{{ collection.url }}?sort_by=best-selling"><img src="{{ b_best.featured_image | image_url: width: 900 }}" alt="" width="900" height="600" loading="lazy"><span class="cpb__t"><b>{{ 'desktop_collection.best_title' | t }}</b><span>{{ 'desktop_collection.best_sub' | t }}</span></span><span class="cpb__go">{{ go }}</span></a>{%- endif -%}
+    {%- if b_new -%}<a class="cpb__card" href="{{ collection.url }}?sort_by=created-descending"><img src="{{ b_new.featured_image | image_url: width: 900 }}" alt="" width="900" height="600" loading="lazy"><span class="cpb__t"><b>{{ 'desktop_collection.new_title' | t }}</b><span>{{ 'desktop_collection.new_sub' | t }}</span></span><span class="cpb__go">{{ go }}</span></a>{%- endif -%}
+    {%- if b_under and under_filter -%}<a class="cpb__card" href="{{ collection.url }}?{{ under_filter.max_value.param_name }}={{ under_amount }}"><img src="{{ b_under.featured_image | image_url: width: 900 }}" alt="" width="900" height="600" loading="lazy"><span class="cpb__t"><b>{{ 'desktop_collection.under_title' | t: amount: under_money }}</b><span>{{ 'desktop_collection.under_sub' | t }}</span></span><span class="cpb__go">{{ go }}</span></a>{%- endif -%}
+  </div>
+
+  {%- comment -%} ---------- Deux rails : meilleures ventes et nouveautés de la collection (remplis par assets/desktop-collection.js) ---------- {%- endcomment -%}
+  <div class="cpr">
+    {%- assign rail_urls = 'best-selling,created-descending' | split: ',' -%}
+    {%- for sort_value in rail_urls -%}
+      {%- if forloop.first -%}{%- assign rail_title = 'desktop_collection.rail_best' | t -%}{%- else -%}{%- assign rail_title = 'desktop_collection.new_title' | t -%}{%- endif -%}
+      <section class="cpr__panel" data-cpr="{{ collection.url }}?sort_by={{ sort_value }}">
+        <div class="cpr__hd"><h2>{{ rail_title | escape }}</h2><a class="cpr__go" href="{{ collection.url }}?sort_by={{ sort_value }}" aria-label="{{ 'desktop_collection.see_all' | t | escape }}">{{ go }}</a></div>
+        <div class="cpr__rail" data-cpr-rail>{%- for i in (1..6) -%}<span class="cpr__sk"></span>{%- endfor -%}</div>
+        <button type="button" class="cpr__next" data-cpr-next aria-label="{{ 'mobile.pdp.next' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+      </section>
+    {%- endfor -%}
+  </div>
+
+  <main class="wrap cl" id="dcl-list">
+    <div class="cl__layout">
+      {%- comment -%}
+        Panneau « Filtri » à gauche (bouton ⇄ de la rangée de filtres) : les vrais filtres Shopify (couleurs et tailles
+        regroupées comme le mobile). Les choix s'appliquent avec « Fatto » ; les pastilles de la rangée ouvrent chacune une
+        fenêtre avec la section correspondante (copiée par assets/desktop-collection.js).
+      {%- endcomment -%}
+      {%- assign pills = '' -%}
+      <section class="cpd" data-dcl-filters aria-label="{{ 'desktop_collection.filters' | t | escape }}">
+        <div class="cpd__bg" data-cpd-close></div>
+        <div class="cpd__pane" role="dialog" aria-modal="true" aria-label="{{ 'desktop_collection.filters' | t | escape }}">
+          <div class="cpd__hd"><b>{{ 'desktop_collection.filters' | t }}</b><button type="button" class="cpd__x" data-cpd-close aria-label="{{ 'mobile.pdp.close' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+          <div class="cpd__body">
           {%- for filter in collection.filters -%}
             {%- liquid
               assign group_name = filter.label | downcase
@@ -250,9 +323,29 @@
                   assign visible = visible | plus: 1
                 endif
               endfor
+              if kind == 'price'
+                assign filter_on = 0
+                if filter.min_value.value != nil or filter.max_value.value != nil
+                  assign filter_on = 1
+                endif
+              else
+                assign filter_on = filter.active_values.size
+              endif
             -%}
             {%- if kind != 'price' and visible == 0 -%}{%- continue -%}{%- endif -%}
-            <div class="flt__sec is-open" data-kind="{{ kind }}">
+            {%- comment -%} Pastille de la rangée : « Disponibili » s'applique tout de suite ; les autres ouvrent leur fenêtre {%- endcomment -%}
+            {%- capture pill -%}
+              {%- if kind == 'switch' -%}
+                {%- for value in filter.values -%}
+                  {%- if value.value != '1' -%}{%- continue -%}{%- endif -%}
+                  <button type="button" class="cpf__pill{% if value.active %} is-on{% endif %}" data-cpf-q="{{ value.param_name | url_encode }}={{ value.value | url_encode }}">{{ 'mobile.collection.available' | t }}</button>
+                {%- endfor -%}
+              {%- else -%}
+                <span class="cpf__dd"><button type="button" class="cpf__pill{% if filter_on > 0 %} is-on{% endif %}" data-cpf-dd="{{ forloop.index0 }}" aria-expanded="false">{{ filter.label | escape }}<span data-cpf-n></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button></span>
+              {%- endif -%}
+            {%- endcapture -%}
+            {%- assign pills = pills | append: pill -%}
+            <div class="flt__sec is-open" data-kind="{{ kind }}" data-fi="{{ forloop.index0 }}">
               <button type="button" class="flt__tg">{{ filter.label | escape }}<i></i></button>
               {%- case kind -%}
                 {%- when 'switch' -%}
@@ -386,29 +479,28 @@
               {%- endcase -%}
             </div>
           {%- endfor -%}
-        </section>
-      </aside>
+          </div>
+          <div class="cpd__ft"><button type="button" class="cp-reset" data-dcl-clear>{{ 'desktop_collection.reset' | t }}</button><button type="button" class="cp-done" data-cp-apply>{{ 'desktop_collection.done' | t }}</button></div>
+        </div>
+      </section>
 
       <div class="cl__main" data-dcl-main
         data-more="{{ 'mobile.collection.show_others' | t: count: '__N__' | escape }}" data-less="{{ 'mobile.collection.show_less' | t | escape }}"
-        data-price-label="{{ cart.currency.symbol }}">
-        <h2 class="cl__title">{{ collection.title | escape }}</h2>
-        <div class="cl__bar">
-          <span class="cl__found" data-dcl-found>{{ 'desktop_collection.count' | t: count: collection.products_count }}</span>
-          <button type="button" class="qchip" data-dcl-sale-chip><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12 12 20 4 12V4h8z"/><circle cx="8.5" cy="8.5" r="1.4"/></svg>{{ 'mobile.explore.on_sale' | t }}</button>
-          {%- assign under_filter = collection.filters | where: 'type', 'price_range' | first -%}
+        data-price-label="{{ cart.currency.symbol }}" data-reset="{{ 'desktop_collection.reset' | t | escape }}" data-done="{{ 'desktop_collection.done' | t | escape }}">
+        <h2 class="cl__title">{{ 'desktop_collection.all_products' | t }}</h2>
+        <p class="cl__found" data-dcl-found>{{ 'desktop_collection.count' | t: count: collection.products_count }}</p>
+        {%- comment -%} Rangée de filtres centrée (comme shop.com), collée sous l'en-tête pendant le défilement {%- endcomment -%}
+        <div class="cpf">
+          <button type="button" class="cpf__pill cpf__pill--ico{% if active_count > 0 %} is-on{% endif %}" data-cpd-open aria-label="{{ 'desktop_collection.all_filters' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><i data-cpf-total hidden></i></button>
+          <button type="button" class="cpf__pill" data-dcl-sale-chip>{{ 'mobile.explore.on_sale' | t }}</button>
           {%- if under_filter -%}
             {%- assign under_on = false -%}
-            {%- assign under_cents = under_amount | times: 100 -%}
             {%- if under_filter.max_value.value == under_cents and under_filter.min_value.value == nil -%}{%- assign under_on = true -%}{%- endif -%}
-            <button type="button" class="qchip{% if under_on %} is-on{% endif %}" data-dcl-under="{{ under_filter.max_value.param_name }}={{ under_amount }}" data-min="{{ under_filter.min_value.param_name }}">{%- assign under_money = under_cents | money_without_trailing_zeros | strip_html -%}{{ 'desktop_collection.under' | t: amount: under_money }}</button>
+            <button type="button" class="cpf__pill{% if under_on %} is-on{% endif %}" data-dcl-under="{{ under_filter.max_value.param_name }}={{ under_amount }}" data-min="{{ under_filter.min_value.param_name }}">{{ 'desktop_collection.under' | t: amount: under_money }}</button>
           {%- endif -%}
-          <div class="view" role="group" aria-label="{{ 'mobile.collection.view' | t | escape }}">
-            <button type="button" class="is-on" data-view="grid" aria-label="{{ 'desktop_collection.grid' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg></button>
-            <button type="button" data-view="list" aria-label="{{ 'desktop_collection.list' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-          </div>
-          <div class="srt">
-            <button type="button" class="srt__btn" aria-haspopup="listbox" aria-expanded="false" data-dcl-sort-btn>{{ 'mobile.collection.sort_title' | t }} <b>{{ sort_label | escape }}</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>
+          {{ pills }}
+          <div class="srt cpf__dd">
+            <button type="button" class="cpf__pill srt__btn" aria-haspopup="listbox" aria-expanded="false" data-dcl-sort-btn>{{ 'desktop_collection.sort_short' | t }}: <b>{{ sort_label | escape }}</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>
             <div class="srt__menu" role="listbox" hidden data-dcl-sort-menu>
               {%- for option in collection.sort_options -%}
                 <button type="button" data-s="{{ option.value }}"{% if option.value == sort_current %} class="is-on"{% endif %}>{{ option.name | escape }}</button>

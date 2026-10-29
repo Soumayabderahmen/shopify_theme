@@ -86,6 +86,22 @@
     "tbar_bf_ends": "Termina en {{ time }}"
   },
   "desktop_collection": {
+    "all_products": "Todos los productos",
+    "filters": "Filtros",
+    "all_filters": "Todos los filtros",
+    "reset": "Restablecer",
+    "done": "Listo",
+    "sort_short": "Ordenar",
+    "best_title": "Lo más vendido de la semana",
+    "best_sub": "Los favoritos de nuestros clientes, ordenados por ventas.",
+    "new_title": "Recién llegados",
+    "new_sub": "Nuevos estilos cada semana.",
+    "under_title": "Todo por menos de {{ amount }}",
+    "under_sub": "Ideas de regalo y básicos a precios pequeños.",
+    "rail_best": "Favoritos por algo",
+    "usp_return": "Devolución gratuita en 30 días",
+    "usp_klarna": "Paga en 3 plazos con Klarna",
+    "more_categories": "Más categorías",
     "collection": "Colección",
     "hint": "Pasa por encima de una prenda · haz clic para verla de cerca",
     "count_copy": {

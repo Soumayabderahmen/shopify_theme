@@ -86,6 +86,22 @@
     "tbar_bf_ends": "Eindigt over {{ time }}"
   },
   "desktop_collection": {
+    "all_products": "Alle producten",
+    "filters": "Filters",
+    "all_filters": "Alle filters",
+    "reset": "Wissen",
+    "done": "Klaar",
+    "sort_short": "Sorteren",
+    "best_title": "Bestsellers van de week",
+    "best_sub": "De favorieten van onze klanten, gesorteerd op verkoop.",
+    "new_title": "Net binnen",
+    "new_sub": "Elke week nieuwe stijlen.",
+    "under_title": "Alles onder {{ amount }}",
+    "under_sub": "Cadeau-ideeën en basics voor kleine prijzen.",
+    "rail_best": "Niet voor niets favoriet",
+    "usp_return": "Gratis retour binnen 30 dagen",
+    "usp_klarna": "Betaal in 3 delen met Klarna",
+    "more_categories": "Meer categorieën",
     "collection": "Collectie",
     "hint": "Beweeg over een item · klik om het van dichtbij te zien",
     "count_copy": {

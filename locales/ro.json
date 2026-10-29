@@ -86,6 +86,22 @@
     "tbar_bf_ends": "Se termină în {{ time }}"
   },
   "desktop_collection": {
+    "all_products": "Toate produsele",
+    "filters": "Filtre",
+    "all_filters": "Toate filtrele",
+    "reset": "Resetează",
+    "done": "Gata",
+    "sort_short": "Sortează",
+    "best_title": "Cele mai vândute ale săptămânii",
+    "best_sub": "Preferatele clienților noștri, ordonate după vânzări.",
+    "new_title": "Tocmai sosite",
+    "new_sub": "Stiluri noi în fiecare săptămână.",
+    "under_title": "Totul sub {{ amount }}",
+    "under_sub": "Idei de cadouri și produse de bază la prețuri mici.",
+    "rail_best": "Preferate pe bună dreptate",
+    "usp_return": "Retur gratuit în 30 de zile",
+    "usp_klarna": "Plătește în 3 rate cu Klarna",
+    "more_categories": "Alte categorii",
     "collection": "Colecție",
     "hint": "Treci cu mouse-ul peste un articol · clic pentru a-l vedea de aproape",
     "count_copy": {

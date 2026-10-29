@@ -1,5 +1,7 @@
-/* Page collection ORDINATEUR (sections/desktop-collection.liquid), d'après le prototype validé « Collezione-desktop ».
-   - Bannière « appendiabiti » : produits de la collection sur une barre courbe (défilement, survol, glisser, clic = vue produit).
+/* Page collection ORDINATEUR (sections/desktop-collection.liquid), d'après le prototype validé « Collezione-desktop-v3 ».
+   - Bandeau : photos de la collection animées comme la bannière de l'accueil ; rails meilleures ventes / nouveautés.
+   - Filtres en haut (comme shop.com) : chaque pastille ouvre sa fenêtre, ⇄ ouvre le panneau « Filtri » ; les choix
+     s'appliquent avec « Fatto ».
    - Filtres, tri, « Sotto 20 », pages : sans recharger la page (template collection.desktop-coll), vraie adresse dans la barre.
    - « In offerta » : produits avec prix barré de la collection (template collection.desktop-coll-sale).
    - Navigation instantanée : un lien vers une autre collection (onglets et méga-menu de l'en-tête, arbre « Raccolte », fil
@@ -85,187 +87,135 @@
   };
   window.addEventListener('resize', setFullWidth);
 
-  // ---------- Bannière « appendiabiti » ----------
-  var startRail = function (state) {
-    var section = root.querySelector('[data-rh]');
-    var rack = section && section.querySelector('[data-rh-rack]');
-    var dataNode = section && section.querySelector('[data-rh-data]');
-    if (!rack || !dataNode) return;
-    var products = [];
-    try { products = JSON.parse(dataNode.textContent); } catch (error) { products = []; }
-    state.railProducts = products;
-    if (!products.length) return;
-    var pathNode = rack.querySelector('[data-rh-path]');
-    var shadowNode = rack.querySelector('[data-rh-shadow]');
-    var nameNode = section.querySelector('[data-rh-name]');
-    var priceNode = section.querySelector('[data-rh-price]');
-    var progNode = section.querySelector('[data-rh-prog]');
-    var els = [];
-    var count = 0;
-    var W, H2, gap, LOOP, iw, ih, sag;
-    var railY = function (x) { var u = (x - W / 2) / (W * 0.62); return 10 + sag * (1 - u * u); };
-    var layout = function () {
-      W = rack.clientWidth; H2 = rack.clientHeight;
-      gap = Math.max(96, W / 10.5); LOOP = count * gap; iw = gap * 2.1; ih = H2 * 0.9; sag = H2 * 0.1;
-      var d = '';
-      for (var k = 0; k <= 48; k++) { var x = -40 + (W + 80) * k / 48; d += (k ? 'L' : 'M') + x.toFixed(1) + ' ' + railY(x).toFixed(1); }
-      pathNode.setAttribute('d', d); shadowNode.setAttribute('d', d);
-      els.forEach(function (item) { item.el.style.width = iw + 'px'; item.el.style.height = ih + 'px'; });
-    };
-    // Photos à fond blanc uni (objet au centre) posées sur la barre ; les autres en cartes suspendues
-    var canvas = document.createElement('canvas'); canvas.width = 40; canvas.height = 40;
-    var context = canvas.getContext('2d', { willReadFrequently: true });
-    var isClean = function (src) {
-      return new Promise(function (resolve) {
-        var image = new Image(); image.crossOrigin = 'anonymous';
-        image.onload = function () {
-          try {
-            context.clearRect(0, 0, 40, 40); context.drawImage(image, 0, 0, 40, 40);
-            var data = context.getImageData(0, 0, 40, 40).data, edge = [], sat = 0, obj = 0;
-            for (var y = 0; y < 40; y++) for (var x = 0; x < 40; x++) {
-              var i = (y * 40 + x) * 4, r = data[i], g = data[i + 1], b = data[i + 2], v = (r + g + b) / 3;
-              if (x < 3 || y < 3 || x > 36 || y > 36) { edge.push(v); sat = Math.max(sat, Math.max(r, g, b) - Math.min(r, g, b)); } else if (v < 215) obj++;
-            }
-            var mean = edge.reduce(function (a, b) { return a + b; }, 0) / edge.length;
-            var sd = Math.sqrt(edge.reduce(function (a, b) { return a + (b - mean) * (b - mean); }, 0) / edge.length);
-            var cover = obj / 1156;
-            resolve(mean > 232 && sd < 8 && sat < 18 && cover > 0.12 && cover < 0.8);
-          } catch (error) { resolve(false); }
-        };
-        image.onerror = function () { resolve(false); };
-        setTimeout(function () { resolve(false); }, 5000);
-        image.src = sized(src, 80) + '&height=80&crop=center';
+  // ---------- Bandeau : photos de la collection qui entrent en tournant, flottent puis laissent la place aux 4 suivantes
+  // (comme la bannière de l'accueil, assets/desktop-home-shop.css .dhp-fl) ----------
+  var startHero = function () {
+    var art = root.querySelector('.cph__art');
+    var dataNode = art && art.querySelector('[data-cph-pics]');
+    if (!dataNode) return;
+    var pics = [];
+    try { pics = JSON.parse(dataNode.textContent); } catch (error) { pics = []; }
+    var floats = [].slice.call(art.querySelectorAll('.cph-fl'));
+    if (!pics.length || !floats.length) return;
+    var set = 0;
+    var visible = true;
+    var timer = 0;
+    var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var show = function () {
+      floats.forEach(function (node, i) {
+        var image = node.querySelector('img');
+        image.src = sized(pics[(set * floats.length + i) % pics.length], 400);
+        node.classList.remove('off');
+        node.classList.add('on');
       });
     };
-    var render = function (rail) {
-      var list = rail.slice();
-      while (list.length && list.length < 14) list = list.concat(rail);
-      rack.querySelectorAll('.rh-pc').forEach(function (node) { node.remove(); });
-      els = list.map(function (entry) {
-        var product = products[entry.i], el = document.createElement('div');
-        el.className = 'rh-pc' + (entry.clean ? '' : ' rh-pc--card');
-        el.innerHTML = '<svg class="rh-pc__hook" viewBox="0 0 22 30" aria-hidden="true"><path d="M11 26V12a4 4 0 1 0-4-4"/></svg><span class="rh-pc__tag">' + escapeHtml(product.p) + '</span><img src="' + escapeHtml(sized(product.i[entry.n] || product.i[0], 700)) + '" alt="" draggable="false">';
-        rack.appendChild(el);
-        return { el: el, img: el.querySelector('img'), p: entry.i, ry: -68, sc: 1, x: 0 };
-      });
-      count = els.length; front = -1; layout();
+    var cycle = function () {
+      if (!art.isConnected) { clearInterval(timer); return; }
+      if (!visible || document.hidden || quickOpen()) return;
+      floats.forEach(function (node) { node.classList.remove('on'); node.classList.add('off'); });
+      setTimeout(function () {
+        set += 1;
+        floats.forEach(function (node) { node.classList.remove('off'); });
+        requestAnimationFrame(function () { requestAnimationFrame(show); });
+      }, 900);
     };
-    var build = function () {
-      var candidates = products.slice(0, 40), rail = [], found = [];
-      render(candidates.slice(0, 14).map(function (_, i) { return { i: i, n: 0, clean: 0 }; }));
-      var tests = [];
-      candidates.forEach(function (product, i) {
-        product.i.forEach(function (src, n) {
-          tests.push(isClean(src).then(function (ok) {
-            if (ok && !found.some(function (f) { return f.i === i; })) found.push({ i: i, n: n, clean: 1 });
-          }));
-        });
-      });
-      var timeout = new Promise(function (resolve) { setTimeout(resolve, 2600); });
-      Promise.race([Promise.all(tests), timeout]).then(function () {
-        if (!rack.isConnected) return;
-        found.sort(function (a, b) { return a.i - b.i; }).forEach(function (entry) { if (rail.length < 16) rail.push(entry); });
-        for (var i = 0; rail.length < 12 && i < candidates.length; i++) if (!rail.some(function (entry) { return entry.i === i; })) rail.push({ i: i, n: 0, clean: 0 });
-        if (found.length) render(rail);
-      });
-    };
-    var off = 0, mouse = null, over = false, drag = null, moved = 0, front = -1, last = performance.now(), visible = true;
-    rack.addEventListener('mousemove', function (event) { var box = rack.getBoundingClientRect(); mouse = { x: event.clientX - box.left, y: event.clientY - box.top }; });
-    rack.addEventListener('mouseenter', function () { over = true; });
-    rack.addEventListener('mouseleave', function () { over = false; mouse = null; });
-    rack.addEventListener('wheel', function (event) { if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) { event.preventDefault(); off += event.deltaX * 0.8; } }, { passive: false });
-    rack.addEventListener('pointerdown', function (event) { drag = { x: event.clientX, off: off }; moved = 0; rack.setPointerCapture(event.pointerId); });
-    rack.addEventListener('pointermove', function (event) { if (!drag) return; moved = Math.max(moved, Math.abs(event.clientX - drag.x)); off = drag.off - (event.clientX - drag.x); if (moved > 4) rack.classList.add('is-drag'); });
-    rack.addEventListener('pointerup', function () { drag = null; rack.classList.remove('is-drag'); });
-    rack.addEventListener('click', function () {
-      if (moved > 4 || front < 0 || !mouse || !els[front]) return;
-      var product = products[els[front].p];
-      var api = quickAdd();
-      if (api) api.open(product.h, null, { title: product.t, image: els[front].img.currentSrc || els[front].img.src, price: product.c || 0, compare: product.w || 0, productId: product.id }, { desktop: true });
-    });
-    new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; }).observe(section);
-    var frame = function (now) {
-      if (!rack.isConnected) return;
-      var dt = Math.min(64, now - last) / 1000; last = now;
-      if (visible && count) {
-        if (!over && !drag && !quickOpen()) off += 24 * dt;
-        var best = -1, bestD = 1e9, cx = mouse ? mouse.x : W * 0.56;
-        els.forEach(function (item, i) {
-          item.x = (((i * gap - off) % LOOP) + LOOP) % LOOP - gap * 1.2;
-          var d = Math.abs(item.x - cx);
-          if (mouse && (mouse.y < 0 || mouse.y > ih + 30)) d = 1e9;
-          if (d < bestD) { bestD = d; best = i; }
-        });
-        if (mouse && bestD > gap * 0.6) best = front;
-        if (best !== front && best >= 0) {
-          front = best;
-          var shown = products[els[front].p];
-          nameNode.textContent = shortTitle(shown.t);
-          priceNode.textContent = shown.p;
-        }
-        var t = now / 1000;
-        els.forEach(function (item, i) {
-          var x = item.x, y = railY(x), slope = (railY(x + 1) - railY(x - 1)) / 2;
-          item.ry += ((i === front ? 0 : -68) - item.ry) * Math.min(1, dt * 9);
-          item.sc += ((i === front ? 1.14 : 1) - item.sc) * Math.min(1, dt * 9);
-          item.el.style.left = (x - iw / 2).toFixed(1) + 'px';
-          item.el.style.top = (y - 2).toFixed(1) + 'px';
-          item.img.style.transform = 'perspective(1200px) rotateY(' + item.ry.toFixed(2) + 'deg) scale(' + item.sc.toFixed(3) + ')';
-          item.img.style.rotate = (Math.atan(slope) * 57.3 + Math.sin(t * 1.6 + i * 1.3) * (i === front ? 0.6 : 1.4)).toFixed(2) + 'deg';
-        });
-        progNode.style.left = ((((off % LOOP) + LOOP) % LOOP) / LOOP * 66) + '%';
-      }
-      requestAnimationFrame(frame);
-    };
-    var onResize = function () { if (!rack.isConnected) { window.removeEventListener('resize', onResize); return; } if (count) layout(); };
-    window.addEventListener('resize', onResize);
-    build();
-    requestAnimationFrame(frame);
+    new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; }).observe(art);
+    requestAnimationFrame(function () { requestAnimationFrame(show); });
+    // Photos suivantes chargées d'avance (pas de trou à l'entrée)
+    setTimeout(function () { pics.slice(floats.length).forEach(function (src) { new Image().src = sized(src, 400); }); }, 1500);
+    if (!still && pics.length > floats.length) timer = setInterval(cycle, 5200);
   };
 
-  // ---------- Arbre « Raccolte » : sous-collections des panneaux Categoria (comme le méga-menu) ----------
-  var fillTree = function () {
-    var tree = root.querySelector('[data-dcl-tree]');
-    if (!tree || typeof window.dhLoadPanels !== 'function') return;
-    var handle = root.getAttribute('data-handle');
-    window.dhLoadPanels().then(function (panels) {
-      if (!tree.isConnected || !panels) return;
-      tree.querySelectorAll('li[data-tree-kid]').forEach(function (kid) {
-        var panel = panels[kid.getAttribute('data-tree-kid')];
-        if (!panel) return;
-        var cards = [].slice.call(panel.querySelectorAll('a.mobile-category-card:not(.mobile-category-card--view-all):not(.mobile-category-card--product)'));
-        var placeholder = kid.querySelector(':scope > .tree__row i.ph');
-        var firstImage = cards.length && cards[0].querySelector('img');
-        if (placeholder && firstImage) {
-          var image = document.createElement('img');
-          image.src = firstImage.getAttribute('data-src') || firstImage.getAttribute('src');
-          image.alt = ''; image.width = 28; image.height = 28; image.loading = 'lazy';
-          placeholder.replaceWith(image);
-        }
-        if (kid.querySelector('.tree__grand') || !cards.length) return;
-        var seen = {};
-        var links = cards.filter(function (card) {
-          var key = card.getAttribute('href');
-          if (seen[key]) return false;
-          seen[key] = true;
-          return true;
-        }).map(function (card) {
-          var title = card.querySelector('.mobile-category-card__title');
-          var href = card.getAttribute('href');
-          var on = handleOf(href) === handle;
-          if (on) {
-            kid.classList.add('is-open', 'is-path');
-            var top = kid.closest('.tree__top');
-            if (top) top.classList.add('is-open', 'is-path');
-          }
-          return '<li><a href="' + escapeHtml(href) + '"' + (on ? ' class="is-current"' : '') + '>' + escapeHtml(title ? title.textContent.trim() : card.textContent.trim()) + '</a></li>';
-        });
-        var row = kid.querySelector(':scope > .tree__row');
-        var label = kid.querySelector(':scope > .tree__row > a span');
-        row.insertAdjacentHTML('beforeend', '<button type="button" class="tree__tg" aria-label="' + escapeHtml(label ? label.textContent : '') + '"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>');
-        kid.insertAdjacentHTML('beforeend', '<ul class="tree__grand">' + links.join('') + '</ul>');
-      });
+  // ---------- Rails « Preferiti per un motivo » / « Appena arrivati » : 14 produits de la même collection triée ----------
+  var loadRails = function () {
+    root.querySelectorAll('[data-cpr]').forEach(function (panel) {
+      var rail = panel.querySelector('[data-cpr-rail]');
+      fetchPage(panel.getAttribute('data-cpr')).then(function (html) {
+        if (!rail.isConnected) return;
+        var cards = [].slice.call(parse(html).querySelectorAll('[data-dcl-grid] > .mshein-card')).slice(0, 14);
+        if (!cards.length) { panel.hidden = true; return; }
+        var text = function (card, selector) { var node = card.querySelector(selector); return node ? node.textContent.replace(/\s+/g, ' ').trim() : ''; };
+        rail.innerHTML = cards.map(function (card) {
+          var link = card.querySelector('.mshein-card__link');
+          var image = card.querySelector('.mshein-card__link img');
+          var rate = text(card, '.mshein-card__stars b');
+          var old = text(card, '.old-price');
+          return '<a class="cpr__mini" href="' + escapeHtml(link ? link.getAttribute('href') : '#') + '">'
+            + '<span class="cpr__img">' + (image ? '<img src="' + escapeHtml(sized(image.getAttribute('src'), 360)) + '" alt="" loading="lazy">' : '') + '</span>'
+            + '<b>' + escapeHtml(card.getAttribute('data-mshein-title') || text(card, '.mshein-card__title')) + '</b>'
+            + (rate ? '<span class="cpr__st">★★★★★<em>' + escapeHtml(rate) + ' ' + escapeHtml(text(card, '.mshein-card__stars em')) + '</em></span>' : '')
+            + '<span class="cpr__pr">' + escapeHtml(text(card, '.mshein-card__now')) + (old ? ' <s>' + escapeHtml(old) + '</s>' : '') + '</span></a>';
+        }).join('');
+      }).catch(function () { panel.hidden = true; });
     });
+  };
+
+  // ---------- Fenêtre d'une pastille de filtre : copie de la section du panneau « Filtri » + « Reimposta » / « Fatto » ----------
+  var closePops = function () {
+    if (!root) return;
+    root.querySelectorAll('.cpf__pop').forEach(function (pop) {
+      var button = pop.parentNode.querySelector('[data-cpf-dd]');
+      if (button) button.setAttribute('aria-expanded', 'false');
+      pop.remove();
+    });
+    var menu = root.querySelector('[data-dcl-sort-menu]');
+    if (menu && !menu.hidden) { menu.hidden = true; root.querySelector('[data-dcl-sort-btn]').setAttribute('aria-expanded', 'false'); }
+  };
+  var openPop = function (button) {
+    var holder = button.parentNode;
+    var wasOpen = Boolean(holder.querySelector('.cpf__pop'));
+    closePops();
+    if (wasOpen) return;
+    var section = root.querySelector('[data-dcl-filters] [data-fi="' + button.getAttribute('data-cpf-dd') + '"] .flt__body');
+    if (!section) return;
+    var host = main();
+    var pop = document.createElement('div');
+    pop.className = 'cpf__pop';
+    pop.setAttribute('data-cp-pop', '');
+    var body = section.cloneNode(true);
+    body.classList.add('is-all');
+    pop.innerHTML = '<div class="cpf__body"></div><div class="cpf__ft"><button type="button" class="cp-reset" data-cp-reset>' + escapeHtml(host.getAttribute('data-reset')) + '</button><button type="button" class="cp-done" data-cp-apply>' + escapeHtml(host.getAttribute('data-done')) + '</button></div>';
+    pop.firstChild.appendChild(body);
+    holder.appendChild(pop);
+    button.setAttribute('aria-expanded', 'true');
+    // Fenêtre gardée dans l'écran (pastilles près des bords)
+    var box = pop.getBoundingClientRect(), edge = document.documentElement.clientWidth - 16;
+    if (box.right > edge) pop.style.marginLeft = (edge - box.right) + 'px';
+    if (box.left < 16) pop.style.marginLeft = (16 - box.left) + 'px';
+  };
+  // Panneau « Filtri »
+  var drawer = function (open) {
+    var panel = root && root.querySelector('[data-dcl-filters]');
+    if (!panel) return;
+    panel.classList.toggle('is-open', open);
+    document.documentElement.classList.toggle('cpd-lock', open);
+  };
+  // Choix d'une fenêtre ou du panneau appliqués d'un coup : options cochées ajoutées, décochées retirées, prix
+  var applyScope = function (scope) {
+    var params = paramsNow();
+    var has = function (key, value) { var found = false; params.forEach(function (v, k) { if (k === key && v === value) found = true; }); return found; };
+    scope.querySelectorAll('[data-q]').forEach(function (node) {
+      var pairs = [];
+      new URLSearchParams(node.getAttribute('data-q')).forEach(function (value, key) { pairs.push([key, value]); });
+      if (node.classList.contains('is-on')) {
+        pairs.forEach(function (pair) { if (!has(pair[0], pair[1])) params.append(pair[0], pair[1]); });
+      } else {
+        var kept = [];
+        params.forEach(function (value, key) { if (!pairs.some(function (pair) { return pair[0] === key && pair[1] === value; })) kept.push([key, value]); });
+        params = new URLSearchParams();
+        kept.forEach(function (pair) { params.append(pair[0], pair[1]); });
+      }
+    });
+    var price = scope.querySelector('[data-dcl-price]');
+    if (price) {
+      var min = price.querySelector('[data-dcl-price-min]').value, max = price.querySelector('[data-dcl-price-max]').value;
+      params.delete(price.getAttribute('data-min')); params.delete(price.getAttribute('data-max'));
+      if (min) params.set(price.getAttribute('data-min'), min);
+      if (max) params.set(price.getAttribute('data-max'), max);
+    }
+    drawer(false);
+    closePops();
+    navigate(urlWith(params));
   };
 
   // ---------- Filtres : listes (ordre, « Mostra altre »), filtres actifs ----------
@@ -316,6 +266,20 @@
     var active = root.querySelector('[data-dcl-active]');
     var clearLabel = filters.querySelector('[data-dcl-clear]');
     active.innerHTML = chips.join('') + (chips.length && clearLabel ? '<button type="button" class="act-f__all" data-dcl-clear>' + escapeHtml(clearLabel.textContent) + '</button>' : '');
+    // Pastilles : nombre de choix de chaque filtre (couleurs et tailles regroupées : un choix par bouton du panneau)
+    var total = 0;
+    root.querySelectorAll('[data-cpf-dd]').forEach(function (pill) {
+      var section = filters.querySelector('[data-fi="' + pill.getAttribute('data-cpf-dd') + '"]');
+      var count = section ? section.querySelectorAll('[data-q].is-on').length : 0;
+      var range = section && section.querySelector('[data-dcl-price]');
+      if (range && (range.querySelector('[data-dcl-price-min]').value || range.querySelector('[data-dcl-price-max]').value)) count = 1;
+      total += count;
+      var label = pill.querySelector('[data-cpf-n]');
+      if (label) label.textContent = count ? ' · ' + count : '';
+    });
+    total += root.querySelectorAll('[data-cpf-q].is-on').length;
+    var badge = root.querySelector('[data-cpf-total]');
+    if (badge) { badge.textContent = total; badge.hidden = !total; }
   };
 
   // Adresse avec des filtres ajoutés / retirés (paires « filter.v.option.size=M » de data-q)
@@ -386,6 +350,8 @@
     target.searchParams.delete('view');
     var sameCollection = handleOf(target.pathname) === root.getAttribute('data-handle');
     var token = ++navToken;
+    drawer(false);
+    closePops();
     var grid = root.querySelector('[data-dcl-grid]');
     if (grid) grid.classList.add('is-loading');
     document.documentElement.classList.add('dcl-busy');
@@ -491,8 +457,26 @@
       if (toggle) { event.preventDefault(); toggle.closest('li').classList.toggle('is-open'); return; }
       var section = target.closest('.flt__tg');
       if (section) { section.parentNode.classList.toggle('is-open'); return; }
-      var option = target.closest('[data-dcl-filters] [data-q]');
-      if (option) { navigate(urlWith(withPairs(option.getAttribute('data-q'), option.classList.contains('is-on')))); return; }
+      // Panneau « Filtri » et fenêtres des pastilles : choix cochés / décochés, appliqués avec « Fatto »
+      var option = target.closest('[data-dcl-filters] [data-q], [data-cp-pop] [data-q]');
+      if (option) { option.classList.toggle('is-on'); return; }
+      if (target.closest('[data-cp-apply]')) { applyScope(target.closest('[data-cp-pop]') || root.querySelector('[data-dcl-filters]')); return; }
+      var resetScope = target.closest('[data-cp-reset]') && target.closest('[data-cp-pop]');
+      if (resetScope) {
+        resetScope.querySelectorAll('[data-q].is-on').forEach(function (node) { node.classList.remove('is-on'); });
+        resetScope.querySelectorAll('[data-dcl-price] input').forEach(function (input) { input.value = ''; });
+        applyScope(resetScope);
+        return;
+      }
+      if (target.closest('[data-cpd-open]')) { closePops(); drawer(true); return; }
+      if (target.closest('[data-cpd-close]')) { drawer(false); return; }
+      var pill = target.closest('[data-cpf-dd]');
+      if (pill) { event.stopPropagation(); openPop(pill); return; }
+      var quickPill = target.closest('[data-cpf-q]');
+      if (quickPill) { navigate(urlWith(withPairs(quickPill.getAttribute('data-cpf-q'), quickPill.classList.contains('is-on')))); return; }
+      if (target.closest('[data-cpt-next]')) { var row = root.querySelector('[data-cpt-row]'); row.scrollBy({ left: row.clientWidth * 0.7, behavior: 'smooth' }); return; }
+      var railNext = target.closest('[data-cpr-next]');
+      if (railNext) { var rail = railNext.parentNode.querySelector('[data-cpr-rail]'); rail.scrollBy({ left: rail.clientWidth * 0.8, behavior: 'smooth' }); return; }
       if (target.closest('[data-dcl-price-ok]')) {
         var price = target.closest('[data-dcl-price]');
         var params = paramsNow();
@@ -540,6 +524,7 @@
       var sortButton = target.closest('[data-dcl-sort-btn]');
       if (sortButton) {
         event.stopPropagation();
+        root.querySelectorAll('.cpf__pop').forEach(function (pop) { pop.remove(); });
         var menu = root.querySelector('[data-dcl-sort-menu]');
         menu.hidden = !menu.hidden;
         sortButton.setAttribute('aria-expanded', String(!menu.hidden));
@@ -572,6 +557,14 @@
         event.stopPropagation();
       }
     });
+    // Cartes comme l'accueil : « Anteprima » (fiche produit) sur la photo au survol
+    var eye = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+    root.addEventListener('mouseover', function (event) {
+      var card = event.target.closest && event.target.closest('[data-dcl-grid] > .mshein-card');
+      if (!card || card.querySelector('.dcl-qv')) return;
+      var media = card.querySelector('.mshein-card__img'), link = card.querySelector('.mshein-card__link');
+      if (media && link) media.insertAdjacentHTML('beforeend', '<a class="dcl-qv" href="' + escapeHtml(link.getAttribute('href')) + '">' + eye + escapeHtml(root.getAttribute('data-preview') || '') + '</a>');
+    });
     root.addEventListener('keydown', function (event) {
       if (event.key === 'Enter' && event.target.matches('[data-dcl-price] input')) { event.preventDefault(); root.querySelector('[data-dcl-price-ok]').click(); }
     });
@@ -583,9 +576,9 @@
     setFullWidth();
     bindRoot();
     afterContent();
-    startRail(current);
+    startHero();
     markHeader();
-    if ('requestIdleCallback' in window) window.requestIdleCallback(fillTree, { timeout: 2500 }); else setTimeout(fillTree, 600);
+    if ('requestIdleCallback' in window) window.requestIdleCallback(loadRails, { timeout: 2500 }); else setTimeout(loadRails, 600);
   };
 
   // ---------- Navigation instantanée entre collections ----------
@@ -625,10 +618,15 @@
     if (!root || !document.querySelector('[data-dcl]')) return;
     navigate(location.pathname + location.search, { push: false, full: handleOf(location.pathname) !== root.getAttribute('data-handle') });
   });
+  // Fenêtres des pastilles et menu de tri fermés par un clic ailleurs ; Échap ferme aussi le panneau « Filtri »
   document.addEventListener('click', function (event) {
-    if (!root) return;
-    var menu = root.querySelector('[data-dcl-sort-menu]');
-    if (menu && !menu.hidden && !event.target.closest('.srt')) { menu.hidden = true; root.querySelector('[data-dcl-sort-btn]').setAttribute('aria-expanded', 'false'); }
+    if (!root || event.target.closest('.cpf__dd')) return;
+    closePops();
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key !== 'Escape' || !root) return;
+    closePops();
+    drawer(false);
   });
   // Fenêtre ouverte : flèches du clavier = produit précédent / suivant
   document.addEventListener('keydown', function (event) {

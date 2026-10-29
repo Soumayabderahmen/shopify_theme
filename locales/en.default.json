@@ -86,6 +86,22 @@
     "tbar_bf_ends": "Ends in {{ time }}"
   },
   "desktop_collection": {
+    "all_products": "All products",
+    "filters": "Filters",
+    "all_filters": "All filters",
+    "reset": "Reset",
+    "done": "Done",
+    "sort_short": "Sort",
+    "best_title": "Best sellers of the week",
+    "best_sub": "Our customers’ favourites, ranked by sales.",
+    "new_title": "Just arrived",
+    "new_sub": "New styles every week.",
+    "under_title": "Everything under {{ amount }}",
+    "under_sub": "Gift ideas and basics at small prices.",
+    "rail_best": "Favourites for a reason",
+    "usp_return": "Free returns within 30 days",
+    "usp_klarna": "Pay in 3 with Klarna",
+    "more_categories": "More categories",
     "collection": "Collection",
     "hint": "Hover over an item · click to see it up close",
     "count_copy": {
