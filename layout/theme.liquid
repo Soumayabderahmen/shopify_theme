@@ -76,6 +76,10 @@
     {%- if settings.custom_primary_font_snippet -%}{{ settings.custom_primary_font_snippet }}{%- endif -%}
     {%- if settings.custom_secondary_font_snippet -%}{{ settings.custom_secondary_font_snippet }}{%- endif -%}
     {{ 'screen.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
+    {%- comment -%} Suite de screen.css (règles que les pages n'appliquent pas au chargement : menus et fenêtres ouverts,
+      modèles rares) : chargée sans bloquer l'affichage, juste après screen.css pour garder l'ordre des styles. {%- endcomment -%}
+    <link rel="stylesheet" href="{{ 'screen-rest.css' | asset_url }}" media="print" onload="this.media='screen'">
+    <noscript>{{ 'screen-rest.css' | asset_url | stylesheet_tag: media: 'screen' }}</noscript>
     {{ 'theme-xtra.css' | asset_url | stylesheet_tag: media: 'screen' }}
     {{ 'mobile-temu-header.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
     {%- comment -%}
