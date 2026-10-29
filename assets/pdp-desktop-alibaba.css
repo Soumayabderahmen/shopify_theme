@@ -1,0 +1,149 @@
+/* Prototype : fiche produit ORDINATEUR organisée comme Alibaba (templates/product.alibaba.json, ?view=alibaba).
+   Les vrais blocs de la fiche (snippets/pdp-mobile-top.liquid, mêmes styles assets/pdp-mobile.css + pdp-desktop.css),
+   rangés par assets/pdp-desktop-alibaba.js en 3 colonnes pleine largeur :
+   galerie + Protezioni / Premi | prix, options, Descrizione | Spedizione e resi + achat (collée au défilement).
+   Avis et « Potrebbe piacerti anche » (cartes comme l'accueil, 6 par ligne) en pleine largeur dessous. */
+
+/* Pleine largeur : même marge de 16 px que l'accueil (position calculée par le script : --pa-x, --pa-w) */
+#root .pdp-m.pa-on {
+  width: var(--pa-w, 100%) !important;
+  max-width: none !important;
+  margin-left: calc(-1 * var(--pa-x, 0px)) !important;
+  padding: 8px 16px 56px !important;
+}
+
+#root .pdp-m.pa-on .pdp-m__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr) 380px;
+  column-gap: 24px;
+  align-items: start;
+}
+
+#root .pdp-m.pa-on .pdp-m__top > .pa-col {
+  grid-column: auto;
+  grid-row: auto;
+  min-width: 0;
+}
+
+/* Les blocs déplacés : plus de règles de placement de la grille à 2 colonnes */
+#root .pdp-m.pa-on .pa-col > * {
+  grid-column: auto;
+  order: 0;
+}
+
+/* --- Colonne 1 : galerie (pas collée, comme Alibaba), puis Protezioni et Premi côte à côte --- */
+#root .pdp-m.pa-on .pa-col--gal > .pdp-m__gal {
+  position: relative;
+  top: auto;
+  /* Place des vignettes (en colonne à gauche, 80 px) */
+  padding-left: 92px;
+  background: none;
+}
+
+#root .pdp-m.pa-on .pa-col--gal .pdp-m__slides {
+  max-height: none;
+  aspect-ratio: 1 / 1;
+}
+
+#root .pdp-m.pa-on .pa-col--gal .pdp-m__ths {
+  max-height: 100%;
+}
+
+#root .pdp-m.pa-on .pa-gal-more {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+#root .pdp-m.pa-on .pa-gal-more > .pdp-m__card {
+  margin: 0;
+  border-radius: 20px;
+}
+
+/* Protezioni : 4 icônes sur 2 lignes dans la demi-largeur */
+#root .pdp-m.pa-on .pa-gal-more .pdp-m__prot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 0;
+}
+
+/* --- Colonne 2 : Vantaggi + carte prix, options, Descrizione --- */
+#root .pdp-m.pa-on .pa-col--info > .pdp-m__vant {
+  margin-top: 0;
+}
+
+#root .pdp-m.pa-on .pa-col--info > #pdp-variants {
+  margin-top: 12px;
+  border-radius: 20px;
+}
+
+#root .pdp-m.pa-on .pa-col--info > .pdp-m__desc {
+  margin-top: 12px;
+  border-radius: 20px;
+}
+
+/* --- Colonne 3 : achat, collée sous l'en-tête du site pendant le défilement --- */
+#root .pdp-m.pa-on .pa-col--buy {
+  position: sticky;
+  top: 142px;
+}
+
+body:has(.pdp-m > .pdp-m__buy:not(.is-hidden)) #root .pdp-m.pa-on .pa-col--buy {
+  top: 214px;
+}
+
+#root .pdp-m.pa-on .pa-col--buy > .pdp-m__card,
+#root .pdp-m.pa-on .pa-col--buy > .pdp-m__klo {
+  margin: 0 0 12px;
+  border-radius: 20px;
+}
+
+/* Carte d'achat seule (elle était soudée à la carte des options) */
+#root .pdp-m.pa-on .pa-col--buy > .pdp-m__card:has(> .pdp-m__qrow) {
+  border-top: 0;
+  border-radius: 20px;
+}
+
+/* --- Dessous : avis puis cartes comme l'accueil (6 par ligne, photo 3 / 4) --- */
+#root .pdp-m.pa-on > #pdp-reviews,
+#root .pdp-m.pa-on > #pdp-related {
+  margin-top: 24px;
+}
+
+#root .pdp-m.pa-on .pdp-m__feed {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+}
+
+#root .pdp-m.pa-on .pdp-m__feed .mshein-card .mshein-card__img {
+  aspect-ratio: 3 / 4 !important;
+}
+
+#root .pdp-m.pa-on .pdp-m__feed .mshein-card {
+  border-radius: 12px;
+  transition: box-shadow 0.2s ease;
+}
+
+#root .pdp-m.pa-on .pdp-m__feed .mshein-card:hover {
+  position: relative;
+  z-index: 3;
+  background: #fff;
+  box-shadow: 0 0 0 10px #fff, 0 8px 34px 10px rgb(22 18 63 / 15%);
+}
+
+/* Barre d'achat collée : même pleine largeur */
+#root .pdp-m.pa-on > .pdp-m__buy {
+  padding: 0 16px;
+}
+
+@media (max-width: 1280px) {
+  #root .pdp-m.pa-on .pdp-m__top { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 340px; }
+  #root .pdp-m.pa-on .pdp-m__feed { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1100px) {
+  #root .pdp-m.pa-on .pdp-m__top { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  #root .pdp-m.pa-on .pa-col--buy { grid-column: 1 / -1; position: static; }
+  #root .pdp-m.pa-on .pdp-m__feed { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
