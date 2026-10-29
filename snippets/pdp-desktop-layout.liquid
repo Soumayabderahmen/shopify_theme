@@ -1,0 +1,113 @@
+{%- comment -%}
+  Fiche produit ORDINATEUR rangée comme Alibaba (styles : assets/pdp-desktop-layout.css). Rendu juste après la fiche
+  (snippets/pdp-mobile-top.liquid) : les vrais blocs sont déplacés avant le premier affichage et avant assets/pdp-mobile.js
+  (leurs scripts les suivent). Mobile (< 761 px) : rien.
+{%- endcomment -%}
+<script>
+  (function () {
+    if (!window.matchMedia('(min-width: 761px)').matches) return;
+    var root = document.querySelector('.pdp-m');
+    var top = root && root.querySelector('.pdp-m__top');
+    if (!top || root.classList.contains('pl-on')) return;
+    var pick = function (selector) { return top.querySelector(':scope > ' + selector); };
+    var box = function (name) { var div = document.createElement('div'); div.className = name; return div; };
+    var add = function (target, node) { if (node) target.appendChild(node); };
+    var cards = [].slice.call(top.querySelectorAll(':scope > .pdp-m__card'));
+    var buyCard = cards.filter(function (card) { return card.querySelector(':scope > .pdp-m__qrow'); })[0];
+    var protections = cards.filter(function (card) { return card.querySelector('.pdp-m__prot'); })[0];
+    var gallery = pick('.pdp-m__gal');
+
+    var main = box('pl-top');
+    var gal = box('pl-col pl-col--gal');
+    var info = box('pl-col pl-col--info');
+    var buy = box('pl-col pl-col--buy');
+    var desc = box('pl-desc');
+
+    // 1. Galerie, « Foto | Video », Protezioni
+    add(gal, gallery);
+    var slides = gallery ? [].slice.call(gallery.querySelectorAll('.pdp-m__sl')) : [];
+    var firstVideo = slides.findIndex(function (slide) { return slide.querySelector('video, iframe, model-viewer'); });
+    var tabs = box('pl-mtabs');
+    tabs.innerHTML = '<div class="pl-mtabs__in" role="tablist"><button type="button" class="is-on" role="tab" aria-selected="true">{{ 'mobile.js.photos' | t | escape }}</button><button type="button" role="tab" aria-selected="false">Video</button></div>';
+    var tabButtons = tabs.querySelectorAll('button');
+    tabButtons[1].disabled = firstVideo < 0;
+    if (gallery) gal.appendChild(tabs);
+    add(gal, protections);
+    // 2. Vantaggi, prix, marque, options, Premi
+    add(info, pick('.pdp-m__vant'));
+    add(info, pick('.pdp-m__price-card'));
+    add(info, pick('.pdp-m__brand'));
+    add(info, pick('#pdp-variants'));
+    add(info, pick('.pdp-m__rw'));
+    // 3. Panneau d'achat : Spedizione e resi, achat, Klarna
+    add(buy, pick('.pdp-m__gentry'));
+    add(buy, buyCard);
+    add(buy, pick('.pdp-m__kl') || pick('.pdp-m__klo'));
+    // 4. Descrizione sous la galerie et les infos
+    add(desc, root.querySelector(':scope > .pdp-m__desc'));
+    main.appendChild(gal);
+    main.appendChild(info);
+    // Ce qui reste (feuilles, modèles…) suit les colonnes
+    top.insertBefore(desc, top.firstChild);
+    top.insertBefore(buy, desc);
+    top.insertBefore(main, buy);
+    root.classList.add('pl-on');
+
+    // Pleine largeur malgré la marge du contenu du thème
+    var fit = function () {
+      root.style.setProperty('--pl-w', document.documentElement.clientWidth + 'px');
+      root.style.setProperty('--pl-x', '0px');
+      root.style.setProperty('--pl-x', root.getBoundingClientRect().left + 'px');
+    };
+    fit();
+    window.addEventListener('resize', fit);
+
+    if (!gallery) return;
+    // Vignettes : flèches haut / bas pour les faire défiler
+    var list = gallery.querySelector('.pdp-m__ths');
+    var thumbs = list ? [].slice.call(list.querySelectorAll('.pdp-m__th')) : [];
+    if (list) {
+      var arrow = function (dir, path, label) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'pl-thnav pl-thnav--' + dir;
+        button.setAttribute('aria-label', label);
+        button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '"/></svg>';
+        button.addEventListener('click', function () { list.scrollBy({ top: dir === 'up' ? -246 : 246 }); });
+        gallery.appendChild(button);
+        return button;
+      };
+      var up = arrow('up', 'm6 15 6-6 6 6', {{ 'mobile.pdp.previous' | t | json }});
+      var down = arrow('down', 'm6 9 6 6 6-6', {{ 'mobile.pdp.next' | t | json }});
+      var navs = function () {
+        up.hidden = list.scrollTop < 4;
+        down.hidden = list.scrollTop + list.clientHeight >= list.scrollHeight - 4;
+      };
+      list.addEventListener('scroll', navs, { passive: true });
+      window.addEventListener('load', navs);
+      navs();
+    }
+    // Flèches de la grande photo : pas de « précédente » sur la première, ni de « suivante » sur la dernière
+    var current = function () {
+      var index = thumbs.findIndex(function (thumb) { return thumb.getAttribute('aria-current') === 'true'; });
+      return index < 0 ? 0 : index;
+    };
+    var ends = function () {
+      var index = current();
+      gallery.classList.toggle('pl-first', index === 0);
+      gallery.classList.toggle('pl-last', index === thumbs.length - 1);
+      var onVideo = firstVideo >= 0 && index >= firstVideo && !!(slides[index] && slides[index].querySelector('video, iframe, model-viewer'));
+      tabButtons[0].classList.toggle('is-on', !onVideo);
+      tabButtons[1].classList.toggle('is-on', onVideo);
+      tabButtons[0].setAttribute('aria-selected', !onVideo);
+      tabButtons[1].setAttribute('aria-selected', onVideo);
+    };
+    if (thumbs.length) {
+      new MutationObserver(ends).observe(list, { subtree: true, attributes: true, attributeFilter: ['aria-current'] });
+      ends();
+    }
+    // « Foto » : première photo ; « Video » : première vidéo (même saut que les vignettes)
+    tabButtons[0].addEventListener('click', function () { if (thumbs[0]) thumbs[0].click(); });
+    tabButtons[1].addEventListener('click', function () { if (thumbs[firstVideo]) thumbs[firstVideo].click(); });
+  })();
+</script>

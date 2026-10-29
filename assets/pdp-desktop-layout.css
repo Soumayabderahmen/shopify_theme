@@ -1,0 +1,423 @@
+/* Fiche produit ORDINATEUR rangée comme Alibaba (prototype « Platinumshop-Prodotto-desktop-v2 ») : les vrais blocs de la
+   fiche (snippets/pdp-mobile-top.liquid, styles assets/pdp-mobile.css + pdp-desktop.css), placés par
+   snippets/pdp-desktop-layout.liquid (classe pl-on) :
+   galerie + Foto | Video + Protezioni (collée) | Vantaggi, prix, options, Premi | panneau d'achat collé (Spedizione e
+   resi, achat, Klarna) ; Descrizione sous la galerie et les infos ; avis et « Potrebbe piacerti anche » en pleine largeur.
+   Pleine largeur, fond blanc, 24 px de marge. Chargé avec media="(min-width: 761px)" (layout/theme.liquid). */
+
+body.template-product #content {
+  background: #fff;
+}
+
+/* Pleine largeur malgré la marge du contenu du thème (position mesurée par le script : --pl-x, --pl-w) */
+#root .pdp-m.pl-on {
+  --pl-line: #e9ebf2;
+  width: var(--pl-w, 100%) !important;
+  max-width: none !important;
+  margin-left: calc(-1 * var(--pl-x, 0px)) !important;
+  padding: 12px 24px 56px !important;
+  background: #fff;
+}
+
+/* ---------- Grille : [galerie | infos] + panneau d'achat ; Descrizione sous [galerie | infos] ---------- */
+#root .pdp-m.pl-on .pdp-m__top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) 370px;
+  column-gap: 32px;
+  row-gap: 28px;
+  align-items: start;
+}
+
+#root .pdp-m.pl-on .pdp-m__top > .pl-top {
+  grid-column: 1 / 3;
+  grid-row: 1;
+  /* Galerie et infos dans leur propre grille : la galerie collée s'arrête avant la Descrizione */
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  column-gap: 32px;
+  align-items: start;
+  min-width: 0;
+}
+
+#root .pdp-m.pl-on .pl-col {
+  min-width: 0;
+}
+
+#root .pdp-m.pl-on .pl-col > * {
+  grid-column: auto;
+  order: 0;
+}
+
+#root .pdp-m.pl-on .pl-col--gal,
+#root .pdp-m.pl-on .pl-col--buy {
+  position: sticky;
+  /* Sous l'en-tête collé du site (126 px) */
+  top: 142px;
+  transition: top 0.25s;
+}
+
+/* Bande d'achat affichée (72 px) : les colonnes collées descendent sous elle */
+body:has(.pdp-m.pl-on > .pdp-m__buy:not(.is-hidden)) #root .pdp-m.pl-on .pl-col--gal,
+body:has(.pdp-m.pl-on > .pdp-m__buy:not(.is-hidden)) #root .pdp-m.pl-on .pl-col--buy {
+  top: 214px;
+}
+
+#root .pdp-m.pl-on .pdp-m__top > .pl-col--buy {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+}
+
+#root .pdp-m.pl-on .pdp-m__top > .pl-desc {
+  grid-column: 1 / 3;
+  grid-row: 2;
+  min-width: 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--pl-line);
+}
+
+/* ---------- Galerie comme Alibaba : vignettes 70 px (coins 8 px, écart 12 px) dans une colonne de la hauteur de la
+   photo, flèches pour les faire défiler ; photo carrée sans cadre ; cœur et loupe en petits cercles blancs ; flèches
+   rondes ; « Foto | Video » en pastille grise sous la photo ---------- */
+#root .pdp-m.pl-on .pl-col--gal > .pdp-m__gal {
+  position: relative;
+  top: auto;
+  padding-left: 82px;
+  background: none;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__slides {
+  max-height: none;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  background: #fff;
+  border-radius: 8px;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__ths {
+  top: 0;
+  bottom: 34px;
+  gap: 12px;
+  width: 70px;
+  scroll-behavior: smooth;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__th {
+  width: 70px;
+  height: 70px;
+  border: 0;
+  border-radius: 8px;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__th img {
+  border-radius: 8px;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__th[aria-current='true'] {
+  box-shadow: inset 0 0 0 1px #222;
+}
+
+#root .pdp-m.pl-on .pl-thnav {
+  position: absolute;
+  left: 0;
+  /* Au-dessus des photos des vignettes (positionnées par le thème) */
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  color: #222;
+  background: #fff;
+  border: 0;
+  cursor: pointer;
+}
+
+#root .pdp-m.pl-on .pl-thnav svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#root .pdp-m.pl-on .pl-thnav--up {
+  top: 0;
+  box-shadow: 0 8px 8px -6px rgb(0 0 0 / 10%);
+}
+
+#root .pdp-m.pl-on .pl-thnav--down {
+  bottom: 0;
+}
+
+#root .pdp-m.pl-on .pl-thnav[hidden] {
+  display: none;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__garr {
+  width: 36px;
+  height: 36px;
+  margin-top: -18px;
+  color: #222;
+  background: #fff;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 14%);
+  opacity: 1;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__garr svg {
+  width: 18px;
+  height: 18px;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__garr--prev {
+  left: 94px;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__garr--next {
+  right: 12px;
+}
+
+/* Pas de flèche « précédente » sur la première photo, ni « suivante » sur la dernière */
+#root .pdp-m.pl-on .pdp-m__gal.pl-first .pdp-m__garr--prev,
+#root .pdp-m.pl-on .pdp-m__gal.pl-last .pdp-m__garr--next {
+  display: none;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__cnt {
+  display: none;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__gfav {
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  color: #222;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 14%);
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__gfav svg {
+  width: 18px;
+  height: 18px;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__gfav.is-on {
+  color: var(--pm-deal);
+}
+
+/* « Ingrandisci » : petit cercle sous le cœur (texte gardé pour les lecteurs d'écran) */
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__gzoom {
+  top: 52px;
+  right: 12px;
+  bottom: auto;
+  left: auto;
+  justify-content: center;
+  gap: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  overflow: hidden;
+  color: #222;
+  font-size: 0;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 14%);
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__gzoom svg {
+  width: 17px;
+  height: 17px;
+}
+
+#root .pdp-m.pl-on .pl-mtabs {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+  padding-left: 82px;
+}
+
+#root .pdp-m.pl-on .pl-mtabs__in {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: #f2f3f5;
+  border-radius: 999px;
+}
+
+#root .pdp-m.pl-on .pl-mtabs button {
+  height: 28px;
+  margin: 0;
+  padding: 0 14px;
+  color: #222;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+#root .pdp-m.pl-on .pl-mtabs button.is-on {
+  font-weight: 700;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 12%);
+}
+
+#root .pdp-m.pl-on .pl-mtabs button:disabled {
+  color: #9a9a9a;
+  cursor: not-allowed;
+}
+
+/* Protezioni sous la galerie : 5 icônes sur une ligne */
+#root .pdp-m.pl-on .pl-col--gal > .pdp-m__card {
+  margin: 18px 0 0 !important;
+  border: 1px solid var(--pl-line);
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__prot {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  overflow: visible !important;
+}
+
+#root .pdp-m.pl-on .pl-col--gal .pdp-m__prot > button {
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+/* ---------- Colonne du milieu : pas d'encadré, sections séparées par un trait fin ---------- */
+#root .pdp-m.pl-on .pl-col--info > .pdp-m__vant {
+  margin: 0 !important;
+  border-radius: 14px 14px 0 0 !important;
+}
+
+#root .pdp-m.pl-on .pl-col--info > .pdp-m__card {
+  margin: 0 !important;
+  padding: 18px 0 !important;
+  background: none !important;
+  border-bottom: 1px solid var(--pl-line);
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#root .pdp-m.pl-on .pl-col--info > .pdp-m__price-card {
+  padding-top: 16px !important;
+}
+
+#root .pdp-m.pl-on .pl-col--info > .pdp-m__brand {
+  margin: 0;
+  padding: 14px 0;
+  background: none;
+  border-bottom: 1px solid var(--pl-line);
+  border-radius: 0;
+}
+
+/* ---------- Panneau d'achat encadré, collé pendant le défilement ---------- */
+#root .pdp-m.pl-on .pl-col--buy {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--pl-line);
+  border-radius: 18px;
+  box-shadow: 0 18px 40px -28px rgb(22 18 63 / 40%);
+}
+
+#root .pdp-m.pl-on .pl-col--buy > .pdp-m__card {
+  margin: 0 !important;
+  padding: 18px 20px !important;
+  background: #fff !important;
+  border-bottom: 1px solid var(--pl-line);
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#root .pdp-m.pl-on .pl-col--buy > .pdp-m__kl,
+#root .pdp-m.pl-on .pl-col--buy > .pdp-m__klo {
+  margin: 0 !important;
+  padding: 14px 20px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ---------- Descrizione : sans encadré, caractéristiques sur 4 colonnes ---------- */
+#root .pdp-m.pl-on .pl-desc > .pdp-m__desc {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#root .pdp-m.pl-on .pl-desc dl.pdp-m__spec {
+  grid-template-columns: 18% 32% 18% 32%;
+  font-size: 13.5px;
+}
+
+#root .pdp-m.pl-on .pl-desc .pdp-m__spec dt:nth-of-type(2),
+#root .pdp-m.pl-on .pl-desc .pdp-m__spec dd:nth-of-type(2) {
+  border-top: 0;
+}
+
+#root .pdp-m.pl-on .pl-desc .pdp-m__spec dd {
+  border-right: 1px solid #ecebf3;
+}
+
+/* ---------- Dessous : avis puis cartes comme l'accueil (6 par ligne, photo 3 / 4) ---------- */
+#root .pdp-m.pl-on > #pdp-reviews,
+#root .pdp-m.pl-on > #pdp-related {
+  margin: 40px 0 0 !important;
+  padding: 28px 0 0 !important;
+  background: none !important;
+  border-top: 1px solid var(--pl-line);
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#root .pdp-m.pl-on .pdp-m__rchips {
+  background: #fff !important;
+}
+
+#root .pdp-m.pl-on .pdp-m__feed {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+}
+
+#root .pdp-m.pl-on .pdp-m__feed .mshein-card .mshein-card__img {
+  aspect-ratio: 3 / 4 !important;
+}
+
+#root .pdp-m.pl-on .pdp-m__feed .mshein-card {
+  border-radius: 12px;
+  transition: box-shadow 0.2s ease;
+}
+
+#root .pdp-m.pl-on .pdp-m__feed .mshein-card:hover {
+  position: relative;
+  z-index: 3;
+  background: #fff;
+  box-shadow: 0 0 0 10px #fff, 0 8px 34px 10px rgb(22 18 63 / 15%);
+}
+
+/* Bande d'achat collée : même pleine largeur que la fiche */
+#root .pdp-m.pl-on > .pdp-m__buy {
+  padding: 0 24px;
+}
+
+@media (max-width: 1280px) {
+  #root .pdp-m.pl-on .pdp-m__top { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 340px; }
+  #root .pdp-m.pl-on .pdp-m__top > .pl-top { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  #root .pdp-m.pl-on .pdp-m__feed { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+/* Écran étroit : panneau d'achat sous la galerie et les infos */
+@media (max-width: 1100px) {
+  #root .pdp-m.pl-on .pdp-m__top { grid-template-columns: minmax(0, 1fr); }
+  #root .pdp-m.pl-on .pdp-m__top > .pl-top { grid-column: 1; }
+  #root .pdp-m.pl-on .pdp-m__top > .pl-col--buy { grid-column: 1; grid-row: 2; position: static; }
+  #root .pdp-m.pl-on .pdp-m__top > .pl-desc { grid-column: 1; grid-row: 3; }
+  #root .pdp-m.pl-on .pdp-m__feed { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

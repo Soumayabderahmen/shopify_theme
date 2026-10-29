@@ -208,11 +208,8 @@
       {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'pdp-mobile.css' | asset_url }}">
       <link rel="stylesheet" href="{{ 'pdp-desktop.css' | asset_url }}" media="(min-width: 761px)">
-      {%- if template.suffix == 'alibaba' -%}
-        {%- comment -%} Prototype : fiche organisée comme Alibaba (templates/product.alibaba.json, ?view=alibaba) {%- endcomment -%}
-        <link rel="stylesheet" href="{{ 'pdp-desktop-alibaba.css' | asset_url }}" media="(min-width: 761px)">
-        <script defer src="{{ 'pdp-desktop-alibaba.js' | asset_url }}"></script>
-      {%- endif -%}
+      {%- comment -%} Ordinateur : fiche rangée comme Alibaba (blocs placés par snippets/pdp-desktop-layout.liquid) {%- endcomment -%}
+      <link rel="stylesheet" href="{{ 'pdp-desktop-layout.css' | asset_url }}" media="(min-width: 761px)">
       {%- comment -%} Tableau des tailles « size_info » des descriptions (desktop et mobile), avant pdp-mobile.js qui l'utilise. {%- endcomment -%}
       <script defer src="{{ 'size-info.js' | asset_url }}"></script>
       {%- comment -%} Caractéristiques des fiches importées traduites (7 langues), avant pdp-mobile.js qui les utilise. {%- endcomment -%}

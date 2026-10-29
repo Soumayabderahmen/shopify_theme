@@ -2564,9 +2564,11 @@
       // direct du haut de la page à plus bas que le bouton ne signalait rien, et la bande ne venait pas).
       var desktopBar = window.matchMedia('(min-width: 761px)').matches;
       if (desktopBar) buy.classList.add('is-hidden');
+      // Fiche rangée comme Alibaba (snippets/pdp-desktop-layout.liquid) : le bouton est dans le panneau d'achat collé, qui ne
+      // sort pas de l'écran ; la bande vient une fois la carte prix dépassée.
       new IntersectionObserver(function (entries) {
         buy.classList.toggle('is-hidden', entries[entries.length - 1].isIntersecting);
-      }, desktopBar ? { rootMargin: '0px 0px 100000px 0px' } : undefined).observe(mainCta);
+      }, desktopBar ? { rootMargin: '0px 0px 100000px 0px' } : undefined).observe(root.classList.contains('pl-on') && root.querySelector('.pdp-m__price-card') || mainCta);
     }
     // Cœur : wishlist du site (window.mobileWishlist, assets/mobile-temu-header.js, chargé après ce script). Visible et
     // déjà rouge dès le premier affichage (snippets/pdp-mobile-top.liquid lit la wishlist enregistrée) ; un toucher
