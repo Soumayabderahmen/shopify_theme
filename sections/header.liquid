@@ -1410,7 +1410,9 @@
             class="nav-scroll no-scroll"
           {% endif %}
         >
-          {{ nav_bar_block }}
+          {%- comment -%} Menus de l'en-tête d'origine non écrits : il est toujours caché (snippets/desktop-header.liquid et
+            l'en-tête mobile le remplacent), ses scripts trouvent leurs balises vides. ~260 Ko de HTML en moins par page. {%- endcomment -%}
+          {%- if request.design_mode -%}{{ nav_bar_block }}{%- endif -%}
         </ul>
         <button type="button" class="overlay-close" aria-label="Close">Close</button>
       </nav>
@@ -1440,11 +1442,13 @@
             <span class="hidden">{{ 'general.accessibility.menu' | t }}</span></a
           >
         </li>
-        {{ main_nav_block }}
-        {{ nav_bar_block }}
+        {%- if request.design_mode -%}
+          {{ main_nav_block }}
+          {{ nav_bar_block }}
+        {%- endif -%}
       </ul>
       <ul class="inner ul-inner">
-        {{ main_nav_inner_block }}
+        {%- if request.design_mode -%}{{ main_nav_inner_block }}{%- endif -%}
       </ul>
 
       <a class="close close-nav" href="./">Close</a>
