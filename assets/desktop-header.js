@@ -444,6 +444,21 @@
     window.dhCloseMega();
     dclOpen(url);
   });
+  // Comme sur mobile : les premiers rayons des onglets préparés à l'avance (ouverts tout de suite au clic). Pas en
+  // économie de données ni en connexion très lente ; sur une page collection, assets/desktop-collection.js prépare les
+  // rayons voisins.
+  window.addEventListener('load', function () {
+    var net = navigator.connection;
+    if (document.querySelector('[data-dcl]') || (net && (net.saveData || /(^|-)2g$/.test(net.effectiveType || '')))) return;
+    var later = function (work) { if ('requestIdleCallback' in window) window.requestIdleCallback(work, { timeout: 4000 }); else setTimeout(work, 1500); };
+    later(function () {
+      if (document.querySelector('[data-dcl]')) return;
+      [].slice.call(header.querySelectorAll('.dh-tab[href*="/collections/"]')).slice(0, 2).forEach(function (tab) {
+        var url = dclLink(tab);
+        if (url) dclFetch(url).catch(function () {});
+      });
+    });
+  });
   var dclHover = null;
   document.addEventListener('mouseover', function (event) {
     var url = dclLink(event.target.closest && event.target.closest('a[href]'));

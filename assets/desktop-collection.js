@@ -399,6 +399,22 @@
     root.querySelectorAll('.view [data-view]').forEach(function (button) { button.classList.toggle('is-on', button.getAttribute('data-view') === current.view); });
   };
 
+  // Rayons voisins (onglet avant / après dans l'en-tête) préparés à l'avance, comme les onglets de rayon du mobile :
+  // un clic sur l'un d'eux l'affiche tout de suite. Pas en économie de données ni en connexion très lente.
+  var slowNet = function () {
+    var net = navigator.connection;
+    return Boolean(net && (net.saveData || /(^|-)2g$/.test(net.effectiveType || '')));
+  };
+  var prefetchNeighbours = function () {
+    if (!root || !root.isConnected || slowNet()) return;
+    var top = root.getAttribute('data-top'), url = root.getAttribute('data-url');
+    var tabs = [].slice.call(document.querySelectorAll('.dh-tab[href*="/collections/"]'));
+    var paths = tabs.map(function (tab) { return new URL(tab.getAttribute('href'), location.href).pathname; });
+    var index = paths.indexOf(top) > -1 ? paths.indexOf(top) : paths.indexOf(url);
+    if (index < 0) return;
+    [index + 1, index - 1].forEach(function (i) { if (paths[i]) fetchPage(paths[i]).catch(function () {}); });
+  };
+
   // Onglet du rayon dans l'en-tête (collection ouverte sans recharger)
   var markHeader = function () {
     var top = root.getAttribute('data-top'), url = root.getAttribute('data-url');
@@ -579,6 +595,10 @@
     startHero();
     markHeader();
     if ('requestIdleCallback' in window) window.requestIdleCallback(loadRails, { timeout: 2500 }); else setTimeout(loadRails, 600);
+    // Après les rails (mêmes demandes en arrière-plan) : rayons voisins
+    setTimeout(function () {
+      if ('requestIdleCallback' in window) window.requestIdleCallback(prefetchNeighbours, { timeout: 4000 }); else prefetchNeighbours();
+    }, 1500);
   };
 
   // ---------- Navigation instantanée entre collections ----------
