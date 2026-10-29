@@ -146,6 +146,9 @@
 .dhp-hero__cta { display: flex; gap: 12px; }
 .dhp-hero__usp { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 26px; color: var(--dhp-ink-2); font-size: 13.5px; font-weight: 600; }
 .dhp-hero__usp b { color: var(--dhp-ink); font-weight: 900; }
+/* Logo Klarna à la place de l'émoji carte : même hauteur que la ligne */
+.dhp-hero__usp-pay { display: inline-flex; align-items: center; gap: 6px; }
+.dhp-hero__usp-pay svg { flex: none; width: 27px; height: 17px; border-radius: 3px; }
 .dhp-hero__txt--bf { opacity: 0; transform: translateY(18px); pointer-events: none; }
 .dhp-hero.is-bf .dhp-hero__txt--std { opacity: 0; transform: translateY(-18px); pointer-events: none; }
 .dhp-hero.is-bf .dhp-hero__txt--bf { opacity: 1; transform: none; pointer-events: auto; }

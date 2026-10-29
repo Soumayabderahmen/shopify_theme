@@ -303,7 +303,8 @@
         <div class="dhp-hero__usp">
           {%- if shipping_amount != '' -%}<span>🚚 {{ 'desktop_home_shop.usp_shipping_html' | t: amount: shipping_amount }}</span>{%- endif -%}
           <span>↩ {{ 'desktop_home_shop.usp_return_html' | t }}</span>
-          <span>💳 {{ 'desktop_home_shop.usp_klarna_html' | t }}</span>
+          {%- comment -%} Vrai logo Klarna (même dessin que les logos de paiement, snippets/payment-icon.liquid) s'il est actif {%- endcomment -%}
+          <span class="dhp-hero__usp-pay">{%- if shop.enabled_payment_types contains 'klarna' -%}{%- render 'payment-icon', type: 'klarna' -%}{%- else -%}💳{%- endif %} {{ 'desktop_home_shop.usp_klarna_html' | t }}</span>
         </div>
       </div>
       <div class="dhp-hero__art" data-dhp-art></div>
