@@ -13,8 +13,12 @@
     {% include 'avada-seo' %}
     <!-- /Added by AVADA SEO Suite -->
     
-    {%- comment -%} Badge « price match » de la fiche produit (drawer1product-style.css retiré : bandeau de marque caché par la fiche). {%- endcomment -%}
+    {%- comment -%}
+      Fiche produit : bande « Negozio Ufficiale del Marchio » et son panneau (snippets/prodducts--brand-popap.liquid, sans styles
+      propres) — chargé tout de suite (sinon flèche géante le temps du chargement) ; badge « price match » (producttext-style.css).
+    {%- endcomment -%}
     {%- if template.name == 'product' -%}
+      {{ 'drawer1product-style.css' | asset_url | stylesheet_tag }}
       <link rel="stylesheet" href="{{ 'producttext-style.css' | asset_url }}" media="print" onload="this.media='all'">
       <noscript>{{ 'producttext-style.css' | asset_url | stylesheet_tag }}</noscript>
     {%- endif -%}
