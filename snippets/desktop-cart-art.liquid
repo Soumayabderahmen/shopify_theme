@@ -1,0 +1,97 @@
+{%- comment -%}
+  Page panier ORDINATEUR : photos qui entrent, flottent puis laissent la place aux suivantes à droite du bandeau du titre
+  (comme les pages collection, sections/desktop-collection.liquid) — produits du panier, puis suggestions. Rendu par
+  sections/main-cart.liquid après le panier ; styles : assets/desktop-cart.css (caché sur mobile).
+{%- endcomment -%}
+{%- liquid
+  assign pics = ''
+  assign pic_count = 0
+  for item in cart.items
+    if item.image == blank
+      continue
+    endif
+    capture pic
+      echo item.image | image_url: width: 400 | json
+    endcapture
+    if pics contains pic
+      continue
+    endif
+    if pics != ''
+      assign pics = pics | append: ','
+    endif
+    assign pics = pics | append: pic
+    assign pic_count = pic_count | plus: 1
+  endfor
+  if pic_count < 8
+    for product in collections.all.products limit: 16
+      if product.featured_image == blank
+        continue
+      endif
+      capture pic
+        echo product.featured_image | image_url: width: 400 | json
+      endcapture
+      if pics != ''
+        assign pics = pics | append: ','
+      endif
+      assign pics = pics | append: pic
+    endfor
+  endif
+-%}
+<div class="dca" data-dca aria-hidden="true">
+  {%- for slot in (1..4) -%}<span class="dca-fl dca-fl--{{ forloop.index }}"><span class="dca-fl__in"><img alt="" width="140" height="190"></span></span>{%- endfor -%}
+  <script type="application/json" data-dca-pics>[{{ pics }}]</script>
+</div>
+<script>
+  // Photos placées dans le bandeau du panier (grille .cart-m) et animées ; le panier redessine toute la section à chaque
+  // changement (assets/cart-mobile.js) : elles y sont replacées à chaque fois.
+  (function (section) {
+    if (!section || window.matchMedia('(max-width: 760px)').matches) return;
+    var timer = 0;
+    var start = function (art) {
+      clearInterval(timer);
+      var pics = [];
+      try { pics = JSON.parse(art.querySelector('[data-dca-pics]').textContent); } catch (error) { return; }
+      var floats = [].slice.call(art.querySelectorAll('.dca-fl'));
+      if (!pics.length) return;
+      var set = 0;
+      var show = function () {
+        floats.forEach(function (node, i) {
+          node.querySelector('img').src = pics[(set * floats.length + i) % pics.length];
+          node.classList.remove('off');
+          node.classList.add('on');
+        });
+      };
+      requestAnimationFrame(function () { requestAnimationFrame(show); });
+      if (pics.length <= floats.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      timer = setInterval(function () {
+        if (!art.isConnected) { clearInterval(timer); return; }
+        if (document.hidden || art.getBoundingClientRect().bottom < 0) return;
+        floats.forEach(function (node) { node.classList.remove('on'); node.classList.add('off'); });
+        setTimeout(function () {
+          set += 1;
+          floats.forEach(function (node) { node.classList.remove('off'); });
+          requestAnimationFrame(function () { requestAnimationFrame(show); });
+        }, 900);
+      }, 5200);
+    };
+    var place = function () {
+      var art = section.querySelector(':scope > [data-dca]');
+      var cart = section.querySelector(':scope > .cart-m');
+      if (!art || !cart) return;
+      cart.insertBefore(art, cart.firstChild);
+      start(art);
+    };
+    place();
+    new MutationObserver(place).observe(section, { childList: true });
+    // Cartes « Questi prodotti… » : bouton « Anteprima » (fiche produit) sur la photo au survol, comme l'accueil
+    var eye = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+    var preview = {{ 'desktop_home_shop.preview' | t | json }};
+    document.addEventListener('mouseover', function (event) {
+      var card = event.target.closest && event.target.closest('.recently-viewed-products .mshein-card');
+      if (!card || card.querySelector('.dca-qv')) return;
+      var media = card.querySelector('.mshein-card__img');
+      var link = card.querySelector('.mshein-card__link');
+      if (media && link) media.insertAdjacentHTML('beforeend', '<a class="dca-qv" href="' + link.getAttribute('href').replace(/"/g, '&quot;') + '">' + eye + preview + '</a>');
+    });
+  })(document.currentScript.closest('.shopify-section'));
+</script>

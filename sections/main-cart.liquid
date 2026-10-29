@@ -28,6 +28,8 @@
 
 {%- comment -%} Panier mobile au design du prototype (assets/cart-mobile.css le montre en mobile et cache le panier ci-dessous). {%- endcomment -%}
 {%- render 'cart-mobile', section: section, form_id: form_id -%}
+{%- comment -%} Ordinateur : photos animées dans le bandeau du titre (comme les pages collection) {%- endcomment -%}
+{%- render 'desktop-cart-art' -%}
 
 {%- if cart.item_count == 0 -%}
   <article
