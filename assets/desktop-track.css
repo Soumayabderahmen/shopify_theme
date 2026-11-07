@@ -1,0 +1,80 @@
+/* Page « Traccia il tuo ordine » ORDINATEUR (sections/main-page.liquid, page traccia-ordine) au style des autres pages :
+   bandeau du site (snippets/desktop-page-hero.liquid, styles dans assets/desktop-contact.css) à la place de l'en-tête
+   violet du contenu, puis le contenu de la page (HTML écrit dans l'admin, styles intégrés) en cartes blanches arrondies,
+   couleurs indigo du site. Chargée à partir de 761px seulement : la page mobile ne change pas. */
+
+/* Fil d'Ariane et titre du thème en double avec le bandeau ; en-tête violet du contenu remplacé par le bandeau */
+[id$="__breadcrumbs"],
+.dtr > header,
+.dtr .track-hero { display: none !important; }
+
+[id$="__main-page"] .dct-hero { margin: 4px 0 26px; }
+.dtr { max-width: none !important; margin: 0 0 40px !important; }
+.dtr .track-page { min-height: 0; padding: 0; color: #4a4f6b; font-family: 'Figtree', system-ui, sans-serif; background: none; }
+.dtr .track-container { max-width: none; }
+.dtr h2, .dtr h3 { font-family: 'Sora', sans-serif; letter-spacing: -.3px; text-transform: none; }
+
+/* Cartes blanches comme la page Contatti, sans saut au survol */
+.dtr .track-card,
+.dtr .info-card,
+.dtr .carriers-section,
+.dtr .faq-section,
+.dtr .help-section { background: #fff; border: 1px solid #eceef4; border-radius: 20px; box-shadow: 0 10px 30px -24px rgb(22 18 63 / 35%); }
+.dtr .track-card:hover,
+.dtr .info-card:hover { transform: none; box-shadow: 0 16px 36px -24px rgb(22 18 63 / 45%); }
+.dtr .track-grid { gap: 22px; margin-bottom: 22px; }
+.dtr .track-card { padding: 30px; }
+.dtr .track-card h2,
+.dtr .carriers-section h2,
+.dtr .faq-section h2 { margin-bottom: 20px; color: #16123f; font-size: 22px; font-weight: 800; }
+.dtr .carriers-section h2,
+.dtr .faq-section h2 { justify-content: center; }
+
+/* Formulaire de suivi */
+.dtr .form-group { margin-bottom: 20px; }
+.dtr .form-group label { color: #16123f; font-size: 13.5px; font-weight: 700; }
+.dtr .form-group input { padding: 14px 16px; font-size: 15px; background: #f8f8fc; border: 1px solid #e3e4ec; border-radius: 12px; }
+.dtr .form-group input:focus { background: #fff; border-color: #3a34d2; box-shadow: 0 0 0 3px rgb(58 52 210 / 15%); }
+.dtr .form-group small { color: #7a7f95; font-size: 12.5px; }
+.dtr .btn-track { padding: 16px; font-size: 16px; font-weight: 800; background: #3a34d2; border-radius: 999px; box-shadow: 0 12px 24px -12px rgb(58 52 210 / 70%); }
+.dtr .btn-track:hover { background: #16123f; transform: translateY(-1px); box-shadow: 0 14px 26px -12px rgb(22 18 63 / 70%); }
+
+/* Étapes du parcours : pastilles indigo, trait lavande */
+.dtr .journey-step { margin-bottom: 24px; }
+.dtr .journey-step:not(:last-child)::after { left: 21px; top: 48px; width: 2px; background: #dcd9fb; }
+.dtr .journey-icon { width: 44px; height: 44px; font-size: 17px; background: #3a34d2; box-shadow: 0 8px 16px -8px rgb(58 52 210 / 80%); }
+.dtr .journey-content h3 { color: #16123f; font-size: 16px; font-weight: 800; }
+.dtr .journey-content p { color: #7a7f95; font-size: 13.5px; }
+
+/* Avantages : 4 cartes, icône dans une pastille lavande */
+.dtr .info-grid { gap: 18px; margin-bottom: 22px; }
+.dtr .info-card { padding: 26px 22px; }
+.dtr .info-icon { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 14px; font-size: 30px; background: #f6f5ff; border-radius: 18px; }
+.dtr .info-card h3 { color: #16123f; font-size: 16px; font-weight: 800; }
+.dtr .info-card p { color: #7a7f95; font-size: 13.5px; }
+
+/* « Il tuo ordine è protetto » : aux couleurs du bandeau */
+.dtr .trust-badges { position: relative; margin-bottom: 22px; padding: 32px 36px; overflow: hidden; background: radial-gradient(120% 140% at 100% 0%, #5b4dff 0%, #3a34d2 38%, #16123f 100%); border-radius: 22px; box-shadow: none; }
+.dtr .trust-badges h3 { margin-bottom: 22px; color: #fff; font-size: 22px; font-weight: 800; }
+.dtr .badges-grid { gap: 16px; }
+.dtr .badge-item { padding: 20px 16px; background: rgb(255 255 255 / 10%); border: 1px solid rgb(255 255 255 / 16%); border-radius: 16px; }
+.dtr .badge-icon { margin-bottom: 10px; font-size: 38px; }
+.dtr .badge-text { font-size: 14.5px; font-weight: 700; }
+
+/* Corrieri, FAQ, aide : comme la page Contatti */
+.dtr .carriers-section,
+.dtr .faq-section,
+.dtr .help-section { margin-bottom: 22px; padding: 30px; }
+.dtr .carriers-section p { margin-bottom: 20px; color: #7a7f95; font-size: 14px; }
+.dtr .carriers-grid { gap: 12px; }
+.dtr .carrier-btn { padding: 13px 18px; color: #16123f; font-size: 14px; font-weight: 800; background: #f6f5ff; border-radius: 999px; box-shadow: none; }
+.dtr .carrier-btn:hover { color: #fff; background: #3a34d2; box-shadow: 0 10px 20px -12px rgb(58 52 210 / 80%); transform: translateY(-1px); }
+.dtr .faq-item { margin-bottom: 10px; padding: 18px 20px; background: #f6f5ff; border-left: 0; border-radius: 14px; }
+.dtr .faq-item:last-child { margin-bottom: 0; }
+.dtr .faq-item:hover { background: #ecebfd; transform: none; }
+.dtr .faq-question { margin-bottom: 8px; color: #16123f; font-size: 15px; font-weight: 800; }
+.dtr .faq-answer { color: #4a4f6b; font-size: 14px; line-height: 1.6; }
+.dtr .help-section h3 { margin-bottom: 18px; color: #16123f; font-size: 20px; font-weight: 800; }
+.dtr .help-links { gap: 10px; }
+.dtr .help-link { padding: 11px 20px; color: #16123f; font-size: 14px; font-weight: 800; background: #ecebfd; border: 0; border-radius: 999px; }
+.dtr .help-link:hover { color: #fff; background: #3a34d2; transform: translateY(-1px); }

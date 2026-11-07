@@ -22,11 +22,22 @@
   endif
 -%}
 {{- pp_page_doc -}}
+{%- if page.handle == 'traccia-ordine' -%}
+  {%- comment -%} Ordinateur : bandeau des pages de service (snippets/desktop-page-hero.liquid) et contenu de la page en cartes
+  au style du site (assets/desktop-track.css) ; mobile inchangé. {%- endcomment -%}
+  <link rel="stylesheet" href="{{ 'desktop-contact.css' | asset_url }}" media="(min-width: 761px)">
+  <link rel="stylesheet" href="{{ 'desktop-track.css' | asset_url }}" media="(min-width: 761px)">
+  {%- liquid
+    assign dtr_title = 'policy_shipping.track_cta' | t
+    assign dtr_copy = 'track_page.intro' | t
+    render 'desktop-page-hero', title: dtr_title, copy: dtr_copy
+  -%}
+{%- endif -%}
 {%- if page.handle == 'wishlist' -%}
   {%- render 'wishlist-page-content' -%}
 {%- else -%}
 <div
-  class="{% if pp_page_doc != '' %}pp-page-desk {% endif %}{% if section.settings.text_alignment == 'center' %}text-center{% endif %}{% if section.settings.content_alignment == 'center' %} align-center{% endif %}{% if title_block.settings.title_size == 'size-50' %} size-16 mobile-size-14{% endif %}"
+  class="{% if pp_page_doc != '' %}pp-page-desk {% endif %}{% if page.handle == 'traccia-ordine' %}dtr {% endif %}{% if section.settings.text_alignment == 'center' %}text-center{% endif %}{% if section.settings.content_alignment == 'center' %} align-center{% endif %}{% if title_block.settings.title_size == 'size-50' %} size-16 mobile-size-14{% endif %}"
   {%- if max_width != 2000 -%}
     style="max-width: {{ max_width }}px;"
   {%- endif -%}

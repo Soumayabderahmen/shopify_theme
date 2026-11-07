@@ -1,0 +1,45 @@
+{%- comment -%}
+  Bandeau ORDINATEUR des pages de service (Contatti : sections/desktop-contact.liquid ; Traccia l'ordine :
+  sections/main-page.liquid), aux couleurs du site comme les pages collection : fil d'Ariane, titre, texte, avantages et,
+  à droite, les moyens de contact du pied de page en cartes (WhatsApp, e-mail, téléphone, suivi de commande : copiés de
+  snippets/mobile-footer.liquid, mêmes liens et textes ; le lien vers la page ouverte est omis).
+  Styles : assets/desktop-contact.css (à charger par la page). Caché sur mobile (≤ 760px).
+  - title, copy : textes du bandeau
+{%- endcomment -%}
+<style>@media (max-width: 760px) { .dct { display: none; } }</style>
+<section class="dct" aria-labelledby="dct-title">
+  <div class="dct-hero">
+    <div class="dct-hero__txt">
+      <nav class="dct-hero__bc" aria-label="{{ 'mobile.cart.breadcrumb' | t }}">
+        <a href="{{ routes.root_url }}">{{ 'mobile.nav.home' | t }}</a><i aria-hidden="true">›</i><b>{{ page.title | escape }}</b>
+      </nav>
+      <h1 class="dct-hero__title" id="dct-title">{{ title }}</h1>
+      <p class="dct-hero__copy">{{ copy }}</p>
+      <div class="dct-hero__usp">
+        <span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{{ 'desktop_contact.fast_reply' | t }}</span>
+        <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>{{ 'mobile.quick_add.easy_return' | t }}</span>
+        <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>{{ 'desktop_contact.secure' | t }}</span>
+      </div>
+    </div>
+    <div class="dct-hero__ways" data-dct-ways></div>
+  </div>
+</section>
+<script>
+  // Moyens de contact du pied de page ordinateur (mêmes numéros, adresses et textes) dans le bandeau
+  (function (ways) {
+    if (!ways || window.matchMedia('(max-width: 760px)').matches) return;
+    var fill = function () {
+      var rows = document.querySelectorAll('.dft__rows > a');
+      if (!rows.length) return false;
+      [].forEach.call(rows, function (row) {
+        if (row.pathname === location.pathname && row.protocol === location.protocol) return;
+        var card = row.cloneNode(true);
+        card.className = 'dct-way';
+        card.insertAdjacentHTML('beforeend', '<svg class="dct-way__go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>');
+        ways.appendChild(card);
+      });
+      return true;
+    };
+    if (!fill()) document.addEventListener('DOMContentLoaded', fill, { once: true });
+  })(document.querySelector('[data-dct-ways]'));
+</script>
