@@ -78,3 +78,24 @@
 .dtr .help-links { gap: 10px; }
 .dtr .help-link { padding: 11px 20px; color: #16123f; font-size: 14px; font-weight: 800; background: #ecebfd; border: 0; border-radius: 999px; }
 .dtr .help-link:hover { color: #fff; background: #3a34d2; transform: translateY(-1px); }
+
+/* Icônes au trait à la place des émojis du contenu (snippets/desktop-track-icons.liquid) */
+.dtr .dtr-ic { display: inline-grid; flex: none; place-items: center; font-style: normal; vertical-align: middle; }
+.dtr .dtr-ic svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.dtr h2 > .dtr-ic, .dtr h3 > .dtr-ic { width: 38px; height: 38px; margin-right: 4px; padding: 9px; color: #3a34d2; background: #ecebfd; border-radius: 12px; }
+.dtr .carriers-section h2, .dtr .faq-section h2, .dtr .help-section h3 { display: flex; align-items: center; gap: 10px; }
+.dtr .help-section h3 { justify-content: center; }
+.dtr .trust-badges h3 { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.dtr .trust-badges h3 > .dtr-ic { color: #fff; background: rgb(255 255 255 / 14%); }
+.dtr .form-group small { display: flex; align-items: center; gap: 6px; }
+.dtr .form-group small > .dtr-ic { width: 14px; height: 14px; color: #3a34d2; }
+.dtr .btn-track { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.dtr .btn-track > .dtr-ic { width: 19px; height: 19px; }
+.dtr .btn-track > .dtr-ic svg { stroke-width: 2.3; }
+.dtr .info-icon > .dtr-ic { width: 30px; height: 30px; color: #3a34d2; }
+.dtr .badge-icon { display: grid; place-items: center; width: 60px; height: 60px; margin: 0 auto 12px; background: rgb(255 255 255 / 14%); border-radius: 16px; }
+.dtr .badge-icon > .dtr-ic { width: 30px; height: 30px; color: #fff; }
+.dtr .carrier-btn > .dtr-ic, .dtr .help-link > .dtr-ic { width: 17px; height: 17px; }
+.dtr .help-link { display: inline-flex; align-items: center; gap: 7px; }
+.dtr .faq-question { display: flex; align-items: center; gap: 10px; }
+.dtr .faq-question > .dtr-ic { width: 30px; height: 30px; padding: 6px; color: #3a34d2; background: #fff; border-radius: 9px; }

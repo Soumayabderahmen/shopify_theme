@@ -52,7 +52,11 @@
         </header>
       {%- when 'content' -%}
         <div {{ block.shopify_attributes }}>
-          {{ page.content }}
+          {%- if page.handle == 'traccia-ordine' -%}
+            {%- render 'desktop-track-icons', content: page.content -%}
+          {%- else -%}
+            {{ page.content }}
+          {%- endif -%}
         </div>
       {%- when 'spacer' -%}
         <div
