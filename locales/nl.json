@@ -8,6 +8,12 @@
  * ------------------------------------------------------------
  */
 {
+  "desktop_contact": {
+    "title": "Hoe kunnen we je helpen?",
+    "copy": "Stuur ons een bericht via WhatsApp of e-mail, volg je bestelling of vind snel een antwoord in de veelgestelde vragen.",
+    "fast_reply": "Antwoord binnen 24 uur",
+    "secure": "Veilig betalen"
+  },
   "desktop_home_shop": {
     "bf_up_to_offers": "Tot {{ percent }} op {{ count }} aanbiedingen",
     "tbar_bf_promo_html": "Black Friday: tot <b>{{ percent }}</b><br>op {{ count }} aanbiedingen",

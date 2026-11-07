@@ -8,6 +8,12 @@
  * ------------------------------------------------------------
  */
 {
+  "desktop_contact": {
+    "title": "Wie können wir dir helfen?",
+    "copy": "Schreib uns per WhatsApp oder E-Mail, verfolge deine Bestellung oder finde schnell eine Antwort in den FAQ.",
+    "fast_reply": "Antwort innerhalb von 24 Stunden",
+    "secure": "Sichere Zahlungen"
+  },
   "desktop_home_shop": {
     "bf_up_to_offers": "Bis zu {{ percent }} auf {{ count }} Angebote",
     "tbar_bf_promo_html": "Black Friday: bis zu <b>{{ percent }}</b><br>auf {{ count }} Angebote",

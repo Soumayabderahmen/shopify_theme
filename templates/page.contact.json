@@ -9,6 +9,10 @@
  */
 {
   "sections": {
+    "desktop-contact": {
+      "type": "desktop-contact",
+      "settings": {}
+    },
     "breadcrumbs": {
       "type": "breadcrumbs",
       "disabled": true,
@@ -200,6 +204,7 @@
     }
   },
   "order": [
+    "desktop-contact",
     "breadcrumbs",
     "page-service-menu",
     "section-faq",
