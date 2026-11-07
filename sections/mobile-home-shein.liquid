@@ -304,8 +304,7 @@
           assign trends = collections['new-trends']
         -%}
         <div class="mshein-mods" data-mshein-home>
-          {%- comment -%} Comme le prototype : « Più venduti » et « Saldi Top » (Nuovi arrivi / Tendenze : (1..4)). {%- endcomment -%}
-          {%- for module_index in (1..2) -%}
+          {%- for module_index in (1..4) -%}
             {%- liquid
               case module_index
                 when 1
