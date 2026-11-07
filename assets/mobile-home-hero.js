@@ -159,7 +159,8 @@
       var syncSolid = function () {
         var active = document.querySelector('[data-mshein-hero-active]');
         var banner = active && (active.querySelector('.mhh') || active);
-        header.classList.toggle('mshein-solid', !banner || banner.getBoundingClientRect().bottom < header.offsetHeight + 10);
+        // Sombre dès qu'on défile : le texte de la bannière ne passe pas derrière le logo et la recherche transparents
+        header.classList.toggle('mshein-solid', !banner || window.scrollY > 4 || banner.getBoundingClientRect().bottom < header.offsetHeight + 10);
       };
       syncHeight();
       syncSolid();

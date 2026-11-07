@@ -62,7 +62,8 @@
       // Bannière au design « Home-mobile-B » (assets/mobile-home-hero.css) : son bas à elle, pas celui de la carte des
       // paiements et des avantages placés dessous dans le même bloc
       var banner = activeHero && (activeHero.querySelector('.mhh') || activeHero);
-      var solid = !banner || banner.getBoundingClientRect().bottom < headerSection.offsetHeight + 10;
+      // Sombre dès qu'on défile : le texte de la bannière ne passe pas derrière le logo et la recherche transparents
+      var solid = !banner || window.scrollY > 4 || banner.getBoundingClientRect().bottom < headerSection.offsetHeight + 10;
       headerSection.classList.toggle('mshein-solid', solid);
     };
     window.msheinSyncHeader = syncSolid;
