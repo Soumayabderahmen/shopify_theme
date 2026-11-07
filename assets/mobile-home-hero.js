@@ -195,6 +195,21 @@
       }, { passive: true });
     }
 
+    // Bannière entièrement passée sous l'en-tête : coins arrondis et ombre (classe mhh-past) ; avant, bords droits
+    if (header) {
+      var syncPast = function () {
+        var banners = document.querySelectorAll('[data-mshein-hero-active] .mhh, .mhh[data-mshein-hero]');
+        var banner = null;
+        for (var i = 0; i < banners.length; i += 1) {
+          if (banners[i].getBoundingClientRect().height > 0) { banner = banners[i]; break; }
+        }
+        header.classList.toggle('mhh-past', !banner || banner.getBoundingClientRect().bottom <= header.offsetHeight + 2);
+      };
+      window.addEventListener('scroll', syncPast, { passive: true });
+      window.addEventListener('resize', syncPast);
+      syncPast();
+    }
+
     // Barres collées sous l'en-tête (onglets « Per te », Filtri / tri des rayons) : sous sa hauteur réelle
     if (header && window.ResizeObserver) {
       new ResizeObserver(function () {

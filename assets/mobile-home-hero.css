@@ -513,13 +513,25 @@ body #root .mhh.mhh[data-mhh] {
 }
 
 /* ---------- En-tête en défilant (accueil et pages collection) : sombre, coins arrondis, recherche repliée en loupe à côté du cœur ---------- */
+/* Passage transparent → sombre d'un coup (le fondu laissait voir le texte de la bannière à travers le logo et la recherche) */
+body.mshein-home.mshein-head #root [id$="__header"].shopify-section,
+body.mshein-home.mshein-head #root [id$="__header"].shopify-section::before {
+  transition: border-radius 0.25s, box-shadow 0.25s !important;
+}
+
+/* Sombre dès qu'on défile ; bords droits tant que la bannière est encore dessous (pas de « bloc » posé sur le violet) */
 body.mshein-home.mshein-head #root [id$="__header"].shopify-section.mshein-solid,
 body.mshein-home.mshein-head #root [id$="__header"].shopify-section.mshein-solid::before {
   background: #0f0d1c !important;
+}
+
+/* Coins arrondis et ombre une fois la bannière passée sous l'en-tête (classe mhh-past, assets/mobile-home-hero.js) */
+body.mshein-home.mshein-head #root [id$="__header"].shopify-section.mshein-solid.mhh-past,
+body.mshein-home.mshein-head #root [id$="__header"].shopify-section.mshein-solid.mhh-past::before {
   border-radius: 0 0 22px 22px;
 }
 
-body.mshein-home.mshein-head #root [id$="__header"].shopify-section.mshein-solid {
+body.mshein-home.mshein-head #root [id$="__header"].shopify-section.mshein-solid.mhh-past {
   box-shadow: 0 10px 24px -14px rgb(15 13 28 / 70%);
 }
 
