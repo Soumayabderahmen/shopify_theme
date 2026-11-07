@@ -3,6 +3,28 @@
    avantages (snippets/mhh-pay-ann.liquid), en-tête en défilant ; script assets/mobile-home-hero.js. Chargée seulement
    jusqu'à 760px (layout/theme.liquid) : l'ordinateur ne change pas. */
 
+/* Autres pages (snippets/mhh-page-hero.liquid, body.mhh-page) : bannière pleine largeur ; titres en double cachés */
+.mhh-page-wrap {
+  width: 100vw;
+  max-width: 100vw;
+  margin-right: calc(50% - 50vw);
+  margin-bottom: 16px;
+  margin-left: calc(50% - 50vw);
+}
+
+body.mhh-page .shopify-section-breadcrumbs,
+body.mhh-page .pp__hero,
+body.mhh-page .pp__back,
+body.mhh-page [id$="__main-page"] > div > header,
+body.mhh-page [id$="__main-list-collection"] > header,
+body.mhh-page .shopify-policy__title,
+body.mhh-page .wishlist-page__heading h1,
+body.mhh-page .cart-m > .cm-bc,
+body.mhh-page .cart-m > .cm-head,
+body.mhh-page .wishlist-page__heading .wl-bc {
+  display: none !important;
+}
+
 /* Recherche avec bannière (snippets/mshein-search.liquid) : le titre est dans la bannière */
 .mshein-search.has-mhh .mshein-search__hd {
   display: none !important;

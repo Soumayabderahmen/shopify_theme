@@ -1,0 +1,152 @@
+{%- comment -%}
+  Bannière MOBILE des autres pages (pages d'informations, politiques, toutes les collections, blog, articles, 404,
+  wishlist, panier) au design de l'accueil et des collections (prototype « Home-mobile-B ») : accrochée à l'en-tête,
+  petit titre, titre de la page, texte, bouton et 3 photos qui entrent, flottent et changent toutes les 5 s ; puis la
+  carte « Pagamenti sicuri » et les avantages qui défilent (snippets/mhh-pay-ann.liquid).
+  Photos : panier = ses produits ; wishlist = les produits enregistrés (lus dans le navigateur par
+  assets/mobile-home-hero.js), sinon les meilleures ventes ; autres pages = les meilleures ventes.
+  Rendue par layout/theme.liquid en haut du contenu ; cachée sur ordinateur. Styles et script : assets/mobile-home-hero.*
+  Params : kind (page, policy, list-collections, blog, article, 404, cart)
+{%- endcomment -%}
+{%- liquid
+  assign shop_name = shop.name | capitalize | escape
+  assign hero_eb = shop_name
+  assign hero_title = ''
+  assign hero_text = 'mobile_home_hero.text1' | t
+  assign hero_cta = 'desktop_home_shop.hero_cta_shop' | t
+  assign hero_url = routes.all_products_collection_url
+  assign hero_source = 'best'
+  case kind
+    when 'page'
+      assign hero_title = page.title
+      if page.handle == 'contatti' or page.handle == 'contact'
+        assign hero_text = 'desktop_contact.copy' | t
+      elsif page.handle == 'traccia-ordine'
+        assign hero_eb = 'track_page.eyebrow' | t
+        assign hero_text = 'track_page.intro' | t
+      elsif page.handle == 'wishlist'
+        assign hero_source = 'wishlist'
+      endif
+    when 'policy'
+      assign hero_eb = 'policy_page.eyebrow' | t
+      for policy in shop.policies
+        if policy.url != blank and request.path contains policy.url
+          assign hero_title = policy.title
+          break
+        endif
+      endfor
+    when 'list-collections'
+      assign hero_title = 'collection.all_collections' | t
+    when 'blog'
+      assign hero_title = blog.title
+    when 'article'
+      assign hero_eb = blog.title | escape
+      assign hero_title = article.title
+    when '404'
+      assign hero_eb = '404'
+      assign hero_title = '404.title' | t
+      assign hero_text = '404.subtitle_html' | t | strip_html
+    when 'cart'
+      assign hero_title = 'mobile.cart.title' | t
+      if cart.item_count == 1
+        assign hero_eb = 'mobile.cart.items_one' | t
+      elsif cart.item_count > 1
+        assign hero_eb = 'mobile.cart.items_other' | t: count: cart.item_count
+      endif
+      if cart.item_count > 0
+        assign hero_source = 'cart'
+      endif
+  endcase
+  if hero_title == blank
+    assign hero_title = page_title
+  endif
+
+  # Titre : dernier mot en lavande
+  assign title_words = hero_title | strip_html | escape | split: ' '
+  if title_words.size > 1
+    assign title_rest_size = title_words.size | minus: 1
+    assign hero_title_html = title_words | slice: 0, title_rest_size | join: ' ' | append: ' <span>' | append: title_words.last | append: '</span>'
+  else
+    assign hero_title_html = '<span>' | append: title_words.first | append: '</span>'
+  endif
+
+  # Photos (jusqu'à 9) : produits du panier, sinon les meilleures ventes
+  assign photos_json = ''
+  assign first_images = ''
+  assign photo_count = 0
+  if hero_source == 'cart'
+    for item in cart.items
+      if photo_count >= 9 or item.image == blank
+        continue
+      endif
+      assign hero_src = item.image | image_url: width: 320
+      assign u_json = item.url | json
+      assign i_json = hero_src | json
+      if photos_json != ''
+        assign photos_json = photos_json | append: ','
+      endif
+      assign photos_json = photos_json | append: '{"u":' | append: u_json | append: ',"i":' | append: i_json | append: '}'
+      if photo_count < 3
+        assign first_images = first_images | append: hero_src | append: '|' | append: item.url | append: '||'
+      endif
+      assign photo_count = photo_count | plus: 1
+    endfor
+  endif
+  if photo_count < 3
+    assign best = collections['bestsellers']
+    if best == blank or best.products_count == 0
+      assign best = collections['all']
+    endif
+    for product in best.products limit: 18
+      if photo_count >= 9
+        break
+      endif
+      if product.featured_image == blank
+        continue
+      endif
+      assign hero_src = product.featured_image | image_url: width: 320
+      assign u_json = product.url | json
+      assign i_json = hero_src | json
+      if photos_json != ''
+        assign photos_json = photos_json | append: ','
+      endif
+      assign photos_json = photos_json | append: '{"u":' | append: u_json | append: ',"i":' | append: i_json | append: '}'
+      if photo_count < 3
+        assign first_images = first_images | append: hero_src | append: '|' | append: product.url | append: '||'
+      endif
+      assign photo_count = photo_count | plus: 1
+    endfor
+  endif
+  assign first_list = first_images | split: '||'
+  assign shipping_amount = ''
+  if settings.enable_free_shipping and settings.free_shipping_amount > 0
+    assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
+  endif
+-%}
+<style>@media (min-width: 761px) { .mhh-page-wrap { display: none !important; } }</style>
+<div class="mhh-page-wrap mhh-page-wrap--{{ kind }}" data-mshein-hero-active>
+  <div class="mhh mhh--page" data-mhh{% if hero_source == 'wishlist' %} data-mhh-source="wishlist"{% endif %}>
+    <div class="mhh__dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+    <div class="mhh__txt" data-mhh-txt>
+      <span class="mhh__eb"><i></i><span data-mhh-eb>{{ hero_eb }}</span></span>
+      <h2 data-mhh-title>{{ hero_title_html }}</h2>
+      <p data-mhh-text>{{ hero_text | escape }}</p>
+      <a class="mhh__btn" href="{{ hero_url }}" data-mhh-btn><span data-mhh-cta>{{ hero_cta }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+    </div>
+    <div class="mhh__art" aria-hidden="true">
+      {%- for slot in (1..3) -%}
+        {%- assign first = first_list[forloop.index0] | split: '|' -%}
+        <a class="mhh-fl mhh-fl--{{ slot }}" href="{{ first[1] | default: hero_url }}" tabindex="-1"><span class="mhh-fl__in">{%- if first[0] != blank -%}<img src="{{ first[0] }}" alt="" width="200" height="260" loading="eager">{%- endif -%}</span></a>
+      {%- endfor -%}
+    </div>
+    <div class="mhh__usp">
+      {%- if shipping_amount != '' -%}<span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>{{ 'desktop_home_shop.usp_shipping_html' | t: amount: shipping_amount }}</span>{%- endif -%}
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>{{ 'desktop_home_shop.usp_return_html' | t }}</span>
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>{{ 'desktop_home_shop.usp_klarna_html' | t }}</span>
+    </div>
+    <script type="application/json" data-mhh-data>
+      { "slides": [], "products": [{{ photos_json }}] }
+    </script>
+  </div>
+  {%- render 'mhh-pay-ann' -%}
+</div>

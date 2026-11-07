@@ -26,6 +26,15 @@
     var txt = hero.querySelector('[data-mhh-txt]');
     var dots = hero.querySelectorAll('.mhh__dots i');
     var products = data.products || [];
+    // Wishlist : les produits enregistrés dans ce navigateur (photo et adresse), sinon les meilleures ventes
+    if (hero.getAttribute('data-mhh-source') === 'wishlist') {
+      try {
+        var saved = JSON.parse(window.localStorage.getItem('platinumshop:wishlist:v1') || '[]');
+        var mine = (Array.isArray(saved) ? saved : []).filter(function (item) { return item && item.image && item.url; })
+          .map(function (item) { return { u: item.url, i: item.image }; });
+        if (mine.length) products = mine.concat(products.slice(0, Math.max(0, 3 - mine.length)));
+      } catch (error) { /* stockage indisponible : meilleures ventes */ }
+    }
     var slides = data.slides || [];
     var set = 0;
     var show = function () {
@@ -137,6 +146,28 @@
     /* ---------- En-tête en défilant : loupe à côté du cœur ---------- */
     if (!document.body.classList.contains('mshein-home')) return;
     var header = document.querySelector('[id$="__header"].shopify-section');
+
+    // Autres pages (snippets/mhh-page-hero.liquid), sans assets/mobile-home-shein.js : hauteur de l'en-tête fixé et
+    // en-tête transparent sur la bannière, sombre dès qu'elle passe dessous (classe mshein-solid)
+    if (header && document.body.classList.contains('mhh-page')) {
+      var syncHeight = function () {
+        var searchBar = header.querySelector('.mobile-temu-search');
+        if (searchBar && searchBar.offsetHeight < 20 && document.documentElement.style.getPropertyValue('--mshein-header-h')) return;
+        var height = Math.round(header.getBoundingClientRect().height);
+        if (height > 0) document.documentElement.style.setProperty('--mshein-header-h', height + 'px');
+      };
+      var syncSolid = function () {
+        var banner = document.querySelector('[data-mshein-hero-active]');
+        header.classList.toggle('mshein-solid', !banner || banner.getBoundingClientRect().bottom < header.offsetHeight + 10);
+      };
+      syncHeight();
+      syncSolid();
+      window.addEventListener('resize', syncHeight);
+      window.addEventListener('load', syncHeight);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeight);
+      window.addEventListener('scroll', syncSolid, { passive: true });
+      window.addEventListener('resize', syncSolid);
+    }
     var actions = header && header.querySelector('.mobile-home-header__actions');
     var input = header && header.querySelector('.mobile-temu-search input');
     if (header && actions && !actions.querySelector('.mhh-find')) {

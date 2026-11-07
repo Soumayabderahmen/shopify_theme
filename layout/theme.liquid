@@ -133,7 +133,20 @@
       elsif template.name == 'collection' and mshein_coll == false
         assign mshein_plain_head = true
       endif
+      # Autres pages mobiles avec la bannière de l'accueil et des collections (snippets/mhh-page-hero.liquid) et l'en-tête
+      # transparent dessus : pages, politiques, toutes les collections, blog, articles, 404, panier
+      assign mhh_page_kind = ''
+      assign mhh_page_templates = 'page,list-collections,blog,article,404,cart' | split: ','
+      if mhh_page_templates contains template.name
+        assign mhh_page_kind = template.name
+      elsif request.page_type == 'policy'
+        assign mhh_page_kind = 'policy'
+      endif
     -%}
+    {%- if mhh_page_kind != '' -%}
+      <link rel="stylesheet" href="{{ 'mobile-home-hero.css' | asset_url }}" media="(max-width: 760px)">
+      <script src="{{ 'mobile-home-hero.js' | asset_url }}" defer></script>
+    {%- endif -%}
     {%- if template.name == 'index' or mshein_coll or mshein_search -%}
       {%- comment -%}
         Accueil, pages collection et recherche mobile style SHEIN : styles chargés en tête, pas d'ancien design avant le nouveau.
@@ -421,7 +434,7 @@
     Connue dès la balise <body> : assets/pdp-mobile.css masque l'en-tête et la barre du bas du site dès le premier affichage
     (avec « :has([data-pdp-hd]) », il fallait attendre que la fiche arrive : l'ancien en-tête apparaissait un instant).
   {%- endcomment -%}
-  <body class="template-{{ template.name | handle }}{% if template.name == 'product' %} pdp-m-page{% endif %}{% if template.name == 'index' %} mshein-home mshein-head{% elsif mshein_coll %} mshein-home mshein-head mshein-coll{% elsif mshein_plain_head %} mshein-head{% if mshein_search %} mshein-search{% endif %}{% if mshein_search_hero %} mshein-home{% endif %}{% endif %}">
+  <body class="template-{{ template.name | handle }}{% if template.name == 'product' %} pdp-m-page{% endif %}{% if template.name == 'index' %} mshein-home mshein-head{% elsif mshein_coll %} mshein-home mshein-head mshein-coll{% elsif mshein_plain_head %} mshein-head{% if mshein_search %} mshein-search{% endif %}{% if mshein_search_hero %} mshein-home{% endif %}{% if mhh_page_kind != '' %} mshein-home mhh-page{% endif %}{% endif %}">
     {%- if template.name == 'index' or mshein_coll -%}
       <script>
         (function () {
@@ -491,7 +504,7 @@
     <div id="root">
       {%- render 'accessible-nav' -%}
       {%- sections 'header-group' -%}
-      {%- if mshein_plain_head and mshein_search_hero == false -%}
+      {%- if mshein_plain_head and mshein_search_hero == false and mhh_page_kind == '' -%}
         <script>
           (function () {
             // Autres modèles de collection, fiches produit et panier, mobile : nouvel en-tête toujours blanc dès son affichage, et sa hauteur pour la barre
@@ -601,6 +614,7 @@
       {%- endif -%}
       {%- sections 'overlay-group' -%}
       <main id="content">
+        {%- if mhh_page_kind != '' -%}{%- render 'mhh-page-hero', kind: mhh_page_kind -%}{%- endif -%}
         {%- comment -%} Politiques : bouton retour, mise en page et politique d'expédition traduite (snippets/policy-page.liquid). {%- endcomment -%}
         {%- if request.page_type == 'policy' -%}
           {%- render 'policy-page', content: content_for_layout -%}
