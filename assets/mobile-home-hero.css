@@ -72,6 +72,14 @@ body.mshein-home .shopify-section:has(> .mhh)::before {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Plus fort que l'ancienne règle de la bannière de l'accueil (assets/mobile-temu-header.css : [data-mshein-hero] en
+   plan 1, coins carrés) : la bannière reste devant la carte des paiements, avec ses coins arrondis */
+body #root .mhh.mhh[data-mhh] {
+  position: relative;
+  z-index: 2 !important;
+  border-radius: 0 0 30px 30px !important;
+}
+
 .mhh *,
 .mhh-pay *,
 .mhh-ann * {
