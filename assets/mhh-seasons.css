@@ -523,3 +523,32 @@
 @media (prefers-reduced-motion: reduce) {
   .mhs-prop--scarf { animation: none; }
 }
+
+/* ---------- Chapeau de saison posé sur le « P » du logo (en-tête ordinateur et mobile) ---------- */
+.mhs-logohat {
+  position: absolute;
+  z-index: 2;
+  top: -15px;
+  left: -9px;
+  width: 34px;
+  pointer-events: none;
+  transform: rotate(-18deg);
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 2px 2px rgb(20 10 40 / 30%));
+}
+
+/* Le logo coupe ce qui dépasse : le chapeau doit pouvoir sortir */
+.dh-logo[data-mhs-hat],
+.mobile-home-header__logo[data-mhs-hat] { overflow: visible !important; }
+
+.mhs-logohat svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* Chapeaux de paille (printemps, été) : plus larges, posés à plat */
+[data-mhs-hat='spring'] > .mhs-logohat,
+[data-mhs-hat='summer'] > .mhs-logohat { top: -13px; left: -12px; width: 42px; transform: rotate(-12deg); }
+
+@media (max-width: 760px) {
+  .mobile-home-header__logo > .mhs-logohat { top: -8px; left: -7px; width: 24px; }
+  [data-mhs-hat='spring'].mobile-home-header__logo > .mhs-logohat,
+  [data-mhs-hat='summer'].mobile-home-header__logo > .mhs-logohat { top: -6px; left: -9px; width: 29px; }
+}

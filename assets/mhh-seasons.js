@@ -322,6 +322,27 @@
     summer: function () { return [HATS.sun('#ff5a5f'), bikini('#ff5a6e', '#fff'), ACCS.sunglasses('#e0a336')]; },
     autumn: function () { return [HATS.beanie('#d98a2b', '#b56d1c', '#f6e3c3'), scarf('plaid', '#a5482a', '#e8a04a', '#f6e3c3'), ACCS.boot('#7a4a2a', '#4a2c18')]; }
   };
+  // Chapeau de saison posé sur le « P » du logo (en-tête ordinateur et mobile)
+  var LOGO_HATS = {
+    xmas: function () { return HATS.santa(); },
+    winter: function () { return HATS.beanie('#3c7be0', '#2a5fb8', '#fff'); },
+    spring: function () { return HATS.sun('#ff8fb8'); },
+    summer: function () { return HATS.sun('#ff5a5f'); },
+    autumn: function () { return HATS.beanie('#d98a2b', '#b56d1c', '#f6e3c3'); }
+  };
+  var hatLogos = function () {
+    if (!LOGO_HATS[current]) return;
+    document.querySelectorAll('.dh-logo:not([data-mhs-hat]), .mobile-home-header__logo:not([data-mhs-hat])').forEach(function (logo) {
+      logo.setAttribute('data-mhs-hat', current);
+      if (getComputedStyle(logo).position === 'static') logo.style.position = 'relative';
+      var hat = document.createElement('span');
+      hat.className = 'mhs-logohat';
+      hat.setAttribute('aria-hidden', 'true');
+      hat.innerHTML = LOGO_HATS[current]();
+      logo.appendChild(hat);
+    });
+  };
+
   var addProps = function (hero) {
     if (!PROPS[current] || !hero.parentNode) return;
     var items = PROPS[current]();
@@ -432,6 +453,7 @@
   };
 
   var scan = function () {
+    hatLogos();
     HEROES.forEach(function (hero) {
       if (hero[2] && !desktop.matches) return;
       document.querySelectorAll(hero[0]).forEach(function (el) {
