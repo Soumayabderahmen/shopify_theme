@@ -75,6 +75,21 @@
       }, 3500);
     }
 
+    /* ---------- Offerte lampo : compte à rebours jusqu'à minuit (heure du visiteur) ---------- */
+    var timer = document.querySelectorAll('[data-mhf-timer] span');
+    if (timer.length === 3) {
+      var tick = function () {
+        var now = new Date();
+        var end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        var left = Math.max(0, Math.floor((end - now) / 1000));
+        [Math.floor(left / 3600), Math.floor(left / 60) % 60, left % 60].forEach(function (value, i) {
+          timer[i].textContent = String(value).padStart(2, '0');
+        });
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+
     /* ---------- En-tête en défilant : loupe à côté du cœur ---------- */
     var header = document.querySelector('[id$="__header"].shopify-section');
     var actions = header && header.querySelector('.mobile-home-header__actions');

@@ -304,7 +304,8 @@
           assign trends = collections['new-trends']
         -%}
         <div class="mshein-mods" data-mshein-home>
-          {%- for module_index in (1..4) -%}
+          {%- comment -%} Comme le prototype : « Più venduti » et « Saldi Top » (Nuovi arrivi / Tendenze : (1..4)). {%- endcomment -%}
+          {%- for module_index in (1..2) -%}
             {%- liquid
               case module_index
                 when 1
@@ -387,6 +388,82 @@
           {%- endfor -%}
         </div>
 
+        {%- comment -%}
+          Offerte lampo (prototype « Home-mobile-B ») : plus fortes remises parmi les 60 premiers « Più venduti » (ou la
+          collection « In offerta »), compte à rebours jusqu'à minuit (assets/mobile-home-hero.js), barre = remise.
+        {%- endcomment -%}
+        {%- liquid
+          assign flash_source = best.products
+          if sale_collection != blank and sale_collection.products_count > 0
+            assign flash_source = sale_collection.products
+          endif
+          assign flash_count = 0
+        -%}
+        {%- capture flash_cards -%}
+          {%- for flash_product in flash_source limit: 60 -%}
+            {%- if flash_count >= 8 -%}{%- break -%}{%- endif -%}
+            {%- liquid
+              assign flash_variant = flash_product.selected_or_first_available_variant
+              if flash_variant.compare_at_price <= flash_variant.price or flash_product.featured_image == blank
+                continue
+              endif
+              assign flash_pct = flash_variant.compare_at_price | minus: flash_variant.price | times: 100.0 | divided_by: flash_variant.compare_at_price | floor
+              assign flash_bar = flash_pct | times: 2
+              if flash_bar > 100
+                assign flash_bar = 100
+              endif
+              assign flash_saved = flash_variant.compare_at_price | minus: flash_variant.price | money_without_trailing_zeros | strip_html
+              assign flash_count = flash_count | plus: 1
+            -%}
+            <a class="mhf__card" href="{{ flash_product.url }}">
+              <span class="mhf__img"><img src="{{ flash_product.featured_image | image_url: width: 240, height: 320, crop: 'center' }}" alt="{{ flash_product.title | escape }}" width="120" height="160" loading="lazy"><b>-{{ flash_pct }}%</b></span>
+              <span class="mhf__price">{{ flash_variant.price | money }}<s>{{ flash_variant.compare_at_price | money }}</s></span>
+              <span class="mhf__bar"><i style="width: {{ flash_bar }}%;"></i></span>
+              <small>{{ 'mobile.home_shein.save' | t: amount: flash_saved }}</small>
+            </a>
+          {%- endfor -%}
+        {%- endcapture -%}
+        {%- if flash_count > 0 -%}
+          <section class="mhf" data-mhf>
+            <div class="mhf__hd">
+              <h3><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>{{ 'mobile_home_hero.flash' | t }}</h3>
+              <span class="mhf__timer" data-mhf-timer aria-hidden="true"><span>00</span>:<span>00</span>:<span>00</span></span>
+            </div>
+            <div class="mhf__rail">{{ flash_cards }}</div>
+          </section>
+        {%- endif -%}
+
+        {%- comment -%} Collezioni da scoprire : sous-collections du menu (les mêmes que l'accueil ordinateur). {%- endcomment -%}
+        {%- assign occ_menu = linklists['main-menu'] -%}
+        {%- capture occ_cards -%}
+          {%- assign occ_shown = 0 -%}
+          {%- assign occ_seen = ',' -%}
+          {%- for round in (0..3) -%}
+            {%- for link in occ_menu.links -%}
+              {%- if occ_shown >= 10 -%}{%- break -%}{%- endif -%}
+              {%- if link.type != 'collection_link' or link.object.handle == 'all' -%}{%- continue -%}{%- endif -%}
+              {%- assign occ_link = link.links[round] -%}
+              {%- if occ_link == blank or occ_link.type != 'collection_link' -%}{%- continue -%}{%- endif -%}
+              {%- assign occ = occ_link.object -%}
+              {%- assign occ_key = ',' | append: occ.handle | append: ',' -%}
+              {%- if occ_seen contains occ_key or occ.products_count < 3 -%}{%- continue -%}{%- endif -%}
+              {%- assign occ_seen = occ_seen | append: occ.handle | append: ',' -%}
+              {%- assign occ_image = occ.image | default: occ.products.first.featured_image -%}
+              {%- assign occ_shown = occ_shown | plus: 1 -%}
+              <a class="mho__card" href="{{ occ.url }}">
+                {%- if occ_image != blank -%}<img src="{{ occ_image | image_url: width: 360 }}" alt="" loading="lazy" width="150" height="190">{%- endif -%}
+                <span>{{ occ_link.title | escape }}<small>{{ link.title | escape }}</small></span>
+              </a>
+            {%- endfor -%}
+          {%- endfor -%}
+        {%- endcapture -%}
+        {%- if occ_shown > 0 -%}
+          <section class="mho">
+            <div class="mho__hd"><h3>{{ 'desktop_home_shop.collections_discover' | t }}</h3><a href="{{ routes.collections_url }}">{{ 'desktop_home_shop.bf_all_tab' | t }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a></div>
+            <div class="mho__rail">{{ occ_cards }}</div>
+          </section>
+        {%- endif -%}
+
       {%- when 'feed' -%}
         {%- liquid
           # Sources de chaque onglet (pages suivantes chargées par assets/mobile-home-shein.js).
@@ -414,12 +491,13 @@
         <script src="{{ 'mobile-home-tabs.js' | asset_url }}" defer></script>
         {%- render 'mshein-tab-heroes', menu: section.settings.menu, best: best -%}
         <div class="mshein-feed" data-mshein-home data-mshein-feed>
+          <h3 class="mshein-feed__title">{{ 'mobile.home_shein.for_you' | t }}</h3>
           <div class="mshein-feed__tabs" role="tablist" data-mshein-tabs>
             {%- comment -%} « Per te » : produits et pages lus dans un ordre au hasard (assets/mobile-home-shein.js, data-random-*). {%- endcomment -%}
-            <button type="button" role="tab" aria-selected="true" class="is-on" data-src="{{ for_you_src | append: '&page=2' }}" data-random-total="{{ best.products_count }}" data-random-per-page="10">✨ {{ 'mobile.home_shein.for_you' | t }}</button>
-            <button type="button" role="tab" aria-selected="false" data-src="{{ sale_src }}">🔥 {{ 'mobile.explore.on_sale' | t }}</button>
+            <button type="button" role="tab" aria-selected="true" class="is-on" data-src="{{ for_you_src | append: '&page=2' }}" data-random-total="{{ best.products_count }}" data-random-per-page="10">{{ 'mobile.home.recommended' | t }}</button>
+            <button type="button" role="tab" aria-selected="false" data-src="{{ sale_src }}">{{ 'mobile.explore.on_sale' | t }}</button>
             {%- if brand_src != '' -%}
-              <button type="button" role="tab" aria-selected="false" data-src="{{ brand_src | strip }}">✓ {{ 'mobile.home_shein.official_brands' | t }}</button>
+              <button type="button" role="tab" aria-selected="false" data-src="{{ brand_src | strip }}">{{ 'mobile.home_shein.official_brands' | t }}</button>
             {%- endif -%}
             <button type="button" role="tab" aria-selected="false" data-src="{{ new_src }}">{{ 'mobile.category.new' | t }}</button>
             <button type="button" role="tab" aria-selected="false" data-src="{{ under_src }}">{{ 'mobile.explore.under_20' | t: amount: under_amount }}</button>
