@@ -1,9 +1,13 @@
 /* Bannières mobiles (.mhh : accueil, collections, recherche, autres pages) et ordinateur (accueil, collections, contact,
-   suivi, pages, politiques, recherche, wishlist, panier) aux couleurs de la saison, avec leurs effets :
-   printemps = rose et pétales ; été = soleil et reflets ; automne = feuilles et pluie ; Noël (1er déc. → 6 janv.) = rouge,
-   neige et étoiles ; hiver = bleu glacé et neige. Saison choisie selon la date du téléphone.
-   Aperçu d'une autre saison : ajouter ?saison=printemps|ete|automne|noel|hiver à l'adresse (gardé pendant la visite,
-   ?saison=auto pour revenir à la date). Styles : assets/mhh-seasons.css. */
+   suivi, pages, politiques, recherche, wishlist, panier) aux couleurs de la saison, avec leurs décors :
+   - Noël (1er déc. → 6 janv.) : rouge profond, horizon enneigé et forêt de sapins en silhouette avec guirlandes
+     lumineuses, boules suspendues (ordinateur), flocons cristallins, neige et paillettes dorées ;
+   - hiver : bleu glacé, même horizon enneigé (sans fêtes), flocons cristallins, neige et halos lumineux ;
+   - printemps : rose, branche de cerisier en fleurs, pétales qui tourbillonnent, papillons ;
+   - été : coucher de soleil, soleil et rayons, mer en vagues transparentes avec reflets, palmiers en silhouette ;
+   - automne : orange, feuilles et pluie.
+   Saison choisie selon la date du téléphone. Aperçu d'une autre saison : ?saison=printemps|ete|automne|noel|hiver
+   (gardé pendant la visite, ?saison=auto pour revenir à la date). Styles : assets/mhh-seasons.css. */
 (function () {
   'use strict';
 
@@ -31,124 +35,195 @@
   };
 
   var current = season();
+  var rand = function (min, max) { return min + Math.random() * (max - min); };
+  var r1 = function (n) { return Math.round(n * 10) / 10; };
+  var uid = 0;
 
   // Particules de chaque saison : [classe, nombre]
   var PARTS = {
-    spring: [['petal', 10], ['fly', 3]],
-    summer: [['spark', 14]],
+    spring: [['petal', 16], ['fly', 2], ['bokeh', 5]],
+    summer: [['spark', 12]],
     autumn: [['leaf', 10], ['drop', 26]],
-    xmas: [['flake', 34], ['star', 8]],
-    winter: [['flake', 38]]
+    xmas: [['flake', 26], ['crystal', 7], ['star', 9], ['bokeh', 5]],
+    winter: [['flake', 28], ['crystal', 9], ['bokeh', 6]]
   };
 
-  var rand = function (min, max) { return min + Math.random() * (max - min); };
-
-  // ---------- Décors posés en bas de la bannière (dessins SVG) ----------
+  // ---------- Dessins ----------
   var svg = function (box, body, extra) {
-    return '<svg viewBox="' + box + '"' + (extra || '') + ' aria-hidden="true">' + body + '</svg>';
-  };
-  var GIFTS = [['#e8323f', '#c21f2c', '#ffd34d'], ['#2aa35c', '#1f7d46', '#ff5a6a'], ['#4d7cff', '#3a5fd6', '#fff'], ['#ffd34d', '#e0a91c', '#e8323f']];
-  var PETALS = ['#ff8fc0', '#fff', '#ffd34d', '#c9a2ff', '#ff6b8b'];
-  var DRAW = {
-    // Sapin de Noël décoré (étoile et boules qui scintillent)
-    tree: function () {
-      return svg('0 0 40 60', '<rect x="17" y="49" width="6" height="11" rx="1" fill="#7a4a24"/>'
-        + '<path d="M20 8 31 22h-6l10 13h-7l10 15H2l10-15H5l10-13H9z" fill="#1d8a4e"/>'
-        + '<path d="M20 8 31 22h-6l10 13h-7l10 15H20z" fill="#17713f"/>'
-        + '<path d="M10 31q10 5 21-1M7 44q13 5 27-1" stroke="#ffd34d" stroke-width="1" fill="none"/>'
-        + '<g class="mhs-lt"><circle cx="17" cy="20" r="1.8" fill="#ff4d5e"/><circle cx="24" cy="28" r="1.8" fill="#ffd34d"/><circle cx="14" cy="33" r="1.8" fill="#4dc3ff"/><circle cx="27" cy="40" r="1.8" fill="#ff4d5e"/><circle cx="12" cy="45" r="1.8" fill="#ffd34d"/><circle cx="20" cy="37" r="1.8" fill="#fff"/><circle cx="31" cy="47" r="1.8" fill="#4dc3ff"/></g>'
-        + '<polygon class="mhs-st" points="20,0 22.2,5 27.6,5.3 23.4,8.7 24.9,14 20,11 15.1,14 16.6,8.7 12.4,5.3 17.8,5" fill="#ffd34d"/>');
-    },
-    // Sapin enneigé (hiver après les fêtes)
-    pine: function () {
-      return svg('0 0 40 60', '<rect x="17" y="49" width="6" height="11" rx="1" fill="#6b4426"/>'
-        + '<path d="M20 4 31 20h-6l10 14h-7l10 16H2l10-16H5l10-14H9z" fill="#2c7a5c"/>'
-        + '<path d="M20 4l5 7-3-1-2 2-2-2-3 1zM13 21l2-1 3 2 2-2 2 2 3-2 2 1-2 3-5-1-5 1zM9 35l3-1 4 2 4-2 4 2 4-2 3 1-3 3-8-1-8 1z" fill="#fff"/>');
-    },
-    gift: function (v) {
-      var c = GIFTS[v % GIFTS.length];
-      return svg('0 0 32 30', '<rect x="2" y="11" width="28" height="19" rx="2" fill="' + c[0] + '"/>'
-        + '<rect x="0" y="7" width="32" height="6" rx="1.5" fill="' + c[1] + '"/>'
-        + '<rect x="14" y="7" width="4" height="23" fill="' + c[2] + '"/>'
-        + '<path d="M16 7C10 0 4 3 9 7M16 7c6-7 12-4 7 0" stroke="' + c[2] + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>');
-    },
-    snowman: function () {
-      return svg('0 0 30 46', '<circle cx="15" cy="34" r="11" fill="#fff"/><circle cx="15" cy="17" r="7.5" fill="#fff"/>'
-        + '<rect x="8" y="2" width="14" height="9" rx="1" fill="#1d1a2e"/><rect x="5" y="10" width="20" height="2.5" rx="1" fill="#1d1a2e"/>'
-        + '<circle cx="12.5" cy="16" r="1" fill="#1d1a2e"/><circle cx="17.5" cy="16" r="1" fill="#1d1a2e"/><path d="M15 18.5l6 1.5-6 1z" fill="#ff8a2a"/>'
-        + '<path d="M8 23.5h14v3H8zM18 25l2 7h-3z" fill="#e8323f"/><circle cx="15" cy="31" r="1" fill="#1d1a2e"/><circle cx="15" cy="36" r="1" fill="#1d1a2e"/>');
-    },
-    flower: function (v) {
-      var p = PETALS[v % PETALS.length];
-      return svg('0 0 24 42', '<path d="M12 42V16" stroke="#3f9b54" stroke-width="2"/><ellipse cx="16" cy="30" rx="4.5" ry="2" fill="#4fb36a" transform="rotate(-30 16 30)"/>'
-        + '<g class="mhs-sway"><circle cx="12" cy="6.5" r="4.4" fill="' + p + '"/><circle cx="17.2" cy="10.3" r="4.4" fill="' + p + '"/><circle cx="15.2" cy="16.4" r="4.4" fill="' + p + '"/><circle cx="8.8" cy="16.4" r="4.4" fill="' + p + '"/><circle cx="6.8" cy="10.3" r="4.4" fill="' + p + '"/>'
-        + '<circle cx="12" cy="12" r="3.2" fill="' + (p === '#ffd34d' ? '#e8641e' : '#ffd34d') + '"/></g>');
-    },
-    tulip: function (v) {
-      var p = ['#ff4d6d', '#c77dff', '#ffb703', '#ff7eb6'][v % 4];
-      return svg('0 0 20 42', '<path d="M10 42V18" stroke="#3f9b54" stroke-width="2"/><path d="M10 34c-6-2-8-8-8-12 4 2 7 5 8 12z" fill="#4fb36a"/>'
-        + '<path class="mhs-sway" d="M3 6q0 15 7 15t7-15l-3.5 4L10 3 6.5 10z" fill="' + p + '"/>');
-    },
-    palm: function () {
-      return svg('0 -2 64 84', '<path d="M30 82c2-20 0-40 6-60" stroke="#8a5a2b" stroke-width="6" fill="none" stroke-linecap="round"/>'
-        + '<path d="M29 70h6M29 58h6M30 46h6M32 34h5" stroke="#6b4220" stroke-width="1.5"/>'
-        + '<g class="mhs-leaves"><path d="M36 22C24 10 10 14 4 24c12-6 22-4 32-2z" fill="#2e9e57"/><path d="M36 22c10-14 22-12 26-2-10-4-18-2-26 2z" fill="#3fb565"/>'
-        + '<path d="M36 22c-6-16 0-24 8-20-6 4-8 10-8 20z" fill="#3fb565"/><path d="M36 22c-12 0-22 10-22 20 6-10 14-16 22-20z" fill="#27894b"/>'
-        + '<path d="M36 22c12 0 20 8 22 18-8-8-14-14-22-18z" fill="#27894b"/><circle cx="34" cy="24" r="2.6" fill="#6b3f1d"/><circle cx="38.5" cy="25" r="2.6" fill="#6b3f1d"/></g>');
-    },
-    parasol: function () {
-      return svg('0 0 50 58', '<path d="M25 8l5 50" stroke="#fff" stroke-width="2.2"/>'
-        + '<path d="M2 22Q25-6 48 22q-4-3-7.7 0-3.8-3-7.6 0-3.9-3-7.7 0-3.8-3-7.7 0-3.8-3-7.6 0Q6 19 2 22z" fill="#ff4d5e"/>'
-        + '<path d="M25 4.5 13.3 22q3.8-3 7.6 0zM25 4.5 28.7 22q3.9-3 7.7 0z" fill="#fff"/>');
-    },
-    ball: function () {
-      return svg('0 0 20 20', '<circle cx="10" cy="10" r="9" fill="#fff"/><path d="M10 10V1a9 9 0 0 1 7.8 13.5z" fill="#ff4d5e"/>'
-        + '<path d="M10 10l7.8 4.5a9 9 0 0 1-15.6 0z" fill="#ffd34d"/><path d="M10 10 2.2 14.5A9 9 0 0 1 10 1z" fill="#2f9bff"/>');
-    },
-    star5: function () {
-      return svg('0 0 24 24', '<path d="M12 1l3 7.5 8 .6-6.1 5.2 1.9 7.8L12 18l-6.8 4.1 1.9-7.8L1 9.1l8-.6z" fill="#ff8a5c" stroke="#e8641e" stroke-width="1" stroke-linejoin="round"/>');
-    }
-  };
-  // Papillon (ailes qui battent), utilisé comme particule volante
-  var BUTTERFLY = ['#ff8fc0', '#ffd34d', '#8fd3ff', '#c9a2ff'];
-  var butterfly = function (n) {
-    var c = BUTTERFLY[n % BUTTERFLY.length];
-    return svg('0 0 30 24', '<g class="mhs-wing"><path d="M15 12C8 0 0 2 2 9c1 4 7 4 13 3z" fill="' + c + '"/><path d="M15 12c-6 2-11 8-7 10 3 1 6-4 7-10z" fill="' + c + '" opacity=".8"/></g>'
-      + '<g class="mhs-wing mhs-wing--r"><path d="M15 12c7-12 15-10 13-3-1 4-7 4-13 3z" fill="' + c + '"/><path d="M15 12c6 2 11 8 7 10-3 1-6-4-7-10z" fill="' + c + '" opacity=".8"/></g>'
-      + '<ellipse cx="15" cy="12" rx="1.3" ry="6" fill="#3b2a4a"/><path d="M15 6l-3-5M15 6l3-5" stroke="#3b2a4a" stroke-width=".8" fill="none"/>');
-  };
-  // Sols (pleine largeur) et décors : [dessin, gauche %, largeur px, variante, retourné]
-  var GROUND_SNOW = svg('0 0 400 60', '<path d="M0 34q60-16 120-4t120-4 120 6 40-4v32H0z" fill="#dcefff"/><path d="M0 44q80-14 160-2t160-4 80 4v18H0z" fill="#fff"/>', ' preserveAspectRatio="none" class="mhs-ground"');
-  var SCENES = {
-    xmas: {
-      ground: GROUND_SNOW,
-      items: [['tree', 0.5, 46], ['gift', 8, 22, 1], ['tree', 23, 34], ['gift', 29, 24, 0], ['gift', 33.5, 18, 2], ['tree', 39, 50], ['gift', 46, 26, 3], ['gift', 51, 20, 1], ['tree', 55.5, 30], ['gift', 90, 18, 2], ['tree', 93.5, 50]]
-    },
-    winter: {
-      ground: GROUND_SNOW,
-      items: [['pine', 0.5, 46], ['pine', 24, 30], ['snowman', 31, 32], ['pine', 40, 48], ['pine', 49, 30], ['pine', 55, 38], ['pine', 93.5, 50]]
-    },
-    spring: {
-      ground: svg('0 0 400 60', '<path d="M0 36q70-14 140-2t140-4 120 4v26H0z" fill="#7fd68e"/><path d="M0 46q90-12 180 0t180-4 40 2v16H0z" fill="#4fb36a"/>', ' preserveAspectRatio="none" class="mhs-ground"'),
-      items: [['flower', 0.5, 18, 0], ['tulip', 4, 15, 0], ['flower', 23, 21, 2], ['tulip', 27.5, 14, 1], ['flower', 31, 17, 4], ['tulip', 35.5, 16, 3], ['flower', 39.5, 22, 0], ['tulip', 44, 15, 2], ['flower', 48, 18, 1], ['tulip', 52, 14, 0], ['flower', 55.5, 20, 3], ['tulip', 92, 15, 1], ['flower', 95.5, 19, 4]]
-    },
-    summer: {
-      ground: '<div class="mhs-sea">' + svg('0 0 800 60', '<path d="M0 22q25-8 50 0t50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0v38H0z" fill="#29b6d8"/><path d="M0 22q25-8 50 0t50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0 50 0" stroke="#fff" stroke-width="2.5" fill="none" opacity=".85"/>', ' preserveAspectRatio="none"') + '</div>'
-        + svg('0 0 400 60', '<path d="M0 46q100-14 200-4t200-2v20H0z" fill="#f5d08a"/><path d="M0 52q120-8 240-2t160 0v10H0z" fill="#ecc06e"/>', ' preserveAspectRatio="none" class="mhs-ground"'),
-      items: [['palm', 0, 70], ['star5', 24, 12], ['ball', 30, 16], ['parasol', 37, 52], ['star5', 47, 11], ['ball', 52, 14], ['palm', 91, 64, 0, true]]
-    }
-  };
-  var scene = function () {
-    var def = SCENES[current];
-    if (!def) return '';
-    var html = '<div class="mhs-scene">' + def.ground;
-    def.items.forEach(function (it) {
-      html += '<span class="mhs-it mhs-it--' + it[0] + '" style="left:' + it[1] + '%;--w:' + it[2] + 'px' + (it[4] ? ';--flip:-1' : '') + '">' + DRAW[it[0]](it[3] || 0) + '</span>';
-    });
-    return html + '</div>';
+    return '<svg viewBox="' + box + '"' + (extra || '') + ' aria-hidden="true" focusable="false">' + body + '</svg>';
   };
 
-  // Bannières : [sélecteur, classe ajoutée, ordinateur seulement]
+  // Flocon cristallin à 6 branches
+  var CRYSTAL = (function () {
+    var arm = '<path d="M0 0V-10M0-6.2l-3-2.6M0-6.2l3-2.6M0-3.2l-2-1.8M0-3.2l2-1.8"/>';
+    var body = '';
+    for (var a = 0; a < 360; a += 60) body += '<g transform="rotate(' + a + ')">' + arm + '</g>';
+    return svg('-12 -12 24 24', '<g fill="none" stroke="#fff" stroke-width="1.15" stroke-linecap="round">' + body + '</g>');
+  })();
+
+  // Papillon fin (ailes nacrées qui battent)
+  var butterfly = function () {
+    var id = 'mhsbf' + (uid += 1);
+    return svg('0 0 30 24', '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#ffc2da"/></linearGradient></defs>'
+      + '<g class="mhs-wing" fill="url(#' + id + ')" stroke="#ff9cc2" stroke-width=".5"><path d="M15 12C9 1 1 2 2.5 9c1 4 7 4.5 12.5 3z"/><path d="M15 12c-5.5 2-10 7.5-6.5 9.5 3 1.2 5.6-3.6 6.5-9.5z" opacity=".85"/></g>'
+      + '<g class="mhs-wing" fill="url(#' + id + ')" stroke="#ff9cc2" stroke-width=".5"><path d="M15 12c6-11 14-10 12.5-3-1 4-7 4.5-12.5 3z"/><path d="M15 12c5.5 2 10 7.5 6.5 9.5-3 1.2-5.6-3.6-6.5-9.5z" opacity=".85"/></g>'
+      + '<path d="M15 6.5v11" stroke="#5a3a52" stroke-width="1.4" stroke-linecap="round"/><path d="M15 6.5c-1-2.5-2.2-4-3.6-4.6M15 6.5c1-2.5 2.2-4 3.6-4.6" stroke="#5a3a52" stroke-width=".6" fill="none"/>');
+  };
+
+  // Sapin en silhouette (forme à étages)
+  var PINE = [[0, -1], [0.2, -0.74], [0.11, -0.74], [0.34, -0.46], [0.21, -0.46], [0.5, -0.13], [0.07, -0.13], [0.07, 0], [-0.07, 0], [-0.07, -0.13], [-0.5, -0.13], [-0.21, -0.46], [-0.34, -0.46], [-0.11, -0.74], [-0.2, -0.74]];
+  var pine = function (x, base, h) {
+    var w = h * 0.62;
+    return 'M' + PINE.map(function (p) { return r1(x + p[0] * w) + ' ' + r1(base + p[1] * h); }).join('L') + 'Z';
+  };
+
+  // Horizon enneigé avec forêt (Noël : sapins verts et guirlandes ; hiver : sapins bleu nuit)
+  var snowScene = function (festive) {
+    var back = '';
+    for (var x = -10; x < 1220; x += rand(20, 30)) back += pine(x, rand(96, 102), rand(24, 44));
+    var front = '';
+    var lights = '';
+    [[0, 230], [300, 420], [470, 700], [780, 900], [970, 1210]].forEach(function (span) {
+      for (var fx = span[0]; fx < span[1]; fx += rand(26, 40)) {
+        var h = rand(44, 76);
+        var base = rand(114, 118);
+        front += pine(fx, base, h);
+        if (!festive) continue;
+        for (var k = 0; k < 4; k += 1) {
+          var t = rand(0.18, 0.85);
+          var lx = fx + rand(-0.38, 0.38) * h * 0.62 * t;
+          lights += '<circle cx="' + r1(lx) + '" cy="' + r1(base - h + t * h * 0.87) + '" r="' + r1(rand(1.1, 1.7)) + '" fill="' + ['#ffd27a', '#ff7a7a', '#fff3c4', '#ffb347'][k] + '"/>';
+        }
+      }
+    });
+    return '<div class="mhs-scene mhs-scene--ground">' + svg('0 0 1200 140',
+      '<path d="M0 92C160 70 320 84 480 76s320-16 480 2 240-4 240-4v66H0z" fill="#fff" opacity=".14"/>'
+      + '<path d="' + back + '" fill="#fff" opacity="' + (festive ? '.1' : '.16') + '"/>'
+      + '<path d="M0 104C200 88 380 100 600 94s420-12 600 4v42H0z" fill="#fff" opacity=".22"/>'
+      + '<path d="' + front + '" fill="' + (festive ? '#0b3d2a' : '#0e2d63') + '" opacity=".92"/>'
+      + (lights ? '<g class="mhs-lt">' + lights + '</g>' : '')
+      + '<path d="M0 118C200 104 420 116 640 110s360-10 560 2v28H0z" fill="#fff"/>'
+      + '<path d="M0 127c260-10 520 2 800-6s280 0 400 2v17H0z" fill="#e4effd"/>',
+      ' preserveAspectRatio="xMidYMax slice"') + '</div>';
+  };
+
+  // Boule de Noël brillante suspendue
+  var ORN = { red: ['#ff9a9a', '#e3263b', '#6e0716'], gold: ['#fff2bf', '#e6b442', '#7d520d'], green: ['#a6e8c0', '#1e8a55', '#093a22'], silver: ['#fff', '#d6dfec', '#6f7d95'] };
+  var bauble = function (len, r, color) {
+    var c = ORN[color];
+    var id = 'mhsor' + (uid += 1);
+    var w = r * 2 + 8;
+    var cx = r + 4;
+    var cy = len + 7 + r;
+    return svg('0 0 ' + w + ' ' + (cy + r + 2), '<defs><radialGradient id="' + id + '" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="' + c[0] + '"/><stop offset=".45" stop-color="' + c[1] + '"/><stop offset="1" stop-color="' + c[2] + '"/></radialGradient></defs>'
+      + '<path d="M' + cx + ' 0V' + (len + 2) + '" stroke="#e8c76a" stroke-width=".9" opacity=".85"/>'
+      + '<rect x="' + (cx - 4) + '" y="' + len + '" width="8" height="7" rx="1.5" fill="#d8b056"/><rect x="' + (cx - 4) + '" y="' + (len + 1.5) + '" width="8" height="1.2" fill="#fff1c2" opacity=".7"/>'
+      + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#' + id + ')"/>'
+      + '<ellipse cx="' + r1(cx - r * 0.34) + '" cy="' + r1(cy - r * 0.42) + '" rx="' + r1(r * 0.3) + '" ry="' + r1(r * 0.17) + '" fill="#fff" opacity=".6" transform="rotate(-32 ' + r1(cx - r * 0.34) + ' ' + r1(cy - r * 0.42) + ')"/>'
+      + '<path d="M' + r1(cx - r * 0.96) + ' ' + r1(cy + r * 0.12) + 'Q' + cx + ' ' + r1(cy + r * 0.42) + ' ' + r1(cx + r * 0.96) + ' ' + r1(cy + r * 0.12) + '" stroke="#fff3c9" stroke-width="1" fill="none" opacity=".45"/>', ' width="' + w + '" height="' + (cy + r + 2) + '"');
+  };
+  var ornaments = function () {
+    // Emplacements possibles ; ceux qui touchent un texte, un bouton ou une photo sont cachés (hideCovered)
+    var list = [[30, 20, 13, 'gold'], [34, 46, 11, 'red'], [38, 26, 15, 'red'], [43.5, 64, 11, 'gold'], [48.5, 16, 19, 'silver'], [53.5, 48, 13, 'green'],
+      [58, 30, 10, 'red'], [61.5, 70, 12, 'gold'], [66, 22, 16, 'silver'], [71, 52, 12, 'green'], [76, 18, 14, 'red'], [81, 40, 11, 'gold']];
+    return '<div class="mhs-orns">' + list.map(function (o, i) {
+      return '<span class="mhs-orn" style="left:' + o[0] + '%;--sw:' + r1(rand(3.5, 6)) + 's;--sd:-' + r1(rand(0, 4)) + 's">' + bauble(o[1], o[2], o[3]) + '</span>';
+    }).join('') + '</div>';
+  };
+
+  // Branche de cerisier en fleurs (accrochée en haut à droite)
+  var sakura = function (cx, cy, r, rot, id) {
+    var petal = 'M0 0C' + r1(-0.62 * r) + ' ' + r1(-0.3 * r) + ' ' + r1(-0.64 * r) + ' ' + r1(-0.96 * r) + ' ' + r1(-0.2 * r) + ' ' + r1(-1.03 * r)
+      + 'L0 ' + r1(-0.86 * r) + 'L' + r1(0.2 * r) + ' ' + r1(-1.03 * r) + 'C' + r1(0.64 * r) + ' ' + r1(-0.96 * r) + ' ' + r1(0.62 * r) + ' ' + r1(-0.3 * r) + ' 0 0Z';
+    var out = '<g transform="translate(' + cx + ' ' + cy + ') rotate(' + rot + ')">';
+    for (var a = 0; a < 360; a += 72) out += '<path d="' + petal + '" transform="rotate(' + a + ')" fill="url(#' + id + ')"/>';
+    var stam = '';
+    for (var s = 0; s < 360; s += 45) {
+      var rad = s * Math.PI / 180;
+      var ex = r1(Math.sin(rad) * r * 0.48);
+      var ey = r1(-Math.cos(rad) * r * 0.48);
+      stam += '<path d="M0 0L' + ex + ' ' + ey + '" stroke="#ff6f99" stroke-width=".7"/><circle cx="' + ex + '" cy="' + ey + '" r=".95" fill="#ffd34d"/>';
+    }
+    return out + '<circle r="' + r1(r * 0.2) + '" fill="#ff5c8a"/>' + stam + '</g>';
+  };
+  var branch = function (cls) {
+    var id = 'mhssk' + (uid += 1);
+    var flowers = [[296, 14, 13, 10], [262, 26, 11, 40], [234, 50, 14, -8], [216, 80, 12, 25], [204, 108, 10, 0], [182, 60, 12, 55], [148, 80, 13, -20], [120, 44, 11, 15], [128, 100, 9, 60], [84, 106, 12, 5], [50, 108, 10, 35], [92, 142, 9, -15], [22, 104, 8, 20]];
+    var buds = [[172, 66, -30], [104, 32, 20], [62, 98, -10], [93, 157, 0], [196, 92, 40], [12, 110, 70]];
+    return '<div class="mhs-branch' + (cls ? ' ' + cls : '') + '">' + svg('0 0 320 175', '<defs><radialGradient id="' + id + '" cx=".5" cy="1" r="1.1"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#ffe0ec"/><stop offset="1" stop-color="#ff9fc3"/></radialGradient></defs>'
+      + '<g fill="none" stroke="#4a2c2a" stroke-linecap="round"><path d="M330 4c-34 6-66 18-100 30" stroke-width="7"/><path d="M230 34c-30 16-50 30-82 44-28 12-50 22-80 27-22 4-42 4-62 2" stroke-width="4.2"/>'
+      + '<path d="M230 34c-8 24-16 50-26 74" stroke-width="2.8"/><path d="M150 77c-10-18-22-30-38-40" stroke-width="2.4"/><path d="M95 99c-6 18-8 34-4 58" stroke-width="2"/><path d="M198 58c8 8 12 18 14 28" stroke-width="1.8"/></g>'
+      + buds.map(function (b) { return '<g transform="translate(' + b[0] + ' ' + b[1] + ') rotate(' + b[2] + ')"><ellipse rx="3.6" ry="5.6" fill="#ff8fb5"/><path d="M-3 3c2 3 4 3 6 0" fill="#6f8f3a"/></g>'; }).join('')
+      + flowers.map(function (f) { return sakura(f[0], f[1], f[2], f[3], id); }).join('')) + '</div>';
+  };
+
+  // Palmier en silhouette (tronc courbé, palmes à folioles)
+  var frond = function (cx, cy, len, ang, droop) {
+    var a = ang * Math.PI / 180;
+    var tx = cx + Math.cos(a) * len;
+    var ty = cy + Math.sin(a) * len + droop;
+    var mx = cx + Math.cos(a) * len * 0.5;
+    var my = cy + Math.sin(a) * len * 0.5 - droop * 0.35;
+    var point = function (t) {
+      var u = 1 - t;
+      return [u * u * cx + 2 * u * t * mx + t * t * tx, u * u * cy + 2 * u * t * my + t * t * ty];
+    };
+    var d = 'M' + r1(cx) + ' ' + r1(cy) + 'Q' + r1(mx) + ' ' + r1(my) + ' ' + r1(tx) + ' ' + r1(ty);
+    var leaves = '';
+    for (var t = 0.1; t < 0.97; t += 0.065) {
+      var p = point(t);
+      var q = point(t + 0.02);
+      var dx = q[0] - p[0];
+      var dy = q[1] - p[1];
+      var n = Math.sqrt(dx * dx + dy * dy) || 1;
+      dx /= n; dy /= n;
+      var leafLen = len * 0.3 * Math.pow(Math.sin(Math.PI * t), 0.6);
+      [-1, 1].forEach(function (side) {
+        // Foliole tournée vers l'arrière et vers le bas
+        var lx = dx * 0.55 + (-dy * side) * 0.83;
+        var ly = dy * 0.55 + (dx * side) * 0.83 + 0.35;
+        var ln = Math.sqrt(lx * lx + ly * ly);
+        lx /= ln; ly /= ln;
+        leaves += 'M' + r1(p[0] - dx * 2.2) + ' ' + r1(p[1] - dy * 2.2) + 'L' + r1(p[0] + lx * leafLen) + ' ' + r1(p[1] + ly * leafLen) + 'L' + r1(p[0] + dx * 2.2) + ' ' + r1(p[1] + dy * 2.2) + 'Z';
+      });
+    }
+    return '<path d="' + d + '" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="' + leaves + '"/>';
+  };
+  var palm = function (cls) {
+    var crown = [100, 72];
+    var fronds = [[78, 200, 34], [86, 228, 20], [72, 256, 6], [66, 290, 4], [80, 318, 16], [88, 346, 30], [70, 12, 40], [60, 160, 30]];
+    return '<div class="mhs-palm ' + cls + '">' + svg('0 0 200 260', '<path d="M52 262C62 182 78 122 96 72l8 3C88 125 74 184 68 262z"/>'
+      + '<g class="mhs-crown">' + fronds.map(function (f) { return frond(crown[0], crown[1], f[0], f[1], f[2]); }).join('')
+      + '<circle cx="97" cy="78" r="5"/><circle cx="105" cy="79" r="4.5"/></g>', ' fill="currentColor"') + '</div>';
+  };
+
+  // Mer : trois couches de vagues transparentes, reflets et sable
+  var waves = function (y, amp, step) {
+    var d = 'M0 ' + y;
+    for (var x = 0; x < 2400; x += step) d += 'q' + (step / 2) + ' ' + (-amp) + ' ' + step + ' 0';
+    return d + 'V140H0z';
+  };
+  var seaScene = function () {
+    var glints = '';
+    for (var g = 0; g < 9; g += 1) glints += '<i style="left:' + r1(rand(4, 96)) + '%;bottom:' + r1(rand(34, 62)) + '%;--d:' + r1(rand(1.8, 3.6)) + 's;--delay:-' + r1(rand(0, 3)) + 's;width:' + r1(rand(8, 18)) + 'px"></i>';
+    return '<div class="mhs-scene mhs-scene--ground mhs-scene--sea">'
+      + '<div class="mhs-wave mhs-wave--1">' + svg('0 0 2400 140', '<path d="' + waves(78, 10, 120) + '" fill="#4fc3e0" opacity=".45"/>', ' preserveAspectRatio="none"') + '</div>'
+      + '<div class="mhs-wave mhs-wave--2">' + svg('0 0 2400 140', '<path d="' + waves(92, 12, 160) + '" fill="#1aa6c9" opacity=".7"/>', ' preserveAspectRatio="none"') + '</div>'
+      + '<div class="mhs-wave mhs-wave--3">' + svg('0 0 2400 140', '<path d="' + waves(104, 9, 100) + '" fill="#0b7fa6" opacity=".9"/><path d="' + waves(104, 9, 100).replace('V140H0z', '') + '" fill="none" stroke="#fff" stroke-width="2" opacity=".55"/>', ' preserveAspectRatio="none"') + '</div>'
+      + '<div class="mhs-glints">' + glints + '</div>'
+      + svg('0 0 1200 140', '<path d="M0 124c240-12 520 2 760-4s340-6 440 0v20H0z" fill="#f3cf92"/><path d="M0 132c300-6 600 4 900-2s220 0 300 2v8H0z" fill="#e7b977"/>', ' preserveAspectRatio="xMidYMax slice" class="mhs-sand"')
+      + '</div>';
+  };
+
+  var SCENES = {
+    xmas: function (desk) { return snowScene(true) + (desk ? ornaments() : ''); },
+    winter: function () { return snowScene(false); },
+    spring: function (desk) { return branch() + (desk ? branch('mhs-branch--low') : ''); },
+    summer: function () { return '<div class="mhs-sun"><b></b></div>' + seaScene() + palm('mhs-palm--l') + palm('mhs-palm--r'); }
+  };
+
+  // ---------- Bannières ----------
+  // [sélecteur, classe ajoutée, ordinateur seulement]
   var HEROES = [
     ['.mhh[data-mhh]', '', false],
     ['.dhp-hero', 'mhs-light', true],
@@ -159,6 +234,24 @@
     ['.cart-m', 'mhs-cart', true]
   ];
   var desktop = window.matchMedia('(min-width: 761px)');
+
+  var particle = function (type, i) {
+    var fly = type === 'fly';
+    var size = { drop: rand(16, 28), flake: rand(3, 7), star: rand(7, 12), fly: rand(20, 26), crystal: rand(10, 20), bokeh: rand(24, 70), petal: rand(9, 15) }[type] || rand(12, 20);
+    var duration = { drop: rand(0.7, 1.2), star: rand(1.6, 3), fly: rand(10, 15), crystal: rand(9, 15), bokeh: rand(5, 9), petal: rand(6, 11) }[type] || rand(5, 10);
+    var top = type === 'star' || type === 'bokeh' ? rand(6, 80) : fly ? rand(30, 62) : null;
+    return '<i class="mhh-sz__' + type + '" style="'
+      + 'left:' + (fly ? 0 : r1(rand(-4, 100))) + '%;'
+      + (top !== null ? 'top:' + r1(top) + '%;' : '')
+      + '--s:' + r1(size) + 'px;'
+      + '--d:' + r1(duration) + 's;'
+      + '--delay:-' + r1(rand(0, duration)) + 's;'
+      + '--dx:' + Math.round(rand(-40, 40)) + 'px;'
+      + '--r:' + Math.round(rand(-260, 260)) + 'deg;'
+      + '--r3:' + Math.round(rand(360, 900)) + 'deg;'
+      + '--o:' + (fly ? 1 : r1(rand(0.55, 1))) + '">'
+      + (fly ? butterfly(i) : type === 'crystal' ? CRYSTAL : '') + '</i>';
+  };
 
   var decorate = function (hero, kind) {
     if (hero.hasAttribute('data-season')) return;
@@ -171,29 +264,45 @@
     layer.setAttribute('aria-hidden', 'true');
     var html = '';
     PARTS[current].forEach(function (part) {
-      for (var i = 0; i < Math.round(part[1] * scale); i += 1) {
-        var fly = part[0] === 'fly';
-        var size = part[0] === 'drop' ? rand(16, 28) : part[0] === 'flake' ? rand(3.5, 8) : part[0] === 'star' ? rand(7, 12) : fly ? rand(20, 28) : rand(12, 20);
-        var duration = part[0] === 'drop' ? rand(0.7, 1.2) : part[0] === 'star' ? rand(1.6, 3) : fly ? rand(9, 14) : rand(5, 10);
-        html += '<i class="mhh-sz__' + part[0] + '" style="'
-          + 'left:' + (fly ? 0 : rand(-4, 100).toFixed(1)) + '%;'
-          + (part[0] === 'star' || fly ? 'top:' + rand(fly ? 30 : 8, fly ? 70 : 80).toFixed(1) + '%;' : '')
-          + '--s:' + size.toFixed(1) + 'px;'
-          + '--d:' + duration.toFixed(2) + 's;'
-          + '--delay:-' + rand(0, duration).toFixed(2) + 's;'
-          + '--dx:' + rand(-40, 40).toFixed(0) + 'px;'
-          + '--r:' + rand(-260, 260).toFixed(0) + 'deg;'
-          + '--o:' + (fly ? 1 : rand(0.55, 1).toFixed(2)) + '">' + (fly ? butterfly(i) : '') + '</i>';
-      }
+      var count = Math.round(part[1] * (part[0] === 'fly' ? Math.min(scale, 1.5) : scale));
+      for (var i = 0; i < count; i += 1) html += particle(part[0], i);
     });
-    if (current === 'summer') html = '<b class="mhh-sz__sun"></b>' + html;
-    layer.innerHTML = html + scene();
+    layer.innerHTML = (SCENES[current] ? SCENES[current](Boolean(kind)) : '') + html;
     hero.insertBefore(layer, hero.firstChild);
+    // Boules de Noël : cachées si elles passeraient derrière un texte, un bouton ou une photo
+    var hideCovered = function () {
+      var orns = layer.querySelectorAll('.mhs-orn');
+      if (!orns.length) return;
+      // Lignes de texte réelles (pas les blocs pleine largeur), puis photos, boutons et cartes
+      var blocks = [];
+      var walker = document.createTreeWalker(hero, NodeFilter.SHOW_TEXT);
+      var range = document.createRange();
+      for (var node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!node.nodeValue.trim() || layer.contains(node)) continue;
+        range.selectNodeContents(node);
+        [].push.apply(blocks, [].slice.call(range.getClientRects()));
+      }
+      [].forEach.call(hero.querySelectorAll('img,button,a[class*="way"],a[class*="btn"],a[class*="cta"],[class*="__usp"] > *'), function (el) {
+        if (!layer.contains(el) && el.offsetWidth) blocks.push(el.getBoundingClientRect());
+      });
+      [].forEach.call(orns, function (orn) {
+        orn.style.visibility = '';
+        var box = orn.getBoundingClientRect();
+        var hit = blocks.some(function (b) {
+          return box.left < b.right + 8 && box.right > b.left - 8 && box.top < b.bottom + 6 && box.bottom > b.top - 6;
+        });
+        if (hit) orn.style.visibility = 'hidden';
+      });
+    };
     // Hauteur de chute = hauteur de la bannière ; traversée des papillons = largeur
     var syncFall = function () {
       layer.style.setProperty('--fall', (hero.offsetHeight + 30) + 'px');
       layer.style.setProperty('--wide', (hero.offsetWidth + 40) + 'px');
+      hideCovered();
     };
+    // Photos et polices chargées plus tard : nouvelle vérification
+    setTimeout(hideCovered, 1200);
+    setTimeout(hideCovered, 3500);
     syncFall();
     if (window.ResizeObserver) new ResizeObserver(syncFall).observe(hero);
   };

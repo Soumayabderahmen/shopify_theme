@@ -213,81 +213,145 @@
   .mhh-sz i:not(.mhh-sz__star) { display: none; }
 }
 
-/* ---------- Décors en bas de la bannière (sapins, cadeaux, bonhomme de neige, fleurs, plage) ---------- */
+/* ---------- Décors : horizon enneigé et forêt (Noël, hiver), boules suspendues, cerisier, soleil, mer et palmiers ---------- */
 .mhs-scene {
-  --scene-h: 44px;
-  --k: 0.62;
   position: absolute;
   right: 0;
   bottom: 0;
   left: 0;
-  height: var(--scene-h);
+  height: var(--scene-h, 50px);
+  overflow: hidden;
+}
+
+.mhs-scene > svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 @media (min-width: 761px) {
-  .mhs-scene { --scene-h: 84px; --k: 1.7; }
-  .mhh-sz > i.mhh-sz__fly { width: calc(var(--s) * 1.5); height: calc(var(--s) * 1.2); }
-  .mhs-cart .mhs-scene { --scene-h: 60px; --k: 1.2; }
+  .mhs-scene { --scene-h: 110px; }
+  .mhs-cart .mhs-scene { --scene-h: 84px; }
+  /* Accueil (fond clair) : paysage bas et plus léger, sous la ligne des avantages */
+  .mhs-light .mhs-scene { --scene-h: 44px; opacity: 0.75; }
 }
 
 /* Mobile : bande de sol sous les avantages de la bannière (sinon cachée derrière) */
 @media (max-width: 760px) {
-  body #root .mhh.mhh[data-season]:has(> .mhh-sz .mhs-scene) { padding-bottom: 40px; }
-  .mhh .mhs-scene { --scene-h: 40px; --k: 0.66; }
+  body #root .mhh.mhh[data-season]:has(> .mhh-sz .mhs-scene--ground) { padding-bottom: 44px; }
+  .mhh .mhs-scene { --scene-h: 50px; }
+  /* Paysage agrandi (côtés coupés) pour que sapins et vagues restent lisibles sur un téléphone */
+  .mhh .mhs-scene > svg,
+  .mhh .mhs-wave { left: -45%; width: 190%; }
+  .mhh .mhs-wave { width: 380%; }
 }
 
-.mhs-scene svg { display: block; width: 100%; height: auto; overflow: visible; }
-.mhs-scene svg.mhs-ground { position: absolute; inset: 0; height: 100%; }
+/* Guirlandes lumineuses des sapins */
+.mhs-lt { filter: drop-shadow(0 0 2px #ffd27a); }
+.mhs-lt circle { animation: mhs-blink 1.8s ease-in-out infinite; }
+.mhs-lt circle:nth-child(2n) { animation-delay: -0.9s; }
+.mhs-lt circle:nth-child(3n) { animation-delay: -0.5s; }
 
-.mhs-it {
+@keyframes mhs-blink { 50% { opacity: 0.3; } }
+
+/* Boules de Noël suspendues (ordinateur) */
+.mhs-orns {
   position: absolute;
-  bottom: calc(var(--scene-h) * 0.22);
-  width: calc(var(--w) * var(--k));
-  transform: scaleX(var(--flip, 1));
-  transform-origin: 50% 100%;
+  inset: 0 0 auto;
+  height: 0;
 }
 
-/* Boules et étoile du sapin qui scintillent */
-.mhs-lt circle { animation: mhs-blink 1.6s ease-in-out infinite; }
-.mhs-lt circle:nth-child(2n) { animation-delay: -0.8s; }
-.mhs-lt circle:nth-child(3n) { animation-delay: -0.4s; }
-.mhs-st { transform-box: fill-box; transform-origin: center; animation: mhs-glow 2.2s ease-in-out infinite; }
-
-@keyframes mhs-blink { 50% { opacity: 0.25; } }
-@keyframes mhs-glow { 50% { transform: scale(1.18); filter: drop-shadow(0 0 3px #ffd34d); } }
-
-/* Fleurs et palmiers qui se balancent */
-.mhs-sway,
-.mhs-leaves { transform-box: fill-box; transform-origin: 50% 100%; animation: mhs-sway 3.2s ease-in-out infinite alternate; }
-.mhs-leaves { transform-origin: 50% 60%; animation-duration: 4s; }
-.mhs-it:nth-child(2n) .mhs-sway { animation-delay: -1.4s; }
-
-@keyframes mhs-sway {
-  from { transform: rotate(-6deg); }
-  to { transform: rotate(6deg); }
-}
-
-/* Ballon de plage qui rebondit */
-.mhs-it--ball { animation: mhs-bounce 1.4s cubic-bezier(0.5, 0, 0.5, 1) infinite; }
-
-@keyframes mhs-bounce { 50% { transform: translateY(-40%) rotate(160deg); } }
-
-/* Mer : vagues qui avancent */
-.mhs-sea {
+.mhs-orn {
   position: absolute;
-  inset: 0 auto 0 0;
-  width: 200%;
-  height: 100%;
-  animation: mhs-waves 7s linear infinite;
+  top: 0;
+  transform-origin: 50% 0;
+  filter: drop-shadow(0 8px 10px rgb(40 0 8 / 35%));
+  animation: mhs-swing var(--sw, 4s) ease-in-out var(--sd, 0s) infinite alternate;
 }
 
-.mhs-sea svg { height: 100%; }
+.mhs-orn svg { display: block; }
 
-@keyframes mhs-waves { to { transform: translateX(-50%); } }
+@keyframes mhs-swing {
+  from { transform: rotate(-4deg); }
+  to { transform: rotate(4deg); }
+}
+
+/* Branche de cerisier en fleurs */
+.mhs-branch {
+  position: absolute;
+  top: 0;
+  right: -6px;
+  width: 340px;
+  transform-origin: 100% 0;
+  filter: drop-shadow(0 6px 10px rgb(90 10 60 / 28%));
+  animation: mhs-branch 6s ease-in-out infinite alternate;
+}
+
+.mhs-branch svg { display: block; width: 100%; height: auto; }
+
+@keyframes mhs-branch {
+  from { transform: rotate(-1.5deg); }
+  to { transform: rotate(1.5deg); }
+}
+
+/* Ordinateur : seconde branche qui monte du coin bas gauche ; halos roses */
+.mhs-branch--low {
+  top: auto;
+  right: auto;
+  bottom: -14px;
+  left: -10px;
+  width: 300px;
+  transform-origin: 0 100%;
+  animation-delay: -3s;
+}
+
+.mhs-branch--low svg { transform: scale(-1, -1); }
+
+[data-season='spring'] .mhh-sz i.mhh-sz__bokeh { background: radial-gradient(circle, rgb(255 225 238 / 42%) 0, rgb(255 190 215 / 14%) 45%, rgb(255 190 215 / 0%) 70%); }
+
+@media (max-width: 760px) {
+  .mhh .mhs-branch { top: calc(var(--mshein-header-h, 122px) - 10px); right: -40px; width: 220px; }
+}
+
+/* Pétales qui tourbillonnent */
+.mhh-sz i.mhh-sz__petal {
+  height: calc(var(--s) * 0.8);
+  background: linear-gradient(135deg, #fff 0%, #ffe1ec 45%, #ff9fc3 100%);
+  border-radius: 80% 12% 80% 12%;
+  box-shadow: 0 2px 4px rgb(160 30 90 / 18%);
+  animation-name: mhs-tumble;
+}
+
+@keyframes mhs-tumble {
+  from { transform: translate3d(0, 0, 0) rotate3d(1, 0.6, 0.3, 0deg); }
+  to { transform: translate3d(var(--dx), var(--fall, 420px), 0) rotate3d(1, 0.6, 0.3, var(--r3, 540deg)); }
+}
+
+/* Flocons cristallins */
+.mhh-sz i.mhh-sz__crystal { filter: drop-shadow(0 0 3px rgb(255 255 255 / 70%)); }
+.mhh-sz__crystal svg { display: block; width: 100%; height: 100%; }
+
+/* Halos lumineux (bokeh) */
+.mhh-sz i.mhh-sz__bokeh {
+  background: radial-gradient(circle, rgb(255 255 255 / 34%) 0, rgb(255 255 255 / 12%) 45%, rgb(255 255 255 / 0%) 70%);
+  border-radius: 50%;
+  animation: mhs-bokeh var(--d) ease-in-out var(--delay) infinite alternate;
+}
+
+[data-season='xmas'] .mhh-sz i.mhh-sz__bokeh { background: radial-gradient(circle, rgb(255 214 120 / 42%) 0, rgb(255 200 90 / 12%) 45%, rgb(255 200 90 / 0%) 70%); }
+
+@keyframes mhs-bokeh {
+  from { transform: translateY(8px) scale(0.8); opacity: 0.25; }
+  to { transform: translateY(-8px) scale(1.1); opacity: 0.9; }
+}
 
 /* Papillons qui traversent la bannière */
 .mhh-sz i.mhh-sz__fly {
-  height: calc(var(--s) * 0.8);
+  width: calc(var(--s) * 1.3);
+  height: var(--s);
+  filter: drop-shadow(0 3px 4px rgb(90 10 60 / 25%));
   animation: mhs-fly var(--d) linear var(--delay) infinite;
 }
 
@@ -303,11 +367,105 @@
   to { transform: translateY(10px) rotate(-6deg); }
 }
 
-.mhs-wing { transform-box: view-box; transform-origin: 15px 12px; animation: mhs-flap 0.22s ease-in-out infinite alternate; }
+.mhs-wing { transform-box: view-box; transform-origin: 15px 12px; animation: mhs-flap 0.24s ease-in-out infinite alternate; }
 
-@keyframes mhs-flap { to { transform: scaleX(0.25); } }
+@keyframes mhs-flap { to { transform: scaleX(0.3); } }
+
+/* Été : soleil et rayons qui tournent */
+.mhs-sun {
+  position: absolute;
+  top: 26%;
+  left: 47%;
+  width: 300px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, #fffbe2 0 14%, rgb(255 238 165 / 92%) 21%, rgb(255 205 115 / 45%) 35%, rgb(255 170 90 / 0%) 62%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mhs-sun b {
+  position: absolute;
+  inset: -30%;
+  background: repeating-conic-gradient(from 0deg, rgb(255 246 205 / 24%) 0deg 5deg, rgb(255 246 205 / 0%) 5deg 15deg);
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(circle, #000 16%, transparent 60%);
+  mask: radial-gradient(circle, #000 16%, transparent 60%);
+  animation: mhs-rays 40s linear infinite;
+}
+
+@keyframes mhs-rays { to { transform: rotate(360deg); } }
+
+@media (max-width: 760px) {
+  .mhh .mhs-sun { top: calc(var(--mshein-header-h, 122px) + 150px); left: 44%; width: 190px; }
+}
+
+/* Palmiers en silhouette */
+.mhs-palm {
+  position: absolute;
+  bottom: 0;
+  width: 190px;
+  color: #2a0f2e;
+  opacity: 0.88;
+}
+
+.mhs-palm svg { display: block; width: 100%; height: auto; overflow: visible; }
+.mhs-palm--l { left: -48px; }
+.mhs-palm--r { right: -48px; transform: scaleX(-1); }
+.mhs-crown { transform-box: view-box; transform-origin: 100px 72px; animation: mhs-crown 5s ease-in-out infinite alternate; }
+.mhs-palm--r .mhs-crown { animation-delay: -2.5s; }
+.mhs-light .mhs-palm { color: #6b3f5e; opacity: 0.4; }
+
+@keyframes mhs-crown {
+  from { transform: rotate(-2.5deg); }
+  to { transform: rotate(2.5deg); }
+}
+
+@media (max-width: 760px) {
+  .mhh .mhs-palm { width: 118px; }
+  .mhh .mhs-palm--l { left: -36px; }
+  .mhh .mhs-palm--r { right: -36px; }
+}
+
+/* Mer : vagues transparentes, reflets, sable */
+.mhs-wave {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 200%;
+  height: 100%;
+  animation: mhs-waves var(--wd, 9s) linear infinite;
+}
+
+.mhs-wave svg { display: block; width: 100%; height: 100%; }
+.mhs-wave--1 { --wd: 18s; }
+.mhs-wave--2 { --wd: 12s; animation-direction: reverse; }
+.mhs-wave--3 { --wd: 8s; }
+.mhs-sand { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+@keyframes mhs-waves { to { transform: translateX(-50%); } }
+
+.mhs-glints { position: absolute; inset: 0; }
+
+.mhh-sz .mhs-glints i {
+  top: auto;
+  height: 2px;
+  background: linear-gradient(90deg, rgb(255 255 255 / 0%), #fff, rgb(255 255 255 / 0%));
+  border-radius: 2px;
+  opacity: 0;
+  animation: mhs-glint var(--d) ease-in-out var(--delay) infinite;
+}
+
+@keyframes mhs-glint {
+  0%, 100% { opacity: 0; transform: scaleX(0.4); }
+  50% { opacity: 0.9; transform: scaleX(1); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .mhs-scene *,
-  .mhs-sea { animation: none !important; }
+  .mhs-orn,
+  .mhs-branch,
+  .mhs-sun b,
+  .mhs-crown,
+  .mhs-wing,
+  .mhh-sz__fly,
+  .mhh-sz__fly svg { animation: none !important; }
 }
