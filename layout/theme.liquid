@@ -101,6 +101,9 @@
     <script src="{{ 'mshein-card.js' | asset_url }}" defer data-brands="{{ 'mobile-brands.json' | asset_url }}" data-preview="{{ 'desktop_home_shop.preview' | t | escape }}"></script>
     <link rel="stylesheet" href="{{ 'atc-feedback.css' | asset_url }}">
     <script src="{{ 'atc-feedback.js' | asset_url }}"></script>
+    {%- comment -%} Bannières mobile et ordinateur aux couleurs de la saison (neige, pluie, feuilles, pétales, soleil) {%- endcomment -%}
+    <link rel="stylesheet" href="{{ 'mhh-seasons.css' | asset_url }}">
+    <script src="{{ 'mhh-seasons.js' | asset_url }}" defer></script>
     {%- liquid
       # Pages collection (template collection.json) et page « In offerta » (collection.offerte.json) : en mobile, même
       # design que les onglets de rayon de l'accueil.
@@ -148,8 +151,6 @@
     {%- if mhh_page_kind != '' -%}
       <link rel="stylesheet" href="{{ 'mobile-home-hero.css' | asset_url }}" media="(max-width: 760px)">
       <script src="{{ 'mobile-home-hero.js' | asset_url }}" defer></script>
-      <link rel="stylesheet" href="{{ 'mhh-seasons.css' | asset_url }}" media="(max-width: 760px)">
-      <script src="{{ 'mhh-seasons.js' | asset_url }}" defer></script>
     {%- endif -%}
     {%- if template.name == 'index' or mshein_coll or mshein_search -%}
       {%- comment -%}
@@ -162,9 +163,6 @@
       {%- comment -%} Bannière de l'accueil et des rayons (aussi ouverts depuis la recherche), en-tête en défilant (prototype « Home-mobile-B ») {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'mobile-home-hero.css' | asset_url }}" media="(max-width: 760px)">
       <script src="{{ 'mobile-home-hero.js' | asset_url }}" defer></script>
-      {%- comment -%} Couleurs et effets de la saison (neige, pluie, feuilles, pétales, soleil) {%- endcomment -%}
-      <link rel="stylesheet" href="{{ 'mhh-seasons.css' | asset_url }}" media="(max-width: 760px)">
-      <script src="{{ 'mhh-seasons.js' | asset_url }}" defer></script>
       {%- if mshein_search -%}
         <link rel="stylesheet" href="{{ 'desktop-search.css' | asset_url }}" media="(min-width: 761px)">
       {%- endif -%}

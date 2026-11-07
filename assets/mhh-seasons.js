@@ -1,4 +1,5 @@
-/* Bannières mobiles (.mhh : accueil, collections, recherche, autres pages) aux couleurs de la saison, avec leurs effets :
+/* Bannières mobiles (.mhh : accueil, collections, recherche, autres pages) et ordinateur (accueil, collections, contact,
+   suivi, pages, politiques, panier) aux couleurs de la saison, avec leurs effets :
    printemps = rose et pétales ; été = soleil et reflets ; automne = feuilles et pluie ; Noël (1er déc. → 6 janv.) = rouge,
    neige et étoiles ; hiver = bleu glacé et neige. Saison choisie selon la date du téléphone.
    Aperçu d'une autre saison : ajouter ?saison=printemps|ete|automne|noel|hiver à l'adresse (gardé pendant la visite,
@@ -42,15 +43,29 @@
 
   var rand = function (min, max) { return min + Math.random() * (max - min); };
 
-  var decorate = function (hero) {
+  // Bannières : [sélecteur, classe ajoutée, ordinateur seulement]
+  var HEROES = [
+    ['.mhh[data-mhh]', '', false],
+    ['.dhp-hero', 'mhs-light', true],
+    ['.dcl .cph', 'mhs-dark', true],
+    ['.dct-hero', 'mhs-dark', true],
+    ['.dtr .trust-badges', 'mhs-dark', true],
+    ['.cart-m', 'mhs-cart', true]
+  ];
+  var desktop = window.matchMedia('(min-width: 761px)');
+
+  var decorate = function (hero, kind) {
     if (hero.hasAttribute('data-season')) return;
     hero.setAttribute('data-season', current);
+    if (kind) hero.classList.add(kind);
+    // Plus de particules sur les grandes bannières de l'ordinateur
+    var scale = kind ? Math.min(2.4, Math.max(1, hero.offsetWidth / 420)) : 1;
     var layer = document.createElement('div');
     layer.className = 'mhh-sz';
     layer.setAttribute('aria-hidden', 'true');
     var html = '';
     PARTS[current].forEach(function (part) {
-      for (var i = 0; i < part[1]; i += 1) {
+      for (var i = 0; i < Math.round(part[1] * scale); i += 1) {
         var size = part[0] === 'drop' ? rand(16, 28) : part[0] === 'flake' ? rand(3.5, 8) : part[0] === 'star' ? rand(7, 12) : rand(12, 20);
         var duration = part[0] === 'drop' ? rand(0.7, 1.2) : part[0] === 'star' ? rand(1.6, 3) : rand(5, 10);
         html += '<i class="mhh-sz__' + part[0] + '" style="'
@@ -74,7 +89,12 @@
   };
 
   var scan = function () {
-    document.querySelectorAll('.mhh[data-mhh]:not([data-season])').forEach(decorate);
+    HEROES.forEach(function (hero) {
+      if (hero[2] && !desktop.matches) return;
+      document.querySelectorAll(hero[0]).forEach(function (el) {
+        if (!el.hasAttribute('data-season')) decorate(el, hero[1]);
+      });
+    });
   };
 
   document.documentElement.setAttribute('data-mhh-season', current);
