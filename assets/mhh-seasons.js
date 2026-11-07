@@ -302,11 +302,24 @@
         + '<path d="M28 12h28M58 30q-10 4-30 0" stroke="#fff" stroke-opacity=".22" stroke-width="2.5" fill="none"/><path d="M30 4v54" stroke="#000" stroke-opacity=".15" stroke-width="2"/>');
     }
   };
+  // Haut de bikini suspendu au coin (été) : bretelle sur le bord, deux triangles à motif, liens qui pendent
+  var bikini = function (c1, c2) {
+    var p = 'mhsbk' + (uid += 1);
+    var s = 'mhsbs' + uid;
+    var cupL = 'M18 40C10 56 6 72 8 84q14 8 26 0C30 68 24 52 18 40z';
+    var cupR = 'M52 40c8 16 12 32 10 44q-14 8-26 0c4-16 10-32 16-44z';
+    return svg('0 0 70 130', '<defs><pattern id="' + p + '" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="' + c1 + '"/><circle cx="3" cy="3" r="1.7" fill="' + c2 + '"/><circle cx="9" cy="9" r="1.7" fill="' + c2 + '"/></pattern>'
+      + '<linearGradient id="' + s + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs>'
+      + '<g fill="none" stroke="' + c1 + '" stroke-width="2.4" stroke-linecap="round"><path d="M8 6q27-12 54 0"/><path d="M12 6l6 34M58 6l-6 34"/><path d="M8 84c-6 12-6 26-2 40M62 84c6 12 6 26 2 40"/></g>'
+      + '<path d="' + cupL + '" fill="url(#' + p + ')"/><path d="' + cupL + '" fill="url(#' + s + ')"/>'
+      + '<path d="' + cupR + '" fill="url(#' + p + ')"/><path d="' + cupR + '" fill="url(#' + s + ')"/>'
+      + '<circle cx="35" cy="84" r="3.4" fill="none" stroke="#f3d27a" stroke-width="2"/><circle cx="6" cy="124" r="2.6" fill="' + c1 + '"/><circle cx="64" cy="124" r="2.6" fill="' + c1 + '"/>');
+  };
   var PROPS = {
     xmas: function () { return [HATS.santa(), scarf('stripes', '#c3132b', '#fff', '#ffd34d'), ACCS.mittens('#d61f30', '#fff')]; },
     winter: function () { return [HATS.beanie('#3c7be0', '#2a5fb8', '#fff'), scarf('stripes', '#e9f2ff', '#4d86e6', '#9cc3ff'), ACCS.mittens('#3c7be0', '#e9f2ff')]; },
     spring: function () { return [HATS.sun('#ff8fb8'), scarf('dots', '#ffe6f0', '#ff8fb8', '#9fd8ff'), ACCS.sneaker('#ffc9dc', '#b98cff')]; },
-    summer: function () { return [HATS.sun('#ff5a5f'), scarf('towel', '#2bb3d6', '#fff', '#ffb347'), ACCS.sunglasses('#e0a336')]; },
+    summer: function () { return [HATS.sun('#ff5a5f'), bikini('#ff5a6e', '#fff'), ACCS.sunglasses('#e0a336')]; },
     autumn: function () { return [HATS.beanie('#d98a2b', '#b56d1c', '#f6e3c3'), scarf('plaid', '#a5482a', '#e8a04a', '#f6e3c3'), ACCS.boot('#7a4a2a', '#4a2c18')]; }
   };
   var addProps = function (hero) {

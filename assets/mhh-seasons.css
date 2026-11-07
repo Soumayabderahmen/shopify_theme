@@ -503,6 +503,9 @@
     animation: mhs-scarf 5s ease-in-out infinite alternate;
   }
 
+  /* Été : haut de bikini suspendu au coin haut gauche */
+  .mhs-props[data-season='summer'] .mhs-prop--scarf { top: -12px; left: -20px; width: 66px; }
+
   .mhs-prop--acc { right: -22px; bottom: -36px; width: 84px; transform: rotate(-10deg); }
   .mhs-props[data-season='summer'] .mhs-prop--acc { right: -22px; bottom: -24px; width: 96px; transform: rotate(-14deg); }
   .mhs-props[data-season='autumn'] .mhs-prop--acc { right: -20px; bottom: -42px; width: 66px; }
