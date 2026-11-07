@@ -596,12 +596,7 @@ body.template-index #root .mshein-card__stars + .mshein-card__sold::before {
   content: '· ';
 }
 
-/* ---------- Reste de l'accueil comme le prototype : fond blanc, titres Sora ---------- */
-body.template-index .shopify-section-mobile-home-shein,
-body.template-index #root .mshein-feed__tabs {
-  background: #fff;
-}
-
+/* ---------- Reste de l'accueil comme le prototype (fond gris clair du site gardé : les cartes blanches ressortent) ---------- */
 /* Offerte lampo (sections/mobile-home-shein.liquid, partie « modules ») */
 .mhf {
   margin: 22px 12px 0;
@@ -861,13 +856,14 @@ body.template-index #root .mshein-feed__tabs button {
   padding: 7px 13px;
   color: #4a4f6b;
   font: 700 12.5px/1.2 'Figtree', system-ui, sans-serif;
-  background: #f4f4f8;
-  border: 0;
+  background: #fff;
+  border: 1px solid #eceef4;
 }
 
 body.template-index #root .mshein-feed__tabs button.is-on {
   color: #fff;
   background: #16123f;
+  border-color: #16123f;
 }
 
 @media (prefers-reduced-motion: reduce) {
