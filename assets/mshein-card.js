@@ -60,7 +60,27 @@
     });
   };
 
+  // Fiche produit : « Venduto da » sans marque trouvée par le serveur (snippets/pdp-mobile-top.liquid) → marque citée
+  // dans le titre, d'après la même liste que les cartes, avec le lien vers ses produits (recherche)
+  var sellerBrand = function () {
+    var seller = document.querySelector('[data-pdp-seller-auto]');
+    if (!seller) return;
+    var title = seller.getAttribute('data-title') || '';
+    loadBrands().then(function (matchers) {
+      for (var index = 0; index < matchers.length; index += 1) {
+        if (!matchers[index].test.test(title)) continue;
+        var link = seller.querySelector('a');
+        if (!link) return;
+        link.textContent = matchers[index].name;
+        link.href = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root || '/') + 'search?q=' + encodeURIComponent(matchers[index].name);
+        seller.removeAttribute('data-pdp-seller-auto');
+        return;
+      }
+    });
+  };
+
   var decorate = function (root) {
+    if (root && root.querySelector && (root.matches && root.matches('[data-pdp-seller-auto]') || root.querySelector('[data-pdp-seller-auto]'))) sellerBrand();
     if (!mobile.matches || !root || !root.querySelectorAll) return;
     dedupeNewTags(root);
     var cards = root.querySelectorAll('.mshein-card:not([data-mshein-brand-done])');
@@ -99,6 +119,7 @@
   });
 
   var start = function () {
+    sellerBrand();
     decorate(document);
     // Cartes ajoutées plus tard (filtres, pages suivantes) : regroupées par image.
     var pending = false;

@@ -299,7 +299,41 @@
       <div class="pdp-m__title" role="heading" aria-level="1" data-pdp-title>{{ product.title | escape }}</div>
       <button class="pdp-m__tmore" type="button" data-pdp-title-more aria-label="{{ 'mobile.pdp.show_all' | t | escape }}" aria-expanded="false" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
     </div>
-    <p class="pdp-m__seller">{{ 'mobile.pdp.sold_by' | t: shop: '' | strip }} <a href="{{ routes.root_url }}">{{ shop.name | escape }}</a></p>
+    {%- comment -%}
+      Vendeur : la marque du produit (ex. Nike). D'abord le vendeur Shopify (s'il n'est pas le nom de la boutique), sinon la
+      marque citée dans le titre (mêmes listes que les cartes : snippets/mshein-card.liquid, snippets/shoe-brand.liquid),
+      sinon la boutique ; dans ce dernier cas, assets/mshein-card.js cherche encore la marque dans assets/mobile-brands.json.
+    {%- endcomment -%}
+    {%- liquid
+      assign pm_seller = product.vendor | strip
+      assign pm_seller_key = pm_seller | downcase | remove: ' '
+      assign pm_shop_key = shop.name | downcase | remove: ' '
+      assign pm_seller_url = ''
+      if pm_seller != blank and pm_seller_key != pm_shop_key and pm_seller_key != 'platinumshop'
+        assign pm_seller_url = pm_seller | url_for_vendor
+      else
+        assign pm_seller = ''
+        assign pm_title_lower = product.title | downcase
+        assign pm_official = 'jordan, nike, adidas, puma, reebok, new balance, onemix, asics' | split: ', '
+        for pm_brand in pm_official
+          if pm_title_lower contains pm_brand
+            assign pm_seller = pm_brand | capitalize
+            break
+          endif
+        endfor
+        if pm_seller == ''
+          capture pm_seller
+            render 'shoe-brand', product: product
+          endcapture
+          assign pm_seller = pm_seller | strip
+        endif
+        if pm_seller != ''
+          assign pm_seller_q = pm_seller | url_encode
+          assign pm_seller_url = routes.search_url | append: '?q=' | append: pm_seller_q
+        endif
+      endif
+    -%}
+    <p class="pdp-m__seller"{% if pm_seller == '' %} data-pdp-seller-auto data-title="{{ product.title | escape }}"{% endif %}>{{ 'mobile.pdp.sold_by' | t: shop: '' | strip }} {% if pm_seller != '' %}<a href="{{ pm_seller_url }}">{{ pm_seller | escape }}</a>{% else %}<a href="{{ routes.root_url }}">{{ shop.name | escape }}</a>{% endif %}</p>
 
     {%- comment -%} Note réelle de l'app d'avis (lien vers les avis) et ventes réelles (métachamps, comme les cartes). {%- endcomment -%}
     {%- liquid
