@@ -3,6 +3,15 @@
    avantages (snippets/mhh-pay-ann.liquid), en-tête en défilant ; script assets/mobile-home-hero.js. Chargée seulement
    jusqu'à 760px (layout/theme.liquid) : l'ordinateur ne change pas. */
 
+/* Recherche avec bannière (snippets/mshein-search.liquid) : le titre est dans la bannière */
+.mshein-search.has-mhh .mshein-search__hd {
+  display: none !important;
+}
+
+#mshein-search-results {
+  scroll-margin-top: var(--mshein-tabs-top, 80px);
+}
+
 /* Pages collection : l'ancienne bande avantages sous la bannière est remplacée par la carte des paiements et les avantages */
 body.mshein-home .mshein-dept > .mshein-perks {
   display: none !important;

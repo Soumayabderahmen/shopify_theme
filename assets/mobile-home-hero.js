@@ -55,6 +55,16 @@
       [].forEach.call(dots, function (dot, i) { dot.classList.toggle('on', i === set % dots.length); });
     };
     requestAnimationFrame(function () { requestAnimationFrame(show); });
+    // Bouton vers les résultats de la même page (recherche) : défilement doux
+    var button = hero.querySelector('[data-mhh-btn]');
+    if (button) {
+      button.addEventListener('click', function (event) {
+        var target = /^#./.test(button.getAttribute('href') || '') && document.querySelector(button.getAttribute('href'));
+        if (!target) return;
+        event.preventDefault();
+        target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      });
+    }
     var sets = Math.ceil(products.length / (floats.length || 1));
     if (reduceMotion || (sets < 2 && slides.length < 2)) return;
     // Points : un par jeu de photos (au plus 3)

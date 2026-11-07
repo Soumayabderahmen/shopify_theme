@@ -9,6 +9,9 @@
 {%- liquid
   assign search_next = ''
   assign search_shown = 0
+  assign hero_photos = ''
+  assign hero_first = ''
+  assign hero_count = 0
   capture search_cards
     paginate search.results by 20
       for item in search.results
@@ -16,6 +19,19 @@
           continue
         endif
         assign search_shown = search_shown | plus: 1
+        if hero_count < 9 and item.featured_image != blank
+          assign hero_src = item.featured_image | image_url: width: 320
+          assign u_json = item.url | json
+          assign i_json = hero_src | json
+          if hero_photos != ''
+            assign hero_photos = hero_photos | append: ','
+          endif
+          assign hero_photos = hero_photos | append: '{"u":' | append: u_json | append: ',"i":' | append: i_json | append: '}'
+          if hero_count < 3
+            assign hero_first = hero_first | append: hero_src | append: '|' | append: item.url | append: '||'
+          endif
+          assign hero_count = hero_count | plus: 1
+        endif
         render 'mshein-card', product: item, best: best, best_ids: best_ids, flag: flag
       endfor
       if paginate.next
@@ -30,7 +46,61 @@
   endcapture
   assign search_sort = search.sort_by | default: search.default_sort_by
 -%}
-<div class="mshein-search" data-mshein-search data-path="{{ routes.search_url }}">
+<div class="mshein-search{% if hero_count > 0 %} has-mhh{% endif %}" data-mshein-search data-path="{{ routes.search_url }}">
+  {%- if hero_count > 0 -%}
+    {%- comment -%}
+      Bannière au design de l'accueil et des collections (prototype « Home-mobile-B ») : nombre de résultats, mot cherché,
+      photos des premiers résultats ; en-tête transparent dessus (data-mshein-hero-active, assets/mobile-home-shein.js).
+      Mobile seulement : la recherche ordinateur a sa propre page (sections/desktop-collection.liquid).
+    {%- endcomment -%}
+    {%- liquid
+      # Phrase traduite coupée autour du mot cherché (mis en lavande) : la traduction reste du texte, le mot est échappé
+      assign hero_title_parts = 'search.results_plus_term' | t: term: 'XMHHTERMX' | split: 'XMHHTERMX'
+      assign hero_terms_safe = search.terms | escape
+      capture hero_title_html
+        echo hero_title_parts[0]
+        echo '<span>'
+        echo hero_terms_safe
+        echo '</span>'
+        echo hero_title_parts[1]
+      endcapture
+      assign hero_eb = 'mobile.cart.items_other' | t: count: search.results_count
+      assign hero_text = 'mobile_home_hero.text1' | t
+      assign hero_cta = 'mobile.category.view_all' | t
+      assign hero_list = hero_first | split: '||'
+      assign shipping_amount = ''
+      if settings.enable_free_shipping and settings.free_shipping_amount > 0
+        assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
+      endif
+    -%}
+    <style>@media (min-width: 761px) { .mhh-search-wrap { display: none !important; } }</style>
+    <div class="mhh-search-wrap" data-mshein-hero-active>
+      <div class="mhh mhh--search" data-mhh>
+        <div class="mhh__dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+        <div class="mhh__txt" data-mhh-txt>
+          <span class="mhh__eb"><i></i><span data-mhh-eb>{{ hero_eb }}</span></span>
+          <h2 data-mhh-title>{{ hero_title_html }}</h2>
+          <p data-mhh-text>{{ hero_text }}</p>
+          <a class="mhh__btn" href="#mshein-search-results" data-mhh-btn><span data-mhh-cta>{{ hero_cta }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+        </div>
+        <div class="mhh__art" aria-hidden="true">
+          {%- for slot in (1..3) -%}
+            {%- assign first = hero_list[forloop.index0] | split: '|' -%}
+            <a class="mhh-fl mhh-fl--{{ slot }}" href="{{ first[1] | default: '#mshein-search-results' }}" tabindex="-1"><span class="mhh-fl__in">{%- if first[0] != blank -%}<img src="{{ first[0] }}" alt="" width="200" height="260" loading="eager">{%- endif -%}</span></a>
+          {%- endfor -%}
+        </div>
+        <div class="mhh__usp">
+          {%- if shipping_amount != '' -%}<span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>{{ 'desktop_home_shop.usp_shipping_html' | t: amount: shipping_amount }}</span>{%- endif -%}
+          <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>{{ 'desktop_home_shop.usp_return_html' | t }}</span>
+          <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>{{ 'desktop_home_shop.usp_klarna_html' | t }}</span>
+        </div>
+        <script type="application/json" data-mhh-data>
+          { "slides": [], "products": [{{ hero_photos }}] }
+        </script>
+      </div>
+      {%- render 'mhh-pay-ann' -%}
+    </div>
+  {%- endif -%}
   <div class="mshein-search__hd">
     <p class="mshein-search__title">
       {%- if search.performed -%}
@@ -43,7 +113,7 @@
   {%- if search.performed and search_shown == 0 and search.results_count == 0 -%}
     <p class="mshein-search__empty">{{ 'search.no_products_found' | t }}</p>
   {%- else -%}
-    <div class="mshein-cblock" data-dept-block>
+    <div class="mshein-cblock" id="mshein-search-results" data-dept-block>
       {%- render 'mshein-results', filters: search.filters, sort_options: search.sort_options, current_sort: search_sort, total: search.results_count, cards: search_cards, next_url: search_next, simple: false -%}
     </div>
   {%- endif -%}
