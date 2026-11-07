@@ -222,15 +222,122 @@
     summer: function () { return '<div class="mhs-sun"><b></b></div>' + seaScene() + palm('mhs-palm--l') + palm('mhs-palm--r'); }
   };
 
+  // ---------- Ordinateur : vêtements de saison posés sur la carte de la bannière ----------
+  // Motifs de tissu : [type, couleur de fond, couleur 2, couleur 3]
+  var fabric = function (id, kind, c1, c2, c3) {
+    var body = '<rect width="64" height="24" fill="' + c1 + '"/>';
+    if (kind === 'stripes') body += '<rect y="0" width="64" height="7" fill="' + c2 + '"/><rect y="9" width="64" height="2" fill="' + c3 + '"/>';
+    if (kind === 'plaid') body += '<rect width="9" height="24" fill="' + c2 + '" opacity=".55"/><rect width="64" height="8" fill="' + c2 + '" opacity=".55"/><path d="M15 0v24M0 14h64" stroke="' + c3 + '" stroke-width="1.2" opacity=".8"/>';
+    if (kind === 'dots') body += '<circle cx="8" cy="6" r="2.6" fill="' + c2 + '"/><circle cx="30" cy="16" r="2.6" fill="' + c3 + '"/><circle cx="52" cy="6" r="2.6" fill="' + c2 + '"/>';
+    if (kind === 'towel') body += '<rect y="0" width="64" height="9" fill="' + c2 + '"/><rect y="12" width="64" height="5" fill="' + c3 + '"/>';
+    return '<pattern id="' + id + '" width="64" height="24" patternUnits="userSpaceOnUse">' + body + '</pattern>';
+  };
+  // Écharpe posée sur le bord gauche (un pli sur le bord, deux pans qui pendent, franges)
+  var scarf = function (kind, c1, c2, c3) {
+    var p = 'mhsfab' + (uid += 1);
+    var s = 'mhssh' + uid;
+    var fringe = '';
+    for (var fx = 11; fx <= 33; fx += 3) fringe += 'M' + fx + ' 209v13';
+    for (var gx = 34; gx <= 51; gx += 3) fringe += 'M' + gx + ' 170v11';
+    return svg('0 0 64 230', '<defs>' + fabric(p, kind, c1, c2, c3) + '<linearGradient id="' + s + '" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".16"/></linearGradient></defs>'
+      + '<path d="M30 24l24-2q2 78-2 148l-20 2q2-74-2-148z" fill="url(#' + p + ')"/><path d="M30 24l24-2q2 78-2 148l-20 2q2-74-2-148z" fill="url(#' + s + ')"/>'
+      + '<path d="' + fringe + '" stroke="' + c1 + '" stroke-width="1.6" stroke-linecap="round"/>'
+      + '<path d="M8 20h26q2 90 0 190l-24-4q2-96-2-186z" fill="url(#' + p + ')"/><path d="M8 20h26q2 90 0 190l-24-4q2-96-2-186z" fill="url(#' + s + ')"/>'
+      + '<path d="M2 6q30-10 60 0l-2 24q-28-8-56 0z" fill="url(#' + p + ')"/><path d="M2 6q30-10 60 0l-2 24q-28-8-56 0z" fill="#000" opacity=".12"/>');
+  };
+  var HATS = {
+    santa: function () {
+      var g = 'mhsht' + (uid += 1);
+      return svg('0 0 120 100', '<defs><linearGradient id="' + g + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5a68"/><stop offset="1" stop-color="#a50f1d"/></linearGradient></defs>'
+        + '<path d="M14 78C30 40 62 14 98 18c10 2 14 12 8 22-10 18-22 30-26 42z" fill="url(#' + g + ')"/>'
+        + '<path d="M6 74q42-12 82 6 4 12-2 18-40-14-82-6-4-8 2-18z" fill="#fff"/><path d="M8 88q40-8 78 8" stroke="#dfe4ec" stroke-width="3" fill="none"/>'
+        + '<circle cx="107" cy="45" r="12" fill="#fff"/><circle cx="103" cy="49" r="6" fill="#e9edf3"/>');
+    },
+    beanie: function (c1, c2, c3) {
+      var ribs = '';
+      for (var x = 18; x <= 92; x += 8) ribs += 'M' + x + ' 66C' + (x + (x - 55) * 0.15) + ' 44 ' + (55 + (x - 55) * 0.55) + ' 24 55 16';
+      var cuff = '';
+      for (var cx = 10; cx <= 100; cx += 6) cuff += 'M' + cx + ' 67v20';
+      return svg('0 0 110 100', '<path d="M10 70C10 30 40 12 55 12s45 18 45 58z" fill="' + c1 + '"/><path d="' + ribs + '" stroke="#000" stroke-opacity=".14" stroke-width="2" fill="none"/>'
+        + '<rect x="4" y="62" width="102" height="28" rx="8" fill="' + c2 + '"/><path d="' + cuff + '" stroke="#000" stroke-opacity=".16" stroke-width="2"/>'
+        + '<g fill="' + c3 + '"><circle cx="55" cy="12" r="13"/><circle cx="46" cy="8" r="7"/><circle cx="64" cy="7" r="7"/><circle cx="55" cy="2" r="6"/></g><circle cx="51" cy="8" r="4" fill="#fff" opacity=".35"/>');
+    },
+    sun: function (ribbon) {
+      var g = 'mhsst' + (uid += 1);
+      return svg('0 0 140 82', '<defs><linearGradient id="' + g + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6e2b0"/><stop offset="1" stop-color="#d4a85a"/></linearGradient></defs>'
+        + '<ellipse cx="70" cy="58" rx="67" ry="19" fill="url(#' + g + ')"/><path d="M8 58q62 18 124 0" stroke="#b9873c" stroke-opacity=".45" fill="none"/>'
+        + '<path d="M18 56q52 14 104 0M28 52q42 10 84 0" stroke="#a87a33" stroke-opacity=".25" fill="none"/>'
+        + '<path d="M38 54c0-32 64-32 64 0z" fill="url(#' + g + ')"/><path d="M44 40q26-8 52 0M42 30q28-8 56 0" stroke="#a87a33" stroke-opacity=".25" fill="none"/>'
+        + '<path d="M38.5 47q31 8 63 0l.5 8q-32 8-64 0z" fill="' + ribbon + '"/><path d="M96 50l14 10-4 4-12-8z" fill="' + ribbon + '" opacity=".85"/>');
+    }
+  };
+  var ACCS = {
+    mittens: function (c1, c2) {
+      var one = function (x, rot) {
+        return '<g transform="translate(' + x + ' 6) rotate(' + rot + ' 24 40)"><path d="M8 66V30C8 14 20 6 30 8s14 12 14 22v36z" fill="' + c1 + '"/>'
+          + '<path d="M9 42C-1 38-2 24 6 21c4-1 8 3 8 8" fill="' + c1 + '"/><path d="M16 30l6 6 6-6 6 6 6-6" stroke="' + c2 + '" stroke-width="2.4" fill="none" opacity=".9"/>'
+          + '<rect x="5" y="62" width="42" height="14" rx="4" fill="' + c2 + '"/><path d="M11 63v12M17 63v12M23 63v12M29 63v12M35 63v12M41 63v12" stroke="#000" stroke-opacity=".14" stroke-width="2"/></g>';
+      };
+      return svg('0 0 110 90', one(0, -12) + one(52, 10));
+    },
+    sunglasses: function (frame) {
+      var g = 'mhssg' + (uid += 1);
+      return svg('0 0 130 54', '<defs><linearGradient id="' + g + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b2a52"/><stop offset=".6" stop-color="#1b1328"/><stop offset="1" stop-color="#ff9a5a"/></linearGradient></defs>'
+        + '<path d="M4 16l-2-8M126 16l2-8" stroke="' + frame + '" stroke-width="4" stroke-linecap="round"/>'
+        + '<rect x="4" y="12" width="52" height="34" rx="15" fill="url(#' + g + ')" stroke="' + frame + '" stroke-width="4"/><rect x="74" y="12" width="52" height="34" rx="15" fill="url(#' + g + ')" stroke="' + frame + '" stroke-width="4"/>'
+        + '<path d="M56 24q9-8 18 0" stroke="' + frame + '" stroke-width="4" fill="none"/><path d="M14 20q8-4 16-2M84 20q8-4 16-2" stroke="#fff" stroke-opacity=".55" stroke-width="2.5" stroke-linecap="round"/>');
+    },
+    sneaker: function (c1, c2) {
+      return svg('0 0 132 72', '<path d="M4 54q0 12 12 12h104q10 0 8-12z" fill="#fff"/><path d="M4 58h124" stroke="#d9dce6" stroke-width="2"/>'
+        + '<path d="M8 56c0-20 12-30 32-30l22-4c14 8 30 12 46 18 12 4 18 10 18 16z" fill="' + c1 + '"/>'
+        + '<path d="M40 27c4 10 14 16 30 18" stroke="' + c2 + '" stroke-width="5" fill="none" stroke-linecap="round"/>'
+        + '<path d="M50 26l6 8M58 25l6 8M66 26l6 8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="40" r="3" fill="#fff" opacity=".7"/>');
+    },
+    boot: function (c1, c2) {
+      return svg('0 0 100 104', '<path d="M24 4h34l2 54c14 4 30 10 34 20 2 6 0 12-6 12H28l-4-8z" fill="' + c1 + '"/>'
+        + '<path d="M24 82h66q4 0 4 4v4q0 4-6 4H30q-6 0-6-6z" fill="' + c2 + '"/><path d="M24 82v18h14V90" fill="' + c2 + '"/>'
+        + '<path d="M28 12h28M58 30q-10 4-30 0" stroke="#fff" stroke-opacity=".22" stroke-width="2.5" fill="none"/><path d="M30 4v54" stroke="#000" stroke-opacity=".15" stroke-width="2"/>');
+    }
+  };
+  var PROPS = {
+    xmas: function () { return [HATS.santa(), scarf('stripes', '#c3132b', '#fff', '#ffd34d'), ACCS.mittens('#d61f30', '#fff')]; },
+    winter: function () { return [HATS.beanie('#3c7be0', '#2a5fb8', '#fff'), scarf('stripes', '#e9f2ff', '#4d86e6', '#9cc3ff'), ACCS.mittens('#3c7be0', '#e9f2ff')]; },
+    spring: function () { return [HATS.sun('#ff8fb8'), scarf('dots', '#ffe6f0', '#ff8fb8', '#9fd8ff'), ACCS.sneaker('#ffc9dc', '#b98cff')]; },
+    summer: function () { return [HATS.sun('#ff5a5f'), scarf('towel', '#2bb3d6', '#fff', '#ffb347'), ACCS.sunglasses('#e0a336')]; },
+    autumn: function () { return [HATS.beanie('#d98a2b', '#b56d1c', '#f6e3c3'), scarf('plaid', '#a5482a', '#e8a04a', '#f6e3c3'), ACCS.boot('#7a4a2a', '#4a2c18')]; }
+  };
+  var addProps = function (hero) {
+    if (!PROPS[current] || !hero.parentNode) return;
+    var items = PROPS[current]();
+    var box = document.createElement('div');
+    box.className = 'mhs-props';
+    box.setAttribute('data-season', current);
+    box.setAttribute('aria-hidden', 'true');
+    box.innerHTML = '<span class="mhs-prop mhs-prop--hat">' + items[0] + '</span><span class="mhs-prop mhs-prop--scarf">' + items[1] + '</span><span class="mhs-prop mhs-prop--acc">' + items[2] + '</span>';
+    hero.parentNode.insertBefore(box, hero.nextSibling);
+    // Même place que la carte (positionnée par rapport au même parent)
+    var place = function () {
+      box.style.top = hero.offsetTop + 'px';
+      box.style.left = hero.offsetLeft + 'px';
+      box.style.width = hero.offsetWidth + 'px';
+      box.style.height = hero.offsetHeight + 'px';
+      box.hidden = !hero.offsetWidth;
+    };
+    place();
+    if (window.ResizeObserver) new ResizeObserver(place).observe(hero);
+    window.addEventListener('resize', place);
+    window.addEventListener('load', place);
+  };
+
   // ---------- Bannières ----------
-  // [sélecteur, classe ajoutée, ordinateur seulement]
+  // [sélecteur, classe ajoutée, ordinateur seulement, vêtements posés sur la carte]
   var HEROES = [
     ['.mhh[data-mhh]', '', false],
-    ['.dhp-hero', 'mhs-light', true],
-    ['.dcl .cph', 'mhs-dark', true],
-    ['.dct-hero', 'mhs-dark', true],
+    ['.dhp-hero', 'mhs-light', true, true],
+    ['.dcl .cph', 'mhs-dark', true, true],
+    ['.dct-hero', 'mhs-dark', true, true],
     ['.dtr .trust-badges', 'mhs-dark', true],
-    ['.wishlist-page__heading', 'mhs-dark', true],
+    ['.wishlist-page__heading', 'mhs-dark', true, true],
     ['.cart-m', 'mhs-cart', true]
   ];
   var desktop = window.matchMedia('(min-width: 761px)');
@@ -253,7 +360,7 @@
       + (fly ? butterfly(i) : type === 'crystal' ? CRYSTAL : '') + '</i>';
   };
 
-  var decorate = function (hero, kind) {
+  var decorate = function (hero, kind, withProps) {
     if (hero.hasAttribute('data-season')) return;
     hero.setAttribute('data-season', current);
     if (kind) hero.classList.add(kind);
@@ -269,6 +376,7 @@
     });
     layer.innerHTML = (SCENES[current] ? SCENES[current](Boolean(kind)) : '') + html;
     hero.insertBefore(layer, hero.firstChild);
+    if (withProps) addProps(hero);
     // Boules de Noël : cachées si elles passeraient derrière un texte, un bouton ou une photo
     var hideCovered = function () {
       var orns = layer.querySelectorAll('.mhs-orn');
@@ -311,7 +419,7 @@
     HEROES.forEach(function (hero) {
       if (hero[2] && !desktop.matches) return;
       document.querySelectorAll(hero[0]).forEach(function (el) {
-        if (!el.hasAttribute('data-season')) decorate(el, hero[1]);
+        if (!el.hasAttribute('data-season')) decorate(el, hero[1], hero[3]);
       });
     });
   };

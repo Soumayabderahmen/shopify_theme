@@ -469,3 +469,49 @@
   .mhh-sz__fly,
   .mhh-sz__fly svg { animation: none !important; }
 }
+
+/* ---------- Ordinateur : vêtements de saison posés sur la carte de la bannière (bonnet ou chapeau sur le coin haut
+   droit, écharpe sur le bord gauche, moufles / lunettes / basket / bottine sur le coin bas droit) ---------- */
+.mhs-props { display: none; }
+
+@media (min-width: 761px) {
+  .mhs-props {
+    position: absolute;
+    z-index: 4;
+    display: block;
+    pointer-events: none;
+  }
+
+  .mhs-prop {
+    position: absolute;
+    display: block;
+    filter: drop-shadow(0 10px 12px rgb(20 10 40 / 28%)) drop-shadow(0 2px 3px rgb(20 10 40 / 22%));
+  }
+
+  .mhs-prop svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+  .mhs-prop--hat { top: -16px; right: -16px; width: 100px; transform: rotate(14deg); }
+  .mhs-props[data-season='summer'] .mhs-prop--hat,
+  .mhs-props[data-season='spring'] .mhs-prop--hat { top: -12px; right: -18px; width: 122px; transform: rotate(10deg); }
+
+  .mhs-prop--scarf {
+    top: 14%;
+    left: -16px;
+    width: 54px;
+    transform-origin: 50% 0;
+    animation: mhs-scarf 5s ease-in-out infinite alternate;
+  }
+
+  .mhs-prop--acc { right: -16px; bottom: -14px; width: 96px; transform: rotate(-8deg); }
+  .mhs-props[data-season='summer'] .mhs-prop--acc { right: -16px; bottom: -6px; width: 108px; transform: rotate(-12deg); }
+  .mhs-props[data-season='autumn'] .mhs-prop--acc { width: 74px; }
+
+  @keyframes mhs-scarf {
+    from { transform: rotate(-1.4deg); }
+    to { transform: rotate(1.4deg); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mhs-prop--scarf { animation: none; }
+}
