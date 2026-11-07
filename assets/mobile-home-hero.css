@@ -608,58 +608,6 @@ body.mshein-home.mshein-head #root .mshein-solid:not(.mhh-search-open) .mobile-h
   stroke-linejoin: round;
 }
 
-/* ---------- Cartes produit de l'accueil : note et ventes sur une seule ligne (« ★ 4,8 · 132 venduti di recente ») ---------- */
-body.template-index #root .mshein-card__body {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  column-gap: 4px;
-}
-
-body.template-index #root .mshein-card__body > * {
-  flex: 0 0 100%;
-  min-width: 0;
-}
-
-body.template-index #root .mshein-card__body > .mshein-card__stars {
-  flex: 0 0 auto;
-  color: #7a7f95;
-}
-
-body.template-index #root .mshein-card__stars .mshein-card__rate,
-body.template-index #root .mshein-card__stars em {
-  display: none;
-}
-
-body.template-index #root .mshein-card__stars::before {
-  content: '★';
-  color: #f5a623;
-}
-
-body.template-index #root .mshein-card__body > .mshein-card__sold {
-  display: block;
-  flex: 1 1 0;
-  overflow: hidden;
-  color: #7a7f95;
-  font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-body.template-index #root .mshein-card__sold svg {
-  display: none;
-}
-
-body.template-index #root .mshein-card__stars + .mshein-card__sold::before {
-  content: '· ';
-}
-
-/* Produit sans chiffre de ventes (champ « ventes du mois » vide) : nombre d'avis à côté de la note, pas de faux chiffre */
-body.template-index #root .mshein-card__stars:not(:has(+ .mshein-card__sold)) em {
-  display: inline;
-  color: #7a7f95;
-}
-
 /* ---------- Reste de l'accueil comme le prototype (fond gris clair du site gardé : les cartes blanches ressortent) ---------- */
 /* Offerte lampo (sections/mobile-home-shein.liquid, partie « modules ») */
 .mhf {
