@@ -48,6 +48,10 @@
         "layout": "scroll"
       }
     },
+    "mobile_home_hero": {
+      "type": "mobile-home-hero",
+      "settings": {}
+    },
     "section_slideshow_XNiKWa": {
       "type": "section-slideshow",
       "blocks": {
@@ -223,7 +227,8 @@
         "spacing_mobile": 10,
         "fix_zindex": 0,
         "mobile_picks": true
-      }
+      },
+      "disabled": true
     },
     "78836e0a-6131-4f01-afff-dbdd186d0914": {
       "type": "section-recently-viewed-products",
@@ -291,7 +296,8 @@
       "type": "mobile-home-shein",
       "settings": {
         "part": "perks"
-      }
+      },
+      "disabled": true
     },
     "mshein_modules": {
       "type": "mobile-home-shein",
@@ -315,6 +321,7 @@
   },
   "order": [
     "desktop_home",
+    "mobile_home_hero",
     "section_slideshow_XNiKWa",
     "mshein_perks",
     "section_category_tiles_home",

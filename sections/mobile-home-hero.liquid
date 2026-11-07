@@ -1,0 +1,102 @@
+{%- comment -%}
+  Accueil MOBILE, haut de page d'après le prototype validé « Platinumshop-Home-mobile-B » :
+  - bannière accrochée à l'en-tête (même fond sombre en haut, qui s'éclaire vers l'indigo, coins arrondis en bas) : texte à
+    gauche, 3 photos de produits à droite (une grande en haut, une à côté, une petite en bas) qui entrent, flottent et
+    changent toutes les 5 s avec le texte ; pastilles d'avantages en bas. Marquée data-mshein-hero : l'en-tête fixé du site
+    est transparent dessus et les onglets de rayon la cachent comme l'ancienne bannière (assets/mobile-home-shein.js,
+    assets/mobile-home-tabs.js) ;
+  - carte « Pagamenti sicuri al 100% » qui sort de sous la bannière (logos des moyens de paiement de la boutique) ;
+  - avantages qui défilent un par un (livraison, échange, Klarna, cashback).
+  Styles (chargés en tête de page, layout/theme.liquid) et script : assets/mobile-home-hero.css / .js (en défilant : en-tête sombre replié, loupe à côté du cœur).
+  Ordinateur : section cachée (sections/desktop-home-shop.liquid cache les autres sections de l'accueil).
+{%- endcomment -%}
+{%- liquid
+  assign hero_collection = collections['bestsellers']
+  if hero_collection == blank or hero_collection.products_count == 0
+    assign hero_collection = collections['all']
+  endif
+  assign sale_collection = collections['in-offerta']
+  if sale_collection != blank and sale_collection.products_count > 0
+    assign sale_url = sale_collection.url
+  else
+    assign sale_url = routes.all_products_collection_url | append: '?view=offerte&sort_by=best-selling'
+  endif
+  assign new_url = routes.all_products_collection_url | append: '?sort_by=created-descending'
+  assign shop_name = shop.name | capitalize | escape
+  assign shipping_amount = ''
+  if settings.enable_free_shipping and settings.free_shipping_amount > 0
+    assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
+  endif
+-%}
+<script src="{{ 'mobile-home-hero.js' | asset_url }}" defer></script>
+
+<div class="mhh" data-mshein-hero data-mhh>
+  <div class="mhh__dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+  <div class="mhh__txt" data-mhh-txt>
+    <span class="mhh__eb"><i></i><span data-mhh-eb>{{ 'mobile_home_hero.eb1' | t }}</span></span>
+    <h2 data-mhh-title>{{ 'desktop_home_shop.hero_title_html' | t: shop: shop_name | replace: '<br>', ' ' }}</h2>
+    <p data-mhh-text>{{ 'mobile_home_hero.text1' | t }}</p>
+    <a class="mhh__btn" href="{{ routes.all_products_collection_url }}" data-mhh-btn><span data-mhh-cta>{{ 'desktop_home_shop.hero_cta_shop' | t }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+  </div>
+  <div class="mhh__art" aria-hidden="true">
+    {%- for slot in (1..3) -%}<a class="mhh-fl mhh-fl--{{ slot }}" href="#" tabindex="-1"><span class="mhh-fl__in"><img alt="" width="200" height="260"></span></a>{%- endfor -%}
+  </div>
+  <div class="mhh__usp">
+    {%- if shipping_amount != '' -%}<span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>{{ 'desktop_home_shop.usp_shipping_html' | t: amount: shipping_amount }}</span>{%- endif -%}
+    <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>{{ 'desktop_home_shop.usp_return_html' | t }}</span>
+    <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>{{ 'desktop_home_shop.usp_klarna_html' | t }}</span>
+  </div>
+  {%- comment -%} Diapositives : textes (traduits) et 3 photos de produits chacune. {%- endcomment -%}
+  <script type="application/json" data-mhh-data>
+    {
+      "slides": [
+        { "eb": {{ 'mobile_home_hero.eb1' | t | json }}, "title": {{ 'desktop_home_shop.hero_title_html' | t: shop: shop_name | replace: '<br>', ' ' | json }}, "text": {{ 'mobile_home_hero.text1' | t | json }}, "cta": {{ 'desktop_home_shop.hero_cta_shop' | t | json }}, "url": {{ routes.all_products_collection_url | json }} },
+        { "eb": {{ 'mobile_home_hero.eb2' | t | json }}, "title": {{ 'mobile_home_hero.title2_html' | t | json }}, "text": {{ 'mobile_home_hero.text2' | t | json }}, "cta": {{ 'desktop_home_shop.hero_cta_deals' | t | json }}, "url": {{ sale_url | json }} },
+        { "eb": {{ 'mobile_home_hero.eb3' | t | json }}, "title": {{ 'mobile_home_hero.title3_html' | t | json }}, "text": {{ 'mobile_home_hero.text3' | t | json }}, "cta": {{ 'mobile_home_hero.cta3' | t | json }}, "url": {{ new_url | json }} }
+      ],
+      "products": [
+        {%- assign hero_count = 0 -%}
+        {%- for product in hero_collection.products limit: 18 -%}
+          {%- if product.featured_image == blank or hero_count >= 9 -%}{%- continue -%}{%- endif -%}
+          {%- if hero_count > 0 -%},{%- endif -%}
+          { "u": {{ product.url | json }}, "i": {{ product.featured_image | image_url: width: 320 | json }} }
+          {%- assign hero_count = hero_count | plus: 1 -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+</div>
+
+{%- capture mhh_pay_items -%}
+  {%- for payment_method in shop.enabled_payment_types -%}
+    <li>{%- render 'payment-icon', type: payment_method -%}</li>
+  {%- endfor -%}
+{%- endcapture -%}
+<div class="mhh-pay" role="region" aria-label="{{ 'desktop_home_shop.pay_aria' | t }}">
+  <span class="mhh-pay__lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v2"/></svg></span>
+  <span class="mhh-pay__t"><b>{{ 'desktop_home_shop.pay_title' | t }}</b><small><i></i>{{ 'desktop_home_shop.pay_count' | t: count: shop.enabled_payment_types.size }}</small></span>
+  <div class="mhh-pay__view">
+    <ul class="mhh-pay__run">
+      {{- mhh_pay_items -}}
+      {{- mhh_pay_items | replace: '<li>', '<li aria-hidden="true">' -}}
+    </ul>
+  </div>
+</div>
+
+<div class="mhh-ann" aria-live="polite">
+  <div class="mhh-ann__list" data-mhh-ann>
+    {%- if shipping_amount != '' -%}
+      <p class="mhh-ann__item on"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></i><span>{{ 'desktop_home_shop.usp_shipping_html' | t: amount: shipping_amount }}</span></p>
+    {%- endif -%}
+    <p class="mhh-ann__item{% if shipping_amount == '' %} on{% endif %}"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-3M4 13a8 8 0 0 0 14.9 3"/><path d="M5 3v5h5M19 21v-5h-5"/></svg></i><span><b>{{ 'mobile.home_shein.perk_exchange' | t }}</b> {{ 'mobile.home_shein.perk_exchange_text' | t }}</span></p>
+    <p class="mhh-ann__item"><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></i><span><b>{{ 'mobile.home_shein.perk_klarna' | t }}</b> {{ 'mobile.home_shein.perk_klarna_text' | t }}</span></p>
+    <p class="mhh-ann__item"><i><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.7 0-2.8 1-2.8 2.2 0 2.8 5.6 1.6 5.6 4.4 0 1.2-1.2 2.4-2.8 2.4-1.2 0-2.2-.6-2.7-1.6M12 6v2M12 17v1.5"/></svg></i><span><b>{{ 'mobile.home_shein.perk_cashback' | t }}</b> {{ 'mobile.home_shein.perk_cashback_text' | t }}</span></p>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Accueil mobile : bannière",
+  "settings": []
+}
+{% endschema %}

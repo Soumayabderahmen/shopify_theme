@@ -14,6 +14,17 @@
     "fast_reply": "Respuesta en 24 horas",
     "secure": "Pagos seguros"
   },
+  "mobile_home_hero": {
+    "eb1": "Novedades cada día",
+    "text1": "Moda, hogar, belleza y accesorios a los mejores precios.",
+    "eb2": "Ofertas de la semana",
+    "title2_html": "El invierno al <span>precio justo</span>",
+    "text2": "Chaquetas, botas y punto rebajados por pocos días.",
+    "eb3": "Entrega rápida",
+    "title3_html": "Tu estilo, <span>en tu casa</span>",
+    "text3": "Entrega rápida y devolución fácil en 30 días.",
+    "cta3": "Ver novedades"
+  },
   "desktop_home_shop": {
     "bf_up_to_offers": "Hasta {{ percent }} en {{ count }} ofertas",
     "tbar_bf_promo_html": "Black Friday: hasta <b>{{ percent }}</b><br>en {{ count }} ofertas",

@@ -24,6 +24,9 @@
 
   var syncHeaderHeight = function () {
     if (!headerSection) return;
+    // Recherche repliée (accueil en défilant, assets/mobile-home-hero.js) : la hauteur complète déjà connue est gardée
+    var searchBar = headerSection.querySelector('.mobile-temu-search');
+    if (searchBar && searchBar.offsetHeight < 20 && document.documentElement.style.getPropertyValue('--mshein-header-h')) return;
     var height = Math.round(headerSection.getBoundingClientRect().height);
     if (height > 0) document.documentElement.style.setProperty('--mshein-header-h', height + 'px');
   };

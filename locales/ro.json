@@ -14,6 +14,17 @@
     "fast_reply": "Răspuns în 24 de ore",
     "secure": "Plăți sigure"
   },
+  "mobile_home_hero": {
+    "eb1": "Noutăți în fiecare zi",
+    "text1": "Modă, casă, frumusețe și accesorii la cele mai bune prețuri.",
+    "eb2": "Ofertele săptămânii",
+    "title2_html": "Iarna la <span>prețul potrivit</span>",
+    "text2": "Geci, cizme și tricotaje reduse doar câteva zile.",
+    "eb3": "Livrare rapidă",
+    "title3_html": "Stilul tău, <span>la tine acasă</span>",
+    "text3": "Livrare rapidă și retur ușor în 30 de zile.",
+    "cta3": "Vezi noutățile"
+  },
   "desktop_home_shop": {
     "bf_up_to_offers": "Până la {{ percent }} la {{ count }} oferte",
     "tbar_bf_promo_html": "Black Friday: până la <b>{{ percent }}</b><br>la {{ count }} oferte",

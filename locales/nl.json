@@ -14,6 +14,17 @@
     "fast_reply": "Antwoord binnen 24 uur",
     "secure": "Veilig betalen"
   },
+  "mobile_home_hero": {
+    "eb1": "Elke dag nieuwe items",
+    "text1": "Mode, wonen, beauty en accessoires voor de beste prijzen.",
+    "eb2": "Aanbiedingen van de week",
+    "title2_html": "De winter voor de <span>juiste prijs</span>",
+    "text2": "Jassen, laarzen en breiwerk maar een paar dagen afgeprijsd.",
+    "eb3": "Snelle levering",
+    "title3_html": "Jouw stijl, <span>bij jou thuis</span>",
+    "text3": "Snelle levering en eenvoudig retourneren binnen 30 dagen.",
+    "cta3": "Bekijk de nieuwe items"
+  },
   "desktop_home_shop": {
     "bf_up_to_offers": "Tot {{ percent }} op {{ count }} aanbiedingen",
     "tbar_bf_promo_html": "Black Friday: tot <b>{{ percent }}</b><br>op {{ count }} aanbiedingen",

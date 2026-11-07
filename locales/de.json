@@ -14,6 +14,17 @@
     "fast_reply": "Antwort innerhalb von 24 Stunden",
     "secure": "Sichere Zahlungen"
   },
+  "mobile_home_hero": {
+    "eb1": "Jeden Tag Neuheiten",
+    "text1": "Mode, Wohnen, Beauty und Accessoires zu den besten Preisen.",
+    "eb2": "Angebote der Woche",
+    "title2_html": "Winter zum <span>richtigen Preis</span>",
+    "text2": "Jacken, Stiefel und Strick nur für kurze Zeit reduziert.",
+    "eb3": "Schnelle Lieferung",
+    "title3_html": "Dein Stil, <span>bis zu dir nach Hause</span>",
+    "text3": "Schnelle Lieferung und einfache Rückgabe innerhalb von 30 Tagen.",
+    "cta3": "Neuheiten ansehen"
+  },
   "desktop_home_shop": {
     "bf_up_to_offers": "Bis zu {{ percent }} auf {{ count }} Angebote",
     "tbar_bf_promo_html": "Black Friday: bis zu <b>{{ percent }}</b><br>auf {{ count }} Angebote",

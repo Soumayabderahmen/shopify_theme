@@ -14,6 +14,17 @@
     "fast_reply": "Reply within 24 hours",
     "secure": "Secure payments"
   },
+  "mobile_home_hero": {
+    "eb1": "New arrivals every day",
+    "text1": "Fashion, home, beauty and accessories at the best prices.",
+    "eb2": "Deals of the week",
+    "title2_html": "Winter at the <span>right price</span>",
+    "text2": "Jackets, boots and knitwear on sale for a few days only.",
+    "eb3": "Fast delivery",
+    "title3_html": "Your style, <span>at your door</span>",
+    "text3": "Fast delivery and easy returns within 30 days.",
+    "cta3": "See what's new"
+  },
   "desktop_home_shop": {
     "bf_up_to_offers": "Up to {{ percent }} on {{ count }} deals",
     "tbar_bf_promo_html": "Black Friday: up to <b>{{ percent }}</b><br>on {{ count }} deals",
