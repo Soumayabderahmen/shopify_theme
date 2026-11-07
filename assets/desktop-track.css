@@ -8,7 +8,6 @@
 .dtr > header,
 .dtr .track-hero { display: none !important; }
 
-[id$="__main-page"] .dct-hero { margin: 4px 0 26px; }
 .dtr { max-width: none !important; margin: 0 0 40px !important; }
 .dtr .track-page { min-height: 0; padding: 0; color: #4a4f6b; font-family: 'Figtree', system-ui, sans-serif; background: none; }
 .dtr .track-container { max-width: none; }

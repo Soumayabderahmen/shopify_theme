@@ -33,11 +33,25 @@
     render 'desktop-page-hero', title: dtr_title, copy: dtr_copy
   -%}
 {%- endif -%}
+{%- liquid
+  # Ordinateur, autres pages simples (modèle de page par défaut) : bandeau du site et contenu dans une carte blanche
+  # (assets/desktop-policy.css) ; mobile inchangé.
+  assign dpg = false
+  if pp_page_doc == '' and template.suffix == blank and page.handle != 'wishlist' and page.handle != 'traccia-ordine'
+    assign dpg = true
+  endif
+-%}
+{%- if dpg -%}
+  <link rel="stylesheet" href="{{ 'desktop-contact.css' | asset_url }}" media="(min-width: 761px)">
+  <link rel="stylesheet" href="{{ 'desktop-policy.css' | asset_url }}" media="(min-width: 761px)">
+  {%- assign dpg_title = page.title | escape -%}
+  {%- render 'desktop-page-hero', title: dpg_title -%}
+{%- endif -%}
 {%- if page.handle == 'wishlist' -%}
   {%- render 'wishlist-page-content' -%}
 {%- else -%}
 <div
-  class="{% if pp_page_doc != '' %}pp-page-desk {% endif %}{% if page.handle == 'traccia-ordine' %}dtr {% endif %}{% if section.settings.text_alignment == 'center' %}text-center{% endif %}{% if section.settings.content_alignment == 'center' %} align-center{% endif %}{% if title_block.settings.title_size == 'size-50' %} size-16 mobile-size-14{% endif %}"
+  class="{% if pp_page_doc != '' %}pp-page-desk {% endif %}{% if page.handle == 'traccia-ordine' %}dtr {% endif %}{% if dpg %}dpg {% endif %}{% if section.settings.text_alignment == 'center' %}text-center{% endif %}{% if section.settings.content_alignment == 'center' %} align-center{% endif %}{% if title_block.settings.title_size == 'size-50' %} size-16 mobile-size-14{% endif %}"
   {%- if max_width != 2000 -%}
     style="max-width: {{ max_width }}px;"
   {%- endif -%}

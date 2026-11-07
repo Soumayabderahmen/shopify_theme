@@ -177,12 +177,32 @@
     </article>
   {%- endcapture -%}
 {%- endif -%}
+{%- liquid
+  # Ordinateur : bandeau du site (snippets/desktop-page-hero.liquid) et version découpée en sections (la même que sur
+  # mobile, traduite) avec sommaire à gauche : assets/desktop-policy.css. Page « Traccia l'ordine » : bandeau et contenu
+  # de la page rendus par sections/main-page.liquid.
+  assign pp_desk_doc = false
+  if pp_doc
+    if pp_page == false or page_handle == 'garanzia-sul-prezzo'
+      assign pp_desk_doc = true
+    endif
+  endif
+  assign pp_hero_title = pp_title
+  if pp_hero_title == blank and pp_policy != nil
+    assign pp_hero_title = pp_policy.title | escape
+  endif
+-%}
+{%- if pp_page == false or pp_desk_doc -%}
+  <link rel="stylesheet" href="{{ 'desktop-contact.css' | asset_url }}" media="(min-width: 761px)">
+  <link rel="stylesheet" href="{{ 'desktop-policy.css' | asset_url }}" media="(min-width: 761px)">
+  {%- render 'desktop-page-hero', title: pp_hero_title, copy: pp_date, crumb: pp_hero_title -%}
+{%- endif -%}
 {%- if pp_page -%}
   {%- if pp_doc -%}
-    <div class="pp pp--page">{{ pp_doc_html }}</div>
+    <div class="pp pp--page{% if pp_desk_doc %} pp--desk-doc{% endif %}">{{ pp_doc_html }}</div>
   {%- endif -%}
 {%- else -%}
-<div class="pp">
+<div class="pp{% if pp_desk_doc %} pp--desk-doc{% endif %}">
   {%- comment -%} Sur mobile, les pages à la charte ont leur bouton retour rond en haut à droite de l'en-tête (pp__hero-back). {%- endcomment -%}
   <a class="pp__back{% if pp_doc %} pp__back--desk{% endif %}" href="{{ routes.root_url }}" data-pp-back>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>

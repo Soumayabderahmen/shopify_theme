@@ -17,8 +17,8 @@
 .dct *, .dct *::before, .dct *::after { box-sizing: border-box; }
 .dct a { color: inherit; text-decoration: none; }
 
-/* ---------- Bandeau (comme .cph des pages collection), aligné sur les cartes en dessous ---------- */
-.dct-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 520px); align-items: center; gap: 36px; min-height: 270px; margin: 4px 42px 34px 58px; padding: 34px 38px; overflow: hidden; color: #fff; background: radial-gradient(120% 140% at 100% 0%, #5b4dff 0%, #3a34d2 38%, #16123f 100%); border-radius: 22px; }
+/* ---------- Bandeau (comme .cph des pages collection) : snippets/desktop-page-hero.liquid ---------- */
+.dct-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 520px); align-items: center; gap: 36px; min-height: 270px; margin: 4px 0 26px; padding: 34px 38px; overflow: hidden; color: #fff; background: radial-gradient(120% 140% at 100% 0%, #5b4dff 0%, #3a34d2 38%, #16123f 100%); border-radius: 22px; }
 .dct-hero::before { content: ''; position: absolute; right: -60px; bottom: -120px; width: 340px; height: 340px; background: radial-gradient(circle, rgb(255 255 255 / 14%), transparent 70%); pointer-events: none; }
 .dct-hero__txt { position: relative; z-index: 1; min-width: 0; }
 .dct-hero__bc { display: flex; flex-wrap: wrap; gap: 8px; color: rgb(255 255 255 / 70%); font-size: 13px; }
@@ -45,6 +45,9 @@
 .dct-way b { display: block; overflow: hidden; color: var(--ink); font-size: 14.5px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
 .dct-way small { display: block; overflow: hidden; margin-top: 2px; color: var(--muted); font-size: 12.5px; text-overflow: ellipsis; white-space: nowrap; }
 .dct-way__go { flex: none; width: 18px; height: 18px; fill: none; stroke: #b4b6c6; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Page Contatti : bandeau aligné sur les cartes du thème en dessous */
+[id$="__desktop-contact"] .dct-hero { margin: 4px 42px 34px 58px; }
 
 /* ---------- Sections du thème sous le bandeau ---------- */
 /* Liens de rayon en double avec l'en-tête, horaires de boutique d'exemple (« Store hours ») et carte Google d'exemple

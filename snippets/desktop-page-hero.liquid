@@ -4,17 +4,17 @@
   à droite, les moyens de contact du pied de page en cartes (WhatsApp, e-mail, téléphone, suivi de commande : copiés de
   snippets/mobile-footer.liquid, mêmes liens et textes ; le lien vers la page ouverte est omis).
   Styles : assets/desktop-contact.css (à charger par la page). Caché sur mobile (≤ 760px).
-  - title, copy : textes du bandeau
+  - title : titre ; copy : texte sous le titre (facultatif) ; crumb : dernier élément du fil d'Ariane (par défaut page.title)
 {%- endcomment -%}
 <style>@media (max-width: 760px) { .dct { display: none; } }</style>
 <section class="dct" aria-labelledby="dct-title">
   <div class="dct-hero">
     <div class="dct-hero__txt">
       <nav class="dct-hero__bc" aria-label="{{ 'mobile.cart.breadcrumb' | t }}">
-        <a href="{{ routes.root_url }}">{{ 'mobile.nav.home' | t }}</a><i aria-hidden="true">›</i><b>{{ page.title | escape }}</b>
+        <a href="{{ routes.root_url }}">{{ 'mobile.nav.home' | t }}</a><i aria-hidden="true">›</i><b>{{ crumb | default: page.title | escape }}</b>
       </nav>
       <h1 class="dct-hero__title" id="dct-title">{{ title }}</h1>
-      <p class="dct-hero__copy">{{ copy }}</p>
+      {%- if copy != blank -%}<p class="dct-hero__copy">{{ copy }}</p>{%- endif -%}
       <div class="dct-hero__usp">
         <span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{{ 'desktop_contact.fast_reply' | t }}</span>
         <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>{{ 'mobile.quick_add.easy_return' | t }}</span>
