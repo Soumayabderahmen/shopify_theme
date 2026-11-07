@@ -171,6 +171,33 @@
     document.addEventListener('keydown', function (event) { if (event.key === 'Escape') setLoc(false); });
   }
 
+  // ---------- Onglets : flèches gauche / droite quand tous les liens ne tiennent pas sur la ligne ----------
+  var rail = header.querySelector('[data-dh-rail]');
+  if (rail) {
+    var strip = rail.querySelector('.dh-tabs__scroll');
+    var arrows = [].slice.call(rail.querySelectorAll('[data-dh-rail-btn]'));
+    var syncArrows = function () {
+      var max = strip.scrollWidth - strip.clientWidth;
+      var canPrev = strip.scrollLeft > 4, canNext = strip.scrollLeft < max - 4;
+      arrows[0].hidden = !canPrev;
+      arrows[1].hidden = !canNext;
+      rail.classList.toggle('can-prev', canPrev);
+      rail.classList.toggle('can-next', canNext);
+    };
+    arrows.forEach(function (arrow) {
+      arrow.addEventListener('click', function () {
+        strip.scrollBy({ left: Number(arrow.getAttribute('data-dh-rail-btn')) * strip.clientWidth * 0.7, behavior: 'smooth' });
+      });
+    });
+    strip.addEventListener('scroll', syncArrows, { passive: true });
+    window.addEventListener('resize', syncArrows);
+    window.addEventListener('load', syncArrows);
+    syncArrows();
+    // Onglet du rayon ouvert visible
+    var here = strip.querySelector('.dh-tab.is-here');
+    if (here && here.offsetLeft + here.offsetWidth > strip.clientWidth) strip.scrollLeft = here.offsetLeft - 40;
+  }
+
   // ---------- Méga-menu « Categorie » ----------
   if (!mega) return;
   var mm = mega.querySelector('[data-dh-mm]');

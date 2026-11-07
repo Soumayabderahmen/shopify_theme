@@ -111,6 +111,18 @@ html:has(#content.dh-loading), html:has(#content.dh-loading) * { cursor: progres
 .dh-tabs__all .dh-ic { width: 18px; height: 18px; stroke-width: 2.2; }
 .dh-tabs__scroll { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; padding-right: 36px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 44px), transparent); }
 .dh-tabs__scroll::-webkit-scrollbar { display: none; }
+/* Flèches des onglets : visibles seulement quand il reste des liens à voir de ce côté (assets/desktop-header.js) */
+.dh-tabs__rail { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; }
+.dh-tabs__rail.can-prev .dh-tabs__scroll { -webkit-mask-image: linear-gradient(90deg, transparent, #000 44px, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(90deg, transparent, #000 44px, #000 calc(100% - 44px), transparent); }
+.dh-tabs__rail:not(.can-next) .dh-tabs__scroll { padding-right: 0; -webkit-mask-image: none; mask-image: none; }
+.dh-tabs__rail.can-prev:not(.can-next) .dh-tabs__scroll { -webkit-mask-image: linear-gradient(90deg, transparent, #000 44px); mask-image: linear-gradient(90deg, transparent, #000 44px); }
+.dh-top .dh-tabs__arrow { position: absolute; z-index: 2; top: 50%; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; color: var(--dh-ink); background: #fff !important; border: 1px solid #e3e4ec; border-radius: 50%; box-shadow: 0 4px 12px -4px rgb(22 18 63 / 30%); cursor: pointer; transform: translateY(-50%); transition: background .15s, box-shadow .15s; }
+.dh-top .dh-tabs__arrow:hover { background: #f3f3f8 !important; box-shadow: 0 6px 16px -4px rgb(22 18 63 / 40%); }
+.dh-top .dh-tabs__arrow::before { display: none; }
+.dh-tabs__arrow[hidden] { display: none !important; }
+.dh-tabs__arrow--prev { left: 0; }
+.dh-tabs__arrow--next { right: 0; }
+.dh-tabs__arrow svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .dh-top .dh-tab { position: relative; flex: none; display: flex; align-items: center; height: 50px; padding: 0 11px; color: #3d4058; font-size: 14.5px; font-weight: 600; white-space: nowrap; }
 .dh-top .dh-tab:hover { color: var(--dh-ink); }
 .dh-top .dh-tab.is-on, .dh-top .dh-tab.is-here { color: var(--dh-ink); font-weight: 800; }

@@ -192,6 +192,8 @@
     <div class="dh-wrap dh-tabs">
       {%- if menu != blank -%}
         <button class="dh-tabs__all" type="button" aria-expanded="false" aria-controls="dh-mega" data-dh-mega-btn><svg class="dh-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>{{ 'desktop_home.categories' | t }}</button>
+        <div class="dh-tabs__rail" data-dh-rail>
+        <button class="dh-tabs__arrow dh-tabs__arrow--prev" type="button" aria-label="{{ 'general.accessibility.previous' | t }}" data-dh-rail-btn="-1" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
         <div class="dh-tabs__scroll">
           {%- assign top_index = 0 -%}
           {%- for link in menu.links -%}
@@ -217,6 +219,8 @@
             {%- unless link.url contains '/collections/' or link.url contains '/pages/contatti' or link.url contains '/pages/contact' -%}{%- continue -%}{%- endunless -%}
             <a class="dh-tab{% if link.current or link.child_active %} is-here{% endif %}" href="{{ tab_url }}"{% if tab_top != '' %} data-top="{{ tab_top }}"{% endif %}>{{ link.title | escape }}</a>
           {%- endfor -%}
+        </div>
+        <button class="dh-tabs__arrow dh-tabs__arrow--next" type="button" aria-label="{{ 'general.accessibility.next' | t }}" data-dh-rail-btn="1" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
         </div>
       {%- endif -%}
     </div>
