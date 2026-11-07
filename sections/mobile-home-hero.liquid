@@ -7,7 +7,7 @@
     assets/mobile-home-tabs.js) ;
   - carte « Pagamenti sicuri al 100% » qui sort de sous la bannière (logos des moyens de paiement de la boutique) ;
   - avantages qui défilent un par un (livraison, échange, Klarna, cashback).
-  Styles (chargés en tête de page, layout/theme.liquid) et script : assets/mobile-home-hero.css / .js (en défilant : en-tête sombre replié, loupe à côté du cœur).
+  Styles et script (chargés en tête de page, layout/theme.liquid) : assets/mobile-home-hero.css / .js (en défilant : en-tête sombre replié, loupe à côté du cœur).
   Ordinateur : section cachée (sections/desktop-home-shop.liquid cache les autres sections de l'accueil).
 {%- endcomment -%}
 {%- liquid
@@ -28,7 +28,6 @@
     assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
   endif
 -%}
-<script src="{{ 'mobile-home-hero.js' | asset_url }}" defer></script>
 
 <div class="mhh" data-mshein-hero data-mhh>
   <div class="mhh__dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
@@ -67,32 +66,7 @@
   </script>
 </div>
 
-{%- capture mhh_pay_items -%}
-  {%- for payment_method in shop.enabled_payment_types -%}
-    <li>{%- render 'payment-icon', type: payment_method -%}</li>
-  {%- endfor -%}
-{%- endcapture -%}
-<div class="mhh-pay" role="region" aria-label="{{ 'desktop_home_shop.pay_aria' | t }}">
-  <span class="mhh-pay__lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v2"/></svg></span>
-  <span class="mhh-pay__t"><b>{{ 'desktop_home_shop.pay_title' | t }}</b><small><i></i>{{ 'desktop_home_shop.pay_count' | t: count: shop.enabled_payment_types.size }}</small></span>
-  <div class="mhh-pay__view">
-    <ul class="mhh-pay__run">
-      {{- mhh_pay_items -}}
-      {{- mhh_pay_items | replace: '<li>', '<li aria-hidden="true">' -}}
-    </ul>
-  </div>
-</div>
-
-<div class="mhh-ann" aria-live="polite">
-  <div class="mhh-ann__list" data-mhh-ann>
-    {%- if shipping_amount != '' -%}
-      <p class="mhh-ann__item on"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg></i><span>{{ 'desktop_home_shop.usp_shipping_html' | t: amount: shipping_amount }}</span></p>
-    {%- endif -%}
-    <p class="mhh-ann__item{% if shipping_amount == '' %} on{% endif %}"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.9-3M4 13a8 8 0 0 0 14.9 3"/><path d="M5 3v5h5M19 21v-5h-5"/></svg></i><span><b>{{ 'mobile.home_shein.perk_exchange' | t }}</b> {{ 'mobile.home_shein.perk_exchange_text' | t }}</span></p>
-    <p class="mhh-ann__item"><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></i><span><b>{{ 'mobile.home_shein.perk_klarna' | t }}</b> {{ 'mobile.home_shein.perk_klarna_text' | t }}</span></p>
-    <p class="mhh-ann__item"><i><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.7 0-2.8 1-2.8 2.2 0 2.8 5.6 1.6 5.6 4.4 0 1.2-1.2 2.4-2.8 2.4-1.2 0-2.2-.6-2.7-1.6M12 6v2M12 17v1.5"/></svg></i><span><b>{{ 'mobile.home_shein.perk_cashback' | t }}</b> {{ 'mobile.home_shein.perk_cashback_text' | t }}</span></p>
-  </div>
-</div>
+{%- render 'mhh-pay-ann' -%}
 
 {% schema %}
 {

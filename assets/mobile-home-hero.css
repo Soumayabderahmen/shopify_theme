@@ -1,5 +1,12 @@
-/* Accueil MOBILE, haut de page d'après le prototype validé « Platinumshop-Home-mobile-B » (sections/mobile-home-hero.liquid,
-   assets/mobile-home-hero.js). Chargée seulement jusqu'à 760px : l'ordinateur ne change pas. */
+/* Accueil et pages collection MOBILES, d'après le prototype validé « Platinumshop-Home-mobile-B » : bannière de l'accueil
+   (sections/mobile-home-hero.liquid) et des collections (snippets/mshein-dept-hero.liquid), carte des paiements et
+   avantages (snippets/mhh-pay-ann.liquid), en-tête en défilant ; script assets/mobile-home-hero.js. Chargée seulement
+   jusqu'à 760px (layout/theme.liquid) : l'ordinateur ne change pas. */
+
+/* Pages collection : l'ancienne bande avantages sous la bannière est remplacée par la carte des paiements et les avantages */
+body.mshein-home .mshein-dept > .mshein-perks {
+  display: none !important;
+}
 
 /* ---------- Section : la bannière remplace l'ancienne (image floutée derrière l'en-tête, assets/mobile-temu-header.css) ---------- */
 body.mshein-home .shopify-section:has(> .mhh) {
@@ -15,7 +22,7 @@ body.mshein-home .shopify-section:has(> .mhh)::before {
 
 /* ---------- Bannière accrochée à l'en-tête ---------- */
 /* Haut du même noir que l'en-tête (posé dessus, transparent), puis indigo ; coins arrondis seulement en bas. */
-body.mshein-home #root .mhh {
+#root .mhh {
   position: relative;
   z-index: 2;
   display: grid;
@@ -466,43 +473,43 @@ body.mshein-home #root .mhh {
   stroke-linejoin: round;
 }
 
-/* ---------- En-tête en défilant (accueil) : sombre, coins arrondis, recherche repliée en loupe à côté du cœur ---------- */
-body.template-index.mshein-head #root [id$="__header"].shopify-section.mshein-solid,
-body.template-index.mshein-head #root [id$="__header"].shopify-section.mshein-solid::before {
+/* ---------- En-tête en défilant (accueil et pages collection) : sombre, coins arrondis, recherche repliée en loupe à côté du cœur ---------- */
+body.mshein-home.mshein-head #root [id$="__header"].shopify-section.mshein-solid,
+body.mshein-home.mshein-head #root [id$="__header"].shopify-section.mshein-solid::before {
   background: #0f0d1c !important;
   border-radius: 0 0 22px 22px;
 }
 
-body.template-index.mshein-head #root [id$="__header"].shopify-section.mshein-solid {
+body.mshein-home.mshein-head #root [id$="__header"].shopify-section.mshein-solid {
   box-shadow: 0 10px 24px -14px rgb(15 13 28 / 70%);
 }
 
-body.template-index.mshein-head #root .mshein-solid .mobile-temu-header {
+body.mshein-home.mshein-head #root .mshein-solid .mobile-temu-header {
   color: #fff;
 }
 
-body.template-index.mshein-head #root .mshein-solid .mobile-temu-header .mobile-home-header__menu,
-body.template-index.mshein-head #root .mshein-solid .mobile-temu-header .mobile-home-header__icon {
+body.mshein-home.mshein-head #root .mshein-solid .mobile-temu-header .mobile-home-header__menu,
+body.mshein-home.mshein-head #root .mshein-solid .mobile-temu-header .mobile-home-header__icon {
   color: #fff;
 }
 
-body.template-index.mshein-head #root .mshein-solid .mobile-temu-header .mobile-home-header__logo-text text {
+body.mshein-home.mshein-head #root .mshein-solid .mobile-temu-header .mobile-home-header__logo-text text {
   fill: url(#mobile-home-logo-gradient-light);
 }
 
-body.template-index.mshein-head #root .mshein-solid .mobile-temu-header .mobile-temu-categories a {
+body.mshein-home.mshein-head #root .mshein-solid .mobile-temu-header .mobile-temu-categories a {
   color: #c9c8dc;
 }
 
-body.template-index.mshein-head #root .mshein-solid .mobile-temu-header .mobile-temu-categories a:is(.is-tab-on, .is-active) {
+body.mshein-home.mshein-head #root .mshein-solid .mobile-temu-header .mobile-temu-categories a:is(.is-tab-on, .is-active) {
   color: #fff;
 }
 
-body.template-index.mshein-head #root .mobile-temu-header .mobile-temu-search {
+body.mshein-home.mshein-head #root .mobile-temu-header .mobile-temu-search {
   transition: height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), margin 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s, border-color 0.25s;
 }
 
-body.template-index.mshein-head #root .mshein-solid:not(.mhh-search-open) .mobile-temu-header .mobile-temu-search {
+body.mshein-home.mshein-head #root .mshein-solid:not(.mhh-search-open) .mobile-temu-header .mobile-temu-search {
   height: 0 !important;
   margin-bottom: 0 !important;
   overflow: hidden;
@@ -533,7 +540,7 @@ body.template-index.mshein-head #root .mshein-solid:not(.mhh-search-open) .mobil
   content: none !important;
 }
 
-body.template-index.mshein-head #root .mshein-solid:not(.mhh-search-open) .mobile-home-header__icon.mhh-find {
+body.mshein-home.mshein-head #root .mshein-solid:not(.mhh-search-open) .mobile-home-header__icon.mhh-find {
   width: 36px !important;
   min-width: 36px !important;
   opacity: 1;

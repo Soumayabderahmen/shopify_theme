@@ -94,8 +94,6 @@
     <link rel="stylesheet" href="{{ 'mshein-card.css' | asset_url }}" media="{% if template.name == 'index' or template.name == 'collection' or template.name == 'product' or template.name == 'search' or template.name == 'cart' or template.name == 'page' and page.handle == 'wishlist' %}all{% else %}(max-width: 760px){% endif %}">
     {%- if template.name == 'index' -%}
       <link rel="stylesheet" href="{{ 'desktop-home-shop.css' | asset_url }}" media="(min-width: 761px)">
-      {%- comment -%} Haut de l'accueil mobile (sections/mobile-home-hero.liquid) {%- endcomment -%}
-      <link rel="stylesheet" href="{{ 'mobile-home-hero.css' | asset_url }}" media="(max-width: 760px)">
     {%- elsif template.name == 'collection' or template.name == 'search' -%}
       {%- comment -%} Recherche : même page que les collections sur ordinateur (sections/desktop-collection.liquid) {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'desktop-collection.css' | asset_url }}" media="(min-width: 761px)">
@@ -139,6 +137,9 @@
       {%- endcomment -%}
       <link rel="stylesheet" href="{{ 'mshein-results.css' | asset_url }}" media="{% if mshein_search %}all{% else %}(max-width: 760px){% endif %}">
       <link rel="stylesheet" href="{{ 'mobile-home-shein.css' | asset_url }}" media="(max-width: 760px)">
+      {%- comment -%} Bannière de l'accueil et des rayons (aussi ouverts depuis la recherche), en-tête en défilant (prototype « Home-mobile-B ») {%- endcomment -%}
+      <link rel="stylesheet" href="{{ 'mobile-home-hero.css' | asset_url }}" media="(max-width: 760px)">
+      <script src="{{ 'mobile-home-hero.js' | asset_url }}" defer></script>
       {%- if mshein_search -%}
         <link rel="stylesheet" href="{{ 'desktop-search.css' | asset_url }}" media="(min-width: 761px)">
       {%- endif -%}
