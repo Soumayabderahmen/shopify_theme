@@ -35,6 +35,14 @@
   assign img_width_limit = limit
   assign img_width = 100 | divided_by: img_width_limit
 -%}
+{%- comment -%} Ordinateur : bandeau du site (snippets/desktop-page-hero.liquid) et collections en carrés arrondis
+  (assets/desktop-policy.css, .dlc) ; mobile inchangé. {%- endcomment -%}
+<link rel="stylesheet" href="{{ 'desktop-contact.css' | asset_url }}" media="(min-width: 761px)">
+<link rel="stylesheet" href="{{ 'desktop-policy.css' | asset_url }}" media="(min-width: 761px)">
+{%- liquid
+  assign dlc_title = 'collection.all_collections' | t
+  render 'desktop-page-hero', title: dlc_title, crumb: dlc_title
+-%}
 {%- paginate collections by section.settings.pagination_qty -%}
   <header class="cols">
     <{{ section.settings.title_size }}>{{ 'collection.all_collections' | t }}</{{ section.settings.title_size }}>

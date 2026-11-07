@@ -46,8 +46,8 @@
 .dct-way small { display: block; overflow: hidden; margin-top: 2px; color: var(--muted); font-size: 12.5px; text-overflow: ellipsis; white-space: nowrap; }
 .dct-way__go { flex: none; width: 18px; height: 18px; fill: none; stroke: #b4b6c6; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Page Contatti : bandeau aligné sur les cartes du thème en dessous */
-[id$="__desktop-contact"] .dct-hero { margin: 4px 42px 34px 58px; }
+/* Page Contatti : marges gauche / droite du bandeau calées sur les cartes du thème en dessous (sections/desktop-contact.liquid) */
+[id$="__desktop-contact"] .dct-hero { margin-bottom: 34px; }
 
 /* ---------- Sections du thème sous le bandeau ---------- */
 /* Liens de rayon en double avec l'en-tête, horaires de boutique d'exemple (« Store hours ») et carte Google d'exemple

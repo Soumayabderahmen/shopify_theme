@@ -9,6 +9,25 @@
   assign dct_copy = 'desktop_contact.copy' | t
   render 'desktop-page-hero', title: dct_title, copy: dct_copy
 -%}
+<script>
+  // Bandeau aligné sur les cartes du thème en dessous (FAQ à gauche, blocs d'infos à droite), quelle que soit la largeur
+  (function (section) {
+    if (!section || window.matchMedia('(max-width: 760px)').matches) return;
+    var hero = section.querySelector('.dct-hero');
+    var align = function () {
+      var left = document.querySelector('[id$="__section-faq"] > article, [id$="__section-contact-form"] form');
+      var right = document.querySelector('[id$="__page-service-info-blocks"]');
+      if (!hero || !left || !right) return;
+      hero.style.marginLeft = hero.style.marginRight = '0px';
+      var box = hero.getBoundingClientRect();
+      hero.style.marginLeft = Math.max(0, left.getBoundingClientRect().left - box.left) + 'px';
+      hero.style.marginRight = Math.max(0, box.right - right.getBoundingClientRect().right) + 'px';
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', align); else align();
+    window.addEventListener('load', align);
+    window.addEventListener('resize', align);
+  })(document.currentScript.closest('.shopify-section'));
+</script>
 
 {% schema %}
 {
