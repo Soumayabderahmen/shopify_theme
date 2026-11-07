@@ -395,7 +395,7 @@
         .then(function (data) {
           brandsGrid.innerHTML = data.brands.map(function (brand, i) {
             var known = shown[String(brand[0]).toLowerCase()];
-            var href = known ? known.href : base + 'search?q=' + encodeURIComponent(brand[1]) + '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type';
+            var href = known ? known.href : base + 'search?q=' + encodeURIComponent('title:"' + brand[1] + '"') + '&type=product&view=brand';
             var image = known ? known.image : (brand[3] ? (/^https?:/.test(brand[3]) ? brand[3] : data.cdn + brand[3]) + '&width=300' : '');
             return '<a class="dhp-brand" href="' + esc(href) + '" data-brand-name="' + esc(normalize(brand[0])) + '" style="background:' + colors[i % colors.length] + ';--i:' + (Math.min(i, 30) * 0.015).toFixed(3) + 's">' +
               (image ? '<img src="' + esc(image) + '" alt="" loading="lazy" width="150" height="150" onerror="this.remove()">' : '') +

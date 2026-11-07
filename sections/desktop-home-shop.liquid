@@ -513,10 +513,12 @@
                 assign brand_collection = collections[brand_collection_handle]
               endif
             endfor
-            assign brand_url = routes.search_url | append: '?q=' | append: brand_query | append: '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type'
+            # Page brand de la marque (sections/desktop-brand.liquid) : sa collection, sinon la recherche dans les titres
+            assign brand_title_query = 'title:"' | append: brand_parts[1] | append: '"' | url_encode
+            assign brand_url = routes.search_url | append: '?q=' | append: brand_title_query | append: '&type=product&view=brand'
             assign brand_image = blank
             if brand_collection != blank
-              assign brand_url = brand_collection.url
+              assign brand_url = brand_collection.url | append: '?view=brand'
               assign brand_image = brand_collection.featured_image | default: brand_collection.image
             endif
             assign brand_color_index = forloop.index0 | modulo: brand_colors.size
