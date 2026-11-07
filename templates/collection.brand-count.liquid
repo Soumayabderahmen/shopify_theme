@@ -1,0 +1,8 @@
+{%- layout none -%}
+{%- comment -%}
+  Page brand ordinateur (assets/desktop-brand.js) : nombre de produits de la collection de la marque et prix et photo du premier
+  produit (avec sort_by=price-ascending : le prix le plus bas). Réponse JSON, sans mise en page.
+{%- endcomment -%}
+{%- paginate collection.products by 1 -%}
+  {"count":{{ collection.products_count | json }},"from":{{ collection.products.first.price | default: 0 | json }},"img":{% if collection.products.first.featured_image %}{{ collection.products.first.featured_image | image_url: width: 700 | json }}{% else %}""{% endif %}}
+{%- endpaginate -%}

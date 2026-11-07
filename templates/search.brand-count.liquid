@@ -1,0 +1,10 @@
+{%- layout none -%}
+{%- comment -%}
+  Page brand ordinateur (assets/desktop-brand.js) : nombre de produits d'une recherche de la marque et prix et photo du premier
+  produit (avec sort_by=price-ascending : le prix le plus bas). Réponse JSON, sans mise en page.
+{%- endcomment -%}
+{%- paginate search.results by 1 -%}
+  {%- assign first_price = 0 -%}{%- assign first_img = '' -%}
+  {%- for item in search.results -%}{%- if item.object_type == 'product' -%}{%- assign first_price = item.price -%}{%- if item.featured_image -%}{%- assign first_img = item.featured_image | image_url: width: 700 -%}{%- endif -%}{%- endif -%}{%- endfor -%}
+  {"count":{{ search.results_count | json }},"from":{{ first_price | json }},"img":{{ first_img | json }}}
+{%- endpaginate -%}

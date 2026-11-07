@@ -1,6 +1,12 @@
 /* Page brand ORDINATEUR (sections/desktop-brand.liquid), prototype « Platinumshop-Brand-desktop ».
    Couleurs de la marque : --brand (fond), --brand-2 (bandeau), --accent ; photo : --photo (snippets/brand-theme.liquid). */
 body:has(.br) { background: var(--br-page, #241d16); }
+/* Comme le prototype : l'en-tête du site défile avec la page (la barre compacte de la marque prend le haut) */
+body:has(.br) .shopify-section:has(> .dh-top) { position: relative !important; top: auto !important; }
+/* Pied de page collé à la page brand (sa marge du haut laissait voir le fond blanc du thème) */
+body:has(.br) .dft { margin-top: 0 !important; }
+/* La page est dans #content (z-index 3, sous l'en-tête à 60) : panneau de la marque et filtres au-dessus de l'en-tête */
+#content:has(.br.menu-open, .br.fd-open) { z-index: 61 !important; }
 
 .br {
   --muted: rgb(255 255 255 / 64%);
@@ -92,7 +98,7 @@ body:has(.br) { background: var(--br-page, #241d16); }
 .br-lock__mark { display: block; width: 420px; height: 150px; margin-top: -58px; margin-left: -30px; -webkit-mask: var(--logo) center / 420px 420px no-repeat; mask: var(--logo) center / 420px 420px no-repeat; animation-delay: -6s; }
 @keyframes br-lock { to { background-position: 100% 60%; } }
 .br-hero__meta { margin: 14px 0 0; color: #fff; font-size: 15px; font-weight: 700; text-shadow: 0 2px 8px rgb(0 0 0 / 50%); }
-.br-hero__meta b { color: var(--accent); }
+.br-hero__meta b { color: #ffd166; }
 
 /* ---------- Pastilles ---------- */
 .br-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 1440px; margin: 0 auto; padding: 18px 28px 6px; }
@@ -101,22 +107,22 @@ body:has(.br) { background: var(--br-page, #241d16); }
 .br-pill.on { color: #111; background: #fff; }
 .br-pill img { width: 38px; height: 38px; object-fit: cover; background: #fff; border-radius: 50%; }
 
-.br-wrap { display: block; max-width: 1440px; margin: 0 auto; padding: 0 28px; }
+.br-wrap { display: block; max-width: 1360px; margin: 0 auto; padding: 0 28px; }
 
 /* ---------- Grandes cartes ---------- */
-.br-feat { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 16px; margin-top: 34px; }
-.br-feat > div { display: grid; gap: 10px; }
+.br-feat { display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; gap: 16px; margin-top: 18px; }
+.br-feat > div { display: grid; gap: 8px; }
 .br-fcard { position: relative; display: block; overflow: hidden; padding: 6px; background: rgb(255 255 255 / 8%); border: 1px solid rgb(255 255 255 / 16%); border-radius: 22px; }
 .br-fcard img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #f4f4f6; border-radius: 16px; transition: transform 0.5s; }
 .br-fcard:hover img { transform: scale(1.04); }
 .br-fcard::after { content: ''; position: absolute; inset: 6px; background: rgb(0 0 0 / 38%); border-radius: 16px; }
-.br-fcard b { position: absolute; z-index: 1; top: 50%; right: 12px; left: 12px; font-size: 42px; font-weight: 900; line-height: 0.95; text-align: center; text-transform: uppercase; transform: translateY(-50%) skewX(-8deg); }
+.br-fcard b { position: absolute; z-index: 1; top: 50%; right: 12px; left: 12px; font-family: 'Anton', 'Figtree', sans-serif; font-size: 46px; font-weight: 400; letter-spacing: 0; line-height: 0.95; text-align: center; text-transform: uppercase; transform: translateY(-50%); }
 .br-flabel { color: #fff; font-size: 16px; font-weight: 700; }
 
 /* ---------- Produits ---------- */
-.br-prod { margin-top: 44px; scroll-margin-top: 90px; }
+.br-prod { margin-top: 26px; scroll-margin-top: 90px; }
 .br-sec { display: flex; align-items: end; justify-content: space-between; margin: 0 0 14px; }
-.br-sec h2 { margin: 0; color: #fff; font-size: 30px; font-weight: 800; letter-spacing: -1px; }
+.br-sec h2 { margin: 0; color: #fff; font-family: 'Sora', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -1px; }
 .br-sec span { color: var(--muted); font-size: 14px; }
 .br-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
 .br-chip { position: relative; display: inline-flex; gap: 6px; align-items: center; height: 44px; padding: 0 16px; color: #fff; font-size: 14px; font-weight: 700; background: rgb(255 255 255 / 10%); border: 1px solid rgb(255 255 255 / 14%); border-radius: 999px; cursor: pointer; }
@@ -135,6 +141,25 @@ body:has(.br) { background: var(--br-page, #241d16); }
 .br-more[hidden] { display: none; }
 .br-more button { height: 46px; padding: 0 22px; color: #fff; font-size: 14px; font-weight: 800; background: rgb(255 255 255 / 10%); border: 1px solid rgb(255 255 255 / 20%); border-radius: 999px; }
 .br-more button[aria-busy='true'] { opacity: 0.6; }
+.br-none[hidden] { display: none; }
+.br-none button { height: 46px; padding: 0 20px; color: #fff; font-size: 15px; font-weight: 800; background: rgb(255 255 255 / 10%); border: 0; border-radius: 999px; }
+.br .br-cards .mshein-card[hidden] { display: none !important; }
+/* Titre sur 2 lignes et cœur visible au survol, comme le prototype */
+.br .br-cards .mshein-card .mshein-card__title, .br .br-cards .mshein-card .mshein-card__title a { height: auto !important; max-height: none !important; white-space: normal !important; -webkit-line-clamp: 2 !important; line-clamp: 2; }
+#root .br .br-cards .mshein-card .mshein-card__fav { top: 10px; right: 10px; opacity: 0; transition: opacity 0.2s; }
+#root .br .br-cards .mshein-card:hover .mshein-card__fav, #root .br .br-cards .mshein-card .mshein-card__fav[aria-pressed='true'] { opacity: 1; }
+.br .br-cards .mshein-tags { top: 10px !important; left: 10px !important; }
+.br .br-cards .mshein-card__add { right: 10px !important; bottom: 10px !important; }
+.br .br-cards .mshein-chip--save svg { fill: currentColor; }
+.br .br-cards .mshein-bb--store { color: #fff !important; }
+/* « Altri brand » : nom des marques sans logo écrit dans leur style */
+.br-wm { display: grid; place-items: center; color: #111; font-weight: 900; line-height: 1; text-align: center; }
+.br-wm--pagani-design { font-family: Georgia, 'Times New Roman', serif; font-size: 8px; font-weight: 700; letter-spacing: 0.6px; }
+.br-wm--pagani-design small { margin-top: 2px; font-size: 5px; letter-spacing: 1.6px; }
+.br-wm--onemix { font-size: 10.5px; font-style: italic; letter-spacing: -0.3px; }
+.br-wm--skechers { color: #0b3a8c; font-size: 8.5px; font-style: italic; letter-spacing: -0.2px; }
+.br-wm--calvin-klein { font-size: 7.5px; letter-spacing: 1.5px; }
+.br-wm--trendsi { font-size: 9px; letter-spacing: 0.5px; }
 
 /* Cartes du site (snippets/mshein-card.liquid) dans le style de la page : photo carrée arrondie, texte clair */
 .br .br-cards .cl__grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 26px 16px; margin: 0; padding: 0; list-style: none; }
@@ -187,10 +212,10 @@ body:has(.br) { background: var(--br-page, #241d16); }
 .br-mp__bar button { display: grid; place-items: center; width: 50px; height: 50px; padding: 0; color: #fff; background: rgb(255 255 255 / 12%); border: 0; border-radius: 50%; pointer-events: auto; backdrop-filter: blur(10px); }
 .br-mp__scroll { height: 100%; overflow: auto; padding: 86px 24px 24px; scrollbar-width: none; }
 .br-mp__id { display: flex; gap: 14px; align-items: center; margin: 0 6px 16px; }
-.br-mp__id b { display: block; font-size: 24px; font-weight: 800; }
+.br-mp__id b { display: block; font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; }
 .br-mp__id small { color: rgb(255 255 255 / 65%); font-size: 13px; }
 .br-mp__card { display: block; margin-bottom: 14px; padding: 18px 20px; background: rgb(255 255 255 / 7%); border: 1px solid rgb(255 255 255 / 8%); border-radius: 26px; }
-.br-mp__card h3 { margin: 0 0 8px; color: #fff; font-size: 26px; font-weight: 800; letter-spacing: -0.6px; }
+.br-mp__card h3 { margin: 0 0 8px; color: #fff; font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.6px; }
 .br-mp__cats { display: grid; gap: 4px; }
 .br-mp__cats a { display: flex; gap: 14px; align-items: center; padding: 8px 4px; font-size: 17px; font-weight: 700; border-radius: 14px; }
 .br-mp__cats a:hover { background: rgb(255 255 255 / 7%); }
@@ -198,7 +223,7 @@ body:has(.br) { background: var(--br-page, #241d16); }
 .br-mp__h { display: flex; align-items: center; justify-content: space-between; }
 .br-mp__go { display: grid; place-items: center; width: 46px; height: 46px; background: rgb(255 255 255 / 9%); border-radius: 50%; }
 .br-mp__score { display: flex; gap: 12px; align-items: center; margin-top: 6px; }
-.br-mp__score b { font-size: 44px; font-weight: 800; }
+.br-mp__score b { font-family: 'Sora', sans-serif; font-size: 44px; font-weight: 700; }
 .br-mp__score i { display: block; font-size: 22px; font-style: normal; letter-spacing: 2px; }
 .br-mp__score small { color: rgb(255 255 255 / 65%); font-size: 13px; }
 .br-mp__note { margin: 10px 0 0; color: rgb(255 255 255 / 80%); font-size: 14px; }
@@ -210,7 +235,7 @@ body:has(.br) { background: var(--br-page, #241d16); }
 
 .br-fd { width: 440px; color: #111; background: #fff; }
 .br-fd__head { display: flex; align-items: center; justify-content: space-between; padding: 22px 22px 10px 24px; }
-.br-fd__head h3 { margin: 0; color: #111; font-size: 24px; font-weight: 800; }
+.br-fd__head h3 { margin: 0; color: #111; font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -0.6px; }
 .br-fd__head button { display: grid; place-items: center; width: 48px; height: 48px; padding: 0; color: #333; background: #f1f1f2; border: 0; border-radius: 50%; }
 .br-fd__body { flex: 1; overflow: auto; padding: 8px 24px; }
 .br-fd__row { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -235,6 +260,88 @@ body:has(.br) { background: var(--br-page, #241d16); }
 
 .br-toast { position: fixed; z-index: 2147483002; bottom: 40px; left: 50%; padding: 10px 18px; color: #111; font-size: 14px; font-weight: 700; background: #fff; border-radius: 999px; opacity: 0; transform: translate(-50%, 10px); transition: 0.25s; pointer-events: none; }
 .br-toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* Le thème force sur les boutons « #root button { background: none } » et une marge de 16px : pastille choisie vide,
+   « Fatto » invisible, espaces inégaux entre les boutons. Fonds et marges remis pour les boutons de la page. */
+#root .br button { margin: 0; }
+#root .br .br-id { background: rgb(255 255 255 / 14%); }
+#root .br .br-clear { background: rgb(255 255 255 / 70%); }
+#root .br .br-chip { background: rgb(255 255 255 / 10%); }
+#root .br .br-chip.on { background: #f2f0ed; }
+#root .br .br-more button, #root .br .br-none button { background: rgb(255 255 255 / 10%); }
+#root .br .br-sicon, #root .br .br-mp__bar button { background: rgb(255 255 255 / 14%); }
+#root .br .br-fd__head button { background: #f1f1f2; }
+#root .br .br-fpill { background: #fff; }
+#root .br .br-fpill.on { color: #fff; background: #111; border-color: #111; }
+#root .br .br-fd__reset { background: #f1f1f2; }
+#root .br .br-fd__done { color: #fff; background: #111; }
+#root .br .br-menu button:hover, #root .br .br-menu button.on { background: #f1f0ff; }
+#root .br .br-sugg__i:hover { background: rgb(255 255 255 / 9%); }
+/* Pastille « Prix » : petite fenêtre blanche sous la pastille (curseur, prix mini / maxi, Réinitialiser, Terminé) */
+#root .br .br-chip.open { color: #111; background: #e9e7e3; border-color: #e9e7e3; }
+.br-pchip.open > svg { transform: rotate(180deg); }
+.br-pp { position: absolute; z-index: 31; top: calc(100% + 10px); left: 50%; display: none; width: 376px; padding: 24px 22px 22px; color: #111; background: #fff; border-radius: 26px; box-shadow: 0 24px 50px -16px rgb(0 0 0 / 55%); cursor: default; transform: translateX(-50%); }
+.br-pchip.open .br-pp { display: block; animation: br-pp-in 0.18s ease-out; }
+@keyframes br-pp-in { from { opacity: 0; transform: translate(-50%, -6px); } }
+.br-pp .br-range { margin: 0 12px 22px; }
+.br-pp__prices { display: flex; gap: 14px; align-items: center; }
+.br-pp__prices i { color: #c4c4ca; font-style: normal; }
+#root .br .br-pp__prices input { flex: 1; width: 100%; min-width: 0; height: 42px; margin: 0; padding: 0 10px; color: #111; font: inherit; font-size: 16px; font-weight: 500; text-align: center; background: #fff; border: 1px solid #e3e3e6; border-radius: 10px; box-shadow: none; outline: 0; -moz-appearance: textfield; }
+#root .br .br-pp__prices input:focus { border-color: var(--site); }
+#root .br .br-pp__prices input::placeholder { color: #111; opacity: 1; }
+.br-pp__prices input::-webkit-outer-spin-button, .br-pp__prices input::-webkit-inner-spin-button { margin: 0; -webkit-appearance: none; }
+.br-pp__foot { display: flex; gap: 12px; margin-top: 16px; }
+.br-pp__foot > * { flex: 1; height: 54px; font-size: 17px; font-weight: 800; border: 0; border-radius: 999px; }
+#root .br .br-pp__foot .br-fd__reset { color: #9a9aa2 !important; }
+
+/* Note et ventes sur une seule ligne comme les cartes du mobile (« ★ 4,6 · 89 vendus récemment ») ; sans chiffre de
+   ventes : nombre d'avis à côté de la note. Couleurs claires pour le fond de la page. */
+#root .br .br-cards .mshein-card__body { display: flex; flex-wrap: wrap; align-items: center; column-gap: 4px; }
+#root .br .br-cards .mshein-card__body > * { flex: 0 0 100%; min-width: 0; }
+#root .br .br-cards .mshein-card__body > .mshein-card__stars { display: flex; flex: 0 0 auto; gap: 3px; margin: 5px 0 0; color: rgb(255 255 255 / 70%); font-size: 12px; }
+#root .br .br-cards .mshein-card__stars .mshein-card__rate, #root .br .br-cards .mshein-card__stars em { display: none; }
+#root .br .br-cards .mshein-card__stars::before { content: '★'; color: #ffd166; }
+#root .br .br-cards .mshein-card__stars b { color: #fff; }
+#root .br .br-cards .mshein-card__body > .mshein-card__sold { display: block; flex: 1 1 0; overflow: hidden; margin: 5px 0 0; color: rgb(255 255 255 / 70%); font-size: 12px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+#root .br .br-cards .mshein-card__sold svg { display: none; }
+#root .br .br-cards .mshein-card__stars + .mshein-card__sold::before { content: '· '; }
+#root .br .br-cards .mshein-card__stars:not(:has(+ .mshein-card__sold)) em { display: inline; color: rgb(255 255 255 / 70%); }
+
+/* Changement de marque sans recharger : la page actuelle s'efface, la nouvelle apparaît */
+.br { transition: opacity 0.22s ease; }
+.br.is-loading { cursor: progress; }
+.br.is-loading .br-bcard { pointer-events: none; }
+.br.is-switching { opacity: 0; }
+.br[data-br-enter] { animation: br-enter 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes br-enter { from { opacity: 0; transform: translateY(14px); } }
+
+/* « Autres marques » : deux rangées qui défilent en sens inverse, bords en fondu, pause au survol */
+.br-brands[data-ready] { display: grid; grid-template-columns: none; gap: 14px; margin: 0 -28px; animation: br-mq-in 0.6s ease-out both; }
+.br-mq__row { overflow: hidden; -webkit-mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+.br-mq__track { display: flex; gap: 14px; width: max-content; padding: 2px 0; animation: br-mq var(--br-mq-dur, 60s) linear infinite; }
+.br-mq__row--rev .br-mq__track { animation-direction: reverse; }
+.br-mq__row:hover .br-mq__track { animation-play-state: paused; }
+.br-mq__track .br-bcard { flex: none; width: 250px; margin-right: 0; transition: background 0.15s, transform 0.2s; }
+.br-mq__track .br-bcard:hover { transform: translateY(-3px); }
+.br-mq__track .br-bcard > span:last-child { min-width: 0; }
+.br-mq__track .br-bcard > span:last-child b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.br-blogo--photo img { width: 100%; height: 100%; object-fit: cover; }
+@keyframes br-mq { to { transform: translateX(calc(-50% - 7px)); } }
+@keyframes br-mq-in { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) {
+  .br-mq__track { animation: none; }
+  .br-mq__row { overflow-x: auto; scrollbar-width: none; }
+}
+
+/* Cartes grises pendant le chargement d'un filtre (comme le prototype) */
+.br .br-sk { list-style: none; }
+.br-sk__img { aspect-ratio: 1; background: rgb(255 255 255 / 7%); border-radius: 18px; animation: br-sk 1.2s ease-in-out infinite; }
+.br-sk__l { height: 14px; margin-top: 12px; background: rgb(255 255 255 / 7%); border-radius: 6px; animation: br-sk 1.2s ease-in-out infinite; }
+.br-sk__l + .br-sk__l { width: 55%; margin-top: 8px; }
+@keyframes br-sk { 50% { opacity: 0.45; } }
+
+/* Liste du panneau des filtres : barre de défilement fine, sans flèches */
+.br-fd__body { scrollbar-width: thin; scrollbar-color: #d6d6dc transparent; }
 
 @media (max-width: 1280px) {
   .br .br-cards .cl__grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
