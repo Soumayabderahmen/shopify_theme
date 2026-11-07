@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "brand": {
+      "type": "desktop-brand",
+      "settings": {}
+    }
+  },
+  "order": [
+    "brand"
+  ]
+}

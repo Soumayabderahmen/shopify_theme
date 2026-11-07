@@ -60,6 +60,15 @@
     });
   };
 
+  // Ordinateur : les liens de marque (« Venduto da ») mènent à la page brand ; en mobile, lien d'origine
+  var brandLinks = function () {
+    if (mobile.matches) return;
+    document.querySelectorAll('a[data-brand-url]').forEach(function (link) {
+      var url = link.getAttribute('data-brand-url');
+      if (url) link.href = url;
+    });
+  };
+
   // Fiche produit : « Venduto da » sans marque trouvée par le serveur (snippets/pdp-mobile-top.liquid) → marque citée
   // dans le titre, d'après la même liste que les cartes, avec le lien vers ses produits (recherche)
   var sellerBrand = function () {
@@ -73,6 +82,9 @@
         if (!link) return;
         link.textContent = matchers[index].name;
         link.href = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root || '/') + 'search?q=' + encodeURIComponent(matchers[index].name);
+        // Ordinateur : page brand de la marque (recherche de la marque, sections/desktop-brand.liquid)
+        link.setAttribute('data-brand-url', (seller.getAttribute('data-brand-search') || '/search') + '?q=' + encodeURIComponent(matchers[index].name) + '&type=product&view=brand');
+        brandLinks();
         seller.removeAttribute('data-pdp-seller-auto');
         return;
       }
@@ -119,6 +131,7 @@
   });
 
   var start = function () {
+    brandLinks();
     sellerBrand();
     decorate(document);
     // Cartes ajoutées plus tard (filtres, pages suivantes) : regroupées par image.

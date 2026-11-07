@@ -1,0 +1,47 @@
+{%- comment -%}
+  Couleurs et logo d'une marque pour sa page brand ORDINATEUR (sections/desktop-brand.liquid) et la rangée « Altri brand ».
+  Renvoie (texte) : « fond|fond 2|accent|logo|nom affiché » — fond : couleur de la page ; fond 2 : dégradé du bandeau ; accent :
+  détails ; logo : nom de l'icône Simple Icons (vide = nom de la marque écrit en grand) ; nom affiché (vide = le nom reçu ;
+  ex. la recherche « Pagani » s'affiche « Pagani Design »).
+  Marque absente de la liste : une des 8 palettes de secours, choisie d'après le nom (toujours la même pour une marque).
+  Params : name (nom de la marque, ex. « Nike »)
+{%- endcomment -%}
+{%- liquid
+  assign bt_key = name | downcase | strip
+  case bt_key
+    when 'nike'
+      echo '#241d16|#3a2c1e|#ff6a2b|nike'
+    when 'adidas'
+      echo '#0e1724|#22344d|#6fd3ff|adidas'
+    when 'jordan'
+      echo '#22080c|#4b1118|#ff3b47|jordan'
+    when 'reebok'
+      echo '#10172e|#23315c|#ff4b55|reebok'
+    when 'puma'
+      echo '#171717|#2f2f2f|#ffd400|puma'
+    when 'new balance'
+      echo '#23262b|#41464e|#ff4b55|newbalance'
+    when 'fila'
+      echo '#0b1d3f|#18356e|#ff4b55|fila'
+    when 'under armour'
+      echo '#141414|#2b2b2b|#ff4b55|underarmour'
+    when 'the north face'
+      echo '#1d1d1d|#3a3a3a|#ff6a2b|thenorthface'
+    when 'calvin klein'
+      echo '#18181a|#323238|#d9d9de|'
+    when 'pagani design', 'pagani'
+      echo '#14212b|#24394a|#d6b874||Pagani Design'
+    when 'trendsi'
+      echo '#2b1630|#4a2552|#ff8fc0|'
+    when 'onemix'
+      echo '#0f2a2a|#1d4a49|#3ddcc3|'
+    when 'skechers'
+      echo '#0b2350|#173a7a|#4da3ff|'
+    when 'addieskin', 'addiesdive', 'addies'
+      echo '#1e1a14|#3a3226|#e8b860|'
+    else
+      assign bt_palettes = '#1d1a2e|#35305a|#9b8cff|,#10241f|#1f4a3f|#3ddc97|,#2a1414|#552626|#ff7a6b|,#141f2e|#26405e|#6fb6ff|,#2a2112|#54421f|#ffc85a|,#231329|#4a2856|#e58cff|,#14262a|#26505a|#5fd8f0|,#262626|#474747|#ffd166|' | split: ','
+      assign bt_index = name | size | modulo: 8
+      echo bt_palettes[bt_index]
+  endcase
+-%}

@@ -1,0 +1,306 @@
+{%- comment -%}
+  Page BRAND ORDINATEUR (prototype validé « Platinumshop-Brand-desktop », inspiré des pages marque de shop.com) : photo en
+  plein écran aux couleurs de la marque, logo de la marque rempli par la photo, catégories en pastilles, 4 grandes cartes
+  (tris), « Prodotti » avec filtres Shopify (panneau « Filtri », tri, disponibilité, prix), vraies cartes
+  snippets/mshein-card.liquid, « Mostra altri prodotti » ; panneau de la marque (bouton logo ☰ : catégories, avis
+  Trustpilot du site, politiques, contacts) ; recherche dans la marque avec suggestions ; « Altri brand ».
+  Deux adresses (snippets/brand-url.liquid) : la collection de la marque si elle existe (templates/collection.brand.json,
+  ex. /collections/nike?view=brand), sinon la recherche de la marque (templates/search.brand.json,
+  /search?q=Pagani&type=product&view=brand). Couleurs et logo : snippets/brand-theme.liquid.
+  Ordinateur uniquement : en mobile, la page renvoie vers la même adresse sans « view=brand » (page mobile habituelle).
+  Styles : assets/desktop-brand.css ; script : assets/desktop-brand.js.
+{%- endcomment -%}
+{%- liquid
+  assign best = collections['bestsellers']
+  assign best_ids = best.products | map: 'id' | join: ','
+  capture flag
+    render 'country-flag-emoji'
+  endcapture
+
+  if template.name == 'search'
+    # Recherche de la marque : title:"Marque" puis, pour une catégorie, title:mot … (assets/desktop-brand.js)
+    assign br_terms = search.terms | replace: '&quot;', '"' | replace: '&#34;', '"' | strip
+    if br_terms contains 'title:"'
+      assign br_name = br_terms | split: '"' | slice: 1, 1 | first
+    else
+      assign br_name = br_terms | remove: 'title:'
+    endif
+    assign br_term = br_name
+    assign br_count = search.results_count
+    assign br_filters = search.filters
+    assign br_sorts = search.sort_options
+    assign br_sort = search.sort_by | default: search.default_sort_by
+    # « Vedi tutto » : toute la marque (sans le mot de la catégorie)
+    assign br_q = 'title:"' | append: br_term | append: '"' | url_encode
+    assign br_base = routes.search_url | append: '?q=' | append: br_q | append: '&type=product&view=brand'
+    assign br_cover = ''
+  else
+    assign br_name = collection.title
+    assign br_term = collection.title
+    assign br_count = collection.products_count
+    assign br_filters = collection.filters
+    assign br_sorts = collection.sort_options
+    assign br_sort = collection.sort_by | default: collection.default_sort_by
+    assign br_base = collection.url | append: '?view=brand'
+    assign br_cover = ''
+    if collection.image
+      assign br_cover = collection.image | image_url: width: 1800
+    endif
+  endif
+  capture br_theme
+    render 'brand-theme', name: br_name
+  endcapture
+  assign br_theme = br_theme | strip | split: '|'
+  assign br_logo = br_theme[3] | strip
+  assign br_display = br_theme[4] | strip
+  if br_display != ''
+    assign br_name = br_display
+  endif
+  assign br_upper = br_name | upcase
+-%}
+
+{%- comment -%} Produits de la page (40 à la fois) {%- endcomment -%}
+{%- capture br_grid -%}
+  {%- if template.name == 'search' -%}
+    {%- paginate search.results by 40 -%}
+      {%- for product in search.results -%}
+        {%- if product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
+        {%- if br_cover == '' and product.featured_image -%}{%- assign br_cover = product.featured_image | image_url: width: 1800 -%}{%- endif -%}
+        {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
+      {%- endfor -%}
+      {%- if paginate.next -%}<li hidden data-br-next="{{ paginate.next.url }}"></li>{%- endif -%}
+    {%- endpaginate -%}
+  {%- else -%}
+    {%- paginate collection.products by 40 -%}
+      {%- for product in collection.products -%}
+        {%- if br_cover == '' and product.featured_image -%}{%- assign br_cover = product.featured_image | image_url: width: 1800 -%}{%- endif -%}
+        {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
+      {%- endfor -%}
+      {%- if paginate.next -%}<li hidden data-br-next="{{ paginate.next.url }}"></li>{%- endif -%}
+    {%- endpaginate -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+<link rel="stylesheet" href="{{ 'desktop-brand.css' | asset_url }}" media="(min-width: 761px)">
+<script>
+  // Mobile : la page habituelle (même adresse sans « view=brand »)
+  if (window.matchMedia('(max-width: 760px)').matches) {
+    var brUrl = new URL(location.href);
+    brUrl.searchParams.delete('view');
+    location.replace(brUrl.toString());
+  }
+</script>
+
+<div class="br" style="--brand: {{ br_theme[0] }}; --brand-2: {{ br_theme[1] }}; --accent: {{ br_theme[2] }}; --photo: url('{{ br_cover }}');" data-br data-br-name="{{ br_name | escape }}" data-br-term="{{ br_term | escape }}"  data-br-base="{{ br_base }}" data-br-search="{{ routes.search_url }}" data-br-root="{{ routes.root_url }}" data-br-currency="{{ cart.currency.symbol }}">
+  <div class="br-bg" aria-hidden="true"></div>
+
+  {%- comment -%} Haut : logo ☰ (panneau) et recherche dans la marque {%- endcomment -%}
+  <div class="br-top">
+    <button class="br-id" type="button" data-br-open-menu aria-label="{{ br_name | escape }}">
+      <span class="br-id__logo">{%- if br_logo != '' -%}<i class="br-mask" style="--logo: url('https://cdn.jsdelivr.net/npm/simple-icons@11.14.0/icons/{{ br_logo }}.svg');"></i>{%- else -%}<b>{{ br_upper | slice: 0, 2 }}</b>{%- endif -%}</span>
+      <b class="br-id__name">{{ br_name | escape }}</b>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="br-sw" data-br-sw>
+      <form class="br-search" action="{{ routes.search_url }}" data-br-form>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" name="q" placeholder="Cerca in {{ br_name | escape }}" autocomplete="off" data-br-q>
+        <button class="br-clear" type="button" data-br-clear aria-label="Cancella"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button>
+      </form>
+      <div class="br-sugg" data-br-sugg></div>
+    </div>
+  </div>
+
+  {%- comment -%} Logo de la marque rempli par la photo {%- endcomment -%}
+  <div class="br-hero">
+    <div class="br-lock{% if br_logo == '' %} br-lock--text{% endif %}" role="img" aria-label="{{ br_name | escape }}">
+      <span class="br-lock__name">{{ br_upper | escape }}</span>
+      {%- if br_logo != '' -%}<i class="br-lock__mark" style="--logo: url('https://cdn.jsdelivr.net/npm/simple-icons@11.14.0/icons/{{ br_logo }}.svg');"></i>{%- endif -%}
+    </div>
+    <p class="br-hero__meta">✓ Brand originale · <b>{{ br_count }}</b> prodotti{% if settings.enable_free_shipping %} · Spedizione gratuita{% endif %}</p>
+  </div>
+  <div class="br-pills" data-br-pills></div>
+
+  <main class="br-wrap">
+    {%- comment -%} 4 grandes cartes : tris de la marque (selon les tris disponibles) {%- endcomment -%}
+    {%- liquid
+      assign br_feat_values = 'best-selling,created-descending,price-ascending,price-descending,relevance' | split: ','
+      assign br_feat_count = 0
+    -%}
+    <section class="br-feat" data-br-feat>
+      {%- for value in br_feat_values -%}
+        {%- assign br_has = false -%}
+        {%- for option in br_sorts -%}{%- if option.value == value -%}{%- assign br_has = true -%}{%- endif -%}{%- endfor -%}
+        {%- if br_has == false or br_feat_count >= 4 -%}{%- continue -%}{%- endif -%}
+        {%- liquid
+          assign br_feat_count = br_feat_count | plus: 1
+          case value
+            when 'best-selling'
+              assign br_feat_title = 'Più venduti'
+            when 'created-descending'
+              assign br_feat_title = 'Novità'
+            when 'price-ascending'
+              assign br_feat_title = 'Prezzi bassi'
+            when 'price-descending'
+              assign br_feat_title = 'Top di gamma'
+            else
+              assign br_feat_title = 'In evidenza'
+          endcase
+        -%}
+        <div><a class="br-fcard" href="{{ br_base }}&sort_by={{ value }}#prodotti" data-br-feat-card><b>{{ br_feat_title }}</b></a><span class="br-flabel">{{ br_feat_title }}</span></div>
+      {%- endfor -%}
+    </section>
+
+    {%- comment -%} Produits {%- endcomment -%}
+    <section class="br-prod" id="prodotti">
+      <div class="br-sec"><h2>Prodotti</h2><span>{{ br_count }} prodotti</span></div>
+      {%- liquid
+        assign br_avail = ''
+        assign br_price = ''
+        for filter in br_filters
+          if filter.type == 'price_range'
+            assign br_price = filter
+          elsif filter.param_name contains 'availability'
+            for value in filter.values
+              if value.value == '1'
+                assign br_avail = value
+              endif
+            endfor
+          endif
+        endfor
+        assign br_sort_label = 'Ordina per'
+        for option in br_sorts
+          if option.value == br_sort and option.value != br_sorts.first.value
+            assign br_sort_label = option.name
+          endif
+        endfor
+      -%}
+      <div class="br-chips">
+        <button class="br-chip br-chip--icon" type="button" data-br-open-filters aria-label="Filtri"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+        <div class="br-chip{% if br_sort_label != 'Ordina per' %} on{% endif %}" data-br-menu>
+          <span>{{ br_sort_label | escape }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          <div class="br-menu">
+            {%- for option in br_sorts -%}<button type="button" data-br-sort="{{ option.value }}"{% if option.value == br_sort %} class="on"{% endif %}>{{ option.name | escape }}</button>{%- endfor -%}
+          </div>
+        </div>
+        {%- if br_price != '' -%}
+          {%- liquid
+            assign br_pmin = br_price.min_value.value | default: 0 | divided_by: 100
+            assign br_pmax = br_price.max_value.value | divided_by: 100
+            assign br_price_on = false
+            if br_price.min_value.value or br_price.max_value.value
+              assign br_price_on = true
+            endif
+          -%}
+          <button class="br-chip{% if br_price_on %} on{% endif %}" type="button" data-br-open-filters>{% if br_price_on %}{{ cart.currency.symbol }}{{ br_pmin }} – {% if br_pmax > 0 %}{{ cart.currency.symbol }}{{ br_pmax }}{% else %}…{% endif %}{% else %}Prezzo{% endif %}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        {%- endif -%}
+        {%- if br_avail != '' -%}
+          <button class="br-chip{% if br_avail.active %} on{% endif %}" type="button" data-br-toggle="{{ br_avail.param_name }}={{ br_avail.value }}">Disponibili</button>
+        {%- endif -%}
+      </div>
+      <div class="br-cards">
+        <ul class="cl__grid" data-br-grid>{{ br_grid }}</ul>
+      </div>
+      {%- if br_count == 0 -%}
+        <div class="br-none"><b>Nessun risultato</b><p>Prova a togliere i filtri per continuare a cercare.</p><a href="{{ br_base }}">Cancella i filtri</a></div>
+      {%- endif -%}
+      <div class="br-more"><button type="button" data-br-more>Mostra altri prodotti</button></div>
+    </section>
+
+    {%- comment -%} Altri brand (sans la marque affichée) {%- endcomment -%}
+    {%- assign br_others = 'Nike,Adidas,Jordan,Pagani Design,Onemix,Skechers,Reebok,Calvin Klein,Trendsi' | split: ',' -%}
+    <section class="br-others">
+      <div class="br-sec"><h2>Altri brand</h2><span>Scopri altri marchi su {{ shop.name | escape }}</span></div>
+      <div class="br-brands">
+        {%- assign br_shown = 0 -%}
+        {%- for other in br_others -%}
+          {%- assign other_key = other | downcase -%}
+          {%- assign br_key = br_name | downcase -%}
+          {%- if other_key == br_key or br_shown >= 6 -%}{%- continue -%}{%- endif -%}
+          {%- assign br_shown = br_shown | plus: 1 -%}
+          {%- capture other_theme -%}{%- render 'brand-theme', name: other -%}{%- endcapture -%}
+          {%- assign other_theme = other_theme | strip | split: '|' -%}
+          {%- assign other_logo = other_theme[3] | strip -%}
+          <a class="br-bcard" href="{%- render 'brand-url', name: other -%}" style="--c: {{ other_theme[0] }};">
+            <span class="br-blogo">{%- if other_logo != '' -%}<i class="br-mask" style="--logo: url('https://cdn.jsdelivr.net/npm/simple-icons@11.14.0/icons/{{ other_logo }}.svg');"></i>{%- else -%}<b>{{ other | upcase | escape }}</b>{%- endif -%}</span>
+            <span><b>{{ other | escape }}</b><small>Vedi i prodotti</small></span>
+          </a>
+        {%- endfor -%}
+      </div>
+    </section>
+  </main>
+
+  {%- comment -%} Barre compacte au défilement {%- endcomment -%}
+  <div class="br-sticky" data-br-sticky>
+    <button class="br-id" type="button" data-br-open-menu aria-label="{{ br_name | escape }}">
+      <span class="br-id__logo">{%- if br_logo != '' -%}<i class="br-mask" style="--logo: url('https://cdn.jsdelivr.net/npm/simple-icons@11.14.0/icons/{{ br_logo }}.svg');"></i>{%- else -%}<b>{{ br_upper | slice: 0, 2 }}</b>{%- endif -%}</span>
+      <b class="br-id__name">{{ br_name | escape }}</b>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <button class="br-sicon" type="button" data-br-goto-search aria-label="Cerca"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <div class="br-pills br-pills--sticky" data-br-pills></div>
+  </div>
+
+  {%- comment -%} Panneau de la marque {%- endcomment -%}
+  <div class="br-veil" data-br-close></div>
+  <aside class="br-menu-panel" data-br-panel aria-hidden="true">
+    <div class="br-mp__bar"><button type="button" data-br-close aria-label="Chiudi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button><button type="button" data-br-share aria-label="Condividi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button></div>
+    <div class="br-mp__scroll">
+      <div class="br-mp__id"><span class="br-blogo">{%- if br_logo != '' -%}<i class="br-mask" style="--logo: url('https://cdn.jsdelivr.net/npm/simple-icons@11.14.0/icons/{{ br_logo }}.svg');"></i>{%- else -%}<b>{{ br_upper | escape }}</b>{%- endif -%}</span><div><b>{{ br_name | escape }}</b><small>{{ br_count }} prodotti · Brand originale</small></div></div>
+      <div class="br-mp__card"><div class="br-mp__cats" data-br-panel-cats></div></div>
+      <a class="br-mp__card" href="https://www.trustpilot.com/review/platinumshop.it" target="_blank" rel="noopener">
+        <div class="br-mp__h"><h3>Recensioni</h3><span class="br-mp__go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></div>
+        <div class="br-mp__score"><b>4,8</b><span><i>★★★★★</i><small>Recensioni verificate di {{ shop.name | escape }} su Trustpilot</small></span></div>
+        <p class="br-mp__note">Lasciaci una recensione su Trustpilot</p>
+      </a>
+      <div class="br-mp__card">
+        <h3>Politiche</h3>
+        {%- for policy in shop.policies -%}
+          {%- if policy.url == blank -%}{%- continue -%}{%- endif -%}
+          <a class="br-mp__row" href="{{ policy.url }}">{{ policy.title | escape }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+        {%- endfor -%}
+      </div>
+      <div class="br-mp__card">
+        <h3>Contatta</h3>
+        <a class="br-mp__row" href="https://wa.me/393314511142" target="_blank" rel="noopener">WhatsApp<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-4A8 8 0 1 1 8 19z"/></svg></a>
+        <div class="br-mp__row">{{ shop.email | escape }}<span class="br-mp__acts"><a href="mailto:{{ shop.email }}" aria-label="Scrivi"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a><button type="button" data-br-copy="{{ shop.email | escape }}" aria-label="Copia"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button></span></div>
+        <a class="br-mp__row" href="{{ routes.root_url }}pages/traccia-ordine">Traccia il tuo ordine<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/></svg></a>
+        <a class="br-mp__row" href="{{ routes.root_url }}pages/dati-aziendali">Dati aziendali<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2 8 2v16M9 21v-5h6v5"/></svg></a>
+      </div>
+      <a class="br-mp__card br-mp__visit" href="{{ routes.root_url }}">Visita il negozio {{ shop.name | escape }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14 21 3M15 3h6v6M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg></a>
+    </div>
+  </aside>
+
+  {%- comment -%} Panneau des filtres (vrais filtres Shopify : tri, disponibilité, prix) {%- endcomment -%}
+  <aside class="br-fd" data-br-filters aria-hidden="true">
+    <div class="br-fd__head"><h3>Filtri</h3><button type="button" data-br-close aria-label="Chiudi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="br-fd__body">
+      {%- if br_avail != '' -%}
+        <div class="br-fd__row"><button class="br-fpill{% if br_avail.active %} on{% endif %}" type="button" data-br-fd-avail="{{ br_avail.param_name }}={{ br_avail.value }}">Disponibili</button></div>
+      {%- endif -%}
+      <div class="br-fd__sec"><p>Ordina per</p><div class="br-fd__row">
+        {%- for option in br_sorts -%}<button class="br-fpill{% if option.value == br_sort %} on{% endif %}" type="button" data-br-fd-sort="{{ option.value }}">{{ option.name | escape }}</button>{%- endfor -%}
+      </div></div>
+      {%- if br_price != '' -%}
+        {%- assign br_range_max = br_price.range_max | divided_by: 100 | plus: 1 -%}
+        <div class="br-fd__sec"><p>Prezzo</p>
+          <div class="br-range" data-br-range data-max="{{ br_range_max }}" data-min-param="{{ br_price.min_value.param_name }}" data-max-param="{{ br_price.max_value.param_name }}"><i class="br-range__fill"></i><input type="range" min="0" max="{{ br_range_max }}" step="1" value="{{ br_pmin }}" data-br-rmin><input type="range" min="0" max="{{ br_range_max }}" step="1" value="{% if br_pmax > 0 %}{{ br_pmax }}{% else %}{{ br_range_max }}{% endif %}" data-br-rmax></div>
+          <div class="br-fd__prices"><label>{{ cart.currency.symbol }}<input type="number" min="0" value="{{ br_pmin }}" data-br-pmin></label><span>–</span><label>{{ cart.currency.symbol }}<input type="number" min="0" placeholder="{{ br_range_max }}" value="{% if br_pmax > 0 %}{{ br_pmax }}{% endif %}" data-br-pmax></label></div>
+        </div>
+      {%- endif -%}
+    </div>
+    <div class="br-fd__foot"><a class="br-fd__reset" href="{{ br_base }}#prodotti">Reimposta</a><button class="br-fd__done" type="button" data-br-apply>Fatto</button></div>
+  </aside>
+  <div class="br-toast" data-br-toast></div>
+</div>
+
+<script src="{{ 'desktop-brand.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Pagina brand desktop",
+  "class": "desktop-brand",
+  "settings": [],
+  "enabled_on": { "templates": ["collection", "search"] }
+}
+{% endschema %}

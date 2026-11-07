@@ -333,7 +333,9 @@
         endif
       endif
     -%}
-    <p class="pdp-m__seller"{% if pm_seller == '' %} data-pdp-seller-auto data-title="{{ product.title | escape }}"{% endif %}>{{ 'mobile.pdp.sold_by' | t: shop: '' | strip }} {% if pm_seller != '' %}<a href="{{ pm_seller_url }}">{{ pm_seller | escape }}</a>{% else %}<a href="{{ routes.root_url }}">{{ shop.name | escape }}</a>{% endif %}</p>
+    {%- comment -%} Ordinateur : le lien mène à la page brand de la marque (snippets/brand-url.liquid, assets/mshein-card.js) {%- endcomment -%}
+    {%- if pm_seller != '' -%}{%- capture pm_brand_url -%}{%- render 'brand-url', name: pm_seller -%}{%- endcapture -%}{%- endif -%}
+    <p class="pdp-m__seller"{% if pm_seller == '' %} data-pdp-seller-auto data-title="{{ product.title | escape }}" data-brand-search="{{ routes.search_url }}"{% endif %}>{{ 'mobile.pdp.sold_by' | t: shop: '' | strip }} {% if pm_seller != '' %}<a href="{{ pm_seller_url }}" data-brand-url="{{ pm_brand_url | strip }}">{{ pm_seller | escape }}</a>{% else %}<a href="{{ routes.root_url }}">{{ shop.name | escape }}</a>{% endif %}</p>
 
     {%- comment -%} Note réelle de l'app d'avis (lien vers les avis) et ventes réelles (métachamps, comme les cartes). {%- endcomment -%}
     {%- liquid

@@ -1,0 +1,23 @@
+{%- comment -%}
+  Adresse de la page brand ORDINATEUR d'une marque (sections/desktop-brand.liquid) : sa collection si la boutique en a une
+  (même nom, ex. /collections/nike?view=brand), sinon la recherche de la marque (/search?q=title:"Pagani"&type=product&view=brand).
+  Recherche : le terme le plus sûr de la marque (« Pagani Design » cherche « Pagani », sinon le mot « Design » ramène
+  d'autres produits).
+  Params : name (nom de la marque)
+{%- endcomment -%}
+{%- liquid
+  assign bu_handle = name | handleize
+  assign bu_collection = collections[bu_handle]
+  if bu_collection != blank and bu_collection.products_count > 0
+    echo bu_collection.url | append: '?view=brand'
+  else
+    assign bu_term = name
+    assign bu_key = name | downcase
+    if bu_key == 'pagani design'
+      assign bu_term = 'Pagani'
+    endif
+    # Recherche limitée au titre des produits (title:"Pagani") : sans ça, la recherche ramène aussi d'autres produits
+    assign bu_q = 'title:"' | append: bu_term | append: '"' | url_encode
+    echo routes.search_url | append: '?q=' | append: bu_q | append: '&type=product&view=brand'
+  endif
+-%}
