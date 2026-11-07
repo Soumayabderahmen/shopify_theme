@@ -99,6 +99,8 @@
       <link rel="stylesheet" href="{{ 'desktop-collection.css' | asset_url }}" media="(min-width: 761px)">
     {%- endif -%}
     <script src="{{ 'mshein-card.js' | asset_url }}" defer data-brands="{{ 'mobile-brands.json' | asset_url }}" data-preview="{{ 'desktop_home_shop.preview' | t | escape }}"></script>
+    <link rel="stylesheet" href="{{ 'atc-feedback.css' | asset_url }}">
+    <script src="{{ 'atc-feedback.js' | asset_url }}"></script>
     {%- liquid
       # Pages collection (template collection.json) et page « In offerta » (collection.offerte.json) : en mobile, même
       # design que les onglets de rayon de l'accueil.

@@ -1,0 +1,94 @@
+/* Boutons « Aggiungi al carrello » : chargement puis coche (assets/atc-feedback.js). Mobile et ordinateur. */
+.atc-loading,
+.atc-done {
+  position: relative !important;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.atc-loading > :not(.atc-ic),
+.atc-done > :not(.atc-ic) {
+  visibility: hidden;
+}
+
+/* Halo pendant le chargement (comme le bouton du prototype) */
+.atc-loading {
+  box-shadow: 0 0 0 3px rgb(107 92 255 / 22%), 0 10px 26px -8px rgb(91 77 255 / 75%) !important;
+  animation: atc-glow 1.4s ease-in-out infinite;
+}
+
+@keyframes atc-glow {
+  50% { box-shadow: 0 0 0 5px rgb(107 92 255 / 14%), 0 12px 30px -8px rgb(91 77 255 / 85%); }
+}
+
+.atc-ic {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: none;
+  place-items: center;
+  color: var(--atc-c, #fff);
+  visibility: visible;
+  pointer-events: none;
+}
+
+.atc-loading > .atc-ic,
+.atc-done > .atc-ic {
+  display: grid;
+}
+
+/* Cercle qui tourne */
+.atc-ic > .atc-spin {
+  display: block;
+  box-sizing: border-box;
+  grid-area: 1 / 1;
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  opacity: 0.9;
+  animation: atc-spin 0.75s linear infinite;
+}
+
+.atc-done > .atc-ic > .atc-spin {
+  display: none !important;
+}
+
+@keyframes atc-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Coche de confirmation */
+.atc-ic svg {
+  grid-area: 1 / 1;
+  display: none;
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 22;
+  stroke-dashoffset: 22;
+}
+
+.atc-done .atc-ic svg {
+  display: block;
+  animation: atc-check 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes atc-check {
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atc-loading { animation: none; }
+  .atc-spin { animation-duration: 1.6s; }
+  .atc-done .atc-ic svg { animation: none; stroke-dashoffset: 0; }
+}
+
+/* Petit bouton rond (suggestions du tiroir panier) */
+.cd-add .atc-ic > .atc-spin { width: 14px; height: 14px; border-width: 2px; }
+.cd-add .atc-ic svg { width: 16px; height: 16px; }
