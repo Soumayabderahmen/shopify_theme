@@ -22,8 +22,13 @@
       if page.handle == 'contatti' or page.handle == 'contact'
         assign hero_text = 'desktop_contact.copy' | t
       elsif page.handle == 'traccia-ordine'
+        assign hero_title = 'policy_shipping.track_cta' | t
         assign hero_eb = 'track_page.eyebrow' | t
         assign hero_text = 'track_page.intro' | t
+      elsif page.handle == 'garanzia-sul-prezzo'
+        # Titre traduit (comme la version mobile de la page, snippets/policy-page.liquid)
+        assign hero_title = 'mobile.pdp.price_guarantee' | t
+        assign hero_eb = 'mobile_protect.eyebrow' | t
       elsif page.handle == 'wishlist'
         assign hero_source = 'wishlist'
       endif
