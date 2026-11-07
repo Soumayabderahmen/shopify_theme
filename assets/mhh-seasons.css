@@ -490,21 +490,26 @@
 
   .mhs-prop svg { display: block; width: 100%; height: auto; overflow: visible; }
 
-  .mhs-prop--hat { top: -16px; right: -16px; width: 100px; transform: rotate(14deg); }
+  /* Posés exactement sur les coins, à moitié à l'extérieur de la carte */
+  .mhs-prop--hat { top: -36px; right: -22px; width: 84px; transform: rotate(18deg); }
   .mhs-props[data-season='summer'] .mhs-prop--hat,
-  .mhs-props[data-season='spring'] .mhs-prop--hat { top: -12px; right: -18px; width: 122px; transform: rotate(10deg); }
+  .mhs-props[data-season='spring'] .mhs-prop--hat { top: -30px; right: -22px; width: 104px; transform: rotate(16deg); }
 
   .mhs-prop--scarf {
-    top: 14%;
-    left: -16px;
+    top: -18px;
+    left: -22px;
     width: 54px;
     transform-origin: 50% 0;
     animation: mhs-scarf 5s ease-in-out infinite alternate;
   }
 
-  .mhs-prop--acc { right: -16px; bottom: -14px; width: 96px; transform: rotate(-8deg); }
-  .mhs-props[data-season='summer'] .mhs-prop--acc { right: -16px; bottom: -6px; width: 108px; transform: rotate(-12deg); }
-  .mhs-props[data-season='autumn'] .mhs-prop--acc { width: 74px; }
+  .mhs-prop--acc { right: -22px; bottom: -36px; width: 84px; transform: rotate(-10deg); }
+  .mhs-props[data-season='summer'] .mhs-prop--acc { right: -22px; bottom: -24px; width: 96px; transform: rotate(-14deg); }
+  .mhs-props[data-season='autumn'] .mhs-prop--acc { right: -20px; bottom: -42px; width: 66px; }
+
+  /* Ce qui dépasse de l'écran est coupé, sans barre de défilement horizontale */
+  html:has(.mhs-props),
+  html:has(.mhs-props) body { overflow-x: clip; }
 
   @keyframes mhs-scarf {
     from { transform: rotate(-1.4deg); }
