@@ -596,6 +596,12 @@ body.template-index #root .mshein-card__stars + .mshein-card__sold::before {
   content: '· ';
 }
 
+/* Produit sans chiffre de ventes (champ « ventes du mois » vide) : nombre d'avis à côté de la note, pas de faux chiffre */
+body.template-index #root .mshein-card__stars:not(:has(+ .mshein-card__sold)) em {
+  display: inline;
+  color: #7a7f95;
+}
+
 /* ---------- Reste de l'accueil comme le prototype (fond gris clair du site gardé : les cartes blanches ressortent) ---------- */
 /* Offerte lampo (sections/mobile-home-shein.liquid, partie « modules ») */
 .mhf {
