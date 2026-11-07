@@ -78,32 +78,35 @@
   };
 
   // Horizon enneigé avec forêt (Noël : sapins verts et guirlandes ; hiver : sapins bleu nuit)
-  var snowScene = function (festive) {
+  // W = largeur du dessin (1200 par défaut) ; plus large sur une bannière très basse pour garder des sapins entiers
+  var snowScene = function (festive, W) {
+    W = W || 1200;
+    var k = W / 1200;
     var back = '';
-    for (var x = -10; x < 1220; x += rand(20, 30)) back += pine(x, rand(96, 102), rand(24, 44));
+    for (var x = -10; x < W + 20; x += rand(20, 30)) back += pine(x, rand(96, 102), rand(24, 44));
     var front = '';
     var lights = '';
     [[0, 230], [300, 420], [470, 700], [780, 900], [970, 1210]].forEach(function (span) {
-      for (var fx = span[0]; fx < span[1]; fx += rand(26, 40)) {
+      for (var fx = span[0] * k; fx < span[1] * k; fx += rand(26, 40)) {
         var h = rand(44, 76);
         var base = rand(114, 118);
         front += pine(fx, base, h);
         if (!festive) continue;
-        for (var k = 0; k < 4; k += 1) {
+        for (var n = 0; n < 4; n += 1) {
           var t = rand(0.18, 0.85);
           var lx = fx + rand(-0.38, 0.38) * h * 0.62 * t;
-          lights += '<circle cx="' + r1(lx) + '" cy="' + r1(base - h + t * h * 0.87) + '" r="' + r1(rand(1.1, 1.7)) + '" fill="' + ['#ffd27a', '#ff7a7a', '#fff3c4', '#ffb347'][k] + '"/>';
+          lights += '<circle cx="' + r1(lx) + '" cy="' + r1(base - h + t * h * 0.87) + '" r="' + r1(rand(1.1, 1.7)) + '" fill="' + ['#ffd27a', '#ff7a7a', '#fff3c4', '#ffb347'][n] + '"/>';
         }
       }
     });
-    return '<div class="mhs-scene mhs-scene--ground">' + svg('0 0 1200 140',
-      '<path d="M0 92C160 70 320 84 480 76s320-16 480 2 240-4 240-4v66H0z" fill="#fff" opacity=".14"/>'
+    return '<div class="mhs-scene mhs-scene--ground">' + svg('0 0 ' + W + ' 140',
+      '<g transform="scale(' + k + ' 1)"><path d="M0 92C160 70 320 84 480 76s320-16 480 2 240-4 240-4v66H0z" fill="#fff" opacity=".14"/></g>'
       + '<path d="' + back + '" fill="#fff" opacity="' + (festive ? '.1' : '.16') + '"/>'
-      + '<path d="M0 104C200 88 380 100 600 94s420-12 600 4v42H0z" fill="#fff" opacity=".22"/>'
+      + '<path transform="scale(' + k + ' 1)" d="M0 104C200 88 380 100 600 94s420-12 600 4v42H0z" fill="#fff" opacity=".22"/>'
       + '<path d="' + front + '" fill="' + (festive ? '#0b3d2a' : '#0e2d63') + '" opacity=".92"/>'
       + (lights ? '<g class="mhs-lt">' + lights + '</g>' : '')
-      + '<path d="M0 118C200 104 420 116 640 110s360-10 560 2v28H0z" fill="#fff"/>'
-      + '<path d="M0 127c260-10 520 2 800-6s280 0 400 2v17H0z" fill="#e4effd"/>',
+      + '<g transform="scale(' + k + ' 1)"><path d="M0 118C200 104 420 116 640 110s360-10 560 2v28H0z" fill="#fff"/>'
+      + '<path d="M0 127c260-10 520 2 800-6s280 0 400 2v17H0z" fill="#e4effd"/></g>',
       ' preserveAspectRatio="xMidYMax slice"') + '</div>';
   };
 
@@ -216,8 +219,8 @@
   };
 
   var SCENES = {
-    xmas: function (desk) { return snowScene(true) + (desk ? ornaments() : ''); },
-    winter: function () { return snowScene(false); },
+    xmas: function (desk, W) { return snowScene(true, W) + (desk ? ornaments() : ''); },
+    winter: function (desk, W) { return snowScene(false, W); },
     spring: function (desk) { return branch() + (desk ? branch('mhs-branch--low') : ''); },
     summer: function () { return '<div class="mhs-sun"><b></b></div>' + seaScene() + palm('mhs-palm--l') + palm('mhs-palm--r'); }
   };
@@ -374,7 +377,7 @@
       var count = Math.round(part[1] * (part[0] === 'fly' ? Math.min(scale, 1.5) : scale));
       for (var i = 0; i < count; i += 1) html += particle(part[0], i);
     });
-    layer.innerHTML = (SCENES[current] ? SCENES[current](Boolean(kind)) : '') + html;
+    layer.innerHTML = (SCENES[current] ? SCENES[current](Boolean(kind), kind === 'mhs-light' ? Math.round(hero.offsetWidth * 140 / 44) : 0) : '') + html;
     hero.insertBefore(layer, hero.firstChild);
     if (withProps) addProps(hero);
     // Boules de Noël : cachées si elles passeraient derrière un texte, un bouton ou une photo
