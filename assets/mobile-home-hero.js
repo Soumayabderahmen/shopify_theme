@@ -157,7 +157,8 @@
         if (height > 0) document.documentElement.style.setProperty('--mshein-header-h', height + 'px');
       };
       var syncSolid = function () {
-        var banner = document.querySelector('[data-mshein-hero-active]');
+        var active = document.querySelector('[data-mshein-hero-active]');
+        var banner = active && (active.querySelector('.mhh') || active);
         header.classList.toggle('mshein-solid', !banner || banner.getBoundingClientRect().bottom < header.offsetHeight + 10);
       };
       syncHeight();

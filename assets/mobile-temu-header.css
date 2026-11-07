@@ -5683,8 +5683,13 @@
     background: #dfe2ea !important;
   }
 
-  body.mshein-head :is(.pp p a, .pp__contact a, .pp__zones b, .pp__toc i, .pp__rte a) {
+  body.mshein-head :is(.pp p a, .pp__contact a, .pp__zones b, .pp__toc i, .pp__rte a):not(.pp__cta) {
     color: #16123f !important;
+  }
+
+  /* Bouton plein (« Scrivici », « Traccia il tuo ordine ») : texte blanc sur le fond foncé */
+  body.mshein-head .pp__cta:not(.pp__cta--ghost) {
+    color: #fff !important;
   }
 
   body.mshein-head .pp__num {

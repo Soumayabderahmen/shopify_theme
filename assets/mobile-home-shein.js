@@ -59,7 +59,10 @@
       // Fiche produit ouverte sur place (assets/mobile-pdp-layer.js) : cet en-tête est caché, rien à mesurer.
       if (document.body.classList.contains('pdp-m-page')) return;
       var activeHero = document.querySelector('[data-mshein-hero-active]') || heroSection;
-      var solid = !activeHero || activeHero.getBoundingClientRect().bottom < headerSection.offsetHeight + 10;
+      // Bannière au design « Home-mobile-B » (assets/mobile-home-hero.css) : son bas à elle, pas celui de la carte des
+      // paiements et des avantages placés dessous dans le même bloc
+      var banner = activeHero && (activeHero.querySelector('.mhh') || activeHero);
+      var solid = !banner || banner.getBoundingClientRect().bottom < headerSection.offsetHeight + 10;
       headerSection.classList.toggle('mshein-solid', solid);
     };
     window.msheinSyncHeader = syncSolid;

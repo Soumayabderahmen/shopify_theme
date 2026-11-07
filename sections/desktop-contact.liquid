@@ -3,7 +3,8 @@
   (snippets/desktop-page-hero.liquid). Les sections du thème en dessous (FAQ, formulaire, blocs d'infos) sont restylées
   en cartes : assets/desktop-contact.css. Caché sur mobile (≤ 760px) : la page mobile ne change pas.
 {%- endcomment -%}
-<link rel="stylesheet" href="{{ 'desktop-contact.css' | asset_url }}" media="(min-width: 761px)">
+{%- comment -%} Aussi sur mobile : FAQ, formulaire et blocs d'infos en cartes comme l'ordinateur (le bandeau ordinateur y reste caché ; bannière mobile : snippets/mhh-page-hero.liquid). {%- endcomment -%}
+<link rel="stylesheet" href="{{ 'desktop-contact.css' | asset_url }}">
 {%- liquid
   assign dct_title = 'desktop_contact.title' | t
   assign dct_copy = 'desktop_contact.copy' | t
