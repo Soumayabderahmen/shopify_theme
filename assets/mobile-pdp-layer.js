@@ -35,6 +35,8 @@
   var added = [];
   var addedSheets = [];
   var saved = null;
+  // Position de la page d'origine quand elle a été remise en haut sous l'aperçu (voir cover.slid dans navigate)
+  var coveredY = null;
   var current = null;
   var token = 0;
 
@@ -623,6 +625,9 @@
       var leftovers = added.concat(marked);
       added = [];
       marked = [];
+      // Page d'origine remise en haut sous l'aperçu : elle revient à sa position avant de réapparaître
+      if (coveredY !== null) jump(coveredY);
+      coveredY = null;
       removeSkeleton('slide', function () {
         leftovers.forEach(function (node) { if (node.isConnected && node.parentNode) node.parentNode.removeChild(node); });
         if (live && !saved) {
@@ -816,6 +821,7 @@
     });
     if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
     openY = null;
+    coveredY = null;
   };
   var footerAnchor = function () {
     return Array.prototype.filter.call(main.children, function (node) { return FOOTER_GROUP.test(node.className || ''); })[0] || null;
@@ -1190,6 +1196,15 @@
           }).then(function () {
             if (mine !== token || !skeleton) return;
             var cover = skeleton;
+            // Retour en haut de la page d'origine fait SOUS l'aperçu (opaque une fois arrivé), pas au moment de la pose :
+            // sur iPhone ce saut (page d'accueil défilée loin → 0) rouvrait la barre de Safari et repeignait tout l'écran
+            // (une image blanche juste après l'affichage de la fiche, comme un rechargement). La position est gardée
+            // (openY) pour le retour.
+            cover.slid.then(function () {
+              if (mine !== token || skeleton !== cover || saved || openY === null || window.scrollY < 1) return;
+              coveredY = openY;
+              jump(0);
+            });
             var live = makeLive();
             var shown = show(doc, href, live);
             // Pose dans la page une image APRÈS l'affichage de la vraie fiche dans le panneau : faite dans la même image,
