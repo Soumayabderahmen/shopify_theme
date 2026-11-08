@@ -944,8 +944,7 @@ body.template-index #root .mshein-feed__tabs button.is-on {
   gap: 10px;
   padding: 0 14px 4px;
   overflow-x: auto;
-  scroll-snap-type: x proximity;
-  scroll-padding: 14px;
+  /* Pas de calage sur une marque : la bande glisse librement avec l'élan du doigt. */
   scrollbar-width: none;
 }
 
@@ -964,7 +963,6 @@ body.template-index #root .mshein-feed__tabs button.is-on {
   text-decoration: none;
   border: 0;
   border-radius: 18px;
-  scroll-snap-align: start;
 }
 
 .mhb__tile img {
