@@ -1043,13 +1043,17 @@
     // Centimes en petit, comme la fiche (« CHF 18<small>.00</small> »).
     var cents = price.match(/^(.*\d)([.,]\d{2})(\D*)$/);
     var priceHtml = cents ? esc(cents[1]) + '<small style="font-size:17px">' + esc(cents[2]) + '</small>' + esc(cents[3]) : esc(price);
+    // Carte « Da €26,64 » (variante la moins chère, snippets/mshein-card.liquid) : le « Da » est gardé, sinon l'aperçu
+    // annonçait €26,64 puis la fiche €31,40 (sa première variante), comme une erreur de prix.
+    var fromWord = priceEl && price ? (priceEl.textContent.replace(/\s+/g, ' ').trim().split(price)[0].match(/([^\W\d_]+)\s*$/) || [])[1] : '';
+    if (fromWord) priceHtml = '<span style="margin-right:6px;font-size:15px;font-weight:600">' + esc(fromWord) + '</span>' + priceHtml;
     var T = window.mobileT || function (key) { return key; };
     var icon = function (path) {
       return '<span style="display:grid;place-items:center;width:30px;height:32px"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16123f" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg></span>';
     };
     // Aperçu = le haut de la vraie fiche (mêmes tailles, couleurs et polices que assets/pdp-mobile.css) : en-tête,
     // photo carrée de la carte, bande « Vantaggi esclusivi », carte prix (prix, « IVA inclusa », nom), barre d'achat.
-    // Pas de blocs gris : la vraie fiche le remplace en fondu sans que rien ne bouge. Il glisse depuis la droite en
+    // La vraie fiche le remplace en fondu sans que rien ne bouge (les lignes de chargement sont sous le nom). Il glisse depuis la droite en
     // 0,28 s sur la page qui s'assombrit (removeSkeleton).
     skeleton = document.createElement('div');
     skeleton.className = 'pdp-swap-skeleton';
@@ -1075,10 +1079,32 @@
           '<b style="font-family:Sora,sans-serif;font-size:15px;font-weight:700">' + esc(T('pdp_vant_band')) + '</b>' +
           '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#6b6f80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>' +
         '</div>' +
+        // Ce qui va arriver est dessiné flou, à sa vraie place (mêmes positions que assets/pdp-mobile.css) : livraison
+        // gratuite et date sous « IVA inclusa », vendeur, note, coupon et tailles sous le nom. Les formes respirent
+        // (opacité, sur le compositeur) : on voit qu'il y a quelque chose qui s'affiche ici, pas une page bloquée. Les
+        // grosses fiches (beaucoup de variantes, page de 2-3 Mo) mettent 2-3 s à arriver sur téléphone.
+        '<style>@keyframes pdp-sk-pulse{0%,100%{opacity:.55}50%{opacity:1}}' +
+          '.pdp-sk-b{display:block;border-radius:7px;background:#dde1ea;filter:blur(1.6px);animation:pdp-sk-pulse 1.3s ease-in-out infinite}' +
+          '.pdp-sk-b.is-green{background:#c9ead6}.pdp-sk-b.is-blue{background:#d9e9ff}' +
+          '@media (prefers-reduced-motion:reduce){.pdp-sk-b{animation:none}}</style>' +
         '<div style="padding:14px;background:#fff">' +
           (price ? '<div style="font-family:Sora,sans-serif;font-size:30px;font-weight:800;line-height:30px">' + priceHtml + '</div>' : '') +
           '<div style="margin-top:4px;font-size:12px;line-height:16.8px;color:#7a7e94">' + esc(T('pdp_vat_short')) + '</div>' +
-          (title ? '<div style="margin-top:61px;font-size:16px;font-weight:600;line-height:21.6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(title) + '</div>' : '') +
+          // « Spedizione gratuita su questo ordine » puis « Consegna entro … » (61 px en tout jusqu'au nom, comme la fiche).
+          '<i class="pdp-sk-b is-green" style="margin-top:10px;width:66%;height:15px"></i>' +
+          '<i class="pdp-sk-b" style="margin-top:9px;width:52%;height:13px;animation-delay:.15s"></i>' +
+          (title ? '<div style="margin-top:14px;font-size:16px;font-weight:600;line-height:21.6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(title) + '</div>' : '') +
+          // « Venduto da … », note et ventes, encadré du coupon, puis les tailles.
+          '<i class="pdp-sk-b" style="margin-top:9px;width:42%;height:12px;animation-delay:.1s"></i>' +
+          '<i class="pdp-sk-b" style="margin-top:12px;width:72%;height:14px;animation-delay:.2s"></i>' +
+          '<i class="pdp-sk-b is-blue" style="margin-top:14px;height:58px;border-radius:12px;animation-delay:.3s"></i>' +
+          '<i class="pdp-sk-b" style="margin-top:16px;width:28%;height:13px;animation-delay:.1s"></i>' +
+          '<div style="display:flex;gap:10px;margin-top:10px">' +
+            '<i class="pdp-sk-b" style="width:56px;height:34px;border-radius:17px;animation-delay:.15s"></i>' +
+            '<i class="pdp-sk-b" style="width:56px;height:34px;border-radius:17px;animation-delay:.25s"></i>' +
+            '<i class="pdp-sk-b" style="width:56px;height:34px;border-radius:17px;animation-delay:.35s"></i>' +
+            '<i class="pdp-sk-b" style="width:56px;height:34px;border-radius:17px;animation-delay:.45s"></i>' +
+          '</div>' +
         '</div>' +
         '<div style="position:absolute;left:0;right:0;bottom:0;display:flex;gap:12px;align-items:center;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:#fff;box-shadow:0 -4px 14px rgba(22,18,63,.1)">' +
           '<span style="flex:none;display:grid;place-items:center;width:40px;height:46px"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#16123f" stroke-width="1.9" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span>' +
