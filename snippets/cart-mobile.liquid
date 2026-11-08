@@ -1,8 +1,8 @@
 {%- comment -%}
-  Page panier MOBILE (prototype « platinumshop-cart-mobile ») — rendu par sections/main-cart.liquid.
+  Page panier (prototype « platinumshop-cart-mobile ») — rendu par sections/main-cart.liquid.
   Données réelles : lignes du panier, quantités, codes de réduction, note, livraison gratuite (réglages du thème),
   boutons de paiement express et moyens de paiement de la boutique. Textes : clés mobile.cart.* (locales).
-  Affiché seulement en mobile (assets/cart-mobile.css) ; le desktop garde le panier Xtra.
+  Mobile (assets/cart-mobile.css) et ordinateur, en 2 colonnes (assets/desktop-cart.css) ; le panier Xtra est caché.
   Script : assets/cart-mobile.js (quantités, suppression avec « Annulla », code, note, barre de paiement).
   Params : section, form_id
 {%- endcomment -%}
@@ -73,6 +73,8 @@
       <a class="cm-go" href="{{ routes.all_products_collection_url }}">{{ 'mobile.cart.continue' | t }}</a>
     </section>
   {%- else -%}
+    {%- comment -%} Colonnes de l'ordinateur (assets/desktop-cart.css) : articles à gauche, récapitulatif à droite. {%- endcomment -%}
+    <div class="cm-main">
     {%- comment -%} Livraison gratuite : seuil des réglages du thème (Paramètres du thème > Panier). {%- endcomment -%}
     {%- if cm_threshold > 0 and cart.requires_shipping -%}
       <section class="cm-card cm-ship{% if cm_free %} is-ok{% endif %}" data-cm-ship aria-live="polite">
@@ -249,7 +251,9 @@
         </div>
       {%- endif -%}
     </section>
+    </div>
 
+    <div class="cm-side">
     <section class="cm-card cm-sum" data-cm-summary>
       <div class="cm-row"><span>{{ 'mobile.cart.subtotal' | t: count: cart.item_count }}</span><b>{{ cart.items_subtotal_price | money }}{{ mm_cur }}</b></div>
       {%- if cm_discount > 0 -%}
@@ -316,8 +320,9 @@
         {%- endif -%}
       </section>
     {%- endif -%}
+    </div>
 
-    {%- comment -%} Barre de paiement collante : visible quand le récapitulatif n'est pas à l'écran. {%- endcomment -%}
+    {%- comment -%} Barre de paiement collante (mobile) : visible quand le récapitulatif n'est pas à l'écran. {%- endcomment -%}
     <div class="cm-bar" data-cm-bar>
       <div class="cm-bar__t">
         <small>{{ 'mobile.cart.total_count' | t: count: cart.item_count }}</small>

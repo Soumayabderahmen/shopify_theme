@@ -1,6 +1,6 @@
-/* Page panier MOBILE (prototype « platinumshop-cart-mobile ») — snippets/cart-mobile.liquid, assets/cart-mobile.js.
-   Chargé seulement sur la page panier et en mobile (media="(max-width: 760px)" dans layout/theme.liquid) :
-   le desktop garde le panier Xtra. */
+/* Page panier (prototype « platinumshop-cart-mobile ») — snippets/cart-mobile.liquid, assets/cart-mobile.js.
+   Chargé sur la page panier à toutes les largeurs (layout/theme.liquid) ; sur ordinateur, mise en page en 2 colonnes
+   par assets/desktop-cart.css. Barre de paiement collante et place pour la barre du bas : mobile seulement. */
 
 .cart-m {
   --cm-ink: #16123f;
@@ -19,7 +19,7 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* Ancien panier Xtra et fil d'Ariane du thème : remplacés en mobile par le nouveau panier. */
+/* Ancien panier Xtra et fil d'Ariane du thème : remplacés par le nouveau panier. */
 #root [id$="__main-cart"] > :not(.cart-m):not(style):not(script),
 #root [id$="__breadcrumbs"] {
   display: none !important;
@@ -41,6 +41,11 @@
 }
 
 .cart-m [hidden] {
+  display: none !important;
+}
+
+/* Compteur ajouté par le thème sous les champs à longueur limitée (assets/custom-async.js) : la note a le sien. */
+.cart-m .f8pr-textarea-counter {
   display: none !important;
 }
 
@@ -854,9 +859,17 @@
   font-weight: 800;
 }
 
+/* Colonnes de l'ordinateur (assets/desktop-cart.css) : sans effet en mobile. */
+.cart-m .cm-main,
+.cart-m .cm-side {
+  display: contents;
+}
+
 /* Place sous le contenu pour la barre collante et la barre du bas. */
-body.template-cart {
-  padding-bottom: 80px;
+@media (max-width: 760px) {
+  body.template-cart {
+    padding-bottom: 80px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

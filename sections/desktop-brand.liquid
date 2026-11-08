@@ -7,7 +7,7 @@
   Deux adresses (snippets/brand-url.liquid) : la collection de la marque si elle existe (templates/collection.brand.json,
   ex. /collections/nike?view=brand), sinon la recherche de la marque (templates/search.brand.json,
   /search?q=Pagani&type=product&view=brand). Couleurs et logo : snippets/brand-theme.liquid.
-  Ordinateur uniquement : en mobile, la page renvoie vers la même adresse sans « view=brand » (page mobile habituelle).
+  Ordinateur et mobile (mise en page mobile : assets/desktop-brand.css, max-width: 760px).
   Styles : assets/desktop-brand.css ; script : assets/desktop-brand.js.
 {%- endcomment -%}
 {%- liquid
@@ -57,6 +57,8 @@
     assign br_name = br_display
   endif
   assign br_upper = br_name | upcase
+  # Promesse « Livraison gratuite dès … » : même montant que la barre du haut (snippets/desktop-header.liquid)
+  assign br_ship_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
   # Grande carte « Best Sellers » : la marque triée par meilleures ventes (si la page a ce tri)
   assign br_best_url = ''
   for option in br_sorts
@@ -88,17 +90,10 @@
   {%- endif -%}
 {%- endcapture -%}
 
-<link rel="stylesheet" href="{{ 'desktop-brand.css' | asset_url }}" media="(min-width: 761px)">
+{%- comment -%} Ordinateur et mobile : même page ; mise en page mobile dans assets/desktop-brand.css (max-width: 760px) {%- endcomment -%}
+<link rel="stylesheet" href="{{ 'desktop-brand.css' | asset_url }}">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap" media="(min-width: 761px)">
-<script>
-  // Mobile : la page habituelle (même adresse sans « view=brand »)
-  if (window.matchMedia('(max-width: 760px)').matches) {
-    var brUrl = new URL(location.href);
-    brUrl.searchParams.delete('view');
-    location.replace(brUrl.toString());
-  }
-</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
 
 <div class="br" style="--brand: {{ br_theme[0] }}; --brand-2: {{ br_theme[1] }}; --accent: {{ br_theme[2] }}; --photo: url('{{ br_cover }}');" data-br data-br-name="{{ br_name | escape }}" data-br-term="{{ br_term | escape }}"  data-br-base="{{ br_base }}" data-br-search="{{ routes.search_url }}" data-br-root="{{ routes.root_url }}" data-br-currency="{{ cart.currency.symbol }}" data-br-brands="{{ 'mobile-brands.json' | asset_url }}" data-br-best="{{ br_best_url }}" data-added="{{ 'mobile.js.added_to_wishlist' | t }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t }}">
   <div class="br-bg" aria-hidden="true"></div>
@@ -131,12 +126,16 @@
   <div class="br-pills" data-br-pills></div>
 
   <main class="br-wrap">
-    {%- comment -%} 4 grandes cartes comme le prototype : « Offerte » puis 3 catégories de la marque (assets/desktop-brand.js) {%- endcomment -%}
-    <section class="br-feat" data-br-feat></section>
+    {%- comment -%} « Sélections » : mosaïque de 4 grandes photos (une catégorie, « Promos », « Meilleures ventes », une autre
+      catégorie), remplie par assets/desktop-brand.js {%- endcomment -%}
+    <section class="br-sel">
+      <div class="br-sec br-sec--x"><div><small>{{ 'desktop_brand.sel_eyebrow' | t }}</small><h2>{{ 'desktop_brand.essentials' | t: brand: br_name }}</h2></div><span>{{ 'desktop_brand.brand_products' | t: count: br_count }}</span></div>
+      <div class="br-feat" data-br-feat></div>
+    </section>
 
     {%- comment -%} Produits {%- endcomment -%}
     <section class="br-prod" id="prodotti">
-      <div class="br-sec"><h2>{{ 'desktop_brand.products' | t }}</h2><span>{% if br_count == 1 %}{{ 'desktop_brand.products_one' | t }}{% else %}{{ 'desktop_brand.products_count' | t: count: br_count }}{% endif %}</span></div>
+      <div class="br-sec br-sec--x"><div><small>{{ 'desktop_brand.collection_eyebrow' | t }}</small><h2>{{ 'desktop_brand.products' | t }}</h2></div><span>{% if br_count == 1 %}{{ 'desktop_brand.products_one' | t }}{% else %}{{ 'desktop_brand.products_count' | t: count: br_count }}{% endif %}</span></div>
       {%- liquid
         assign br_avail = ''
         assign br_price = ''
@@ -225,11 +224,29 @@
       <div class="br-more"><button type="button" data-br-more>{{ 'desktop_brand.show_more' | t }}</button></div>
     </section>
 
-    {%- comment -%} Altri brand (sans la marque affichée) {%- endcomment -%}
+    {%- comment -%} Top 5 : les plus fortes remises parmi les produits de la marque chargés (assets/desktop-brand.js) {%- endcomment -%}
+    <section class="br-top5" data-br-top5 hidden>
+      <div class="br-sec br-sec--x"><div><small>{{ 'desktop_brand.top_eyebrow' | t }}</small><h2>{{ 'desktop_brand.top_title' | t }}</h2></div><span>{{ 'desktop_brand.top_sub' | t }}</span></div>
+      <div class="br-top5__list" data-br-top5-list></div>
+    </section>
+
+    {%- comment -%} Promesses du site {%- endcomment -%}
+    <div class="br-prom">
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg><span><b>{{ 'desktop_brand.pr_original' | t }}</b><small>{{ 'desktop_brand.pr_original_sub' | t }}</small></span></div>
+      {%- if settings.enable_free_shipping -%}
+        <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l4 4v3h-8"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg><span><b>{{ 'desktop_brand.pr_ship' | t }}</b><small>{%- if settings.free_shipping_amount > 0 -%}{{ 'desktop_brand.pr_ship_sub' | t: amount: br_ship_amount }}{%- else -%}{{ 'desktop_brand.pr_ship_sub_any' | t }}{%- endif -%}</small></span></div>
+      {%- endif -%}
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v13H4zM3 4h18v3H3z"/><path d="M14 13H9.5m0 0 2-2m-2 2 2 2"/></svg><span><b>{{ 'desktop_brand.pr_returns' | t }}</b><small>{{ 'desktop_brand.pr_returns_sub' | t }}</small></span></div>
+      <div><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg><span><b>{{ 'desktop_brand.pr_pay' | t }}</b><small>{{ 'desktop_brand.pr_pay_sub' | t }}</small></span></div>
+    </div>
+
+    {%- comment -%} Autres marques : panneaux qui s'ouvrent, 8 par page (assets/desktop-brand.js, assets/mobile-brands.json) ;
+      les 6 marques ci-dessous (avec logo) s'affichent tout de suite et donnent leur logo aux panneaux {%- endcomment -%}
     {%- assign br_others = 'Nike,Adidas,Pagani Design,Onemix,Jordan,Skechers,Reebok,Calvin Klein,Trendsi' | split: ',' -%}
     <section class="br-others">
-      <div class="br-sec"><h2>{{ 'desktop_brand.other_brands' | t }}</h2><span>{{ 'desktop_brand.other_brands_sub' | t: shop: shop.name }}</span></div>
-      {%- comment -%} 6 marques tout de suite ; assets/desktop-brand.js en fait deux rangées qui défilent avec les marques les plus présentes (assets/mobile-brands.json) {%- endcomment -%}
+      <div class="br-sec br-sec--x"><div><small>{{ 'desktop_brand.others_eyebrow' | t }}</small><h2>{{ 'desktop_brand.others_title' | t }}</h2></div>
+        <div class="br-accnav" data-br-accnav hidden><span class="br-accnav__n" data-br-acc-n></span><button type="button" data-br-acc-prev aria-label="{{ 'desktop_brand.prev_brands' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button><button type="button" data-br-acc-next aria-label="{{ 'desktop_brand.next_brands' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button><button class="br-accnav__all" type="button" data-br-all-brands>{{ 'desktop_brand.all_brands' | t }} <b data-br-all-n></b></button></div>
+      </div>
       <div class="br-brands" data-br-marquee>
         {%- assign br_shown = 0 -%}
         {%- for other in br_others -%}
@@ -246,8 +263,18 @@
           </a>
         {%- endfor -%}
       </div>
+      <div class="br-acc__dots" data-br-acc-dots></div>
     </section>
   </main>
+
+  {%- comment -%} Toutes les marques (bouton « Toutes les marques ») : liste de assets/mobile-brands.json avec recherche {%- endcomment -%}
+  <div class="br-bm" data-br-bm hidden>
+    <div class="br-bm__box" role="dialog" aria-modal="true" aria-label="{{ 'desktop_brand.all_brands' | t }}">
+      <div class="br-bm__head"><h3>{{ 'desktop_brand.all_brands' | t }} <span data-br-bm-n></span></h3><label class="br-bm__search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="{{ 'desktop_brand.search_brands' | t }}" autocomplete="off" data-br-bm-q></label><button type="button" data-br-bm-close aria-label="{{ 'desktop_brand.close' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="br-bm__grid" data-br-bm-grid></div>
+      <p class="br-bm__none" data-br-bm-none hidden>{{ 'desktop_brand.no_brand' | t }}</p>
+    </div>
+  </div>
 
   {%- comment -%} Barre compacte au défilement {%- endcomment -%}
   <div class="br-sticky" data-br-sticky>
@@ -322,6 +349,10 @@
       "price": {{ 'desktop_brand.price' | t | json }},
       "sort_by": {{ 'desktop_brand.sort_by' | t | json }},
       "best_sellers": {{ 'desktop_brand.best_sellers' | t | json }},
+      "see_brand": {{ 'desktop_brand.see_brand' | t | json }},
+      "page_n": {{ 'desktop_brand.page_n' | t: n: '__N__' | json }},
+      "brands_count": {{ 'desktop_brand.brands_count' | t: count: '__N__' | json }},
+      "original": {{ 'desktop_brand.original' | t | json }},
       "biggest_discount": {{ 'desktop_brand.biggest_discount' | t | json }},
       "email_copied": {{ 'desktop_brand.email_copied' | t | json }},
       "link_copied": {{ 'desktop_brand.link_copied' | t | json }},

@@ -1,11 +1,11 @@
 /* Page panier MOBILE (prototype « platinumshop-cart-mobile ») — snippets/cart-mobile.liquid, assets/cart-mobile.css.
    Quantités et suppression (avec « Annulla ») via l'API panier de Shopify ; après chaque changement, la section
    panier est re-rendue par Shopify (Section Rendering API) : prix, remises, livraison gratuite et totaux restent
-   ceux du serveur. Code de réduction et note : /cart/update.js. Textes : window.mobileT (snippets/mobile-i18n.liquid). */
+   ceux du serveur. Code de réduction et note : /cart/update.js. Textes : window.mobileT (snippets/mobile-i18n.liquid).
+   Mobile et ordinateur (même panier, 2 colonnes sur ordinateur : assets/desktop-cart.css). */
 (function () {
   'use strict';
 
-  if (!window.matchMedia('(max-width: 760px)').matches) return;
   var first = document.querySelector('[data-cart-mobile]');
   if (!first) return;
 

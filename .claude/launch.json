@@ -11,8 +11,8 @@
     {
       "name": "prototypes",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8765", "--bind", "127.0.0.1", "--directory", "C:\\Users\\TROOPY\\Downloads"],
-      "port": 8765
+      "runtimeArgs": ["-m", "http.server", "9471", "--bind", "127.0.0.1", "--directory", "C:\\Users\\TROOPY\\Downloads"],
+      "port": 9471
     },
     {
       "name": "scratch-video",

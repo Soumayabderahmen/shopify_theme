@@ -7,6 +7,7 @@
 
   // Une marque à la fois : init(root) au chargement, puis à nouveau sur la page de l'autre marque quand on change de
   // marque sans recharger (« Autres marques », bouton Retour du navigateur)
+  var isMobile = function () { return window.matchMedia('(max-width: 760px)').matches; };
   var init = function (root) {
 
     var brand = root.getAttribute('data-br-name') || '';
@@ -216,12 +217,20 @@
       cats.filter(function (c) { return !c.gender; }).slice(0, 4 - items.length).forEach(function (c) {
         items.push({ title: c.label, label: c.label, img: c.img, url: c.url });
       });
-      feat.innerHTML = items.map(function (item, k) {
-        return '<div><a class="br-fcard" href="' + esc(item.url || '#prodotti') + '"' + (item.sale ? ' data-br-feat-sale' : '') + '>'
-          + (item.img ? '<img src="' + esc(item.img) + '" alt="" loading="lazy" data-br-fimg="' + k + '">' : '') + '<b>' + esc(item.title) + '</b></a>'
-          + '<span class="br-flabel" data-br-flabel="' + k + '">' + esc(item.label) + '</span></div>';
-      }).join('');
-      // « 46 modèles » : nombre de produits de chaque catégorie ; Best Sellers : photo du n° 1 des ventes
+      // Mosaïque comme le prototype v3 : grande photo (1re catégorie), Promos, Meilleures ventes, photo large (2e catégorie)
+    var catItems = items.filter(function (item) { return !item.sale && !item.best; });
+    var tiles = [catItems[0], items.filter(function (item) { return item.sale; })[0], items.filter(function (item) { return item.best; })[0], catItems[1]].filter(Boolean);
+    if (tiles.length < 4) tiles = items;
+    var GO = '<span class="br-tile__go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>';
+    feat.classList.toggle('br-feat--bento', tiles.length === 4);
+    feat.innerHTML = tiles.map(function (item, k) {
+      var kind = tiles.length === 4 ? (k === 0 ? ' br-tile--big' : k === 3 ? ' br-tile--wide' : '') : '';
+      var tag = item.sale ? t('up_to', 'Fino a -__PCT__%').replace('__PCT__', best[0].off) : '';
+      return '<a class="br-fcard br-tile' + kind + '" href="' + esc(item.url || '#prodotti') + '"' + (item.sale ? ' data-br-feat-sale' : '') + '>'
+        + (item.img ? '<img src="' + esc(item.img) + '" alt="" loading="lazy" data-br-fimg="' + items.indexOf(item) + '">' : '')
+        + '<span class="br-tile__tag" data-br-flabel="' + items.indexOf(item) + '"' + (tag ? '' : ' hidden') + '>' + esc(tag) + '</span><b>' + esc(item.title) + '</b>' + GO + '</a>';
+    }).join('');
+    // « 46 modèles » : nombre de produits de chaque catégorie ; Best Sellers : photo du n° 1 des ventes
       items.forEach(function (item, k) {
         if (!item.url) return;
         getCount(item.url).then(function (data) {
@@ -234,10 +243,49 @@
             return;
           }
           var label = feat.querySelector('[data-br-flabel="' + k + '"]');
-          if (label && data.count) label.textContent = item.title + ' · ' + (data.count === 1 ? t('models_one', '__N__ modello') : t('models_other', '__N__ modelli')).replace('__N__', data.count);
+          if (label && data.count) { label.textContent = (data.count === 1 ? t('models_one', '__N__ modello') : t('models_other', '__N__ modelli')).replace('__N__', data.count); label.hidden = false; }
         });
       });
     }
+    // ---------- Cartes comme le prototype v3 : remise « -15 % » sur la photo, étiquettes Sale / New Arrivals sous la photo ----------
+    var decorateCards = function (scope) {
+      scope.querySelectorAll('.mshein-card:not([data-br-deco])').forEach(function (card) {
+        card.setAttribute('data-br-deco', '');
+        var media = card.querySelector('.mshein-card__img');
+        var body = card.querySelector('.mshein-card__body');
+        // Même remise que la carte du site (arrondie vers le bas, snippets/mshein-card.liquid)
+        var info = cardInfo(card);
+        var off = info.compare > info.price ? Math.floor((info.compare - info.price) * 100 / info.compare) : 0;
+        if (media && off > 0) media.insertAdjacentHTML('beforeend', '<span class="br-off">-' + off + '%</span>');
+        var tags = media && media.querySelector('.mshein-tags');
+        if (tags && body) body.insertBefore(tags, body.firstChild);
+      });
+    };
+    decorateCards(grid);
+
+    // ---------- Top 5 : les plus fortes remises parmi les produits de la marque de la page ----------
+    var top5 = root.querySelector('[data-br-top5]');
+    if (top5) {
+      var ranked = [].slice.call(grid.querySelectorAll('.mshein-card')).map(function (card) { var info = cardInfo(card); return { card: card, info: info, off: info.off }; })
+        .filter(function (x) { return x.off > 0; }).sort(function (a, b) { return b.off - a.off; }).slice(0, 5);
+      if (ranked.length >= 3) {
+        top5.querySelector('[data-br-top5-list]').innerHTML = ranked.map(function (x, i) {
+          var card = x.card;
+          var link = card.querySelector('.mshein-card__title a, a.mshein-card__link');
+          var img = card.querySelector('.mshein-card__link img');
+          var now = card.querySelector('.mshein-card__now');
+          var chips = card.querySelector('.mshein-chips');
+          var bar = card.querySelector('.mshein-brandbar');
+          return '<a class="br-t5" href="' + esc(link ? link.getAttribute('href') : '#') + '"><span class="br-t5__n">0' + (i + 1) + '</span>'
+            + '<span class="br-t5__img">' + (img ? '<img src="' + esc(img.currentSrc || img.src) + '" alt="" loading="lazy">' : '') + '</span>'
+            + '<b class="br-t5__t">' + esc(card.getAttribute('data-mshein-title') || (link ? link.textContent.trim() : '')) + '</b>'
+            + '<span class="br-t5__p"><b>' + esc(now ? now.textContent.replace(/\s+/g, ' ').trim() : '') + '</b><em>-' + Math.floor((x.info.compare - x.info.price) * 100 / x.info.compare) + '%</em></span>'
+            + (chips ? chips.outerHTML : '') + (bar ? bar.outerHTML : '') + '</a>';
+        }).join('');
+        top5.hidden = false;
+      }
+    }
+
     // ---------- Barre compacte ----------
     var heroPills = root.querySelector('.br-pills');
     var sticky = root.querySelector('[data-br-sticky]');
@@ -389,6 +437,7 @@
       if (more) more.parentElement.hidden = !next;
       applyLocal();
       syncHearts(grid);
+      decorateCards(grid);
       if (window.msheinCards && typeof window.msheinCards.decorate === 'function') window.msheinCards.decorate(grid);
     };
     window.addEventListener('popstate', function () { if (root.isConnected) load(location.href, false); });
@@ -404,7 +453,7 @@
       root.querySelectorAll('.br-pill').forEach(function (pill) { pill.classList.toggle('on', pageKey(pill.href) === currentKey); });
     };
     var CAT_LINKS = '.br-pill[href], .br-fcard[href]:not([data-br-feat-sale]), [data-br-panel-cats] a[href]';
-    var PREFETCH = CAT_LINKS + ', .br-bcard[href]';
+    var PREFETCH = CAT_LINKS + ', .br-bcard[href], .br-acc__go[href]';
     root.addEventListener('click', function (event) {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       var link = event.target.closest(CAT_LINKS);
@@ -467,7 +516,7 @@
     };
     root.addEventListener('click', function (event) {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      var tile = event.target.closest('.br-bcard[href]');
+      var tile = event.target.closest('.br-bcard[href], .br-acc__go[href]');
       if (!tile) return;
       event.preventDefault();
       goBrand(tile);
@@ -479,7 +528,7 @@
       if (!link) return;
       clearTimeout(hoverTimer);
       hoverTimer = setTimeout(function () {
-        if (link.matches('.br-bcard')) resolveBrand(link).catch(function () {});
+        if (link.matches('.br-bcard, .br-acc__go')) resolveBrand(link).catch(function () {});
         else fetchSection(new URL(link.getAttribute('href'), location.href).toString()).catch(function () {});
       }, 90);
     });    root.addEventListener('mouseout', function (event) { if (event.target.closest && event.target.closest(PREFETCH)) clearTimeout(hoverTimer); });
@@ -498,7 +547,7 @@
       index = (index + list.length) % list.length;
       var trigger = list[index].querySelector('[data-quick-add]') || list[index].querySelector('.mshein-card__add');
       if (!trigger) return false;
-      return api.openCard(trigger, { desktop: true, count: (index + 1) + ' / ' + list.length, onStep: function (step) { openCardAt(index + step); } });
+      return api.openCard(trigger, { desktop: !isMobile(), count: (index + 1) + ' / ' + list.length, onStep: function (step) { openCardAt(index + step); } });
     };
     grid.addEventListener('click', function (event) {
       var card = event.target.closest('.mshein-card');
@@ -797,6 +846,7 @@
             next = nextUrl();
             more.parentElement.hidden = !next;
             applyLocal();
+            decorateCards(grid);
             if (window.msheinCards && typeof window.msheinCards.decorate === 'function') window.msheinCards.decorate(grid);
           })
           .catch(function (error) { console.error('Brand page: next page failed.', error); toast(t('retry', 'Riprova tra un attimo')); })
@@ -869,27 +919,124 @@
     // Deux rangées qui défilent en sens inverse (pause au survol) : les 6 marques avec logo du serveur puis les marques
     // les plus présentes du catalogue (photo d'un de leurs produits), sans la marque affichée
     var handleize = function (text) { return String(text).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); };
+    // Panneaux qui s'ouvrent (prototype v3) : 24 marques les plus présentes du catalogue, 8 par page ; la marque ouverte
+    // s'élargit (photo, logo, nombre de produits, « Voir la marque »), la suivante s'ouvre quand sa barre est pleine, puis la
+    // page suivante ; survol = ouverture et pause. Logos : ceux des tuiles du serveur (snippets/brand-theme.liquid).
+    var brandUrl = function (b) { return searchUrl + '?q=' + encodeURIComponent('title:"' + b[1] + '"') + '&type=product&view=brand'; };
+    var brandImg = function (data, b, width) { return b[3] ? (data.cdn || '') + b[3] + (String(b[3]).indexOf('?') > -1 ? '&' : '?') + 'width=' + width : ''; };
+    var countHtml = function (n) { return esc(countText(n)).replace(String(n), '<b>' + n + '</b>'); };
     var buildMarquee = function (data) {
       var box = root.querySelector('[data-br-marquee]');
       if (!box || box.hasAttribute('data-ready')) return;
-      var tiles = [].slice.call(box.querySelectorAll('.br-bcard')).map(function (tile) { return tile.outerHTML; });
-      var shown = [].slice.call(box.querySelectorAll('.br-bcard b')).map(function (b) { return b.textContent.trim().toLowerCase(); });
-      shown.push(brand.toLowerCase(), brandTerm.toLowerCase());
-      data.brands.filter(function (b) { return shown.indexOf(String(b[0]).toLowerCase()) < 0 && shown.indexOf(String(b[1]).toLowerCase()) < 0 && Number(b[2]) > 0; })
-        .slice(0, 34)
-        .forEach(function (b) {
-          var url = searchUrl + '?q=' + encodeURIComponent('title:"' + b[1] + '"') + '&type=product&view=brand';
-          var img = b[3] ? (data.cdn || '') + b[3] + (String(b[3]).indexOf('?') > -1 ? '&' : '?') + 'width=120' : '';
-          tiles.push('<a class="br-bcard" href="' + esc(url) + '" data-br-handle="' + esc(handleize(b[0])) + '"><span class="br-blogo br-blogo--photo">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" width="58" height="58">' : '<b>' + esc(String(b[0]).slice(0, 2).toUpperCase()) + '</b>') + '</span><span><b>' + esc(b[0]) + '</b><small>' + esc(countText(Number(b[2]))) + '</small></span></a>');
-        });
-      if (tiles.length < 8) return;
-      var rows = [[], []];
-      tiles.forEach(function (tile, i) { rows[i % 2].push(tile); });
-      box.innerHTML = rows.map(function (row, r) {
-        var copy = row.join('').replace(/<a /g, '<a tabindex="-1" aria-hidden="true" ');
-        return '<div class="br-mq__row' + (r ? ' br-mq__row--rev' : '') + '"><div class="br-mq__track" style="--br-mq-dur: ' + (row.length * 3.2) + 's;">' + row.join('') + copy + '</div></div>';
-      }).join('');
+      var logos = {};
+      box.querySelectorAll('.br-bcard').forEach(function (tile) {
+        var name = tile.querySelector('span:last-child b');
+        var logo = tile.querySelector('.br-blogo');
+        if (name && logo) logos[name.textContent.trim().toLowerCase()] = logo.innerHTML;
+      });
+      var current = [brand.toLowerCase(), brandTerm.toLowerCase()];
+      var brands = data.brands.filter(function (b) { return current.indexOf(String(b[0]).toLowerCase()) < 0 && current.indexOf(String(b[1]).toLowerCase()) < 0 && Number(b[2]) > 0; }).slice(0, 24);
+      if (brands.length < 4) return;
+      // Mobile : toutes les marques dans une rangée qui défile (pas de pages)
+    var PER = isMobile() ? brands.length : 8;
+      var pages = Math.ceil(brands.length / PER);
+      var page = 0;
+      var panel = function (b, i) {
+        var logo = logos[String(b[0]).toLowerCase()] || '<b>' + esc(String(b[0]).toUpperCase()) + '</b>';
+        return '<div class="br-acc__p' + (i ? '' : ' on') + '" data-acc="' + i + '"><img src="' + esc(brandImg(data, b, 900)) + '" alt="" loading="lazy"><span class="br-acc__v">' + esc(b[0]) + '</span>'
+          + '<div class="br-acc__c"><span class="br-acc__logo">' + logo + '</span><h3>' + esc(b[0]) + '</h3><p>' + esc(t('original', '✓')) + ' · ' + countHtml(Number(b[2])) + '</p>'
+          + '<a class="br-acc__go" href="' + esc(brandUrl(b)) + '" data-br-handle="' + esc(handleize(b[0])) + '">' + esc(t('see_brand', 'Vedi il brand')) + ' <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>'
+          + '<span class="br-acc__bar"><i></i></span></div>';
+      };
+      box.innerHTML = '<div class="br-acc" data-br-acc></div>';
       box.setAttribute('data-ready', '');
+      var acc = box.querySelector('[data-br-acc]');
+      var nav = root.querySelector('[data-br-accnav]');
+      var dots = root.querySelector('[data-br-acc-dots]');
+      var draw = function () {
+        acc.innerHTML = brands.slice(page * PER, page * PER + PER).map(panel).join('');
+        if (nav) { nav.hidden = false; nav.querySelector('[data-br-acc-n]').textContent = (page + 1) + ' / ' + pages; }
+        if (dots) {
+          var html = '';
+          for (var k = 0; k < pages; k += 1) html += '<button type="button" class="' + (k === page ? 'on' : '') + '" data-br-acc-page="' + k + '" aria-label="' + esc(t('page_n', '__N__').replace('__N__', k + 1)) + '"></button>';
+          dots.innerHTML = pages > 1 ? html : '';
+        }
+      };
+      var goPage = function (p) {
+        page = (p + pages) % pages;
+        acc.classList.add('swap');
+        setTimeout(function () {
+          draw();
+          acc.classList.remove('swap'); acc.classList.add('swap-in');
+          requestAnimationFrame(function () { requestAnimationFrame(function () { acc.classList.remove('swap-in'); }); });
+        }, 350);
+      };
+      var openPanel = function (i) { acc.querySelectorAll('.br-acc__p').forEach(function (p) { p.classList.toggle('on', +p.getAttribute('data-acc') === i); }); };
+      acc.addEventListener('animationend', function (event) {
+        if (event.animationName !== 'braccbar') return;
+        var next = +acc.querySelector('.br-acc__p.on').getAttribute('data-acc') + 1;
+        if (next >= acc.querySelectorAll('.br-acc__p').length) goPage(page + 1); else openPanel(next);
+      });
+      acc.addEventListener('click', function (event) {
+        var p = event.target.closest('.br-acc__p');
+        if (p && !p.classList.contains('on')) { event.preventDefault(); openPanel(+p.getAttribute('data-acc')); }
+      });
+      var hover = null;
+      acc.addEventListener('mouseover', function (event) {
+        var p = event.target.closest('.br-acc__p');
+        if (p && !p.classList.contains('on')) { clearTimeout(hover); hover = setTimeout(function () { openPanel(+p.getAttribute('data-acc')); }, 160); }
+      });
+      acc.addEventListener('mouseleave', function () { clearTimeout(hover); });
+      root.addEventListener('click', function (event) {
+        if (event.target.closest('[data-br-acc-next]')) goPage(page + 1);
+        if (event.target.closest('[data-br-acc-prev]')) goPage(page - 1);
+        var d = event.target.closest('[data-br-acc-page]');
+        if (d) goPage(+d.getAttribute('data-br-acc-page'));
+      });
+      draw();
+      buildAllBrands(data);
+    };
+    // Fenêtre « Toutes les marques » : toutes les marques du catalogue (photo, nom, nombre de produits), recherche ; un clic
+    // ouvre la marque sans recharger (goBrand)
+    var buildAllBrands = function (data) {
+      var modal = root.querySelector('[data-br-bm]');
+      var openBtn = root.querySelector('[data-br-all-brands]');
+      if (!modal || !openBtn) return;
+      var current = [brand.toLowerCase(), brandTerm.toLowerCase()];
+      var all = data.brands.filter(function (b) { return current.indexOf(String(b[0]).toLowerCase()) < 0 && Number(b[2]) > 0; });
+      var n = root.querySelector('[data-br-all-n]');
+      if (n) n.textContent = all.length;
+      var gridBox = modal.querySelector('[data-br-bm-grid]');
+      var filled = false;
+      var fill = function () {
+        if (filled) return;
+        filled = true;
+        gridBox.innerHTML = all.map(function (b) {
+          var img = brandImg(data, b, 160);
+          return '<a class="br-bcard br-bm__t" href="' + esc(brandUrl(b)) + '" data-br-handle="' + esc(handleize(b[0])) + '" data-name="' + esc(String(b[0]).toLowerCase()) + '">'
+            + '<span class="br-blogo br-blogo--photo">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" width="58" height="58">' : '<b>' + esc(String(b[0]).slice(0, 2).toUpperCase()) + '</b>') + '</span>'
+            + '<span><b>' + esc(b[0]) + '</b><small>' + esc(countText(Number(b[2]))) + '</small></span></a>';
+        }).join('');
+        modal.querySelector('[data-br-bm-n]').textContent = t('brands_count', '__N__').replace('__N__', all.length);
+      };
+      var q = modal.querySelector('[data-br-bm-q]');
+      var closeBm = function () { modal.hidden = true; document.documentElement.classList.remove('br-modal-open'); };
+      openBtn.addEventListener('click', function () {
+        fill();
+        modal.hidden = false;
+        document.documentElement.classList.add('br-modal-open');
+        setTimeout(function () { q.focus(); }, 60);
+      });
+      q.addEventListener('input', function () {
+        var term = q.value.trim().toLowerCase();
+        var shown = 0;
+        gridBox.querySelectorAll('.br-bm__t').forEach(function (tile) { var ok = !term || tile.getAttribute('data-name').indexOf(term) > -1; tile.hidden = !ok; if (ok) shown += 1; });
+        modal.querySelector('[data-br-bm-none]').hidden = shown > 0;
+      });
+      modal.addEventListener('click', function (event) {
+        if (event.target === modal || event.target.closest('[data-br-bm-close]') || event.target.closest('.br-bm__t')) closeBm();
+      });
+      document.addEventListener('keydown', function (event) { if (event.key === 'Escape' && !modal.hidden && root.isConnected) closeBm(); });
     };
     var brandsUrl = root.getAttribute('data-br-brands');
     if (brandsUrl && root.querySelector('[data-br-count]')) {
@@ -911,6 +1058,6 @@
   };
 
   var first = document.querySelector('[data-br]');
-  if (!first || window.matchMedia('(max-width: 760px)').matches) return;
+  if (!first) return;
   init(first);
 })();
