@@ -4,6 +4,7 @@
    (page suivante ajoutée à la grille), barre compacte au défilement. */
 (function () {
   'use strict';
+  if (window.__brandInit) return; // déjà chargé (page marque ouverte sur place puis script de la section)
 
   // Une marque à la fois : init(root) au chargement, puis à nouveau sur la page de l'autre marque quand on change de
   // marque sans recharger (« Autres marques », bouton Retour du navigateur)
@@ -224,6 +225,7 @@
     var GO = '<span class="br-tile__go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>';
     feat.classList.toggle('br-feat--bento', tiles.length === 4);
     feat.removeAttribute('aria-busy');
+    window.setTimeout(function () { if (typeof fadeImgs === 'function') fadeImgs(feat); }, 0);
     feat.innerHTML = tiles.map(function (item, k) {
       var kind = tiles.length === 4 ? (k === 0 ? ' br-tile--big' : k === 3 ? ' br-tile--wide' : '') : '';
       var tag = item.sale ? t('up_to', 'Fino a -__PCT__%').replace('__PCT__', best[0].off) : '';
@@ -249,7 +251,49 @@
       });
     }
     // ---------- Cartes comme le prototype v3 : remise « -15 % » sur la photo, étiquettes Sale / New Arrivals sous la photo ----------
+    // ---------- Arrivée progressive (assets/desktop-brand.css, br-rise) : produits de l'écran l'un après l'autre, les
+    // suivants en arrivant à l'écran ; photos en fondu à leur arrivée ----------
+    var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var fadeImgs = function (scope) {
+      if (calm) return;
+      scope.querySelectorAll('.mshein-card__img img:not([data-br-img]), .br-tile > img:not([data-br-img])').forEach(function (img) {
+        img.setAttribute('data-br-img', '');
+        if (img.complete && img.naturalWidth) return;
+        img.classList.add('br-img-wait');
+        var done = function () { img.classList.remove('br-img-wait'); img.classList.add('br-img-in'); };
+        img.addEventListener('load', done, { once: true });
+        img.addEventListener('error', done, { once: true });
+      });
+    };
+    var revealIo = !calm && 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+      var n = 0;
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        revealIo.unobserve(entry.target);
+        entry.target.style.setProperty('--d', (n++ * 70) + 'ms');
+        entry.target.classList.remove('br-wait');
+        entry.target.classList.add('br-rise');
+      });
+    }, { rootMargin: '0px 0px -6% 0px' }) : null;
+    var reveal = function (scope) {
+      fadeImgs(scope);
+      if (!revealIo) return;
+      var bottom = window.innerHeight;
+      var n = 0;
+      scope.querySelectorAll('.mshein-card:not([data-br-rv])').forEach(function (card) {
+        card.setAttribute('data-br-rv', '');
+        if (card.hidden) return;
+        if (card.getBoundingClientRect().top < bottom) {
+          card.style.setProperty('--d', (300 + Math.min(n++, 10) * 60) + 'ms');
+          card.classList.add('br-rise');
+        } else {
+          card.classList.add('br-wait');
+          revealIo.observe(card);
+        }
+      });
+    };
     var decorateCards = function (scope) {
+      reveal(scope);
       scope.querySelectorAll('.mshein-card:not([data-br-deco])').forEach(function (card) {
         card.setAttribute('data-br-deco', '');
         var media = card.querySelector('.mshein-card__img');
@@ -1141,6 +1185,8 @@
     applyLocal();
   };
 
+  // Page marque ouverte sur place depuis une autre page (assets/brand-instant.js) : il appelle init sur la section reçue
+  window.__brandInit = init;
   var first = document.querySelector('[data-br]');
   if (!first) return;
   init(first);

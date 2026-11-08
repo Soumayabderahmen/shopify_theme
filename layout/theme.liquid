@@ -356,7 +356,8 @@
     document.head.appendChild(rules);
   });
 </script>
-{%- comment -%} Lien vers une page marque : page marque en attente affichée tout de suite, comme les onglets des rayons {%- endcomment -%}
+{%- comment -%} Lien vers une page marque ou une fiche produit : page en attente affichée tout de suite (nom de la marque ; photo,
+  titre et prix de la carte), comme les onglets des rayons — assets/brand-instant.js {%- endcomment -%}
 <script src="{{ 'brand-instant.js' | asset_url }}" async></script>
 
 <!-- Speculation Rules e Gestione Attivazione Smart per App & Widget -->

@@ -557,3 +557,30 @@ html.br-modal-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .br-lock__name, .br-lock__mark, .br-lock--text .br-lock__name { animation: none; }
 }
+
+/* Arrivée de la page marque : les éléments entrent l'un après l'autre (bannière, pastilles, mosaïque tuile par tuile,
+   produits au fil du défilement : assets/desktop-brand.js, reveal) au lieu d'apparaître tous ensemble. Animations en
+   « backwards » : plus aucun effet une fois finies (une transformation restante casserait les fenêtres fixes). */
+@keyframes br-rise { from { opacity: 0; transform: translateY(16px); } }
+@keyframes br-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  #root .br .br-lock { animation: br-rise .55s cubic-bezier(.2, .8, .2, 1) backwards; }
+  #root .br .br-hero__meta { animation: br-rise .5s .12s cubic-bezier(.2, .8, .2, 1) backwards; }
+  #root .br .br-pills > a { animation: br-rise .45s cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: .18s; }
+  #root .br .br-pills > a:nth-child(2) { animation-delay: .23s; }
+  #root .br .br-pills > a:nth-child(3) { animation-delay: .28s; }
+  #root .br .br-pills > a:nth-child(4) { animation-delay: .33s; }
+  #root .br .br-pills > a:nth-child(5) { animation-delay: .38s; }
+  #root .br .br-pills > a:nth-child(n+6) { animation-delay: .43s; }
+  #root .br .br-sel > .br-sec, #root .br .br-prod > .br-sec { animation: br-rise .5s .2s cubic-bezier(.2, .8, .2, 1) backwards; }
+  #root .br .br-feat > .br-tile:not(.br-tile--sk) { animation: br-rise .6s cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: .26s; }
+  #root .br .br-feat > .br-tile:not(.br-tile--sk):nth-child(2) { animation-delay: .36s; }
+  #root .br .br-feat > .br-tile:not(.br-tile--sk):nth-child(3) { animation-delay: .46s; }
+  #root .br .br-feat > .br-tile:not(.br-tile--sk):nth-child(4) { animation-delay: .56s; }
+  /* Produits : ceux de l'écran l'un après l'autre (--d), les suivants en arrivant à l'écran */
+  #root .br .mshein-card.br-wait { opacity: 0; }
+  #root .br .mshein-card.br-rise { animation: br-rise .55s cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: var(--d, 0ms); }
+  /* Photos : fondu à leur arrivée au lieu d'apparaître d'un coup */
+  #root .br .mshein-card__img img.br-img-wait, #root .br .br-tile > img.br-img-wait { opacity: 0; }
+  #root .br .mshein-card__img img.br-img-in, #root .br .br-tile > img.br-img-in { animation: br-fade .45s ease backwards; }
+}
