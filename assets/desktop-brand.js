@@ -275,7 +275,20 @@
         entry.target.classList.add('br-rise');
       });
     }, { rootMargin: '0px 0px -6% 0px' }) : null;
+    // Animations des cartes (étiquettes qui brillent, barre de marque, étiquette qui tourne : 3 par carte, sans fin)
+    // seulement pour les cartes à l'écran ou proches (classe br-vis, assets/desktop-brand.css) : 40 cartes = 135
+    // animations permanentes, assez pour que Safari sur iPhone recharge la page (« un problème est survenu »).
+    var liveIo = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { entry.target.classList.toggle('br-vis', entry.isIntersecting); });
+    }, { rootMargin: '300px 0px' }) : null;
     var reveal = function (scope) {
+      scope.querySelectorAll('.mshein-card').forEach(function (card) {
+        // Classe « reveal » des cartes du site : invisible tant que le script de l'accueil ne l'a pas montrée
+        // (assets/mobile-home-shein.css) — page marque ouverte sur place depuis l'accueil : cartes restées invisibles
+        card.classList.remove('reveal');
+        if (liveIo && !card.hasAttribute('data-br-live')) { card.setAttribute('data-br-live', ''); liveIo.observe(card); }
+        else if (!liveIo) card.classList.add('br-vis');
+      });
       fadeImgs(scope);
       if (!revealIo) return;
       var bottom = window.innerHeight;

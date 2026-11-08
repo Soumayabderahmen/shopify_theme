@@ -561,6 +561,11 @@ html.br-modal-open { overflow: hidden; }
   .br-lock__name, .br-lock__mark, .br-lock--text .br-lock__name { animation: none; }
 }
 
+/* Animations sans fin des cartes arrêtées hors de l'écran (assets/desktop-brand.js, br-vis) : mémoire de Safari sur iPhone */
+#root .br .mshein-card[data-br-live]:not(.br-vis) *,
+#root .br .mshein-card[data-br-live]:not(.br-vis) *::before,
+#root .br .mshein-card[data-br-live]:not(.br-vis) *::after { animation: none !important; }
+
 /* Arrivée de la page marque : les éléments entrent l'un après l'autre (bannière, pastilles, mosaïque tuile par tuile,
    produits au fil du défilement : assets/desktop-brand.js, reveal) au lieu d'apparaître tous ensemble. Animations en
    « backwards » : plus aucun effet une fois finies (une transformation restante casserait les fenêtres fixes). */
