@@ -131,7 +131,8 @@
       catégorie), remplie par assets/desktop-brand.js {%- endcomment -%}
     <section class="br-sel">
       <div class="br-sec br-sec--x"><div><small>{{ 'desktop_brand.sel_eyebrow' | t }}</small><h2>{{ 'desktop_brand.essentials' | t: brand: br_name }}</h2></div><span>{{ 'desktop_brand.brand_products' | t: count: br_count }}</span></div>
-      <div class="br-feat" data-br-feat></div>
+      {%- comment -%} Mosaïque grise animée en attendant le script (remplacée dès qu'il tourne) {%- endcomment -%}
+      <div class="br-feat br-feat--bento" data-br-feat aria-busy="true"><span class="br-tile br-tile--big br-tile--sk"></span><span class="br-tile br-tile--sk"></span><span class="br-tile br-tile--sk"></span><span class="br-tile br-tile--wide br-tile--sk"></span></div>
     </section>
 
     {%- comment -%} Produits {%- endcomment -%}
@@ -382,7 +383,9 @@
   </script>
 </div>
 
-<script src="{{ 'desktop-brand.js' | asset_url }}" defer></script>
+{%- comment -%} async, pas defer : tourne dès qu'il est téléchargé (la section au-dessus est déjà lue), sans attendre la fin
+  de la page ni les scripts defer du thème (mosaïque et pastilles affichées ~2-3 s plus tôt) {%- endcomment -%}
+<script src="{{ 'desktop-brand.js' | asset_url }}" async></script>
 
 {% schema %}
 {

@@ -223,6 +223,7 @@
     if (tiles.length < 4) tiles = items;
     var GO = '<span class="br-tile__go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></span>';
     feat.classList.toggle('br-feat--bento', tiles.length === 4);
+    feat.removeAttribute('aria-busy');
     feat.innerHTML = tiles.map(function (item, k) {
       var kind = tiles.length === 4 ? (k === 0 ? ' br-tile--big' : k === 3 ? ' br-tile--wide' : '') : '';
       var tag = item.sale ? t('up_to', 'Fino a -__PCT__%').replace('__PCT__', best[0].off) : '';
@@ -341,9 +342,22 @@
       var key = url.toString();
       if (!sectionCache[key]) {
         sectionCache[key] = fetch(key, { credentials: 'same-origin' }).then(function (response) { if (!response.ok) throw new Error(response.status); return response.text(); });
-        sectionCache[key].catch(function () { delete sectionCache[key]; });
+        sectionCache[key].then(function () { sectionReady[key] = true; }, function () { delete sectionCache[key]; });
       }
       return sectionCache[key];
+    };
+    // Page déjà reçue : affichée tout de suite, sans le court squelette
+    var sectionReady = {};
+    var isReady = function (href) {
+      var url = new URL(href, location.origin);
+      url.hash = '';
+      url.searchParams.set('view', 'brand');
+      url.searchParams.set('section_id', 'desktop-brand');
+      return Boolean(sectionReady[url.toString()]);
+    };
+    var slowNet = function () {
+      var net = navigator.connection;
+      return Boolean(net && (net.saveData || /(^|-)2g$/.test(net.effectiveType || '')));
     };
     var loading = 0;
     var skeleton = function () {
@@ -363,7 +377,7 @@
       skeleton();
       var section = document.getElementById('prodotti');
       if (section && section.getBoundingClientRect().top < 0) section.scrollIntoView({ behavior: 'smooth' });
-      Promise.all([fetchSection(href), new Promise(function (resolve) { setTimeout(resolve, 200); })])
+      Promise.all([fetchSection(href), isReady(href) ? null : new Promise(function (resolve) { setTimeout(resolve, 200); })])
         .then(function (out) {
           if (id !== loading || !root.isConnected) return;
           var doc = new DOMParser().parseFromString(out[0], 'text/html');
@@ -467,71 +481,138 @@
       // Barre compacte, grandes cartes, panneau : on descend aux produits (les pastilles du bandeau restent en place)
       if (!link.closest('.br-pills:not(.br-pills--sticky)')) document.getElementById('prodotti').scrollIntoView({ behavior: 'smooth' });
     });
-    // ---------- Autre marque (« Autres marques ») sans recharger : la page de la marque est demandée (dès le survol),
-    // la page actuelle s'efface, la nouvelle apparaît en haut ----------
-    var switchBrand = function (other) {
+    // ---------- Autre marque (« Autres marques », « Toutes les marques ») sans recharger, tout de suite : la page de la
+    // marque est préparée à l'avance (marque ouverte du panneau quand il est à l'écran, survol, premier contact du doigt),
+    // analysée une seule fois et gardée ; au clic elle remplace la page actuelle sans attente ----------
+    var switchBrand = function (other, current) {
       loading += 1;
       var fresh = document.importNode(other, true);
       fresh.setAttribute('data-br-enter', '');
-      root.classList.add('is-switching');
-      setTimeout(function () {
-        root.replaceWith(fresh);
-        window.scrollTo(0, 0);
-        var name = fresh.getAttribute('data-br-name') || '';
-        var parts = document.title.split(' – ');
-        if (name) document.title = name + (parts.length > 1 ? ' – ' + parts[parts.length - 1] : '');
-        init(fresh);
-        setTimeout(function () { fresh.removeAttribute('data-br-enter'); }, 600);
-      }, 220);
+      (current || root).replaceWith(fresh);
+      window.scrollTo(0, 0);
+      var name = fresh.getAttribute('data-br-name') || '';
+      var parts = document.title.split(' – ');
+      if (name) document.title = name + (parts.length > 1 ? ' – ' + parts[parts.length - 1] : '');
+      init(fresh);
+      setTimeout(function () { fresh.removeAttribute('data-br-enter'); }, 450);
     };
     // Adresse de la marque d'une tuile : sa collection si elle existe et a des produits (data-br-handle, comme
-    // snippets/brand-url.liquid), sinon la recherche de la marque (lien de la tuile)
+    // snippets/brand-url.liquid), sinon la recherche de la marque (lien de la tuile). Les deux sont demandées en même
+    // temps (avant : la recherche attendait l'échec de la collection, 2,8 s) ; la réponse est retenue pour la session.
+    var resolved = window.__brResolved || (window.__brResolved = {});
+    var RES_KEY = 'brResolve1';
+    var remember = function (handle, kind) {
+      try { var map = JSON.parse(sessionStorage.getItem(RES_KEY) || '{}'); map[handle] = kind; sessionStorage.setItem(RES_KEY, JSON.stringify(map)); } catch (error) { /* stockage bloqué */ }
+    };
+    var known = function (handle) {
+      try { return (JSON.parse(sessionStorage.getItem(RES_KEY) || '{}'))[handle] || ''; } catch (error) { return ''; }
+    };
     var resolveBrand = function (tile) {
       var search = new URL(tile.getAttribute('href'), location.href);
       search.searchParams.set('view', 'brand');
-      var bySearch = function () { return fetchSection(search.toString()).then(function (text) { return { href: search.toString(), text: text }; }); };
+      search.hash = '';
       var handle = tile.getAttribute('data-br-handle');
-      if (!handle) return bySearch();
-      var collection = new URL((root.getAttribute('data-br-root') || '/').replace(/\/?$/, '/') + 'collections/' + handle, location.origin);
-      collection.searchParams.set('view', 'brand');
-      return fetchSection(collection.toString())
-        .then(function (text) {
-          if (!new DOMParser().parseFromString(text, 'text/html').querySelector('[data-br-grid] .mshein-card')) throw new Error('empty collection');
-          return { href: collection.toString(), text: text };
-        })
-        .catch(bySearch);
+      var key = handle || search.toString();
+      if (resolved[key]) return resolved[key];
+      var parse = function (href) {
+        return function (text) {
+          var other = new DOMParser().parseFromString(text, 'text/html').querySelector('[data-br]');
+          if (!other) throw new Error('no brand page');
+          return { href: href, other: other, full: Boolean(other.querySelector('[data-br-grid] .mshein-card')) };
+        };
+      };
+      var bySearch = function () { return fetchSection(search.toString()).then(parse(search.toString())); };
+      var kind = handle ? known(handle) : 's';
+      var promise;
+      if (kind === 's') promise = bySearch();
+      else {
+        var collection = new URL((root.getAttribute('data-br-root') || '/').replace(/\/?$/, '/') + 'collections/' + handle, location.origin);
+        collection.searchParams.set('view', 'brand');
+        var searchEarly = kind === 'c' ? null : bySearch();
+        if (searchEarly) searchEarly.catch(function () {});
+        promise = fetchSection(collection.toString())
+          .then(parse(collection.toString()))
+          .then(function (page) { if (!page.full) throw new Error('empty collection'); remember(handle, 'c'); return page; })
+          .catch(function () { remember(handle, 's'); return searchEarly || bySearch(); });
+      }
+      resolved[key] = promise;
+      promise.catch(function () { delete resolved[key]; });
+      return promise;
+    };
+    // Page d'attente de la marque choisie (comme les rayons des collections) : nom de la marque, pastilles et cartes grises,
+    // affichée tout de suite en haut si la page de la marque n'est pas encore arrivée
+    var ghostPage = function (tile) {
+      var nameEl = (tile.closest('.br-acc__p') || tile).querySelector('h3, span:last-child b, b');
+      var name = nameEl ? nameEl.textContent.trim() : '';
+      var ghost = document.createElement('div');
+      ghost.className = 'br br-ghost';
+      ghost.setAttribute('aria-busy', 'true');
+      var color = tile.style.getPropertyValue('--c');
+      if (color) ghost.style.setProperty('--brand', color);
+      var pills = new Array(7).join('<span></span>');
+      var cards = new Array(9).join('<li class="br-sk" aria-hidden="true"><div class="br-sk__img"></div><div class="br-sk__l"></div><div class="br-sk__l"></div></li>');
+      ghost.innerHTML = '<div class="br-ghost__hero"><div class="br-ghost__name">' + esc(name) + '</div><div class="br-ghost__meta"></div><div class="br-ghost__pills">' + pills + '</div></div>'
+        + '<div class="br-wrap"><ul class="br-ghost__grid">' + cards + '</ul></div>';
+      return ghost;
     };
     var goBrand = function (tile) {
       var id = loading += 1;
-      root.classList.add('is-loading');
+      var ghost = null;
+      // Réaction immédiate : la page s'efface ; si la marque n'est pas prête en 120 ms, la page d'attente prend sa place
+      root.classList.add('is-switching');
+      var ghostTimer = setTimeout(function () {
+        if (id !== loading || !root.isConnected) return;
+        ghost = ghostPage(tile);
+        root.replaceWith(ghost);
+        window.scrollTo(0, 0);
+      }, 120);
       resolveBrand(tile)
         .then(function (page) {
-          if (id !== loading || !root.isConnected) return;
-          var other = new DOMParser().parseFromString(page.text, 'text/html').querySelector('[data-br]');
-          if (!other) throw new Error('no brand page');
+          if (id !== loading) return;
+          clearTimeout(ghostTimer);
           history.pushState({ br: true }, '', page.href);
-          switchBrand(other);
+          switchBrand(page.other, ghost && ghost.isConnected ? ghost : root);
         })
         .catch(function (error) { console.error('Brand page: brand switch failed.', error); location.href = tile.href; });
     };
+    var BRAND_TILES = '.br-bcard[href], .br-acc__go[href]';
     root.addEventListener('click', function (event) {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      var tile = event.target.closest('.br-bcard[href], .br-acc__go[href]');
+      var tile = event.target.closest(BRAND_TILES);
       if (!tile) return;
       event.preventDefault();
       goBrand(tile);
     });
 
+    var prefetchLink = function (link) {
+      if (link.matches(BRAND_TILES)) resolveBrand(link).catch(function () {});
+      else fetchSection(new URL(link.getAttribute('href'), location.href).toString()).catch(function () {});
+    };
     var hoverTimer = null;
     root.addEventListener('mouseover', function (event) {
       var link = event.target.closest && event.target.closest(PREFETCH);
       if (!link) return;
       clearTimeout(hoverTimer);
-      hoverTimer = setTimeout(function () {
-        if (link.matches('.br-bcard, .br-acc__go')) resolveBrand(link).catch(function () {});
-        else fetchSection(new URL(link.getAttribute('href'), location.href).toString()).catch(function () {});
-      }, 90);
-    });    root.addEventListener('mouseout', function (event) { if (event.target.closest && event.target.closest(PREFETCH)) clearTimeout(hoverTimer); });
+      hoverTimer = setTimeout(function () { prefetchLink(link); }, 60);
+    });
+    root.addEventListener('mouseout', function (event) { if (event.target.closest && event.target.closest(PREFETCH)) clearTimeout(hoverTimer); });
+    // Téléphone (pas de survol) : dès que le doigt touche la tuile, ~150 ms avant le clic
+    root.addEventListener('pointerdown', function (event) {
+      var link = event.target.closest && event.target.closest(PREFETCH);
+      if (link) prefetchLink(link);
+    }, { passive: true });
+    // Panneau des marques : la marque ouverte est préparée pendant qu'on la regarde (panneau à l'écran seulement)
+    var accSeen = false;
+    var prefetchOpen = function () {
+      if (!accSeen || slowNet() || !root.isConnected) return;
+      var go = root.querySelector('.br-acc__p.on .br-acc__go[href]');
+      if (go) (window.requestIdleCallback || setTimeout)(function () { resolveBrand(go).catch(function () {}); });
+    };
+    var accBox = root.querySelector('[data-br-marquee]');
+    if (accBox && 'IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) { accSeen = entries[entries.length - 1].isIntersecting; prefetchOpen(); }, { rootMargin: '300px 0px' }).observe(accBox);
+      root.addEventListener('animationstart', function (event) { if (event.animationName === 'braccbar') prefetchOpen(); });
+    }
 
     // ---------- Cartes : cœur (wishlist du site) et panier (fenêtre « Aggiungi al carrello », comme les autres pages) ----------
     var syncHearts = function (scope) {
@@ -582,6 +663,9 @@
       event.stopPropagation();
     });
     syncHearts(grid);
+    // Script chargé en async : la wishlist du site (window.mobileWishlist) peut arriver après lui
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { syncHearts(grid); });
+    window.addEventListener('load', function () { syncHearts(grid); });
     window.addEventListener('pageshow', function () { syncHearts(grid); });
     var menu = root.querySelector('[data-br-menu]');
     if (menu) {

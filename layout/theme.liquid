@@ -337,10 +337,21 @@
             ],
           },
           // "eager" fa partire il prerendering all'istante non appena il link appare nel viewport o viene sfiorato
-          eagerness: 'moderate', 
+          eagerness: 'moderate',
         },
       ],
     });
+    // Pages des marques (tuiles « Shop per brand » de l'accueil, liens des marques du menu, des cartes, de la barre du
+    // haut) : la page est téléchargée au survol (ordinateur) ou au premier contact du doigt (téléphone), le clic l'ouvre
+    // sans attendre le serveur. Prefetch seulement : les apps de la page ne tournent pas avant le clic.
+    const brandRule = {
+      source: 'document',
+      where: { and: [{ href_matches: '/*' }, { selector_matches: 'a[href*="view=brand"]' }, { not: { selector_matches: '[data-br] a' } }] },
+      eagerness: isMobile ? 'conservative' : 'moderate',
+    };
+    const parsed = JSON.parse(rules.textContent);
+    parsed.prefetch = (parsed.prefetch || []).concat(brandRule);
+    rules.textContent = JSON.stringify(parsed);
 
     document.head.appendChild(rules);
   });

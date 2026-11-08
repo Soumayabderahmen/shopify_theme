@@ -300,12 +300,14 @@ body:has(.br) .dft { margin-top: 0 !important; }
 #root .br .br-cards .mshein-card__stars:not(:has(+ .mshein-card__sold)) em { display: inline; color: rgb(255 255 255 / 70%); }
 
 /* Changement de marque sans recharger : la page actuelle s'efface, la nouvelle apparaît */
-.br { transition: opacity 0.22s ease; }
+/* Marque pas encore reçue (rare : elle est préparée à l'avance) : réponse visible au clic, page atténuée + barre */
 .br.is-loading { cursor: progress; }
 .br.is-loading .br-bcard { pointer-events: none; }
-.br.is-switching { opacity: 0; }
-.br[data-br-enter] { animation: br-enter 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-@keyframes br-enter { from { opacity: 0; transform: translateY(14px); } }
+.br.is-loading > * { opacity: 0.55; transition: opacity 0.15s ease; }
+.br.is-loading::before { content: ''; position: fixed; z-index: 30; top: 0; left: 0; width: 100%; height: 3px; background: var(--site); transform-origin: 0 50%; animation: br-progress 2.4s cubic-bezier(0.1, 0.7, 0.3, 1) both; }
+@keyframes br-progress { from { transform: scaleX(0.08); } to { transform: scaleX(0.92); } }
+.br[data-br-enter] { animation: br-enter 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes br-enter { from { opacity: 0.4; transform: translateY(8px); } }
 
 /* « Autres marques » : deux rangées qui défilent en sens inverse, bords en fondu, pause au survol */
 .br-brands[data-ready] { display: grid; grid-template-columns: none; gap: 14px; margin: 0 -28px; animation: br-mq-in 0.6s ease-out both; }
@@ -390,6 +392,9 @@ body:has(.br) .dft { margin-top: 0 !important; }
 #root .br .br-tile { position: relative; display: block; min-height: 240px; padding: 0; overflow: hidden; color: #fff; background: #f4f5f9; border: 0; border-radius: 22px; isolation: isolate; }
 #root .br .br-tile--big { grid-row: span 2; }
 #root .br .br-tile--wide { grid-column: span 2; }
+#root .br .br-tile--sk { background: linear-gradient(100deg, #f1f1f5 30%, #f8f8fb 50%, #f1f1f5 70%) 0 0 / 300% 100%; animation: br-sk 1.3s linear infinite; }
+#root .br .br-tile--sk::after { display: none; }
+@keyframes br-sk { to { background-position: -150% 0; } }
 #root .br .br-tile img { --height: 100%; position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; border-radius: 0; transition: transform 1s cubic-bezier(.2, .8, .2, 1); }
 #root .br .br-tile:hover img { transform: scale(1.05); }
 #root .br .br-tile::after { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / 0%) 30%, rgb(0 0 0 / 62%)); border-radius: 0; }
@@ -497,6 +502,26 @@ body:has(.br) .dft { margin-top: 0 !important; }
 .br-acc:hover .br-acc__p.on .br-acc__bar i { animation-play-state: paused; }
 @keyframes braccbar { to { width: 100%; } }
 
+/* Page d'attente pendant le changement de marque (assets/desktop-brand.js, ghostPage) : nom de la marque, pastilles et
+   cartes grises qui pulsent, comme le chargement des rayons */
+.br-ghost { min-height: 100vh; }
+.br-ghost__hero { display: grid; justify-items: center; gap: 18px; padding: 110px 20px 46px; background: linear-gradient(180deg, color-mix(in srgb, var(--brand, #241d16) 80%, #000), var(--brand, #241d16)); }
+.br-ghost__name { max-width: 92vw; overflow: hidden; color: rgb(255 255 255 / 22%); font-size: 120px; font-weight: 900; line-height: .9; letter-spacing: -2px; white-space: nowrap; text-overflow: ellipsis; text-transform: uppercase; transform: skewX(-12deg); animation: br-ghost 1.2s ease-in-out infinite; }
+.br-ghost__meta { width: min(340px, 70vw); height: 16px; background: rgb(255 255 255 / 14%); border-radius: 8px; animation: br-ghost 1.2s ease-in-out infinite; }
+.br-ghost__pills { display: flex; gap: 8px; justify-content: center; max-width: 100%; overflow: hidden; }
+.br-ghost__pills span { flex: none; width: 120px; height: 50px; background: rgb(255 255 255 / 12%); border-radius: 999px; animation: br-ghost 1.2s ease-in-out infinite; }
+#root .br-ghost .br-wrap { margin-top: 0; padding-top: 32px; padding-bottom: 60px; color: #16123f; background: #fff; box-shadow: 0 0 0 100vmax #fff; clip-path: inset(0 -100vmax); }
+.br-ghost__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px 22px; margin: 0; padding: 0; list-style: none; }
+#root .br-ghost .br-sk__img { aspect-ratio: 4 / 5; background: #f0f0f4; border-radius: 22px; }
+#root .br-ghost .br-sk__l { background: #f0f0f4; }
+@keyframes br-ghost { 50% { opacity: .5; } }
+@media (max-width: 760px) {
+  .br-ghost__hero { padding: 70px 16px 30px; }
+  .br-ghost__name { font-size: 58px; }
+  .br-ghost__pills span { width: 96px; height: 42px; }
+  .br-ghost__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .br-ghost__name, .br-ghost__meta, .br-ghost__pills span { animation: none; } }
 /* Fenêtre « Toutes les marques » */
 html.br-modal-open { overflow: hidden; }
 .br-bm { position: fixed; z-index: 2147483001; inset: 0; display: grid; place-items: center; padding: 30px; background: rgb(22 18 63 / 45%); backdrop-filter: blur(6px); animation: br-bm-in .25s ease; }

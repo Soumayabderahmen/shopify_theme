@@ -293,6 +293,12 @@
       # et onglet marqué sur sa page (comme snippets/mobile-bottom-navigation.liquid).
       assign tab_own_prefixes = shop.secure_url | append: '|https://www.' | append: shop.domain | append: '|http://' | append: shop.domain | split: '|'
       assign tab_request_path = request.path | downcase
+      # Page marque (?view=brand) : la collection de la marque est un sous-lien d'un rayon (Nike sous « Uomo ») ;
+      # aucun onglet marqué, la page n'est pas le rayon.
+      assign tab_brand_page = false
+      if template.suffix == 'brand'
+        assign tab_brand_page = true
+      endif
     -%}
     <nav class="mobile-temu-categories" aria-label="{{ 'general.accessibility.menu' | t }}">
       <ul>
@@ -315,11 +321,19 @@
               if tab_start == '/apps/' and tab_path == tab_request_path
                 assign tab_current = true
               endif
+              assign tab_marked = false
+              if tab_current or link.child_active
+                assign tab_marked = true
+              endif
+              if tab_brand_page
+                assign tab_current = false
+                assign tab_marked = false
+              endif
             -%}
             <li>
               <a
                 href="{{ tab_url }}"
-                class="{% if tab_current or link.child_active %}is-active{% endif %}"
+                class="{% if tab_marked %}is-active{% endif %}"
                 {% if tab_current %}aria-current="page"{% endif %}
               >{{ link.title | escape }}</a>
             </li>
