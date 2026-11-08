@@ -1,0 +1,28 @@
+{%- comment -%}
+  Fiche produit, « Potrebbe piacerti anche » : cartes des produits recommandés par Shopify, en UNE requête
+  (/recommendations/products?product_id=…&intent=related&section_id=pdp-related-cards), au lieu de la liste JSON puis
+  d'une recherche de ces produits. Même format que les pages de cartes du site (sections/mobile-home-shein.liquid,
+  search_page) : lu par assets/pdp-mobile.js (fil de la fiche) ; le produit affiché est écarté par le script.
+{%- endcomment -%}
+{%- liquid
+  assign best = collections['bestsellers']
+  assign best_ids = best.products | map: 'id' | join: ','
+  capture flag
+    render 'country-flag-emoji'
+  endcapture
+-%}
+<ul class="mshein-page" data-mshein-page>
+  {%- if recommendations.performed -%}
+    {%- for product in recommendations.products -%}
+      {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
+    {%- endfor -%}
+  {%- endif -%}
+</ul>
+
+{% schema %}
+{
+  "name": "Consigliati scheda",
+  "tag": "div",
+  "class": "pdp-related-cards"
+}
+{% endschema %}

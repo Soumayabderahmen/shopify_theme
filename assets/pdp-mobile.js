@@ -2348,6 +2348,21 @@
     }
     var fallback = root.querySelector('[data-pdp-reviews-fallback]');
     if (fallback) fallback.hidden = true;
+    // L'app ne charge sa boîte qu'au premier défilement (ou quand la boîte arrive à l'écran), puis il lui faut ~5 s de
+    // requêtes : les avis restaient gris en arrivant dessus. Une fois la page chargée, on lui envoie ce « défilement »
+    // (sans bouger la page) jusqu'à ce que sa boîte soit demandée : les avis sont prêts avant qu'on y arrive.
+    var kickReviews = function () {
+      var tries = 0;
+      var kick = function () {
+        tries += 1;
+        if (document.querySelector('script[src*="alireviews-box"]') || reviewsBlock.querySelector('.alireviews-review-box') && reviewsBlock.innerText.trim().length > 50) return;
+        window.dispatchEvent(new Event('scroll'));
+        if (tries < 30) window.setTimeout(kick, 500);
+      };
+      kick();
+    };
+    if (document.readyState === 'complete') kickReviews();
+    else window.addEventListener('load', kickReviews, { once: true });
     // Note et nombre d'avis de l'app, repris dans la carte prix (« ★ 4,6 · 111 recensioni »).
     // L'app remplit son bloc en différé (souvent quand on s'en approche) : on attend son contenu.
     var rateLink = root.querySelector('.pdp-m__rate');
@@ -2422,50 +2437,72 @@
       return height;
     };
     var addFeedCards = function (cards) {
+      var added = 0;
       cards.forEach(function (card) {
         var handle = cardHandle(card);
-        if (!handle || handle === currentHandle || feed.seen[handle]) return;
+        if (!handle || handle === currentHandle || handle.indexOf(currentHandle + '-') === 0 || feed.seen[handle]) return;
         feed.seen[handle] = true;
         card.classList.remove('reveal');
         card.classList.add('pdp-m__fin');
         var index = feed.heights[0] <= feed.heights[1] ? 0 : 1;
         feed.heights[index] += cardHeight(card);
         feedCols[index].appendChild(card);
+        added += 1;
       });
       if (window.msheinCards) window.msheinCards.decorate(feedBox);
+      return added;
     };
+    // Requêtes partagées avec la section (snippets/pdp-mobile-top.liquid les lance dès son arrivée) : même adresse =
+    // même requête, déjà en route ou arrivée (60 s).
+    if (!window.__pdpGet) window.__pdpGet = ( function (url, json) {
+      var cache = window.__pdpGet.cache || (window.__pdpGet.cache = {});
+      var hit = cache[url];
+      if (hit && Date.now() - hit.time < 60000) return hit.promise;
+      var promise = fetch(url, { credentials: 'same-origin' }).then(function (response) {
+        if (!response.ok) throw new Error('Request failed: ' + response.status);
+        return json ? response.json() : response.text();
+      });
+      promise.catch(function () { delete cache[url]; });
+      cache[url] = { time: Date.now(), promise: promise };
+      return promise;
+    });
+    var pageHtml = function (url) { return window.__pdpGet(url, false); };
     var loadFeed = function () {
       if (feed.busy || !feed.next) return;
       feed.busy = true;
       feedLoader.hidden = false;
       var token = feed.token;
       var url = feed.next;
-      fetch(url, { credentials: 'same-origin' })
-        .then(function (response) {
-          if (!response.ok) throw new Error('Feed page request failed: ' + response.status);
-          return response.text();
-        })
+      pageHtml(url)
         .then(function (html) {
           if (token !== feed.token) return;
           var page = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-mshein-page]');
           var nextLink = page && page.querySelector('[data-mshein-next]');
           feed.next = nextLink ? nextLink.getAttribute('data-mshein-next') : (feed.queue.shift() || null);
           var cards = page ? Array.prototype.slice.call(page.querySelectorAll(':scope > li.mshein-card')) : [];
-          // Recommandations : même ordre que Shopify (la recherche les rend par pertinence).
-          if (feed.order) {
-            var order = feed.order;
-            cards.sort(function (a, b) { return order.indexOf(cardHandle(a)) - order.indexOf(cardHandle(b)); });
-            feed.order = null;
-          }
-          // Formes grises gardées jusqu'aux premières cartes.
-          if (feed.clear) {
+          // Formes grises gardées jusqu'aux premières cartes (une page sans carte, ex. aucune recommandation, les garde).
+          var fresh = cards.filter(function (card) {
+            var handle = cardHandle(card);
+            return handle && handle !== currentHandle && handle.indexOf(currentHandle + '-') !== 0 && !feed.seen[handle];
+          });
+          if (feed.clear && fresh.length) {
             feedCols[0].innerHTML = '';
             feedCols[1].innerHTML = '';
             feed.clear = false;
           }
-          addFeedCards(cards);
+          addFeedCards(fresh);
           feed.busy = false;
           feedLoader.hidden = true;
+          // Rien du tout (ni recommandation ni catégorie) : la section est retirée.
+          if (feed.clear && !fresh.length && !feed.next) {
+            related.hidden = true;
+            return;
+          }
+          // Encore les formes grises (page vide) : page suivante tout de suite.
+          if (feed.clear && feed.next) {
+            loadFeed();
+            return;
+          }
           // Bas de page encore proche (page sans nouvelle carte, écran haut) : page suivante tout de suite.
           if (feed.next && feedSentinel.getBoundingClientRect().top < window.innerHeight + 700) loadFeed();
         })
@@ -2475,19 +2512,6 @@
           feed.busy = false;
           feedLoader.hidden = true;
         });
-    };
-    // Recommandations du produit (identifiants Shopify) : pages de cartes du site, dans l'ordre.
-    var recommendedHandles = null;
-    var recommendations = function () {
-      if (recommendedHandles) return Promise.resolve(recommendedHandles);
-      return fetch(related.getAttribute('data-url'), { credentials: 'same-origin' })
-        .then(function (response) { return response.ok ? response.json() : { products: [] }; })
-        .then(function (data) {
-          recommendedHandles = ((data && data.products) || []).map(function (product) { return product.handle; })
-            .filter(function (handle) { return handle !== currentHandle && handle.indexOf(currentHandle + '-') !== 0; });
-          return recommendedHandles;
-        })
-        .catch(function () { recommendedHandles = []; return recommendedHandles; });
     };
     var startFeed = function (src, withSkeleton) {
       feed.token += 1;
@@ -2503,18 +2527,11 @@
       feedCols[0].innerHTML = withSkeleton ? shape + shape + shape : '';
       feedCols[1].innerHTML = withSkeleton ? shape + shape + shape : '';
       var category = related.getAttribute('data-cat');
-      var sources = src === 'rec'
-        ? recommendations().then(function (handles) {
-          var list = [];
-          if (handles.length) {
-            var query = handles.map(function (handle) { return 'handle:"' + handle + '"'; }).join(' OR ');
-            list.push(related.getAttribute('data-search') + '?q=' + encodeURIComponent(query) + '&type=product&view=mshein-search-page');
-            feed.order = handles;
-          }
-          if (category) list.push(category);
-          return list;
-        })
-        : Promise.resolve([src]);
+      // « Consigliati » : cartes recommandées par Shopify (une requête, sections/pdp-related-cards.liquid, dans leur
+      // ordre), puis la catégorie du produit.
+      var sources = Promise.resolve(src === 'rec'
+        ? [related.getAttribute('data-rec-page')].concat(category ? [category] : [])
+        : [src]);
       sources.then(function (list) {
         if (token !== feed.token) return;
         feed.clear = true;
@@ -2547,8 +2564,8 @@
       }
       startFeed(chip.getAttribute('data-src'), true);
     });
-    // Demandé 0,5 s après la mise en place de la fiche : prêt avant que le client arrive en bas.
-    window.setTimeout(function () { startFeed('rec', false); }, 500);
+    // Tout de suite (la section a déjà lancé les requêtes) ; formes grises gardées jusqu'aux premières cartes.
+    startFeed('rec', true);
   }
 
   /* ---------- Barre d'achat fixe : variante + prix ; cachée quand le gros bouton est visible ---------- */

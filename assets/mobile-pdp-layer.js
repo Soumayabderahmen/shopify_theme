@@ -451,8 +451,8 @@
     });
   };
 
-  var initTheme = function () {
-    reviewsAfter();
+  var initTheme = function (reviewsStarted) {
+    if (!reviewsStarted) reviewsAfter();
     dedupeWallets();
     refreshKlarna();
     INIT_EVENTS.forEach(function (name) {
@@ -796,10 +796,26 @@
     // Moment où la fiche apparaît : la feuille « Vantaggi esclusivi » de assets/pdp-mobile.js s'ouvre 5 s après.
     window.msheinPdpShownAt = Date.now();
     reviewsBefore();
+    // Avis lancés dès que les réglages de l'app (script dans la fiche) sont posés, sans attendre la fin de tous les
+    // scripts des apps (~8 s sur la fiche ouverte sur place : les avis arrivaient vers 12 s).
+    var reviewsKick = { done: false };
+    var reviewsTries = 0;
+    var reviewsWait = function () {
+      if (reviewsKick.done || (live && live.gate.cancelled)) return;
+      if ('__AR_VARIABLE_INJECT' in window && document.querySelector('.alireviews-review-box')) {
+        reviewsKick.done = true;
+        reviewsAfter();
+        return;
+      }
+      reviewsTries += 1;
+      if (reviewsTries < 100) window.setTimeout(reviewsWait, 150);
+    };
+    if ('__AR_VARIABLE_INJECT' in window) reviewsTries = 100;
+    else window.setTimeout(reviewsWait, 150);
     return runScripts(added, scripts, reveal, live ? live.gate : null).then(function () {
       if (live && live.gate.cancelled) return;
       reveal();
-      initTheme();
+      initTheme(reviewsKick.done);
     });
   };
 

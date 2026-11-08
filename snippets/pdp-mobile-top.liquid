@@ -758,16 +758,40 @@
       {%- endfor -%}
     {%- endif -%}
   {%- endcapture -%}
-  <section class="pdp-m__rel" id="pdp-related" data-pdp-related data-url="{{ routes.product_recommendations_url }}.json?limit=10&intent=related&product_id={{ product.id }}" data-search="{{ routes.search_url }}" data-product-id="{{ product.id }}" data-handle="{{ product.handle }}"{% if rl_cat != nil %} data-cat="{{ rl_cat.object.url }}?view=mshein-dept-page"{% endif %}>
+  <section class="pdp-m__rel" id="pdp-related" data-pdp-related data-rec-page="{{ routes.product_recommendations_url }}?product_id={{ product.id }}&limit=10&intent=related&section_id=pdp-related-cards" data-search="{{ routes.search_url }}" data-product-id="{{ product.id }}" data-handle="{{ product.handle }}"{% if rl_cat != nil %} data-cat="{{ rl_cat.object.url }}?view=mshein-dept-page"{% endif %}>
     <h2>{{ 'mobile.pdp.you_may_like' | t }}</h2>
     <div class="pdp-m__rchips" role="tablist" data-pdp-rchips>
       <button type="button" role="tab" aria-selected="true" class="is-on" data-src="rec">{{ 'mobile.home.recommended' | t }}</button>
       {{- rl_chips -}}
     </div>
-    <div class="pdp-m__feed" data-pdp-feed><ul class="pdp-m__fcol"></ul><ul class="pdp-m__fcol"></ul></div>
+    {%- comment -%} Formes grises dès le premier affichage (remplacées par les premières cartes, assets/pdp-mobile.js) {%- endcomment -%}
+    {%- capture rl_shape -%}<li class="pdp-m__fsk" aria-hidden="true"><i></i><i></i><i></i></li>{%- endcapture -%}
+    <div class="pdp-m__feed" data-pdp-feed><ul class="pdp-m__fcol">{{ rl_shape }}{{ rl_shape }}{{ rl_shape }}</ul><ul class="pdp-m__fcol">{{ rl_shape }}{{ rl_shape }}{{ rl_shape }}</ul></div>
     <div class="mshein-loader pdp-m__floader" data-pdp-feed-loader hidden aria-label="{{ 'mobile.js.loading' | t }}"><i></i><i></i><i></i></div>
     <div class="pdp-m__fsent" data-pdp-feed-sentinel></div>
   </section>
+  <script>
+    /* Cartes recommandées demandées dès l'arrivée de la section (sans attendre assets/pdp-mobile.js, chargé en différé),
+       en une requête (sections/pdp-related-cards.liquid). Requête partagée avec pdp-mobile.js (window.__pdpGet : même
+       adresse = même requête, quel que soit le script qui passe en premier). */
+    (function () {
+      var section = document.currentScript && document.currentScript.previousElementSibling;
+      if (!section || !section.hasAttribute('data-pdp-related') || !window.fetch) return;
+      window.__pdpGet || (window.__pdpGet = function (url, json) {
+        var cache = window.__pdpGet.cache || (window.__pdpGet.cache = {});
+        var hit = cache[url];
+        if (hit && Date.now() - hit.time < 60000) return hit.promise;
+        var promise = fetch(url, { credentials: 'same-origin' }).then(function (response) {
+          if (!response.ok) throw new Error('Request failed: ' + response.status);
+          return json ? response.json() : response.text();
+        });
+        promise.catch(function () { delete cache[url]; });
+        cache[url] = { time: Date.now(), promise: promise };
+        return promise;
+      });
+      window.__pdpGet(section.getAttribute('data-rec-page'), false).catch(function () {});
+    })();
+  </script>
 
   {%- comment -%}
     14. Barre d'achat fixe au style SHEIN (au-dessus de la barre du bas) : cœur de la wishlist du site et bouton foncé
