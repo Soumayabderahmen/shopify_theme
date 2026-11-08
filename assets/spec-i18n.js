@@ -110,7 +110,26 @@
     'mirror type': ['Vetro', 'Verre', 'Glas', 'Cristal', 'Glas', 'Geam'],
     'shell thickness': ['Spessore cassa', 'Épaisseur du boîtier', 'Gehäusehöhe', 'Grosor de la caja', 'Kastdikte', 'Grosime carcasă'],
     'case craftsmanship': ['Finitura cassa', 'Finition du boîtier', 'Gehäuseverarbeitung', 'Acabado de la caja', 'Afwerking kast', 'Finisaj carcasă'],
-    'sweaters men': ['Maglioni uomo', 'Pulls homme', 'Herrenpullover', 'Jerséis hombre', 'Herentruien', 'Pulovere bărbați']
+    'sweaters men': ['Maglioni uomo', 'Pulls homme', 'Herrenpullover', 'Jerséis hombre', 'Herentruien', 'Pulovere bărbați'],
+    // Fiches des marques (Shopify Collective, « - Product Type : Knitted pullover »).
+    'product type': ['Tipo di prodotto', 'Type de produit', 'Produkttyp', 'Tipo de producto', 'Producttype', 'Tip produs'],
+    'neck': ['Collo', 'Col', 'Ausschnitt', 'Cuello', 'Hals', 'Guler'],
+    'sleeve': ['Maniche', 'Manches', 'Ärmel', 'Mangas', 'Mouwen', 'Mâneci'],
+    'cuffs': ['Polsini', 'Poignets', 'Bündchen', 'Puños', 'Manchetten', 'Manșete'],
+    'closing': ['Chiusura', 'Fermeture', 'Verschluss', 'Cierre', 'Sluiting', 'Închidere'],
+    'pockets': ['Tasche', 'Poches', 'Taschen', 'Bolsillos', 'Zakken', 'Buzunare'],
+    'wash/finish': ['Lavaggio / finitura', 'Lavage / finition', 'Waschung / Finish', 'Lavado / acabado', 'Wassing / afwerking', 'Spălare / finisaj'],
+    'lining': ['Fodera', 'Doublure', 'Futter', 'Forro', 'Voering', 'Căptușeală'],
+    'lifestyle': ['Stile', 'Style', 'Stil', 'Estilo', 'Stijl', 'Stil'],
+    'width': ['Larghezza', 'Largeur', 'Breite', 'Ancho', 'Breedte', 'Lățime'],
+    'length/size': ['Lunghezza / taglia', 'Longueur / taille', 'Länge / Größe', 'Largo / talla', 'Lengte / maat', 'Lungime / mărime'],
+    'straps': ['Cinturini', 'Brides', 'Riemen', 'Tiras', 'Bandjes', 'Barete'],
+    'sole': ['Suola', 'Semelle', 'Sohle', 'Suela', 'Zool', 'Talpă'],
+    'toecap type': ['Punta', 'Bout', 'Schuhspitze', 'Puntera', 'Neus', 'Vârf'],
+    'heel height': ['Altezza tacco', 'Hauteur du talon', 'Absatzhöhe', 'Altura del tacón', 'Hakhoogte', 'Înălțime toc'],
+    'heel height type': ['Tipo di tacco', 'Type de talon', 'Absatzart', 'Tipo de tacón', 'Type hak', 'Tip toc'],
+    'padding': ['Imbottitura', 'Rembourrage', 'Polsterung', 'Relleno', 'Vulling', 'Căptușire'],
+    'functionality': ['Funzionalità', 'Fonctionnalités', 'Funktionen', 'Funcionalidad', 'Functionaliteit', 'Funcționalitate']
   };
 
   // Libellés déjà en italien (fiches traduites par le fournisseur) → clé anglaise.
@@ -299,7 +318,59 @@
     'light': ['Leggero', 'Léger', 'Leicht', 'Ligero', 'Licht', 'Ușor'],
     'wear resistant': ['Resistente all\'usura', 'Résistant à l\'usure', 'Verschleißfest', 'Resistente al desgaste', 'Slijtvast', 'Rezistent la uzură'],
     'massage': ['Massaggiante', 'Massant', 'Massage', 'Masaje', 'Massage', 'Masaj'],
-    'fur & faux fur': ['Pelliccia ed ecopelliccia', 'Fourrure et fausse fourrure', 'Pelz & Kunstpelz', 'Piel y piel sintética', 'Bont & imitatiebont', 'Blană & blană artificială']
+    'fur & faux fur': ['Pelliccia ed ecopelliccia', 'Fourrure et fausse fourrure', 'Pelz & Kunstpelz', 'Piel y piel sintética', 'Bont & imitatiebont', 'Blană & blană artificială'],
+    // Fiches des marques (Shopify Collective).
+    'long sleeves': ['Maniche lunghe', 'Manches longues', 'Lange Ärmel', 'Manga larga', 'Lange mouwen', 'Mâneci lungi'],
+    'long sleeves (l/s)': ['Maniche lunghe', 'Manches longues', 'Lange Ärmel', 'Manga larga', 'Lange mouwen', 'Mâneci lungi'],
+    'short sleeves': ['Maniche corte', 'Manches courtes', 'Kurze Ärmel', 'Manga corta', 'Korte mouwen', 'Mâneci scurte'],
+    'relaxed fit': ['Vestibilità comoda', 'Coupe décontractée', 'Lockere Passform', 'Ajuste holgado', 'Relaxed fit', 'Croială lejeră'],
+    'loose fit': ['Vestibilità ampia', 'Coupe ample', 'Weite Passform', 'Ajuste amplio', 'Ruime pasvorm', 'Croială largă'],
+    'slim fit': ['Vestibilità slim', 'Coupe ajustée', 'Schmale Passform', 'Ajuste slim', 'Slim fit', 'Croială slim'],
+    'tapered fit': ['Vestibilità affusolata', 'Coupe fuselée', 'Tapered Fit', 'Ajuste tapered', 'Tapered fit', 'Croială îngustată'],
+    'button fastening': ['Chiusura a bottoni', 'Fermeture boutonnée', 'Knopfverschluss', 'Cierre de botones', 'Knoopsluiting', 'Închidere cu nasturi'],
+    'zip fastening': ['Chiusura con zip', 'Fermeture zippée', 'Reißverschluss', 'Cierre de cremallera', 'Ritssluiting', 'Închidere cu fermoar'],
+    'half zip fastening': ['Chiusura con mezza zip', 'Demi-zip', 'Halber Reißverschluss', 'Media cremallera', 'Halve rits', 'Fermoar pe jumătate'],
+    'button and zip fastening': ['Chiusura con zip e bottone', 'Fermeture zip et bouton', 'Reißverschluss und Knopf', 'Cremallera y botón', 'Rits en knoop', 'Fermoar și nasture'],
+    'button fly fastening': ['Patta con bottoni', 'Braguette boutonnée', 'Knopfleiste', 'Bragueta de botones', 'Knoopgulp', 'Prohab cu nasturi'],
+    'press stud and zip fastening': ['Chiusura con zip e bottoni a pressione', 'Fermeture zip et pressions', 'Reißverschluss und Druckknöpfe', 'Cremallera y corchetes', 'Rits en drukknopen', 'Fermoar și capse'],
+    'double breasted button fastening': ['Chiusura doppiopetto', 'Fermeture croisée', 'Zweireihiger Knopfverschluss', 'Cierre cruzado', 'Dubbele knoopsluiting', 'Închidere la două rânduri'],
+    'buckle fastening': ['Chiusura con fibbia', 'Fermeture à boucle', 'Schnallenverschluss', 'Cierre de hebilla', 'Gespsluiting', 'Închidere cu cataramă'],
+    'buttoned cuffs': ['Polsini con bottone', 'Poignets boutonnés', 'Knopfmanschetten', 'Puños con botón', 'Manchetten met knoop', 'Manșete cu nasture'],
+    'ribbed cuffs': ['Polsini a costine', 'Poignets côtelés', 'Rippbündchen', 'Puños de canalé', 'Geribde manchetten', 'Manșete reiate'],
+    'press-stud cuffs': ['Polsini con bottone a pressione', 'Poignets à pressions', 'Druckknopfmanschetten', 'Puños con corchete', 'Manchetten met drukknoop', 'Manșete cu capsă'],
+    'round neck': ['Girocollo', 'Col rond', 'Rundhals', 'Cuello redondo', 'Ronde hals', 'Guler rotund'],
+    'crew neck': ['Girocollo', 'Col rond', 'Rundhals', 'Cuello redondo', 'Ronde hals', 'Guler rotund'],
+    'high neck': ['Collo alto', 'Col montant', 'Stehkragen', 'Cuello alto', 'Hoge hals', 'Guler înalt'],
+    'shirt collar': ['Colletto a camicia', 'Col chemise', 'Hemdkragen', 'Cuello camisero', 'Overhemdkraag', 'Guler de cămașă'],
+    'spread collar': ['Collo francese', 'Col italien', 'Haifischkragen', 'Cuello italiano', 'Spread-kraag', 'Guler răsfrânt'],
+    'cut-away collar': ['Collo cutaway', 'Col cutaway', 'Cutaway-Kragen', 'Cuello cutaway', 'Cutaway-kraag', 'Guler cutaway'],
+    'button down collar': ['Collo button down', 'Col boutonné', 'Button-down-Kragen', 'Cuello abotonado', 'Button-down-kraag', 'Guler cu nasturi'],
+    'peak lapel': ['Revers a lancia', 'Revers en pointe', 'Spitzrevers', 'Solapa de pico', 'Puntrevers', 'Rever ascuțit'],
+    'notch lapel': ['Revers classico', 'Revers cranté', 'Steigendes Revers', 'Solapa de muesca', 'Inkeping revers', 'Rever clasic'],
+    'formal': ['Elegante', 'Habillé', 'Elegant', 'Formal', 'Formeel', 'Elegant'],
+    'casual': ['Casual', 'Décontracté', 'Freizeit', 'Informal', 'Casual', 'Casual'],
+    'knitted pullover': ['Pullover in maglia', 'Pull en maille', 'Strickpullover', 'Jersey de punto', 'Gebreide trui', 'Pulover tricotat'],
+    'trousers': ['Pantaloni', 'Pantalon', 'Hose', 'Pantalones', 'Broek', 'Pantaloni'],
+    'tailored trousers': ['Pantaloni sartoriali', 'Pantalon de tailleur', 'Anzughose', 'Pantalones de vestir', 'Pantalon', 'Pantaloni croiți'],
+    'loose-fit jeans': ['Jeans ampi', 'Jean ample', 'Weite Jeans', 'Vaqueros holgados', 'Ruime jeans', 'Blugi largi'],
+    'dress shirt': ['Camicia elegante', 'Chemise habillée', 'Anzughemd', 'Camisa de vestir', 'Overhemd', 'Cămașă elegantă'],
+    'shirt': ['Camicia', 'Chemise', 'Hemd', 'Camisa', 'Overhemd', 'Cămașă'],
+    'overshirt': ['Sovracamicia', 'Surchemise', 'Overshirt', 'Sobrecamisa', 'Overshirt', 'Supracămașă'],
+    'blazer': ['Blazer', 'Blazer', 'Sakko', 'Americana', 'Blazer', 'Sacou'],
+    'double breasted blazer': ['Blazer doppiopetto', 'Blazer croisé', 'Zweireihiges Sakko', 'Americana cruzada', 'Double-breasted blazer', 'Sacou la două rânduri'],
+    'jacket': ['Giacca', 'Veste', 'Jacke', 'Chaqueta', 'Jas', 'Jachetă'],
+    'coat': ['Cappotto', 'Manteau', 'Mantel', 'Abrigo', 'Jas', 'Palton'],
+    'parka': ['Parka', 'Parka', 'Parka', 'Parka', 'Parka', 'Parka'],
+    'cardigan': ['Cardigan', 'Cardigan', 'Strickjacke', 'Cárdigan', 'Vest', 'Cardigan'],
+    'beanie': ['Berretto', 'Bonnet', 'Mütze', 'Gorro', 'Muts', 'Căciulă'],
+    'belt': ['Cintura', 'Ceinture', 'Gürtel', 'Cinturón', 'Riem', 'Curea'],
+    'wallet': ['Portafoglio', 'Portefeuille', 'Geldbörse', 'Cartera', 'Portemonnee', 'Portofel'],
+    'chelsea boots': ['Stivaletti Chelsea', 'Bottines Chelsea', 'Chelsea-Boots', 'Botines Chelsea', 'Chelsea boots', 'Ghete Chelsea'],
+    'round toe': ['Punta tonda', 'Bout rond', 'Runde Spitze', 'Puntera redonda', 'Ronde neus', 'Vârf rotund'],
+    'resin sole': ['Suola in resina', 'Semelle en résine', 'Harzsohle', 'Suela de resina', 'Harszool', 'Talpă din rășină'],
+    'fully lined': ['Completamente foderato', 'Entièrement doublé', 'Voll gefüttert', 'Totalmente forrado', 'Volledig gevoerd', 'Complet căptușit'],
+    'low': ['Basso', 'Bas', 'Niedrig', 'Bajo', 'Laag', 'Jos'],
+    'short': ['Corto', 'Court', 'Kurz', 'Corto', 'Kort', 'Scurt']
   };
   var HIDDEN_VALUES = /^(noenname_null|others \(fill in by yourself\))$/i;
 
@@ -311,6 +382,8 @@
 
   // Libellé traduit ; null si la ligne doit être masquée.
   var label = function (text, lang) {
+    // « - Product Type » (puce du fournisseur) : la puce n'est pas gardée.
+    text = String(text).replace(/^\s*[-–•*·]+\s*/, '');
     var key = clean(text).replace(/\s*:\s*$/, '');
     if (HIDDEN.test(key)) return null;
     key = ALIASES[key] || key;

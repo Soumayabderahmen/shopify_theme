@@ -1998,10 +1998,11 @@
         paragraphs = '';
       };
       // Lignes « Libellé : valeur » des fiches importées (Decorazione: NONE, Materiale: Cotone…) : tableau à deux
-      // colonnes dès 3 lignes de suite ; moins de 3, elles restent du texte.
+      // colonnes dès 3 lignes de suite ; moins de 3, elles restent du texte, sauf les lignes à puce des marques
+      // (« - Width : 22.0 ») qui sont toujours une liste de caractéristiques.
       var pairs = [];
       var flushPairs = function () {
-        if (pairs.length >= 3) {
+        if (pairs.length >= 3 || (pairs.length && pairs.every(function (pair) { return pair.bullet; }))) {
           flushParagraphs();
           body += '<dl class="pdp-m__spec">' + pairs.map(function (pair) {
             return '<dt>' + escapeHtml(pair.label) + '</dt><dd>' + escapeHtml(pair.value) + '</dd>';
@@ -2050,7 +2051,7 @@
           var pairLabel = specLabel(pair[1].trim());
           var pairValue = specValue(pair[2].trim());
           if (pairLabel === null || pairValue === null) return;
-          pairs.push({ label: pairLabel, value: pairValue, html: node.outerHTML });
+          pairs.push({ label: pairLabel, value: pairValue, html: node.outerHTML, bullet: /^\s*[-–•]/.test(text) });
           return;
         }
         flushPairs();
@@ -2290,6 +2291,11 @@
 
   buildDescription();
   addMeasuresLink();
+  // « Guida alle taglie » sans rien à ouvrir (ni tableau dans la description, ni guide du produit, métachamp
+  // custom.size_chart via snippets/charts.liquid) : bouton caché au lieu d'un lien qui ne fait rien (nouvelles fiches).
+  if (sizeGuide && !document.getElementById('scWrapper') && !(descBox && descBox.querySelector('[data-pdp-section="size"]'))) {
+    sizeGuide.hidden = true;
+  }
 
   /* ---------- Klarna : pendant son chargement, l'app floute son texte (filter: blur 5px) ; sur un réseau lent le
      client voyait un bandeau flou. Le flou est retiré : quand l'app recharge son message, l'ancien reste net

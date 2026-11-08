@@ -674,7 +674,18 @@
     11. Description en sections + onglets collants : construite par assets/pdp-mobile.js à partir des vrais titres
     de la description du produit (Panoramica, Caratteristiche, Vantaggi, Tabella delle taglie, Specifiche…) et de ses photos.
   {%- endcomment -%}
-  {%- if product.description != blank -%}
+  {%- comment -%}
+    Description réduite à un caractère de remplissage (« x », « * » : fiches des marques importées) : pas de bloc
+    « Descrizione » vide de sens.
+  {%- endcomment -%}
+  {%- liquid
+    assign pm_desc_len = product.description | strip_html | strip | size
+    assign pm_desc_ok = false
+    if pm_desc_len > 2 or product.description contains '<img'
+      assign pm_desc_ok = true
+    endif
+  -%}
+  {%- if product.description != blank and pm_desc_ok -%}
     <template data-pdp-desc-src>{{ product.description }}</template>
     <div class="pdp-m__desc" data-pdp-desc></div>
   {%- endif -%}
