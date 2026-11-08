@@ -761,11 +761,21 @@
     // textes traduits…) : sur téléphone la fiche se montrait d'abord brute, une à plusieurs secondes. 2,5 s au plus.
     // Dans le panneau : la couche de l'aperçu est retirée (la fiche mise en forme est dessous, au même endroit).
     var cover = skeleton;
+    // Photo de départ de la galerie prête (téléchargée et décodée) avant de retirer l'aperçu : sur iPhone la galerie
+    // apparaissait d'abord blanche ~0,5 s (photo encore en route). 1,2 s au plus.
+    var startPhoto = startSlide && startSlide.querySelector('img');
+    var photoReady = function () {
+      if (!startPhoto || (startPhoto.complete && startPhoto.naturalWidth)) return Promise.resolve();
+      var loaded = typeof startPhoto.decode === 'function'
+        ? startPhoto.decode().catch(function () {})
+        : new Promise(function (resolve) { startPhoto.addEventListener('load', resolve, { once: true }); startPhoto.addEventListener('error', resolve, { once: true }); });
+      return Promise.race([loaded, new Promise(function (resolve) { window.setTimeout(resolve, 1200); })]);
+    };
     var reveal = function () {
       var node = cover;
       cover = null;
       if (!node || skeleton !== node) return;
-      window.requestAnimationFrame(function () {
+      photoReady().then(function () { window.requestAnimationFrame(function () {
         if (skeleton !== node) return;
         if (live) {
           var preview = node.querySelector('[data-skeleton-preview]');
@@ -774,7 +784,7 @@
         } else {
           removeSkeleton(true);
         }
-      });
+      }); });
     };
     window.setTimeout(reveal, 2500);
     var scripts = headScripts.map(function (script) { return document.importNode(script, true); });

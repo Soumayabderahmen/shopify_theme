@@ -4600,3 +4600,10 @@ html body:has(.pdp-m__lb:not([hidden])) .firepush-widget-container {
   #root .pdp-m .pdp-rv-wait { opacity: 0; }
   #root .pdp-m .pdp-rv-in { animation: pdp-rv .5s cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: var(--pdp-rv-d, 0ms); }
 }
+
+/* Fiche construite dans le panneau qui glisse (assets/mobile-pdp-layer.js) : la page porte encore les classes de la page
+   d'origine, la règle « body.template-product.pdp-m-page » ne cache pas le fil d'Ariane — son « ‹ Retour » s'affichait
+   en haut de la fiche (page marque en recherche, ~1 à 3 s sur iPhone). */
+@media (max-width: 760px) {
+  #root .pdp-swap-skeleton [id$="__breadcrumbs"] { display: none !important; }
+}
