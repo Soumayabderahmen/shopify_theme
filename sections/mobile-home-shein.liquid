@@ -499,15 +499,35 @@
               -%}
               <a class="mhb__tile" href="{{ mhb_url }}" style="background: {{ mhb_colors[mhb_color] }}">
                 {%- if mhb_image != blank -%}
-                  <img src="{{ mhb_image | image_url: width: 240 }}" alt="" loading="lazy" width="120" height="120">
+                  <img src="{{ mhb_image | image_url: width: 240 }}" alt="" loading="lazy" decoding="async" width="120" height="120">
                 {%- elsif mhb_parts[3] != blank -%}
-                  <img src="{{ mhb_parts[3] | strip }}&width=240" alt="" loading="lazy" width="120" height="120" onerror="this.remove()">
+                  <img src="{{ mhb_parts[3] | strip }}&width=240" alt="" loading="lazy" decoding="async" width="120" height="120" onerror="this.remove()">
                 {%- endif -%}
                 <strong>{{ mhb_parts[0] | escape }}</strong>
               </a>
             {%- endfor -%}
             <button class="mhb__tile mhb__tile--more" type="button" aria-haspopup="dialog" data-mobile-brands-open><strong>{{ 'mobile.explore.see_more_brands' | t }}</strong></button>
           </div>
+          {%- comment -%}
+            Photos des marques : en « lazy », seules les 4 premières étaient chargées, les autres attendaient d'entrer
+            dans l'écran en glissant (cases vides qui se remplissaient pendant le geste). Toutes demandées dès que la
+            bande approche (à ~1 écran), avant que le doigt y arrive.
+          {%- endcomment -%}
+          <script>
+            (function () {
+              var rail = document.currentScript.previousElementSibling;
+              var load = function () {
+                rail.querySelectorAll('img[loading="lazy"]').forEach(function (img) { img.loading = 'eager'; });
+              };
+              if (!('IntersectionObserver' in window)) { load(); return; }
+              var io = new IntersectionObserver(function (entries) {
+                if (!entries.some(function (entry) { return entry.isIntersecting; })) return;
+                io.disconnect();
+                load();
+              }, { rootMargin: '900px 0px' });
+              io.observe(rail);
+            })();
+          </script>
         </section>
 
       {%- when 'feed' -%}

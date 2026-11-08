@@ -413,6 +413,13 @@
     });
     layer.innerHTML = (SCENES[current] ? SCENES[current](Boolean(kind), kind === 'mhs-light' ? Math.round(hero.offsetWidth * 140 / 44) : 0) : '') + html;
     hero.insertBefore(layer, hero.firstChild);
+    // Bannière sortie de l'écran : particules et animations de la bannière en pause (51 animations sans fin continuaient pendant qu'on glissait
+    // les bandes plus bas, ex. « Shop per brand »).
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        hero.classList.toggle('mhh-off', !entries[entries.length - 1].isIntersecting);
+      }).observe(hero);
+    }
     if (withProps) addProps(hero);
     // Boules de Noël : cachées si elles passeraient derrière un texte, un bouton ou une photo
     var hideCovered = function () {

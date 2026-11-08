@@ -1370,16 +1370,53 @@
     return false;
   };
   var drag = null;
+  // La page suit le doigt par une animation en pause dont on déplace le temps (dragAnim.currentTime), pas par son
+  // attribut style : changer le style de #content faisait recalculer toute la page à chaque mouvement (sélecteurs
+  // [style*=…] et :has() du thème, ~100 ms pour 4 000 éléments, la page suivait le doigt à ~10 images/s) ; l'animation
+  // ne touche pas l'attribut (~3 ms).
+  var dragAnim = null;
+  var dragOpacity = function (shift) { return 1 - Math.min(Math.abs(shift) / window.innerWidth, 1) * 0.5; };
   var setDrag = function (shift) {
-    page.style.transform = shift ? 'translate3d(' + shift + 'px, 0, 0)' : '';
-    page.style.opacity = shift ? String(1 - Math.min(Math.abs(shift) / window.innerWidth, 1) * 0.5) : '';
+    if (!page.animate) {
+      page.style.transform = shift ? 'translate3d(' + shift + 'px, 0, 0)' : '';
+      page.style.opacity = shift ? String(dragOpacity(shift)) : '';
+      return;
+    }
+    if (!shift) {
+      if (dragAnim) dragAnim.cancel();
+      dragAnim = null;
+      return;
+    }
+    if (!dragAnim) {
+      var width = window.innerWidth;
+      dragAnim = page.animate([
+        { transform: 'translate3d(' + (-width) + 'px, 0, 0)', opacity: 0.5 },
+        { transform: 'translate3d(0px, 0, 0)', opacity: 1 },
+        { transform: 'translate3d(' + width + 'px, 0, 0)', opacity: 0.5 }
+      ], { duration: 1000, fill: 'both' });
+      dragAnim.pause();
+      dragAnim.width = width;
+    }
+    var limited = Math.max(-dragAnim.width, Math.min(dragAnim.width, shift));
+    dragAnim.currentTime = 500 + limited / dragAnim.width * 500;
   };
   var release = function (shift, to, done) {
     if (reduceMotion || !page.animate) { setDrag(0); done(); return; }
-    var from = { transform: 'translate3d(' + shift + 'px, 0, 0)', opacity: page.style.opacity || 1 };
+    var from = { transform: 'translate3d(' + shift + 'px, 0, 0)', opacity: dragOpacity(shift) };
+    var duration = to ? 170 : 220;
+    var animation = page.animate([from, { transform: 'translate3d(' + to + 'px, 0, 0)', opacity: to ? 0.35 : 1 }], { duration: duration, easing: 'cubic-bezier(0.3, 0.7, 0.4, 1)' });
     setDrag(0);
-    var animation = page.animate([from, { transform: 'translate3d(' + to + 'px, 0, 0)', opacity: to ? 0.35 : 1 }], { duration: to ? 170 : 220, easing: 'cubic-bezier(0.3, 0.7, 0.4, 1)' });
-    animation.onfinish = done;
+    // Changement de rayon sans attendre les images de l'animation : téléphone occupé ou en économie d'énergie
+    // (moins d'images par seconde), la fin de l'animation arrivait bien après ses 170 ms.
+    var finished = false;
+    var finish = function () {
+      if (finished) return;
+      finished = true;
+      animation.cancel();
+      done();
+    };
+    animation.onfinish = finish;
+    window.setTimeout(finish, duration + 60);
   };
   page.addEventListener('touchstart', function (event) {
     drag = null;

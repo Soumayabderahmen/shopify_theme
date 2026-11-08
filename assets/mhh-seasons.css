@@ -117,6 +117,12 @@
   will-change: transform;
 }
 
+/* Bannière hors de l'écran (assets/mhh-seasons.js) : particules et décor animé en pause. */
+[data-season].mhh-off,
+[data-season].mhh-off * {
+  animation-play-state: paused !important;
+}
+
 @keyframes mhh-fall {
   from { transform: translate3d(0, 0, 0) rotate(0deg); }
   to { transform: translate3d(var(--dx), var(--fall, 420px), 0) rotate(var(--r)); }
