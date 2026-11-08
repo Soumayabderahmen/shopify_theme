@@ -6,15 +6,15 @@
    et bannière claire de l'accueil (.mhs-light, texte foncé : teintes pastel). */
 
 /* Couleurs de chaque saison */
-[data-season='spring'] { --mhh-c1: #ff8fc0; --mhh-c2: #d9468a; --mhh-c3: #5e1a52; --mhh-accent: #ffe1ef; --mhh-dot: #9cf29a; --mhs-l1: #ffd3e6; --mhs-l2: #fff0f6; --mhs-l3: #fff; }
-[data-season='summer'] { --mhh-c1: #ffb347; --mhh-c2: #ff7a3d; --mhh-c3: #0a6f9e; --mhh-accent: #ffe27a; --mhh-dot: #ffe27a; --mhs-l1: #ffe0a3; --mhs-l2: #fff4e2; --mhs-l3: #eef9ff; }
-[data-season='autumn'] { --mhh-c1: #f0943f; --mhh-c2: #b5461c; --mhh-c3: #3b1a12; --mhh-accent: #ffd08a; --mhh-dot: #ffb347; --mhs-l1: #ffcf9f; --mhs-l2: #fff0e2; --mhs-l3: #fff; }
-[data-season='xmas'] { --mhh-c1: #ff4d5e; --mhh-c2: #c3132b; --mhh-c3: #3e0612; --mhh-accent: #ffd98a; --mhh-dot: #3ddc97; --mhs-l1: #ffcdd2; --mhs-l2: #fff0f1; --mhs-l3: #fff; }
-[data-season='winter'] { --mhh-c1: #7cc4ff; --mhh-c2: #2f6fd8; --mhh-c3: #0c2559; --mhh-accent: #d6ecff; --mhh-dot: #bfe6ff; --mhs-l1: #cfe7ff; --mhs-l2: #eef7ff; --mhs-l3: #fff; }
+[data-season='spring'], html[data-mhh-season='spring'] .mhh[data-mhh] { --mhh-c1: #ff8fc0; --mhh-c2: #d9468a; --mhh-c3: #5e1a52; --mhh-accent: #ffe1ef; --mhh-dot: #9cf29a; --mhs-l1: #ffd3e6; --mhs-l2: #fff0f6; --mhs-l3: #fff; }
+[data-season='summer'], html[data-mhh-season='summer'] .mhh[data-mhh] { --mhh-c1: #ffb347; --mhh-c2: #ff7a3d; --mhh-c3: #0a6f9e; --mhh-accent: #ffe27a; --mhh-dot: #ffe27a; --mhs-l1: #ffe0a3; --mhs-l2: #fff4e2; --mhs-l3: #eef9ff; }
+[data-season='autumn'], html[data-mhh-season='autumn'] .mhh[data-mhh] { --mhh-c1: #f0943f; --mhh-c2: #b5461c; --mhh-c3: #3b1a12; --mhh-accent: #ffd08a; --mhh-dot: #ffb347; --mhs-l1: #ffcf9f; --mhs-l2: #fff0e2; --mhs-l3: #fff; }
+[data-season='xmas'], html[data-mhh-season='xmas'] .mhh[data-mhh] { --mhh-c1: #ff4d5e; --mhh-c2: #c3132b; --mhh-c3: #3e0612; --mhh-accent: #ffd98a; --mhh-dot: #3ddc97; --mhs-l1: #ffcdd2; --mhs-l2: #fff0f1; --mhs-l3: #fff; }
+[data-season='winter'], html[data-mhh-season='winter'] .mhh[data-mhh] { --mhh-c1: #7cc4ff; --mhh-c2: #2f6fd8; --mhh-c3: #0c2559; --mhh-accent: #d6ecff; --mhh-dot: #bfe6ff; --mhs-l1: #cfe7ff; --mhs-l2: #eef7ff; --mhs-l3: #fff; }
 
 /* ---------- Mobile ---------- */
 @media (max-width: 760px) {
-  #root .mhh[data-season] {
+  #root .mhh[data-season], html[data-mhh-season] #root .mhh[data-mhh] {
     --mhh-top: #0f0d1c;
     background:
       linear-gradient(180deg, var(--mhh-top) 0, var(--mhh-top) var(--mshein-header-h, 122px), rgb(15 13 28 / 0%) calc(var(--mshein-header-h, 122px) + 90px)),
@@ -22,15 +22,15 @@
   }
 
   /* Été : coucher de soleil sur la mer */
-  #root .mhh[data-season='summer'] {
+  #root .mhh[data-season='summer'], html[data-mhh-season='summer'] #root .mhh[data-mhh] {
     background:
       linear-gradient(180deg, var(--mhh-top) 0, var(--mhh-top) var(--mshein-header-h, 122px), rgb(15 13 28 / 0%) calc(var(--mshein-header-h, 122px) + 90px)),
       linear-gradient(200deg, #ffc35a 0%, #ff7a3d 38%, #d2486a 62%, #0a6f9e 100%);
   }
 
-  #root .mhh[data-season] h2 span { color: var(--mhh-accent); }
-  .mhh[data-season] .mhh__eb i { background: var(--mhh-dot); box-shadow: 0 0 0 3px color-mix(in srgb, var(--mhh-dot) 25%, transparent); }
-  #root .mhh[data-season] .mhh__btn { color: var(--mhh-c3) !important; }
+  #root .mhh[data-season] h2 span, html[data-mhh-season] #root .mhh[data-mhh] h2 span { color: var(--mhh-accent); }
+  .mhh[data-season] .mhh__eb i, html[data-mhh-season] .mhh[data-mhh] .mhh__eb i { background: var(--mhh-dot); box-shadow: 0 0 0 3px color-mix(in srgb, var(--mhh-dot) 25%, transparent); }
+  #root .mhh[data-season] .mhh__btn, html[data-mhh-season] #root .mhh[data-mhh] .mhh__btn { color: var(--mhh-c3) !important; }
 }
 
 /* ---------- Ordinateur ---------- */

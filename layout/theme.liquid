@@ -102,6 +102,9 @@
     <link rel="stylesheet" href="{{ 'atc-feedback.css' | asset_url }}">
     <script src="{{ 'atc-feedback.js' | asset_url }}"></script>
     {%- comment -%} Bannières mobile et ordinateur aux couleurs de la saison (neige, pluie, feuilles, pétales, soleil) {%- endcomment -%}
+    {%- comment -%} Saison posée tout de suite sur <html> : la bannière s'affiche directement à ses couleurs (sans passer
+      par le bleu en attendant mhh-seasons.js, chargé en différé). Même calcul que dans mhh-seasons.js. {%- endcomment -%}
+    <script>(function(){var N={printemps:'spring',ete:'summer',automne:'autumn',noel:'xmas',hiver:'winter'},f=null;try{var q=new URLSearchParams(location.search).get('saison');if(q&&N[q])f=q;else if(q!=='auto')f=sessionStorage.getItem('mhhSeason');}catch(e){}var d=new Date(),m=d.getMonth()+1,s=f&&N[f]?N[f]:(m===12||(m===1&&d.getDate()<=6))?'xmas':m<=2?'winter':m<=5?'spring':m<=8?'summer':'autumn';document.documentElement.setAttribute('data-mhh-season',s);})();</script>
     <link rel="stylesheet" href="{{ 'mhh-seasons.css' | asset_url }}">
     <script src="{{ 'mhh-seasons.js' | asset_url }}" defer></script>
     {%- liquid
