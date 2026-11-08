@@ -345,8 +345,14 @@
     };
     var runMarq = function () {
       clearInterval(marqTimer);
-      if (!still) marqTimer = setInterval(function () { if (!document.hidden) showDept(current + 1); }, 4500);
+      if (!still) marqTimer = setInterval(function () { if (!document.hidden && !marqHover) showDept(current + 1); }, 4500);
     };
+    // Souris sur le mot géant ou sur ses produits : le rayon ne change pas (reprise 4,5 s après la sortie)
+    var marqHover = false;
+    [marq, prods].forEach(function (zone) {
+      zone.addEventListener('mouseenter', function () { marqHover = true; });
+      zone.addEventListener('mouseleave', function () { marqHover = false; runMarq(); });
+    });
     row.addEventListener('click', function (event) {
       var word = event.target.closest('[data-i]');
       if (!word) return;
