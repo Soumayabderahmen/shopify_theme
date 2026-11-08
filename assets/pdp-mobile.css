@@ -4582,3 +4582,21 @@ html body:has(.pdp-m__lb:not([hidden])) .firepush-widget-container {
   background: rgb(22 18 63 / 7%);
   border-radius: 999px;
 }
+
+/* Arrivée de la fiche sur mobile, bloc par bloc.
+   - Fiche ouverte directement (lien, produit touché depuis une fiche) : le haut entre l'un après l'autre (photos, marque,
+     « Avantages exclusifs », carte prix). Fiche ouverte sur place (html.pdp-inplace, assets/mobile-pdp-layer.js) : pas
+     d'entrée, l'aperçu qui glisse montre déjà ce haut à l'identique.
+   - Dans les deux cas, les blocs sous l'écran apparaissent en douceur au défilement (assets/pdp-mobile.js).
+   Animations en « backwards » : plus aucun effet une fois finies (fenêtres et barres fixes intactes). */
+@keyframes pdp-rv { from { opacity: 0; transform: translateY(18px); } }
+@media (max-width: 760px) and (prefers-reduced-motion: no-preference) {
+  html:not(.pdp-inplace) #root .pdp-m .pdp-m__top > :is(.pdp-m__gal, .pdp-m__brand, .pdp-m__vant, .pdp-m__price-card) {
+    animation: pdp-rv .5s cubic-bezier(.2, .8, .2, 1) backwards;
+  }
+  html:not(.pdp-inplace) #root .pdp-m .pdp-m__top > .pdp-m__brand { animation-delay: .07s; }
+  html:not(.pdp-inplace) #root .pdp-m .pdp-m__top > .pdp-m__vant { animation-delay: .12s; }
+  html:not(.pdp-inplace) #root .pdp-m .pdp-m__top > .pdp-m__price-card { animation-delay: .17s; }
+  #root .pdp-m .pdp-rv-wait { opacity: 0; }
+  #root .pdp-m .pdp-rv-in { animation: pdp-rv .5s cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: var(--pdp-rv-d, 0ms); }
+}

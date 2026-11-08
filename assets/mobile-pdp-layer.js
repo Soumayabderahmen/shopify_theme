@@ -26,6 +26,9 @@
   var main = document.getElementById('content');
   var pageRoot = document.getElementById('root');
   if (!main || !pageRoot) return;
+  // Fiches ouvertes sur place sur cette page : pas d'entrée bloc par bloc du haut de la fiche (assets/pdp-mobile.css),
+  // l'aperçu qui glisse le montre déjà
+  root.classList.add('pdp-inplace');
 
   var cache = {};
   var ran = {};
@@ -47,6 +50,10 @@
     root.style.scrollBehavior = previous;
   };
 
+  // Ordinateur : fiche ouverte sur place quand la fiche en attente existe (assets/brand-instant.js, chargé partout)
+  var desktopReady = function () {
+    return !!(window.__brandInstant && typeof window.__brandInstant.hide === 'function');
+  };
   var isProduct = function (url) {
     return url.origin === window.location.origin && PRODUCT_PATH.test(url.pathname);
   };
@@ -560,7 +567,7 @@
     });
   };
   var slideOut = function () {
-    if (!motion()) return false;
+    if (!motion() || !mobile.matches) return false;
     var sheet = added.filter(function (node) { return node.querySelector && node.querySelector('[data-pdp-mobile]'); })[0];
     if (!sheet) return false;
     var y = window.scrollY;
@@ -603,6 +610,8 @@
     token += 1;
     closedAt = Date.now();
     progress(false);
+    // Ordinateur, retour pendant l'attente : la fiche en attente part, la page revient à sa position
+    if (!saved && !mobile.matches && desktopReady() && window.__brandInstant.hide() && openY !== null) jump(openY);
     if (!saved) {
       // Retour pendant l'arrivée : l'aperçu (et la fiche en construction dedans) repart vers la droite, la page revient
       // de la parallaxe ; ce que la fiche a mis ailleurs (fenêtres déplacées dans <body>) et ses styles sont retirés.
@@ -668,6 +677,8 @@
     });
     var sticky = doc.getElementById('shopify-section-sticky-add-to-cart');
     closeOverlays();
+    // Ordinateur : la fiche en attente laisse la place à la vraie fiche
+    if (desktopReady()) window.__brandInstant.hide();
     var headScripts = Array.prototype.filter.call(doc.head.querySelectorAll('script[src]'), function (script) {
       var src = bare(abs(script.getAttribute('src')));
       if (RERUN.test(src)) return true;
@@ -745,7 +756,7 @@
     // Photo de la carte transmise à assets/pdp-mobile.js, qui place la galerie dans ses mesures groupées (avant le
     // premier affichage) ; hors panneau, placée tout de suite ici aussi.
     window.msheinPdpStartSlide = cardMatched ? startIndex : null;
-    if (startIndex > 0 && !live) placeGallery();
+    if (startIndex > 0 && !live && mobile.matches) placeGallery();
     // L'aperçu reste par-dessus jusqu'à la mise en forme par assets/pdp-mobile.js (galerie, options, badges déplacés,
     // textes traduits…) : sur téléphone la fiche se montrait d'abord brute, une à plusieurs secondes. 2,5 s au plus.
     // Dans le panneau : la couche de l'aperçu est retirée (la fiche mise en forme est dessous, au même endroit).
@@ -1127,7 +1138,14 @@
     // Barre de chargement seulement sans aperçu (retour / avance du navigateur) : l'aperçu couvre déjà l'écran, et sa
     // classe sur <html> faisait recalculer toute la page au toucher (~130 ms avant que l'aperçu bouge).
     if (!push) progress(true);
-    if (push) {
+    if (push && !mobile.matches) {
+      // Ordinateur : fiche en attente (photo, titre et prix de la carte) tout de suite à la place du contenu, sous
+      // l'en-tête ; la vraie fiche la remplace dès qu'elle est prête (show), sans glissement.
+      closeOverlays();
+      if (!saved) openY = window.scrollY;
+      if (desktopReady()) window.__brandInstant.show(link, 'product');
+      window.setTimeout(function () { if (mine === token) pushProduct(href); }, 0);
+    } else if (push) {
       // Avant d'enregistrer la position : un panneau du header ouvert la bloque (et la remet en se fermant).
       closeOverlays();
       // Position de la page au toucher (sous l'aperçu, la page peut encore bouger avant l'arrivée de la fiche).
@@ -1199,7 +1217,8 @@
   };
 
   var productLink = function (event) {
-    if (!mobile.matches) return null;
+    // Ordinateur : aussi sur place, avec la fiche en attente de assets/brand-instant.js à la place du panneau qui glisse
+    if (!mobile.matches && !desktopReady()) return null;
     var link = event.target.closest ? event.target.closest('a[href]') : null;
     if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return null;
     var url = new URL(link.href, window.location.href);
@@ -1208,6 +1227,21 @@
 
   // Page demandée dès le toucher : elle arrive souvent avant la fin du toucher.
   document.addEventListener('touchstart', function (event) {
+    var url = productLink(event);
+    if (url) fetchDoc(url.href).catch(function () {});
+  }, { passive: true });
+  // Ordinateur : demandée au survol de la carte (80 ms), puis au clic (pointerdown) si le survol a été trop court
+  var hoverTimer = null;
+  document.addEventListener('mouseover', function (event) {
+    if (mobile.matches) return;
+    var url = productLink(event);
+    window.clearTimeout(hoverTimer);
+    var connection = navigator.connection || {};
+    if (!url || connection.saveData || /2g/.test(connection.effectiveType || '')) return;
+    hoverTimer = window.setTimeout(function () { fetchDoc(url.href).catch(function () {}); }, 80);
+  }, { passive: true });
+  document.addEventListener('pointerdown', function (event) {
+    if (mobile.matches || event.button !== 0) return;
     var url = productLink(event);
     if (url) fetchDoc(url.href).catch(function () {});
   }, { passive: true });
@@ -1221,7 +1255,7 @@
     if (connection.saveData || /2g/.test(connection.effectiveType || '')) return;
     // Styles des fiches (liste retenue à la première fiche) téléchargés dès que la page est au repos : la première
     // fiche ouverte est mise en forme dès son apparition.
-    if (cfg && cfg.head && mobile.matches) {
+    if (cfg && cfg.head) {
       (window.requestIdleCallback || function (fn) { return window.setTimeout(fn, 1500); })(function () {
         warmStyles(parse('<!doctype html><html><head>' + cfg.head + '</head><body></body></html>'));
       });

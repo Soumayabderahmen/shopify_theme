@@ -347,5 +347,14 @@
     event.preventDefault();
     go(link, 'product');
   });
-  window.__brandInstant = { show: show };
+  // hide : la fiche en attente laisse la place à la vraie (fiche ouverte sur place, assets/mobile-pdp-layer.js) ;
+  // true s'il y en avait une
+  var hide = function () {
+    document.documentElement.classList.remove('bri-on');
+    if (!ghost) return false;
+    ghost.remove();
+    ghost = null;
+    return true;
+  };
+  window.__brandInstant = { show: show, hide: hide };
 })();

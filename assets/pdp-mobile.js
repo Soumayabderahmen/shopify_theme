@@ -2733,4 +2733,35 @@
     if (klarna) klarna.textContent = T('klarna_installments', { amount: money(Math.round(variant.price / 3)) });
   }
   updateTotals();
+
+  // ---------- Mobile : blocs sous l'écran (cartes, description, produits similaires) qui apparaissent en douceur quand
+  // on arrive dessus, l'un après l'autre (assets/pdp-mobile.css, pdp-rv) ; ceux du premier écran ne bougent pas ----------
+  (function () {
+    if (!window.matchMedia('(max-width: 760px)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var limit = window.innerHeight;
+    var waiting = [].slice.call(root.querySelectorAll(':scope > .pdp-m__top > section.pdp-m__card, :scope > .pdp-m__top > .pdp-m__klo, :scope > .pdp-m__desc, :scope > .pdp-m__sec, :scope > .pdp-m__rel'))
+      .filter(function (block) { return block.getBoundingClientRect().top > limit; });
+    if (!waiting.length) return;
+    waiting.forEach(function (block) { block.classList.add('pdp-rv-wait'); });
+    var ticking = false;
+    var check = function () {
+      ticking = false;
+      var bottom = window.innerHeight * 0.94;
+      var n = 0;
+      waiting = waiting.filter(function (block) {
+        if (!block.isConnected) return false;
+        if (block.getBoundingClientRect().top > bottom) return true;
+        block.style.setProperty('--pdp-rv-d', (n++ * 70) + 'ms');
+        block.classList.remove('pdp-rv-wait');
+        block.classList.add('pdp-rv-in');
+        return false;
+      });
+    };
+    // Défilement du doigt, onglets « Articolo / Recensioni / Consigliati » (défilement vers la section) compris
+    listen(window, 'scroll', function () {
+      if (ticking || !waiting.length) return;
+      ticking = true;
+      window.requestAnimationFrame(check);
+    }, { passive: true });
+  })();
 })();

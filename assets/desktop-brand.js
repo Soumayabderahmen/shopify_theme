@@ -413,6 +413,7 @@
       if (shopifyNone) shopifyNone.remove();
     };
     var load = function (href, push) {
+      shownHref = href;
       close();
       if (menu) menu.classList.remove('open');
       if (pchip) pchip.classList.remove('open');
@@ -498,7 +499,14 @@
       decorateCards(grid);
       if (window.msheinCards && typeof window.msheinCards.decorate === 'function') window.msheinCards.decorate(grid);
     };
-    window.addEventListener('popstate', function () { if (root.isConnected) load(location.href, false); });
+    // Retour vers l'adresse déjà affichée (fermeture d'une fiche ouverte sur place, assets/mobile-pdp-layer.js) : rien
+    // à recharger, la page est restée telle quelle (avant : produits rechargés et page remontée aux produits)
+    var shownHref = location.href;
+    var sameUrl = function (a, b) { return String(a).split('#')[0] === String(b).split('#')[0]; };
+    window.addEventListener('popstate', function () {
+      if (!root.isConnected || sameUrl(new URL(shownHref, location.href).href, location.href)) return;
+      load(location.href, false);
+    });
 
     // ---------- Catégories sans recharger la page (comme les rayons des pages collection) : pastilles, grandes cartes,
     // catégories du panneau de la marque ----------
