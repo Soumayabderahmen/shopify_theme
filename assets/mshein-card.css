@@ -743,9 +743,9 @@
   }
 }
 
-@media (max-width: 760px) {
-  /* ---------- Mobile, toutes les pages : note et ventes sur une seule ligne comme les cartes de l'accueil
-     (« ★ 4,8 · 132 venduti di recente » ; sans chiffre de ventes : nombre d'avis). L'ordinateur ne change pas. ---------- */
+@media all {
+  /* ---------- Mobile et ordinateur, toutes les pages : note et ventes sur une seule ligne comme les cartes de l'accueil
+     mobile (« ★ 4,8 · 132 venduti di recente » ; sans chiffre de ventes : nombre d'avis). ---------- */
   #root .mshein-card__body {
     display: flex;
     flex-wrap: wrap;
