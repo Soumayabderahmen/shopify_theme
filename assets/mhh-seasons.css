@@ -6,11 +6,11 @@
    et bannière claire de l'accueil (.mhs-light, texte foncé : teintes pastel). */
 
 /* Couleurs de chaque saison */
-[data-season='spring'], html[data-mhh-season='spring'] .mhh[data-mhh] { --mhh-c1: #ff8fc0; --mhh-c2: #d9468a; --mhh-c3: #5e1a52; --mhh-accent: #ffe1ef; --mhh-dot: #9cf29a; --mhs-l1: #ffd3e6; --mhs-l2: #fff0f6; --mhs-l3: #fff; }
-[data-season='summer'], html[data-mhh-season='summer'] .mhh[data-mhh] { --mhh-c1: #ffb347; --mhh-c2: #ff7a3d; --mhh-c3: #0a6f9e; --mhh-accent: #ffe27a; --mhh-dot: #ffe27a; --mhs-l1: #ffe0a3; --mhs-l2: #fff4e2; --mhs-l3: #eef9ff; }
-[data-season='autumn'], html[data-mhh-season='autumn'] .mhh[data-mhh] { --mhh-c1: #f0943f; --mhh-c2: #b5461c; --mhh-c3: #3b1a12; --mhh-accent: #ffd08a; --mhh-dot: #ffb347; --mhs-l1: #ffcf9f; --mhs-l2: #fff0e2; --mhs-l3: #fff; }
-[data-season='xmas'], html[data-mhh-season='xmas'] .mhh[data-mhh] { --mhh-c1: #ff4d5e; --mhh-c2: #c3132b; --mhh-c3: #3e0612; --mhh-accent: #ffd98a; --mhh-dot: #3ddc97; --mhs-l1: #ffcdd2; --mhs-l2: #fff0f1; --mhs-l3: #fff; }
-[data-season='winter'], html[data-mhh-season='winter'] .mhh[data-mhh] { --mhh-c1: #7cc4ff; --mhh-c2: #2f6fd8; --mhh-c3: #0c2559; --mhh-accent: #d6ecff; --mhh-dot: #bfe6ff; --mhs-l1: #cfe7ff; --mhs-l2: #eef7ff; --mhs-l3: #fff; }
+[data-season='spring'], html[data-mhh-season='spring'] { --mhh-c1: #ff8fc0; --mhh-c2: #d9468a; --mhh-c3: #5e1a52; --mhh-accent: #ffe1ef; --mhh-dot: #9cf29a; --mhs-l1: #ffd3e6; --mhs-l2: #fff0f6; --mhs-l3: #fff; }
+[data-season='summer'], html[data-mhh-season='summer'] { --mhh-c1: #ffb347; --mhh-c2: #ff7a3d; --mhh-c3: #0a6f9e; --mhh-accent: #ffe27a; --mhh-dot: #ffe27a; --mhs-l1: #ffe0a3; --mhs-l2: #fff4e2; --mhs-l3: #eef9ff; }
+[data-season='autumn'], html[data-mhh-season='autumn'] { --mhh-c1: #f0943f; --mhh-c2: #b5461c; --mhh-c3: #3b1a12; --mhh-accent: #ffd08a; --mhh-dot: #ffb347; --mhs-l1: #ffcf9f; --mhs-l2: #fff0e2; --mhs-l3: #fff; }
+[data-season='xmas'], html[data-mhh-season='xmas'] { --mhh-c1: #ff4d5e; --mhh-c2: #c3132b; --mhh-c3: #3e0612; --mhh-accent: #ffd98a; --mhh-dot: #3ddc97; --mhs-l1: #ffcdd2; --mhs-l2: #fff0f1; --mhs-l3: #fff; }
+[data-season='winter'], html[data-mhh-season='winter'] { --mhh-c1: #7cc4ff; --mhh-c2: #2f6fd8; --mhh-c3: #0c2559; --mhh-accent: #d6ecff; --mhh-dot: #bfe6ff; --mhs-l1: #cfe7ff; --mhs-l2: #eef7ff; --mhs-l3: #fff; }
 
 /* ---------- Mobile ---------- */
 @media (max-width: 760px) {
@@ -34,14 +34,16 @@
 }
 
 /* ---------- Ordinateur ---------- */
+/* Couleurs posées dès l'affichage grâce à html[data-mhh-season] (script en ligne de layout/theme.liquid) ; mhh-seasons.js
+   ajoute ensuite les classes mhs-* et les particules. */
 @media (min-width: 761px) {
   /* Bannières foncées (texte blanc) */
-  .mhs-dark[data-season] {
+  .mhs-dark[data-season], html[data-mhh-season] :is(.dcl .cph, .dct-hero, .dtr .trust-badges, .wishlist-page__heading) {
     isolation: isolate;
     background: radial-gradient(120% 140% at 100% 0%, var(--mhh-c1) 0%, var(--mhh-c2) 38%, var(--mhh-c3) 100%) !important;
   }
 
-  .mhs-dark[data-season='summer'] {
+  .mhs-dark[data-season='summer'], html[data-mhh-season='summer'] :is(.dcl .cph, .dct-hero, .dtr .trust-badges, .wishlist-page__heading) {
     background: linear-gradient(200deg, #ffc35a 0%, #ff7a3d 34%, #d2486a 60%, #0a6f9e 100%) !important;
   }
 
@@ -64,7 +66,7 @@
   }
 
   /* Bannière claire de l'accueil : teintes pastel, texte foncé inchangé */
-  .mhs-light[data-season] {
+  .mhs-light[data-season], html[data-mhh-season] .dhp-hero {
     isolation: isolate;
     background: radial-gradient(120% 140% at 85% 20%, var(--mhs-l1) 0%, var(--mhs-l2) 45%, var(--mhs-l3) 78%) !important;
   }
