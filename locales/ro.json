@@ -959,7 +959,21 @@
     "term_limits": "Limitări",
     "eu_clients_title": "Pentru clienții din Uniunea Europeană (UE)",
     "extra_eu_clients_title": "Pentru clienții internaționali (din afara UE)",
-    "support_title": "Asistență și suport pentru clienți"
+    "support_title": "Asistență și suport pentru clienți",
+    "term_discount_value_text": "20% din totalul produselor eligibile.",
+    "term_min_spend_text": "Valabil pentru cumpărături de la 40,00 €.",
+    "term_max_discount_text": "12,00 €.",
+    "term_validity_text": "Valabil în cicluri de 48 de ore de la prima vizită a clientului și reînnoit automat.",
+    "term_limits_text": "Nu se cumulează cu alte coduri promoționale.",
+    "eu_prices_label": "Transparența prețurilor (Directiva UE 2019/2161 - Omnibus)",
+    "eu_prices_text": "Procentul de reducere se aplică prețului de vânzare. Orice preț anterior se referă la cel mai mic preț din ultimele 30 de zile.",
+    "eu_withdrawal_label": "Dreptul de retragere (Directiva UE 2011/83/UE)",
+    "eu_withdrawal_text": "Dreptul de retragere garantat în 14 zile. Rambursarea în caz de retur va corespunde sumei nete plătite efectiv.",
+    "extra_discount_label": "Calculul reducerii",
+    "extra_discount_text": "Reducerea se aplică doar valorii nete a produselor, fără transportul internațional și vămuirea.",
+    "extra_duties_label": "Taxe vamale și impozite",
+    "extra_duties_text": "Taxele și impozitele vamale locale sunt suportate de client.",
+    "support_text": "Dacă ai întrebări sau probleme cu codul de reducere, echipa noastră te ajută:"
   },
   "discount_R": {
     "Risparmio": "Economisești"
@@ -1573,6 +1587,7 @@
       "login": "Autentificare",
       "filter": "Filtrează favoritele",
       "sort_recent": "Adăugate recent",
+      "sort_label": "Sortează:",
       "sort_asc": "Preț: crescător",
       "sort_desc": "Preț: descrescător",
       "edit": "Modifică",

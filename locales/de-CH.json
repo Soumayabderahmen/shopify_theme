@@ -869,7 +869,21 @@
     "term_limits": "Einschränkungen",
     "eu_clients_title": "Für Kunden aus der Europäischen Union (EU)",
     "extra_eu_clients_title": "Für internationale Kunden (Nicht-EU)",
-    "support_title": "Kundenservice und Support"
+    "support_title": "Kundenservice und Support",
+    "term_discount_value_text": "20 % auf den Gesamtbetrag der berechtigten Produkte.",
+    "term_min_spend_text": "Gültig für Einkäufe ab 40,00 €.",
+    "term_max_discount_text": "12,00 €.",
+    "term_validity_text": "Gültig in Zyklen von 48 Stunden ab dem ersten Besuch des Kunden und automatisch verlängert.",
+    "term_limits_text": "Nicht mit anderen Rabattcodes kombinierbar.",
+    "eu_prices_label": "Preistransparenz (EU-Richtlinie 2019/2161 - Omnibus)",
+    "eu_prices_text": "Der Rabatt wird auf den Verkaufspreis angewendet. Jeder frühere Preis bezieht sich auf den niedrigsten Preis der letzten 30 Tage.",
+    "eu_withdrawal_label": "Widerrufsrecht (EU-Richtlinie 2011/83/EU)",
+    "eu_withdrawal_text": "Widerrufsrecht innerhalb von 14 Tagen garantiert. Die Erstattung bei einer Rücksendung entspricht dem tatsächlich gezahlten Nettobetrag.",
+    "extra_discount_label": "Rabattberechnung",
+    "extra_discount_text": "Der Rabatt gilt nur für den Nettowert der Produkte, ohne internationale Versandkosten und Verzollung.",
+    "extra_duties_label": "Zölle und Steuern",
+    "extra_duties_text": "Lokale Steuern und Zölle trägt der Kunde.",
+    "support_text": "Bei Fragen oder Problemen mit dem Rabattcode ist unser Team für dich da:"
   },
   "border": {
     "top_picks": "Top-Auswahl"
@@ -1478,6 +1492,7 @@
       "login": "Anmelden",
       "filter": "Wunschliste filtern",
       "sort_recent": "Zuletzt hinzugefügt",
+      "sort_label": "Sortieren:",
       "sort_asc": "Preis aufsteigend",
       "sort_desc": "Preis absteigend",
       "edit": "Bearbeiten",

@@ -953,7 +953,21 @@
     "term_limits": "Limitazioni",
     "eu_clients_title": "Per i Clienti dell'Unione Europea (UE)",
     "extra_eu_clients_title": "Per i Clienti Internazionali (Extra-UE)",
-    "support_title": "Assistenza e Supporto Clienti"
+    "support_title": "Assistenza e Supporto Clienti",
+    "term_discount_value_text": "20% sul totale dei prodotti idonei.",
+    "term_min_spend_text": "Applicabile su acquisti da 40,00 €.",
+    "term_max_discount_text": "12,00 €.",
+    "term_validity_text": "Valida per cicli da 48 ore dalla prima visita del cliente e automaticamente rinnovabile.",
+    "term_limits_text": "Non cumulabile con altri codici promozionali.",
+    "eu_prices_label": "Trasparenza Prezzi (Direttiva UE 2019/2161 - Omnibus)",
+    "eu_prices_text": "La percentuale di sconto viene applicata al prezzo di vendita. Ogni prezzo precedente fa riferimento al prezzo più basso degli ultimi 30 giorni.",
+    "eu_withdrawal_label": "Diritto di Recesso (Direttiva UE 2011/83/UE)",
+    "eu_withdrawal_text": "Diritto di recesso garantito entro 14 giorni. Il rimborso in caso di reso corrisponderà al valore netto effettivamente pagato.",
+    "extra_discount_label": "Calcolo Sconto",
+    "extra_discount_text": "Sconto applicato unicamente sul valore netto dei prodotti, escluse spese di spedizione estere e sdoganamento.",
+    "extra_duties_label": "Dazi e Tasse",
+    "extra_duties_text": "Imposte e dazi doganali locali rimangono a carico del cliente.",
+    "support_text": "In caso di domande o difficoltà con il codice sconto, il nostro team è a disposizione:"
   },
   "discount_R": {
     "Risparmio": "Risparmio"
@@ -1567,6 +1581,7 @@
       "login": "Accedi",
       "filter": "Filtra la wishlist",
       "sort_recent": "Aggiunti di recente",
+      "sort_label": "Ordina:",
       "sort_asc": "Prezzo crescente",
       "sort_desc": "Prezzo decrescente",
       "edit": "Modifica",

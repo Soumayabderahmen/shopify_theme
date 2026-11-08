@@ -890,7 +890,21 @@
     "term_limits": "Beperkingen",
     "eu_clients_title": "Voor klanten binnen de Europese Unie (EU)",
     "extra_eu_clients_title": "Voor internationale klanten (Buiten de EU)",
-    "support_title": "Klantenservice en ondersteuning"
+    "support_title": "Klantenservice en ondersteuning",
+    "term_discount_value_text": "20% op het totaal van de geschikte producten.",
+    "term_min_spend_text": "Geldig bij aankopen vanaf € 40,00.",
+    "term_max_discount_text": "€ 12,00.",
+    "term_validity_text": "Geldig in cycli van 48 uur vanaf het eerste bezoek van de klant en automatisch verlengd.",
+    "term_limits_text": "Niet te combineren met andere kortingscodes.",
+    "eu_prices_label": "Prijstransparantie (EU-richtlijn 2019/2161 - Omnibus)",
+    "eu_prices_text": "Het kortingspercentage wordt toegepast op de verkoopprijs. Elke eerdere prijs verwijst naar de laagste prijs van de afgelopen 30 dagen.",
+    "eu_withdrawal_label": "Herroepingsrecht (EU-richtlijn 2011/83/EU)",
+    "eu_withdrawal_text": "Herroepingsrecht gegarandeerd binnen 14 dagen. De terugbetaling bij een retour is gelijk aan het netto betaalde bedrag.",
+    "extra_discount_label": "Berekening van de korting",
+    "extra_discount_text": "De korting geldt alleen voor de nettowaarde van de producten, exclusief internationale verzending en inklaring.",
+    "extra_duties_label": "Invoerrechten en belastingen",
+    "extra_duties_text": "Lokale belastingen en invoerrechten zijn voor rekening van de klant.",
+    "support_text": "Heb je vragen of problemen met de kortingscode? Ons team helpt je graag:"
   },
   "border": {
     "top_picks": "Topkeuzes"
@@ -1496,6 +1510,7 @@
       "login": "Inloggen",
       "filter": "Verlanglijst filteren",
       "sort_recent": "Onlangs toegevoegd",
+      "sort_label": "Sorteren:",
       "sort_asc": "Prijs oplopend",
       "sort_desc": "Prijs aflopend",
       "edit": "Bewerken",

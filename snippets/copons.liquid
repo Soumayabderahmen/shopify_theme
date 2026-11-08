@@ -111,22 +111,18 @@
       <span class="ve-dhead-title">
         {{- 'vantaggi.terms_modal_title' | t: default: 'Termini e Condizioni Promozionali' -}}
       </span>
-      <button class="ve-dclose" id="ve-close-terms-x" type="button" aria-label="Chiudi">x</button>
+      <button class="ve-dclose" id="ve-close-terms-x" type="button" aria-label="{{ 'vantaggi.close' | t }}">x</button>
     </div>
     <div class="ve-dbody">
       <!-- Dettagli del Coupon -->
       <div class="ve-ocard ve-ocard-drawer">
         <div class="ve-otag">📌 {{ 'vantaggi.promo_details_title' | t: default: 'Dettagli della Promozione' }}</div>
         <p class="ve-odesc ve-odesc-last">
-          • <strong>{{ 'vantaggi.term_discount_value' | t: default: 'Valore sconto' }}:</strong> 20% sul totale dei
-          prodotti idonei.<br>
-          • <strong>{{ 'vantaggi.term_min_spend' | t: default: 'Spesa minima' }}:</strong> Applicabile su acquisti da
-          40,00 €.<br>
-          • <strong>{{ 'vantaggi.term_max_discount' | t: default: 'Sconto massimo' }}:</strong> 12,00 €.<br>
-          • <strong>{{ 'vantaggi.term_validity' | t: default: 'Durata offerta' }}:</strong> Valida per cicli da 48 ore
-          dalla prima visita del cliente e automaticamente rinnovabile.<br>
-          • <strong>{{ 'vantaggi.term_limits' | t: default: 'Limitazioni' }}:</strong> Non cumulabile con altri codici
-          promozionali.
+          • <strong>{{ 'vantaggi.term_discount_value' | t: default: 'Valore sconto' }}:</strong> {{ 'vantaggi.term_discount_value_text' | t }}<br>
+          • <strong>{{ 'vantaggi.term_min_spend' | t: default: 'Spesa minima' }}:</strong> {{ 'vantaggi.term_min_spend_text' | t }}<br>
+          • <strong>{{ 'vantaggi.term_max_discount' | t: default: 'Sconto massimo' }}:</strong> {{ 'vantaggi.term_max_discount_text' | t }}<br>
+          • <strong>{{ 'vantaggi.term_validity' | t: default: 'Durata offerta' }}:</strong> {{ 'vantaggi.term_validity_text' | t }}<br>
+          • <strong>{{ 'vantaggi.term_limits' | t: default: 'Limitazioni' }}:</strong> {{ 'vantaggi.term_limits_text' | t }}
         </p>
       </div>
 
@@ -136,11 +132,8 @@
           🇪🇺 {{ 'vantaggi.eu_clients_title' | t: default: "Per i Clienti dell'Unione Europea (UE)" }}
         </div>
         <p class="ve-odesc ve-odesc-last">
-          • <strong>Trasparenza Prezzi (Direttiva UE 2019/2161 - Omnibus):</strong> La percentuale di sconto viene
-          applicata al prezzo di vendita. Ogni prezzo precedente fa riferimento al prezzo più basso degli ultimi 30
-          giorni.<br>
-          • <strong>Diritto di Recesso (Direttiva UE 2011/83/UE):</strong> Diritto di recesso garantito entro 14 giorni.
-          Il rimborso in caso di reso corrisponderà al valore netto effettivamente pagato.
+          • <strong>{{ 'vantaggi.eu_prices_label' | t }}:</strong> {{ 'vantaggi.eu_prices_text' | t }}<br>
+          • <strong>{{ 'vantaggi.eu_withdrawal_label' | t }}:</strong> {{ 'vantaggi.eu_withdrawal_text' | t }}
         </p>
       </div>
 
@@ -150,9 +143,8 @@
           🌐 {{ 'vantaggi.extra_eu_clients_title' | t: default: 'Per i Clienti Internazionali (Extra-UE)' }}
         </div>
         <p class="ve-odesc ve-odesc-last">
-          • <strong>Calcolo Sconto:</strong> Sconto applicato unicamente sul valore netto dei prodotti, escluse spese di
-          spedizione estere e sdoganamento.<br>
-          • <strong>Dazi e Tasse:</strong> Imposte e dazi doganali locali rimangono a carico del cliente.
+          • <strong>{{ 'vantaggi.extra_discount_label' | t }}:</strong> {{ 'vantaggi.extra_discount_text' | t }}<br>
+          • <strong>{{ 'vantaggi.extra_duties_label' | t }}:</strong> {{ 'vantaggi.extra_duties_text' | t }}
         </p>
       </div>
 
@@ -160,7 +152,7 @@
       <div class="ve-ocard ve-ocard-drawer">
         <div class="ve-otag">✉️ {{ 'vantaggi.support_title' | t: default: 'Assistenza e Supporto Clienti' }}</div>
         <p class="ve-odesc ve-odesc-last">
-          In caso di domande o difficoltà con il codice sconto, il nostro team è a disposizione:<br>
+          {{ 'vantaggi.support_text' | t }}<br>
           Email:
           <a href="mailto:contact@platinumshop.it" class="ve-terms-link" style="font-weight:700;"
             >contact@platinumshop.it</a
@@ -833,22 +825,18 @@
       <span class="ve-dhead-title">
         {{- 'vantaggi.terms_modal_title' | t: default: 'Termini e Condizioni Promozionali' -}}
       </span>
-      <button class="ve-dclose" id="ve-close-terms-x" type="button" aria-label="Chiudi">✕</button>
+      <button class="ve-dclose" id="ve-close-terms-x" type="button" aria-label="{{ 'vantaggi.close' | t }}">✕</button>
     </div>
     <div class="ve-dbody">
       <!-- Dettagli del Coupon -->
       <div class="ve-ocard ve-ocard-drawer">
         <div class="ve-otag">📌 {{ 'vantaggi.promo_details_title' | t: default: 'Dettagli della Promozione' }}</div>
         <p class="ve-odesc ve-odesc-last">
-          • <strong>{{ 'vantaggi.term_discount_value' | t: default: 'Valore sconto' }}:</strong> 20% sul totale dei
-          prodotti idonei.<br>
-          • <strong>{{ 'vantaggi.term_min_spend' | t: default: 'Spesa minima' }}:</strong> Applicabile su acquisti da
-          40,00 €.<br>
-          • <strong>{{ 'vantaggi.term_max_discount' | t: default: 'Sconto massimo' }}:</strong> 12,00 €.<br>
-          • <strong>{{ 'vantaggi.term_validity' | t: default: 'Durata offerta' }}:</strong> Valida per cicli da 48 ore
-          dalla prima visita del cliente e automaticamente rinnovabile.<br>
-          • <strong>{{ 'vantaggi.term_limits' | t: default: 'Limitazioni' }}:</strong> Non cumulabile con altri codici
-          promozionali.
+          • <strong>{{ 'vantaggi.term_discount_value' | t: default: 'Valore sconto' }}:</strong> {{ 'vantaggi.term_discount_value_text' | t }}<br>
+          • <strong>{{ 'vantaggi.term_min_spend' | t: default: 'Spesa minima' }}:</strong> {{ 'vantaggi.term_min_spend_text' | t }}<br>
+          • <strong>{{ 'vantaggi.term_max_discount' | t: default: 'Sconto massimo' }}:</strong> {{ 'vantaggi.term_max_discount_text' | t }}<br>
+          • <strong>{{ 'vantaggi.term_validity' | t: default: 'Durata offerta' }}:</strong> {{ 'vantaggi.term_validity_text' | t }}<br>
+          • <strong>{{ 'vantaggi.term_limits' | t: default: 'Limitazioni' }}:</strong> {{ 'vantaggi.term_limits_text' | t }}
         </p>
       </div>
 
@@ -858,11 +846,8 @@
           🇪🇺 {{ 'vantaggi.eu_clients_title' | t: default: "Per i Clienti dell'Unione Europea (UE)" }}
         </div>
         <p class="ve-odesc ve-odesc-last">
-          • <strong>Trasparenza Prezzi (Direttiva UE 2019/2161 - Omnibus):</strong> La percentuale di sconto viene
-          applicata al prezzo di vendita. Ogni prezzo precedente fa riferimento al prezzo più basso degli ultimi 30
-          giorni.<br>
-          • <strong>Diritto di Recesso (Direttiva UE 2011/83/UE):</strong> Diritto di recesso garantito entro 14 giorni.
-          Il rimborso in caso di reso corrisponderà al valore netto effettivamente pagato.
+          • <strong>{{ 'vantaggi.eu_prices_label' | t }}:</strong> {{ 'vantaggi.eu_prices_text' | t }}<br>
+          • <strong>{{ 'vantaggi.eu_withdrawal_label' | t }}:</strong> {{ 'vantaggi.eu_withdrawal_text' | t }}
         </p>
       </div>
 
@@ -872,9 +857,8 @@
           🌐 {{ 'vantaggi.extra_eu_clients_title' | t: default: 'Per i Clienti Internazionali (Extra-UE)' }}
         </div>
         <p class="ve-odesc ve-odesc-last">
-          • <strong>Calcolo Sconto:</strong> Sconto applicato unicamente sul valore netto dei prodotti, escluse spese di
-          spedizione estere e sdoganamento.<br>
-          • <strong>Dazi e Tasse:</strong> Imposte e dazi doganali locali rimangono a carico del cliente.
+          • <strong>{{ 'vantaggi.extra_discount_label' | t }}:</strong> {{ 'vantaggi.extra_discount_text' | t }}<br>
+          • <strong>{{ 'vantaggi.extra_duties_label' | t }}:</strong> {{ 'vantaggi.extra_duties_text' | t }}
         </p>
       </div>
 
@@ -882,7 +866,7 @@
       <div class="ve-ocard ve-ocard-drawer">
         <div class="ve-otag">✉️ {{ 'vantaggi.support_title' | t: default: 'Assistenza e Supporto Clienti' }}</div>
         <p class="ve-odesc ve-odesc-last">
-          In caso di domande o difficoltà con il codice sconto, il nostro team è a disposizione:<br>
+          {{ 'vantaggi.support_text' | t }}<br>
           Email:
           <a href="mailto:contact@platinumshop.it" class="ve-terms-link" style="font-weight:700;"
             >contact@platinumshop.it</a
