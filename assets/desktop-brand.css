@@ -1,10 +1,13 @@
 /* Page brand ORDINATEUR (sections/desktop-brand.liquid), prototype « Platinumshop-Brand-desktop ».
    Couleurs de la marque : --brand (fond), --brand-2 (bandeau), --accent ; photo : --photo (snippets/brand-theme.liquid). */
-body:has(.br) { background: var(--br-page, #241d16); }
-/* Comme le prototype : l'en-tête du site défile avec la page (la barre compacte de la marque prend le haut) */
-body:has(.br) .shopify-section:has(> .dh-top) { position: relative !important; top: auto !important; }
+/* body:not(.template-product) : fiche ouverte sur place depuis la page marque (assets/mobile-pdp-layer.js, classe de la
+   fiche sur <body>), la page marque reste cachée dans la page — ces règles ne s'appliquent plus à la fiche (avant :
+   en-tête qui partait au défilement, vide au-dessus de la barre d'achat de la fiche) */
+body:not(.template-product):has(.br) { background: var(--br-page, #241d16); }
+/* En-tête du site collé en haut comme sur les autres pages ; la barre compacte de la marque se place juste dessous
+   (assets/desktop-brand.js, syncBar) */
 /* Pied de page collé à la page brand (sa marge du haut laissait voir le fond blanc du thème) */
-body:has(.br) .dft { margin-top: 0 !important; }
+body:not(.template-product):has(.br) .dft { margin-top: 0 !important; }
 /* La page est dans #content (z-index 3, sous l'en-tête à 60) : panneau de la marque et filtres au-dessus de l'en-tête */
 #content:has(.br.menu-open, .br.fd-open, .br-bm:not([hidden])) { z-index: 61 !important; }
 

@@ -334,7 +334,14 @@
     // ---------- Barre compacte ----------
     var heroPills = root.querySelector('.br-pills');
     var sticky = root.querySelector('[data-br-sticky]');
-    var syncBar = function () { if (sticky && heroPills) sticky.classList.toggle('on', heroPills.getBoundingClientRect().bottom < 0); };
+    // Juste sous l'en-tête du site (collé en haut) : bas de l'en-tête à l'écran, 0 quand il n'est pas visible
+    var siteHeader = document.querySelector('#root > [id$="__header"]');
+    var syncBar = function () {
+      if (!sticky || !heroPills) return;
+      var below = siteHeader ? Math.max(0, Math.round(siteHeader.getBoundingClientRect().bottom)) : 0;
+      sticky.style.top = below + 'px';
+      sticky.classList.toggle('on', heroPills.getBoundingClientRect().bottom < below);
+    };
     window.addEventListener('scroll', function () { if (root.isConnected) syncBar(); }, { passive: true });
     syncBar();
 
