@@ -388,10 +388,11 @@
                 if brand_image == blank and brand_parts[3] != blank
                   assign brand_image_url = brand_parts[3] | strip | append: '&width=240&height=148&crop=center'
                 endif
-                assign brand_query = brand_query | url_encode
-                assign brand_url = routes.search_url | append: '?q=' | append: brand_query | append: '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type'
+                assign brand_query = 'title:"' | append: brand_query | append: '"' | url_encode
+                # Page brand de la marque (sections/desktop-brand.liquid) : sa collection, sinon la recherche dans les titres
+                assign brand_url = routes.search_url | append: '?q=' | append: brand_query | append: '&type=product&view=brand'
                 if brand_collection != blank
-                  assign brand_url = brand_collection.url
+                  assign brand_url = brand_collection.url | append: '?view=brand'
                 endif
             -%}
             <a href="{{ brand_url }}" class="mobile-explore-brand">

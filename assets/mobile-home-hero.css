@@ -891,3 +891,126 @@ body.template-index #root .mshein-feed__tabs button.is-on {
     transition: none !important;
   }
 }
+
+/* Shop per brand (accueil mobile, sections/mobile-home-shein.liquid) : comme l'accueil ordinateur — tuiles de couleur,
+   photo penchée à droite, nom en bas à gauche, 2 rangées qui défilent ; « Vedi altri » : fenêtre de toutes les marques */
+.mhb {
+  margin-top: 22px;
+  font-family: 'Figtree', system-ui, sans-serif;
+}
+
+#root .mhb h3 {
+  color: #16123f;
+  font-size: 18px;
+}
+
+#root .mhb .mho__hd button {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  color: #4a4f6b;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+  background: none;
+  border: 0;
+}
+
+#root .mhb .mho__hd button::before,
+#root .mhb .mho__hd button::after {
+  content: none;
+}
+
+.mhb .mho__hd svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mhb__rail {
+  display: grid;
+  grid-template-rows: repeat(2, 96px);
+  grid-auto-flow: column;
+  grid-auto-columns: 142px;
+  gap: 10px;
+  padding: 0 14px 4px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding: 14px;
+  scrollbar-width: none;
+}
+
+.mhb__rail::-webkit-scrollbar {
+  display: none;
+}
+
+#root .mhb__tile {
+  position: relative;
+  display: block;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  color: #fff;
+  text-decoration: none;
+  border: 0;
+  border-radius: 18px;
+  scroll-snap-align: start;
+}
+
+.mhb__tile img {
+  position: absolute;
+  top: 12%;
+  right: -8%;
+  width: 60%;
+  height: 100%;
+  object-fit: cover;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: -8px 12px 22px -12px rgb(0 0 0 / 45%);
+  transform: rotate(-6deg);
+}
+
+.mhb__tile strong {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  max-width: 48%;
+  color: #fff;
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 20%);
+}
+
+#root .mhb__tile--more {
+  display: grid;
+  place-items: center;
+  color: #3a34d2;
+  font: inherit;
+  background: #f1f0ff;
+  border: 1.5px dashed #b9b6f3;
+}
+
+#root .mhb__tile--more::before,
+#root .mhb__tile--more::after {
+  content: none;
+}
+
+.mhb__tile--more strong {
+  position: static;
+  max-width: none;
+  color: #3a34d2;
+  font-family: 'Figtree', sans-serif;
+  text-shadow: none;
+}

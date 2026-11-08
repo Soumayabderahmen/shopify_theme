@@ -60,9 +60,8 @@
     });
   };
 
-  // Ordinateur : les liens de marque (« Venduto da ») mènent à la page brand ; en mobile, lien d'origine
+  // Ordinateur et mobile : les liens de marque (« Venduto da ») mènent à la page brand de la marque
   var brandLinks = function () {
-    if (mobile.matches) return;
     document.querySelectorAll('a[data-brand-url]').forEach(function (link) {
       var url = link.getAttribute('data-brand-url');
       if (url) link.href = url;
@@ -82,7 +81,7 @@
         if (!link) return;
         link.textContent = matchers[index].name;
         link.href = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root || '/') + 'search?q=' + encodeURIComponent(matchers[index].name);
-        // Ordinateur : page brand de la marque (recherche de la marque, sections/desktop-brand.liquid)
+        // Page brand de la marque (recherche de la marque, sections/desktop-brand.liquid)
         link.setAttribute('data-brand-url', (seller.getAttribute('data-brand-search') || '/search') + '?q=' + encodeURIComponent(matchers[index].name) + '&type=product&view=brand');
         brandLinks();
         seller.removeAttribute('data-pdp-seller-auto');

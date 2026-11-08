@@ -1,0 +1,156 @@
+/* Page brand MOBILE (même page que l'ordinateur : sections/desktop-brand.liquid, assets/desktop-brand.css/.js), chargée
+   seulement jusqu'à 760px : bandeau photo de la marque, logo animé plus petit, recherche, catégories en une rangée qui
+   défile, mosaïque 2 colonnes, produits 2 par rangée, filtres qui défilent, Top 5 et autres marques en rangées qui
+   défilent, panneaux (marque, filtres, prix, toutes les marques) en plein écran depuis le bas. */
+
+/* ---------- Bandeau ---------- */
+.br { padding-bottom: 0; }
+.br-bg { height: 560px; }
+.br-top { gap: 8px; padding: 14px 16px 0; }
+.br-id { height: 44px; padding: 0 10px 0 4px; }
+.br-id__logo { width: 36px; height: 36px; }
+.br-id__name { max-width: 96px; overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.br-sw { flex: 1; min-width: 0; }
+.br-search { width: 100%; height: 44px; padding: 0 14px; }
+.br-search input { font-size: 15px; }
+.br-sw.open .br-search { width: 100%; }
+.br-sugg { position: fixed; top: 0; right: 0; left: 0; width: auto; max-height: 100dvh; padding: 72px 8px 16px; border-radius: 0 0 24px 24px; }
+.br-sw.open { position: fixed; z-index: 2147483003; top: 14px; right: 16px; left: 16px; }
+.br-sugg__i { min-height: 46px; gap: 12px; font-size: 15px; }
+
+.br-hero { padding: 40px 16px 22px; }
+.br-lock__name { max-width: 100%; font-size: 72px; letter-spacing: -1px; }
+.br-lock--text .br-lock__name { font-size: clamp(40px, 13vw, 64px); }
+.br-lock__mark { width: 200px; height: 72px; margin-top: -28px; margin-left: -14px; -webkit-mask-size: 200px 200px; mask-size: 200px 200px; }
+.br-hero__meta { max-width: 320px; font-size: 13px; line-height: 1.5; }
+
+/* Catégories : une rangée qui défile, comme shop.com sur mobile */
+.br-pills { flex-wrap: nowrap; justify-content: flex-start; gap: 8px; padding: 14px 16px 8px; overflow-x: auto; scroll-padding: 16px; scroll-snap-type: x proximity; scrollbar-width: none; }
+.br-pills::-webkit-scrollbar { display: none; }
+.br-pill { height: 44px; padding: 0 14px 0 5px; font-size: 14px; scroll-snap-align: start; }
+.br-pill img { width: 34px; height: 34px; }
+
+/* ---------- Partie blanche ---------- */
+.br-wrap { padding: 0 16px; }
+#root .br .br-wrap { margin-top: 14px; padding-top: 22px; padding-bottom: 40px; border-radius: 24px 24px 0 0; box-shadow: none; clip-path: none; }
+#root .br .br-sec--x { flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+#root .br .br-sec--x h2, #root .br .br-sec h2 { font-size: 22px; }
+#root .br .br-sec--x small { font-size: 11px; letter-spacing: 1.5px; }
+.br-sec span { font-size: 13px; }
+#root .br .br-sel, #root .br .br-prod, #root .br .br-top5, #root .br .br-others { margin-top: 34px; }
+#root .br .br-sel { margin-top: 0; }
+
+/* Mosaïque : 2 colonnes (grande photo en haut sur toute la largeur) */
+#root .br .br-feat, #root .br .br-feat--bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; grid-auto-rows: 150px; gap: 10px; }
+#root .br .br-tile { min-height: 0; border-radius: 18px; }
+#root .br .br-tile--big { grid-column: span 2; grid-row: span 1; height: 190px; }
+#root .br .br-feat--bento .br-tile--big { grid-row: auto; }
+#root .br .br-tile--wide { grid-column: span 2; }
+#root .br .br-tile b { right: 14px; bottom: 14px; left: 14px; font-size: 28px; }
+#root .br .br-tile--big b { font-size: 40px; }
+#root .br .br-tile__tag { top: 10px; left: 10px; padding: 4px 9px; font-size: 11px; }
+#root .br .br-tile__go { display: none; }
+
+/* Filtres : une rangée qui défile ; menus et fenêtre du prix en bas de l'écran */
+.br-chips { flex-wrap: nowrap; margin: 0 -16px 16px; padding: 0 16px; overflow-x: auto; scrollbar-width: none; }
+.br-chips::-webkit-scrollbar { display: none; }
+.br-chip { flex: none; height: 40px; padding: 0 14px; font-size: 13.5px; }
+.br .br-chip--icon { width: 40px; min-width: 40px; }
+.br-menu { position: fixed; z-index: 2147483004; top: auto; right: 12px; bottom: 12px; left: 12px; min-width: 0; padding: 10px; border-radius: 22px; box-shadow: 0 -10px 40px -10px rgb(0 0 0 / 45%); }
+.br-menu button { padding: 14px 14px; font-size: 15px; }
+.br-pp { position: fixed; top: auto; right: 12px; bottom: 12px; left: 12px; width: auto; transform: none; }
+@keyframes br-pp-in { from { opacity: 0; transform: translateY(10px); } }
+
+/* Produits : 2 par rangée */
+#root .br .br-cards .cl__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 10px; }
+#root .br .br-cards .mshein-card .mshein-card__img { border-radius: 16px !important; }
+#root .br .br-off { top: 8px; left: 8px; padding: 3px 8px; font-size: 11px; }
+#root .br .br-cards .mshein-card .mshein-card__fav { top: 8px; right: 8px; width: 34px; height: 34px; }
+#root .br .br-cards .mshein-card .mshein-card__fav svg { width: 16px; height: 16px; }
+#root .br .br-cards .mshein-card .mshein-card__add, #root .br .br-cards .mshein-card .mshein-card__img.has-strip .mshein-card__add { right: 8px !important; bottom: 8px !important; width: 34px; height: 34px; }
+#root .br .br-cards .mshein-strip { bottom: 8px !important; left: 8px !important; }
+#root .br .br-cards .mshein-strip__ver { padding: 3px 7px !important; font-size: 9.5px !important; }
+#root .br .br-cards .mshein-card__body { padding: 10px 0 0 !important; }
+#root .br .br-cards .mshein-card__title, #root .br .br-cards .mshein-card__title a { font-size: 13px !important; }
+#root .br .br-cards .mshein-card__now, #root .br .br-cards .mshein-card__now .money { font-size: 16px !important; }
+#root .br .br-cards .mshein-chip { padding: 0 5px; font-size: 10px; }
+#root .br .br-cards .mshein-bb { padding: 2px 7px; font-size: 10px; }
+.br-more { margin-top: 22px; }
+
+/* Top 5 : une rangée qui défile */
+#root .br .br-top5__list { display: flex; gap: 10px; margin: 0 -16px; padding: 0 16px 6px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 16px; scrollbar-width: none; }
+#root .br .br-top5__list::-webkit-scrollbar { display: none; }
+#root .br .br-t5 { flex: 0 0 62%; scroll-snap-align: start; }
+#root .br .br-t5:hover { transform: none; box-shadow: none; }
+
+/* Promesses : 2 par rangée */
+#root .br .br-prom { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row; gap: 10px; margin-top: 34px; }
+#root .br .br-prom > div { gap: 10px; padding: 14px; }
+#root .br .br-prom svg { width: 22px; height: 22px; }
+#root .br .br-prom b { font-size: 13.5px; }
+#root .br .br-prom small { font-size: 11.5px; }
+
+/* Autres marques : toutes ouvertes, en rangée qui défile (pas de survol sur mobile) */
+#root .br .br-accnav { display: none; }
+#root .br .br-acc__dots { display: none; }
+.br-acc { gap: 10px; height: 300px; margin: 0 -16px; padding: 0 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 16px; scrollbar-width: none; }
+.br-acc::-webkit-scrollbar { display: none; }
+.br-acc.swap, .br-acc.swap-in { opacity: 1; transform: none; }
+.br-acc__p, .br-acc__p.on { flex: 0 0 82%; cursor: default; scroll-snap-align: start; }
+#root .br .br-acc__p > img { transform: none; }
+.br-acc__p::after, .br-acc__p.on::after { background: linear-gradient(180deg, rgb(22 18 63 / 10%) 20%, rgb(22 18 63 / 88%)); }
+.br-acc__v { display: none; }
+.br-acc__c, .br-acc__p.on .br-acc__c { top: auto; bottom: 22px; left: 20px; width: auto; right: 20px; opacity: 1; transform: none; transition: none; pointer-events: auto; }
+.br-acc__logo { width: 56px; height: 56px; }
+#root .br .br-acc__c h3 { margin-top: 12px; font-size: 40px; }
+.br-acc__c p { font-size: 13.5px; }
+#root .br .br-acc__go { height: 42px; margin-top: 14px; padding: 0 18px; font-size: 13px; }
+.br-acc__bar { display: none; }
+
+/* « Altri brand » simple (avant le chargement de la liste) : 2 par rangée */
+.br-brands:not([data-ready]) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.br-bcard { gap: 10px; padding: 10px; }
+.br-blogo { width: 46px; height: 46px; }
+
+/* ---------- Barre compacte : plus petite ---------- */
+.br-sticky { gap: 8px; padding: 10px 12px; }
+.br-sticky .br-id__name { display: none; }
+.br-sicon { width: 44px; height: 44px; }
+.br-pills--sticky { padding: 0; }
+
+/* ---------- Panneaux : plein écran depuis le bas ---------- */
+.br-menu-panel, .br-fd { top: auto; right: 0; bottom: 0; left: 0; width: auto; max-height: 92dvh; border-radius: 26px 26px 0 0; transform: translateY(105%); }
+.br-menu-panel { height: 92dvh; }
+.br-fd { height: auto; }
+.br.menu-open .br-menu-panel, .br.fd-open .br-fd { transform: none; }
+.br-mp__bar { padding: 16px 16px 0; }
+.br-mp__bar button { width: 44px; height: 44px; }
+.br-mp__scroll { padding: 74px 16px calc(20px + env(safe-area-inset-bottom)); }
+.br-mp__card { padding: 16px; border-radius: 22px; }
+.br-mp__card h3 { font-size: 22px; }
+.br-mp__cats a { font-size: 15px; }
+.br-mp__score b { font-size: 36px; }
+.br-mp__row { min-height: 44px; font-size: 15px; }
+.br-fd__head { padding: 18px 16px 8px 20px; }
+.br-fd__head h3 { font-size: 22px; }
+.br-fd__body { padding: 6px 20px; }
+.br-fpill { height: 42px; padding: 0 16px; font-size: 14px; }
+.br-fd__foot { padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); }
+.br-fd__foot > * { height: 52px; font-size: 15px; }
+
+/* Fenêtre « Toutes les marques » : plein écran */
+.br-bm { place-items: end stretch; padding: 0; }
+.br-bm__box { width: 100%; max-height: 92dvh; border-radius: 26px 26px 0 0; }
+.br-bm__head { flex-wrap: wrap; gap: 10px; padding: 16px 16px 12px; }
+#root .br .br-bm__head h3 { font-size: 20px; }
+.br-bm__search { order: 3; flex: 0 0 100%; max-width: none; margin: 0; }
+#root .br .br-bm__head button { margin-left: auto; }
+.br-bm__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 14px 16px calc(20px + env(safe-area-inset-bottom)); }
+
+.br-toast { bottom: calc(86px + env(safe-area-inset-bottom)); }
+
+/* Panneaux, menus et suggestions ouverts : au-dessus de la barre de navigation du bas (z-index 1000, hors de #root à 13) */
+html:has(.br.menu-open, .br.fd-open, .br-bm:not([hidden]), .br-pchip.open, .br [data-br-menu].open, .br-sw.open) #root { z-index: 1001 !important; }
+html:has(.br.menu-open, .br.fd-open, .br-bm:not([hidden]), .br-pchip.open, .br [data-br-menu].open, .br-sw.open) #content { z-index: 61 !important; }
+/* Panneau de la marque opaque (le fond semi-transparent laissait voir la page dessous) */
+.br-menu-panel { background: color-mix(in srgb, var(--brand-2) 70%, #000); backdrop-filter: none; }

@@ -1674,7 +1674,8 @@ function initMobileTemuHeader() {
           var link = document.createElement('a');
           link.className = 'mobile-explore-brand';
           link.setAttribute('data-brand-name', normalizeBrandName(brand[0]));
-          link.href = known ? known.href : root + 'search?q=' + encodeURIComponent(brand[1]) + '&type=product&options%5Bfields%5D=title%2Cvendor%2Cproduct_type';
+          // Page brand de la marque (sections/desktop-brand.liquid) : recherche dans les titres
+          link.href = known ? known.href : root + 'search?q=' + encodeURIComponent('title:"' + brand[1] + '"') + '&type=product&view=brand';
           var imageUrl = known ? known.image
             : (brand[3] ? (/^https?:/.test(brand[3]) ? brand[3] : data.cdn + brand[3]) + '&width=240&height=148&crop=center' : '');
           if (imageUrl) {
@@ -1722,6 +1723,16 @@ function initMobileTemuHeader() {
   };
   var openBrandsSheet = function () {
     if (!brandsSheet) return;
+    // Ouverte hors du panneau Categoria (ex. « Vedi altri » de « Shop per brand » de l'accueil) : la fenêtre est dans
+    // le panneau fermé, donc invisible tout en bloquant la page. Elle passe dans <body> le temps d'être ouverte.
+    if (!exploreDrawer.open && brandsSheet.parentElement !== document.body) {
+      var home = brandsSheet.parentElement;
+      document.body.appendChild(brandsSheet);
+      brandsSheet.addEventListener('close', function back() {
+        brandsSheet.removeEventListener('close', back);
+        home.appendChild(brandsSheet);
+      });
+    }
     openExploreSheet(brandsSheet);
     fillBrandsSheet();
   };

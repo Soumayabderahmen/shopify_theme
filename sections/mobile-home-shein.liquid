@@ -463,6 +463,53 @@
           </section>
         {%- endif -%}
 
+        {%- comment -%}
+          Shop per brand : comme l'accueil ordinateur (même liste snippets/brand-list.liquid, mêmes tuiles de couleur à photo
+          penchée), 2 rangées qui défilent ; chaque marque ouvre sa page brand (sections/desktop-brand.liquid : sa
+          collection, sinon la recherche dans les titres) ; « Vedi altri » ouvre la fenêtre de toutes les marques du
+          panneau Categoria (snippets/mobile-category-browser.liquid). Styles : assets/mobile-home-hero.css (.mhb).
+        {%- endcomment -%}
+        {%- capture mhb_list -%}{%- render 'brand-list' -%}{%- endcapture -%}
+        {%- assign mhb_entries = mhb_list | split: ';' -%}
+        {%- assign mhb_colors = '#e8547a,#c8102e,#2f2a6b,#0e7c66,#f08c2e,#e2506b,#b23a48,#7a4e2d,#3a74c4,#5b5799' | split: ',' -%}
+        <section class="mhb">
+          <div class="mho__hd"><h3>{{ 'desktop_home_shop.shop_by_brand' | t }}</h3><button type="button" aria-haspopup="dialog" data-mobile-brands-open>{{ 'mobile.explore.see_more_brands' | t }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></div>
+          <div class="mhb__rail">
+            {%- for mhb_entry in mhb_entries -%}
+              {%- liquid
+                assign mhb_parts = mhb_entry | strip | split: '|'
+                if mhb_parts[0] == blank
+                  continue
+                endif
+                assign mhb_collection = blank
+                assign mhb_handles = mhb_parts[2] | split: ','
+                for mhb_handle in mhb_handles
+                  if mhb_collection == blank and collections[mhb_handle].products_count > 0
+                    assign mhb_collection = collections[mhb_handle]
+                  endif
+                endfor
+                assign mhb_query = 'title:"' | append: mhb_parts[1] | append: '"' | url_encode
+                assign mhb_url = routes.search_url | append: '?q=' | append: mhb_query | append: '&type=product&view=brand'
+                assign mhb_image = blank
+                if mhb_collection != blank
+                  assign mhb_url = mhb_collection.url | append: '?view=brand'
+                  assign mhb_image = mhb_collection.featured_image | default: mhb_collection.image
+                endif
+                assign mhb_color = forloop.index0 | modulo: mhb_colors.size
+              -%}
+              <a class="mhb__tile" href="{{ mhb_url }}" style="background: {{ mhb_colors[mhb_color] }}">
+                {%- if mhb_image != blank -%}
+                  <img src="{{ mhb_image | image_url: width: 240 }}" alt="" loading="lazy" width="120" height="120">
+                {%- elsif mhb_parts[3] != blank -%}
+                  <img src="{{ mhb_parts[3] | strip }}&width=240" alt="" loading="lazy" width="120" height="120" onerror="this.remove()">
+                {%- endif -%}
+                <strong>{{ mhb_parts[0] | escape }}</strong>
+              </a>
+            {%- endfor -%}
+            <button class="mhb__tile mhb__tile--more" type="button" aria-haspopup="dialog" data-mobile-brands-open><strong>{{ 'mobile.explore.see_more_brands' | t }}</strong></button>
+          </div>
+        </section>
+
       {%- when 'feed' -%}
         {%- liquid
           # Sources de chaque onglet (pages suivantes chargées par assets/mobile-home-shein.js).
