@@ -29,8 +29,11 @@
   window.addEventListener('resize', setFullWidth);
   setFullWidth();
 
+  // Données de la grande carte (rayons et leurs produits) : dans la réponse de la partie « more-b » (window.dhpMore.b,
+  // demandée par la section à l'arrivée de la page) ; tout le reste du script démarre à leur arrivée (boot), sans
+  // elles si la demande échoue
   var depts = [];
-  try { depts = JSON.parse(root.querySelector('[data-dhp-data]').textContent); } catch (error) { depts = []; }
+  var boot = function () {
 
   // ---------- Black Friday : entre les dates des réglages (ou dans l'éditeur, ou avec ?bf-preview) ----------
   var bfStart = Number(root.getAttribute('data-bf-start')) * 1000;
@@ -624,4 +627,14 @@
         console.error(error);
       });
   });
+  };
+  var readData = function (html) {
+    var found = /<script[^>]*data-dhp-data[^>]*>([\s\S]*?)<\/script>/.exec(html);
+    var list = JSON.parse(found[1]);
+    if (Array.isArray(list)) depts = list;
+  };
+  ((window.dhpMore && window.dhpMore.b) || Promise.reject(new Error('dhp-more-b absent')))
+    .then(readData)
+    .catch(function (error) { depts = []; console.error(error); })
+    .then(boot);
 })();

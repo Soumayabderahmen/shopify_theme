@@ -158,6 +158,57 @@
     echo months[bf_end_month]
   endcapture
 -%}
+{%- if part == 'more-b' -%}
+  {%- comment -%}
+    Données de la grande carte de la bannière (rayons et leurs produits : photo, prix, remise, note), lues par
+    assets/desktop-home-shop.js dans la réponse de « more-b » (demandée à l'arrivée de la page, ordinateur seulement),
+    qui charge déjà ces mêmes produits pour les offres. Elles étaient calculées dans la page pour tous les visiteurs,
+    mobiles compris : 9 rayons × 14 produits, ~0,9 s de serveur sur 2,1 s.
+  {%- endcomment -%}
+  <script type="application/json" data-dhp-data>
+    [
+      {%- for dept_handle in dept_handles -%}
+        {%- assign dept = collections[dept_handle] -%}
+        {%- unless forloop.first -%},{%- endunless -%}
+        {"t": {{ dept_titles[forloop.index0] | json }}, "u": {{ dept.url | json }}, "p": [
+          {%- assign dept_first = true -%}
+          {%- for item in dept.products limit: 14 -%}
+            {%- liquid
+              assign item_ali = item.metafields.alireviews.seo_rating_review_key_script | append: '' | strip_newlines | remove: ' '
+              assign item_ali_value = 0
+              if item_ali contains '"ratingValue":"'
+                assign item_ali_value = item_ali | split: '"ratingValue":"' | last | split: '"' | first | times: 1.0
+              endif
+              assign item_variant = item.selected_or_first_available_variant
+              assign item_image = item_variant.featured_image | default: item.featured_image
+              if item_image == blank
+                continue
+              endif
+              assign item_old = ''
+              assign item_pct = ''
+              if item_variant.compare_at_price > item_variant.price
+                assign item_old = item_variant.compare_at_price | money | strip_html
+                assign item_pct = item_variant.compare_at_price | minus: item_variant.price | times: 100 | divided_by: item_variant.compare_at_price | prepend: '-' | append: '%'
+              endif
+              assign item_rating = ''
+              if item_ali contains '"ratingValue":"'
+                assign item_rating = item_ali_value | round: 1 | append: ''
+              elsif item.metafields.reviews.rating
+                assign item_rating = item.metafields.reviews.rating.value.rating | times: 1.0 | round: 1 | append: ''
+              endif
+              unless request.locale.iso_code contains 'en'
+                assign item_rating = item_rating | replace: '.', ','
+              endunless
+            -%}
+            {%- unless dept_first -%},{%- endunless -%}
+            {%- assign dept_first = false -%}
+            {"t": {{ item.title | json }}, "u": {{ item.url | json }}, "i": {{ item_image | image_url: width: 600 | json }}, "p": {{ item_variant.price | money | strip_html | json }}, "o": {{ item_old | json }}, "c": {{ item_pct | json }}, "r": {{ item_rating | json }}}
+          {%- endfor -%}
+        ]}
+      {%- endfor -%}
+    ]
+  </script>
+{%- endif -%}
 {%- if part == 'top' -%}
 <script src="{{ 'desktop-home-shop.js' | asset_url }}" defer></script>
 <style>
@@ -211,50 +262,7 @@
     })(document.currentScript.parentElement);
   </script>
 
-  {%- comment -%} Données de la grande carte : rayons et leurs produits (photo, prix, remise, note) {%- endcomment -%}
-  <script type="application/json" data-dhp-data>
-    [
-      {%- for dept_handle in dept_handles -%}
-        {%- assign dept = collections[dept_handle] -%}
-        {%- unless forloop.first -%},{%- endunless -%}
-        {"t": {{ dept_titles[forloop.index0] | json }}, "u": {{ dept.url | json }}, "p": [
-          {%- assign dept_first = true -%}
-          {%- for item in dept.products limit: 14 -%}
-            {%- liquid
-              assign item_ali = item.metafields.alireviews.seo_rating_review_key_script | append: '' | strip_newlines | remove: ' '
-              assign item_ali_value = 0
-              if item_ali contains '"ratingValue":"'
-                assign item_ali_value = item_ali | split: '"ratingValue":"' | last | split: '"' | first | times: 1.0
-              endif
-              assign item_variant = item.selected_or_first_available_variant
-              assign item_image = item_variant.featured_image | default: item.featured_image
-              if item_image == blank
-                continue
-              endif
-              assign item_old = ''
-              assign item_pct = ''
-              if item_variant.compare_at_price > item_variant.price
-                assign item_old = item_variant.compare_at_price | money | strip_html
-                assign item_pct = item_variant.compare_at_price | minus: item_variant.price | times: 100 | divided_by: item_variant.compare_at_price | prepend: '-' | append: '%'
-              endif
-              assign item_rating = ''
-              if item_ali contains '"ratingValue":"'
-                assign item_rating = item_ali_value | round: 1 | append: ''
-              elsif item.metafields.reviews.rating
-                assign item_rating = item.metafields.reviews.rating.value.rating | times: 1.0 | round: 1 | append: ''
-              endif
-              unless request.locale.iso_code contains 'en'
-                assign item_rating = item_rating | replace: '.', ','
-              endunless
-            -%}
-            {%- unless dept_first -%},{%- endunless -%}
-            {%- assign dept_first = false -%}
-            {"t": {{ item.title | json }}, "u": {{ item.url | json }}, "i": {{ item_image | image_url: width: 600 | json }}, "p": {{ item_variant.price | money | strip_html | json }}, "o": {{ item_old | json }}, "c": {{ item_pct | json }}, "r": {{ item_rating | json }}}
-          {%- endfor -%}
-        ]}
-      {%- endfor -%}
-    ]
-  </script>
+  {%- comment -%} Données de la grande carte : dans la partie « more-b » (plus haut), plus dans la page. {%- endcomment -%}
 
   <div class="dhp-wrap">
     {%- comment -%} ---------- Moyens de paiement (mêmes logos que le pied de page), logos qui défilent ---------- {%- endcomment -%}
