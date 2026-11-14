@@ -246,7 +246,7 @@
         "top_bar_color": "scheme-1",
         "header_color": "scheme-4",
         "menubar_color": "scheme-1",
-        "show_top_bar": true,
+        "show_top_bar": false,
         "top_bar_height": "35px|25px",
         "top_bar_font": "secondary",
         "top_bar_font_size": "14px",
