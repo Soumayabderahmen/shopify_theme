@@ -1120,7 +1120,11 @@
     };
     var heroTemplate = !tab.query && !tab.view && heroTemplates[trimPath(tab.path)];
     if (heroTemplate) {
-      slots.hero.replaceChildren(heroTemplate.content.cloneNode(true));
+      var heroCopy = heroTemplate.content.cloneNode(true);
+      // Logos de paiement : liste unique de la page (snippets/mshein-tab-heroes.liquid), copiée dans la bannière affichée
+      var payItems = document.querySelector('template[data-mhh-pay-items]');
+      if (payItems) heroCopy.querySelectorAll('[data-mhh-pay-fill]').forEach(function (list) { list.replaceChildren(payItems.content.cloneNode(true)); });
+      slots.hero.replaceChildren(heroCopy);
       slots.hero.setAttribute('data-hero-for', tab.key);
     } else if (tab.extra) {
       slots.hero.replaceChildren(provisionalHero(tab));

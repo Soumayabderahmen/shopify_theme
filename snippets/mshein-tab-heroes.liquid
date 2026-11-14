@@ -11,6 +11,13 @@
   endif
 -%}
 <div hidden data-mshein-tab-heroes>
+  {%- comment -%} Logos de paiement : une seule liste pour toutes les bannières préparées (~60 Ko de HTML en moins). {%- endcomment -%}
+  {%- capture heroes_pay_items -%}
+    {%- for payment_method in shop.enabled_payment_types -%}
+      <li>{%- render 'payment-icon', type: payment_method -%}</li>
+    {%- endfor -%}
+  {%- endcapture -%}
+  <template data-mhh-pay-items>{{- heroes_pay_items -}}{{- heroes_pay_items | replace: '<li>', '<li aria-hidden="true">' -}}</template>
   {%- for hero_link in heroes_menu.links -%}
     {%- liquid
       assign hero_collection = nil
@@ -28,7 +35,7 @@
       endif
     -%}
     <template data-mshein-hero-for="{{ hero_collection.url }}">
-      {%- render 'mshein-dept-hero', collection: hero_collection, best: best, title: hero_link.title, is_all: hero_is_all -%}
+      {%- render 'mshein-dept-hero', collection: hero_collection, best: best, title: hero_link.title, is_all: hero_is_all, pay_shared: true -%}
     </template>
   {%- endfor -%}
 </div>

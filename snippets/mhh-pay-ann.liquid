@@ -2,6 +2,8 @@
   Carte « Pagamenti sicuri al 100% » qui sort de sous la bannière et avantages qui défilent un par un (mobile), sous la
   bannière de l'accueil (sections/mobile-home-hero.liquid) et de chaque collection (snippets/mshein-dept-hero.liquid).
   Styles et script : assets/mobile-home-hero.css / .js.
+  Param : shared (true = liste des logos laissée vide, remplie à l'affichage par assets/mobile-home-tabs.js depuis la
+  liste unique de snippets/mshein-tab-heroes.liquid ; sinon elle était écrite une fois par bannière de rayon préparée)
 {%- endcomment -%}
 {%- liquid
   assign shipping_amount = ''
@@ -10,15 +12,17 @@
   endif
 -%}
 {%- capture mhh_pay_items -%}
-  {%- for payment_method in shop.enabled_payment_types -%}
-    <li>{%- render 'payment-icon', type: payment_method -%}</li>
-  {%- endfor -%}
+  {%- unless shared -%}
+    {%- for payment_method in shop.enabled_payment_types -%}
+      <li>{%- render 'payment-icon', type: payment_method -%}</li>
+    {%- endfor -%}
+  {%- endunless -%}
 {%- endcapture -%}
 <div class="mhh-pay" role="region" aria-label="{{ 'desktop_home_shop.pay_aria' | t }}">
   <span class="mhh-pay__lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v2"/></svg></span>
   <span class="mhh-pay__t"><b>{{ 'desktop_home_shop.pay_title' | t }}</b><small><i></i>{{ 'desktop_home_shop.pay_count' | t: count: shop.enabled_payment_types.size }}</small></span>
   <div class="mhh-pay__view">
-    <ul class="mhh-pay__run">
+    <ul class="mhh-pay__run"{% if shared %} data-mhh-pay-fill{% endif %}>
       {{- mhh_pay_items -}}
       {{- mhh_pay_items | replace: '<li>', '<li aria-hidden="true">' -}}
     </ul>
