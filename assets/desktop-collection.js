@@ -369,7 +369,10 @@
         afterContent();
         var list = root.querySelector('.cl__layout');
         var top = list.getBoundingClientRect().top + window.scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dh-h')) || 126) - 70;
-        if (window.scrollY > top) window.scrollTo({ top: top, behavior: 'instant' });
+        // Lien du haut de page (bannières « Più venduti », « Appena arrivati », « Tutto sotto… », rails) : la page
+        // descend jusqu'aux produits triés, sinon le clic semblait sans effet (la grille changeait plus bas, hors de vue)
+        if (options.reveal && top > window.scrollY) window.scrollTo({ top: top, behavior: 'smooth' });
+        else if (window.scrollY > top) window.scrollTo({ top: top, behavior: 'instant' });
       } else {
         var node = document.importNode(fresh, true);
         root.replaceWith(node);
@@ -620,11 +623,12 @@
     return url;
   };
   document.addEventListener('click', function (event) {
-    var url = collectionLink(event.target.closest('a[href]'), event);
+    var link = event.target.closest('a[href]');
+    var url = collectionLink(link, event);
     if (!url) return;
     event.preventDefault();
     closeMega();
-    navigate(url.pathname + url.search, { full: url.pathname !== location.pathname }).then(closeMega);
+    navigate(url.pathname + url.search, { full: url.pathname !== location.pathname, reveal: Boolean(link.closest('.cpb, .cpr')) }).then(closeMega);
   }, true);
   // Préparée dès le survol (le clic affiche la page tout de suite)
   var hoverTimer = null;
