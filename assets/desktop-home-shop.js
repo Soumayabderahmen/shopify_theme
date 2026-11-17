@@ -473,20 +473,7 @@
       // Objet du rayon suivant préparé pendant que celui-ci est affiché
       (window.requestIdleCallback || setTimeout)(function () { objectOf(at(current + 1)); });
     };
-    // Rangée des produits jusqu'aux bords de l'écran : marge du contenu en pixels (--bleed, lue par desktop-home-shop.css
-    // pour le débord, le retrait et l'aimantation du défilement, qui ne comprend pas les pourcentages ici)
-    var marqRail = prods.closest('.dhp-marq__rail');
-    var setBleed = function () {
-      if (!marqRail) return;
-      var box = marqRail.getBoundingClientRect();
-      marqRail.style.setProperty('--bleed', Math.max(0, Math.round(box.left)) + 'px');
-      marqRail.style.setProperty('--bleed-r', Math.max(0, Math.round(document.documentElement.clientWidth - box.right)) + 'px');
-    };
-    setBleed();
-    prods.scrollLeft = 0;
-    // Recalé à chaque changement de largeur de la page (après la mise en page, contrairement à l'événement resize)
-    if (marqRail && 'ResizeObserver' in window) new ResizeObserver(function () { setBleed(); }).observe(document.documentElement);
-    window.addEventListener('resize', function () { requestAnimationFrame(setBleed); if (!row.classList.contains('is-sliding')) drawRow(); });
+    window.addEventListener('resize', function () { if (!row.classList.contains('is-sliding')) drawRow(); });
     var runMarq = function () {
       clearInterval(marqTimer);
       if (!still) marqTimer = setInterval(function () { if (!document.hidden && !marqHover) showDept(current + 1); }, 5300);
