@@ -311,7 +311,7 @@
   var prods = root.querySelector('[data-dhp-prods]');
   if (marq && prods && once(marq)) {
     var list = [].slice.call(marq.querySelector('[data-dhp-marq-depts]').content.querySelectorAll('i')).map(function (i) {
-      return { title: i.getAttribute('data-title'), src: i.getAttribute('data-src'), imgs: (i.getAttribute('data-imgs') || '').split('|').filter(Boolean), cards: '' };
+      return { title: i.getAttribute('data-title'), src: i.getAttribute('data-src'), imgs: (i.getAttribute('data-imgs') || '').split('|').filter(Boolean), webm: i.getAttribute('data-webm') || '', hevc: i.getAttribute('data-hevc') || '', cards: '' };
     });
     var row = marq.querySelector('[data-dhp-marq-row]');
     var pic = marq.querySelector('[data-dhp-marq-img]');
@@ -433,7 +433,29 @@
       });
       return d.object;
     };
+    // Vidéo 3D transparente du rayon (réglages du thème), comme shop.com : WebM avec transparence (Chrome, Edge, Firefox),
+    // HEVC avec transparence pour Safari (qui ne lit pas la transparence des WebM). Sans vidéo lisible : photo détourée.
+    var isSafari = /^((?!chrome|android|crios|fxios|edg).)*safari/i.test(navigator.userAgent);
+    var videoOf = function (d) {
+      if (isSafari) return d.hevc ? { src: d.hevc, type: 'video/mp4; codecs="hvc1"' } : null;
+      return d.webm ? { src: d.webm, type: 'video/webm' } : null;
+    };
     var showPic = function (d) {
+      var video = videoOf(d);
+      if (video) {
+        pic.classList.add('is-out');
+        setTimeout(function () {
+          if (list[current] !== d) return;
+          pic.innerHTML = '<span class="dhp-marq__obj is-video"><video autoplay muted loop playsinline preload="auto" aria-hidden="true"><source src="' + esc(video.src) + '" type="' + esc(video.type) + '"></video></span>';
+          var el = pic.querySelector('video');
+          // Vidéo illisible (adresse fausse, format) : photo détourée à la place
+          el.addEventListener('error', function () { if (list[current] === d) { d.webm = ''; d.hevc = ''; showPic(d); } }, true);
+          var play = el.play();
+          if (play && play.catch) play.catch(function () {});
+          pic.classList.remove('is-out');
+        }, first0 ? 0 : 280);
+        return;
+      }
       pic.classList.add('is-out');
       Promise.all([objectOf(d), new Promise(function (resolve) { setTimeout(resolve, first0 ? 0 : 280); })]).then(function (out) {
         if (list[current] !== d) return;
@@ -470,8 +492,12 @@
         });
       }
       load(at(current + 1));
-      // Objet du rayon suivant préparé pendant que celui-ci est affiché
-      (window.requestIdleCallback || setTimeout)(function () { objectOf(at(current + 1)); });
+      // Objet du rayon suivant préparé pendant que celui-ci est affiché (vidéo : préchargée par le navigateur)
+      (window.requestIdleCallback || setTimeout)(function () {
+        var next = at(current + 1), nextVideo = videoOf(next);
+        if (nextVideo) { if (!next.preload) { next.preload = document.createElement('link'); next.preload.rel = 'preload'; next.preload.as = 'video'; next.preload.href = nextVideo.src; document.head.appendChild(next.preload); } }
+        else objectOf(next);
+      });
     };
     window.addEventListener('resize', function () { if (!row.classList.contains('is-sliding')) drawRow(); });
     var runMarq = function () {

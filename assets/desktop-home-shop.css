@@ -353,6 +353,9 @@ html.dhp-modal-open { overflow: hidden; }
 .dhp-marq__img.is-out { opacity: 0; transform: translate(-50%, -50%) scale(0); transition: opacity .25s cubic-bezier(.45, 0, .55, 1), transform .25s cubic-bezier(.45, 0, .55, 1); }
 .dhp-marq__obj { display: block; width: 100%; height: 100%; transform-style: preserve-3d; animation: dhp-marq-spin 6s ease-in-out infinite; }
 .dhp-marq__obj img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 14px 14px rgb(0 0 0 / 22%)) drop-shadow(0 3px 4px rgb(0 0 0 / 12%)); }
+/* Vidéo 3D du rayon : elle tourne d'elle-même (pas de rotation ajoutée), fond transparent, sans ombre ajoutée */
+.dhp-marq__obj.is-video { animation: none; }
+.dhp-marq__obj.is-video video { display: block; width: 100%; height: 100%; object-fit: contain; background: transparent; }
 /* Photo non détourable (mise en scène) : médaillon rond à bords fondus, même rotation */
 .dhp-marq__obj.is-photo img { object-fit: cover; border-radius: 50%; filter: none; -webkit-mask: radial-gradient(closest-side, #000 74%, transparent); mask: radial-gradient(closest-side, #000 74%, transparent); }
 /* Rotation lente en perspective, comme l'objet qui tourne sur lui-même chez shop.com */

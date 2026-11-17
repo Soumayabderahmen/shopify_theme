@@ -568,7 +568,23 @@
                 {%- if marq_product.images[1] != blank -%}{{ marq_product.images[1] | image_url: width: 320 }}|{%- endif -%}
               {%- endfor -%}
             {%- endcapture -%}
-            <i data-title="{{ dept_titles[forloop.index0] | escape }}" data-src="{{ dept.url }}?view=mshein-dept-page" data-imgs="{{ marq_imgs | strip | escape }}"></i>
+            {%- comment -%} Vidéo 3D transparente du rayon (Réglages du thème > Video 3D dei reparti), comme shop.com {%- endcomment -%}
+            {%- liquid
+              assign marq_webm = ''
+              assign marq_hevc = ''
+              for marq_n in (1..12)
+                assign marq_key_coll = 'marq3d_' | append: marq_n | append: '_collection'
+                assign marq_key_webm = 'marq3d_' | append: marq_n | append: '_webm'
+                assign marq_key_hevc = 'marq3d_' | append: marq_n | append: '_hevc'
+                assign marq_coll = settings[marq_key_coll]
+                if marq_coll != blank and marq_coll.handle == dept.handle
+                  assign marq_webm = settings[marq_key_webm] | strip
+                  assign marq_hevc = settings[marq_key_hevc] | strip
+                  break
+                endif
+              endfor
+            -%}
+            <i data-title="{{ dept_titles[forloop.index0] | escape }}" data-src="{{ dept.url }}?view=mshein-dept-page" data-imgs="{{ marq_imgs | strip | escape }}"{% if marq_webm != '' %} data-webm="{{ marq_webm | escape }}"{% endif %}{% if marq_hevc != '' %} data-hevc="{{ marq_hevc | escape }}"{% endif %}></i>
           {%- endfor -%}
         </template>
       </section>
