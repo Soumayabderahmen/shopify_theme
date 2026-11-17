@@ -544,7 +544,7 @@
     {%- if part == 'more-b' -%}
     {%- comment -%}
       ---------- Mot géant (style shop.com) : nom du rayon en très grand qui glisse vers la gauche pour laisser venir le
-      suivant (clic ou toutes les 4,5 s), voisins estompés sur les bords, photo d'un produit posée sur le mot, et dessous
+      suivant (clic ou toutes les 5,3 s), voisins estompés sur les bords, photo détourée d'un produit posée sur le mot, et dessous
       ses 10 produits sur une seule rangée avec flèches. Le 1er rayon est rendu ici, les autres sont chargés à leur tour
       (modèle collection.mshein-dept-page, mêmes cartes) ----------
     {%- endcomment -%}
@@ -558,7 +558,17 @@
         <template data-dhp-marq-depts>
           {%- for dept_handle in dept_handles -%}
             {%- assign dept = collections[dept_handle] -%}
-            <i data-title="{{ dept_titles[forloop.index0] | escape }}" data-src="{{ dept.url }}?view=mshein-dept-page" data-img="{{ dept.products.first.featured_image | image_url: width: 240 }}"></i>
+            {%- comment -%}
+              Photos candidates pour l'objet détouré posé sur le mot : photo principale puis 2e photo (souvent sur fond
+              blanc) des 8 premiers produits du rayon ; assets/desktop-home-shop.js garde la première à fond uni.
+            {%- endcomment -%}
+            {%- capture marq_imgs -%}
+              {%- for marq_product in dept.products limit: 8 -%}
+                {%- if marq_product.featured_image != blank -%}{{ marq_product.featured_image | image_url: width: 320 }}|{%- endif -%}
+                {%- if marq_product.images[1] != blank -%}{{ marq_product.images[1] | image_url: width: 320 }}|{%- endif -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+            <i data-title="{{ dept_titles[forloop.index0] | escape }}" data-src="{{ dept.url }}?view=mshein-dept-page" data-imgs="{{ marq_imgs | strip | escape }}"></i>
           {%- endfor -%}
         </template>
       </section>

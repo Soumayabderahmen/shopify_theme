@@ -306,12 +306,12 @@
     return true;
   };
   var initMore = function () {
-  // ---------- Mot géant : le rayon choisi (clic ou toutes les 4,5 s) et ses 10 produits ----------
+  // ---------- Mot géant : le rayon choisi (clic ou toutes les 5,3 s, comme shop.com) et ses 10 produits ----------
   var marq = root.querySelector('[data-dhp-marq]');
   var prods = root.querySelector('[data-dhp-prods]');
   if (marq && prods && once(marq)) {
     var list = [].slice.call(marq.querySelector('[data-dhp-marq-depts]').content.querySelectorAll('i')).map(function (i) {
-      return { title: i.getAttribute('data-title'), src: i.getAttribute('data-src'), img: i.getAttribute('data-img'), cards: '' };
+      return { title: i.getAttribute('data-title'), src: i.getAttribute('data-src'), imgs: (i.getAttribute('data-imgs') || '').split('|').filter(Boolean), cards: '' };
     });
     var row = marq.querySelector('[data-dhp-marq-row]');
     var pic = marq.querySelector('[data-dhp-marq-img]');
@@ -340,13 +340,107 @@
     };
     var offsetOf = function (word) { return marq.clientWidth / 2 - (word.offsetLeft + word.offsetWidth / 2); };
     var sliding = null;
+    // ---------- Objet posé sur le mot (comme les objets 3D de shop.com) : une photo produit du rayon détourée dans le
+    // navigateur (fond blanc ou uni retiré depuis les bords, contour adouci, recadrée), qui tourne en perspective.
+    // Les photos sans fond uni (mises en scène) sont écartées ; si aucune ne convient, la 1re photo en médaillon.
+    var cutout = function (src) {
+      return new Promise(function (resolve) {
+        var img = new Image();
+        img.decoding = 'async';
+        img.onload = function () {
+          try {
+            var w = img.naturalWidth, h = img.naturalHeight;
+            if (!w || !h) return resolve(null);
+            var canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            var ctx = canvas.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(img, 0, 0);
+            var data = ctx.getImageData(0, 0, w, h);
+            var px = data.data;
+            // Couleur du fond : moyenne des 4 coins ; refus si les coins diffèrent (photo mise en scène)
+            var corner = function (x0, y0) {
+              var r = 0, g = 0, b = 0, n = 0;
+              for (var y = y0; y < y0 + 6; y += 1) for (var x = x0; x < x0 + 6; x += 1) { var o = (y * w + x) * 4; r += px[o]; g += px[o + 1]; b += px[o + 2]; n += 1; }
+              return [r / n, g / n, b / n];
+            };
+            var cs = [corner(0, 0), corner(w - 6, 0), corner(0, h - 6), corner(w - 6, h - 6)];
+            var bg = [0, 1, 2].map(function (k) { return (cs[0][k] + cs[1][k] + cs[2][k] + cs[3][k]) / 4; });
+            var far = function (c) { return Math.abs(c[0] - bg[0]) + Math.abs(c[1] - bg[1]) + Math.abs(c[2] - bg[2]); };
+            if (cs.some(function (c) { return far(c) > 30; }) || bg[0] + bg[1] + bg[2] < 600) return resolve(null);
+            // Remplissage depuis tous les bords : les pixels proches du fond deviennent transparents
+            var TOL = 46;
+            var seen = new Uint8Array(w * h);
+            var stack = [];
+            var near = function (i) { var o = i * 4; return Math.abs(px[o] - bg[0]) + Math.abs(px[o + 1] - bg[1]) + Math.abs(px[o + 2] - bg[2]) < TOL; };
+            for (var x = 0; x < w; x += 1) { stack.push(x, (h - 1) * w + x); }
+            for (var y = 0; y < h; y += 1) { stack.push(y * w, y * w + w - 1); }
+            var cleared = 0;
+            while (stack.length) {
+              var i = stack.pop();
+              if (seen[i] || !near(i)) continue;
+              seen[i] = 1; px[i * 4 + 3] = 0; cleared += 1;
+              var cx = i % w;
+              if (cx > 0) stack.push(i - 1);
+              if (cx < w - 1) stack.push(i + 1);
+              if (i >= w) stack.push(i - w);
+              if (i < w * (h - 1)) stack.push(i + w);
+            }
+            // Trop peu de fond retiré (objet collé aux bords) ou presque tout (objet clair perdu) : photo écartée
+            var ratio = cleared / (w * h);
+            if (ratio < 0.18 || ratio > 0.92) return resolve(null);
+            // Contour adouci : pixels gardés qui touchent le fond retiré, à moitié transparents ; cadre de l'objet
+            var minX = w, minY = h, maxX = 0, maxY = 0;
+            for (var j = 0; j < w * h; j += 1) {
+              if (seen[j]) continue;
+              var jx = j % w, jy = (j - jx) / w;
+              if ((jx > 0 && seen[j - 1]) || (jx < w - 1 && seen[j + 1]) || (j >= w && seen[j - w]) || (j < w * (h - 1) && seen[j + w])) px[j * 4 + 3] = 120;
+              if (jx < minX) minX = jx; if (jx > maxX) maxX = jx; if (jy < minY) minY = jy; if (jy > maxY) maxY = jy;
+            }
+            ctx.putImageData(data, 0, 0);
+            var cw = maxX - minX + 1, ch = maxY - minY + 1;
+            var out = document.createElement('canvas');
+            out.width = cw; out.height = ch;
+            out.getContext('2d').drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
+            out.toBlob(function (blob) { resolve(blob ? URL.createObjectURL(blob) : null); }, 'image/png');
+          } catch (error) { resolve(null); }
+        };
+        img.onerror = function () { resolve(null); };
+        img.src = src;
+      });
+    };
+    var objectOf = function (d) {
+      if (d.object) return d.object;
+      // Toutes les photos candidates en même temps ; la première (dans l'ordre du rayon) qui se détoure est gardée, dès
+      // que les précédentes ont échoué (sans attendre les suivantes)
+      d.object = new Promise(function (resolve) {
+        var urls = new Array(d.imgs.length), done = new Array(d.imgs.length), settled = false;
+        var check = function () {
+          if (settled) return;
+          for (var k = 0; k < urls.length; k += 1) {
+            if (!done[k]) return;
+            if (urls[k]) { settled = true; return resolve({ url: urls[k], cut: true }); }
+          }
+          settled = true;
+          resolve(d.imgs[0] ? { url: d.imgs[0], cut: false } : null);
+        };
+        if (!d.imgs.length) return resolve(null);
+        d.imgs.forEach(function (src, k) {
+          cutout(src).then(function (url) {
+            if (settled && url) URL.revokeObjectURL(url);
+            else { urls[k] = url; done[k] = true; check(); }
+          });
+        });
+      });
+      return d.object;
+    };
     var showPic = function (d) {
-      if (!d.img) { pic.innerHTML = ''; return; }
       pic.classList.add('is-out');
-      setTimeout(function () {
-        pic.innerHTML = '<img src="' + esc(d.img) + '" alt="">';
+      Promise.all([objectOf(d), new Promise(function (resolve) { setTimeout(resolve, first0 ? 0 : 280); })]).then(function (out) {
+        if (list[current] !== d) return;
+        var obj = out[0];
+        pic.innerHTML = obj ? '<span class="dhp-marq__obj' + (obj.cut ? ' is-cut' : ' is-photo') + '"><img src="' + esc(obj.url) + '" alt=""></span>' : '';
         pic.classList.remove('is-out');
-      }, first0 ? 0 : 260);
+      });
     };
     var first0 = true;
     var showDept = function (i, first) {
@@ -360,7 +454,7 @@
       if (target && !still) {
         row.classList.add('is-sliding');
         row.style.transform = 'translateX(' + offsetOf(target) + 'px)';
-        sliding = setTimeout(drawRow, 820);
+        sliding = setTimeout(drawRow, 320);
       } else drawRow();
       showPic(d);
       first0 = false;
@@ -376,13 +470,15 @@
         });
       }
       load(at(current + 1));
+      // Objet du rayon suivant préparé pendant que celui-ci est affiché
+      (window.requestIdleCallback || setTimeout)(function () { objectOf(at(current + 1)); });
     };
     window.addEventListener('resize', function () { if (!row.classList.contains('is-sliding')) drawRow(); });
     var runMarq = function () {
       clearInterval(marqTimer);
-      if (!still) marqTimer = setInterval(function () { if (!document.hidden && !marqHover) showDept(current + 1); }, 4500);
+      if (!still) marqTimer = setInterval(function () { if (!document.hidden && !marqHover) showDept(current + 1); }, 5300);
     };
-    // Souris sur le mot géant ou sur ses produits : le rayon ne change pas (reprise 4,5 s après la sortie)
+    // Souris sur le mot géant ou sur ses produits : le rayon ne change pas (reprise 5,3 s après la sortie)
     var marqHover = false;
     [marq, prods.closest('.dhp-marq__rail') || prods].forEach(function (zone) {
       zone.addEventListener('mouseenter', function () { marqHover = true; });
