@@ -305,6 +305,73 @@
     el.setAttribute('data-ready', '');
     return true;
   };
+  // Détourage d'une photo produit dans le navigateur (mot géant des rayons, titre des nouveaux arrivages) : fond blanc
+  // ou uni retiré depuis les bords, contour adouci, recadrée ; null si la photo n'a pas de fond uni
+  var cutout = function (src) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.decoding = 'async';
+      img.onload = function () {
+        try {
+          var w = img.naturalWidth, h = img.naturalHeight;
+          if (!w || !h) return resolve(null);
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          var ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0);
+          var data = ctx.getImageData(0, 0, w, h);
+          var px = data.data;
+          // Couleur du fond : moyenne des 4 coins ; refus si les coins diffèrent (photo mise en scène)
+          var corner = function (x0, y0) {
+            var r = 0, g = 0, b = 0, n = 0;
+            for (var y = y0; y < y0 + 6; y += 1) for (var x = x0; x < x0 + 6; x += 1) { var o = (y * w + x) * 4; r += px[o]; g += px[o + 1]; b += px[o + 2]; n += 1; }
+            return [r / n, g / n, b / n];
+          };
+          var cs = [corner(0, 0), corner(w - 6, 0), corner(0, h - 6), corner(w - 6, h - 6)];
+          var bg = [0, 1, 2].map(function (k) { return (cs[0][k] + cs[1][k] + cs[2][k] + cs[3][k]) / 4; });
+          var far = function (c) { return Math.abs(c[0] - bg[0]) + Math.abs(c[1] - bg[1]) + Math.abs(c[2] - bg[2]); };
+          if (cs.some(function (c) { return far(c) > 30; }) || bg[0] + bg[1] + bg[2] < 600) return resolve(null);
+          // Remplissage depuis tous les bords : les pixels proches du fond deviennent transparents
+          var TOL = 46;
+          var seen = new Uint8Array(w * h);
+          var stack = [];
+          var near = function (i) { var o = i * 4; return Math.abs(px[o] - bg[0]) + Math.abs(px[o + 1] - bg[1]) + Math.abs(px[o + 2] - bg[2]) < TOL; };
+          for (var x = 0; x < w; x += 1) { stack.push(x, (h - 1) * w + x); }
+          for (var y = 0; y < h; y += 1) { stack.push(y * w, y * w + w - 1); }
+          var cleared = 0;
+          while (stack.length) {
+            var i = stack.pop();
+            if (seen[i] || !near(i)) continue;
+            seen[i] = 1; px[i * 4 + 3] = 0; cleared += 1;
+            var cx = i % w;
+            if (cx > 0) stack.push(i - 1);
+            if (cx < w - 1) stack.push(i + 1);
+            if (i >= w) stack.push(i - w);
+            if (i < w * (h - 1)) stack.push(i + w);
+          }
+          // Trop peu de fond retiré (objet collé aux bords) ou presque tout (objet clair perdu) : photo écartée
+          var ratio = cleared / (w * h);
+          if (ratio < 0.18 || ratio > 0.92) return resolve(null);
+          // Contour adouci : pixels gardés qui touchent le fond retiré, à moitié transparents ; cadre de l'objet
+          var minX = w, minY = h, maxX = 0, maxY = 0;
+          for (var j = 0; j < w * h; j += 1) {
+            if (seen[j]) continue;
+            var jx = j % w, jy = (j - jx) / w;
+            if ((jx > 0 && seen[j - 1]) || (jx < w - 1 && seen[j + 1]) || (j >= w && seen[j - w]) || (j < w * (h - 1) && seen[j + w])) px[j * 4 + 3] = 120;
+            if (jx < minX) minX = jx; if (jx > maxX) maxX = jx; if (jy < minY) minY = jy; if (jy > maxY) maxY = jy;
+          }
+          ctx.putImageData(data, 0, 0);
+          var cw = maxX - minX + 1, ch = maxY - minY + 1;
+          var out = document.createElement('canvas');
+          out.width = cw; out.height = ch;
+          out.getContext('2d').drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
+          out.toBlob(function (blob) { resolve(blob ? URL.createObjectURL(blob) : null); }, 'image/png');
+        } catch (error) { resolve(null); }
+      };
+      img.onerror = function () { resolve(null); };
+      img.src = src;
+    });
+  };
   var initMore = function () {
   // ---------- Mot géant : le rayon choisi (clic ou toutes les 5,3 s, comme shop.com) et ses 20 produits (2 lignes) ----------
   var marq = root.querySelector('[data-dhp-marq]');
@@ -343,71 +410,7 @@
     // ---------- Objet posé sur le mot (comme les objets 3D de shop.com) : une photo produit du rayon détourée dans le
     // navigateur (fond blanc ou uni retiré depuis les bords, contour adouci, recadrée), qui tourne en perspective.
     // Les photos sans fond uni (mises en scène) sont écartées ; si aucune ne convient, la 1re photo en médaillon.
-    var cutout = function (src) {
-      return new Promise(function (resolve) {
-        var img = new Image();
-        img.decoding = 'async';
-        img.onload = function () {
-          try {
-            var w = img.naturalWidth, h = img.naturalHeight;
-            if (!w || !h) return resolve(null);
-            var canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            var ctx = canvas.getContext('2d', { willReadFrequently: true });
-            ctx.drawImage(img, 0, 0);
-            var data = ctx.getImageData(0, 0, w, h);
-            var px = data.data;
-            // Couleur du fond : moyenne des 4 coins ; refus si les coins diffèrent (photo mise en scène)
-            var corner = function (x0, y0) {
-              var r = 0, g = 0, b = 0, n = 0;
-              for (var y = y0; y < y0 + 6; y += 1) for (var x = x0; x < x0 + 6; x += 1) { var o = (y * w + x) * 4; r += px[o]; g += px[o + 1]; b += px[o + 2]; n += 1; }
-              return [r / n, g / n, b / n];
-            };
-            var cs = [corner(0, 0), corner(w - 6, 0), corner(0, h - 6), corner(w - 6, h - 6)];
-            var bg = [0, 1, 2].map(function (k) { return (cs[0][k] + cs[1][k] + cs[2][k] + cs[3][k]) / 4; });
-            var far = function (c) { return Math.abs(c[0] - bg[0]) + Math.abs(c[1] - bg[1]) + Math.abs(c[2] - bg[2]); };
-            if (cs.some(function (c) { return far(c) > 30; }) || bg[0] + bg[1] + bg[2] < 600) return resolve(null);
-            // Remplissage depuis tous les bords : les pixels proches du fond deviennent transparents
-            var TOL = 46;
-            var seen = new Uint8Array(w * h);
-            var stack = [];
-            var near = function (i) { var o = i * 4; return Math.abs(px[o] - bg[0]) + Math.abs(px[o + 1] - bg[1]) + Math.abs(px[o + 2] - bg[2]) < TOL; };
-            for (var x = 0; x < w; x += 1) { stack.push(x, (h - 1) * w + x); }
-            for (var y = 0; y < h; y += 1) { stack.push(y * w, y * w + w - 1); }
-            var cleared = 0;
-            while (stack.length) {
-              var i = stack.pop();
-              if (seen[i] || !near(i)) continue;
-              seen[i] = 1; px[i * 4 + 3] = 0; cleared += 1;
-              var cx = i % w;
-              if (cx > 0) stack.push(i - 1);
-              if (cx < w - 1) stack.push(i + 1);
-              if (i >= w) stack.push(i - w);
-              if (i < w * (h - 1)) stack.push(i + w);
-            }
-            // Trop peu de fond retiré (objet collé aux bords) ou presque tout (objet clair perdu) : photo écartée
-            var ratio = cleared / (w * h);
-            if (ratio < 0.18 || ratio > 0.92) return resolve(null);
-            // Contour adouci : pixels gardés qui touchent le fond retiré, à moitié transparents ; cadre de l'objet
-            var minX = w, minY = h, maxX = 0, maxY = 0;
-            for (var j = 0; j < w * h; j += 1) {
-              if (seen[j]) continue;
-              var jx = j % w, jy = (j - jx) / w;
-              if ((jx > 0 && seen[j - 1]) || (jx < w - 1 && seen[j + 1]) || (j >= w && seen[j - w]) || (j < w * (h - 1) && seen[j + w])) px[j * 4 + 3] = 120;
-              if (jx < minX) minX = jx; if (jx > maxX) maxX = jx; if (jy < minY) minY = jy; if (jy > maxY) maxY = jy;
-            }
-            ctx.putImageData(data, 0, 0);
-            var cw = maxX - minX + 1, ch = maxY - minY + 1;
-            var out = document.createElement('canvas');
-            out.width = cw; out.height = ch;
-            out.getContext('2d').drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
-            out.toBlob(function (blob) { resolve(blob ? URL.createObjectURL(blob) : null); }, 'image/png');
-          } catch (error) { resolve(null); }
-        };
-        img.onerror = function () { resolve(null); };
-        img.src = src;
-      });
-    };
+    // (détourage : fonction cutout, partagée avec les nouveaux arrivages, plus haut)
     var objectOf = function (d) {
       if (d.object) return d.object;
       // Toutes les photos candidates en même temps ; la première (dans l'ordre du rayon) qui se détoure est gardée, dès
@@ -752,6 +755,94 @@
         showPage(edPage + 1);
       }, 500);
     }
+  }
+
+  // ---------- Nuovi arrivi (style shop.com) : cartes remplies à l'approche (dernier arrivé du rayon en grande photo,
+  // nombre d'arrivées sur 30 jours, 3 miniatures en éventail), rangée doublée qui défile en continu (12 px/s comme
+  // shop.com, pause au survol), objet détouré des derniers arrivés qui change dans le titre ----------
+  var novita = root.querySelector('[data-dhp-new]');
+  if (novita && once(novita)) {
+    var newTrack = novita.querySelector('[data-dhp-new-track]');
+    var newObj = novita.querySelector('[data-dhp-new-obj]');
+    var tr = function (key) { return novita.getAttribute('data-i18n-' + key) || ''; };
+    var subText = function (data) {
+      if (data.more) return tr('many').replace('__N__', data.count);
+      if (data.count === 1) return tr('one');
+      if (data.count > 1) return tr('count').replace('__N__', data.count);
+      return tr('latest');
+    };
+    var objSources = [];
+    var fillCard = function (card) {
+      return fetch(card.getAttribute('data-src'), { credentials: 'same-origin' })
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (data) {
+          card.classList.remove('is-loading');
+          if (!data || !data.items || !data.items.length) { card.remove(); return; }
+          // Photos ramenées au domaine de la boutique (/cdn/shop/…) : sinon le détourage est refusé par le navigateur
+          var local = function (src) { return String(src || '').replace(/^(https?:)?\/\/[^/]+(?=\/cdn\/)/, ''); };
+          data.items.forEach(function (item) { item.b = local(item.b); item.s = local(item.s); item.c = local(item.c); });
+          var first = data.items[0];
+          card.insertAdjacentHTML('afterbegin', '<img class="dhp-new__bg" src="' + esc(first.b) + '" alt="" loading="lazy" width="352" height="446">');
+          card.setAttribute('aria-label', card.querySelector('.dhp-new__txt b').textContent + ' – ' + first.t);
+          card.querySelector('[data-dhp-new-sub]').textContent = subText(data);
+          card.querySelector('[data-dhp-new-thumbs]').innerHTML = data.items.slice(1, 4).map(function (item) {
+            return '<span><img src="' + esc(item.s) + '" alt="" loading="lazy" width="45" height="45"></span>';
+          }).join('');
+          data.items.forEach(function (item) { if (item.c) objSources.push(item.c); });
+        })
+        .catch(function () { card.classList.remove('is-loading'); });
+    };
+    // Défilement continu : la rangée est doublée (copie cachée aux lecteurs d'écran), durée selon sa largeur
+    var startDrift = function () {
+      var cards = [].slice.call(newTrack.children);
+      if (!cards.length) { novita.hidden = true; return; }
+      cards.forEach(function (card) {
+        var copy = card.cloneNode(true);
+        copy.setAttribute('aria-hidden', 'true');
+        copy.setAttribute('tabindex', '-1');
+        newTrack.appendChild(copy);
+      });
+      var half = newTrack.scrollWidth / 2;
+      newTrack.style.setProperty('--drift', Math.max(20, Math.round(half / 12)) + 's');
+      if (!still) newTrack.classList.add('is-drifting');
+    };
+    // Objet du titre : un dernier arrivé détouré, puis un autre toutes les 5,3 s
+    var objs = [];
+    var objAt = 0;
+    var showObj = function () {
+      if (!objs.length) return;
+      var url = objs[objAt % objs.length];
+      objAt += 1;
+      newObj.classList.remove('is-in');
+      setTimeout(function () {
+        newObj.innerHTML = '<img src="' + esc(url) + '" alt="">';
+        newObj.classList.add('is-in');
+      }, newObj.firstChild ? 250 : 0);
+    };
+    var prepareObjects = function () {
+      var tries = objSources.slice(0, 12);
+      var next = function () {
+        if (!tries.length || objs.length >= 4) return;
+        cutout(tries.shift()).then(function (url) {
+          if (url) { objs.push(url); if (objs.length === 1) showObj(); }
+          next();
+        });
+      };
+      next();
+      if (!still) setInterval(function () { if (!document.hidden && objs.length > 1) showObj(); }, 5300);
+    };
+    var started = false;
+    var start = function () {
+      if (started) return;
+      started = true;
+      Promise.all([].slice.call(newTrack.children).map(fillCard)).then(function () { startDrift(); prepareObjects(); });
+    };
+    if ('IntersectionObserver' in window) {
+      var newSeen = new IntersectionObserver(function (entries) {
+        if (entries.some(function (entry) { return entry.isIntersecting; })) { newSeen.disconnect(); start(); }
+      }, { rootMargin: '600px 0px' });
+      newSeen.observe(novita);
+    } else start();
   }
   };
 

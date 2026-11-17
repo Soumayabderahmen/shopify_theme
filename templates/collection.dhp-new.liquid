@@ -1,0 +1,24 @@
+{%- layout none -%}
+{%- comment -%}
+  Accueil ordinateur, « Nuovi arrivi » (sections/desktop-home-shop.liquid, assets/desktop-home-shop.js) : derniers
+  produits arrivés dans un rayon, demandé avec sort_by=created-descending. Réponse JSON, sans mise en page :
+  count = produits créés dans les 30 derniers jours parmi les 24 plus récents (more = au moins 24),
+  items = les 4 plus récents (b : grande photo, s : miniature, c : photo pour l'objet détouré du titre).
+{%- endcomment -%}
+{%- assign month_ago = 'now' | date: '%s' | minus: 2592000 -%}
+{%- paginate collection.products by 24 -%}
+  {%- assign recent = 0 -%}
+  {%- assign shown = 0 -%}
+  {%- capture items -%}
+    {%- for product in collection.products -%}
+      {%- assign created = product.created_at | date: '%s' | plus: 0 -%}
+      {%- if created >= month_ago -%}{%- assign recent = recent | plus: 1 -%}{%- endif -%}
+      {%- if shown < 4 and product.featured_image != blank -%}
+        {%- unless shown == 0 -%},{%- endunless -%}
+        {"t":{{ product.title | json }},"u":{{ product.url | json }},"b":{{ product.featured_image | image_url: width: 720 | json }},"s":{{ product.featured_image | image_url: width: 120 | json }},"c":{{ product.featured_image | image_url: width: 320 | json }}}
+        {%- assign shown = shown | plus: 1 -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+  {"count":{{ recent }},"more":{% if recent >= 24 %}true{% else %}false{% endif %},"items":[{{ items }}]}
+{%- endpaginate -%}

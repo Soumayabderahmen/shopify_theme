@@ -19,7 +19,7 @@
   Plusieurs parties (réglage « part »), pour rester sous le temps limite de Shopify et afficher vite :
   - « top » (templates/index.json) : bande des paiements, grande carte, Black Friday ; la suite est demandée dès
     l'arrivée de la page, en 3 morceaux en même temps (modèles sans en-tête ni pied de page, /?view=dhp-more-a/-b/-c) :
-  - « more-a » : reparti di tendenza, Shop per brand ; « more-b » : mot géant et ses produits, offres du moment ;
+  - « more-a » : reparti di tendenza, nuovi arrivi, Shop per brand ; « more-b » : mot géant et ses produits, offres du moment ;
   - « more-c » : collections, Occasioni et colpo di fulmine (blocs « occasion » et « featured » de ce modèle) ;
   insérés dans la page par assets/desktop-home-shop.js.
 {%- endcomment -%}
@@ -469,6 +469,35 @@
     </section>
 
     {%- comment -%}
+      ---------- Nuovi arrivi (style shop.com « Découvrez votre prochain coup de cœur ») : grand titre centré avec un
+      objet détouré qui tourne, cartes hautes d'un rayon (photo du dernier arrivé, nombre d'arrivées sur 30 jours,
+      3 miniatures en éventail) qui défilent lentement en continu. Les cartes sont remplies par assets/desktop-home-shop.js
+      depuis templates/collection.dhp-new.liquid (rayon trié du plus récent au plus ancien) ; rayon sans produit : carte
+      retirée. ----------
+    {%- endcomment -%}
+    <section class="dhp-sec dhp-new" id="dhp-novita" data-dhp-new
+      data-i18n-latest="{{ 'desktop_home_shop.new_card_latest' | t | escape }}"
+      data-i18n-one="{{ 'desktop_home_shop.new_card_count_one' | t | escape }}"
+      data-i18n-count="{{ 'desktop_home_shop.new_card_count' | t: count: '__N__' | escape }}"
+      data-i18n-many="{{ 'desktop_home_shop.new_card_count_many' | t: count: '__N__' | escape }}">
+      <h2 class="dhp-new__hd">{{ 'desktop_home_shop.new_title_html' | t }}<span class="dhp-new__obj" data-dhp-new-obj aria-hidden="true"></span></h2>
+      <div class="dhp-new__view">
+        <div class="dhp-new__track" data-dhp-new-track>
+          {%- for dept_handle in dept_handles -%}
+            {%- assign dept = collections[dept_handle] -%}
+            <a class="dhp-new__card is-loading" href="{{ dept.url }}?sort_by=created-descending" data-src="{{ dept.url }}?view=dhp-new&amp;sort_by=created-descending">
+              <span class="dhp-new__txt">
+                <b>{{ 'desktop_home_shop.new_card_title' | t: dept: dept_titles[forloop.index0] }}</b>
+                <small data-dhp-new-sub>{{ 'desktop_home_shop.new_card_latest' | t }}</small>
+              </span>
+              <span class="dhp-new__thumbs" data-dhp-new-thumbs aria-hidden="true"></span>
+            </a>
+          {%- endfor -%}
+        </div>
+      </div>
+    </section>
+
+    {%- comment -%}
       ---------- Shop per brand : même liste que le panneau Categoria mobile (snippets/mobile-category-browser.liquid,
       Nom|recherche|collection(s)|photo) ; tuiles de couleur, photo penchée, 2 lignes qui défilent ----------
     {%- endcomment -%}
@@ -833,7 +862,7 @@
       "info": "Home: Parte alta. Il resto è caricato dopo dai modelli « index.dhp-more-a » (reparti, brand), « -b » (parola gigante, offerte), « -c » (collezioni, occasioni, categorie in evidenza: blocchi qui).",
       "options": [
         { "value": "top", "label": "Parte alta (pagamenti, banner, Black Friday)" },
-        { "value": "more-a", "label": "Reparti di tendenza e Shop per brand" },
+        { "value": "more-a", "label": "Reparti di tendenza, Nuovi arrivi e Shop per brand" },
         { "value": "more-b", "label": "Parola gigante dei reparti e offerte del momento" },
         { "value": "more-c", "label": "Collezioni, Occasioni e categorie in evidenza" }
       ]
