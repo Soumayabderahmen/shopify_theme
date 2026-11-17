@@ -806,19 +806,78 @@
       newTrack.style.setProperty('--drift', Math.max(20, Math.round(half / 12)) + 's');
       if (!still) newTrack.classList.add('is-drifting');
     };
-    // Objet du titre : un dernier arrivé détouré, puis un autre toutes les 5,3 s
+    // ---------- Titre animé comme shop.com (relevé sur le site) : chaque mot est séparé ; l'objet (un dernier arrivé
+    // détouré) se glisse dans un espace entre deux mots, les mots qui suivent s'écartent pour lui faire de la place, il
+    // grandit ; ~7 s plus tard il rétrécit, les mots se resserrent, et il réapparaît ailleurs dans le titre avec un autre
+    // produit. Lignes du titre : séparées par <br> dans la traduction. ----------
+    var heading = novita.querySelector('.dhp-new__hd');
+    var lines = [];
+    (function splitTitle() {
+      var parts = heading.innerHTML.replace(newObj.outerHTML, '').split(/<br\s*\/?>/i);
+      var holder = document.createElement('div');
+      heading.textContent = '';
+      parts.forEach(function (part) {
+        holder.innerHTML = part;
+        var words = holder.textContent.trim().split(/\s+/).filter(Boolean);
+        if (!words.length) return;
+        var line = document.createElement('span');
+        line.className = 'dhp-new__line';
+        words.forEach(function (word) {
+          var span = document.createElement('span');
+          span.className = 'dhp-new__w';
+          span.textContent = word;
+          line.appendChild(span);
+          line.appendChild(document.createTextNode(' '));
+        });
+        heading.appendChild(line);
+        lines.push([].slice.call(line.querySelectorAll('.dhp-new__w')));
+      });
+      heading.appendChild(newObj);
+    })();
+    // Espaces possibles : avant chaque mot (sauf le 1er de la ligne) et en fin de ligne
+    var gaps = [];
+    lines.forEach(function (words, li) { for (var k = 1; k <= words.length; k += 1) gaps.push({ line: li, at: k }); });
+    var gapAt = -1;
+    var closeGap = function () { lines.forEach(function (words) { words.forEach(function (w) { w.style.transform = ''; }); }); };
+    var openGap = function (gap) {
+      var size = newObj.offsetWidth;
+      var room = size * 0.82;
+      var words = lines[gap.line];
+      var box = heading.getBoundingClientRect();
+      var space = parseFloat(getComputedStyle(heading).fontSize) * 0.26;
+      var x;
+      if (gap.at < words.length) {
+        x = words[gap.at].getBoundingClientRect().left - box.left - space / 2 + room / 2;
+        words.slice(gap.at).forEach(function (w) { w.style.transform = 'translateX(' + Math.round(room) + 'px)'; });
+      } else {
+        var last = words[words.length - 1].getBoundingClientRect();
+        x = last.right - box.left + space / 2 + room / 2;
+      }
+      var lineBox = words[0].getBoundingClientRect();
+      var y = lineBox.top - box.top + lineBox.height / 2;
+      newObj.style.transform = 'translate(' + Math.round(x - size / 2) + 'px, ' + Math.round(y - size / 2) + 'px)';
+    };
     var objs = [];
     var objAt = 0;
     var showObj = function () {
       if (!objs.length) return;
       var url = objs[objAt % objs.length];
       objAt += 1;
+      var wasIn = newObj.classList.contains('is-in');
       newObj.classList.remove('is-in');
+      if (wasIn) closeGap();
       setTimeout(function () {
+        // Autre espace que le précédent, au hasard
+        var next = gapAt;
+        if (gaps.length > 1) while (next === gapAt) next = Math.floor(Math.random() * gaps.length);
+        else next = 0;
+        gapAt = next;
+        openGap(gaps[gapAt]);
         newObj.innerHTML = '<img src="' + esc(url) + '" alt="">';
-        newObj.classList.add('is-in');
-      }, newObj.firstChild ? 250 : 0);
+        setTimeout(function () { newObj.classList.add('is-in'); }, 260);
+      }, wasIn ? 420 : 0);
     };
+    window.addEventListener('resize', function () { if (gapAt > -1 && newObj.classList.contains('is-in')) { closeGap(); openGap(gaps[gapAt]); } });
     var prepareObjects = function () {
       var tries = objSources.slice(0, 12);
       var next = function () {
@@ -829,7 +888,7 @@
         });
       };
       next();
-      if (!still) setInterval(function () { if (!document.hidden && objs.length > 1) showObj(); }, 5300);
+      if (!still) setInterval(function () { if (!document.hidden && objs.length) showObj(); }, 7000);
     };
     var started = false;
     var start = function () {
