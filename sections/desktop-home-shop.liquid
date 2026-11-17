@@ -562,28 +562,37 @@
               Photos candidates pour l'objet détouré posé sur le mot : photo principale puis 2e photo (souvent sur fond
               blanc) des 8 premiers produits du rayon ; assets/desktop-home-shop.js garde la première à fond uni.
             {%- endcomment -%}
-            {%- capture marq_imgs -%}
-              {%- for marq_product in dept.products limit: 8 -%}
-                {%- if marq_product.featured_image != blank -%}{{ marq_product.featured_image | image_url: width: 320 }}|{%- endif -%}
-                {%- if marq_product.images[1] != blank -%}{{ marq_product.images[1] | image_url: width: 320 }}|{%- endif -%}
-              {%- endfor -%}
-            {%- endcapture -%}
-            {%- comment -%} Vidéo 3D transparente du rayon (Réglages du thème > Video 3D dei reparti), comme shop.com {%- endcomment -%}
+            {%- comment -%}
+              Objet du rayon (Réglages du thème > Oggetto della parola gigante) : produit choisi (ses photos passent en
+              premier pour le détourage) et vidéo 3D transparente, comme shop.com
+            {%- endcomment -%}
             {%- liquid
               assign marq_webm = ''
               assign marq_hevc = ''
+              assign marq_product = nil
               for marq_n in (1..12)
                 assign marq_key_coll = 'marq3d_' | append: marq_n | append: '_collection'
                 assign marq_key_webm = 'marq3d_' | append: marq_n | append: '_webm'
                 assign marq_key_hevc = 'marq3d_' | append: marq_n | append: '_hevc'
+                assign marq_key_product = 'marq3d_' | append: marq_n | append: '_product'
                 assign marq_coll = settings[marq_key_coll]
                 if marq_coll != blank and marq_coll.handle == dept.handle
                   assign marq_webm = settings[marq_key_webm] | strip
                   assign marq_hevc = settings[marq_key_hevc] | strip
+                  assign marq_product = settings[marq_key_product]
                   break
                 endif
               endfor
             -%}
+            {%- capture marq_imgs -%}
+              {%- if marq_product != blank -%}
+                {%- for marq_image in marq_product.images limit: 6 -%}{{ marq_image | image_url: width: 320 }}|{%- endfor -%}
+              {%- endif -%}
+              {%- for marq_item in dept.products limit: 8 -%}
+                {%- if marq_item.featured_image != blank -%}{{ marq_item.featured_image | image_url: width: 320 }}|{%- endif -%}
+                {%- if marq_item.images[1] != blank -%}{{ marq_item.images[1] | image_url: width: 320 }}|{%- endif -%}
+              {%- endfor -%}
+            {%- endcapture -%}
             <i data-title="{{ dept_titles[forloop.index0] | escape }}" data-src="{{ dept.url }}?view=mshein-dept-page" data-imgs="{{ marq_imgs | strip | escape }}"{% if marq_webm != '' %} data-webm="{{ marq_webm | escape }}"{% endif %}{% if marq_hevc != '' %} data-hevc="{{ marq_hevc | escape }}"{% endif %}></i>
           {%- endfor -%}
         </template>
