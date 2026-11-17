@@ -1,0 +1,39 @@
+/* Page « Appena arrivati » d'une collection (sections/desktop-novita.liquid) : bannière avec les 4 derniers arrivés en
+   éventail, puis les produits regroupés (cette semaine, ce mois-ci, avant) en grille. Cartes : snippets/mshein-card.liquid
+   (styles assets/mshein-card.css). */
+.nv { max-width: 1320px; margin: 0 auto; padding: 24px 24px 64px; color: #0f0d26; }
+.nv-hero { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 260px; padding: 36px 44px; overflow: hidden; color: #fff; background: radial-gradient(120% 140% at 0% 0%, #3a34d2 0%, #16123f 62%); border-radius: 28px; isolation: isolate; }
+.nv-hero__txt { position: relative; z-index: 1; max-width: 520px; }
+.nv-back { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 14px; padding: 7px 14px 7px 8px; color: #fff; font-size: 14px; font-weight: 600; background: rgb(255 255 255 / 14%); border-radius: 999px; transition: background .2s; }
+.nv-back:hover { background: rgb(255 255 255 / 24%); }
+.nv-back svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nv-hero h1 { margin: 0; color: #fff; font-family: 'Sora', sans-serif; font-size: clamp(40px, 4.6vw, 64px); font-weight: 800; line-height: .95; letter-spacing: -1.2px; }
+.nv-hero p { margin: 12px 0 0; color: rgb(255 255 255 / 78%); font-size: 16px; line-height: 1.4; }
+.nv-hero__pics { position: relative; display: flex; align-items: center; padding-right: 12px; }
+.nv-hero__pics span { display: block; width: 150px; height: 188px; margin-left: -46px; overflow: hidden; background: #fff; border: 4px solid #fff; border-radius: 18px; box-shadow: 0 18px 40px -12px rgb(0 0 0 / 55%); transform: rotate(var(--r, 0deg)) translateY(var(--y, 0)); animation: nv-in .7s cubic-bezier(.2, .9, .3, 1.2) both; }
+.nv-hero__pics span:nth-child(1) { --r: -9deg; --y: 10px; animation-delay: .05s; }
+.nv-hero__pics span:nth-child(2) { --r: -3deg; --y: -6px; animation-delay: .12s; }
+.nv-hero__pics span:nth-child(3) { --r: 4deg; --y: 4px; animation-delay: .19s; }
+.nv-hero__pics span:nth-child(4) { --r: 10deg; --y: -10px; animation-delay: .26s; }
+.nv-hero__pics img { width: 100%; height: 100%; object-fit: cover; }
+@keyframes nv-in { from { opacity: 0; transform: translateY(30px) scale(.85) rotate(0deg); } }
+.nv-group { margin-top: 40px; }
+.nv-group h2 { margin: 0 0 16px; font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -.5px; }
+.nv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 24px 16px; margin: 0; padding: 0; list-style: none; }
+.nv-grid > .mshein-card { min-width: 0; }
+.nv-empty { margin: 40px 0; text-align: center; }
+.nv-pages { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 44px; font-weight: 600; }
+.nv-pages a { padding: 12px 22px; color: #fff; background: #16123f; border-radius: 999px; }
+.nv-pages__next { background: #3a34d2 !important; }
+@media (max-width: 900px) {
+  .nv-hero__pics { display: none; }
+}
+@media (max-width: 760px) {
+  .nv { padding: 12px 12px 48px; }
+  .nv-hero { min-height: 0; padding: 26px 20px; border-radius: 20px; }
+  .nv-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 8px; }
+  .nv-group h2 { font-size: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nv-hero__pics span { animation: none; }
+}

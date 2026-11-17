@@ -485,7 +485,7 @@
         <div class="dhp-new__track" data-dhp-new-track>
           {%- for dept_handle in dept_handles -%}
             {%- assign dept = collections[dept_handle] -%}
-            <a class="dhp-new__card is-loading" href="{{ dept.url }}?sort_by=created-descending" data-src="{{ dept.url }}?view=dhp-new&amp;sort_by=created-descending">
+            <a class="dhp-new__card is-loading" href="{{ dept.url }}?view=novita&amp;sort_by=created-descending" data-src="{{ dept.url }}?view=dhp-new&amp;sort_by=created-descending">
               <span class="dhp-new__txt">
                 <b>{{ 'desktop_home_shop.new_card_title' | t: dept: dept_titles[forloop.index0] }}</b>
                 <small data-dhp-new-sub>{{ 'desktop_home_shop.new_card_latest' | t }}</small>

@@ -1,0 +1,105 @@
+{%- comment -%}
+  Page « Appena arrivati » d'une collection (templates/collection.novita.json, adresse
+  /collections/<collection>?view=novita&sort_by=created-descending) : ouverte par la bannière « Appena arrivati » des pages
+  collection (sections/desktop-collection.liquid) et les cartes « Novità in … » de l'accueil (sections/desktop-home-shop.liquid).
+  Bannière (nom de la collection, nombre réel d'arrivées sur 30 jours, 4 derniers arrivés en éventail), puis les produits du
+  plus récent au plus ancien, regroupés : cette semaine, ce mois-ci, avant. 48 par page. Styles : assets/desktop-novita.css.
+{%- endcomment -%}
+{%- liquid
+  assign best = collections['bestsellers']
+  assign best_ids = best.products | map: 'id' | join: ','
+  capture flag
+    render 'country-flag-emoji'
+  endcapture
+  assign now_s = 'now' | date: '%s' | plus: 0
+  assign week_ago = now_s | minus: 604800
+  assign month_ago = now_s | minus: 2592000
+  assign novita_url = collection.url | append: '?view=novita&sort_by=created-descending'
+-%}
+{{ 'desktop-novita.css' | asset_url | stylesheet_tag }}
+{%- comment -%} Adresse sans tri : rechargée triée du plus récent (sinon l'ordre de la collection) {%- endcomment -%}
+{%- unless collection.sort_by == 'created-descending' -%}
+  <script>location.replace({{ novita_url | json }});</script>
+{%- endunless -%}
+
+{%- paginate collection.products by 48 -%}
+  {%- liquid
+    assign recent = 0
+    for product in collection.products
+      assign created = product.created_at | date: '%s' | plus: 0
+      if created >= month_ago
+        assign recent = recent | plus: 1
+      endif
+    endfor
+  -%}
+  <div class="nv">
+    <header class="nv-hero">
+      <div class="nv-hero__txt">
+        <a class="nv-back" href="{{ collection.url }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>{{ collection.title | escape }}</a>
+        <h1>{{ 'desktop_collection.new_title' | t }}</h1>
+        <p>
+          {%- if paginate.current_page == 1 and recent >= 48 -%}
+            {{ 'desktop_home_shop.new_card_count_many' | t: count: recent }}
+          {%- elsif paginate.current_page == 1 and recent > 1 -%}
+            {{ 'desktop_home_shop.new_card_count' | t: count: recent }}
+          {%- elsif paginate.current_page == 1 and recent == 1 -%}
+            {{ 'desktop_home_shop.new_card_count_one' | t }}
+          {%- else -%}
+            {{ 'desktop_collection.new_sub' | t }}
+          {%- endif -%}
+        </p>
+      </div>
+      <div class="nv-hero__pics" aria-hidden="true">
+        {%- assign pic_count = 0 -%}
+        {%- for product in collection.products -%}
+          {%- if product.featured_image == blank -%}{%- continue -%}{%- endif -%}
+          <span><img src="{{ product.featured_image | image_url: width: 400 }}" alt="" width="200" height="250"></span>
+          {%- assign pic_count = pic_count | plus: 1 -%}
+          {%- if pic_count == 4 -%}{%- break -%}{%- endif -%}
+        {%- endfor -%}
+      </div>
+    </header>
+
+    {%- if collection.products.size == 0 -%}
+      <p class="nv-empty">{{ 'desktop_collection.new_sub' | t }}</p>
+    {%- else -%}
+      {%- assign group = '' -%}
+      {%- for product in collection.products -%}
+        {%- liquid
+          assign created = product.created_at | date: '%s' | plus: 0
+          if created >= week_ago
+            assign next_group = 'week'
+          elsif created >= month_ago
+            assign next_group = 'month'
+          else
+            assign next_group = 'before'
+          endif
+        -%}
+        {%- if next_group != group -%}
+          {%- unless group == '' -%}</ul></section>{%- endunless -%}
+          {%- assign group = next_group -%}
+          <section class="nv-group">
+            <h2>{{ 'desktop_collection.novita_' | append: group | t }}</h2>
+            <ul class="nv-grid">
+        {%- endif -%}
+        {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
+      {%- endfor -%}
+      </ul></section>
+    {%- endif -%}
+
+    {%- if paginate.pages > 1 -%}
+      <nav class="nv-pages" aria-label="{{ 'desktop_collection.novita_pages' | t }}">
+        {%- if paginate.previous -%}<a href="{{ paginate.previous.url }}">{{ 'mobile.pdp.previous' | t }}</a>{%- endif -%}
+        <span>{{ paginate.current_page }} / {{ paginate.pages }}</span>
+        {%- if paginate.next -%}<a class="nv-pages__next" href="{{ paginate.next.url }}">{{ 'mobile.pdp.next' | t }}</a>{%- endif -%}
+      </nav>
+    {%- endif -%}
+  </div>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Appena arrivati",
+  "settings": []
+}
+{% endschema %}
