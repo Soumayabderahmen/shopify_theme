@@ -306,7 +306,7 @@
     return true;
   };
   var initMore = function () {
-  // ---------- Mot géant : le rayon choisi (clic ou toutes les 5,3 s, comme shop.com) et ses 10 produits ----------
+  // ---------- Mot géant : le rayon choisi (clic ou toutes les 5,3 s, comme shop.com) et ses 20 produits (2 lignes) ----------
   var marq = root.querySelector('[data-dhp-marq]');
   var prods = root.querySelector('[data-dhp-prods]');
   if (marq && prods && once(marq)) {
@@ -324,7 +324,7 @@
         .then(function (response) { return response.ok ? response.text() : ''; })
         .then(function (html) {
           var page = new DOMParser().parseFromString(html, 'text/html');
-          d.cards = [].slice.call(page.querySelectorAll('.mshein-card')).slice(0, 10).map(function (c) { return c.outerHTML; }).join('');
+          d.cards = [].slice.call(page.querySelectorAll('.mshein-card')).slice(0, 20).map(function (c) { return c.outerHTML; }).join('');
         })
         .catch(function () { d.cards = ''; });
       return d.loading;

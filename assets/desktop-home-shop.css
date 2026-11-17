@@ -366,11 +366,12 @@ html.dhp-modal-open { overflow: hidden; }
 }
 /* Rangée des produits du rayon */
 .dhp-marq__rail { position: relative; margin-top: 0; }
-.dhp .dhp-prods.dhp-marq__prods { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 5 * 16px) / 6); grid-template-columns: none; margin: 0 -12px; padding: 12px; overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; scroll-padding-inline: 12px; scrollbar-width: none; }
+/* Deux lignes de produits qui défilent ensemble (colonne par colonne) */
+.dhp .dhp-prods.dhp-marq__prods { display: grid; grid-auto-flow: column; grid-template-rows: repeat(2, auto); grid-auto-columns: calc((100% - 5 * 16px) / 6); grid-template-columns: none; row-gap: 22px; margin: 0 -12px; padding: 12px; overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; scroll-padding-inline: 12px; scrollbar-width: none; }
 .dhp-marq__prods::-webkit-scrollbar { display: none; }
 .dhp-prods.dhp-marq__prods.is-swap { opacity: .35; transform: none; }
 .dhp-marq__prods > .mshein-card { scroll-snap-align: start; }
-#root .dhp .dhp-marq__arws { position: absolute; inset: 0; z-index: 4; justify-content: space-between; align-items: center; padding-bottom: 90px; pointer-events: none; }
+#root .dhp .dhp-marq__arws { position: absolute; inset: 0; z-index: 4; justify-content: space-between; align-items: center; padding-bottom: 0; pointer-events: none; }
 #root .dhp .dhp-marq__arws .dhp-arw { width: 44px; height: 44px; margin: 0 -22px; pointer-events: auto; box-shadow: 0 0 0 1px var(--dhp-line), 0 8px 20px -8px rgb(22 18 63 / 45%); transition: opacity .2s, transform .2s; }
 #root .dhp .dhp-marq__arws .dhp-arw:hover { transform: scale(1.08); }
 #root .dhp .dhp-marq__arws .dhp-arw:disabled { opacity: 0; pointer-events: none; }

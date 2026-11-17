@@ -545,7 +545,7 @@
     {%- comment -%}
       ---------- Mot géant (style shop.com) : nom du rayon en très grand qui glisse vers la gauche pour laisser venir le
       suivant (clic ou toutes les 5,3 s), voisins estompés sur les bords, photo détourée d'un produit posée sur le mot, et dessous
-      ses 10 produits sur une seule rangée avec flèches. Le 1er rayon est rendu ici, les autres sont chargés à leur tour
+      ses 20 produits sur deux lignes qui défilent ensemble, avec flèches. Le 1er rayon est rendu ici, les autres sont chargés à leur tour
       (modèle collection.mshein-dept-page, mêmes cartes) ----------
     {%- endcomment -%}
     {%- if dept_handles.size > 0 -%}
@@ -590,7 +590,7 @@
       </section>
       <div class="dhp-marq__rail">
         <ul class="dhp-prods dhp-marq__prods" id="dhp-t-marq" data-dhp-prods>
-          {%- for product in collections[dept_handles[marq_start]].products limit: 10 -%}
+          {%- for product in collections[dept_handles[marq_start]].products limit: 20 -%}
             {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag, uniform: true -%}
           {%- endfor -%}
         </ul>
