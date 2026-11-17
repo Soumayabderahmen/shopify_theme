@@ -543,8 +543,10 @@
 
     {%- if part == 'more-b' -%}
     {%- comment -%}
-      ---------- Mot géant : nom du rayon (clic ou toutes les 4,5 s) et ses 10 produits ; le 1er rayon est rendu ici,
-      les autres sont chargés à leur tour (modèle collection.mshein-dept-page, mêmes cartes) ----------
+      ---------- Mot géant (style shop.com) : nom du rayon en très grand qui glisse vers la gauche pour laisser venir le
+      suivant (clic ou toutes les 4,5 s), voisins estompés sur les bords, photo d'un produit posée sur le mot, et dessous
+      ses 10 produits sur une seule rangée avec flèches. Le 1er rayon est rendu ici, les autres sont chargés à leur tour
+      (modèle collection.mshein-dept-page, mêmes cartes) ----------
     {%- endcomment -%}
     {%- if dept_handles.size > 0 -%}
       {%- comment -%} Départ sur le 6e rayon, comme le prototype {%- endcomment -%}
@@ -560,11 +562,17 @@
           {%- endfor -%}
         </template>
       </section>
-      <ul class="dhp-prods" data-dhp-prods>
-        {%- for product in collections[dept_handles[marq_start]].products limit: 10 -%}
-          {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag, uniform: true -%}
-        {%- endfor -%}
-      </ul>
+      <div class="dhp-marq__rail">
+        <ul class="dhp-prods dhp-marq__prods" id="dhp-t-marq" data-dhp-prods>
+          {%- for product in collections[dept_handles[marq_start]].products limit: 10 -%}
+            {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag, uniform: true -%}
+          {%- endfor -%}
+        </ul>
+        <div class="dhp-arws dhp-marq__arws" data-for="dhp-t-marq">
+          <button class="dhp-arw" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+          <button class="dhp-arw" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </div>
+      </div>
     {%- endif -%}
 
     {%- comment -%} ---------- Le offerte del momento : les 10 plus fortes remises des rayons ---------- {%- endcomment -%}

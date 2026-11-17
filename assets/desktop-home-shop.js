@@ -329,37 +329,70 @@
         .catch(function () { d.cards = ''; });
       return d.loading;
     };
+    // Rangée des mots : 2 voisins de chaque côté, le rayon affiché au centre de l'écran (décalage calculé sur le mot)
+    var at = function (k) { return list[((k % list.length) + list.length) % list.length]; };
+    var drawRow = function () {
+      var html = '';
+      for (var k = current - 2; k <= current + 2; k += 1) html += '<span class="dhp-marq__w' + (k === current ? ' is-on' : '') + '" data-i="' + k + '">' + esc(at(k).title) + '</span>';
+      row.classList.remove('is-sliding');
+      row.innerHTML = html;
+      row.style.transform = 'translateX(' + offsetOf(row.querySelector('.is-on')) + 'px)';
+    };
+    var offsetOf = function (word) { return marq.clientWidth / 2 - (word.offsetLeft + word.offsetWidth / 2); };
+    var sliding = null;
+    var showPic = function (d) {
+      if (!d.img) { pic.innerHTML = ''; return; }
+      pic.classList.add('is-out');
+      setTimeout(function () {
+        pic.innerHTML = '<img src="' + esc(d.img) + '" alt="">';
+        pic.classList.remove('is-out');
+      }, first0 ? 0 : 260);
+    };
+    var first0 = true;
     var showDept = function (i, first) {
-      current = (i + list.length) % list.length;
+      var step = i - current;
+      current = ((i % list.length) + list.length) % list.length;
       var d = list[current];
-      var before = list[(current - 1 + list.length) % list.length], after = list[(current + 1) % list.length];
-      row.innerHTML = '<span class="dhp-marq__w" data-i="' + (current - 1) + '">' + esc(before.title) + '</span><span class="dhp-marq__w is-on">' + esc(d.title) + '</span><span class="dhp-marq__w" data-i="' + (current + 1) + '">' + esc(after.title) + '</span>';
-      pic.innerHTML = d.img ? '<img src="' + esc(d.img) + '" alt="">' : '';
+      // Glissement : la rangée actuelle se déplace jusqu'au nouveau mot (comme shop.com), puis elle est redessinée
+      // autour de lui sans que rien ne bouge à l'écran
+      var target = !first && Math.abs(step) <= 2 && row.querySelector('[data-i="' + (Number(row.querySelector('.is-on').getAttribute('data-i')) + step) + '"]');
+      clearTimeout(sliding);
+      if (target && !still) {
+        row.classList.add('is-sliding');
+        row.style.transform = 'translateX(' + offsetOf(target) + 'px)';
+        sliding = setTimeout(drawRow, 820);
+      } else drawRow();
+      showPic(d);
+      first0 = false;
       if (!first) {
         prods.classList.add('is-swap');
         load(d).then(function () {
           if (list[current] !== d || !d.cards) { prods.classList.remove('is-swap'); return; }
           prods.innerHTML = d.cards;
+          prods.scrollLeft = 0;
           decorate(prods);
+          prods.dispatchEvent(new Event('scroll'));
           prods.classList.remove('is-swap');
         });
       }
-      load(list[(current + 1) % list.length]);
+      load(at(current + 1));
     };
+    window.addEventListener('resize', function () { if (!row.classList.contains('is-sliding')) drawRow(); });
     var runMarq = function () {
       clearInterval(marqTimer);
       if (!still) marqTimer = setInterval(function () { if (!document.hidden && !marqHover) showDept(current + 1); }, 4500);
     };
     // Souris sur le mot géant ou sur ses produits : le rayon ne change pas (reprise 4,5 s après la sortie)
     var marqHover = false;
-    [marq, prods].forEach(function (zone) {
+    [marq, prods.closest('.dhp-marq__rail') || prods].forEach(function (zone) {
       zone.addEventListener('mouseenter', function () { marqHover = true; });
       zone.addEventListener('mouseleave', function () { marqHover = false; runMarq(); });
     });
     row.addEventListener('click', function (event) {
       var word = event.target.closest('[data-i]');
-      if (!word) return;
-      showDept(Number(word.getAttribute('data-i')));
+      if (!word || word.classList.contains('is-on')) return;
+      var onIndex = Number(row.querySelector('.is-on').getAttribute('data-i'));
+      showDept(current + Number(word.getAttribute('data-i')) - onIndex);
       runMarq();
     });
     if (list.length) { showDept(current, true); runMarq(); }

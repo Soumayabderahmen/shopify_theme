@@ -339,13 +339,32 @@ html.dhp-modal-open { overflow: hidden; }
 .dhp-brand--more svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ---------- Mot géant (rayon) + ses produits ---------- */
-.dhp-marq { position: relative; margin-top: 64px; overflow: hidden; }
-.dhp-marq__row { display: flex; align-items: center; justify-content: center; gap: 48px; white-space: nowrap; }
-.dhp-marq__w { color: #d7d8de; font-family: 'Sora', sans-serif; font-size: 82px; font-weight: 800; letter-spacing: -3.5px; line-height: 1.1; cursor: pointer; transition: color .4s; }
-.dhp-marq__w:hover { color: #b9bbc6; }
-.dhp-marq__w.is-on { color: #0f0d26; cursor: default; }
-.dhp-marq__img { position: absolute; left: 50%; top: 50%; width: 92px; height: 120px; overflow: hidden; border-radius: 16px; box-shadow: 0 18px 30px -14px rgb(22 18 63 / 60%); transform: translate(-50%, -38%) rotate(-8deg); pointer-events: none; transition: opacity .3s; }
-.dhp-marq__img img { width: 100%; height: 100%; object-fit: cover; }
+/* Style shop.com : mot très grand, centré, qui glisse ; voisins estompés vers les bords (masque) ; photo du produit
+   posée sur le mot (bords fondus, flotte doucement) ; une seule rangée de produits avec flèches de chaque côté */
+.dhp-marq { position: relative; margin-top: 44px; padding: 34px 0; overflow: hidden; -webkit-mask: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent); mask: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent); }
+.dhp-marq__row { display: flex; align-items: center; gap: .32em; width: max-content; font-family: 'Sora', sans-serif; font-size: clamp(64px, 6.6vw, 112px); font-weight: 800; letter-spacing: -.045em; line-height: 1.12; white-space: nowrap; will-change: transform; }
+.dhp-marq__row.is-sliding { transition: transform .8s cubic-bezier(.65, 0, .25, 1); }
+.dhp-marq__w { color: #0f0d26; cursor: pointer; }
+.dhp-marq__w.is-on { cursor: default; }
+.dhp-marq__img { position: absolute; z-index: 2; left: 50%; top: 50%; width: clamp(120px, 11vw, 176px); aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; }
+.dhp-marq__img img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; -webkit-mask: radial-gradient(closest-side, #000 72%, transparent); mask: radial-gradient(closest-side, #000 72%, transparent); animation: dhp-marq-in .7s cubic-bezier(.2, .9, .3, 1.25) both, dhp-marq-float 4s ease-in-out .7s infinite; }
+.dhp-marq__img.is-out img { opacity: 0; transform: scale(.6) rotate(-14deg); transition: opacity .25s, transform .25s; animation: none; }
+@keyframes dhp-marq-in { from { opacity: 0; transform: scale(.55) rotate(-16deg); } }
+@keyframes dhp-marq-float { 50% { transform: translateY(-7px) rotate(-5deg); } }
+/* Rangée des produits du rayon */
+.dhp-marq__rail { position: relative; margin-top: -4px; }
+.dhp .dhp-prods.dhp-marq__prods { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 5 * 16px) / 6); grid-template-columns: none; margin: 0 -12px; padding: 12px; overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; scroll-padding-inline: 12px; scrollbar-width: none; }
+.dhp-marq__prods::-webkit-scrollbar { display: none; }
+.dhp-prods.dhp-marq__prods.is-swap { opacity: .35; transform: none; }
+.dhp-marq__prods > .mshein-card { scroll-snap-align: start; }
+#root .dhp .dhp-marq__arws { position: absolute; inset: 0; z-index: 4; justify-content: space-between; align-items: center; padding-bottom: 90px; pointer-events: none; }
+#root .dhp .dhp-marq__arws .dhp-arw { width: 44px; height: 44px; margin: 0 -22px; pointer-events: auto; box-shadow: 0 0 0 1px var(--dhp-line), 0 8px 20px -8px rgb(22 18 63 / 45%); transition: opacity .2s, transform .2s; }
+#root .dhp .dhp-marq__arws .dhp-arw:hover { transform: scale(1.08); }
+#root .dhp .dhp-marq__arws .dhp-arw:disabled { opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  .dhp-marq__row.is-sliding { transition: none; }
+  .dhp-marq__img img { animation: none; }
+}
 
 /* ---------- Collezioni da scoprire ---------- */
 .dhp .dhp-coll { position: relative; display: flex; flex-direction: column; justify-content: space-between; width: 300px; height: 380px; padding: 18px; overflow: hidden; color: #fff; border-radius: 26px; isolation: isolate; }
@@ -422,9 +441,9 @@ html.dhp-modal-open { overflow: hidden; }
 @media (max-width: 1199px) {
   .dhp-hero h1 { font-size: 48px; }
   .dhp .dhp-prods { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .dhp-prods > :nth-child(n + 9) { display: none; }
+  .dhp-prods:not(.dhp-marq__prods) > :nth-child(n + 9) { display: none; }
+  .dhp .dhp-prods.dhp-marq__prods { grid-auto-columns: calc((100% - 4 * 16px) / 5); }
   .dhp .dhp-bf__rail { grid-auto-columns: calc((100% - 48px) / 4); }
-  .dhp-marq__w { font-size: 64px; }
   .dhp .dhp-ed__hd { font-size: 46px; }
   .dhp-pay__r { display: none; }
 }
