@@ -15,7 +15,11 @@
   Params : product, best (collection « Più venduti »), best_ids (facultatif : identifiants des 50 premiers « Più venduti »
   séparés par des virgules, calculés une fois par la page), flag (emoji du pays, snippets/country-flag-emoji.liquid),
   container (facultatif : 'div' pour la carte mobile placée dans les cartes du site, snippets/product-item.liquid),
-  uniform (facultatif : photo au format 3:4 pour toutes les cartes, lignes alignées dans les grilles du site).
+  uniform (facultatif : photo au format 3:4 pour toutes les cartes, lignes alignées dans les grilles du site),
+  eager / priority (facultatifs : photo chargée tout de suite, et en priorité haute — 1re rangée visible des grilles
+  collection et recherche ordinateur, sinon la plus grande image de la page arrivait tard : LCP ~3,3 s).
+  sizes : largeur réelle des cartes sur ordinateur (220 à 310 px), au lieu de 50vw qui faisait télécharger des photos
+  de 540 px pour des cartes de 260 px.
 {%- endcomment -%}
 {%- liquid
   assign card_tag = container | default: 'li'
@@ -172,11 +176,11 @@
         <img
           src="{{ card_image | image_url: width: 360 }}"
           srcset="{{ card_image | image_url: width: 220 }} 220w, {{ card_image | image_url: width: 360 }} 360w, {{ card_image | image_url: width: 540 }} 540w"
-          sizes="50vw"
+          sizes="(min-width: 761px) min(22vw, 320px), 50vw"
           alt="{{ card_image.alt | default: product.title | escape }}"
           width="360"
           height="{{ 360 | times: card_ratio | round }}"
-          loading="lazy"
+          {%- if eager %} loading="eager" fetchpriority="{% if priority %}high{% else %}auto{% endif %}"{% else %} loading="lazy"{% endif %}
           decoding="async"
         >
       {%- endif -%}

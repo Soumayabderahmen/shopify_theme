@@ -564,7 +564,18 @@
             {%- for product in search.results -%}
               {%- if product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
               {%- assign grid_count = grid_count | plus: 1 -%}
-              {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
+              {%- comment -%} 1re rangée visible (6 cartes sur ordinateur) : photos chargées tout de suite, les 4 premières en priorité (LCP) {%- endcomment -%}
+              {%- liquid
+                assign card_eager = false
+                assign card_priority = false
+                if grid_count <= 6
+                  assign card_eager = true
+                endif
+                if grid_count <= 4
+                  assign card_priority = true
+                endif
+              -%}
+              {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag, eager: card_eager, priority: card_priority -%}
             {%- endfor -%}
           {%- endcapture -%}
           {%- capture grid_pager -%}
@@ -593,7 +604,18 @@
           {%- capture grid_cards -%}
             {%- for product in collection.products -%}
               {%- assign grid_count = grid_count | plus: 1 -%}
-              {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
+              {%- comment -%} 1re rangée visible (6 cartes sur ordinateur) : photos chargées tout de suite, les 4 premières en priorité (LCP) {%- endcomment -%}
+              {%- liquid
+                assign card_eager = false
+                assign card_priority = false
+                if grid_count <= 6
+                  assign card_eager = true
+                endif
+                if grid_count <= 4
+                  assign card_priority = true
+                endif
+              -%}
+              {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag, eager: card_eager, priority: card_priority -%}
             {%- endfor -%}
           {%- endcapture -%}
           {%- capture grid_pager -%}

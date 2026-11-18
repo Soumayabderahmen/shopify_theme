@@ -28,10 +28,18 @@
         return response.json();
       })
       .then(function (data) {
+        // Expression compilée seulement quand le nom figure dans le titre : compiler les 428 expressions (classes Unicode
+        // \p{L}) d'un coup bloquait la page ~120 ms à l'arrivée de la liste. Même règle de mot entier qu'avant.
         return (data.brands || []).map(function (brand) {
           var name = String(brand[0]);
+          var lower = name.toLowerCase();
           var escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          return { name: name, test: new RegExp('(^|[^\\p{L}\\d])' + escaped + '(?=$|[^\\p{L}\\d])', 'iu') };
+          var regex = null;
+          return { name: name, test: { test: function (title) {
+            if (String(title).toLowerCase().indexOf(lower) === -1) return false;
+            if (!regex) regex = new RegExp('(^|[^\\p{L}\\d])' + escaped + '(?=$|[^\\p{L}\\d])', 'iu');
+            return regex.test(title);
+          } } };
         });
       })
       .catch(function (error) {

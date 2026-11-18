@@ -326,7 +326,89 @@
   };
   // Détourage d'une photo produit dans le navigateur (mot géant des rayons, titre des nouveaux arrivages) : fond blanc
   // ou uni retiré depuis les bords, contour adouci, recadrée ; null si la photo n'a pas de fond uni
-  var cutout = function (src) {
+  // Calcul pur (sans fermeture : recopié tel quel dans le Web Worker ci-dessous) : fond retiré dans px (RGBA) en place,
+  // renvoie le cadre de l'objet [minX, minY, maxX, maxY] ou null si la photo n'a pas de fond uni
+  var cutPixels = function (px, w, h) {
+    // Couleur du fond : moyenne des 4 coins ; refus si les coins diffèrent (photo mise en scène)
+    var corner = function (x0, y0) {
+      var r = 0, g = 0, b = 0, n = 0;
+      for (var y = y0; y < y0 + 6; y += 1) for (var x = x0; x < x0 + 6; x += 1) { var o = (y * w + x) * 4; r += px[o]; g += px[o + 1]; b += px[o + 2]; n += 1; }
+      return [r / n, g / n, b / n];
+    };
+    var cs = [corner(0, 0), corner(w - 6, 0), corner(0, h - 6), corner(w - 6, h - 6)];
+    var bg = [0, 1, 2].map(function (k) { return (cs[0][k] + cs[1][k] + cs[2][k] + cs[3][k]) / 4; });
+    var far = function (c) { return Math.abs(c[0] - bg[0]) + Math.abs(c[1] - bg[1]) + Math.abs(c[2] - bg[2]); };
+    if (cs.some(function (c) { return far(c) > 30; }) || bg[0] + bg[1] + bg[2] < 600) return null;
+    // Remplissage depuis tous les bords : les pixels proches du fond deviennent transparents
+    var TOL = 46;
+    var seen = new Uint8Array(w * h);
+    var stack = [];
+    var near = function (i) { var o = i * 4; return Math.abs(px[o] - bg[0]) + Math.abs(px[o + 1] - bg[1]) + Math.abs(px[o + 2] - bg[2]) < TOL; };
+    for (var x = 0; x < w; x += 1) { stack.push(x, (h - 1) * w + x); }
+    for (var y = 0; y < h; y += 1) { stack.push(y * w, y * w + w - 1); }
+    var cleared = 0;
+    while (stack.length) {
+      var i = stack.pop();
+      if (seen[i] || !near(i)) continue;
+      seen[i] = 1; px[i * 4 + 3] = 0; cleared += 1;
+      var cx = i % w;
+      if (cx > 0) stack.push(i - 1);
+      if (cx < w - 1) stack.push(i + 1);
+      if (i >= w) stack.push(i - w);
+      if (i < w * (h - 1)) stack.push(i + w);
+    }
+    // Trop peu de fond retiré (objet collé aux bords) ou presque tout (objet clair perdu) : photo écartée
+    var ratio = cleared / (w * h);
+    if (ratio < 0.18 || ratio > 0.92) return null;
+    // Contour adouci : pixels gardés qui touchent le fond retiré, à moitié transparents ; cadre de l'objet
+    var minX = w, minY = h, maxX = 0, maxY = 0;
+    for (var j = 0; j < w * h; j += 1) {
+      if (seen[j]) continue;
+      var jx = j % w, jy = (j - jx) / w;
+      if ((jx > 0 && seen[j - 1]) || (jx < w - 1 && seen[j + 1]) || (j >= w && seen[j - w]) || (j < w * (h - 1) && seen[j + w])) px[j * 4 + 3] = 120;
+      if (jx < minX) minX = jx; if (jx > maxX) maxX = jx; if (jy < minY) minY = jy; if (jy > maxY) maxY = jy;
+    }
+    return [minX, minY, maxX, maxY];
+  };
+  // Le détourage se fait dans un Web Worker (fil séparé) : sur le fil principal, chaque photo bloquait la page 30 à 40 ms
+  // (une vingtaine de photos au chargement de l'accueil, ~600 ms). Sans Worker / OffscreenCanvas : ancien calcul ci-dessous.
+  var cutWorker = null, cutJobs = {}, cutSeq = 0;
+  try {
+    if (window.Worker && window.OffscreenCanvas && window.createImageBitmap) {
+      var workerCode = 'var cutPixels = ' + cutPixels.toString() + ';\n' +
+        'self.onmessage = function (e) {\n' +
+        '  var id = e.data.id;\n' +
+        '  var fail = function () { self.postMessage({ id: id, blob: null }); };\n' +
+        '  fetch(e.data.src, { credentials: "omit" }).then(function (r) { if (!r.ok) throw 0; return r.blob(); })\n' +
+        '    .then(function (b) { return createImageBitmap(b); })\n' +
+        '    .then(function (bmp) {\n' +
+        '      var w = bmp.width, h = bmp.height;\n' +
+        '      if (!w || !h) return fail();\n' +
+        '      var canvas = new OffscreenCanvas(w, h);\n' +
+        '      var ctx = canvas.getContext("2d", { willReadFrequently: true });\n' +
+        '      ctx.drawImage(bmp, 0, 0);\n' +
+        '      var data = ctx.getImageData(0, 0, w, h);\n' +
+        '      var box = cutPixels(data.data, w, h);\n' +
+        '      if (!box) return fail();\n' +
+        '      ctx.putImageData(data, 0, 0);\n' +
+        '      var cw = box[2] - box[0] + 1, ch = box[3] - box[1] + 1;\n' +
+        '      var out = new OffscreenCanvas(cw, ch);\n' +
+        '      out.getContext("2d").drawImage(canvas, box[0], box[1], cw, ch, 0, 0, cw, ch);\n' +
+        '      return out.convertToBlob({ type: "image/png" }).then(function (blob) { self.postMessage({ id: id, blob: blob }); });\n' +
+        '    })\n' +
+        '    .catch(fail);\n' +
+        '};\n';
+      cutWorker = new Worker(URL.createObjectURL(new Blob([workerCode], { type: 'text/javascript' })));
+      cutWorker.onmessage = function (e) {
+        var job = cutJobs[e.data.id];
+        if (!job) return;
+        delete cutJobs[e.data.id];
+        job(e.data.blob ? URL.createObjectURL(e.data.blob) : null);
+      };
+      cutWorker.onerror = function () { cutWorker = null; };
+    }
+  } catch (error) { cutWorker = null; }
+  var cutoutMain = function (src) {
     return new Promise(function (resolve) {
       var img = new Image();
       img.decoding = 'async';
@@ -339,56 +421,27 @@
           var ctx = canvas.getContext('2d', { willReadFrequently: true });
           ctx.drawImage(img, 0, 0);
           var data = ctx.getImageData(0, 0, w, h);
-          var px = data.data;
-          // Couleur du fond : moyenne des 4 coins ; refus si les coins diffèrent (photo mise en scène)
-          var corner = function (x0, y0) {
-            var r = 0, g = 0, b = 0, n = 0;
-            for (var y = y0; y < y0 + 6; y += 1) for (var x = x0; x < x0 + 6; x += 1) { var o = (y * w + x) * 4; r += px[o]; g += px[o + 1]; b += px[o + 2]; n += 1; }
-            return [r / n, g / n, b / n];
-          };
-          var cs = [corner(0, 0), corner(w - 6, 0), corner(0, h - 6), corner(w - 6, h - 6)];
-          var bg = [0, 1, 2].map(function (k) { return (cs[0][k] + cs[1][k] + cs[2][k] + cs[3][k]) / 4; });
-          var far = function (c) { return Math.abs(c[0] - bg[0]) + Math.abs(c[1] - bg[1]) + Math.abs(c[2] - bg[2]); };
-          if (cs.some(function (c) { return far(c) > 30; }) || bg[0] + bg[1] + bg[2] < 600) return resolve(null);
-          // Remplissage depuis tous les bords : les pixels proches du fond deviennent transparents
-          var TOL = 46;
-          var seen = new Uint8Array(w * h);
-          var stack = [];
-          var near = function (i) { var o = i * 4; return Math.abs(px[o] - bg[0]) + Math.abs(px[o + 1] - bg[1]) + Math.abs(px[o + 2] - bg[2]) < TOL; };
-          for (var x = 0; x < w; x += 1) { stack.push(x, (h - 1) * w + x); }
-          for (var y = 0; y < h; y += 1) { stack.push(y * w, y * w + w - 1); }
-          var cleared = 0;
-          while (stack.length) {
-            var i = stack.pop();
-            if (seen[i] || !near(i)) continue;
-            seen[i] = 1; px[i * 4 + 3] = 0; cleared += 1;
-            var cx = i % w;
-            if (cx > 0) stack.push(i - 1);
-            if (cx < w - 1) stack.push(i + 1);
-            if (i >= w) stack.push(i - w);
-            if (i < w * (h - 1)) stack.push(i + w);
-          }
-          // Trop peu de fond retiré (objet collé aux bords) ou presque tout (objet clair perdu) : photo écartée
-          var ratio = cleared / (w * h);
-          if (ratio < 0.18 || ratio > 0.92) return resolve(null);
-          // Contour adouci : pixels gardés qui touchent le fond retiré, à moitié transparents ; cadre de l'objet
-          var minX = w, minY = h, maxX = 0, maxY = 0;
-          for (var j = 0; j < w * h; j += 1) {
-            if (seen[j]) continue;
-            var jx = j % w, jy = (j - jx) / w;
-            if ((jx > 0 && seen[j - 1]) || (jx < w - 1 && seen[j + 1]) || (j >= w && seen[j - w]) || (j < w * (h - 1) && seen[j + w])) px[j * 4 + 3] = 120;
-            if (jx < minX) minX = jx; if (jx > maxX) maxX = jx; if (jy < minY) minY = jy; if (jy > maxY) maxY = jy;
-          }
+          var box = cutPixels(data.data, w, h);
+          if (!box) return resolve(null);
           ctx.putImageData(data, 0, 0);
-          var cw = maxX - minX + 1, ch = maxY - minY + 1;
+          var cw = box[2] - box[0] + 1, ch = box[3] - box[1] + 1;
           var out = document.createElement('canvas');
           out.width = cw; out.height = ch;
-          out.getContext('2d').drawImage(canvas, minX, minY, cw, ch, 0, 0, cw, ch);
+          out.getContext('2d').drawImage(canvas, box[0], box[1], cw, ch, 0, 0, cw, ch);
           out.toBlob(function (blob) { resolve(blob ? URL.createObjectURL(blob) : null); }, 'image/png');
         } catch (error) { resolve(null); }
       };
       img.onerror = function () { resolve(null); };
       img.src = src;
+    });
+  };
+  var cutout = function (src) {
+    if (!cutWorker) return cutoutMain(src);
+    return new Promise(function (resolve) {
+      var id = (cutSeq += 1);
+      cutJobs[id] = resolve;
+      // Adresse complète : le Worker (adresse blob:) ne sait pas résoudre « //platinumshop.it/… » ni « /cdn/… »
+      try { cutWorker.postMessage({ id: id, src: new URL(src, location.href).href }); } catch (error) { delete cutJobs[id]; cutoutMain(src).then(resolve); }
     });
   };
   var initMore = function () {
