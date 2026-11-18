@@ -414,6 +414,8 @@
     });
     layer.innerHTML = (SCENES[current] ? SCENES[current](Boolean(kind), kind === 'mhs-light' ? Math.round(hero.offsetWidth * 140 / 44) : 0) : '') + html;
     hero.insertBefore(layer, hero.firstChild);
+    // Scène au sol : place en bas de la bannière (mhh-seasons.css), au lieu de :has(> .mhh-sz .mhs-scene--ground)
+    if (layer.querySelector('.mhs-scene--ground')) hero.classList.add('mhh-ground');
     // Bannière sortie de l'écran : particules et animations de la bannière en pause (51 animations sans fin continuaient pendant qu'on glissait
     // les bandes plus bas, ex. « Shop per brand »).
     if ('IntersectionObserver' in window) {

@@ -46,6 +46,8 @@
   endcapture
   assign search_sort = search.sort_by | default: search.default_sort_by
 -%}
+{%- comment -%} body.has-mshein-search : remplace body.mshein-search:has([data-mshein-search]) (mobile-home-shein.css, desktop-search.css) {%- endcomment -%}
+<script>document.body.classList.add('has-mshein-search');</script>
 <div class="mshein-search{% if hero_count > 0 %} has-mhh{% endif %}" data-mshein-search data-path="{{ routes.search_url }}">
   {%- if hero_count > 0 -%}
     {%- comment -%}

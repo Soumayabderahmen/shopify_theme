@@ -105,6 +105,7 @@
   <div
     class="
       m6as
+      {% if section.settings.layout_mobile == 'slider' %}m6as-compact{% endif %}
       text-start
       padding-custom
       {% if section.settings.media_position == 'right' %}inv{% endif %}

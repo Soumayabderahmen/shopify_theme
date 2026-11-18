@@ -670,6 +670,35 @@ checkAndAddClass(alignCenterElements, 'align-center-static');
 }
 
 
+// Classes sur <body> qui remplacent des body:has(...) (assets/mobile-bottom-nav.css, assets/pdp-mobile.css) : sur mobile
+// chacun faisait recalculer les styles de toute la page à chaque élément ajouté. Tenues à jour quand ces éléments changent :
+//   pdp-buy-on = une barre d'achat de fiche visible (.pdp-m__buy sans .is-hidden, aussi dans l'aperçu glissé de la fiche)
+//   cm-bar-on  = barre de paiement du panier affichée (.cm-bar.is-shown)
+//   pdp-lb-on  = visionneuse photo de la fiche ouverte (.pdp-m__lb sans [hidden])
+(() => {
+	const body = document.body;
+	if (!body) return;
+	const watched = '.pdp-m__buy, .cm-bar, .pdp-m__lb';
+	const sync = () => {
+		body.classList.toggle('pdp-buy-on', !!document.querySelector('.pdp-m__buy:not(.is-hidden)'));
+		body.classList.toggle('cm-bar-on', !!document.querySelector('.cm-bar.is-shown'));
+		body.classList.toggle('pdp-lb-on', !!document.querySelector('.pdp-m__lb:not([hidden])'));
+	};
+	sync();
+	let queued = false;
+	const touches = node => node.nodeType === 1 && (node.matches(watched) || (node.firstElementChild && node.querySelector(watched)));
+	new MutationObserver(records => {
+		if (queued) return;
+		for (const r of records) {
+			const hit = r.type === 'attributes'
+				? r.target.matches(watched)
+				: [...r.addedNodes].some(touches) || [...r.removedNodes].some(touches);
+			if (hit) { queued = true; queueMicrotask(() => { queued = false; sync(); }); return; }
+		}
+	}).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'hidden'] });
+})();
+
+
 // .link-btn dont le seul enfant est masqué en ligne (style="display: none" / "display:none") : classe .lb-child-hidden,
 // qui masque le bouton (screen-rest.css). Remplace .link-btn:has(>[style*="display:none"]:only-child) : un [style] dans :has()
 // obligeait le navigateur à recalculer les styles de toute la page à chaque changement d'attribut style, n'importe où.

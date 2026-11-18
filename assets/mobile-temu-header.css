@@ -4822,7 +4822,8 @@
     transition: transform 0.45s ease;
   }
 
-  body.mshein-head .mobile-temu-search:has(.mshein-search-ph) input::placeholder {
+  /* .has-ph posée avec le texte de tendance (header.liquid, mobile-home-shein.js) au lieu de :has(.mshein-search-ph) */
+  body.mshein-head .mobile-temu-search.has-ph input::placeholder {
     color: transparent;
   }
 

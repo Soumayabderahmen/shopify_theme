@@ -4,8 +4,9 @@
    Filtri en panneau à droite. Chargée à partir de 761px (layout/theme.liquid) ; le mobile ne change pas. */
 
 /* Ancienne page de recherche du thème (fil d'Ariane, résultats et filtres de gauche) : remplacée. */
-body.mshein-search:has([data-mshein-search]) [id$="__breadcrumbs"],
-body.mshein-search:has([data-mshein-search]) [id$="__main-search"] {
+/* body.has-mshein-search posée par snippets/mshein-search.liquid au lieu de :has([data-mshein-search]) */
+body.mshein-search.has-mshein-search [id$="__breadcrumbs"],
+body.mshein-search.has-mshein-search [id$="__main-search"] {
   display: none !important;
 }
 
@@ -18,7 +19,7 @@ body.mshein-search:has([data-mshein-search]) [id$="__main-search"] {
   background: #f4f5f9;
 }
 
-body.mshein-search:has([data-mshein-search]) #content {
+body.mshein-search.has-mshein-search #content {
   padding-top: 0;
   padding-bottom: 0;
 }

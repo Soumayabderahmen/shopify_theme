@@ -248,7 +248,8 @@
 
 /* Mobile : bande de sol sous les avantages de la bannière (sinon cachée derrière) */
 @media (max-width: 760px) {
-  body #root .mhh.mhh[data-season]:has(> .mhh-sz .mhs-scene--ground) { padding-bottom: 44px; }
+  /* .mhh-ground posée par mhh-seasons.js avec la scène au sol, au lieu de :has(> .mhh-sz .mhs-scene--ground) */
+  body #root .mhh.mhh[data-season].mhh-ground.mhh-ground { padding-bottom: 44px; }
   .mhh .mhs-scene { --scene-h: 50px; }
   /* Paysage agrandi (côtés coupés) pour que sapins et vagues restent lisibles sur un téléphone */
   .mhh .mhs-scene > svg,

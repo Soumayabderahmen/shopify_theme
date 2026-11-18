@@ -26,13 +26,14 @@ body .firepush-widget-container {
 
 /* Fiche produit et panier : la barre d'achat ou de paiement (≈70px) est posée sur la barre du bas, les bulles montent au-dessus d'elle
    pour ne plus couvrir "Aggiungi al carrello". */
-body:has(.pdp-m__buy:not(.is-hidden)) #honeypop-app button[class*="BubbleLauncher"],
-body:has(.cm-bar.is-shown) #honeypop-app button[class*="BubbleLauncher"] {
+/* body.pdp-buy-on / body.cm-bar-on tenues à jour par custom.js (barre d achat / barre de paiement visibles) au lieu de body:has(...) qui recalculait toute la page */
+body.pdp-buy-on.pdp-buy-on #honeypop-app button[class*="BubbleLauncher"],
+body.cm-bar-on.cm-bar-on #honeypop-app button[class*="BubbleLauncher"] {
   bottom: calc(66px + 70px + 12px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-body:has(.pdp-m__buy:not(.is-hidden)) .firepush-widget-container,
-body:has(.cm-bar.is-shown) .firepush-widget-container {
+body.pdp-buy-on.pdp-buy-on .firepush-widget-container,
+body.cm-bar-on.cm-bar-on .firepush-widget-container {
   bottom: calc(66px + 70px + 14px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
@@ -41,8 +42,8 @@ pandectes-cmp {
   --mobile-cookie-bottom: calc(66px + 12px + env(safe-area-inset-bottom, 0px));
 }
 
-body:has(.pdp-m__buy:not(.is-hidden)) pandectes-cmp,
-body:has(.cm-bar.is-shown) pandectes-cmp {
+body.pdp-buy-on.pdp-buy-on pandectes-cmp,
+body.cm-bar-on.cm-bar-on pandectes-cmp {
   --mobile-cookie-bottom: calc(66px + 70px + 12px + env(safe-area-inset-bottom, 0px));
 }
 

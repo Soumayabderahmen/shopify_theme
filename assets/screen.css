@@ -1310,6 +1310,7 @@ li.w50, .w50 li { --width: 50%; }
 	/* aspects */
 	/* Classe posée en Liquid (diaporama, hotspots, specs) au lieu de :has(article[style*=…]) : un [style] dans :has()
 	   faisait recalculer toute la page à chaque changement d'attribut style (animations, sliders). */
+	/* Mobile : .m6fr-aspect posée en Liquid au lieu de :has(article[style*=--aspect_m]) (recalcul de toute la page à chaque changement de style) */
 	.m6fr.m6fr-aspect { container-type: inline-size; }
 		#root .m6fr article[style*="--aspect:"] { --mih: calc(var(--aspect) * 1cqw); }
 		#root .m6fr.wide article[style*="--aspect:"] { --mih: calc(var(--aspect) * 1vw); }
@@ -1342,7 +1343,7 @@ li.w50, .w50 li { --width: 50%; }
 @media only screen and (max-width: 760px) {
 /*.m6fr {}*/
 	/* aspects */
-	.m6fr:has(article[style*="--aspect_m:"]) { container-type: inline-size; }
+	.m6fr.m6fr-aspect { container-type: inline-size; }
 		#root .m6fr article[style*="--aspect_m:"] { --mih: calc(var(--aspect_m) * 1cqw); }
 		#root .m6fr.wide article[style*="--aspect_m:"] { --mih: calc(var(--aspect_m) * 1vw); }
 		

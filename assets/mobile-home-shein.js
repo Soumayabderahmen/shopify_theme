@@ -95,6 +95,8 @@
       placeholder.appendChild(document.createElement('span'));
       searchBox.appendChild(placeholder);
     }
+    // Remplace .mobile-temu-search:has(.mshein-search-ph) (assets/mobile-temu-header.css) : texte d'origine du champ caché
+    searchBox.classList.add('has-ph');
     var placeholderText = placeholder.firstElementChild;
     placeholderText.textContent = trendWords[0];
     if (!reduceMotion && trendWords.length > 1) {

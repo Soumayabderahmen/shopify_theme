@@ -245,7 +245,21 @@
     Champ de recherche mobile rendu directement ici (et non plus déplacé par script après le chargement),
     pour que le header soit complet dès la première image. Le panneau de recherche s'y branche (assets/mobile-search.js).
   {%- endcomment -%}
-  <div class="mobile-temu-search" data-mobile-search-host>
+  {%- liquid
+    # Première « Di tendenza » de l'accueil (écrite dans la barre plus bas). Calculée ici pour la classe has-ph, qui remplace
+    # .mobile-temu-search:has(.mshein-search-ph) dans assets/mobile-temu-header.css (recalcul de toute la page sur mobile).
+    assign home_trend = ''
+    if template.name == 'index'
+      assign home_trend_lines = section.settings.mobile_trending_searches | newline_to_br | replace: '<br />', '<br>' | split: '<br>'
+      for home_trend_line in home_trend_lines
+        assign home_trend = home_trend_line | strip_newlines | strip
+        if home_trend != blank
+          break
+        endif
+      endfor
+    endif
+  -%}
+  <div class="mobile-temu-search{% if home_trend != blank %} has-ph{% endif %}" data-mobile-search-host>
     <form action="{{ routes.search_url }}" method="get" role="search" class="mobile-temu-search__form" data-mobile-search-form>
       <label class="mobile-temu-search__label" for="mobile-search-input">{{ 'search.title' | t }}</label>
       <input
@@ -269,16 +283,7 @@
         Accueil mobile style SHEIN : première « Di tendenza » déjà écrite dans la barre (pas de changement de texte
         au chargement) ; assets/mobile-home-shein.js la fait ensuite défiler avec les suivantes.
       {%- endcomment -%}
-      {%- liquid
-        assign home_trend = ''
-        assign home_trend_lines = section.settings.mobile_trending_searches | newline_to_br | replace: '<br />', '<br>' | split: '<br>'
-        for home_trend_line in home_trend_lines
-          assign home_trend = home_trend_line | strip_newlines | strip
-          if home_trend != blank
-            break
-          endif
-        endfor
-      -%}
+      {%- comment -%} home_trend : calculé avant la barre (classe has-ph, ci-dessus) {%- endcomment -%}
       {%- if home_trend != blank -%}
         <span class="mshein-search-ph" aria-hidden="true" data-mshein-search-ph><span>{{ home_trend | capitalize | escape }}</span></span>
       {%- endif -%}

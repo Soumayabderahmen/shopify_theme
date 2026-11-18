@@ -321,8 +321,9 @@
 
   /* Recherche au design des rayons (snippets/mshein-search.liquid) : l'ancienne page est cachée (ordinateur :
      assets/desktop-search.css). */
-  body.mshein-search:has([data-mshein-search]) [id$="__breadcrumbs"],
-  body.mshein-search:has([data-mshein-search]) [id$="__main-search"] {
+  /* body.has-mshein-search posée par snippets/mshein-search.liquid au lieu de :has([data-mshein-search]) */
+  body.mshein-search.has-mshein-search [id$="__breadcrumbs"],
+  body.mshein-search.has-mshein-search [id$="__main-search"] {
     display: none !important;
   }
 

@@ -27,8 +27,29 @@
   if settings.enable_free_shipping and settings.free_shipping_amount > 0
     assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
   endif
+  # 3 premières photos (mêmes produits et mêmes adresses que la liste « products » plus bas, lue par assets/mobile-home-hero.js) :
+  # écrites dans la page pour que la plus grande image de l'accueil mobile (LCP) ne soit plus demandée par le script, qui ne
+  # tourne qu'après la lecture de toute la page (~4,4 s ; LCP 4,2 à 5,2 s)
+  assign hero_first_imgs = ''
+  assign hero_first_urls = ''
+  assign hero_first_n = 0
+  for product in hero_collection.products limit: 18
+    if product.featured_image == blank or hero_first_n >= 3
+      continue
+    endif
+    assign hero_img_url = product.featured_image | image_url: width: 320
+    assign hero_first_imgs = hero_first_imgs | append: hero_img_url | append: '|'
+    assign hero_first_urls = hero_first_urls | append: product.url | append: '|'
+    assign hero_first_n = hero_first_n | plus: 1
+  endfor
+  assign hero_first_imgs = hero_first_imgs | split: '|'
+  assign hero_first_urls = hero_first_urls | split: '|'
 -%}
 
+{%- if hero_first_imgs[0] != blank -%}
+  {%- comment -%} Grande photo de la bannière (LCP du mobile) demandée dès la lecture de la page, mobile seulement {%- endcomment -%}
+  <link rel="preload" as="image" href="{{ hero_first_imgs[0] }}" media="(max-width: 760px)" fetchpriority="high">
+{%- endif -%}
 <div class="mhh" data-mshein-hero data-mhh>
   <div class="mhh__dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   <div class="mhh__txt" data-mhh-txt>
@@ -38,7 +59,10 @@
     <a class="mhh__btn" href="{{ routes.all_products_collection_url }}" data-mhh-btn><span data-mhh-cta>{{ 'desktop_home_shop.hero_cta_shop' | t }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
   </div>
   <div class="mhh__art" aria-hidden="true">
-    {%- for slot in (1..3) -%}<a class="mhh-fl mhh-fl--{{ slot }}" href="#" tabindex="-1"><span class="mhh-fl__in"><img alt="" width="200" height="260"></span></a>{%- endfor -%}
+    {%- for slot in (1..3) -%}
+      {%- assign hero_i = slot | minus: 1 -%}
+      <a class="mhh-fl mhh-fl--{{ slot }}" href="{{ hero_first_urls[hero_i] | default: '#' }}" tabindex="-1"><span class="mhh-fl__in"><img alt="" width="200" height="260"{% if hero_first_imgs[hero_i] != blank %} data-src="{{ hero_first_imgs[hero_i] }}"{% if slot == 1 %} fetchpriority="high"{% endif %}{% endif %}></span></a>
+    {%- endfor -%}
   </div>
   <div class="mhh__usp">
     {%- if shipping_amount != '' -%}<span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>{{ 'desktop_home_shop.usp_shipping_html' | t: amount: shipping_amount }}</span>{%- endif -%}
@@ -65,6 +89,16 @@
     }
   </script>
 </div>
+{%- comment -%} Entrée des 3 photos lancée dès que la bannière est lue (même animation que assets/mobile-home-hero.js, qui prend
+   ensuite le relais toutes les 5,2 s) : sans ça elle attendait la fin de la page, et la photo arrivait vers 5 s. {%- endcomment -%}
+<script>(function (hero) {
+  if (!hero || !window.matchMedia('(max-width: 760px)').matches) return;
+  // Adresses posées ici (data-src) et pas dans le HTML : sur ordinateur la section est cachée, rien n'est téléchargé
+  hero.querySelectorAll('.mhh-fl img[data-src]').forEach(function (img) { img.src = img.getAttribute('data-src'); });
+  requestAnimationFrame(function () { requestAnimationFrame(function () {
+    hero.querySelectorAll('.mhh-fl').forEach(function (node) { if (node.querySelector('img[src]')) node.classList.add('on'); });
+  }); });
+})(document.currentScript.previousElementSibling);</script>
 
 {%- render 'mhh-pay-ann' -%}
 

@@ -334,6 +334,9 @@
     {%- endcase -%}
   {%- endfor -%}
 </nav>
+{%- comment -%} Dernier bloc affiché = assistance (.m6cn) : classe pour assets/screen-rest.css, au lieu de nav:has(>.m6cn:last-child) qui
+   faisait recalculer toute la page à chaque élément ajouté sur mobile. Avant le premier affichage du pied de page. {%- endcomment -%}
+<script>(function (n) { if (n && n.lastElementChild && n.lastElementChild.classList.contains('m6cn')) n.classList.add('nav-last-m6cn'); })(document.currentScript.previousElementSibling);</script>
 
 {%- if split_menu -%}
   {%- assign menu_block = section.blocks | where: 'type', 'menu' | first -%}

@@ -3161,9 +3161,10 @@ html[dir="rtl"]:not(.m2a) #nav > ul > li.sub:not(.show-all, .no-arrow) > a:not(.
 	.l4pr .swiper-pagination-bullets .swiper-pagination-bullet { padding: 6px; }.l4st:not([class*="width-"]) { --width: 33.3333333333333%; }
 	.l4st h1 i, .l4st h2 i, .l4st h3 i, .l4st h4 i, .l4st h5 i, .l4st h6 i { margin-bottom: 18px; }
 .m6as { --d: 32px; }
-.m6as:has(.l4cl.mobile-compact) { flex-direction: column;}
-	.m6as:has(.l4cl.mobile-compact) .l4cl.hr { margin-right: var(--rpn); }
-	#root .m6as:has(.l4cl.mobile-compact) > * { width: auto; padding-left: 0; padding-right: 0; }
+/* .m6as-compact posée en Liquid (section-image-with-banners, réglage mobile « slider ») au lieu de :has(.l4cl.mobile-compact) — classe doublée = même spécificité */
+.m6as.m6as-compact.m6as-compact { flex-direction: column;}
+	.m6as.m6as-compact.m6as-compact .l4cl.hr { margin-right: var(--rpn); }
+	#root .m6as.m6as-compact.m6as-compact > * { width: auto; padding-left: 0; padding-right: 0; }
 .m6ac { display: block; }
 	#root .m6ac > *, #root .m6ac > [class] { width: 100%; }
 	.m6ac .l4cl, .m6ac > *:first-child .l4cl, .m6ac .l4ft { margin-bottom: var(--dist_a); }
@@ -3388,7 +3389,8 @@ h1.cols > .small, h2.cols > .small, h3.cols > .small, h4.cols > .small, h5.cols 
 		
 			
 			
-			#root .shopify-section-footer > nav:has(>.m6cn:last-child) > *:nth-last-child(2):before { display: none; }
+			/* .nav-last-m6cn posée en Liquid (footer.liquid, dernier bloc = assistance) au lieu de :has(>.m6cn:last-child) */
+			#root .shopify-section-footer > nav.nav-last-m6cn.nav-last-m6cn > *:nth-last-child(2):before { display: none; }
 		
 			
 			.js .shopify-section-footer > nav h1 ~ *, .js .shopify-section-footer > nav h2 ~ *, .js .shopify-section-footer > nav h3 ~ *, .js .shopify-section-footer > nav h4 ~ *, .js .shopify-section-footer > nav h5 ~ *, .js .shopify-section-footer > nav h6 ~ * { display: none; }
