@@ -860,9 +860,59 @@
           card.querySelector('[data-dhp-new-thumbs]').innerHTML = data.items.slice(1, 4).map(function (item) {
             return '<span><img src="' + esc(item.s) + '" alt="" loading="lazy" width="45" height="45"></span>';
           }).join('');
-          data.items.forEach(function (item) { if (item.c) objSources.push(item.c); });
+          // Pour le tri des cartes (keepRecent) : date du produit le plus récent, heure du serveur, premier produit
+          card.dhpNew = { d: Number(first.d) || 0, now: Number(data.now) || 0, first: first.u, items: data.items };
         })
         .catch(function () { card.classList.remove('is-loading'); });
+    };
+    // Cartes en plus : les collections publiées le plus récemment (marques importées, templates/collection.dhp-new-all.liquid),
+    // à côté des rayons déjà dans la page. Titre « Novità in … » avec le nom court de la collection (avant « | » ou « : »).
+    var addRecentCollections = function () {
+      var url = novita.getAttribute('data-dhp-new-all');
+      if (!url) return Promise.resolve();
+      return fetch(url, { credentials: 'same-origin' })
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (data) {
+          var known = {};
+          newTrack.querySelectorAll('[data-k]').forEach(function (card) { known[card.getAttribute('data-k')] = true; });
+          ((data && data.c) || []).forEach(function (c) {
+            if (!c || !c.k || !c.l || known[c.k]) return;
+            known[c.k] = true;
+            var name = String(c.n || '').split(/\s+[|–—]\s+|:\s/)[0].trim() || String(c.n || '');
+            var card = document.createElement('a');
+            card.className = 'dhp-new__card is-loading';
+            card.href = c.l + '?view=novita&sort_by=created-descending';
+            card.setAttribute('data-src', c.l + '?view=dhp-new&sort_by=created-descending');
+            card.setAttribute('data-k', c.k);
+            card.innerHTML = '<span class="dhp-new__txt"><b>' + esc(tr('title').replace('__D__', name)) + '</b><small data-dhp-new-sub>' +
+              esc(tr('latest')) + '</small></span><span class="dhp-new__thumbs" data-dhp-new-thumbs aria-hidden="true"></span>';
+            newTrack.appendChild(card);
+          });
+        })
+        .catch(function () {});
+    };
+    // Cartes gardées : celles qui ont reçu des produits ces 45 derniers jours, la plus récente d'abord, 10 au plus, sans deux
+    // cartes avec le même premier produit (un produit peut être dans un rayon et dans la collection de sa marque). Au moins
+    // 4 cartes restent même sans nouveauté récente.
+    var keepRecent = function () {
+      var MAX_AGE = 45 * 86400;
+      var cards = [].slice.call(newTrack.children);
+      cards.filter(function (card) { return !card.dhpNew; }).forEach(function (card) { card.remove(); });
+      var filled = cards.filter(function (card) { return card.dhpNew; });
+      filled.sort(function (a, b) { return b.dhpNew.d - a.dhpNew.d; });
+      var used = {};
+      var kept = [];
+      filled.forEach(function (card) {
+        var info = card.dhpNew;
+        var old = info.now && info.d && info.now - info.d > MAX_AGE;
+        if (kept.length >= 10 || used[info.first] || (old && kept.length >= 4)) { card.remove(); return; }
+        used[info.first] = true;
+        kept.push(card);
+      });
+      kept.forEach(function (card) {
+        newTrack.appendChild(card);
+        card.dhpNew.items.forEach(function (item) { if (item.c) objSources.push(item.c); });
+      });
     };
     // Défilement continu : la rangée est doublée (copie cachée aux lecteurs d'écran), durée selon sa largeur
     var startDrift = function () {
@@ -1015,7 +1065,9 @@
     var start = function () {
       if (started) return;
       started = true;
-      Promise.all([].slice.call(newTrack.children).map(fillCard)).then(function () { startDrift(); prepareObjects(); });
+      addRecentCollections()
+        .then(function () { return Promise.all([].slice.call(newTrack.children).map(fillCard)); })
+        .then(function () { keepRecent(); startDrift(); prepareObjects(); });
     };
     if ('IntersectionObserver' in window) {
       var newSeen = new IntersectionObserver(function (entries) {

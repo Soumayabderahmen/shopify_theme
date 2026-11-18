@@ -475,7 +475,12 @@
       depuis templates/collection.dhp-new.liquid (rayon trié du plus récent au plus ancien) ; rayon sans produit : carte
       retirée. ----------
     {%- endcomment -%}
+    {%- comment -%} Cartes : les rayons ci-dessous + les collections publiées le plus récemment (marques importées :
+       templates/collection.dhp-new-all.liquid) ; le script garde celles qui ont reçu des produits ces 45 derniers jours,
+       la plus récente d'abord (10 au plus) — sinon un rayon sans nouveauté depuis des mois restait affiché. {%- endcomment -%}
     <section class="dhp-sec dhp-new" id="dhp-novita" data-dhp-new
+      data-dhp-new-all="{{ routes.all_products_collection_url }}?view=dhp-new-all"
+      data-i18n-title="{{ 'desktop_home_shop.new_card_title' | t: dept: '__D__' | escape }}"
       data-i18n-latest="{{ 'desktop_home_shop.new_card_latest' | t | escape }}"
       data-i18n-one="{{ 'desktop_home_shop.new_card_count_one' | t | escape }}"
       data-i18n-count="{{ 'desktop_home_shop.new_card_count' | t: count: '__N__' | escape }}"
@@ -486,7 +491,7 @@
         <div class="dhp-new__track" data-dhp-new-track>
           {%- for dept_handle in dept_handles -%}
             {%- assign dept = collections[dept_handle] -%}
-            <a class="dhp-new__card is-loading" href="{{ dept.url }}?view=novita&amp;sort_by=created-descending" data-src="{{ dept.url }}?view=dhp-new&amp;sort_by=created-descending">
+            <a class="dhp-new__card is-loading" href="{{ dept.url }}?view=novita&amp;sort_by=created-descending" data-src="{{ dept.url }}?view=dhp-new&amp;sort_by=created-descending" data-k="{{ dept.handle }}">
               <span class="dhp-new__txt">
                 <b>{{ 'desktop_home_shop.new_card_title' | t: dept: dept_titles[forloop.index0] }}</b>
                 <small data-dhp-new-sub>{{ 'desktop_home_shop.new_card_latest' | t }}</small>

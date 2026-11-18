@@ -1,0 +1,47 @@
+{%- layout none -%}
+{%- comment -%}
+  Accueil ordinateur, « Appena arrivati » (sections/desktop-home-shop.liquid, assets/desktop-home-shop.js) : collections
+  candidates pour les cartes « Novità in … » = les 14 collections publiées le plus récemment (une marque importée arrive
+  avec sa collection : TOYOU, FSLE, Michael Kors…), hors collections fourre-tout (all, shop, remises, meilleures ventes,
+  arrivages datés…) et collections vides. Le script y ajoute les rayons, demande à chacune ses derniers produits
+  (templates/collection.dhp-new.liquid) et garde celles qui ont vraiment reçu des produits récemment, la plus récente
+  d'abord. Réponse JSON, sans mise en page : c = [{ k handle, n titre, l adresse }].
+  Demandé sur n'importe quelle collection (?view=dhp-new-all) : seule la liste globale « collections » est lue.
+{%- endcomment -%}
+{%- liquid
+  assign keys = ''
+  for c in collections
+    assign h = c.handle
+    if c.products_count == 0 or c.products_count > 1500
+      continue
+    endif
+    if h == 'all' or h == 'frontpage' or h == 'shop' or h == 'bestsellers' or h == 'in-offerta' or h == 'new-trends'
+      continue
+    endif
+    if h contains 'discount' or h contains 'new-arrival' or h contains 'novita' or h contains 'offert' or h contains 'sale'
+      continue
+    endif
+    assign h4 = h | slice: 0, 4
+    if h4 == 'jan-' or h4 == 'feb-' or h4 == 'mar-' or h4 == 'apr-' or h4 == 'may-' or h4 == 'jun-' or h4 == 'jul-' or h4 == 'aug-' or h4 == 'sep-' or h4 == 'oct-' or h4 == 'nov-' or h4 == 'dec-'
+      continue
+    endif
+    assign t = c.published_at | date: '%s'
+    if t == blank
+      continue
+    endif
+    assign keys = keys | append: t | append: '~' | append: h | append: '|'
+  endfor
+  assign keys = keys | split: '|' | sort | reverse
+-%}
+{"c":[
+  {%- assign shown = 0 -%}
+  {%- for key in keys -%}
+    {%- if shown >= 14 -%}{%- break -%}{%- endif -%}
+    {%- assign handle = key | split: '~' | last -%}
+    {%- assign c = collections[handle] -%}
+    {%- if c == blank -%}{%- continue -%}{%- endif -%}
+    {%- unless shown == 0 -%},{%- endunless -%}
+    {"k":{{ c.handle | json }},"n":{{ c.title | json }},"l":{{ c.url | json }}}
+    {%- assign shown = shown | plus: 1 -%}
+  {%- endfor -%}
+]}
