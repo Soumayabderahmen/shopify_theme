@@ -268,6 +268,10 @@ body:not(.template-product):has(.br) .dft { margin-top: 0 !important; }
 #root .br .br-fd__head button { background: #f1f1f2; }
 #root .br .br-fpill { background: #fff; }
 #root .br .br-fpill.on { color: #fff; background: #111; border-color: #111; }
+/* Survol / focus : le style des boutons du thème mettait le texte en blanc sur la pastille blanche (« Sconto più alto » vide) */
+#root .br .br-fpill::before, #root .br .br-fpill::after { content: none; }
+#root .br .br-fpill:hover, #root .br .br-fpill:focus, #root .br .br-fpill:focus-visible { color: #111; background: #f4f4f6; border-color: #d6d6db; box-shadow: none; }
+#root .br .br-fpill.on:hover, #root .br .br-fpill.on:focus, #root .br .br-fpill.on:focus-visible { color: #fff; background: #111; border-color: #111; }
 #root .br .br-fd__reset { background: #f1f1f2; }
 #root .br .br-fd__done { color: #fff; background: #111; }
 #root .br .br-menu button:hover, #root .br .br-menu button.on { background: #f1f0ff; }
@@ -540,6 +544,20 @@ html.br-modal-open { overflow: hidden; }
 .br-bm__search svg { flex: none; width: 18px; height: 18px; color: #7a7f95; }
 #root .br .br-bm__search input { flex: 1; min-width: 0; height: 100%; margin: 0; padding: 0; color: #16123f; font: inherit; font-size: 15px; background: none; border: 0; box-shadow: none; outline: 0; }
 #root .br .br-bm__head button { display: grid; flex: none; place-items: center; width: 42px; height: 42px; color: #16123f; background: #f4f5f9; border-radius: 50%; }
+/* Lettres A–Z de « Tutti i brand » (une ligne ; lettres sans marque grisées) */
+.br-bm__az { display: flex; flex: none; gap: 4px; padding: 12px 24px 12px 28px; border-bottom: 1px solid #eceef4; }
+#root .br .br-bm__az button { flex: 1 1 0; min-width: 0; height: 32px; margin: 0; padding: 0; color: #16123f; font: 700 13px/32px 'Figtree', sans-serif; text-align: center; background: #f4f5f9; border: 0; border-radius: 999px; box-shadow: none; cursor: pointer; }
+#root .br .br-bm__az button::before, #root .br .br-bm__az button::after { content: none; }
+#root .br .br-bm__az button[data-letter=''] { flex: none; padding: 0 12px; }
+#root .br .br-bm__az button:hover:not(:disabled) { color: #16123f; background: #ecebff; }
+#root .br .br-bm__az button[aria-pressed='true'], #root .br .br-bm__az button[aria-pressed='true']:hover { color: #fff; background: #3a34d2; }
+#root .br .br-bm__az button:disabled { opacity: .3; cursor: default; }
+.br-bm__grid.is-az .br-bm__t { order: var(--az, 0); }
+@media (max-width: 760px) {
+  .br-bm__az { gap: 6px; padding: 10px 14px; overflow-x: auto; scrollbar-width: none; }
+  .br-bm__az::-webkit-scrollbar { display: none; }
+  #root .br .br-bm__az button { flex: none; min-width: 34px; height: 34px; padding: 0 10px; font-size: 14px; line-height: 34px; }
+}
 .br-bm__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 20px 24px 28px 28px; overflow-y: auto; overscroll-behavior: contain; }
 #root .br .br-bm__t { color: #16123f; background: #f6f6f9; border-color: #eceef4; }
 #root .br .br-bm__t:hover { background: #eeeef4; }

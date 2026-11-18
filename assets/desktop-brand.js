@@ -588,7 +588,11 @@
       if (resolved[key]) return resolved[key];
       var parse = function (href) {
         return function (text) {
-          var other = new DOMParser().parseFromString(text, 'text/html').querySelector('[data-br]');
+          var parsed = new DOMParser().parseFromString(text, 'text/html');
+          // Marque sans produit à cette adresse : la page indique la bonne (sections/desktop-brand.liquid)
+          var redirect = parsed.querySelector('[data-br-redirect]');
+          if (redirect) { location.href = redirect.getAttribute('data-br-redirect'); throw new Error('redirect'); }
+          var other = parsed.querySelector('[data-br]');
           if (!other) throw new Error('no brand page');
           return { href: href, other: other, full: Boolean(other.querySelector('[data-br-grid] .mshein-card')) };
         };
@@ -1164,18 +1168,79 @@
       if (n) n.textContent = all.length;
       var gridBox = modal.querySelector('[data-br-bm-grid]');
       var filled = false;
+      var azBox = modal.querySelector('[data-br-bm-az]');
+      var q = modal.querySelector('[data-br-bm-q]');
+      var activeLetter = '';
+      var letterOf = function (name) {
+        var first = String(name).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').charAt(0);
+        return /[a-z]/.test(first) ? first.toUpperCase() : '#';
+      };
+      // Marques ajoutées depuis le fournisseur des produits (snippets/brand-vendors-json.liquid) : en premier (photo et
+      // nombre de produits demandés à leur page, tuile retirée si aucun produit) ; plus en double dans la liste.
+      var vendors = [];
+      try { vendors = JSON.parse((modal.querySelector('[data-vendor-brands]') || {}).textContent || '[]'); } catch (error) { vendors = []; }
+      vendors = vendors.filter(function (v) { return current.indexOf(String(v[0]).toLowerCase()) < 0; });
+      var isVendor = {};
+      vendors.forEach(function (v) { isVendor[String(v[0]).toLowerCase()] = true; });
+      all = all.filter(function (b) { return !isVendor[String(b[0]).toLowerCase()]; });
+      var applyFilter = function () {
+        var term = q.value.trim().toLowerCase();
+        var shown = 0;
+        gridBox.querySelectorAll('.br-bm__t').forEach(function (tile) {
+          var name = tile.getAttribute('data-name');
+          var ok = (!term || name.indexOf(term) > -1) && (!activeLetter || letterOf(name) === activeLetter);
+          tile.hidden = !ok;
+          if (ok) shown += 1;
+        });
+        modal.querySelector('[data-br-bm-none]').hidden = shown > 0;
+      };
+      var buildAz = function () {
+        if (!azBox) return;
+        var tiles = Array.prototype.slice.call(gridBox.querySelectorAll('.br-bm__t'));
+        var present = {};
+        tiles.forEach(function (tile) { present[letterOf(tile.getAttribute('data-name'))] = true; });
+        tiles.slice().sort(function (x, y) { return x.getAttribute('data-name').localeCompare(y.getAttribute('data-name')); })
+          .forEach(function (tile, rank) { tile.style.setProperty('--az', rank); });
+        var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').concat(present['#'] ? ['#'] : []);
+        azBox.innerHTML = '<button type="button" data-letter="" aria-pressed="true">' + esc(azBox.getAttribute('data-all') || 'Tutti') + '</button>' +
+          letters.map(function (letter) { return '<button type="button" data-letter="' + letter + '" aria-pressed="false"' + (present[letter] ? '' : ' disabled') + '>' + letter + '</button>'; }).join('');
+        azBox.addEventListener('click', function (event) {
+          var button = event.target.closest('button[data-letter]');
+          if (!button || button.disabled) return;
+          activeLetter = button.getAttribute('data-letter') === activeLetter ? '' : button.getAttribute('data-letter');
+          azBox.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-letter') === activeLetter ? 'true' : 'false'); });
+          gridBox.classList.toggle('is-az', Boolean(activeLetter));
+          applyFilter();
+          gridBox.scrollTop = 0;
+        });
+      };
       var fill = function () {
         if (filled) return;
         filled = true;
-        gridBox.innerHTML = all.map(function (b) {
+        gridBox.innerHTML = vendors.map(function (v) {
+          return '<a class="br-bcard br-bm__t" href="' + esc(v[1]) + '" data-br-vendor-count="' + esc(v[2]) + '" data-name="' + esc(String(v[0]).toLowerCase()) + '">'
+            + '<span class="br-blogo br-blogo--photo"><b>' + esc(String(v[0]).slice(0, 2).toUpperCase()) + '</b></span>'
+            + '<span><b>' + esc(v[0]) + '</b><small></small></span></a>';
+        }).join('') + all.map(function (b) {
           var img = brandImg(data, b, 160);
           return '<a class="br-bcard br-bm__t" href="' + esc(brandUrl(b)) + '" data-br-handle="' + esc(handleize(b[0])) + '" data-name="' + esc(String(b[0]).toLowerCase()) + '">'
             + '<span class="br-blogo br-blogo--photo">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" width="58" height="58">' : '<b>' + esc(String(b[0]).slice(0, 2).toUpperCase()) + '</b>') + '</span>'
             + '<span><b>' + esc(b[0]) + '</b><small>' + esc(countText(Number(b[2]))) + '</small></span></a>';
         }).join('');
-        modal.querySelector('[data-br-bm-n]').textContent = t('brands_count', '__N__').replace('__N__', all.length);
+        var total = function () { modal.querySelector('[data-br-bm-n]').textContent = t('brands_count', '__N__').replace('__N__', gridBox.querySelectorAll('.br-bm__t').length); };
+        total();
+        buildAz();
+        gridBox.querySelectorAll('[data-br-vendor-count]').forEach(function (tile) {
+          fetch(tile.getAttribute('data-br-vendor-count'), { credentials: 'same-origin' })
+            .then(function (response) { return response.json(); })
+            .then(function (info) {
+              if (!info.count) { tile.remove(); total(); return; }
+              tile.querySelector('small').textContent = countText(Number(info.count));
+              if (info.img) tile.querySelector('.br-blogo').innerHTML = '<img src="' + esc(info.img.replace(/width=\d+/, 'width=160')) + '" alt="" width="58" height="58">';
+            })
+            .catch(function () {});
+        });
       };
-      var q = modal.querySelector('[data-br-bm-q]');
       var closeBm = function () { modal.hidden = true; document.documentElement.classList.remove('br-modal-open'); };
       openBtn.addEventListener('click', function () {
         fill();
@@ -1183,12 +1248,7 @@
         document.documentElement.classList.add('br-modal-open');
         setTimeout(function () { q.focus(); }, 60);
       });
-      q.addEventListener('input', function () {
-        var term = q.value.trim().toLowerCase();
-        var shown = 0;
-        gridBox.querySelectorAll('.br-bm__t').forEach(function (tile) { var ok = !term || tile.getAttribute('data-name').indexOf(term) > -1; tile.hidden = !ok; if (ok) shown += 1; });
-        modal.querySelector('[data-br-bm-none]').hidden = shown > 0;
-      });
+      q.addEventListener('input', applyFilter);
       modal.addEventListener('click', function (event) {
         if (event.target === modal || event.target.closest('[data-br-bm-close]') || event.target.closest('.br-bm__t')) closeBm();
       });

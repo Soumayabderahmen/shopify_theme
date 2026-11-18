@@ -34,6 +34,35 @@
     assign br_q = 'title:"' | append: br_term | append: '"' | url_encode
     assign br_base = routes.search_url | append: '?q=' | append: br_q | append: '&type=product&view=brand'
     assign br_cover = ''
+    # Marque cherchée dans les titres sans aucun produit (ex. « AMII Clothing », nom du fournisseur alors que les titres
+    # disent « Amii ») : sa collection du même nom si elle a des produits, sinon sa page fournisseur ; la page vide
+    # « Nessun risultato » n'est plus affichée.
+    if br_count == 0 and br_term != blank
+      assign br_only = 'title:"' | append: br_term | append: '"'
+      if br_terms == br_only
+        assign br_alt = ''
+        assign br_alt_handle = br_term | handleize
+        if collections[br_alt_handle].products_count > 0
+          assign br_alt = collections[br_alt_handle].url | append: '?view=brand'
+        else
+          assign br_alt_key = br_term | downcase | strip
+          for br_vendor in shop.vendors
+            assign br_vendor_key = br_vendor | downcase | strip
+            if br_vendor_key == br_alt_key
+              assign br_alt = br_vendor | url_for_vendor | append: '&view=brand'
+              break
+            endif
+          endfor
+        endif
+        if br_alt != ''
+          assign br_alt_json = br_alt | json
+          # Page ouverte sur place (section seule, script non lancé) : assets/brand-instant.js et desktop-brand.js lisent
+          # data-br-redirect.
+          assign br_alt_attr = br_alt | escape
+          echo '<script>location.replace(' | append: br_alt_json | append: ');</script><i hidden data-br-redirect="' | append: br_alt_attr | append: '"></i>'
+        endif
+      endif
+    endif
   else
     assign br_name = collection.title
     assign br_term = collection.title
@@ -273,6 +302,9 @@
   <div class="br-bm" data-br-bm hidden>
     <div class="br-bm__box" role="dialog" aria-modal="true" aria-label="{{ 'desktop_brand.all_brands' | t }}">
       <div class="br-bm__head"><h3>{{ 'desktop_brand.all_brands' | t }} <span data-br-bm-n></span></h3><label class="br-bm__search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="{{ 'desktop_brand.search_brands' | t }}" autocomplete="off" data-br-bm-q></label><button type="button" data-br-bm-close aria-label="{{ 'desktop_brand.close' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      {%- comment -%} Lettres A–Z (assets/desktop-brand.js) et nouvelles marques du fournisseur en premier (snippets/brand-vendors-json.liquid) {%- endcomment -%}
+      <div class="br-bm__az" role="toolbar" aria-label="A–Z" data-br-bm-az data-all="{{ 'mobile.collection.all' | t | escape }}"></div>
+      {%- render 'brand-vendors-json' -%}
       <div class="br-bm__grid" data-br-bm-grid></div>
       <p class="br-bm__none" data-br-bm-none hidden>{{ 'desktop_brand.no_brand' | t }}</p>
     </div>

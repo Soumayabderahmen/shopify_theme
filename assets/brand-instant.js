@@ -273,6 +273,9 @@
         if (id !== token) return null;
         var doc = new DOMParser().parseFromString(out[0], 'text/html');
         wrap = doc.querySelector('.shopify-section') || doc.body;
+        // Marque sans produit à cette adresse : la page indique la bonne (sections/desktop-brand.liquid, data-br-redirect)
+        var redirect = wrap.querySelector('[data-br-redirect]');
+        if (redirect) { wrap = null; location.href = redirect.getAttribute('data-br-redirect'); return null; }
         if (!wrap.querySelector('[data-br]')) throw new Error('no brand page');
         var script = wrap.querySelector('script[src*="desktop-brand"]');
         scriptSrc = script ? script.src : '';
