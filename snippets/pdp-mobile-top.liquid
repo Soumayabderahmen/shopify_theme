@@ -541,8 +541,10 @@
     </section>
   {%- endunless -%}
 
-  {%- comment -%} 6. Quantité + livraison + bouton : pilotent le champ quantité et le bouton du formulaire du thème. {%- endcomment -%}
-  <section class="pdp-m__card">
+  {%- comment -%} 6. Quantité + livraison + bouton : pilotent le champ quantité et le bouton du formulaire du thème.
+     pdp-m__card--buy : repère de cette carte pour assets/pdp-desktop.css (remplace .pdp-m__card:has(> .pdp-m__qrow), qui
+     faisait recalculer toute la page à chaque élément ajouté). Aucun style mobile ne l'utilise. {%- endcomment -%}
+  <section class="pdp-m__card pdp-m__card--buy">
     <div class="pdp-m__qrow">
       <div class="pdp-m__qty" role="group" aria-label="{{ 'mobile.pdp.quantity' | t }}">
         <button type="button" aria-label="{{ 'mobile.pdp.less' | t }}" data-pdp-qty="-1">−</button>

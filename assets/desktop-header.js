@@ -105,11 +105,18 @@
   // ---------- Hauteur de l'en-tête (barres collées dessous) et état au défilement ----------
   var mega = header.querySelector('[data-dh-mega]');
   var top = header.closest('[data-dh-top]');
+  // Toutes les mesures d'abord, puis les écritures, et seulement si la valeur change : une variable écrite sur <html>
+  // invalide toute la page, et une mesure lue juste après forçait un recalcul complet (deux fois par appel avant).
+  var dhSet = function (el, name, value) { if (el.style.getPropertyValue(name) !== value) el.style.setProperty(name, value); };
   var setHeight = function () {
-    document.documentElement.style.setProperty('--dh-h', header.offsetHeight + 'px');
+    var parent = top.parentElement;
+    var h = header.offsetHeight + 'px';
     // Pleine largeur malgré les marges du conteneur du thème (assets/desktop-header.css)
-    top.style.setProperty('--dh-x', top.parentElement.getBoundingClientRect().left + parseFloat(getComputedStyle(top.parentElement).paddingLeft) + 'px');
-    document.documentElement.style.setProperty('--dh-vw', document.documentElement.clientWidth + 'px'); // aussi pour le footer (assets/desktop-footer.css)
+    var x = parent.getBoundingClientRect().left + parseFloat(getComputedStyle(parent).paddingLeft) + 'px';
+    var vw = document.documentElement.clientWidth + 'px'; // aussi pour le footer (assets/desktop-footer.css)
+    dhSet(document.documentElement, '--dh-h', h);
+    dhSet(top, '--dh-x', x);
+    dhSet(document.documentElement, '--dh-vw', vw);
   };
   var paint = function () {
     header.classList.toggle('is-stuck', window.scrollY > 40);
@@ -192,10 +199,13 @@
     strip.addEventListener('scroll', syncArrows, { passive: true });
     window.addEventListener('resize', syncArrows);
     window.addEventListener('load', syncArrows);
-    syncArrows();
-    // Onglet du rayon ouvert visible
-    var here = strip.querySelector('.dh-tab.is-here');
-    if (here && here.offsetLeft + here.offsetWidth > strip.clientWidth) strip.scrollLeft = here.offsetLeft - 40;
+    // À l'image suivante : mesurer ici, juste après les écritures de setHeight, forçait un recalcul complet de la page
+    requestAnimationFrame(function () {
+      // Onglet du rayon ouvert visible
+      var here = strip.querySelector('.dh-tab.is-here');
+      if (here && here.offsetLeft + here.offsetWidth > strip.clientWidth) strip.scrollLeft = here.offsetLeft - 40;
+      syncArrows();
+    });
   }
 
   // ---------- Méga-menu « Categorie » ----------

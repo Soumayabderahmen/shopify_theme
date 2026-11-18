@@ -367,24 +367,26 @@ body:has(.pdp-m > .pdp-m__buy:not(.is-hidden)) #root .pdp-m .pdp-m__slides {
   border-radius: 0 0 20px 20px;
 }
 
-#root .pdp-m__top > .pdp-m__card:has(> .pdp-m__qrow) {
+/* .pdp-m__card--buy (snippets/pdp-mobile-top.liquid) = la carte qui contient .pdp-m__qrow. Avant : .pdp-m__card:has(> .pdp-m__qrow),
+   et « :has(…) > * » obligeait le navigateur à recalculer toute la page à chaque élément ajouté (~30 ms). Même spécificité. */
+#root .pdp-m__top > .pdp-m__card.pdp-m__card--buy {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 12px;
   align-items: center;
 }
 
-#root .pdp-m__top > .pdp-m__card:has(> .pdp-m__qrow) > * {
+#root .pdp-m__top > .pdp-m__card.pdp-m__card--buy > * {
   grid-column: 1 / -1;
 }
 
 /* Rangées fixes : quantité, puis bouton + cœur ; les boutons de paiement (ajoutés après le bouton par le thème) et les
    garanties suivent. */
-#root .pdp-m__top > .pdp-m__card:has(> .pdp-m__qrow) > .pdp-m__qrow {
+#root .pdp-m__top > .pdp-m__card.pdp-m__card--buy > .pdp-m__qrow {
   grid-row: 1;
 }
 
-#root .pdp-m__top > .pdp-m__card:has(> .pdp-m__qrow) > .pdp-m__cta {
+#root .pdp-m__top > .pdp-m__card.pdp-m__card--buy > .pdp-m__cta {
   grid-row: 2;
   grid-column: 1;
   width: 100%;
@@ -395,7 +397,7 @@ body:has(.pdp-m > .pdp-m__buy:not(.is-hidden)) #root .pdp-m .pdp-m__slides {
   text-transform: uppercase;
 }
 
-#root .pdp-m__top > .pdp-m__card:has(> .pdp-m__qrow) > .pdp-m__qfav {
+#root .pdp-m__top > .pdp-m__card.pdp-m__card--buy > .pdp-m__qfav {
   grid-row: 2;
   grid-column: 2;
   display: grid;

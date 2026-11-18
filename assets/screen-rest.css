@@ -2426,7 +2426,9 @@ button[class*="reputon-swiper-button"] { min-height: 0; border-width: 0 !importa
 		.input-amount.is-valid input, .is-valid .input-amount input { background-position: -3000em -3000em; }
 		
 		span ~ .input-amount ~ button { align-self: center; }
-.input-amount:has(input[disabled]) a[role="button"], .input-amount:has(input.disabled) a[role="button"] { opacity: .3; pointer-events: none; }
+/* Boutons +/− ajoutés par custom-async.js (amountRun) juste après le champ, dans le même parent : « ~ » suffit, même
+   spécificité que l'ancien .input-amount:has(input[disabled]) a[role="button"], qui faisait recalculer toute la page. */
+.input-amount input[disabled] ~ a[role="button"], .input-amount input.disabled ~ a[role="button"] { opacity: .3; pointer-events: none; }
 .input-amount.size-m, .input-amount.size-m input { width: calc(var(--main_fz) * 4); --input_h: calc(var(--btn_pv) * 1.2 * 2 + var(--btn_fz) * var(--btn_lh)); }
 .input-amount.size-l, .input-amount.size-l input { width: calc(var(--main_fz) * 4.4285714286); --input_h: calc(var(--btn_pv) * 1.35 * 2 + var(--btn_fz) * var(--btn_lh)); }.input-inline input {
 		width: 0% !important; margin-right: 12px;
@@ -4184,19 +4186,12 @@ table { --p_lr: 8px; }
 #root li:not(.legacy-product-card) .f8pr.form-card .submit > button {
   flex: 1 0 auto !important;
   width: auto;
-}#root .f8pr.form-card .submit:has(> select):has(> .input-amount):has(> button) {
-  flex-wrap: wrap;
 }
-#root .f8pr.form-card .submit:has(> select):has(> .input-amount):has(> button) > select {
-  flex: 0 0 100% !important;
-  width: 100% !important;
-}
-#root .f8pr.form-card .submit:has(> select):has(> .input-amount):has(> button) > .input-amount {
-  flex: 0 0 auto !important;
-}
-#root .f8pr.form-card .submit:has(> select):has(> .input-amount):has(> button) > button {
-  flex: 1 0 auto !important;
-}#root .f8pr.form-card.stack .submit {
+/* Retirées : #root .f8pr.form-card .submit:has(> select):has(> .input-amount):has(> button) (+ « > select »,
+   « > .input-amount », « > button »). Aucun gabarit ne met de <select> directement dans .submit (snippets/product-item.liquid :
+   le select est dans un <p> à part) : ces règles ne s'appliquaient jamais, mais leurs :has() faisaient recalculer une grande
+   partie de la page à chaque élément ajouté. */
+#root .f8pr.form-card.stack .submit {
   flex-wrap: wrap;
 }
 #root .f8pr.form-card.stack .submit > * {
