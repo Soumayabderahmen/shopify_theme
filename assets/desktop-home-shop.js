@@ -802,50 +802,55 @@
         copy.setAttribute('tabindex', '-1');
         newTrack.appendChild(copy);
       });
-      // Défilement continu à 12 px/s (comme shop.com) piloté ici : la rangée est doublée, le décalage revient au début
-      // après une moitié. Pause au survol de la rangée et des flèches, et quand l'onglet est caché. Flèches : une carte de
-      // plus ou de moins en 0,45 s, puis le défilement reprend.
+      // Défilement continu à 12 px/s (comme shop.com) par le moteur d'animation du navigateur (Web Animations, sur la
+      // carte graphique) : aucune modification de style pendant le mouvement. Important sur l'accueil : chaque changement de
+      // style y recalcule toute la page (~55 ms, nombreuses règles :has()) ; un défilement image par image en JS la faisait
+      // tomber à 7–15 images/s (impression de gel au clic des flèches). Rangée doublée : le mouvement boucle sur une moitié.
+      // Pause au survol de la rangée et des flèches ; flèches : une carte de plus ou de moins en 0,45 s, puis reprise.
       var half = newTrack.scrollWidth / 2 + 5;
-      var offset = 0;
-      var jump = null;
+      var SPEED = 0.012; // px par ms
+      var at = function (px) { return { transform: 'translate3d(' + (-px).toFixed(1) + 'px, 0, 0)' }; };
+      var drift = newTrack.animate([at(0), at(half)], { duration: half / SPEED, iterations: Infinity, easing: 'linear' });
+      var jumpAnim = null;
       var hovering = false;
-      var last = 0;
+      var holdDrift = function () { if (still || hovering || jumpAnim) drift.pause(); else drift.play(); };
+      holdDrift();
       var rail = novita.querySelector('.dhp-new__rail') || newTrack.parentElement;
-      rail.addEventListener('mouseenter', function () { hovering = true; });
-      rail.addEventListener('mouseleave', function () { hovering = false; });
-      rail.addEventListener('focusin', function () { hovering = true; });
-      rail.addEventListener('focusout', function () { hovering = false; });
-      var paint = function () {
-        var x = ((offset % half) + half) % half;
-        newTrack.style.transform = 'translate3d(' + (-x).toFixed(1) + 'px, 0, 0)';
+      rail.addEventListener('mouseenter', function () { hovering = true; holdDrift(); });
+      rail.addEventListener('mouseleave', function () { hovering = false; holdDrift(); });
+      rail.addEventListener('focusin', function () { hovering = true; holdDrift(); });
+      rail.addEventListener('focusout', function () { hovering = false; holdDrift(); });
+      // Décalage actuel de la rangée (0 … half), d'après l'animation en cours
+      var currentOffset = function () {
+        if (jumpAnim) return jumpAnim.to;
+        return (((Number(drift.currentTime) || 0) * SPEED) % half + half) % half;
       };
-      var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
-      var tick = function (now) {
-        // Temps écoulé réel (même si le navigateur dessine peu d'images par seconde) ; plafonné après un onglet en pause
-        var dt = last ? Math.min(250, now - last) : 0;
-        last = now;
-        if (jump) {
-          var t = Math.min(1, (now - jump.start) / 450);
-          offset = jump.from + (jump.to - jump.from) * ease(t);
-          if (t >= 1) jump = null;
-        } else if (!still && !hovering && !document.hidden) {
-          offset += dt * 0.012;
-        }
-        paint();
-        requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
       var cardStep = function () {
         var card = newTrack.children[0];
         return card ? card.getBoundingClientRect().width + 10 : 362;
       };
       novita.querySelectorAll('[data-dhp-new-step]').forEach(function (button) {
         button.addEventListener('click', function () {
-          var step = Number(button.getAttribute('data-dhp-new-step')) * cardStep();
-          // Prochaine carte alignée sur le bord gauche de la rangée
-          var base = jump ? jump.to : offset;
-          var target = step > 0 ? Math.floor(base / cardStep() + 1e-3) * cardStep() + step : Math.ceil(base / cardStep() - 1e-3) * cardStep() + step;
-          jump = { from: offset, to: target, start: performance.now() };
+          var unit = cardStep();
+          var dir = Number(button.getAttribute('data-dhp-new-step'));
+          var from = currentOffset();
+          // Carte suivante (ou précédente) calée sur le bord gauche de la rangée
+          var to = dir > 0 ? (Math.floor(from / unit + 1e-3) + 1) * unit : (Math.ceil(from / unit - 1e-3) - 1) * unit;
+          // Toujours un vrai pas : si la carte à caler était déjà presque en place, on va à la suivante
+          if (Math.abs(to - from) < unit * 0.5) to += dir * unit;
+          // Avant le début : même position dans la 2e moitié (identique), pour ne jamais montrer de vide à gauche
+          if (to < 0) { from += half; to += half; }
+          if (jumpAnim) jumpAnim.anim.cancel();
+          drift.pause();
+          var anim = newTrack.animate([at(from), at(to)], { duration: 450, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'forwards' });
+          jumpAnim = { anim: anim, to: to };
+          anim.onfinish = function () {
+            if (!jumpAnim || jumpAnim.anim !== anim) return;
+            drift.currentTime = ((to % half) + half) % half / SPEED;
+            jumpAnim = null;
+            anim.cancel();
+            holdDrift();
+          };
         });
       });
     };
