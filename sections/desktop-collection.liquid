@@ -310,12 +310,15 @@
     <button type="button" class="cpt__next" data-cpt-next aria-label="{{ 'desktop_collection.more_categories' | t | escape }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
   </div>
 
-  {%- comment -%} ---------- 3 bannières : meilleures vendite, novità, sotto 20 € (liens = même collection triée / filtrée) ---------- {%- endcomment -%}
+  {%- comment -%}
+    ---------- 3 bannières : meilleures vendite, novità, sotto 20 € ; chacune ouvre sa page dédiée (sections/desktop-novita.liquid :
+    modèles collection.top, collection.novita, collection.prezzi) ----------
+  {%- endcomment -%}
   {%- assign go = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>' -%}
   <div class="cpb">
-    {%- if b_best -%}<a class="cpb__card" href="{{ collection.url }}?sort_by=best-selling"><img src="{{ b_best.featured_image | image_url: width: 900 }}" alt="" width="900" height="600" loading="lazy"><span class="cpb__t"><b>{{ 'desktop_collection.best_title' | t }}</b><span>{{ 'desktop_collection.best_sub' | t }}</span></span><span class="cpb__go">{{ go }}</span></a>{%- endif -%}
+    {%- if b_best -%}<a class="cpb__card" href="{{ collection.url }}?view=top&amp;sort_by=best-selling"><img src="{{ b_best.featured_image | image_url: width: 900 }}" alt="" width="900" height="600" loading="lazy"><span class="cpb__t"><b>{{ 'desktop_collection.best_title' | t }}</b><span>{{ 'desktop_collection.best_sub' | t }}</span></span><span class="cpb__go">{{ go }}</span></a>{%- endif -%}
     {%- if b_new -%}<a class="cpb__card" href="{{ collection.url }}?view=novita&amp;sort_by=created-descending"><img src="{{ b_new.featured_image | image_url: width: 900 }}" alt="" width="900" height="600" loading="lazy"><span class="cpb__t"><b>{{ 'desktop_collection.new_title' | t }}</b><span>{{ 'desktop_collection.new_sub' | t }}</span></span><span class="cpb__go">{{ go }}</span></a>{%- endif -%}
-    {%- if b_under and under_filter -%}<a class="cpb__card" href="{{ collection.url }}?{{ under_filter.max_value.param_name }}={{ under_amount }}"><img src="{{ b_under.featured_image | image_url: width: 900 }}" alt="" width="900" height="600" loading="lazy"><span class="cpb__t"><b>{{ 'desktop_collection.under_title' | t: amount: under_money }}</b><span>{{ 'desktop_collection.under_sub' | t }}</span></span><span class="cpb__go">{{ go }}</span></a>{%- endif -%}
+    {%- if b_under and under_filter -%}<a class="cpb__card" href="{{ collection.url }}?view=prezzi&amp;sort_by=price-ascending&amp;{{ under_filter.max_value.param_name }}={{ under_amount }}"><img src="{{ b_under.featured_image | image_url: width: 900 }}" alt="" width="900" height="600" loading="lazy"><span class="cpb__t"><b>{{ 'desktop_collection.under_title' | t: amount: under_money }}</b><span>{{ 'desktop_collection.under_sub' | t }}</span></span><span class="cpb__go">{{ go }}</span></a>{%- endif -%}
   </div>
 
   {%- comment -%} ---------- Deux rails : meilleures ventes et nouveautés de la collection (remplis par assets/desktop-collection.js) ---------- {%- endcomment -%}

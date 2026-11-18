@@ -1,11 +1,16 @@
 {%- comment -%}
-  Page « Appena arrivati » d'une collection (templates/collection.novita.json, adresse
-  /collections/<collection>?view=novita&sort_by=created-descending) : ouverte par la bannière « Appena arrivati » des pages
-  collection (sections/desktop-collection.liquid) et les cartes « Novità in … » de l'accueil (sections/desktop-home-shop.liquid).
-  Bannière (nom de la collection, nombre réel d'arrivées sur 30 jours, 4 derniers arrivés en éventail), puis les produits du
-  plus récent au plus ancien, regroupés : cette semaine, ce mois-ci, avant. 48 par page. Styles : assets/desktop-novita.css.
+  Pages dédiées d'une collection, ouvertes par les 3 bannières du haut des pages collection (sections/desktop-collection.liquid) :
+  - « Appena arrivati » (templates/collection.novita.json, ?view=novita&sort_by=created-descending ; aussi les cartes
+    « Novità in … » de l'accueil) : produits du plus récent au plus ancien, regroupés cette semaine / ce mois-ci / avant ;
+  - « Più venduti della settimana » (templates/collection.top.json, ?view=top&sort_by=best-selling) : la top 10 numérotée,
+    puis les autres meilleures ventes ;
+  - « Tutto sotto … » (templates/collection.prezzi.json, ?view=prezzi&sort_by=price-ascending&<filtre prix max>) : du moins
+    cher au plus cher, regroupés par tranche de prix.
+  Bannière (retour à la collection, titre, sous-titre, 4 premiers produits en éventail), cartes snippets/mshein-card.liquid,
+  48 par page. Styles : assets/desktop-novita.css. Mode : réglage « mode » du modèle.
 {%- endcomment -%}
 {%- liquid
+  assign mode = section.settings.mode | default: 'new'
   assign best = collections['bestsellers']
   assign best_ids = best.products | map: 'id' | join: ','
   capture flag
@@ -14,31 +19,70 @@
   assign now_s = 'now' | date: '%s' | plus: 0
   assign week_ago = now_s | minus: 604800
   assign month_ago = now_s | minus: 2592000
-  assign novita_url = collection.url | append: '?view=novita&sort_by=created-descending'
+
+  # Tri attendu par mode ; filtre de prix (mode « prezzi ») : celui de la collection, 20 € par défaut comme la bannière
+  case mode
+    when 'best'
+      assign want_sort = 'best-selling'
+      assign view_name = 'top'
+    when 'under'
+      assign want_sort = 'price-ascending'
+      assign view_name = 'prezzi'
+    else
+      assign want_sort = 'created-descending'
+      assign view_name = 'novita'
+  endcase
+  assign price_filter = collection.filters | where: 'type', 'price_range' | first
+  assign under_cents = 2000
+  if price_filter and price_filter.max_value.value
+    assign under_cents = price_filter.max_value.value
+  endif
+  assign fix_url = ''
+  if mode == 'under' and price_filter
+    assign max_units = under_cents | divided_by: 100
+    if collection.sort_by != want_sort or price_filter.max_value.value == nil
+      assign fix_url = collection.url | append: '?view=prezzi&sort_by=price-ascending&' | append: price_filter.max_value.param_name | append: '=' | append: max_units
+    endif
+  elsif collection.sort_by != want_sort
+    assign fix_url = collection.url | append: '?view=' | append: view_name | append: '&sort_by=' | append: want_sort
+  endif
+  assign under_money = under_cents | money_without_trailing_zeros | strip_html
 -%}
 {{ 'desktop-novita.css' | asset_url | stylesheet_tag }}
-{%- comment -%} Adresse sans tri : rechargée triée du plus récent (sinon l'ordre de la collection) {%- endcomment -%}
-{%- unless collection.sort_by == 'created-descending' -%}
-  <script>location.replace({{ novita_url | json }});</script>
-{%- endunless -%}
+{%- comment -%} Adresse sans le bon tri (ou sans filtre de prix) : rechargée corrigée {%- endcomment -%}
+{%- if fix_url != '' -%}
+  <script>location.replace({{ fix_url | json }});</script>
+{%- endif -%}
 
 {%- paginate collection.products by 48 -%}
   {%- liquid
     assign recent = 0
-    for product in collection.products
-      assign created = product.created_at | date: '%s' | plus: 0
-      if created >= month_ago
-        assign recent = recent | plus: 1
-      endif
-    endfor
+    if mode == 'new'
+      for product in collection.products
+        assign created = product.created_at | date: '%s' | plus: 0
+        if created >= month_ago
+          assign recent = recent | plus: 1
+        endif
+      endfor
+    endif
   -%}
-  <div class="nv">
+  <div class="nv nv--{{ mode }}">
     <header class="nv-hero">
       <div class="nv-hero__txt">
         <a class="nv-back" href="{{ collection.url }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>{{ collection.title | escape }}</a>
-        <h1>{{ 'desktop_collection.new_title' | t }}</h1>
+        <h1>
+          {%- case mode -%}
+            {%- when 'best' -%}{{ 'desktop_collection.best_title' | t }}
+            {%- when 'under' -%}{{ 'desktop_collection.under_title' | t: amount: under_money }}
+            {%- else -%}{{ 'desktop_collection.new_title' | t }}
+          {%- endcase -%}
+        </h1>
         <p>
-          {%- if paginate.current_page == 1 and recent >= 48 -%}
+          {%- if mode == 'best' -%}
+            {{ 'desktop_collection.best_sub' | t }}
+          {%- elsif mode == 'under' -%}
+            {{ 'desktop_collection.under_sub' | t }}
+          {%- elsif paginate.current_page == 1 and recent >= 48 -%}
             {{ 'desktop_home_shop.new_card_count_many' | t: count: recent }}
           {%- elsif paginate.current_page == 1 and recent > 1 -%}
             {{ 'desktop_home_shop.new_card_count' | t: count: recent }}
@@ -63,24 +107,60 @@
     {%- if collection.products.size == 0 -%}
       <p class="nv-empty">{{ 'desktop_collection.new_sub' | t }}</p>
     {%- else -%}
+      {%- liquid
+        # Tranches de prix (mode « prezzi ») : un quart, la moitié, puis le prix maximum
+        assign band_1 = under_cents | divided_by: 4
+        assign band_2 = under_cents | divided_by: 2
+        assign band_1_money = band_1 | money_without_trailing_zeros | strip_html
+        assign band_2_money = band_2 | money_without_trailing_zeros | strip_html
+      -%}
       {%- assign group = '' -%}
       {%- for product in collection.products -%}
+        {%- comment -%}
+          « Tutto sotto … » : le filtre de prix de Shopify compte dans la devise de la boutique, les cartes affichent le prix
+          converti (ex. 25,82 € avec le filtre « 20 ») : produits au-dessus de la limite affichée retirés de la page
+        {%- endcomment -%}
+        {%- if mode == 'under' and product.price > under_cents -%}{%- continue -%}{%- endif -%}
         {%- liquid
-          assign created = product.created_at | date: '%s' | plus: 0
-          if created >= week_ago
-            assign next_group = 'week'
-          elsif created >= month_ago
-            assign next_group = 'month'
-          else
-            assign next_group = 'before'
-          endif
+          case mode
+            when 'best'
+              if paginate.current_page == 1 and forloop.index <= 10
+                assign next_group = 'top'
+              else
+                assign next_group = 'top_more'
+              endif
+            when 'under'
+              if product.price < band_1
+                assign next_group = 'band_1'
+              elsif product.price < band_2
+                assign next_group = 'band_2'
+              else
+                assign next_group = 'band_3'
+              endif
+            else
+              assign created = product.created_at | date: '%s' | plus: 0
+              if created >= week_ago
+                assign next_group = 'week'
+              elsif created >= month_ago
+                assign next_group = 'month'
+              else
+                assign next_group = 'before'
+              endif
+          endcase
         -%}
         {%- if next_group != group -%}
           {%- unless group == '' -%}</ul></section>{%- endunless -%}
           {%- assign group = next_group -%}
           <section class="nv-group">
-            <h2>{{ 'desktop_collection.novita_' | append: group | t }}</h2>
-            <ul class="nv-grid">
+            <h2>
+              {%- case group -%}
+                {%- when 'band_1' -%}{{ 'desktop_collection.under_title' | t: amount: band_1_money }}
+                {%- when 'band_2' -%}{{ 'desktop_collection.novita_band' | t: from: band_1_money, to: band_2_money }}
+                {%- when 'band_3' -%}{{ 'desktop_collection.novita_band' | t: from: band_2_money, to: under_money }}
+                {%- else -%}{{ 'desktop_collection.novita_' | append: group | t }}
+              {%- endcase -%}
+            </h2>
+            <ul class="nv-grid{% if group == 'top' %} nv-grid--rank{% endif %}">
         {%- endif -%}
         {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag -%}
       {%- endfor -%}
@@ -99,7 +179,16 @@
 
 {% schema %}
 {
-  "name": "Appena arrivati",
-  "settings": []
+  "name": "Pagina della collezione",
+  "settings": [
+    {
+      "type": "select", "id": "mode", "label": "Pagina", "default": "new",
+      "options": [
+        { "value": "new", "label": "Appena arrivati" },
+        { "value": "best", "label": "Più venduti" },
+        { "value": "under", "label": "Tutto sotto un prezzo" }
+      ]
+    }
+  ]
 }
 {% endschema %}

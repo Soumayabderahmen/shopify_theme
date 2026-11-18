@@ -1,9 +1,11 @@
-/* Page « Appena arrivati » d'une collection (sections/desktop-novita.liquid) : bannière avec les 4 derniers arrivés en
-   éventail, puis les produits regroupés (cette semaine, ce mois-ci, avant) en grille. Cartes : snippets/mshein-card.liquid
-   (styles assets/mshein-card.css). */
+/* Pages dédiées d'une collection (sections/desktop-novita.liquid) : « Appena arrivati », « Più venduti della settimana »,
+   « Tutto sotto … » — bannière (couleur propre à chaque page) avec les 4 premiers produits en éventail, puis les produits
+   regroupés en grille. Cartes : snippets/mshein-card.liquid (styles assets/mshein-card.css). */
 .nv { max-width: 1320px; margin: 0 auto; padding: 24px 24px 64px; color: #0f0d26; }
 .nv-hero { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 260px; padding: 36px 44px; overflow: hidden; color: #fff; background: radial-gradient(120% 140% at 0% 0%, #3a34d2 0%, #16123f 62%); border-radius: 28px; isolation: isolate; }
-.nv-hero__txt { position: relative; z-index: 1; max-width: 520px; }
+.nv--best .nv-hero { background: radial-gradient(120% 140% at 0% 0%, #ff7a1a 0%, #b4231f 58%, #4a0f12 100%); }
+.nv--under .nv-hero { background: radial-gradient(120% 140% at 0% 0%, #19b37a 0%, #0b6b55 55%, #062f2a 100%); }
+.nv-hero__txt { position: relative; z-index: 1; max-width: 560px; }
 .nv-back { display: inline-flex; align-items: center; gap: 4px; margin-bottom: 14px; padding: 7px 14px 7px 8px; color: #fff; font-size: 14px; font-weight: 600; background: rgb(255 255 255 / 14%); border-radius: 999px; transition: background .2s; }
 .nv-back:hover { background: rgb(255 255 255 / 24%); }
 .nv-back svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -21,6 +23,11 @@
 .nv-group h2 { margin: 0 0 16px; font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -.5px; }
 .nv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 24px 16px; margin: 0; padding: 0; list-style: none; }
 .nv-grid > .mshein-card { min-width: 0; }
+/* Top 10 des meilleures ventes : numéro de rang sur la photo (en bas à gauche) */
+.nv-grid--rank { counter-reset: nv-rank; }
+.nv-grid--rank > .mshein-card { counter-increment: nv-rank; }
+.nv-grid--rank > .mshein-card .mshein-card__img { position: relative; }
+.nv-grid--rank > .mshein-card .mshein-card__img::after { content: counter(nv-rank); position: absolute; left: 10px; bottom: 8px; z-index: 2; color: #fff; font-family: 'Sora', sans-serif; font-size: 44px; font-weight: 800; line-height: 1; letter-spacing: -2px; -webkit-text-stroke: 2px #0f0d26; paint-order: stroke fill; text-shadow: 0 6px 16px rgb(0 0 0 / 35%); pointer-events: none; }
 .nv-empty { margin: 40px 0; text-align: center; }
 .nv-pages { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 44px; font-weight: 600; }
 .nv-pages a { padding: 12px 22px; color: #fff; background: #16123f; border-radius: 999px; }

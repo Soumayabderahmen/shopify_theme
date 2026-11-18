@@ -1,0 +1,13 @@
+{
+  "sections": {
+    "main": {
+      "type": "desktop-novita",
+      "settings": {
+        "mode": "under"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

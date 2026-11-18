@@ -2,7 +2,9 @@
   "sections": {
     "main": {
       "type": "desktop-novita",
-      "settings": {}
+      "settings": {
+        "mode": "new"
+      }
     }
   },
   "order": [

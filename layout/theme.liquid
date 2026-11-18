@@ -223,7 +223,7 @@
       # Ancienne grille (main-collection / main-search) : absente de collection.json et search.json (pages au nouveau design)
       assign old_grid = false
       if template.name == 'collection' or template.name == 'search'
-        if template.suffix != blank and template.suffix != 'novita'
+        if template.suffix != blank and template.suffix != 'novita' and template.suffix != 'top' and template.suffix != 'prezzi'
           assign old_grid = true
         endif
       endif
