@@ -2,7 +2,7 @@
   Marques de « Shop per brand » (accueil ordinateur : sections/desktop-home-shop.liquid ; accueil mobile :
   sections/mobile-home-shein.liquid) — Nom|recherche|collection(s)|photo, séparées par « ; ». Même liste que le panneau
   Categoria mobile (snippets/mobile-category-browser.liquid).
-  Après cette liste : chaque fournisseur (« Vendor » des produits, ex. une marque arrivée par Shopify Collective) qui n'y
+  Avant cette liste (en premier) : chaque fournisseur (« Vendor » des produits, ex. une marque arrivée par Shopify Collective) qui n'y
   est pas encore est ajouté tout seul, 5e partie « vendor » : page /collections/vendors?q=…&view=brand, photo de son
   premier produit (templates/collection.brand-count.liquid). « platinumshop », « PlatiNum »… (la boutique) sont ignorés ; un
   fournisseur sans produit visible est retiré par le script de la bande.
@@ -46,7 +46,7 @@ Lige|Lige||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8738fe98c5014
     assign bl_name = bl_entry | strip | split: '|' | first | strip | downcase
     assign bl_known = bl_known | append: bl_name | append: '|'
   endfor
-  assign bl_out = bl_static | strip
+  assign bl_auto = ''
   for bl_vendor in shop.vendors
     assign bl_key = bl_vendor | strip | downcase
     assign bl_start = bl_key | slice: 0, 8
@@ -59,7 +59,9 @@ Lige|Lige||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8738fe98c5014
     endif
     assign bl_known = bl_known | append: bl_key | append: '|'
     assign bl_handle = bl_vendor | handleize
-    assign bl_out = bl_out | append: ';' | append: bl_vendor | append: '|' | append: bl_vendor | append: '|' | append: bl_handle | append: '||vendor'
+    assign bl_auto = bl_auto | append: bl_vendor | append: '|' | append: bl_vendor | append: '|' | append: bl_handle | append: '||vendor;'
   endfor
+  # Marques ajoutées depuis le fournisseur EN PREMIER dans « Shop per brand », puis la liste ci-dessus.
+  assign bl_out = bl_auto | append: bl_static | strip
 -%}
 {{- bl_out -}}
