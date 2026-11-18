@@ -1277,6 +1277,8 @@
           {%- when 'menu' -%}
             {% comment %} START #nav-bar - in-header-menu {% endcomment %}
             {% if menu %}
+              {%- comment -%} html.has-nav-bar remplace html:has(#nav-bar) dans screen-rest.css (recalcul de toute la page) {%- endcomment -%}
+              <script>document.documentElement.classList.add('has-nav-bar');</script>
               <div id="nav-outer">
                 <nav
                   id="nav-bar"
@@ -1415,6 +1417,8 @@
     {%- endcapture -%}
 
     {%- if has_menu_bar and navbar_menu -%}
+      {%- comment -%} html.has-nav-bar remplace html:has(#nav-bar) dans screen-rest.css (recalcul de toute la page) {%- endcomment -%}
+      <script>document.documentElement.classList.add('has-nav-bar');</script>
       <nav
         id="nav-bar"
         aria-label="{{ 'general.accessibility.menu' | t }}"

@@ -657,8 +657,9 @@ checkAndAddClass(alignMiddleElements, 'align-center');
 checkAndAddClass(alignCenterElements, 'align-center-static');
 
 
-// .l4ft .content.box - adds 'has-content-box' class to the closest <li> of each '.l4ft .content.box' element if :has() selector is not supported
-if (!isHasSelectorSupported()) {
+// .l4ft .content.box - adds 'has-content-box' class to the closest <li> of each '.l4ft .content.box' element.
+// Toujours posée : la version :has(.content.box) a été retirée de screen-rest.css (recalcul de toute la page à chaque insertion).
+{
 	const list_featured_content_box = document.querySelectorAll('.l4ft .content.box');
 	for (const el of list_featured_content_box) {
 		let closestLi = el.closest('li');
@@ -667,6 +668,39 @@ if (!isHasSelectorSupported()) {
 		}
 	}
 }
+
+
+// .link-btn dont le seul enfant est masqué en ligne (style="display: none" / "display:none") : classe .lb-child-hidden,
+// qui masque le bouton (screen-rest.css). Remplace .link-btn:has(>[style*="display:none"]:only-child) : un [style] dans :has()
+// obligeait le navigateur à recalculer les styles de toute la page à chaque changement d'attribut style, n'importe où.
+(() => {
+	const hiddenRe = /display: ?none/;
+	const sync = lb => {
+		const kids = lb.children;
+		lb.classList.toggle('lb-child-hidden', kids.length === 1 && hiddenRe.test(kids[0].getAttribute('style') || ''));
+	};
+	document.querySelectorAll('.link-btn').forEach(sync);
+	const pending = new Set();
+	let queued = false;
+	const flush = () => { queued = false; pending.forEach(sync); pending.clear(); };
+	new MutationObserver(records => {
+		for (const r of records) {
+			const t = r.target;
+			if (r.type === 'attributes') {
+				const p = t.parentElement;
+				if (p && p.classList.contains('link-btn')) pending.add(p);
+				continue;
+			}
+			if (t.classList && t.classList.contains('link-btn')) pending.add(t);
+			for (const n of r.addedNodes) {
+				if (n.nodeType !== 1) continue;
+				if (n.classList.contains('link-btn')) pending.add(n);
+				if (n.firstElementChild) n.querySelectorAll('.link-btn').forEach(x => pending.add(x));
+			}
+		}
+		if (pending.size && !queued) { queued = true; queueMicrotask(flush); }
+	}).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['style'] });
+})();
 
 
 // Scrolls to a previously clicked "load more" item after page load, centering it and using manual scroll restoration
@@ -1841,10 +1875,9 @@ window.addEventListener('moduleFeaturedSlider', function (event) {
 			pauseOnMouseEnter: true
 		} : false;
 
-		if (!isHasSelectorSupported()) {
-			for (const em of el.querySelectorAll('figure')) {
-				if (em.querySelectorAll('picture').length > 1) em.classList.add('has-pics');
-			}
+		// Toujours posée : la version figure:has(picture ~ picture) a été retirée de screen-rest.css (recalcul de toute la page)
+		for (const em of el.querySelectorAll('figure')) {
+			if (em.querySelector('picture ~ picture')) em.classList.add('has-pics');
 		}
 
 		randomize(el);
@@ -2627,6 +2660,12 @@ window.addEventListener('listCollection', (event) => {
 			if (el.clientHeight < el.scrollHeight) {
 				el.classList.add('is-scrollable');
 			}
+
+			// Toujours posée : la version li:has(div.box) a été retirée de screen-rest.css (recalcul de toute la page)
+			el.querySelectorAll('div.box').forEach(em => {
+				const li = em.closest('li');
+				if (li) li.classList.add('has-div-box');
+			});
 
 			if (isHasSelectorSupported()) continue;
 

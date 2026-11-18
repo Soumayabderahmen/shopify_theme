@@ -435,7 +435,10 @@
     var content = document.getElementById('content');
     if (!content) { location.href = url.href; return; }
     // Page pas encore prête : contenu estompé tout de suite (comme la forme grise du mobile)
-    var waiting = setTimeout(function () { content.classList.add('dh-loading'); }, 120);
+    var waiting = setTimeout(function () {
+      content.classList.add('dh-loading');
+      document.documentElement.classList.add('dh-loading'); // curseur « en cours » (desktop-header.css)
+    }, 120);
     Promise.all([dclFetch(url), dclStyle()]).then(function (results) {
       var doc = new DOMParser().parseFromString(results[0], 'text/html');
       var fresh = doc.querySelector('[data-dcl]');
@@ -461,6 +464,7 @@
     }).then(function () {
       clearTimeout(waiting);
       content.classList.remove('dh-loading');
+      document.documentElement.classList.remove('dh-loading');
     });
   };
   document.addEventListener('click', function (event) {

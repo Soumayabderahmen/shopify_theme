@@ -170,7 +170,9 @@ h6, .h6, .l4cl.category h6, .l4cl .has-text h6, .l4cl .cols h6 { font-size: var(
 					html:not([dir="rtl"]) #nav > ul > li.text-end, html:not([dir="rtl"]) #nav-bar > ul > li.text-end { margin-left: auto; }
 					#nav > ul > li:last-child:not(.show-all), #nav-bar > ul > li:last-child:not(.show-all), #nav > ul > li[data-index="1"]:not(.show-all), #nav-bar > ul > li[data-index="1"]:not(.show-all) { padding-right: 1px; }
 				
-					html:not(:has(#nav-bar)) #nav > ul > li > a img { display: none; }
+					/* html.has-nav-bar : posée par un petit script juste avant <nav id="nav-bar"> (sections/header.liquid), au lieu de
+					   html:has(#nav-bar) qui faisait recalculer toute la page. « , #nav-bar » garde la spécificité d'origine (jamais vrai sur <html>). */
+					html:not(.has-nav-bar, #nav-bar) #nav > ul > li > a img { display: none; }
 					#nav > ul > li > a[class*="overlay-"], #nav-bar > ul > li > a[class*="overlay-"] { --custom_top_nav_fg: var(--product_label_bg); }
 				#nav > ul > li > a span + *:not(span), #nav-bar > ul > li > a span + *:not(span) { margin-left: 6px; }
 				#nav > ul > li.disabled > a:not(.toggle), #nav-bar > ul > li.disabled > a:not(.toggle), #nav > ul > li > a.disabled:not(.toggle), #nav-bar > ul > li > a.disabled:not(.toggle) { opacity: .6; cursor: default; pointer-events: none; }
@@ -190,7 +192,7 @@ h6, .h6, .l4cl.category h6, .l4cl .has-text h6, .l4cl .cols h6 { font-size: var(
 		#nav.no-bd:before, #nav-bar.no-bd:before { border-width: 0; }
 		#nav.no-wide:before, #nav-bar.no-wide:before { left: 0; right: 0; width: auto; margin-left: 0; margin-right: 0; background: none; }
 			#nav.no-wide:after, #nav-bar.no-wide:after { content: ""; display: block; position: absolute; left: 50%; right: auto; top: 0; bottom: 0; z-index: -2; width: var(--100vw); margin: 0 0 0 calc(0px - var(--100vw) * 0.5); background: var(--custom_top_nav_bg); }	
-			html:has(#nav-bar) #nav.no-wide:after { display: none; }
+			html:is(.has-nav-bar, #nav-bar) #nav.no-wide:after { display: none; }
 		#header-inner #nav-bar:not(.fixed), #header-inner #nav:not(.fixed) { 
 			--custom_top_nav_fg: var(--custom_top_main_fg); 
 			align-self: center; 
@@ -732,8 +734,8 @@ span.countdown { margin-left: 10px; }
 	
 		
 		#root .m6fr .media-flexible picture, #root .m6fr .media-flexible video, #root .m6fr .media-flexible img, #root .m6fr .media-flexible svg { border-radius: var(--b2p); }
-			#root .m6fr:not(.wide) figure:has(picture ~ picture) picture { border-radius: 0; }
-			#root .m6fr:not(.wide) figure:has(picture ~ picture) picture * { --b2p: 0px; }
+			/* Versions :has(picture ~ picture) retirées (« picture * » après :has() = recalcul de toute la page à chaque insertion) :
+			   custom.js pose désormais toujours .has-pics sur ces figures. */
 			#root .m6fr:not(.wide) figure.has-pics picture { border-radius: 0; }
 			#root .m6fr:not(.wide) figure.has-pics picture * { --b2p: 0px; }
 		#root .m6fr figure.text-end img { object-position: right center; }
@@ -1308,7 +1310,9 @@ a.square, button.square, input.square { --b2r: 0px; --btn_br: 0px; }
 	#root .link-btn a.circle i, #root button.circle i { display: flex; top: 0; height: var(--s); margin: 0; font-size: calc(var(--s) * 0.4680851064); line-height: var(--s); justify-content: center; align-items: center; }
 		#root .link-btn a.circle i[class*="icon-plus"], #root button.circle i[class*="icon-plus"] { font-size: calc(var(--s) * 0.4); }
 		#root .link-btn a.circle i[class*="icon-check"], #root button.circle i[class*="icon-check"] { font-size: calc(var(--s) * 0.3); }
-	.link-btn:has(>[style*="display: none"]:only-child), .link-btn:has(>[style*="display:none"]:only-child) { display: none; }.link-btn.single > * { min-width: 222px; }
+	/* Ancien .link-btn:has(>[style*="display:none"]:only-child) : un [style] dans :has() faisait recalculer toute la page
+	   à chaque changement d'attribut style, n'importe où. La classe est tenue à jour par custom.js (même spécificité). */
+	.link-btn.lb-child-hidden.lb-child-hidden { display: none; }.link-btn.single > * { min-width: 222px; }
 	.link-btn.single > .inline { min-width: 0; }
 	.link-btn.single > * + * { margin-top: 15px; }
 .link-btn.cols { margin-left: 0; }
@@ -1625,7 +1629,7 @@ table.size-l tr > * { padding-top: 14px; padding-bottom: 14px; }ul.text-center, 
 		
 	.l4cl a.s1tt { display: inline-block; }
 	.l4cl div.box { position: relative; z-index: 2; padding: 20px min(20px, var(--rpp)); border-radius: 0 0 var(--b2r) var(--b2r); background: var(--bg); color: var(--fg); font-weight: var(--main_fw); --bg: var(--sand); --fg: var(--primary_text); }
-		.l4cl li:has(div.box) figure, .l4cl li:has(div.box) img { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+		/* Version :has(div.box) retirée (coûteuse à chaque insertion) : la classe .has-div-box est désormais toujours posée par custom.js */
 		.l4cl li.has-div-box figure, .l4cl li.has-div-box img { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }	
 		.l4cl li > .cols > *:first-child { flex-shrink: 0; }
 		.l4cl li > .cols > *:first-child ~ * { flex-grow: 3; }
@@ -1771,8 +1775,11 @@ table.size-l tr > * { padding-top: 14px; padding-bottom: 14px; }ul.text-center, 
 	
 	
 	.m6as .l4cl.hr { --pdd: var(--d); }
-	.m6as > *:has(.l4cl.hr) { align-self: stretch; }
-	.m6as > *:has(.l4cl.hr) > * { flex-grow: 3; }
+	/* .m6as-hr posée en Liquid (section-image-with-banners) sur l'enfant qui contient .l4cl.hr — remplace *:has(.l4cl.hr) :
+	   un :has() sans sélecteur devant, suivi de « > * », faisait recalculer toute la page à chaque insertion dans le DOM.
+	   Classe doublée = même spécificité qu'avant. */
+	.m6as > .m6as-hr.m6as-hr { align-self: stretch; }
+	.m6as > .m6as-hr.m6as-hr > * { flex-grow: 3; }
 	.m6as .l4cl.hr { height: 100%; }
 	#root .m6as .l4cl.hr figure { top: 50%; transform: translateY(-50%); }
 	.m6as .l4cl.hr li { flex-direction: column; justify-content: center; }#root .l4cl.hr.inv li { padding-right: 0; padding-left: calc(var(--img_w) + 16px); }
@@ -1952,7 +1959,8 @@ table.size-l tr > * { padding-top: 14px; padding-bottom: 14px; }ul.text-center, 
 		.l4ft li > .content:not(.module-color-palette):before { background: var(--bg); }
 			.l4ft li > .content.box { padding: var(--pt) var(--pr) calc(var(--pt) - var(--main_mr) * 0.25) var(--pl); --fg: var(--primary_text); --bg: var(--sand); }
 			.l4ft li > .content > .link-btn:last-child { margin-bottom: 0; }
-		.l4ft li:has(.content.box) > .main > figure, .l4ft li:has(.content.box) > .main:before, .l4ft li:has(.content.box) > .main > figure * { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+		/* Version :has(.content.box) retirée (« figure * » après :has() = recalcul de toute la page à chaque insertion) :
+		   custom.js pose désormais toujours .has-content-box sur ces <li>. */
 		.l4ft li.has-content-box > .main > figure, .l4ft li.has-content-box > .main:before, .l4ft li.has-content-box > .main > figure * { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 	.l4ft figure { overflow: hidden; z-index: -2; }
 		

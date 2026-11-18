@@ -346,6 +346,7 @@
   var addProps = function (hero) {
     if (!PROPS[current] || !hero.parentNode) return;
     var items = PROPS[current]();
+    document.documentElement.classList.add('mhs-on'); // overflow-x: clip (mhh-seasons.css)
     var box = document.createElement('div');
     box.className = 'mhs-props';
     box.setAttribute('data-season', current);
@@ -475,8 +476,20 @@
   // Bannières ajoutées plus tard (onglets de l'accueil, pages ouvertes sans recharger)
   if (window.MutationObserver) {
     var pending = false;
-    new MutationObserver(function () {
-      if (pending) return;
+    // Seulement quand un élément (pas du texte, pas un <script>/<style>/<link>) est ajouté : les applis et le compte à
+    // rebours modifient le DOM en continu, et chaque passage relançait une recherche dans toute la page.
+    var useful = function (records) {
+      for (var i = 0; i < records.length; i += 1) {
+        var added = records[i].addedNodes;
+        for (var k = 0; k < added.length; k += 1) {
+          var node = added[k];
+          if (node.nodeType === 1 && !/^(SCRIPT|STYLE|LINK|META|NOSCRIPT|IFRAME|I|B|IMG|SOURCE)$/.test(node.nodeName)) return true;
+        }
+      }
+      return false;
+    };
+    new MutationObserver(function (records) {
+      if (pending || !useful(records)) return;
       pending = true;
       requestAnimationFrame(function () { pending = false; scan(); });
     }).observe(document.documentElement, { childList: true, subtree: true });

@@ -100,7 +100,8 @@
 
 /* Collection ouverte sans recharger (assets/desktop-header.js) : contenu estompé pendant l'attente */
 #content.dh-loading > .shopify-section:not(.shopify-section-footer) { opacity: .35; pointer-events: none; transition: opacity .2s; }
-html:has(#content.dh-loading), html:has(#content.dh-loading) * { cursor: progress; }
+/* html.dh-loading posée avec #content.dh-loading (desktop-header.js) : html:has(...) * faisait recalculer toute la page */
+html.dh-loading, html.dh-loading * { cursor: progress; }
 
 /* Accueil : la section commence juste sous l'en-tête (bannière du prototype v8, assets/desktop-home-shein.css) */
 .template-index #content { padding-top: 0; }

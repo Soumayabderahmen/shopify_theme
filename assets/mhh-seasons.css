@@ -519,8 +519,9 @@
   .mhs-props[data-season='autumn'] .mhs-prop--acc { right: -20px; bottom: -42px; width: 66px; }
 
   /* Ce qui dépasse de l'écran est coupé, sans barre de défilement horizontale */
-  html:has(.mhs-props),
-  html:has(.mhs-props) body { overflow-x: clip; }
+  /* html.mhs-on posée par mhh-seasons.js avec les vêtements (au lieu de html:has(.mhs-props) : recalcul de toute la page) */
+  html.mhs-on,
+  html.mhs-on body { overflow-x: clip; }
 
   @keyframes mhs-scarf {
     from { transform: rotate(-1.4deg); }

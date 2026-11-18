@@ -74,6 +74,14 @@
 .dhp-rest__part--b[aria-busy="true"] { height: 2300px; }
 .dhp-rest__part--c[aria-busy="true"] { height: 1900px; }
 @keyframes dhp-shimmer { from { background-position: 100% 50%; } to { background-position: 0 50%; } }
+/* Parties chargées et hors de l'écran : le navigateur saute leur rendu (styles, mise en page, peinture, animations).
+   Sans ça, la moindre animation visible (feuilles, mot géant, cartes) faisait repeindre ces ~5 000 px à chaque image :
+   ~45 ms par image, 20 images/s ; avec : ~10 ms. Hauteur d'attente = hauteur réelle mesurée (puis retenue : « auto »).
+   overflow-clip-margin : les flèches des rangées dépassent de quelques pixels sur les côtés, elles ne sont pas rognées. */
+.dhp-rest__part:not([aria-busy="true"]) { content-visibility: auto; overflow-clip-margin: 48px; }
+.dhp-rest__part--a:not([aria-busy="true"]) { contain-intrinsic-size: auto 1460px; }
+.dhp-rest__part--b:not([aria-busy="true"]) { contain-intrinsic-size: auto 1870px; }
+.dhp-rest__part--c:not([aria-busy="true"]) { contain-intrinsic-size: auto 1680px; }
 
 /* ---------- Titres de section, flèches, rangées qui défilent ---------- */
 .dhp-sec { margin-top: 44px; }
@@ -137,6 +145,10 @@
 
 /* ---------- Grande carte animée (comme shop.com) : texte à gauche, scènes de produits à droite ---------- */
 .dhp-hero { position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: center; min-height: 420px; margin-top: 14px; overflow: hidden; overflow: clip; background: radial-gradient(120% 140% at 85% 20%, #e9e6ff 0%, #f6f5ff 45%, #fff 75%); border-radius: 36px; box-shadow: 0 1px 2px rgb(22 18 63 / 5%), 0 30px 60px -36px rgb(22 18 63 / 35%); }
+/* Carte sortie de l'écran : rendu et animations sautés. Ses scènes animées étaient repeintes à chaque image même plus
+   bas dans la page (~40 ms par image vers les rangées produits). Rien ne change à l'écran : la carte coupe déjà ce qui
+   dépasse (overflow: clip ci-dessus). */
+.dhp-hero { content-visibility: auto; contain-intrinsic-size: auto 420px; }
 .dhp-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(110% 130% at 80% 15%, #3a1a5c 0%, #17122e 42%, #07060d 80%); opacity: 0; transition: opacity .9s ease; }
 .dhp-hero.is-bf::before { opacity: 1; }
 .dhp-hero__txt { position: relative; z-index: 1; grid-area: 1 / 1; padding: 56px 0 56px 64px; transition: opacity .6s ease, transform .7s cubic-bezier(.2, .8, .2, 1); }

@@ -20,6 +20,20 @@
   });
   var esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
   var sized = function (src, w) { return String(src).replace(/([?&])width=\d+/, '$1width=' + w); };
+  // Bloc visible à l'écran ? (IntersectionObserver, sans mesure) — les minuteries ne touchent plus au DOM des blocs hors
+  // de l'écran : chaque modification relançait un recalcul de style de la page entière pour rien.
+  var onScreen = (function () {
+    if (!('IntersectionObserver' in window)) return function () { return true; };
+    var seen = new WeakMap();
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { seen.set(entry.target, entry.isIntersecting); });
+    });
+    return function (el) {
+      if (!el) return false;
+      if (!seen.has(el)) { seen.set(el, true); io.observe(el); }
+      return seen.get(el);
+    };
+  })();
 
   // Pleine largeur : décalage du conteneur du thème et largeur sans la barre de défilement
   var setFullWidth = function () {
@@ -64,10 +78,15 @@
       var p = { d: left / 86400 | 0, h: left % 86400 / 3600 | 0, m: left % 3600 / 60 | 0, s: left % 60 };
       var boxes = '<span><b>' + p.d + '</b>' + esc(t.days) + '</span><span><b>' + pad(p.h) + '</b>' + esc(t.hours) + '</span><span><b>' + pad(p.m) + '</b>' + esc(t.minutes) + '</span><span><b>' + pad(p.s) + '</b>' + esc(t.seconds) + '</span>';
       var line = p.d + esc(t.dayShort) + ' ' + pad(p.h) + ':' + pad(p.m) + ':' + pad(p.s);
-      root.querySelectorAll('[data-bf-cd]').forEach(function (el) { el.innerHTML = el.getAttribute('data-bf-cd') === 'boxes' ? boxes : line; });
+      root.querySelectorAll('[data-bf-cd]').forEach(function (el) {
+        if (!first && !onScreen(el)) return;
+        el.innerHTML = el.getAttribute('data-bf-cd') === 'boxes' ? boxes : line;
+      });
     };
+    var first = true;
     tick();
-    setInterval(tick, 1000);
+    first = false;
+    setInterval(function () { if (!document.hidden) tick(); }, 1000);
     // Barre du haut (snippets/desktop-header.liquid) : sur l'accueil, la remise et le nombre d'offres comme le prototype
     var tbar = document.querySelector('[data-dh-tbar]');
     if (tbar) {
@@ -197,7 +216,7 @@
         dots.forEach(function (b) { b.classList.toggle('on', Number(b.getAttribute('data-di')) === s.di); });
         preload(scenes[(i + 1) % scenes.length]);
       };
-      var run = function () { clearInterval(timer); if (!still) timer = setInterval(function () { if (!document.hidden) show((cur + 1) % scenes.length); }, STEP); };
+      var run = function () { clearInterval(timer); if (!still) timer = setInterval(function () { if (!document.hidden && onScreen(art)) show((cur + 1) % scenes.length); }, STEP); };
       dots.forEach(function (b) {
         b.addEventListener('click', function () {
           for (var k = 1; k <= scenes.length; k++) { var j = (cur + k) % scenes.length; if (scenes[j].di === Number(b.getAttribute('data-di'))) { show(j); break; } }
@@ -505,7 +524,7 @@
     window.addEventListener('resize', function () { if (!row.classList.contains('is-sliding')) drawRow(); });
     var runMarq = function () {
       clearInterval(marqTimer);
-      if (!still) marqTimer = setInterval(function () { if (!document.hidden && !marqHover) showDept(current + 1); }, 5300);
+      if (!still) marqTimer = setInterval(function () { if (!document.hidden && !marqHover && onScreen(marq)) showDept(current + 1); }, 5300);
     };
     // Souris sur le mot géant ou sur ses produits : le rayon ne change pas (reprise 5,3 s après la sortie)
     var marqHover = false;
@@ -636,7 +655,7 @@
     coll.addEventListener('mouseleave', function () { over = false; });
     if (!still && pages > 1) {
       setTimeout(function () {
-        setInterval(function () { if (!over && !document.hidden) go(page + 1); }, 3500);
+        setInterval(function () { if (!over && !document.hidden && onScreen(coll)) go(page + 1); }, 3500);
       }, index * 600);
     }
   });
@@ -670,7 +689,7 @@
       if (!still && pics.length > 1) {
         new Image().src = pics[1];
         setInterval(function () {
-          if (document.hidden) return;
+          if (document.hidden || !onScreen(chip)) return;
           n = (n + 1) % pics.length;
           chip.classList.add('is-out');
           setTimeout(function () {
@@ -749,7 +768,7 @@
     });
     if (!still) {
       setInterval(function () {
-        if (document.hidden || busy || Date.now() - lastAction < 4400) return;
+        if (document.hidden || busy || Date.now() - lastAction < 4400 || !onScreen(grid)) return;
         if (grid.matches(':hover') || edArrows.matches(':hover') || edDotsBox.matches(':hover')) return;
         lastAction = Date.now();
         showPage(edPage + 1);
@@ -893,6 +912,9 @@
       var words = lines[gap.line];
       var box = heading.getBoundingClientRect();
       var space = parseFloat(getComputedStyle(heading).fontSize) * 0.26;
+      // Toutes les mesures avant les écritures : sinon le navigateur recalcule la page entière entre les deux
+      var lineBox = words[0].getBoundingClientRect();
+      var y = lineBox.top - box.top + lineBox.height / 2;
       var x;
       if (gap.at < words.length) {
         x = words[gap.at].getBoundingClientRect().left - box.left - space / 2 + room / 2;
@@ -901,8 +923,6 @@
         var last = words[words.length - 1].getBoundingClientRect();
         x = last.right - box.left + space / 2 + room / 2;
       }
-      var lineBox = words[0].getBoundingClientRect();
-      var y = lineBox.top - box.top + lineBox.height / 2;
       newObj.style.transform = 'translate(' + Math.round(x - size / 2) + 'px, ' + Math.round(y - size / 2) + 'px)';
     };
     var objs = [];
@@ -936,7 +956,7 @@
         });
       };
       next();
-      if (!still) setInterval(function () { if (!document.hidden && objs.length) showObj(); }, 7000);
+      if (!still) setInterval(function () { if (!document.hidden && objs.length && onScreen(heading)) showObj(); }, 7000);
     };
     var started = false;
     var start = function () {
