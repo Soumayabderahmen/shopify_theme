@@ -491,13 +491,20 @@
                 assign mhb_query = 'title:"' | append: mhb_parts[1] | append: '"' | url_encode
                 assign mhb_url = routes.search_url | append: '?q=' | append: mhb_query | append: '&type=product&view=brand'
                 assign mhb_image = blank
+                # Marque ajoutée toute seule depuis le fournisseur des produits (snippets/brand-list.liquid) : sa page
+                # fournisseur ; photo de son premier produit posée par le script plus bas.
+                assign mhb_vendor = false
+                if mhb_parts[4] == 'vendor'
+                  assign mhb_vendor = true
+                  assign mhb_url = mhb_parts[0] | url_for_vendor | append: '&view=brand'
+                endif
                 if mhb_collection != blank
                   assign mhb_url = mhb_collection.url | append: '?view=brand'
                   assign mhb_image = mhb_collection.featured_image | default: mhb_collection.image
                 endif
                 assign mhb_color = forloop.index0 | modulo: mhb_colors.size
               -%}
-              <a class="mhb__tile" href="{{ mhb_url }}" style="background: {{ mhb_colors[mhb_color] }}">
+              <a class="mhb__tile" href="{{ mhb_url }}" style="background: {{ mhb_colors[mhb_color] }}"{% if mhb_vendor and mhb_image == blank %} data-brand-photo="{{ mhb_parts[0] | url_for_vendor | append: '&view=brand-count' }}"{% endif %}>
                 {%- if mhb_image != blank -%}
                   <img src="{{ mhb_image | image_url: width: 240 }}" alt="" loading="lazy" decoding="async" width="120" height="120">
                 {%- elsif mhb_parts[3] != blank -%}
@@ -518,6 +525,21 @@
               var rail = document.currentScript.previousElementSibling;
               var load = function () {
                 rail.querySelectorAll('img[loading="lazy"]').forEach(function (img) { img.loading = 'eager'; });
+                // Marques ajoutées depuis le fournisseur : photo de leur premier produit (JSON de collection.brand-count).
+                rail.querySelectorAll('[data-brand-photo]').forEach(function (tile) {
+                  fetch(tile.getAttribute('data-brand-photo')).then(function (r) { return r.json(); }).then(function (data) {
+                    // Fournisseur sans produit visible (brouillons, épuisés masqués) : pas de tuile vide.
+                    if (!data.count) { tile.remove(); return; }
+                    if (!data.img) return;
+                    var img = document.createElement('img');
+                    img.src = data.img.replace(/width=\d+/, 'width=240');
+                    img.alt = '';
+                    img.width = 120;
+                    img.height = 120;
+                    img.decoding = 'async';
+                    tile.insertBefore(img, tile.firstChild);
+                  }).catch(function () {});
+                });
               };
               if (!('IntersectionObserver' in window)) { load(); return; }
               var io = new IntersectionObserver(function (entries) {

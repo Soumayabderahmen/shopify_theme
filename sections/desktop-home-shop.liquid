@@ -541,13 +541,20 @@
             assign brand_title_query = 'title:"' | append: brand_parts[1] | append: '"' | url_encode
             assign brand_url = routes.search_url | append: '?q=' | append: brand_title_query | append: '&type=product&view=brand'
             assign brand_image = blank
+            # Marque ajoutée toute seule depuis le fournisseur des produits (snippets/brand-list.liquid) : sa page
+            # fournisseur ; photo de son premier produit posée par le script après la liste.
+            assign brand_vendor = false
+            if brand_parts[4] == 'vendor'
+              assign brand_vendor = true
+              assign brand_url = brand_label | url_for_vendor | append: '&view=brand'
+            endif
             if brand_collection != blank
               assign brand_url = brand_collection.url | append: '?view=brand'
               assign brand_image = brand_collection.featured_image | default: brand_collection.image
             endif
             assign brand_color_index = forloop.index0 | modulo: brand_colors.size
           -%}
-          <a class="dhp-brand" href="{{ brand_url }}" style="background: {{ brand_colors[brand_color_index] }}">
+          <a class="dhp-brand" href="{{ brand_url }}" style="background: {{ brand_colors[brand_color_index] }}"{% if brand_vendor and brand_image == blank %} data-brand-photo="{{ brand_label | url_for_vendor | append: '&view=brand-count' }}"{% endif %}>
             {%- if brand_image != blank -%}
               <img src="{{ brand_image | image_url: width: 300 }}" alt="" loading="lazy" width="150" height="150">
             {%- elsif brand_parts[3] != blank -%}
@@ -558,6 +565,7 @@
         {%- endfor -%}
         <button class="dhp-brand dhp-brand--more" type="button" aria-haspopup="dialog" data-dhp-brands-open><strong>{{ 'mobile.explore.see_more_brands' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></strong></button>
       </div>
+      {%- comment -%} Marques ajoutées depuis le fournisseur ([data-brand-photo]) : photo de leur premier produit posée par assets/desktop-home-shop.js (brandPhotos). {%- endcomment -%}
 
       {%- comment -%}
         « Vedi altri » : fenêtre de toutes les marques, comme « Tutti i brand » du mobile (même liste assets/mobile-brands.json,

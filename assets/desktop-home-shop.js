@@ -1082,6 +1082,40 @@
   // ses rangées, animations et cartes sont lancées comme avant
   // 3 morceaux demandés en même temps par le petit script de la section (window.dhpMore, dès l'arrivée de la page) :
   // chacun est inséré dès qu'il arrive, puis ses rangées, animations et cartes sont lancées
+  // « Shop per brand » : marques ajoutées toutes seules depuis le fournisseur des produits (snippets/brand-list.liquid,
+  // tuiles [data-brand-photo]) : photo de leur premier produit (JSON de templates/collection.brand-count.liquid),
+  // demandée quand la bande approche ; fournisseur sans produit visible : tuile retirée.
+  var brandPhotos = function (scope) {
+    var tiles = scope.querySelectorAll('[data-brand-photo]');
+    if (!tiles.length) return;
+    var rail = tiles[0].parentNode;
+    var load = function () {
+      tiles.forEach(function (tile) {
+        fetch(tile.getAttribute('data-brand-photo'), { credentials: 'same-origin' })
+          .then(function (response) { return response.json(); })
+          .then(function (data) {
+            if (!data.count) { tile.remove(); return; }
+            if (!data.img) return;
+            var img = document.createElement('img');
+            img.src = data.img.replace(/width=\d+/, 'width=300');
+            img.alt = '';
+            img.width = 150;
+            img.height = 150;
+            img.decoding = 'async';
+            tile.insertBefore(img, tile.firstChild);
+          })
+          .catch(function () {});
+      });
+    };
+    if (!('IntersectionObserver' in window)) { load(); return; }
+    var io = new IntersectionObserver(function (entries) {
+      if (!entries.some(function (entry) { return entry.isIntersecting; })) return;
+      io.disconnect();
+      load();
+    }, { rootMargin: '900px 0px' });
+    io.observe(rail);
+  };
+  brandPhotos(root);
   root.querySelectorAll('[data-dhp-more-part]').forEach(function (box) {
     var key = box.getAttribute('data-dhp-more-part');
     var request = window.dhpMore && window.dhpMore[key];
@@ -1099,6 +1133,7 @@
         decorate(box);
         initArrows();
         initMore();
+        brandPhotos(box);
       })
       .catch(function (error) {
         box.removeAttribute('aria-busy');

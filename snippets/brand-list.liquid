@@ -2,7 +2,12 @@
   Marques de « Shop per brand » (accueil ordinateur : sections/desktop-home-shop.liquid ; accueil mobile :
   sections/mobile-home-shein.liquid) — Nom|recherche|collection(s)|photo, séparées par « ; ». Même liste que le panneau
   Categoria mobile (snippets/mobile-category-browser.liquid).
+  Après cette liste : chaque fournisseur (« Vendor » des produits, ex. une marque arrivée par Shopify Collective) qui n'y
+  est pas encore est ajouté tout seul, 5e partie « vendor » : page /collections/vendors?q=…&view=brand, photo de son
+  premier produit (templates/collection.brand-count.liquid). « platinumshop », « PlatiNum »… (la boutique) sont ignorés ; un
+  fournisseur sans produit visible est retiré par le script de la bande.
 {%- endcomment -%}
+{%- capture bl_static -%}
 Camden Rimini|Camden Rimini|camden-rimini|https://cdn.shopify.com/s/files/1/0942/1570/0821/files/QlrZxGJStJ5mI0UukLMbQNVZeaFYv_001.jpg?v=1793983817;
 Amii|Amii|amii-clothing|https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S09b494a0906f4a7ba642c9568d5bf276S.webp?v=1794798132;
 Toyouth|Toyouth|toyou|https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S6a1c8bc6a5e545898209e7547030a0d6E.webp?v=1794967754;
@@ -33,3 +38,28 @@ Xtep|Xtep||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sfb6b6f82cd214
 Liyke|Liyke||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/Sb448ffb35ef64938aaa2fcd0f7f3521dK.webp?v=1778891350;
 Tous|Tous||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/E84fa3a6652534ff8a638cd4c4023f5d19.webp?v=1786930592;
 Lige|Lige||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8738fe98c50142dd8c1dd35ab4d74fe9u.webp?v=1779602758
+{%- endcapture -%}
+{%- liquid
+  assign bl_entries = bl_static | split: ';'
+  assign bl_known = '|'
+  for bl_entry in bl_entries
+    assign bl_name = bl_entry | strip | split: '|' | first | strip | downcase
+    assign bl_known = bl_known | append: bl_name | append: '|'
+  endfor
+  assign bl_out = bl_static | strip
+  for bl_vendor in shop.vendors
+    assign bl_key = bl_vendor | strip | downcase
+    assign bl_start = bl_key | slice: 0, 8
+    if bl_key == blank or bl_start == 'platinum' or bl_vendor contains '|' or bl_vendor contains ';'
+      continue
+    endif
+    assign bl_probe = '|' | append: bl_key | append: '|'
+    if bl_known contains bl_probe
+      continue
+    endif
+    assign bl_known = bl_known | append: bl_key | append: '|'
+    assign bl_handle = bl_vendor | handleize
+    assign bl_out = bl_out | append: ';' | append: bl_vendor | append: '|' | append: bl_vendor | append: '|' | append: bl_handle | append: '||vendor'
+  endfor
+-%}
+{{- bl_out -}}
