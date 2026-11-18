@@ -395,9 +395,14 @@ html.dhp-modal-open { overflow: hidden; }
 .dhp-new__obj.is-in img { scale: 1; transition: scale .3s cubic-bezier(.16, 1, .3, 1); animation: dhp-marq-spin 6s ease-in-out .3s infinite; }
 .dhp-new__view { overflow: hidden; margin: 0 -16px; padding: 4px 16px 24px; -webkit-mask: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 16px), transparent); mask: linear-gradient(90deg, transparent, #000 16px, #000 calc(100% - 16px), transparent); }
 .dhp-new__track { display: flex; gap: 10px; width: max-content; }
-.dhp-new__track.is-drifting { animation: dhp-new-drift var(--drift, 60s) linear infinite; }
-.dhp-new__view:hover .dhp-new__track, .dhp-new__view:focus-within .dhp-new__track { animation-play-state: paused; }
-@keyframes dhp-new-drift { to { transform: translateX(calc(-50% - 5px)); } }
+/* Défilement piloté par assets/desktop-home-shop.js ; flèches rondes blanches de chaque côté, au milieu des cartes */
+.dhp-new__track { will-change: transform; }
+.dhp-new__rail { position: relative; }
+#root .dhp .dhp-new__arw { position: absolute; top: calc(50% - 10px); z-index: 3; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; color: #0f0d26; background: #fff; border: .8px solid rgb(5 41 77 / 10%); border-radius: 50%; box-shadow: 0 4px 24px rgb(0 0 0 / 16%); transform: translateY(-50%); cursor: pointer; transition: transform .2s, background-color .2s; }
+#root .dhp .dhp-new__arw:hover { background: #f2f4f5; transform: translateY(-50%) scale(1.08); }
+#root .dhp .dhp-new__arw svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.dhp-new__arw--prev { left: -8px; }
+.dhp-new__arw--next { right: -8px; }
 #root .dhp .dhp-new__card { position: relative; flex: 0 0 352px; height: 446px; overflow: hidden; color: #fff; background: #eceef1; border-radius: 28px; isolation: isolate; }
 .dhp-new__card::before, .dhp-new__card::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
 .dhp-new__card::before { background: linear-gradient(rgb(0 0 0 / 16%) 0%, rgb(0 0 0 / 0%) 32%); }
@@ -417,8 +422,6 @@ html.dhp-modal-open { overflow: hidden; }
 .dhp-new__thumbs span:nth-child(3) { transform: rotate(8deg) translateY(4px); }
 .dhp-new__thumbs img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
 @media (prefers-reduced-motion: reduce) {
-  .dhp-new__track.is-drifting { animation: none; }
-  .dhp-new__view { overflow-x: auto; }
   .dhp-new__obj.is-in img { animation: none; }
 }
 

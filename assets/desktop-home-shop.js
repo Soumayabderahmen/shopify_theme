@@ -802,9 +802,52 @@
         copy.setAttribute('tabindex', '-1');
         newTrack.appendChild(copy);
       });
-      var half = newTrack.scrollWidth / 2;
-      newTrack.style.setProperty('--drift', Math.max(20, Math.round(half / 12)) + 's');
-      if (!still) newTrack.classList.add('is-drifting');
+      // Défilement continu à 12 px/s (comme shop.com) piloté ici : la rangée est doublée, le décalage revient au début
+      // après une moitié. Pause au survol de la rangée et des flèches, et quand l'onglet est caché. Flèches : une carte de
+      // plus ou de moins en 0,45 s, puis le défilement reprend.
+      var half = newTrack.scrollWidth / 2 + 5;
+      var offset = 0;
+      var jump = null;
+      var hovering = false;
+      var last = 0;
+      var rail = novita.querySelector('.dhp-new__rail') || newTrack.parentElement;
+      rail.addEventListener('mouseenter', function () { hovering = true; });
+      rail.addEventListener('mouseleave', function () { hovering = false; });
+      rail.addEventListener('focusin', function () { hovering = true; });
+      rail.addEventListener('focusout', function () { hovering = false; });
+      var paint = function () {
+        var x = ((offset % half) + half) % half;
+        newTrack.style.transform = 'translate3d(' + (-x).toFixed(1) + 'px, 0, 0)';
+      };
+      var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+      var tick = function (now) {
+        // Temps écoulé réel (même si le navigateur dessine peu d'images par seconde) ; plafonné après un onglet en pause
+        var dt = last ? Math.min(250, now - last) : 0;
+        last = now;
+        if (jump) {
+          var t = Math.min(1, (now - jump.start) / 450);
+          offset = jump.from + (jump.to - jump.from) * ease(t);
+          if (t >= 1) jump = null;
+        } else if (!still && !hovering && !document.hidden) {
+          offset += dt * 0.012;
+        }
+        paint();
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      var cardStep = function () {
+        var card = newTrack.children[0];
+        return card ? card.getBoundingClientRect().width + 10 : 362;
+      };
+      novita.querySelectorAll('[data-dhp-new-step]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var step = Number(button.getAttribute('data-dhp-new-step')) * cardStep();
+          // Prochaine carte alignée sur le bord gauche de la rangée
+          var base = jump ? jump.to : offset;
+          var target = step > 0 ? Math.floor(base / cardStep() + 1e-3) * cardStep() + step : Math.ceil(base / cardStep() - 1e-3) * cardStep() + step;
+          jump = { from: offset, to: target, start: performance.now() };
+        });
+      });
     };
     // ---------- Titre animé comme shop.com (relevé sur le site) : chaque mot est séparé ; l'objet (un dernier arrivé
     // détouré) se glisse dans un espace entre deux mots, les mots qui suivent s'écartent pour lui faire de la place, il

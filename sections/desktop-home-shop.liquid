@@ -481,6 +481,7 @@
       data-i18n-count="{{ 'desktop_home_shop.new_card_count' | t: count: '__N__' | escape }}"
       data-i18n-many="{{ 'desktop_home_shop.new_card_count_many' | t: count: '__N__' | escape }}">
       <h2 class="dhp-new__hd">{{ 'desktop_home_shop.new_title_html' | t }}<span class="dhp-new__obj" data-dhp-new-obj aria-hidden="true"></span></h2>
+      <div class="dhp-new__rail">
       <div class="dhp-new__view">
         <div class="dhp-new__track" data-dhp-new-track>
           {%- for dept_handle in dept_handles -%}
@@ -494,6 +495,9 @@
             </a>
           {%- endfor -%}
         </div>
+      </div>
+        <button class="dhp-new__arw dhp-new__arw--prev" type="button" data-dhp-new-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+        <button class="dhp-new__arw dhp-new__arw--next" type="button" data-dhp-new-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
       </div>
     </section>
 
