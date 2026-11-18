@@ -356,17 +356,46 @@
         Lige|Lige||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8738fe98c50142dd8c1dd35ab4d74fe9u.webp?v=1779602758
       {%- endcapture -%}
       {%- assign brand_entries = brand_list | split: ';' -%}
+      {%- comment -%}
+        Nouvelles marques ajoutées toutes seules depuis le fournisseur des produits (entrées « …|vendor » de
+        snippets/brand-list.liquid) : en premier dans la rangée, comme « Shop per brand » de l'accueil ; photo de leur premier
+        produit posée par assets/mobile-temu-header.js (data-brand-photo), tuile retirée si la marque n'a aucun produit.
+      {%- endcomment -%}
+      {%- capture explore_vendor_list -%}{%- render 'brand-list' -%}{%- endcapture -%}
+      {%- assign explore_vendor_entries = explore_vendor_list | split: ';' -%}
+      {%- assign explore_vendor_names = '|' -%}
+      {%- for explore_vendor_entry in explore_vendor_entries -%}
+        {%- assign explore_vendor_parts = explore_vendor_entry | strip | split: '|' -%}
+        {%- if explore_vendor_parts[4] == 'vendor' -%}
+          {%- assign explore_vendor_key = explore_vendor_parts[0] | downcase -%}
+          {%- assign explore_vendor_names = explore_vendor_names | append: explore_vendor_key | append: '|' -%}
+        {%- endif -%}
+      {%- endfor -%}
       <section class="mobile-explore-section">
         <div class="mobile-explore-section__title">
           <h2>{{ 'mobile.explore.brands' | t }}</h2>
           <button type="button" class="mobile-explore-section__more" aria-haspopup="dialog" data-mobile-brands-open>{{ 'mobile.explore.see_more_brands' | t }}</button>
         </div>
         <div class="mobile-explore-brands" aria-label="{{ 'mobile.explore.scroll_brands' | t }}">
+          {%- for explore_vendor_entry in explore_vendor_entries -%}
+            {%- assign explore_vendor_parts = explore_vendor_entry | strip | split: '|' -%}
+            {%- if explore_vendor_parts[4] == 'vendor' -%}
+              {%- assign explore_vendor_url = explore_vendor_parts[0] | url_for_vendor -%}
+              <a href="{{ explore_vendor_url | append: '&view=brand' }}" class="mobile-explore-brand" data-brand-photo="{{ explore_vendor_url | append: '&view=brand-count' }}">
+                <strong>{{ explore_vendor_parts[0] | escape }}</strong>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
           {%- for brand_entry in brand_entries -%}
             {%- liquid
                 assign brand_parts = brand_entry | strip | split: '|'
                 assign brand_label = brand_parts[0]
                 assign brand_query = brand_parts[1]
+                # Déjà en tête comme nouvelle marque du fournisseur : pas en double
+                assign brand_probe = brand_label | strip | downcase | prepend: '|' | append: '|'
+                if brand_label == blank or explore_vendor_names contains brand_probe
+                  continue
+                endif
                 assign brand_collection = blank
                 assign brand_collection_handles = brand_parts[2] | split: ','
                 for brand_collection_handle in brand_collection_handles

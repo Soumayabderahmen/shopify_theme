@@ -1628,6 +1628,29 @@ function initMobileTemuHeader() {
     var closeButton = exploreDrawer.querySelector('.mobile-explore-drawer__close');
     if (closeButton) closeButton.focus();
     renderRecentExploreProducts();
+    fillExploreBrandPhotos();
+  };
+  // Rangée des marques : nouvelles marques du fournisseur (snippets/mobile-category-browser.liquid, data-brand-photo) :
+  // photo de leur premier produit à la première ouverture ; marque sans produit visible : tuile retirée.
+  var fillExploreBrandPhotos = function () {
+    if (!exploreDrawer) return;
+    exploreDrawer.querySelectorAll('.mobile-explore-brands [data-brand-photo]').forEach(function (tile) {
+      var url = tile.getAttribute('data-brand-photo');
+      tile.removeAttribute('data-brand-photo');
+      fetch(url, { credentials: 'same-origin' })
+        .then(function (response) { return response.json(); })
+        .then(function (info) {
+          if (!info.count) { tile.remove(); return; }
+          if (!info.img || tile.querySelector('img')) return;
+          var image = document.createElement('img');
+          image.src = info.img.replace(/width=\d+/, 'width=240&height=148&crop=center');
+          image.alt = '';
+          image.width = 120;
+          image.height = 74;
+          tile.insertBefore(image, tile.firstChild);
+        })
+        .catch(function () { tile.setAttribute('data-brand-photo', url); });
+    });
   };
   // « Shop per brand » : 20 marques dans la rangée ; « Voir plus » ouvre la fenêtre de toutes les marques
   // (assets/mobile-brands.json, relevé réel du catalogue), remplie à sa première ouverture.
