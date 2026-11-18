@@ -290,6 +290,19 @@ body:has(.pdp-m.pl-on > .pdp-m__buy:not(.is-hidden)) #root .pdp-m.pl-on .pl-col-
   min-width: 0 !important;
 }
 
+/* Tablette portrait (761–900 px) : colonne galerie ~340 px, 5 libellés côte à côte se chevauchaient — 3 par ligne */
+@media (max-width: 900px) {
+  #root .pdp-m.pl-on .pl-col--gal .pdp-m__prot {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 14px;
+  }
+
+  #root .pdp-m.pl-on .pl-col--gal .pdp-m__prot > button:nth-child(3n + 1) {
+    padding-left: 0 !important;
+    border-left: 0;
+  }
+}
+
 /* ---------- Colonne du milieu : pas d'encadré, sections séparées par un trait fin ---------- */
 #root .pdp-m.pl-on .pl-col--info > .pdp-m__vant {
   margin: 0 !important;

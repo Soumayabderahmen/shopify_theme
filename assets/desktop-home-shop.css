@@ -517,6 +517,20 @@ html.dhp-modal-open { overflow: hidden; }
   .dhp .dhp-bf__rail { grid-auto-columns: calc((100% - 48px) / 4); }
   .dhp .dhp-ed__hd { font-size: 46px; }
   .dhp-pay__r { display: none; }
+  /* Tablette paysage (~1024 px) : flèches du mot géant moins décalées vers l'extérieur — à -22 px elles sortaient de
+     l'écran de 6 px et étaient rognées */
+  #root .dhp .dhp-marq__arws .dhp-arw { margin: 0 -12px; }
+}
+/* Tablette portrait (761–900 px) : la colonne de texte de la grande carte ne fait plus que ~300 px — titre plus petit
+   (« Platinumshop » se coupait en plein mot), marge gauche réduite, boutons sur une ligne, photos flottantes un peu
+   plus petites pour ne plus passer sur le titre */
+@media (max-width: 900px) {
+  .dhp-hero__txt { padding: 44px 0 44px 32px; }
+  .dhp-hero h1 { font-size: 38px; letter-spacing: -1.4px; }
+  .dhp-hero__txt p { margin: 14px 0 20px; font-size: 15px; }
+  .dhp-hero__cta { gap: 8px; }
+  .dhp-hero .dhp-btn { padding: 0 16px; font-size: 14px; white-space: nowrap; }
+  .dhp-hero__art { transform: scale(.86); transform-origin: 70% 50%; }
 }
 @media (prefers-reduced-motion: reduce) {
   .dhp *, .dhp *::before, .dhp *::after { animation: none !important; transition: none !important; }
