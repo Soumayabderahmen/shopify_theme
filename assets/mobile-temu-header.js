@@ -1669,6 +1669,42 @@ function initMobileTemuHeader() {
       })
       .then(function (data) {
         var fragment = document.createDocumentFragment();
+        // Marques ajoutées depuis le fournisseur des produits (snippets/brand-vendors-json.liquid) : en premier, photo
+        // de leur premier produit ; fournisseur sans produit visible : retiré.
+        var vendors = [];
+        try { vendors = JSON.parse((brandsSheet.querySelector('[data-vendor-brands]') || {}).textContent || '[]'); } catch (error) { vendors = []; }
+        // (une marque déjà dans la liste du catalogue n'y reste pas en double : elle passe en tête, vers sa page fournisseur)
+        var isVendor = {};
+        vendors.forEach(function (v) { isVendor[String(v[0]).toLowerCase()] = true; });
+        data.brands = data.brands.filter(function (brand) { return !isVendor[String(brand[0]).toLowerCase()]; });
+        var countEl = brandsSheet.querySelector('[data-mobile-brands-count]');
+        vendors.forEach(function (v) {
+          var link = document.createElement('a');
+          link.className = 'mobile-explore-brand';
+          link.setAttribute('data-brand-name', normalizeBrandName(v[0]));
+          link.href = v[1];
+          var label = document.createElement('strong');
+          label.textContent = v[0];
+          link.appendChild(label);
+          fragment.appendChild(link);
+          fetch(v[2], { credentials: 'same-origin' })
+            .then(function (response) { return response.json(); })
+            .then(function (info) {
+              if (!info.count) {
+                link.remove();
+                if (countEl) countEl.textContent = brandsGrid.querySelectorAll('.mobile-explore-brand').length;
+                return;
+              }
+              if (!info.img) return;
+              var image = document.createElement('img');
+              image.src = info.img.replace(/width=\d+/, 'width=240&height=148&crop=center');
+              image.alt = '';
+              image.width = 120;
+              image.height = 74;
+              link.insertBefore(image, link.firstChild);
+            })
+            .catch(function () {});
+        });
         data.brands.forEach(function (brand) {
           var known = shown[String(brand[0]).toLowerCase()];
           var link = document.createElement('a');
@@ -1695,7 +1731,7 @@ function initMobileTemuHeader() {
         });
         brandsGrid.appendChild(fragment);
         var count = brandsSheet.querySelector('[data-mobile-brands-count]');
-        if (count) count.textContent = data.brands.length;
+        if (count) count.textContent = brandsGrid.querySelectorAll('.mobile-explore-brand').length;
         filterBrandsSheet();
       })
       .catch(function (error) {

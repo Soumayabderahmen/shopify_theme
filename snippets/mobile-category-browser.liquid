@@ -593,6 +593,7 @@
       data-mobile-brands-sheet
       data-brands-url="{{ 'mobile-brands.json' | asset_url }}"
     >
+      {%- render 'brand-vendors-json' -%}
       <div class="mobile-brands-sheet__head">
         <h2 id="mobile-brands-sheet-title">{{ 'mobile.explore.all_brands' | t }} <span data-mobile-brands-count></span></h2>
         <button type="button" class="mobile-brands-sheet__close" aria-label="{{ 'mobile.common.close' | t }}" data-mobile-brands-close>

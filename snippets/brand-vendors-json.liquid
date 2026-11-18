@@ -1,0 +1,19 @@
+{%- comment -%}
+  Marques ajoutées toutes seules depuis le fournisseur des produits (entrées « …|vendor » de snippets/brand-list.liquid),
+  pour la fenêtre « Vedi altri » / « Tutti i brand » (assets/desktop-home-shop.js, assets/mobile-temu-header.js) : affichées
+  en premier. Chaque marque : [nom, page marque, JSON photo + nombre de produits (templates/collection.brand-count.liquid)].
+{%- endcomment -%}
+{%- capture bv_list -%}{%- render 'brand-list' -%}{%- endcapture -%}
+{%- assign bv_entries = bv_list | split: ';' -%}
+<script type="application/json" data-vendor-brands>[
+  {%- assign bv_first = true -%}
+  {%- for bv_entry in bv_entries -%}
+    {%- assign bv_parts = bv_entry | strip | split: '|' -%}
+    {%- if bv_parts[4] == 'vendor' -%}
+      {%- assign bv_url = bv_parts[0] | url_for_vendor -%}
+      {%- unless bv_first -%},{%- endunless -%}
+      [{{ bv_parts[0] | json }},{{ bv_url | append: '&view=brand' | json }},{{ bv_url | append: '&view=brand-count' | json }}]
+      {%- assign bv_first = false -%}
+    {%- endif -%}
+  {%- endfor -%}
+]</script>

@@ -573,6 +573,7 @@
         rangée, recherche, nombre de marques.
       {%- endcomment -%}
       <dialog class="dhp-bm" aria-labelledby="dhp-bm-title" data-dhp-brands data-brands-url="{{ 'mobile-brands.json' | asset_url }}">
+        {%- render 'brand-vendors-json' -%}
         <div class="dhp-bm__head">
           <h2 id="dhp-bm-title">{{ 'mobile.explore.all_brands' | t }} <span class="dhp-bm__count" data-dhp-brands-count></span></h2>
           <label class="dhp-bm__search">

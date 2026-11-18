@@ -632,7 +632,21 @@
           return response.json();
         })
         .then(function (data) {
+          // Marques ajoutées depuis le fournisseur des produits (snippets/brand-vendors-json.liquid) : en premier.
+          var vendors = [];
+          try { vendors = JSON.parse((brandsBox.querySelector('[data-vendor-brands]') || {}).textContent || '[]'); } catch (error) { vendors = []; }
+          // (une marque déjà dans la liste du catalogue n'y reste pas en double : elle passe en tête, vers sa page fournisseur)
+          var isVendor = {};
+          vendors.forEach(function (v) { isVendor[String(v[0]).toLowerCase()] = true; });
+          data.brands = vendors.map(function (v) { return [v[0], v[0], '', '', v]; })
+            .concat(data.brands.filter(function (brand) { return !isVendor[String(brand[0]).toLowerCase()]; }));
           brandsGrid.innerHTML = data.brands.map(function (brand, i) {
+            if (brand[4]) {
+              var row = shown[String(brand[0]).toLowerCase()];
+              return '<a class="dhp-brand" href="' + esc(brand[4][1]) + '" data-brand-name="' + esc(normalize(brand[0])) + '" data-brand-photo="' + esc(brand[4][2]) + '" style="background:' + colors[i % colors.length] + ';--i:' + (Math.min(i, 30) * 0.015).toFixed(3) + 's">' +
+                (row && row.image ? '<img src="' + esc(row.image) + '" alt="" loading="lazy" width="150" height="150">' : '') +
+                '<strong>' + esc(brand[0]) + '</strong></a>';
+            }
             var known = shown[String(brand[0]).toLowerCase()];
             var href = known ? known.href : base + 'search?q=' + encodeURIComponent('title:"' + brand[1] + '"') + '&type=product&view=brand';
             var image = known ? known.image : (brand[3] ? (/^https?:/.test(brand[3]) ? brand[3] : data.cdn + brand[3]) + '&width=300' : '');
@@ -642,6 +656,20 @@
           }).join('');
           brandsBox.querySelector('[data-dhp-brands-count]').textContent = data.brands.length;
           filterBrands();
+          // Photo du premier produit (si la rangée ne l'avait pas encore) ; fournisseur sans produit visible : retiré.
+          brandsGrid.querySelectorAll('[data-brand-photo]').forEach(function (tile) {
+            fetch(tile.getAttribute('data-brand-photo'), { credentials: 'same-origin' })
+              .then(function (response) { return response.json(); })
+              .then(function (info) {
+                if (!info.count) {
+                  tile.remove();
+                  brandsBox.querySelector('[data-dhp-brands-count]').textContent = brandsGrid.querySelectorAll('.dhp-brand').length;
+                  return;
+                }
+                if (info.img && !tile.querySelector('img')) tile.insertAdjacentHTML('afterbegin', '<img src="' + esc(info.img.replace(/width=\d+/, 'width=300')) + '" alt="" width="150" height="150">');
+              })
+              .catch(function () {});
+          });
         })
         .catch(function (error) {
           brandsLoaded = false;
