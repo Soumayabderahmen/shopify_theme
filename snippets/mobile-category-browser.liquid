@@ -604,6 +604,8 @@
         <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
         <input type="search" placeholder="{{ 'mobile.explore.search_brands' | t }}" aria-label="{{ 'mobile.explore.search_brands' | t }}" autocomplete="off" enterkeyhint="search" data-mobile-brands-filter>
       </label>
+      {%- comment -%} Lettres A–Z : n'affichent que les marques qui commencent par la lettre (assets/mobile-temu-header.js). {%- endcomment -%}
+      <div class="mobile-brands-sheet__az" role="toolbar" aria-label="A–Z" data-mobile-brands-az data-all="{{ 'mobile.collection.all' | t | escape }}"></div>
       <div class="mobile-brands-sheet__grid" data-mobile-brands-grid></div>
       <p class="mobile-brands-sheet__empty" data-mobile-brands-empty hidden>{{ 'mobile.explore.no_brands' | t }}</p>
     </dialog>

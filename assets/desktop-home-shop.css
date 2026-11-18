@@ -340,6 +340,16 @@
 #root .dhp .dhp-bm__close { flex: none; display: grid; place-items: center; width: 42px; height: 42px; color: var(--dhp-ink); background: var(--dhp-soft); border-radius: 50%; cursor: pointer; transition: background .2s, transform .2s; }
 #root .dhp .dhp-bm__close:hover { background: var(--dhp-lav); transform: rotate(90deg); }
 .dhp-bm__close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+/* Lettres A–Z de « Tutti i brand » */
+.dhp-bm__az { flex: none; display: flex; gap: 4px; padding: 12px 24px 12px 28px; border-bottom: 1px solid var(--dhp-line); }
+#root .dhp .dhp-bm__az button { flex: 1 1 0; min-width: 0; height: 32px; margin: 0; padding: 0; color: var(--dhp-ink); font: 700 13px/32px 'Figtree', sans-serif; text-align: center; background: var(--dhp-soft); border: 0; border-radius: 999px; box-shadow: none; cursor: pointer; transition: background .15s, color .15s; }
+#root .dhp .dhp-bm__az button::before, #root .dhp .dhp-bm__az button::after { content: none; }
+#root .dhp .dhp-bm__az button:hover:not(:disabled) { background: var(--dhp-lav); }
+#root .dhp .dhp-bm__az button[aria-pressed='true'] { color: #fff; background: var(--dhp-brand); }
+#root .dhp .dhp-bm__az button:disabled { opacity: .3; cursor: default; }
+#root .dhp .dhp-bm__az button[data-letter=''] { flex: none; padding: 0 12px; }
+/* Lettre choisie : ses marques dans l'ordre alphabétique (rang posé par assets/desktop-home-shop.js) */
+.dhp-bm__grid.is-az .dhp-brand { order: var(--az, 0); }
 .dhp-bm__grid { flex: 0 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: 112px; gap: 12px; padding: 20px 24px 28px 28px; overflow-y: auto; overscroll-behavior: contain; }
 .dhp-bm__grid .dhp-brand { animation: dhp-bm-tile .4s cubic-bezier(.2, .8, .2, 1) both; animation-delay: var(--i, 0s); }
 @keyframes dhp-bm-tile { from { opacity: 0; transform: translateY(10px); } }

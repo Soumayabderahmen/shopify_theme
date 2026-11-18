@@ -582,6 +582,8 @@
           </label>
           <button class="dhp-bm__close" type="button" aria-label="{{ 'mobile.common.close' | t }}" data-dhp-brands-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
         </div>
+        {%- comment -%} Lettres A–Z : n'affichent que les marques qui commencent par la lettre (assets/desktop-home-shop.js). {%- endcomment -%}
+        <div class="dhp-bm__az" role="toolbar" aria-label="A–Z" data-dhp-brands-az data-all="{{ 'mobile.collection.all' | t | escape }}"></div>
         <div class="dhp-bm__grid" data-dhp-brands-grid></div>
         <p class="dhp-bm__empty" data-dhp-brands-empty hidden>{{ 'mobile.explore.no_brands' | t }}</p>
       </dialog>

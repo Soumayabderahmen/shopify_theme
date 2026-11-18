@@ -1639,12 +1639,51 @@ function initMobileTemuHeader() {
   var normalizeBrandName = function (value) {
     return String(value).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
   };
+  // Lettres A–Z : lettre choisie (vide = toutes) ; « # » pour les marques qui commencent par un chiffre ou un signe
+  var brandsAz = brandsSheet && brandsSheet.querySelector('[data-mobile-brands-az]');
+  var activeBrandLetter = '';
+  var brandLetterOf = function (name) {
+    var first = String(name).charAt(0);
+    return /[a-z]/.test(first) ? first.toUpperCase() : '#';
+  };
+  var buildBrandsAz = function () {
+    if (!brandsAz) return;
+    var present = {};
+    var tiles = Array.prototype.slice.call(brandsGrid.querySelectorAll('.mobile-explore-brand'));
+    tiles.forEach(function (tile) { present[brandLetterOf(tile.getAttribute('data-brand-name'))] = true; });
+    // Rang alphabétique de chaque marque (utilisé quand une lettre est choisie)
+    tiles.slice().sort(function (x, y) { return x.getAttribute('data-brand-name').localeCompare(y.getAttribute('data-brand-name')); })
+      .forEach(function (tile, rank) { tile.style.setProperty('--az', rank); });
+    var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').concat(present['#'] ? ['#'] : []);
+    brandsAz.textContent = '';
+    [''].concat(letters).forEach(function (letter) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.setAttribute('data-letter', letter);
+      button.setAttribute('aria-pressed', letter === activeBrandLetter ? 'true' : 'false');
+      button.textContent = letter || brandsAz.getAttribute('data-all') || 'Tutti';
+      if (letter && !present[letter]) button.disabled = true;
+      brandsAz.appendChild(button);
+    });
+  };
+  if (brandsAz) {
+    brandsAz.addEventListener('click', function (event) {
+      var button = event.target.closest('button[data-letter]');
+      if (!button || button.disabled) return;
+      activeBrandLetter = button.getAttribute('data-letter') === activeBrandLetter ? '' : button.getAttribute('data-letter');
+      brandsAz.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-letter') === activeBrandLetter ? 'true' : 'false'); });
+      brandsGrid.classList.toggle('is-az', Boolean(activeBrandLetter));
+      filterBrandsSheet();
+      brandsGrid.scrollTop = 0;
+    });
+  }
   var filterBrandsSheet = function () {
     if (!brandsGrid) return;
     var query = normalizeBrandName(brandsFilter ? brandsFilter.value : '');
     var visible = 0;
     brandsGrid.querySelectorAll('.mobile-explore-brand').forEach(function (tile) {
-      var match = !query || tile.getAttribute('data-brand-name').indexOf(query) !== -1;
+      var match = (!query || tile.getAttribute('data-brand-name').indexOf(query) !== -1) &&
+        (!activeBrandLetter || brandLetterOf(tile.getAttribute('data-brand-name')) === activeBrandLetter);
       tile.hidden = !match;
       if (match) visible += 1;
     });
@@ -1732,6 +1771,7 @@ function initMobileTemuHeader() {
         brandsGrid.appendChild(fragment);
         var count = brandsSheet.querySelector('[data-mobile-brands-count]');
         if (count) count.textContent = brandsGrid.querySelectorAll('.mobile-explore-brand').length;
+        buildBrandsAz();
         filterBrandsSheet();
       })
       .catch(function (error) {

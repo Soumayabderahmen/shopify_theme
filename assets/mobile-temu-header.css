@@ -1540,6 +1540,56 @@
     box-shadow: none;
   }
 
+  /* Lettres A–Z de « Tutti i brand » : une ligne qui défile de côté */
+  .mobile-brands-sheet__az {
+    display: flex;
+    flex: none;
+    gap: 6px;
+    margin: 0 0 12px;
+    padding: 0 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-brands-sheet__az::-webkit-scrollbar {
+    display: none;
+  }
+
+  #root .mobile-brands-sheet__az button {
+    flex: none;
+    min-width: 34px;
+    height: 34px;
+    margin: 0;
+    padding: 0 10px;
+    color: #16123f;
+    font: 700 14px/34px Figtree, system-ui, sans-serif;
+    text-align: center;
+    background: #f1f2f6;
+    border: 0;
+    border-radius: 999px;
+    box-shadow: none;
+  }
+
+  #root .mobile-brands-sheet__az button::before,
+  #root .mobile-brands-sheet__az button::after {
+    content: none;
+  }
+
+  #root .mobile-brands-sheet__az button[aria-pressed='true'] {
+    color: #fff;
+    background: #3a34d2;
+  }
+
+  #root .mobile-brands-sheet__az button:disabled {
+    opacity: 0.3;
+  }
+
+  /* Lettre choisie : ses marques dans l'ordre alphabétique (rang posé par assets/mobile-temu-header.js) */
+  .mobile-brands-sheet__grid.is-az .mobile-explore-brand {
+    order: var(--az, 0);
+  }
+
   .mobile-brands-sheet__grid {
     display: grid;
     flex: 0 1 auto;

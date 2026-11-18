@@ -605,11 +605,44 @@
     var brandsLoaded = false;
     var colors = ['#e8547a', '#c8102e', '#2f2a6b', '#0e7c66', '#f08c2e', '#e2506b', '#b23a48', '#7a4e2d', '#3a74c4', '#5b5799'];
     var normalize = function (value) { return String(value).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim(); };
+    // Lettres A–Z : lettre choisie (vide = toutes) ; « # » pour les marques qui commencent par un chiffre ou un signe
+    var brandsAz = brandsBox.querySelector('[data-dhp-brands-az]');
+    var activeLetter = '';
+    var letterOf = function (name) {
+      var first = String(name).charAt(0);
+      return /[a-z]/.test(first) ? first.toUpperCase() : '#';
+    };
+    var buildAz = function () {
+      if (!brandsAz) return;
+      var present = {};
+      var tiles = Array.prototype.slice.call(brandsGrid.querySelectorAll('.dhp-brand'));
+      tiles.forEach(function (tile) { present[letterOf(tile.getAttribute('data-brand-name'))] = true; });
+      // Rang alphabétique de chaque marque (utilisé quand une lettre est choisie)
+      tiles.slice().sort(function (x, y) { return x.getAttribute('data-brand-name').localeCompare(y.getAttribute('data-brand-name')); })
+        .forEach(function (tile, rank) { tile.style.setProperty('--az', rank); });
+      var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').concat(present['#'] ? ['#'] : []);
+      brandsAz.innerHTML = '<button type="button" data-letter="" aria-pressed="true">' + esc(brandsAz.getAttribute('data-all') || 'Tutti') + '</button>' +
+        letters.map(function (letter) {
+          return '<button type="button" data-letter="' + letter + '" aria-pressed="false"' + (present[letter] ? '' : ' disabled') + '>' + letter + '</button>';
+        }).join('');
+    };
+    if (brandsAz) {
+      brandsAz.addEventListener('click', function (event) {
+        var button = event.target.closest('button[data-letter]');
+        if (!button || button.disabled) return;
+        activeLetter = button.getAttribute('data-letter') === activeLetter ? '' : button.getAttribute('data-letter');
+        brandsAz.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-letter') === activeLetter ? 'true' : 'false'); });
+        brandsGrid.classList.toggle('is-az', Boolean(activeLetter));
+        filterBrands();
+        brandsGrid.scrollTop = 0;
+      });
+    }
     var filterBrands = function () {
       var query = normalize(brandsFilter.value);
       var visible = 0;
       brandsGrid.querySelectorAll('.dhp-brand').forEach(function (tile) {
-        var match = !query || tile.getAttribute('data-brand-name').indexOf(query) !== -1;
+        var match = (!query || tile.getAttribute('data-brand-name').indexOf(query) !== -1) &&
+          (!activeLetter || letterOf(tile.getAttribute('data-brand-name')) === activeLetter);
         tile.hidden = !match;
         if (match) visible += 1;
       });
@@ -655,6 +688,7 @@
               '<strong>' + esc(brand[0]) + '</strong></a>';
           }).join('');
           brandsBox.querySelector('[data-dhp-brands-count]').textContent = data.brands.length;
+          buildAz();
           filterBrands();
           // Photo du premier produit (si la rangée ne l'avait pas encore) ; fournisseur sans produit visible : retiré.
           brandsGrid.querySelectorAll('[data-brand-photo]').forEach(function (tile) {
