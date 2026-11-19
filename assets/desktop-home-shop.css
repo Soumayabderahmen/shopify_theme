@@ -517,26 +517,31 @@ html.dhp-modal-open { overflow: hidden; }
 
 /* In primo piano (« À la une ») : 2 histoires côte à côte ; chacune une grille 4 × 3 de cases carrées —
    histoire 2 × 2 en haut à gauche, 2 petits produits à droite, grand produit 2 × 2 en bas à droite, 2 petits en bas à gauche */
+/* Mesures relevées sur le modèle (bloc d'une histoire = 610 px : cases 145 px, histoire et grand produit 300 px, espaces
+   10 px) et reportées en proportion de la largeur du bloc (cqw du conteneur .dhp-feat__set) : identique à toute taille.
+   Titre de l'histoire 46 px, marge 25 px à gauche / 27 px en bas ; flèche ronde 40 px à 25 px du coin ; pastilles à 15 px du
+   coin, 20 px de haut, texte 12,5 px ; coins 22 px ; contour gris clair 1 px. */
+.dhp-feat .dhp-hd { margin-bottom: 26px; }
+.dhp-feat .dhp-hd h2 { color: #0d0d0f; font-family: 'Figtree', sans-serif; font-size: 22px; font-weight: 600; letter-spacing: -.3px; }
 .dhp-feat__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.dhp-feat__set { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "s s a b" "s s g g" "c d g g"; gap: 10px; }
-.dhp-feat__story, .dhp-feat__p { position: relative; display: block; overflow: hidden; aspect-ratio: 1; background: #f3f3f6; border-radius: 22px; }
-.dhp-feat__story { grid-area: s; color: #fff; background: #2a2540; }
+.dhp-feat__set { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "s s a b" "s s g g" "c d g g"; gap: 10px; container-type: inline-size; }
+.dhp-feat__story, .dhp-feat__p { position: relative; display: block; overflow: hidden; aspect-ratio: 1; background: #fff; border-radius: 3.6cqw; }
+.dhp-feat__story { grid-area: s; color: #fff; background: #d9d6d2; }
 .dhp-feat__p--a { grid-area: a; }
 .dhp-feat__p--b { grid-area: b; }
 .dhp-feat__p--g { grid-area: g; }
 .dhp-feat__p--c { grid-area: c; }
 .dhp-feat__p--d { grid-area: d; }
-.dhp-feat__p { background: #fff; box-shadow: inset 0 0 0 1px #e6e6ea; }
-.dhp-feat__p::after { content: ''; position: absolute; inset: 0; border: 1px solid #e6e6ea; border-radius: inherit; pointer-events: none; }
-#root .dhp-feat__story img, #root .dhp-feat__p img { position: absolute; inset: 0; width: 100%; height: 100% !important; object-fit: cover; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
-.dhp-feat__story:hover img, .dhp-feat__p:hover img { transform: scale(1.05); }
-.dhp-feat__story::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / 0%) 35%, rgb(0 0 0 / 55%) 100%); }
-.dhp-feat__story b { position: absolute; left: 26px; right: 26px; bottom: 24px; z-index: 1; font-family: 'Sora', sans-serif; font-size: clamp(26px, 2.9vw, 40px); font-weight: 800; letter-spacing: -1.2px; line-height: 1.04; text-shadow: 0 2px 14px rgb(0 0 0 / 25%); overflow-wrap: break-word; }
-.dhp-feat__go { position: absolute; top: 18px; right: 18px; z-index: 1; display: grid; place-items: center; width: 40px; height: 40px; background: rgb(0 0 0 / 28%); border-radius: 50%; backdrop-filter: blur(4px); transition: background .2s, transform .2s; }
-.dhp-feat__story:hover .dhp-feat__go { background: rgb(0 0 0 / 45%); transform: translateX(2px); }
-.dhp-feat__go svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.dhp-feat__chip { position: absolute; top: 10px; left: 10px; z-index: 1; padding: 4px 9px; color: #fff; font-size: 12.5px; font-weight: 700; line-height: 1.3; white-space: nowrap; background: rgb(60 60 70 / 55%); border-radius: 999px; backdrop-filter: blur(4px); }
-.dhp-feat__chip.is-off { background: #e3262f; }
+.dhp-feat__p::after { content: ''; position: absolute; inset: 0; z-index: 1; border: 1px solid rgb(0 0 0 / 9%); border-radius: inherit; pointer-events: none; }
+#root .dhp-feat__story img, #root .dhp-feat__p img { position: absolute; inset: 0; width: 100%; height: 100% !important; object-fit: cover; border-radius: 0; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+.dhp-feat__story:hover img, .dhp-feat__p:hover img { transform: scale(1.04); }
+.dhp-feat__story::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / 0%) 50%, rgb(0 0 0 / 28%) 100%); }
+.dhp-feat__story b { position: absolute; left: 4.1cqw; right: 4.1cqw; bottom: 4.4cqw; z-index: 1; font-family: 'Figtree', sans-serif; font-size: 7.55cqw; font-weight: 700; letter-spacing: -.045em; line-height: 1.02; text-shadow: 0 1px 10px rgb(0 0 0 / 18%); overflow-wrap: break-word; }
+.dhp-feat__go { position: absolute; top: 4.1cqw; right: 4.1cqw; z-index: 1; display: grid; place-items: center; width: 6.55cqw; height: 6.55cqw; background: rgb(0 0 0 / 32%); border-radius: 50%; backdrop-filter: blur(6px); transition: background .2s; }
+.dhp-feat__story:hover .dhp-feat__go { background: rgb(0 0 0 / 48%); }
+.dhp-feat__go svg { width: 2.95cqw; height: 2.95cqw; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.dhp-feat__chip { position: absolute; top: 2.45cqw; left: 2.45cqw; z-index: 2; padding: .35cqw 1.3cqw; color: #fff; font-family: 'Figtree', sans-serif; font-size: 2.05cqw; font-weight: 600; line-height: 1.3; white-space: nowrap; background: rgb(0 0 0 / 36%); border-radius: 999px; backdrop-filter: blur(6px); }
+.dhp-feat__chip.is-off { background: #e3321f; }
 @media (max-width: 900px) {
   .dhp-feat__grid { grid-template-columns: minmax(0, 1fr); }
 }
