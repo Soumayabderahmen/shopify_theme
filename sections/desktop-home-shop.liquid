@@ -596,6 +596,30 @@
             endif
             assign feat_img = feat_images[feat_i] | strip
           -%}
+          {%- liquid
+            # Comme le modèle : le prix sur chaque produit, et une seule pastille rouge « X % di sconto » par histoire, sur le
+            # produit (parmi les 5 affichés) qui a la plus forte réduction, d'au moins 5 %
+            assign feat_off_n = -1
+            assign feat_off_best = 4
+            assign feat_k = 0
+            for product in fc.products limit: 12
+              if product.featured_image == blank
+                continue
+              endif
+              if feat_k >= 5
+                break
+              endif
+              assign fv = product.selected_or_first_available_variant
+              if fv.compare_at_price > fv.price
+                assign f_pct = fv.compare_at_price | minus: fv.price | times: 100.0 | divided_by: fv.compare_at_price | floor
+                if f_pct > feat_off_best
+                  assign feat_off_best = f_pct
+                  assign feat_off_n = feat_k
+                endif
+              endif
+              assign feat_k = feat_k | plus: 1
+            endfor
+          -%}
           <div class="dhp-feat__set">
             {%- assign feat_n = 0 -%}
             {%- assign feat_slots = 'a,b,g,c,d' | split: ',' -%}
@@ -622,8 +646,8 @@
               -%}
               <a class="dhp-feat__p dhp-feat__p--{{ slot }}" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
                 <img src="{{ product.featured_image | image_url: width: f_w }}" alt="" loading="lazy" width="{{ f_w }}" height="{{ f_w }}">
-                {%- if f_pct >= 1 -%}
-                  <span class="dhp-feat__chip is-off">-{{ f_pct }}%</span>
+                {%- if feat_n == feat_off_n -%}
+                  <span class="dhp-feat__chip is-off">{{ 'desktop_home_shop.featured_off' | t: percent: f_pct }}</span>
                 {%- else -%}
                   <span class="dhp-feat__chip">{{ fv.price | money | strip_html }}</span>
                 {%- endif -%}

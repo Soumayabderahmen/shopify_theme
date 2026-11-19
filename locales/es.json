@@ -169,6 +169,7 @@
     "new_card_count_many": "Más de {{ count }} novedades en los últimos 30 días",
     "shop_by_brand": "Comprar por marca",
     "featured_title": "Destacados",
+    "featured_off": "{{ percent }} % de descuento",
     "products_by_dept": "Productos por sección",
     "deals_now": "Las ofertas del momento",
     "collections_discover": "Colecciones por descubrir",

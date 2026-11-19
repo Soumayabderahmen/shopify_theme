@@ -169,6 +169,7 @@
     "new_card_count_many": "Meer dan {{ count }} nieuwe artikelen in de laatste 30 dagen",
     "shop_by_brand": "Shop per merk",
     "featured_title": "Uitgelicht",
+    "featured_off": "{{ percent }}% korting",
     "products_by_dept": "Producten per afdeling",
     "deals_now": "Aanbiedingen van het moment",
     "collections_discover": "Collecties om te ontdekken",
