@@ -168,6 +168,7 @@
     "new_card_count": "{{ count }} nouveaux arrivages ces 30 derniers jours",
     "new_card_count_many": "Plus de {{ count }} nouveaux arrivages ces 30 derniers jours",
     "shop_by_brand": "Acheter par marque",
+    "featured_title": "À la une",
     "products_by_dept": "Produits par rayon",
     "deals_now": "Les offres du moment",
     "collections_discover": "Collections à découvrir",

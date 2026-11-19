@@ -168,6 +168,7 @@
     "new_card_count": "{{ count }} Neuheiten in den letzten 30 Tagen",
     "new_card_count_many": "Über {{ count }} Neuheiten in den letzten 30 Tagen",
     "shop_by_brand": "Nach Marke shoppen",
+    "featured_title": "Im Fokus",
     "products_by_dept": "Produkte nach Abteilung",
     "deals_now": "Aktuelle Angebote",
     "collections_discover": "Kollektionen entdecken",

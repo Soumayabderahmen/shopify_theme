@@ -168,6 +168,7 @@
     "new_card_count": "{{ count }} produse noi în ultimele 30 de zile",
     "new_card_count_many": "Peste {{ count }} produse noi în ultimele 30 de zile",
     "shop_by_brand": "Cumpără după brand",
+    "featured_title": "În prim-plan",
     "products_by_dept": "Produse pe departamente",
     "deals_now": "Ofertele momentului",
     "collections_discover": "Colecții de descoperit",

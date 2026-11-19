@@ -507,6 +507,150 @@
     </section>
 
     {%- comment -%}
+      ---------- In primo piano (« À la une ») : 2 histoires côte à côte. Chacune : grande photo avec titre et flèche vers sa
+      collection, entourée de 5 produits de la collection (prix, ou « -X % » en promotion) — grille 4 × 3 : histoire en
+      haut à gauche (2 × 2), 2 petits à droite, grand produit en bas à droite (2 × 2), 2 petits en bas à gauche.
+      Histoires : blocs « Storia in primo piano » de ce modèle (index.dhp-more-a : collection, titre, photo) ; sinon, ou pour
+      compléter jusqu'à 2, les collections publiées le plus récemment qui ont au moins 6 produits avec photo (hors
+      collections fourre-tout, même règle que templates/collection.dhp-new-all.liquid). Ordinateur seulement. ----------
+    {%- endcomment -%}
+    {%- liquid
+      assign feat_handles = ''
+      assign feat_titles = ''
+      assign feat_images = ''
+      assign feat_count = 0
+      for block in section.blocks
+        if block.type != 'story' or feat_count >= 2
+          continue
+        endif
+        assign fc = block.settings.collection
+        if fc == blank or fc.products_count < 6
+          continue
+        endif
+        assign feat_handles = feat_handles | append: fc.handle | append: '|~|'
+        assign feat_titles = feat_titles | append: block.settings.title | append: '|~|'
+        if block.settings.image != blank
+          assign feat_img = block.settings.image | image_url: width: 900
+        else
+          assign feat_img = ''
+        endif
+        assign feat_images = feat_images | append: feat_img | append: '|~|'
+        assign feat_count = feat_count | plus: 1
+      endfor
+      if feat_count < 2
+        assign feat_keys = ''
+        for c in collections
+          assign h = c.handle
+          if c.products_count < 6 or c.products_count > 1500
+            continue
+          endif
+          if h == 'all' or h == 'frontpage' or h == 'shop' or h == 'bestsellers' or h == 'in-offerta' or h == 'new-trends'
+            continue
+          endif
+          if h contains 'discount' or h contains 'new-arrival' or h contains 'novita' or h contains 'offert' or h contains 'sale'
+            continue
+          endif
+          assign h4 = h | slice: 0, 4
+          if h4 == 'jan-' or h4 == 'feb-' or h4 == 'mar-' or h4 == 'apr-' or h4 == 'may-' or h4 == 'jun-' or h4 == 'jul-' or h4 == 'aug-' or h4 == 'sep-' or h4 == 'oct-' or h4 == 'nov-' or h4 == 'dec-'
+            continue
+          endif
+          assign t = c.published_at | date: '%s'
+          if t == blank
+            continue
+          endif
+          assign feat_keys = feat_keys | append: t | append: '~' | append: h | append: '|'
+        endfor
+        assign feat_keys = feat_keys | split: '|' | sort | reverse
+        for key in feat_keys
+          if feat_count >= 2
+            break
+          endif
+          assign kh = key | split: '~' | last
+          if feat_handles contains kh
+            continue
+          endif
+          assign feat_handles = feat_handles | append: kh | append: '|~|'
+          assign feat_titles = feat_titles | append: '' | append: '|~|'
+          assign feat_images = feat_images | append: '' | append: '|~|'
+          assign feat_count = feat_count | plus: 1
+        endfor
+      endif
+      assign feat_handles = feat_handles | split: '|~|'
+      assign feat_titles = feat_titles | split: '|~|'
+      assign feat_images = feat_images | split: '|~|'
+    -%}
+    {%- if feat_count > 0 -%}
+    <section class="dhp-sec dhp-feat" aria-labelledby="dhp-feat-title">
+      <div class="dhp-hd"><h2 id="dhp-feat-title">{{ 'desktop_home_shop.featured_title' | t }}</h2></div>
+      <div class="dhp-feat__grid">
+        {%- for feat_handle in feat_handles -%}
+          {%- liquid
+            assign fc = collections[feat_handle]
+            if fc == blank
+              continue
+            endif
+            assign feat_i = forloop.index0
+            assign feat_title = feat_titles[feat_i] | strip
+            if feat_title == blank
+              assign feat_title = fc.title | split: ' | ' | first | split: ': ' | first | strip
+            endif
+            assign feat_img = feat_images[feat_i] | strip
+          -%}
+          <div class="dhp-feat__set">
+            {%- assign feat_n = 0 -%}
+            {%- assign feat_slots = 'a,b,g,c,d' | split: ',' -%}
+            {%- assign feat_story_src = '' -%}
+            {%- for product in fc.products limit: 12 -%}
+              {%- if product.featured_image == blank -%}{%- continue -%}{%- endif -%}
+              {%- if feat_n >= 5 -%}
+                {%- comment -%} Photo de l'histoire sans photo choisie : collection, sinon 6e produit (pas déjà affiché) {%- endcomment -%}
+                {%- if feat_story_src == '' -%}{%- assign feat_story_src = product.featured_image | image_url: width: 900 -%}{%- endif -%}
+                {%- continue -%}
+              {%- endif -%}
+              {%- liquid
+                assign slot = feat_slots[feat_n]
+                assign fv = product.selected_or_first_available_variant
+                assign f_pct = 0
+                if fv.compare_at_price > fv.price
+                  assign f_pct = fv.compare_at_price | minus: fv.price | times: 100.0 | divided_by: fv.compare_at_price | floor
+                endif
+                if slot == 'g'
+                  assign f_w = 700
+                else
+                  assign f_w = 360
+                endif
+              -%}
+              <a class="dhp-feat__p dhp-feat__p--{{ slot }}" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+                <img src="{{ product.featured_image | image_url: width: f_w }}" alt="" loading="lazy" width="{{ f_w }}" height="{{ f_w }}">
+                {%- if f_pct >= 1 -%}
+                  <span class="dhp-feat__chip is-off">-{{ f_pct }}%</span>
+                {%- else -%}
+                  <span class="dhp-feat__chip">{{ fv.price | money | strip_html }}</span>
+                {%- endif -%}
+              </a>
+              {%- assign feat_n = feat_n | plus: 1 -%}
+            {%- endfor -%}
+            {%- liquid
+              if feat_img == blank
+                if fc.image != blank
+                  assign feat_img = fc.image | image_url: width: 900
+                else
+                  assign feat_img = feat_story_src
+                endif
+              endif
+            -%}
+            <a class="dhp-feat__story" href="{{ fc.url }}">
+              {%- if feat_img != blank -%}<img src="{{ feat_img }}" alt="" loading="lazy" width="900" height="900">{%- endif -%}
+              <b>{{ feat_title | escape }}</b>
+              <span class="dhp-feat__go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>
+          </div>
+        {%- endfor -%}
+      </div>
+    </section>
+    {%- endif -%}
+
+    {%- comment -%}
       ---------- Shop per brand : même liste que le panneau Categoria mobile (snippets/mobile-category-browser.liquid,
       Nom|recherche|collection(s)|photo) ; tuiles de couleur, photo penchée, 2 lignes qui défilent ----------
     {%- endcomment -%}
@@ -911,6 +1055,17 @@
         { "type": "collection", "id": "collection", "label": "Collezione" },
         { "type": "text", "id": "query", "label": "Oppure ricerca", "info": "Senza collezione: prodotti della ricerca (es. pigiama)" },
         { "type": "text", "id": "label", "label": "Nome (italiano)", "info": "Vuoto o altra lingua: nome tradotto scelto sopra" }
+      ]
+    },
+    {
+      "type": "story",
+      "name": "Storia in primo piano",
+      "limit": 2,
+      "settings": [
+        { "type": "paragraph", "content": "Sezione « In primo piano » (modello index.dhp-more-a): grande foto con titolo e 5 prodotti della collezione. Senza blocchi: le 2 collezioni pubblicate più di recente." },
+        { "type": "collection", "id": "collection", "label": "Collezione", "info": "Almeno 6 prodotti con foto" },
+        { "type": "text", "id": "title", "label": "Titolo", "info": "Vuoto: nome della collezione" },
+        { "type": "image_picker", "id": "image", "label": "Foto grande", "info": "Vuota: foto della collezione, altrimenti di un suo prodotto" }
       ]
     },
     {
