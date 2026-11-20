@@ -571,6 +571,17 @@ html.dhp-modal-open { overflow: hidden; }
 .dhp-flx__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 /* Flip : la 1re face est dans la mise en page (elle donne la hauteur), la 2e est posée dessus, retournée */
 .dhp-flx__cell { min-width: 0; perspective: 1400px; }
+/* Cases qui flottent doucement (même mouvement que les photos de la grande bannière : 7 s aller-retour, ~14 px vers le
+   haut et 2° de rotation), chacune décalée ; sur la case extérieure, pour ne pas gêner le retournement */
+@keyframes dhp-flx-float { from { transform: translate3d(0, 0, 0) rotate(0deg); } to { transform: translate3d(var(--dx, 6px), var(--dy, -14px), 0) rotate(var(--dr, 2deg)); } }
+.dhp-flx__cell { animation: dhp-flx-float 7s ease-in-out infinite alternate; animation-delay: var(--dd, 0s); }
+.dhp-flx__cell--big { --dx: 4px; --dy: -10px; --dr: -1deg; --dd: -1s; }
+.dhp-flx__grid > :nth-child(1) { --dx: -5px; --dy: -12px; --dr: -2deg; --dd: -3s; }
+.dhp-flx__grid > :nth-child(2) { --dx: 6px; --dy: -14px; --dr: 1.5deg; --dd: -5s; }
+.dhp-flx__grid > :nth-child(3) { --dx: -4px; --dy: -11px; --dr: 2deg; --dd: -2s; }
+.dhp-flx__grid > :nth-child(4) { --dx: 5px; --dy: -13px; --dr: -1.5deg; --dd: -6s; }
+.dhp-flx__grid > :nth-child(5) { --dx: -6px; --dy: -10px; --dr: 1deg; --dd: -4s; }
+.dhp-flx__grid > :nth-child(6) { --dx: 4px; --dy: -14px; --dr: -2deg; --dd: 0s; }
 .dhp-flx__in { position: relative; height: 100%; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.45, .05, .25, 1); }
 .dhp-flx__cell.is-back .dhp-flx__in { transform: rotateY(180deg); }
 .dhp-flx__face { position: relative; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
@@ -608,7 +619,7 @@ html.dhp-modal-open { overflow: hidden; }
   .dhp-flx__cell--big { aspect-ratio: 1.2; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .dhp-flx__ring, .dhp-flx__bolt, .dhp-flx__box::before, .dhp-flx__box::after { animation: none; }
+  .dhp-flx__ring, .dhp-flx__bolt, .dhp-flx__box::before, .dhp-flx__box::after, .dhp-flx__cell { animation: none; }
 }
 
 /* Toast (cœur des cartes) */
