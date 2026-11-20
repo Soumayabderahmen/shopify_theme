@@ -862,15 +862,15 @@
             assign fl_max = d_pct
           endif
         -%}
-        <a class="dhp-fl__card" href="{{ deal.url }}" aria-label="{{ deal.title | escape }}">
-          <span class="dhp-fl__img">
+        <a class="dhp-flx__card" href="{{ deal.url }}" aria-label="{{ deal.title | escape }}">
+          <span class="dhp-flx__img">
             <img src="{{ deal.featured_image | image_url: width: 700 }}" alt="" loading="lazy" width="700" height="700">
-            <span class="dhp-fl__pct">-{{ d_pct }}%</span>
+            <span class="dhp-flx__pct">-{{ d_pct }}%</span>
           </span>
-          <span class="dhp-fl__b">
-            <span class="dhp-fl__t">{{ deal.title | escape }}</span>
-            <span class="dhp-fl__pr"><b>{{ dv.price | money | strip_html }}</b> <s>{{ dv.compare_at_price | money | strip_html }}</s></span>
-            <span class="dhp-fl__save">{{ 'mobile.home_shein.save' | t: amount: d_save }}</span>
+          <span class="dhp-flx__b">
+            <span class="dhp-flx__t">{{ deal.title | escape }}</span>
+            <span class="dhp-flx__pr"><b>{{ dv.price | money | strip_html }}</b> <s>{{ dv.compare_at_price | money | strip_html }}</s></span>
+            <span class="dhp-flx__save">{{ 'mobile.home_shein.save' | t: amount: d_save }}</span>
           </span>
         </a>
         {%- assign fl_count = fl_count | plus: 1 -%}
@@ -878,7 +878,7 @@
       {%- endfor -%}
     {%- endcapture -%}
     {%- liquid
-      assign fl_list = fl_cards | split: '<a class="dhp-fl__card"'
+      assign fl_list = fl_cards | split: '<a class="dhp-flx__card"'
       assign fl_pages = fl_count | divided_by: 7
       if fl_pages < 1
         assign fl_pages = 1
@@ -887,25 +887,25 @@
     -%}
     {%- if fl_count > 0 -%}
     <section class="dhp-sec dhp-flash" id="dhp-offerte">
-      <div class="dhp-fl__ring">
-        <div class="dhp-fl__box" data-dhp-fl data-pages="{{ fl_pages }}">
-          <div class="dhp-fl__hd">
-            <h2><a href="{{ sale_url }}"><span class="dhp-fl__bolt" aria-hidden="true">⚡</span>{{ 'desktop_home_shop.deals_now' | t }}</a></h2>
-            <a class="dhp-fl__all" href="{{ sale_url }}">{{ 'desktop_home_shop.bf_up_to_offers' | t: percent: fl_max_text, count: fl_count }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+      <div class="dhp-flx__ring">
+        <div class="dhp-flx__box" data-dhp-flx data-pages="{{ fl_pages }}">
+          <div class="dhp-flx__hd">
+            <h2><a href="{{ sale_url }}"><span class="dhp-flx__bolt" aria-hidden="true">⚡</span>{{ 'desktop_home_shop.deals_now' | t }}</a></h2>
+            <a class="dhp-flx__all" href="{{ sale_url }}">{{ 'desktop_home_shop.bf_up_to_offers' | t: percent: fl_max_text, count: fl_count }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
           </div>
           {%- comment -%} Page 1 : 1re carte en grand, 6 suivantes en petit (le reste attend dans le template) {%- endcomment -%}
           {%- for fl_i in (1..7) -%}
             {%- if fl_list[fl_i] == blank -%}{%- break -%}{%- endif -%}
-            {%- if fl_i == 1 -%}<div class="dhp-fl__cell dhp-fl__cell--big">{%- elsif fl_i == 2 -%}<div class="dhp-fl__grid"><div class="dhp-fl__cell">{%- else -%}<div class="dhp-fl__cell">{%- endif -%}
-              <div class="dhp-fl__in"><div class="dhp-fl__face"><a class="dhp-fl__card"{{ fl_list[fl_i] }}</div><div class="dhp-fl__face" aria-hidden="true"></div></div>
+            {%- if fl_i == 1 -%}<div class="dhp-flx__cell dhp-flx__cell--big">{%- elsif fl_i == 2 -%}<div class="dhp-flx__grid"><div class="dhp-flx__cell">{%- else -%}<div class="dhp-flx__cell">{%- endif -%}
+              <div class="dhp-flx__in"><div class="dhp-flx__face"><a class="dhp-flx__card"{{ fl_list[fl_i] }}</div><div class="dhp-flx__face" aria-hidden="true"></div></div>
             </div>
           {%- endfor -%}
           {%- if fl_count > 1 -%}</div>{%- endif -%}
           {%- if fl_pages > 1 -%}
-            <div class="dhp-fl__dots">
+            <div class="dhp-flx__dots">
               {%- for p in (1..fl_pages) -%}<button type="button"{% if forloop.first %} class="on"{% endif %} data-page="{{ forloop.index0 }}" aria-label="{{ forloop.index }} / {{ fl_pages }}"></button>{%- endfor -%}
             </div>
-            <template data-dhp-fl-pool>{{ fl_cards }}</template>
+            <template data-dhp-flx-pool>{{ fl_cards }}</template>
           {%- endif -%}
         </div>
       </div>

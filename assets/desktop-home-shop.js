@@ -1162,19 +1162,19 @@
     // suivante est copiée sur la face cachée de chaque case (cartes du <template>), puis les cases se retournent l'une
     // après l'autre (110 ms d'écart). Points : aller à une page. Pas au survol, hors écran, onglet caché, ni si les
     // animations sont réduites (les points restent utilisables, sans retournement animé : la page change d'un coup). ----------
-    var fl = root.querySelector('[data-dhp-fl]');
-    var flPool = fl && fl.querySelector('[data-dhp-fl-pool]');
+    var fl = root.querySelector('[data-dhp-flx]');
+    var flPool = fl && fl.querySelector('[data-dhp-flx-pool]');
     if (fl && flPool && once(fl)) {
-      var flCards = [].slice.call(flPool.content.querySelectorAll('.dhp-fl__card'));
-      var flCells = [].slice.call(fl.querySelectorAll('.dhp-fl__cell'));
-      var flDots = [].slice.call(fl.querySelectorAll('.dhp-fl__dots button'));
+      var flCards = [].slice.call(flPool.content.querySelectorAll('.dhp-flx__card'));
+      var flCells = [].slice.call(fl.querySelectorAll('.dhp-flx__cell'));
+      var flDots = [].slice.call(fl.querySelectorAll('.dhp-flx__dots button'));
       var flPages = Math.max(1, Math.floor(flCards.length / flCells.length));
       var flPage = 0;
       var flOver = false;
       var flGo = function (page) {
         flPage = (page + flPages) % flPages;
         flCells.forEach(function (cell, k) {
-          var faces = cell.querySelectorAll('.dhp-fl__face');
+          var faces = cell.querySelectorAll('.dhp-flx__face');
           var back = cell.classList.contains('is-back');
           var hidden = faces[back ? 0 : 1];
           var card = flCards[flPage * flCells.length + k];
