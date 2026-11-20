@@ -1158,28 +1158,44 @@
       }, 15000);
     }
 
-    // ---------- Le offerte del momento : la bande avance d'une carte toutes les 4 s, puis revient au début ; pas au
-    // survol, hors écran, onglet caché, ni pendant 8 s après une flèche ou un défilement à la main ----------
-    var deals = root.querySelector('[data-dhp-deals]');
-    if (deals && once(deals) && !still) {
-      var dealsOver = false;
-      var dealsHand = 0;
-      var dealsAuto = 0;
-      var dealsBox = deals.closest('.dhp-deals');
-      dealsBox.addEventListener('mouseenter', function () { dealsOver = true; });
-      dealsBox.addEventListener('mouseleave', function () { dealsOver = false; });
-      deals.addEventListener('scroll', function () { if (Date.now() - dealsAuto > 900) dealsHand = Date.now(); }, { passive: true });
-      setInterval(function () {
-        if (dealsOver || document.hidden || Date.now() - dealsHand < 8000 || !onScreen(deals)) return;
-        var card = deals.firstElementChild;
-        if (!card) return;
-        // Lectures d'abord, puis le défilement
-        var step = card.getBoundingClientRect().width + parseFloat(getComputedStyle(deals).columnGap || 0);
-        var atEnd = deals.scrollLeft + deals.clientWidth > deals.scrollWidth - 4;
-        dealsAuto = Date.now();
-        if (atEnd) deals.scrollTo({ left: 0 });
-        else deals.scrollBy({ left: step });
-      }, 4000);
+    // ---------- Le offerte del momento (« Flash deal ») : 7 cases (1 grande + 6 petites) ; toutes les 6 s, la page
+    // suivante est copiée sur la face cachée de chaque case (cartes du <template>), puis les cases se retournent l'une
+    // après l'autre (110 ms d'écart). Points : aller à une page. Pas au survol, hors écran, onglet caché, ni si les
+    // animations sont réduites (les points restent utilisables, sans retournement animé : la page change d'un coup). ----------
+    var fl = root.querySelector('[data-dhp-fl]');
+    var flPool = fl && fl.querySelector('[data-dhp-fl-pool]');
+    if (fl && flPool && once(fl)) {
+      var flCards = [].slice.call(flPool.content.querySelectorAll('.dhp-fl__card'));
+      var flCells = [].slice.call(fl.querySelectorAll('.dhp-fl__cell'));
+      var flDots = [].slice.call(fl.querySelectorAll('.dhp-fl__dots button'));
+      var flPages = Math.max(1, Math.floor(flCards.length / flCells.length));
+      var flPage = 0;
+      var flOver = false;
+      var flGo = function (page) {
+        flPage = (page + flPages) % flPages;
+        flCells.forEach(function (cell, k) {
+          var faces = cell.querySelectorAll('.dhp-fl__face');
+          var back = cell.classList.contains('is-back');
+          var hidden = faces[back ? 0 : 1];
+          var card = flCards[flPage * flCells.length + k];
+          if (!card) return;
+          hidden.replaceChildren(card.cloneNode(true));
+          hidden.removeAttribute('aria-hidden');
+          faces[back ? 1 : 0].setAttribute('aria-hidden', 'true');
+          var turn = function () { cell.classList.toggle('is-back'); };
+          if (still) turn(); else setTimeout(turn, 60 + k * 110);
+        });
+        flDots.forEach(function (dot, i) { dot.classList.toggle('on', i === flPage); });
+      };
+      var flTimer = 0;
+      var flRestart = function () {
+        clearInterval(flTimer);
+        if (!still) flTimer = setInterval(function () { if (!flOver && !document.hidden && onScreen(fl)) flGo(flPage + 1); }, 6000);
+      };
+      fl.addEventListener('mouseenter', function () { flOver = true; });
+      fl.addEventListener('mouseleave', function () { flOver = false; });
+      flDots.forEach(function (dot, i) { dot.addEventListener('click', function () { if (i !== flPage) { flGo(i); flRestart(); } }); });
+      if (flPages > 1) flRestart();
     }
   };
 
