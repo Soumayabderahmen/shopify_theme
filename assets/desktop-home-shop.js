@@ -1157,6 +1157,30 @@
         featPages[featAt].inert = false;
       }, 15000);
     }
+
+    // ---------- Le offerte del momento : la bande avance d'une carte toutes les 4 s, puis revient au début ; pas au
+    // survol, hors écran, onglet caché, ni pendant 8 s après une flèche ou un défilement à la main ----------
+    var deals = root.querySelector('[data-dhp-deals]');
+    if (deals && once(deals) && !still) {
+      var dealsOver = false;
+      var dealsHand = 0;
+      var dealsAuto = 0;
+      var dealsBox = deals.closest('.dhp-deals');
+      dealsBox.addEventListener('mouseenter', function () { dealsOver = true; });
+      dealsBox.addEventListener('mouseleave', function () { dealsOver = false; });
+      deals.addEventListener('scroll', function () { if (Date.now() - dealsAuto > 900) dealsHand = Date.now(); }, { passive: true });
+      setInterval(function () {
+        if (dealsOver || document.hidden || Date.now() - dealsHand < 8000 || !onScreen(deals)) return;
+        var card = deals.firstElementChild;
+        if (!card) return;
+        // Lectures d'abord, puis le défilement
+        var step = card.getBoundingClientRect().width + parseFloat(getComputedStyle(deals).columnGap || 0);
+        var atEnd = deals.scrollLeft + deals.clientWidth > deals.scrollWidth - 4;
+        dealsAuto = Date.now();
+        if (atEnd) deals.scrollTo({ left: 0 });
+        else deals.scrollBy({ left: step });
+      }, 4000);
+    }
   };
 
   // Chargement : la suite est rendue par Shopify dans une 2e requête (sans en-tête ni pied de page), insérée ici, puis

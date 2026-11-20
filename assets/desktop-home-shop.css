@@ -550,6 +550,30 @@ html.dhp-modal-open { overflow: hidden; }
   .dhp-feat__grid { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* Le offerte del momento : bande de cartes compactes qui défile (6 visibles ; 5 sous 1200 px, 4 sous 900 px), grosse
+   pastille rouge de remise, prix en rouge et prix barré, « Risparmia € » */
+.dhp-deals .dhp-hd { margin-bottom: 18px; }
+.dhp-deals__rail { display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 5 * 14px) / 6); gap: 14px; margin: 0 -10px; padding: 10px; list-style: none; overflow-x: auto; scroll-behavior: smooth; scroll-snap-type: x mandatory; scroll-padding-inline: 10px; scrollbar-width: none; }
+.dhp-deals__rail::-webkit-scrollbar { display: none; }
+.dhp-deal { min-width: 0; scroll-snap-align: start; }
+.dhp-deal__a { display: flex; flex-direction: column; gap: 4px; height: 100%; padding: 8px 8px 12px; color: var(--dhp-ink); background: #fff; border-radius: 16px; box-shadow: 0 0 0 1px var(--dhp-line); transition: box-shadow .25s, transform .25s; }
+.dhp-deal__a:hover { box-shadow: 0 0 0 1px var(--dhp-line), 0 12px 28px -14px rgb(22 18 63 / 35%); transform: translateY(-3px); }
+.dhp-deal__img { position: relative; display: block; overflow: hidden; margin-bottom: 6px; aspect-ratio: 1; background: #f4f3f1; border-radius: 11px; }
+#root .dhp-deal__img img { position: absolute; inset: 0; width: 100%; height: 100% !important; object-fit: cover; border-radius: 0; transition: transform .45s cubic-bezier(.2, .8, .2, 1); }
+.dhp-deal__a:hover .dhp-deal__img img { transform: scale(1.05); }
+.dhp-deal__pct { position: absolute; top: 8px; left: 8px; padding: 4px 9px; color: #fff; font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: -.3px; line-height: 1.2; background: #e3262f; border-radius: 999px; box-shadow: 0 4px 10px -4px rgb(227 38 47 / 60%); }
+.dhp-deal__t { display: block; overflow: hidden; padding: 0 2px; color: var(--dhp-ink-2, #55526b); font-size: 13px; line-height: 1.3; white-space: nowrap; text-overflow: ellipsis; }
+.dhp-deal__pr { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 6px; padding: 0 2px; }
+.dhp-deal__pr b { color: #e3262f; font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 800; letter-spacing: -.3px; }
+.dhp-deal__pr s { color: #9a98a6; font-size: 12.5px; }
+.dhp-deal__save { align-self: flex-start; margin: 2px 2px 0; padding: 2px 8px; color: #c81e27; font-size: 11.5px; font-weight: 700; background: #fdebec; border-radius: 6px; }
+@media (max-width: 1199px) {
+  .dhp-deals__rail { grid-auto-columns: calc((100% - 4 * 14px) / 5); }
+}
+@media (max-width: 900px) {
+  .dhp-deals__rail { grid-auto-columns: calc((100% - 3 * 14px) / 4); }
+}
+
 /* Toast (cœur des cartes) */
 .dhp-toast { position: fixed; left: 50%; bottom: 32px; z-index: 50; padding: 12px 20px; color: #fff; font-size: 14px; font-weight: 700; background: rgb(22 18 63 / 92%); border-radius: 999px; opacity: 0; transform: translate(-50%, 10px); pointer-events: none; transition: opacity .2s, transform .2s; }
 .dhp-toast.is-on { opacity: 1; transform: translate(-50%, 0); }

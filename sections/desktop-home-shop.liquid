@@ -835,23 +835,46 @@
       </div>
     {%- endif -%}
 
-    {%- comment -%} ---------- Le offerte del momento : les 10 plus fortes remises des rayons ---------- {%- endcomment -%}
-    <section class="dhp-sec" id="dhp-offerte">
-      <div class="dhp-hd"><h2><a href="{{ sale_url }}">{{ 'desktop_home_shop.deals_now' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a></h2></div>
-      <ul class="dhp-prods">
+    {%- comment -%}
+      ---------- Le offerte del momento : les 30 plus fortes remises des rayons, en bande qui défile (6 cartes compactes
+      visibles, grosse pastille « -43 % », prix barré, « Risparmia € ») ; avance toute seule d'une carte toutes les 4 s
+      (assets/desktop-home-shop.js), flèches en haut à droite ----------
+    {%- endcomment -%}
+    <section class="dhp-sec dhp-deals" id="dhp-offerte">
+      <div class="dhp-hd">
+        <h2><a href="{{ sale_url }}">{{ 'desktop_home_shop.deals_now' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a></h2>
+        <div class="dhp-arws" data-for="dhp-t-deals">
+          <button class="dhp-arw" type="button" data-step="-1" aria-label="{{ 'mobile.pdp.previous' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg></button>
+          <button class="dhp-arw" type="button" data-step="1" aria-label="{{ 'mobile.pdp.next' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </div>
+      </div>
+      <ul class="dhp-deals__rail" id="dhp-t-deals" data-dhp-deals>
         {%- assign deal_shown = 0 -%}
         {%- for deal_key in deal_keys -%}
           {%- liquid
             assign deal_parts = deal_key | split: '|'
             assign deal_id = deal_parts[3] | plus: 0
             assign deal = collections[deal_parts[2]].products | where: 'id', deal_id | first
-            if deal == blank
+            if deal == blank or deal.featured_image == blank
               continue
             endif
+            assign dv = deal.selected_or_first_available_variant
+            assign d_pct = dv.compare_at_price | minus: dv.price | times: 100.0 | divided_by: dv.compare_at_price | round
+            assign d_save = dv.compare_at_price | minus: dv.price | money_without_trailing_zeros | strip_html
           -%}
-          {%- render 'mshein-card', product: deal, best: best, best_ids: best_ids, flag: flag, uniform: true -%}
+          <li class="dhp-deal">
+            <a class="dhp-deal__a" href="{{ deal.url }}">
+              <span class="dhp-deal__img">
+                <img src="{{ deal.featured_image | image_url: width: 400 }}" alt="" loading="lazy" width="400" height="400">
+                <span class="dhp-deal__pct">-{{ d_pct }}%</span>
+              </span>
+              <span class="dhp-deal__t">{{ deal.title | escape }}</span>
+              <span class="dhp-deal__pr"><b>{{ dv.price | money | strip_html }}</b> <s>{{ dv.compare_at_price | money | strip_html }}</s></span>
+              <span class="dhp-deal__save">{{ 'mobile.home_shein.save' | t: amount: d_save }}</span>
+            </a>
+          </li>
           {%- assign deal_shown = deal_shown | plus: 1 -%}
-          {%- if deal_shown == 10 -%}{%- break -%}{%- endif -%}
+          {%- if deal_shown == 30 -%}{%- break -%}{%- endif -%}
         {%- endfor -%}
       </ul>
     </section>
