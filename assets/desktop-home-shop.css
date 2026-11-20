@@ -523,7 +523,11 @@ html.dhp-modal-open { overflow: hidden; }
    coin, 20 px de haut, texte 12,5 px ; coins 22 px ; contour gris clair 1 px. */
 .dhp-feat .dhp-hd { margin-bottom: 26px; }
 .dhp-feat .dhp-hd h2 { color: #0d0d0f; font-family: 'Figtree', sans-serif; font-size: 22px; font-weight: 600; letter-spacing: -.3px; }
-.dhp-feat__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+/* Pages de 2 histoires empilées au même endroit : celle affichée (.is-on) remplacée en fondu toutes les 15 s ; les autres
+   restent dans la mise en page (invisibles) pour que leurs photos soient déjà chargées */
+.dhp-feat__stack { display: grid; }
+.dhp-feat__grid { display: grid; grid-area: 1 / 1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; opacity: 0; visibility: hidden; transition: opacity .7s ease, visibility 0s .7s; }
+.dhp-feat__grid.is-on { opacity: 1; visibility: visible; transition: opacity .7s ease, visibility 0s; }
 .dhp-feat__set { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "s s a b" "s s g g" "c d g g"; gap: 10px; container-type: inline-size; }
 .dhp-feat__story, .dhp-feat__p { position: relative; display: block; overflow: hidden; aspect-ratio: 1; background: #fff; border-radius: 3.6cqw; }
 .dhp-feat__story { grid-area: s; color: #fff; background: #d9d6d2; }

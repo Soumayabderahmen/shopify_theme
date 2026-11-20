@@ -1138,6 +1138,25 @@
       newSeen.observe(novita);
     } else start();
   }
+
+    // ---------- In primo piano : pages de 2 histoires, la suivante toutes les 15 s (seulement à l'écran, onglet ouvert ;
+    // pas de changement au survol ni si les animations sont réduites) ----------
+    var feat = root.querySelector('[data-dhp-feat]');
+    if (feat && once(feat) && !still) {
+      var featPages = [].slice.call(feat.children);
+      var featAt = 0;
+      var featOver = false;
+      feat.addEventListener('mouseenter', function () { featOver = true; });
+      feat.addEventListener('mouseleave', function () { featOver = false; });
+      if (featPages.length > 1) setInterval(function () {
+        if (featOver || document.hidden || !onScreen(feat)) return;
+        featPages[featAt].classList.remove('is-on');
+        featPages[featAt].inert = true;
+        featAt = (featAt + 1) % featPages.length;
+        featPages[featAt].classList.add('is-on');
+        featPages[featAt].inert = false;
+      }, 15000);
+    }
   };
 
   // Chargement : la suite est rendue par Shopify dans une 2e requête (sans en-tête ni pied de page), insérée ici, puis

@@ -511,7 +511,7 @@
       collection, entourée de 5 produits de la collection (prix, ou « -X % » en promotion) — grille 4 × 3 : histoire en
       haut à gauche (2 × 2), 2 petits à droite, grand produit en bas à droite (2 × 2), 2 petits en bas à gauche.
       Histoires : blocs « Storia in primo piano » de ce modèle (index.dhp-more-a : collection, titre, photo) ; sinon, ou pour
-      compléter jusqu'à 2, les collections publiées le plus récemment qui ont au moins 6 produits avec photo (hors
+      compléter jusqu'à 6 (3 pages de 2, qui changent toutes les 15 s), les collections publiées le plus récemment qui ont au moins 6 produits avec photo (hors
       collections fourre-tout, même règle que templates/collection.dhp-new-all.liquid). Ordinateur seulement. ----------
     {%- endcomment -%}
     {%- liquid
@@ -520,7 +520,7 @@
       assign feat_images = ''
       assign feat_count = 0
       for block in section.blocks
-        if block.type != 'story' or feat_count >= 2
+        if block.type != 'story' or feat_count >= 6
           continue
         endif
         assign fc = block.settings.collection
@@ -537,7 +537,7 @@
         assign feat_images = feat_images | append: feat_img | append: '|~|'
         assign feat_count = feat_count | plus: 1
       endfor
-      if feat_count < 2
+      if feat_count < 6
         assign feat_keys = ''
         for c in collections
           assign h = c.handle
@@ -562,7 +562,7 @@
         endfor
         assign feat_keys = feat_keys | split: '|' | sort | reverse
         for key in feat_keys
-          if feat_count >= 2
+          if feat_count >= 6
             break
           endif
           assign kh = key | split: '~' | last
@@ -582,7 +582,9 @@
     {%- if feat_count > 0 -%}
     <section class="dhp-sec dhp-feat" aria-labelledby="dhp-feat-title">
       <div class="dhp-hd"><h2 id="dhp-feat-title">{{ 'desktop_home_shop.featured_title' | t }}</h2></div>
-      <div class="dhp-feat__grid">
+      {%- assign feat_shown = 0 -%}
+      <div class="dhp-feat__stack" data-dhp-feat>
+      <div class="dhp-feat__grid is-on">
         {%- for feat_handle in feat_handles -%}
           {%- liquid
             assign fc = collections[feat_handle]
@@ -590,6 +592,11 @@
               continue
             endif
             assign feat_i = forloop.index0
+            # 2 histoires par page : les pages se remplacent toutes les 15 s (assets/desktop-home-shop.js)
+            if feat_shown == 2 or feat_shown == 4
+              echo '</div><div class="dhp-feat__grid" inert>'
+            endif
+            assign feat_shown = feat_shown | plus: 1
             assign feat_title = feat_titles[feat_i] | strip
             if feat_title == blank
               assign feat_title = fc.title | split: ' | ' | first | split: ': ' | first | strip
@@ -670,6 +677,7 @@
             </a>
           </div>
         {%- endfor -%}
+      </div>
       </div>
     </section>
     {%- endif -%}
@@ -1084,9 +1092,9 @@
     {
       "type": "story",
       "name": "Storia in primo piano",
-      "limit": 2,
+      "limit": 6,
       "settings": [
-        { "type": "paragraph", "content": "Sezione « In primo piano » (modello index.dhp-more-a): grande foto con titolo e 5 prodotti della collezione. Senza blocchi: le 2 collezioni pubblicate più di recente." },
+        { "type": "paragraph", "content": "Sezione « In primo piano » (modello index.dhp-more-a): grande foto con titolo e 5 prodotti della collezione, 2 storie alla volta, cambiano ogni 15 s. Fino a 6 storie; completate con le collezioni pubblicate più di recente." },
         { "type": "collection", "id": "collection", "label": "Collezione", "info": "Almeno 6 prodotti con foto" },
         { "type": "text", "id": "title", "label": "Titolo", "info": "Vuoto: nome della collezione" },
         { "type": "image_picker", "id": "image", "label": "Foto grande", "info": "Vuota: foto della collezione, altrimenti di un suo prodotto" }
