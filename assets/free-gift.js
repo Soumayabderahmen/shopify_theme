@@ -1,5 +1,5 @@
 /* Popup « 3 regali gratis » — réglages et textes dans snippets/free-gift-popup.liquid, styles dans assets/free-gift.css.
-   - Ouverture après 15 s cumulées sur le site (sessionStorage fg_t0). Une fois fermée, elle vole jusqu'à une bulle
+   - Ouverture après 10 s cumulées sur le site (sessionStorage fg_t0). Une fois fermée, elle vole jusqu'à une bulle
      story sur le côté pour le reste de la visite (sessionStorage fg_docked) ; à la visite suivante elle se rouvre en entier. La bulle se déplace au doigt le long
      du bord et se colle au côté le plus proche (position retenue).
    - Plateau de 3 places en haut (un clic retire le produit), barre vers 50 €, filtres par type de produit.
