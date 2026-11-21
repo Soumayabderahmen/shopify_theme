@@ -1556,7 +1556,7 @@
     display: none;
   }
 
-  #root .mobile-brands-sheet__az button {
+  .mobile-brands-sheet .mobile-brands-sheet__az button {
     flex: none;
     min-width: 34px;
     height: 34px;
@@ -1571,17 +1571,17 @@
     box-shadow: none;
   }
 
-  #root .mobile-brands-sheet__az button::before,
-  #root .mobile-brands-sheet__az button::after {
+  .mobile-brands-sheet .mobile-brands-sheet__az button::before,
+  .mobile-brands-sheet .mobile-brands-sheet__az button::after {
     content: none;
   }
 
-  #root .mobile-brands-sheet__az button[aria-pressed='true'] {
+  .mobile-brands-sheet .mobile-brands-sheet__az button[aria-pressed='true'] {
     color: #fff;
     background: #3a34d2;
   }
 
-  #root .mobile-brands-sheet__az button:disabled {
+  .mobile-brands-sheet .mobile-brands-sheet__az button:disabled {
     opacity: 0.3;
   }
 

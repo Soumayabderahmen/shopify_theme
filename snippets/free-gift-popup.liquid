@@ -1,0 +1,42 @@
+{%- comment -%}
+  Popup « 3 regali gratis » (prototype) — assets/free-gift.js + assets/free-gift.css.
+  - S'ouvre après 15 s passées sur le site (le temps compte sur toutes les pages de la visite).
+  - Liste les produits de la collection choisie dans Personnalizza tema > Impostazioni tema > « Regali gratis (popup) »
+    (pour l'instant : n'importe quelle collection ; à remplacer par la collection des produits à 0 €).
+  - Le client choisit au plus 3 produits (les autres se grisent) ; l'ajout au panier n'est permis qu'à partir de 50 €
+    d'achats. Les regali portent la propriété cachée _gift ; si le panier redescend sous 50 €, ils sont retirés.
+  - Fermée : elle se range en bulle ronde sur le côté de la page (comme une story Instagram) qui la rouvre.
+{%- endcomment -%}
+{%- liquid
+  assign fg_handle = 'all'
+  if settings.free_gift_collection != blank
+    assign fg_handle = settings.free_gift_collection.handle
+  endif
+  assign fg_threshold = settings.free_gift_threshold | default: 50
+  assign fg_delay = settings.free_gift_delay | default: 15
+  assign fg_max = settings.free_gift_max | default: 3
+  assign fg_lang = request.locale.iso_code | slice: 0, 2
+-%}
+{%- unless settings.free_gift_enabled == false or template.name == 'cart' or template.name == 'password' or template.name == 'gift_card' -%}
+  {{ 'free-gift.css' | asset_url | stylesheet_tag }}
+  <script type="application/json" id="free-gift-config">
+    {
+      "url": {{ routes.root_url | append: '/collections/' | replace: '//collections', '/collections' | append: fg_handle | append: '/products.json?limit=24' | json }},
+      "root": {{ routes.root_url | append: '/' | replace: '//', '/' | json }},
+      "threshold": {{ fg_threshold | times: 100 }},
+      "delay": {{ fg_delay | times: 1000 }},
+      "max": {{ fg_max }},
+      "currency": {{ cart.currency.iso_code | json }},
+      "locale": {{ request.locale.iso_code | json }},
+      "t": {%- case fg_lang -%}
+        {%- when 'fr' -%}
+          {"title":"Choisis tes cadeaux","sub":"{{ fg_max }} articles offerts dès {{ fg_threshold }} € d'achat","free":"GRATUIT","picked":"sélectionnés","missing":"Encore %s pour débloquer tes cadeaux","unlocked":"Cadeaux débloqués ! Ajoute-les à ton panier","add":"Ajouter mes cadeaux au panier","locked":"Débloqué à {{ fg_threshold }} € d'achat","choose":"Choisis jusqu'à {{ fg_max }} cadeaux","added":"Cadeaux ajoutés au panier ✓","bubble":"Cadeaux","close":"Fermer","error":"Ajout impossible, réessaie"}
+        {%- when 'en' -%}
+          {"title":"Pick your free gifts","sub":"{{ fg_max }} free items with orders over €{{ fg_threshold }}","free":"FREE","picked":"selected","missing":"%s more to unlock your gifts","unlocked":"Gifts unlocked! Add them to your cart","add":"Add my gifts to cart","locked":"Unlocks at €{{ fg_threshold }}","choose":"Pick up to {{ fg_max }} gifts","added":"Gifts added to your cart ✓","bubble":"Gifts","close":"Close","error":"Could not add, please retry"}
+        {%- else -%}
+          {"title":"Scegli i tuoi regali","sub":"{{ fg_max }} articoli gratis con un ordine da {{ fg_threshold }} €","free":"GRATIS","picked":"selezionati","missing":"Ti mancano %s per sbloccare i regali","unlocked":"Regali sbloccati! Aggiungili al carrello","add":"Aggiungi i regali al carrello","locked":"Si sblocca a {{ fg_threshold }} € di spesa","choose":"Scegli fino a {{ fg_max }} regali","added":"Regali aggiunti al carrello ✓","bubble":"Regali","close":"Chiudi","error":"Impossibile aggiungere, riprova"}
+      {%- endcase -%}
+    }
+  </script>
+  <script src="{{ 'free-gift.js' | asset_url }}" defer></script>
+{%- endunless -%}

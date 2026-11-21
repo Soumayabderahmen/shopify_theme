@@ -664,6 +664,7 @@
       <div class="panel-2"></div>
     </div>
     {% render 'global-variables' %}
+    {%- render 'free-gift-popup' -%}
     {%- if rtl_languages contains localization.language.iso_code -%}
       {{ 'rtl.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
     {%- endif -%}

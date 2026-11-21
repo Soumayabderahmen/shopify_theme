@@ -1,0 +1,109 @@
+/* Popup « 3 regali gratis » + bulle latérale (snippets/free-gift-popup.liquid, assets/free-gift.js).
+   Hors de #root, au-dessus de tout. Les boutons du thème ont un ::before coloré : coupé ici.
+   Animations : uniquement transform / opacity (carte graphique), pour ne pas ralentir le défilement. */
+.fg-root { --fg-ink: #161616; --fg-mute: #6f6f6f; --fg-line: #ececec; --fg-bg: #fff; --fg-accent: #ff3d6e; --fg-ok: #14a44d; --fg-ring: conic-gradient(from 210deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5, #feda75); font-family: inherit; color: var(--fg-ink); }
+.fg-root *, .fg-root *::before, .fg-root *::after { box-sizing: border-box; }
+.fg-root button { font: inherit; color: inherit; background: none; border: 0; margin: 0; padding: 0; cursor: pointer; text-transform: none; letter-spacing: normal; min-width: 0; min-height: 0; box-shadow: none; }
+.fg-root button::before, .fg-root button::after { content: none; display: none; }
+.fg-root img { display: block; max-width: none; }
+
+/* ---------- Fenêtre ---------- */
+.fg-modal { position: fixed; inset: 0; z-index: 2147482000; display: flex; align-items: center; justify-content: center; padding: 24px; visibility: hidden; pointer-events: none; }
+.fg-modal.is-open { visibility: visible; pointer-events: auto; }
+.fg-modal__shade { position: absolute; inset: 0; background: rgb(0 0 0 / 55%); opacity: 0; transition: opacity .3s ease; }
+.fg-modal.is-open .fg-modal__shade { opacity: 1; }
+.fg-box { position: relative; width: min(760px, 100%); max-height: min(86vh, 820px); display: flex; flex-direction: column; background: var(--fg-bg); border-radius: 22px; overflow: hidden; box-shadow: 0 30px 80px rgb(0 0 0 / 30%); opacity: 0; transform: translateY(24px) scale(.96); transform-origin: var(--fg-origin, 50% 50%); transition: opacity .3s ease, transform .4s cubic-bezier(.2, .9, .25, 1.15); }
+.fg-modal.is-open .fg-box { opacity: 1; transform: none; }
+.fg-modal.is-closing .fg-box { transform: scale(.15); opacity: 0; transition: transform .35s cubic-bezier(.5, 0, .75, 0), opacity .3s ease .05s; }
+
+.fg-head { position: relative; padding: 22px 64px 16px 24px; background: linear-gradient(120deg, #fff1f5 0%, #fff7ec 55%, #f3f0ff 100%); }
+.fg-head__title { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 22px; font-weight: 800; line-height: 1.15; }
+.fg-head__ico { flex: none; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: var(--fg-accent); color: #fff; font-size: 20px; }
+.fg-head__sub { margin: 6px 0 0 48px; font-size: 14px; color: var(--fg-mute); }
+.fg-x { position: absolute; top: 16px; right: 16px; width: 38px; height: 38px; border-radius: 50% !important; display: grid !important; place-items: center; background: #fff !important; box-shadow: 0 2px 10px rgb(0 0 0 / 10%) !important; }
+.fg-x svg { width: 16px; height: 16px; }
+
+/* Barre de progression vers 50 € */
+.fg-goal { padding: 14px 24px 12px; border-bottom: 1px solid var(--fg-line); }
+.fg-goal__txt { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+.fg-goal__txt b { color: var(--fg-accent); }
+.fg-goal.is-ok .fg-goal__txt { color: var(--fg-ok); }
+.fg-goal__bar { height: 8px; border-radius: 8px; background: #f1f1f1; overflow: hidden; }
+.fg-goal__fill { height: 100%; width: 100%; border-radius: inherit; background: linear-gradient(90deg, #ff8a3d, var(--fg-accent)); transform: scaleX(var(--fg-p, 0)); transform-origin: left; transition: transform .6s cubic-bezier(.2, .8, .2, 1); }
+.fg-goal.is-ok .fg-goal__fill { background: linear-gradient(90deg, #3ccf73, var(--fg-ok)); }
+
+/* Grille des produits */
+.fg-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px 24px 20px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: max-content; align-content: start; gap: 14px; -webkit-overflow-scrolling: touch; }
+.fg-card { position: relative; height: auto !important; width: auto !important; padding: 0 !important; display: flex !important; flex-direction: column; text-align: left; border-radius: 14px !important; border: 2px solid var(--fg-line) !important; background: #fff !important; overflow: hidden; transition: border-color .2s ease, transform .2s ease, opacity .2s ease; }
+.fg-card:hover:not(:disabled) { transform: translateY(-2px); }
+.fg-card__img { display: block; position: relative; aspect-ratio: 1 / 1; background: #f6f6f6; }
+.fg-card__img img { width: 100%; height: 100%; object-fit: cover; }
+.fg-card__free { position: absolute; left: 8px; top: 8px; padding: 3px 8px; border-radius: 999px; background: var(--fg-accent); color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .03em; }
+.fg-card__check { position: absolute; right: 8px; top: 8px; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; background: rgb(0 0 0 / 25%); display: grid; place-items: center; color: #fff; transition: background .2s ease, transform .25s cubic-bezier(.2, .9, .3, 1.4); }
+.fg-card__check svg { width: 14px; height: 14px; opacity: 0; transform: scale(.4); transition: opacity .2s ease, transform .25s ease; }
+.fg-card__body { display: block; padding: 8px 10px 10px; }
+.fg-card__title { margin: 0; font-size: 13px; line-height: 1.3; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em; }
+.fg-card__price { margin: 6px 0 0; display: flex; align-items: baseline; gap: 6px; font-size: 15px; font-weight: 800; color: var(--fg-accent); }
+.fg-card__price s { font-size: 12px; font-weight: 400; color: var(--fg-mute); }
+.fg-card.is-on { border-color: var(--fg-accent) !important; }
+.fg-card.is-on .fg-card__check { background: var(--fg-accent); transform: scale(1.1); }
+.fg-card.is-on .fg-card__check svg { opacity: 1; transform: none; }
+.fg-card:disabled { opacity: .38; cursor: not-allowed; filter: grayscale(.8); }
+
+.fg-sk { border-radius: 14px; background: #f3f3f3; aspect-ratio: 3 / 4; opacity: .7; animation: fg-sk 1.2s ease-in-out infinite alternate; }
+@keyframes fg-sk { to { opacity: .3; } }
+
+/* Pied : compteur + bouton */
+.fg-foot { display: flex; align-items: center; gap: 14px; padding: 14px 24px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--fg-line); background: #fff; }
+.fg-count { flex: none; display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--fg-mute); }
+.fg-dots { display: flex; gap: 4px; }
+.fg-dots i { width: 10px; height: 10px; border-radius: 50%; background: #e4e4e4; transition: background .2s ease, transform .2s ease; }
+.fg-dots i.is-on { background: var(--fg-accent); transform: scale(1.15); }
+.fg-cta { flex: 1 1 auto; display: flex !important; align-items: center; justify-content: center; gap: 8px; min-height: 50px !important; border-radius: 999px !important; background: var(--fg-ink) !important; color: #fff !important; font-size: 15px !important; font-weight: 700 !important; padding: 0 18px !important; transition: opacity .2s ease, transform .15s ease; }
+.fg-cta:active:not(:disabled) { transform: scale(.98); }
+.fg-cta:disabled { background: #d9d9d9 !important; color: #7a7a7a !important; cursor: not-allowed; }
+.fg-cta svg { width: 16px; height: 16px; flex: none; }
+.fg-cta.is-done { background: var(--fg-ok) !important; }
+
+/* ---------- Bulle sur le côté (story Instagram) ---------- */
+.fg-bubble { position: fixed; right: 14px; top: 46%; z-index: 2147481000; display: flex !important; flex-direction: column; align-items: center; gap: 4px; opacity: 0; transform: translateX(120%) scale(.6); pointer-events: none; transition: opacity .35s ease, transform .5s cubic-bezier(.2, .9, .25, 1.3); }
+.fg-bubble.is-shown { opacity: 1; transform: none; pointer-events: auto; }
+.fg-bubble__ring { display: block; position: relative; width: 72px; height: 72px; border-radius: 50%; padding: 3px; isolation: isolate; filter: drop-shadow(0 6px 16px rgb(0 0 0 / 22%)); }
+.fg-bubble__ring::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--fg-ring); z-index: -1; animation: fg-spin 4s linear infinite; }
+.fg-bubble.is-seen .fg-bubble__ring::before { background: #cfcfcf; animation: none; }
+.fg-bubble__in { display: block; position: relative; width: 100%; height: 100%; border-radius: 50%; border: 3px solid #fff; overflow: hidden; background: #fff; }
+.fg-bubble__in img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.12); transition: opacity .6s ease, transform 2.4s ease; }
+.fg-bubble__in img.is-on { opacity: 1; transform: scale(1); }
+.fg-bubble__in .fg-bubble__gift { position: absolute; inset: 0; display: grid; place-items: center; font-size: 30px; background: #fff1f5; }
+.fg-bubble__badge { position: absolute; right: -2px; top: -2px; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 12px; border: 2px solid #fff; background: var(--fg-accent); color: #fff; font-size: 12px; font-weight: 800; line-height: 20px; text-align: center; }
+.fg-bubble__badge.is-ok { background: var(--fg-ok); }
+.fg-bubble__label { padding: 2px 8px; border-radius: 999px; background: #fff; box-shadow: 0 2px 8px rgb(0 0 0 / 14%); font-size: 11px; font-weight: 700; }
+.fg-bubble:hover .fg-bubble__ring { transform: scale(1.06); }
+.fg-bubble__ring { transition: transform .2s ease; }
+@keyframes fg-spin { to { transform: rotate(1turn); } }
+
+/* Message bref */
+.fg-toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); z-index: 2147482500; padding: 12px 18px; border-radius: 999px; background: #161616; color: #fff; font-size: 14px; font-weight: 600; opacity: 0; transform: translate(-50%, 12px); pointer-events: none; transition: opacity .25s ease, transform .25s ease; white-space: nowrap; }
+.fg-toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- Téléphone : feuille qui monte du bas ---------- */
+@media (max-width: 760px) {
+  .fg-modal { padding: 0; align-items: flex-end; }
+  .fg-box { width: 100%; max-height: 88vh; border-radius: 22px 22px 0 0; transform: translateY(100%); transition: opacity .2s ease, transform .4s cubic-bezier(.2, .9, .25, 1); }
+  .fg-head { padding: 18px 60px 14px 16px; }
+  .fg-head__title { font-size: 19px; }
+  .fg-head__ico { width: 34px; height: 34px; font-size: 18px; }
+  .fg-head__sub { margin-left: 44px; font-size: 13px; }
+  .fg-x { top: 14px; right: 12px; }
+  .fg-goal { padding: 12px 16px 10px; }
+  .fg-goal__txt { font-size: 13px; }
+  .fg-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px 16px 16px; }
+  .fg-foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); gap: 10px; }
+  .fg-cta { font-size: 14px !important; min-height: 48px !important; }
+  .fg-bubble { right: 10px; top: auto; bottom: calc(150px + env(safe-area-inset-bottom)); }
+  .fg-bubble__ring { width: 62px; height: 62px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fg-root *, .fg-root *::before, .fg-root *::after { animation: none !important; transition-duration: .01ms !important; }
+}
