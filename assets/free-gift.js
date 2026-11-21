@@ -30,6 +30,7 @@
   var lastCartGifts = Array.isArray(state.cartGifts) ? state.cartGifts : [];
   var side = state.side === 'left' ? 'left' : 'right';
   var yRatio = typeof state.y === 'number' ? state.y : null;
+  var yPhone = typeof state.yPhone === 'number' ? state.yPhone : null;   // téléphone : position à part (en bas par défaut)
   var products = null;   // [{id, title, img, value, type}]
   var cart = { subtotal: 0, gifts: [], count: 0 };
   var filter = '';
@@ -81,7 +82,7 @@
       '<span class="fg-bubble__ring"><span class="fg-bubble__in"></span><span class="fg-bubble__badge"></span></span>' +
       '<span class="fg-bubble__label">' + esc(T.bubble) + '</span>' +
       // Téléphone : petite pile de photos qui dépasse du bord de l'écran (comme les Instants d'Instagram)
-      '<span class="fg-peek" aria-hidden="true"><span class="fg-peek__grip"></span><span class="fg-peek__stack"></span><span class="fg-peek__badge"></span></span>' +
+      '<span class="fg-peek" aria-hidden="true"><span class="fg-peek__stack"></span><span class="fg-peek__badge"></span></span>' +
       '<span class="fg-bubble__tip">' + esc(T.tip) + '</span>' +
     '</button>' +
     // 2e fenêtre : l'e-mail du client avant l'ajout des regali au panier
@@ -339,11 +340,12 @@
   };
   var placeBubble = function () {
     var w = document.documentElement.clientWidth, h = window.innerHeight, lim = limits();
-    if (yRatio == null) yRatio = window.innerWidth < 760 ? .6 : .46;
-    var y = Math.max(lim.min, Math.min(lim.max, Math.round(h * yRatio)));
-    bubble.style.setProperty('--fg-bx', (side === 'right' ? w - BW - 10 : 10) + 'px');
+    var ratio = isPhone() ? (yPhone == null ? 1 : yPhone) : (yRatio == null ? .46 : yRatio);
+    var y = Math.max(lim.min, Math.min(lim.max, Math.round(h * ratio)));
+    var sd = isPhone() ? 'right' : side;   // téléphone : toujours au bord droit, comme Instagram
+    bubble.style.setProperty('--fg-bx', (sd === 'right' ? w - BW - 10 : 10) + 'px');
     bubble.style.setProperty('--fg-by', y + 'px');
-    bubble.classList.toggle('is-left', side === 'left');
+    bubble.classList.toggle('is-left', sd === 'left');
     return y;
   };
 
@@ -367,7 +369,7 @@
     store.set({ docked: true, picks: picks });
     var y = placeBubble();
     var r = box.getBoundingClientRect();
-    var bx = isPhone() ? (side === 'right' ? document.documentElement.clientWidth - 30 : 30) : parseFloat(bubble.style.getPropertyValue('--fg-bx')) + BW / 2, by = y + 37;
+    var bx = isPhone() ? document.documentElement.clientWidth - 30 : parseFloat(bubble.style.getPropertyValue('--fg-bx')) + BW / 2, by = y + 37;
     box.style.setProperty('--fg-dx', Math.round(bx - (r.left + r.width / 2)) + 'px');
     box.style.setProperty('--fg-dy', Math.round(by - (r.top + r.height / 2)) + 'px');
     modal.classList.add('is-docking');
@@ -517,7 +519,7 @@
     tip.classList.remove('is-shown');
     // Téléphone : tirer la pile vers le centre de l'écran ouvre la popup ; glisser en hauteur la déplace le long du bord
     if (isPhone()) {
-      var inward = side === 'right' ? -dx : dx;
+      var inward = -dx;
       if (inward > 30 && inward > Math.abs(dy)) { drag = null; bubble.__dragged = true; setTimeout(function () { bubble.__dragged = false; }, 50); open(); return; }
       bubble.classList.add('is-drag');
       bubble.style.setProperty('--fg-by', (drag.by + dy) + 'px');
@@ -534,10 +536,11 @@
     bubble.classList.remove('is-drag');
     if (!d.moved) return;
     if (!isPhone()) side = e.clientX < window.innerWidth / 2 ? 'left' : 'right';
-    yRatio = (d.by + (e.clientY - d.y)) / window.innerHeight;
+    var phone = isPhone(), r = (d.by + (e.clientY - d.y)) / window.innerHeight;
+    if (phone) yPhone = r; else yRatio = r;
     placeBubble();
-    yRatio = (parseFloat(bubble.style.getPropertyValue('--fg-by')) || 0) / window.innerHeight;
-    store.set({ side: side, y: yRatio });
+    r = (parseFloat(bubble.style.getPropertyValue('--fg-by')) || 0) / window.innerHeight;
+    if (phone) { yPhone = r; store.set({ yPhone: r }); } else { yRatio = r; store.set({ side: side, y: r }); }
     bubble.__dragged = true;
     setTimeout(function () { bubble.__dragged = false; }, 50);
   };
@@ -545,8 +548,23 @@
   bubble.addEventListener('pointercancel', endDrag);
   bubble.addEventListener('click', function (e) {
     if (bubble.__dragged) { e.preventDefault(); return; }
+    if (isPhone()) {
+      bubble.classList.remove('is-tucked');
+      bubble.classList.add('is-pop');
+      setTimeout(function () { bubble.classList.remove('is-pop'); open(); }, 230);
+      return;
+    }
     open();
   });
+  /* Téléphone : pendant le défilement la pile se range dans le bord, et ressort avec un rebond à l'arrêt
+     (comme les Instants d'Instagram). */
+  var tuckTimer;
+  window.addEventListener('scroll', function () {
+    if (!isPhone() || !bubble.classList.contains('is-shown') || drag) return;
+    if (!bubble.classList.contains('is-tucked')) bubble.classList.add('is-tucked');
+    clearTimeout(tuckTimer);
+    tuckTimer = setTimeout(function () { bubble.classList.remove('is-tucked'); }, 260);
+  }, { passive: true });
   window.addEventListener('resize', function () { if (bubble.classList.contains('is-shown')) placeBubble(); });
 
   /* Panier modifié ailleurs sur la page (ajout, suppression) : relire le total, retirer les regali sous 50 €. */
