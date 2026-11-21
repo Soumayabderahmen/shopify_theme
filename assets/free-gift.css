@@ -191,11 +191,11 @@ html.m6pn-open .fg-root .fg-bubble.is-shown, html.mobile-wishlist-open .fg-root 
   .fg-root .fg-foot { padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* ---------- Téléphone : pile de photos façon Instants d'Instagram ----------
+/* ---------- Téléphone et tablette (jusqu'à 1024 px) : pile de photos façon Instants d'Instagram ----------
    En bas à droite au-dessus de la barre du bas, à moitié rentrée dans le bord ; photos à bord blanc, coins arrondis,
    inclinées. Pendant le défilement elle se range dans le bord (is-tucked), et ressort avec un rebond à l'arrêt ;
    à l'appui les photos s'écartent en éventail (is-pop) avant l'ouverture. Tout en transform (carte graphique). */
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .fg-root .fg-bubble { left: auto; right: 0; gap: 0; transform: translate(120%, var(--fg-by, 0)); transition: opacity .3s ease, transform .55s cubic-bezier(.34, 1.56, .64, 1); }
   .fg-root .fg-bubble.is-shown { transform: translate(0, var(--fg-by, 0)); }
   .fg-root .fg-bubble.is-left { right: auto; left: 0; transform: translate(-120%, var(--fg-by, 0)); }

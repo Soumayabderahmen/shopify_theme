@@ -111,7 +111,8 @@
   var tip = q('.fg-bubble__tip'), toast = q('.fg-toast');
   var peekStack = q('.fg-peek__stack'), peekBadge = q('.fg-peek__badge');
   var mail = q('.fg-mail'), mailForm = q('.fg-mail__box'), mailInput = q('#fg-mail-input'), mailConsent = q('#fg-mail-consent'), mailErr = q('.fg-mail__err'), mailPicks = q('.fg-mail__picks');
-  var isPhone = function () { return window.matchMedia('(max-width: 760px)').matches; };
+  // Téléphone et tablette (jusqu'à 1024 px) : pile façon Instants d'Instagram au lieu de la bulle (même règle que free-gift.css)
+  var isPhone = function () { return window.matchMedia('(max-width: 1024px)').matches; };
 
   var toastTimer;
   var say = function (text) {
@@ -335,7 +336,7 @@
   /* ---------- Position de la bulle ---------- */
   var BW = 80;
   var limits = function () {
-    var h = window.innerHeight, mobile = window.innerWidth < 760;
+    var h = window.innerHeight, mobile = isPhone();
     return { min: 80, max: h - (mobile ? 190 : 130) };   // téléphone : au-dessus de la barre du bas
   };
   var placeBubble = function () {
