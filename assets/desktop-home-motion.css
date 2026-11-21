@@ -1,0 +1,74 @@
+/* Accueil ordinateur : couche de motion design par-dessus le design actuel (sections/desktop-home-shop.liquid, styles
+   assets/desktop-home-shop.css). Chargée seulement sur l'accueil, au-dessus de 760 px (layout/theme.liquid).
+   Règle de performance : sur cet accueil, tout changement de style recalcule la page entière (~55 ms). Ici, uniquement
+   des animations que la carte graphique joue seule : opacity, translate, scale, rotate ; défilement piloté en CSS
+   (animation-timeline: view() / scroll()), aucun script à chaque image. Sans prise en charge : la page s'affiche
+   normalement, sans ces effets. Mouvement réduit demandé par le système : tout est coupé. */
+
+:root {
+  --mo-ease: cubic-bezier(.2, .8, .2, 1);
+  --mo-spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* ---------- 1. Arrivée de la page : la bannière se met en place (la barre des paiements et les accessoires de saison
+   gardent leurs propres animations) ---------- */
+.dhp-hero { animation: mo-rise .9s var(--mo-ease) .08s both; }
+.dhp-hero__txt > * { animation: mo-rise .8s var(--mo-ease) both; }
+.dhp-hero__txt > :nth-child(1) { animation-delay: .22s; }
+.dhp-hero__txt > :nth-child(2) { animation-delay: .32s; }
+.dhp-hero__txt > :nth-child(3) { animation-delay: .42s; }
+.dhp-hero__txt > :nth-child(4) { animation-delay: .52s; }
+.dhp-hero__txt > :nth-child(5) { animation-delay: .62s; }
+.dhp-hero__art { animation: mo-pop 1.1s var(--mo-spring) .3s both; }
+@keyframes mo-rise { from { opacity: 0; translate: 0 34px; } }
+@keyframes mo-pop { from { opacity: 0; scale: .9; rotate: -2deg; } }
+
+/* ---------- 2. Micro-interactions au survol (transitions courtes, sur la carte graphique) ---------- */
+.dhp .mshein-card, .dhp-dept, .dhp-coll, .dhp-new__card, .dhp-brands > *, .dhp-occ, .dhp-fc { transition: translate .45s var(--mo-ease), scale .45s var(--mo-ease), rotate .45s var(--mo-ease); }
+.dhp .mshein-card:hover { translate: 0 -6px; }
+.dhp-dept:hover, .dhp-coll:hover { translate: 0 -8px; rotate: -.6deg; }
+.dhp-new__card:hover { translate: 0 -8px; scale: 1.015; }
+.dhp-brands > *:hover { translate: 0 -6px; rotate: 1deg; }
+.dhp-btn, .dhp-arw, .dhp-new__arw { transition: scale .2s var(--mo-ease), translate .2s var(--mo-ease); }
+.dhp-btn:active, .dhp-arw:active, .dhp-new__arw:active { scale: .94; }
+.dhp-btn:hover { translate: 0 -2px; }
+
+/* ---------- 3. Au défilement (piloté par le défilement, sans script) ---------- */
+@supports (animation-timeline: view()) {
+  /* Barre de progression de lecture, en haut de l'écran */
+  .dhp::before { content: ''; position: fixed; inset: 0 0 auto; z-index: 60; height: 3px; background: linear-gradient(90deg, #5b4dff, #ff5a3c, #ffcf4a); transform-origin: 0 50%; scale: 0 1; pointer-events: none; animation: mo-progress linear both; animation-timeline: scroll(root); }
+  @keyframes mo-progress { to { scale: 1 1; } }
+
+  /* Titres de section : montent et apparaissent en entrant dans l'écran */
+  .dhp-sec > .dhp-hd, .dhp-ed__hd, .dhp-new__hd { animation: mo-title linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+  @keyframes mo-title { from { opacity: 0; translate: -40px 56px; scale: .94; } }
+
+  /* Cartes des rangées : entrent l'une après l'autre (décalage par position) */
+  .dhp-track > *, .dhp .dhp-prods > .mshein-card, .dhp-brands > *, .dhp-new__card, .dhp-fcgrid > *, .dhp-bf__rail > * { animation: mo-card linear both; animation-timeline: view(); animation-range: entry 5% cover 28%; }
+  .dhp-track > :nth-child(2), .dhp .dhp-prods > :nth-child(2), .dhp-brands > :nth-child(2), .dhp-new__card:nth-child(2) { animation-range: entry 10% cover 31%; }
+  .dhp-track > :nth-child(3), .dhp .dhp-prods > :nth-child(3), .dhp-brands > :nth-child(3), .dhp-new__card:nth-child(3) { animation-range: entry 15% cover 34%; }
+  .dhp-track > :nth-child(4), .dhp .dhp-prods > :nth-child(4), .dhp-brands > :nth-child(4), .dhp-new__card:nth-child(4) { animation-range: entry 20% cover 37%; }
+  .dhp-track > :nth-child(5), .dhp .dhp-prods > :nth-child(5), .dhp-brands > :nth-child(5), .dhp-new__card:nth-child(5) { animation-range: entry 25% cover 40%; }
+  .dhp-track > :nth-child(n + 6), .dhp .dhp-prods > :nth-child(n + 6), .dhp-brands > :nth-child(n + 6), .dhp-new__card:nth-child(n + 6) { animation-range: entry 30% cover 43%; }
+  @keyframes mo-card { from { opacity: 0; translate: 0 110px; scale: .88; rotate: 3deg; } }
+
+  /* Photos des grandes cartes : léger effet de profondeur (la photo glisse moins vite que la carte) */
+  .dhp-dept__bg, .dhp-coll__bg { scale: 1.18; animation: mo-parallax linear both; animation-timeline: view(); animation-range: cover 0% cover 100%; }
+  @keyframes mo-parallax { from { translate: 0 -8%; } to { translate: 0 8%; } }
+
+  /* Grand mot des rayons et sa rangée : la bande s'élargit en entrant */
+  .dhp-marq { animation: mo-stretch linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }
+  @keyframes mo-stretch { from { opacity: 0; scale: .86 1; } }
+
+  /* Blocs pleine largeur (Black Friday, offres, « colpo di fulmine ») : s'avancent vers l'écran */
+  .dhp-bfs, .dhp-flash, .dhp-ed { animation: mo-block linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
+  @keyframes mo-block { from { opacity: .15; scale: .9; translate: 0 90px; } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dhp-hero, .dhp-hero__txt > *, .dhp-hero__art,
+  .dhp-sec > .dhp-hd, .dhp-ed__hd, .dhp-new__hd, .dhp-track > *, .dhp .dhp-prods > .mshein-card, .dhp-brands > *, .dhp-new__card,
+  .dhp-fcgrid > *, .dhp-bf__rail > *, .dhp-dept__bg, .dhp-coll__bg, .dhp-marq, .dhp-bfs, .dhp-flash, .dhp-ed { animation: none !important; }
+  .dhp::before { display: none; }
+  .dhp .mshein-card, .dhp-dept, .dhp-coll, .dhp-new__card, .dhp-brands > * { transition: none; }
+}
