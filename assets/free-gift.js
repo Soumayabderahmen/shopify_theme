@@ -27,6 +27,7 @@
   };
   var state = store.get();
   var picks = Array.isArray(state.picks) ? state.picks.slice(0, cfg.max) : [];
+  var lastCartGifts = Array.isArray(state.cartGifts) ? state.cartGifts : [];
   var side = state.side === 'left' ? 'left' : 'right';
   var yRatio = typeof state.y === 'number' ? state.y : null;
   var products = null;   // [{id, title, img, value, type}]
@@ -38,6 +39,9 @@
     try { return new Intl.NumberFormat(cfg.locale, { style: 'currency', currency: cfg.currency }).format(cents / 100); }
     catch (e) { return (cents / 100).toFixed(2) + ' €'; }
   };
+  // Seuil affiché dans la monnaie du client (comme « Spedizione gratuita da 50 » du thème) : %t dans les textes
+  var tMoney = money(cfg.threshold).replace(/[,.]00(?=\D|$)/, '');
+  Object.keys(T).forEach(function (k) { if (typeof T[k] === 'string') T[k] = T[k].split('%t').join(tMoney); });
   var esc = function (s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; };
   var I_X = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>';
   var I_OK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
@@ -76,6 +80,8 @@
     '<button type="button" class="fg-bubble" aria-label="' + esc(T.bubble) + '">' +
       '<span class="fg-bubble__ring"><span class="fg-bubble__in"></span><span class="fg-bubble__badge"></span></span>' +
       '<span class="fg-bubble__label">' + esc(T.bubble) + '</span>' +
+      // Téléphone : petite pile de photos qui dépasse du bord de l'écran (comme les Instants d'Instagram)
+      '<span class="fg-peek" aria-hidden="true"><span class="fg-peek__grip"></span><span class="fg-peek__stack"></span><span class="fg-peek__badge"></span></span>' +
       '<span class="fg-bubble__tip">' + esc(T.tip) + '</span>' +
     '</button>' +
     '<div class="fg-toast" role="status" aria-live="polite"></div>';
@@ -86,6 +92,8 @@
   var list = q('.fg-list'), goal = q('.fg-goal'), goalTxt = q('.fg-goal__txt'), goalFill = q('.fg-goal__fill');
   var cta = q('.fg-cta'), bubble = q('.fg-bubble'), bubbleIn = q('.fg-bubble__in'), badge = q('.fg-bubble__badge');
   var tip = q('.fg-bubble__tip'), toast = q('.fg-toast');
+  var peekStack = q('.fg-peek__stack'), peekBadge = q('.fg-peek__badge');
+  var isPhone = function () { return window.matchMedia('(max-width: 760px)').matches; };
 
   var toastTimer;
   var say = function (text) {
@@ -122,12 +130,14 @@
         var gifts = (c.items || []).filter(function (i) { return i.properties && i.properties._gift; });
         var giftTotal = gifts.reduce(function (s, i) { return s + i.final_line_price; }, 0);
         cart = { subtotal: (c.items_subtotal_price || c.total_price || 0) - giftTotal, gifts: gifts, count: gifts.reduce(function (s, i) { return s + i.quantity; }, 0) };
-        // Regali déjà dans le panier (autre onglet, autre appareil) : ce sont eux qui remplissent les 3 places
-        if (gifts.length) {
-          var giftIds = gifts.map(function (i) { return i.variant_id; }).filter(function (id, at, all) { return all.indexOf(id) === at; });
-          picks = giftIds.concat(picks.filter(function (id) { return giftIds.indexOf(id) === -1; })).slice(0, cfg.max);
-          store.set({ picks: picks });
-        }
+        // Regali dans le panier (autre onglet, autre appareil) : ce sont eux qui remplissent les 3 places.
+        // Un regalo qui était dans le panier et n'y est plus (retiré depuis le tiroir ou la page panier) quitte aussi
+        // la popup ; les choix pas encore ajoutés restent. lastCartGifts retient ceux vus dans le panier la dernière fois.
+        var giftIds = gifts.map(function (i) { return i.variant_id; }).filter(function (id, at, all) { return all.indexOf(id) === at; });
+        var removed = lastCartGifts.filter(function (id) { return giftIds.indexOf(id) === -1; });
+        picks = giftIds.concat(picks.filter(function (id) { return giftIds.indexOf(id) === -1 && removed.indexOf(id) === -1; })).slice(0, cfg.max);
+        lastCartGifts = giftIds;
+        store.set({ picks: picks, cartGifts: giftIds });
         return cart;
       });
   };
@@ -279,9 +289,10 @@
   var renderBubble = function () {
     bubble.classList.toggle('is-ok', unlocked());
     bubble.classList.toggle('is-done', added());
-    badge.textContent = added() ? '✓' : picks.length + '/' + cfg.max;
+    badge.textContent = peekBadge.textContent = added() ? '✓' : picks.length + '/' + cfg.max;
     if (!products) return;
     var pool = (picks.length ? picks.map(byId) : products.slice(0, 4)).filter(function (p) { return p && p.img; });
+    peekStack.innerHTML = pool.slice(0, 3).reverse().map(function (p) { return '<img src="' + esc(p.img) + '" alt="" width="50" height="64">'; }).join('');
     bubbleIn.innerHTML = pool.map(function (p, i) { return '<img src="' + esc(p.img) + '" alt="" width="74" height="74"' + (i === 0 ? ' class="is-on"' : '') + '>'; }).join('');
     clearInterval(bubbleTimer);
     if (pool.length > 1) {
@@ -335,7 +346,7 @@
     store.set({ docked: true, picks: picks });
     var y = placeBubble();
     var r = box.getBoundingClientRect();
-    var bx = parseFloat(bubble.style.getPropertyValue('--fg-bx')) + BW / 2, by = y + 37;
+    var bx = isPhone() ? (side === 'right' ? document.documentElement.clientWidth - 30 : 30) : parseFloat(bubble.style.getPropertyValue('--fg-bx')) + BW / 2, by = y + 37;
     box.style.setProperty('--fg-dx', Math.round(bx - (r.left + r.width / 2)) + 'px');
     box.style.setProperty('--fg-dy', Math.round(by - (r.top + r.height / 2)) + 'px');
     modal.classList.add('is-docking');
@@ -435,6 +446,14 @@
     if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 8) return;
     drag.moved = true;
     tip.classList.remove('is-shown');
+    // Téléphone : tirer la pile vers le centre de l'écran ouvre la popup ; glisser en hauteur la déplace le long du bord
+    if (isPhone()) {
+      var inward = side === 'right' ? -dx : dx;
+      if (inward > 30 && inward > Math.abs(dy)) { drag = null; bubble.__dragged = true; setTimeout(function () { bubble.__dragged = false; }, 50); open(); return; }
+      bubble.classList.add('is-drag');
+      bubble.style.setProperty('--fg-by', (drag.by + dy) + 'px');
+      return;
+    }
     bubble.classList.add('is-drag');
     bubble.style.setProperty('--fg-bx', (e.clientX - BW / 2) + 'px');
     bubble.style.setProperty('--fg-by', (drag.by + dy) + 'px');
@@ -445,7 +464,7 @@
     drag = null;
     bubble.classList.remove('is-drag');
     if (!d.moved) return;
-    side = e.clientX < window.innerWidth / 2 ? 'left' : 'right';
+    if (!isPhone()) side = e.clientX < window.innerWidth / 2 ? 'left' : 'right';
     yRatio = (d.by + (e.clientY - d.y)) / window.innerHeight;
     placeBubble();
     yRatio = (parseFloat(bubble.style.getPropertyValue('--fg-by')) || 0) / window.innerHeight;
@@ -467,7 +486,7 @@
     clearTimeout(cartTimer);
     cartTimer = setTimeout(function () {
       readCart().then(enforce).then(function () {
-        renderGoal(); renderCta(); renderBubble();
+        renderSlots(); renderGoal(); renderCta(); renderBubble();
         if (modal.classList.contains('is-open')) { renderList(); }
       }).catch(function () {});
     }, 400);

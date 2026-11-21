@@ -122,7 +122,7 @@ html.m6pn-open .fg-root .fg-bubble.is-shown, html.mobile-wishlist-open .fg-root 
 .fg-root .fg-toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
 
 /* ---------- Téléphone : feuille qui monte du bas ---------- */
-@media (max-width: 720px) {
+@media (max-width: 760px) {
   .fg-root .fg-modal { padding: 0; align-items: flex-end; }
   .fg-root .fg-box { width: 100%; max-height: 90vh; border-radius: 24px 24px 0 0; transform: translateY(100%); }
   .fg-root .fg-head { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; padding: 18px 60px 14px 16px; }
@@ -139,6 +139,48 @@ html.m6pn-open .fg-root .fg-bubble.is-shown, html.mobile-wishlist-open .fg-root 
   .fg-root .fg-cta { font-size: 14px; min-height: 50px; border-radius: 12px; }
   .fg-root .fg-bubble__ring { width: 64px; height: 64px; }
 }
+
+/* Pas de cadre carré autour de la bulle après un clic ; au clavier, un anneau autour du cercle */
+.fg-root .fg-bubble:focus, .fg-root .fg-bubble:focus-visible { outline: none; }
+.fg-root .fg-bubble:focus-visible .fg-bubble__ring { box-shadow: 0 0 0 3px #3a34d2; border-radius: 50%; }
+
+/* Pile de photos du téléphone (cachée ailleurs) */
+.fg-root .fg-peek { display: none; }
+
+/* ---------- Tablette ---------- */
+@media (min-width: 761px) and (max-width: 1024px) {
+  .fg-root .fg-modal { padding: 20px; }
+  .fg-root .fg-box { width: min(720px, 100%); max-height: 86vh; }
+  .fg-root .fg-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 14px 20px 18px; }
+  .fg-root .fg-tray { gap: 16px; padding: 14px 20px; }
+  .fg-root .fg-head { padding: 20px 64px 16px 20px; }
+  .fg-root .fg-chips { padding: 12px 20px 2px; }
+  .fg-root .fg-foot { padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---------- Téléphone : la bulle devient une pile de photos qui dépasse du bord (Instants d'Instagram) ---------- */
+@media (max-width: 760px) {
+  .fg-root .fg-bubble { left: auto; right: 0; gap: 0; transform: translate(110%, var(--fg-by, 0)); }
+  .fg-root .fg-bubble.is-shown { transform: translate(0, var(--fg-by, 0)); }
+  .fg-root .fg-bubble.is-left { right: auto; left: 0; transform: translate(-110%, var(--fg-by, 0)); }
+  .fg-root .fg-bubble.is-left.is-shown { transform: translate(0, var(--fg-by, 0)); }
+  .fg-root .fg-bubble__ring, .fg-root .fg-bubble__label { display: none; }
+  .fg-root .fg-peek { display: block; position: relative; width: 70px; height: 92px; animation: fg-peek-hint 5s ease-in-out 1.5s infinite; }
+  .fg-root .fg-bubble.is-left .fg-peek { animation-name: fg-peek-hint-l; }
+  .fg-root .fg-peek__stack img { position: absolute; top: 12px; width: 50px; height: 64px; object-fit: cover; border-radius: 10px; border: 2px solid #fff; box-shadow: 0 6px 16px rgb(22 18 63 / 28%); background: #fff; }
+  .fg-root .fg-peek__stack img:nth-child(1) { left: 46px; top: 4px; transform: rotate(16deg); }
+  .fg-root .fg-peek__stack img:nth-child(2) { left: 32px; top: 9px; transform: rotate(5deg); }
+  .fg-root .fg-peek__stack img:last-child { left: 16px; top: 16px; transform: rotate(-9deg); }
+  .fg-root .fg-bubble.is-left .fg-peek__stack { position: absolute; inset: 0; transform: scaleX(-1); }
+  .fg-root .fg-peek__badge { position: absolute; top: 2px; left: 4px; z-index: 2; min-width: 28px; height: 20px; padding: 0 6px; border-radius: 10px; border: 2px solid #fff; background: var(--fg-red); color: #fff; font-size: 11px; font-weight: 800; line-height: 16px; text-align: center; }
+  .fg-root .fg-bubble.is-left .fg-peek__badge { left: auto; right: 4px; }
+  .fg-root .fg-bubble.is-ok .fg-peek__badge, .fg-root .fg-bubble.is-done .fg-peek__badge { background: var(--fg-accent); }
+  .fg-root .fg-peek__grip { position: absolute; left: 4px; top: 44px; width: 4px; height: 24px; border-radius: 2px; background: rgb(22 18 63 / 35%); }
+  .fg-root .fg-bubble.is-left .fg-peek__grip { left: auto; right: 4px; }
+  .fg-root .fg-bubble__tip { top: 30px; }
+}
+@keyframes fg-peek-hint { 0%, 80%, 100% { transform: none; } 88% { transform: translateX(-8px); } 94% { transform: translateX(-2px); } }
+@keyframes fg-peek-hint-l { 0%, 80%, 100% { transform: none; } 88% { transform: translateX(8px); } 94% { transform: translateX(2px); } }
 
 @media (prefers-reduced-motion: reduce) {
   .fg-root *, .fg-root *::before, .fg-root *::after { animation: none !important; transition-duration: .01ms !important; }
