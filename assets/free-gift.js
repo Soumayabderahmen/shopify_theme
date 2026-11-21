@@ -1,6 +1,6 @@
 /* Popup « 3 regali gratis » — réglages et textes dans snippets/free-gift-popup.liquid, styles dans assets/free-gift.css.
-   - Ouverture après 10 s cumulées sur le site (sessionStorage fg_t0). Une fois fermée, elle vole jusqu'à une bulle
-     story sur le côté pour le reste de la visite (sessionStorage fg_docked) ; à la visite suivante elle se rouvre en entier. La bulle se déplace au doigt le long
+   - Ouverture automatique en entier 10 s après l'arrivée sur chaque page. Une fois fermée, elle vole jusqu'à une bulle
+     story sur le côté pour le reste de la page. La bulle se déplace au doigt le long
      du bord et se colle au côté le plus proche (position retenue).
    - Plateau de 3 places en haut (un clic retire le produit), barre vers 50 €, filtres par type de produit.
    - Au plus 3 choix : les autres cartes se grisent, la carte touchée en trop tremble. L'ajout au panier n'est permis
@@ -333,7 +333,6 @@
     if (!modal.classList.contains('is-open') || modal.classList.contains('is-docking')) return;
     var first = !store.get().docked;
     store.set({ docked: true, picks: picks });
-    try { sessionStorage.setItem('fg_docked', '1'); } catch (e) {}
     var y = placeBubble();
     var r = box.getBoundingClientRect();
     var bx = parseFloat(bubble.style.getPropertyValue('--fg-bx')) + BW / 2, by = y + 37;
@@ -485,26 +484,15 @@
   }
 
   /* ---------- Démarrage ---------- */
-  // Chaque visite : la popup s'ouvre d'abord en entier ; fermée, elle reste rangée dans la bulle jusqu'à la fin de la
-  // visite (sessionStorage fg_docked), puis se rouvre en entier à la visite suivante.
-  var dockedThisVisit = false;
-  try { dockedThisVisit = sessionStorage.getItem('fg_docked') === '1'; } catch (e) {}
-  if (dockedThisVisit) {
-    // Déjà vue et fermée pendant cette visite : directement la bulle ; données chargées sans bloquer la page.
-    // La bulle s'affiche tout de suite (avant : elle attendait un moment calme du navigateur, qui n'arrive jamais sur
-    // l'accueil, et restait invisible) ; photos et panier la complètent ensuite.
+  // Sur chaque page ouverte ou rechargée, la popup s'ouvre toute seule en entier après 10 s ; fermée, elle se range
+  // dans la bulle pour le reste de la page. Déjà rangée une fois : la bulle est là dès l'arrivée en attendant.
+  if (state.docked) {
     showBubble();
     setTimeout(function () {
-      Promise.all([loadProducts(), readCart()]).then(enforce).then(showBubble).catch(function () {});
+      Promise.all([loadProducts(), readCart()]).then(enforce).then(function () { if (!modal.classList.contains('is-open')) showBubble(); }).catch(function () {});
     }, 800);
-    return;
   }
-  var t0;
-  try {
-    t0 = Number(sessionStorage.getItem('fg_t0'));
-    if (!t0) { t0 = Date.now(); sessionStorage.setItem('fg_t0', String(t0)); }
-  } catch (e) { t0 = Date.now(); }
-  var wait = Math.max(0, cfg.delay - (Date.now() - t0));
+  var wait = cfg.delay;
   // Produits préparés 3 s avant l'ouverture pour que la fenêtre arrive déjà remplie
   setTimeout(function () { loadProducts().catch(function () {}); readCart().catch(function () {}); }, Math.max(0, wait - 3000));
   setTimeout(function () { if (!modal.classList.contains('is-open')) open(); }, wait);
