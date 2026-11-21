@@ -1,6 +1,6 @@
 /* Popup « 3 regali gratis » — réglages et textes dans snippets/free-gift-popup.liquid, styles dans assets/free-gift.css.
    - Ouverture après 15 s cumulées sur le site (sessionStorage fg_t0). Une fois fermée, elle vole jusqu'à une bulle
-     story sur le côté (localStorage fg_state.docked) et ne se rouvre plus seule. La bulle se déplace au doigt le long
+     story sur le côté pour le reste de la visite (sessionStorage fg_docked) ; à la visite suivante elle se rouvre en entier. La bulle se déplace au doigt le long
      du bord et se colle au côté le plus proche (position retenue).
    - Plateau de 3 places en haut (un clic retire le produit), barre vers 50 €, filtres par type de produit.
    - Au plus 3 choix : les autres cartes se grisent, la carte touchée en trop tremble. L'ajout au panier n'est permis
@@ -333,6 +333,7 @@
     if (!modal.classList.contains('is-open') || modal.classList.contains('is-docking')) return;
     var first = !store.get().docked;
     store.set({ docked: true, picks: picks });
+    try { sessionStorage.setItem('fg_docked', '1'); } catch (e) {}
     var y = placeBubble();
     var r = box.getBoundingClientRect();
     var bx = parseFloat(bubble.style.getPropertyValue('--fg-bx')) + BW / 2, by = y + 37;
@@ -484,8 +485,12 @@
   }
 
   /* ---------- Démarrage ---------- */
-  if (state.docked) {
-    // Déjà vue et fermée : directement la bulle ; données chargées sans bloquer la page.
+  // Chaque visite : la popup s'ouvre d'abord en entier ; fermée, elle reste rangée dans la bulle jusqu'à la fin de la
+  // visite (sessionStorage fg_docked), puis se rouvre en entier à la visite suivante.
+  var dockedThisVisit = false;
+  try { dockedThisVisit = sessionStorage.getItem('fg_docked') === '1'; } catch (e) {}
+  if (dockedThisVisit) {
+    // Déjà vue et fermée pendant cette visite : directement la bulle ; données chargées sans bloquer la page.
     var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 1200); };
     idle(function () {
       Promise.all([loadProducts(), readCart()]).then(enforce).then(showBubble).catch(showBubble);
