@@ -84,6 +84,22 @@
       '<span class="fg-peek" aria-hidden="true"><span class="fg-peek__grip"></span><span class="fg-peek__stack"></span><span class="fg-peek__badge"></span></span>' +
       '<span class="fg-bubble__tip">' + esc(T.tip) + '</span>' +
     '</button>' +
+    // 2e fenêtre : l'e-mail du client avant l'ajout des regali au panier
+    '<div class="fg-mail" role="dialog" aria-modal="true" aria-labelledby="fg-mail-title" hidden>' +
+      '<div class="fg-mail__shade" data-fg-mail-close></div>' +
+      '<form class="fg-mail__box" novalidate>' +
+        '<button type="button" class="fg-x" data-fg-mail-close aria-label="' + esc(T.back) + '">' + I_X + '</button>' +
+        '<span class="fg-mail__ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></span>' +
+        '<h2 class="fg-mail__title" id="fg-mail-title">' + esc(T.emailTitle) + '</h2>' +
+        '<p class="fg-mail__sub">' + esc(T.emailSub) + '</p>' +
+        '<div class="fg-mail__picks"></div>' +
+        '<label class="fg-mail__field"><span>' + esc(T.emailLabel) + '</span><input type="email" name="email" id="fg-mail-input" autocomplete="email" inputmode="email" placeholder="' + esc(T.emailPh) + '" required></label>' +
+        '<p class="fg-mail__err" role="alert" hidden>' + esc(T.emailErr) + '</p>' +
+        '<label class="fg-mail__consent"><input type="checkbox" name="consent" id="fg-mail-consent"><span>' + esc(T.consent) + '</span></label>' +
+        '<button type="submit" class="fg-cta is-ready fg-mail__cta">' + esc(T.emailCta) + '</button>' +
+        '<p class="fg-mail__note">' + esc(T.emailNote) + (cfg.privacyUrl ? ' <a href="' + esc(cfg.privacyUrl) + '" target="_blank" rel="noopener">' + esc(T.privacy) + '</a>' : '') + '</p>' +
+      '</form>' +
+    '</div>' +
     '<div class="fg-toast" role="status" aria-live="polite"></div>';
   document.body.appendChild(root);
 
@@ -93,6 +109,7 @@
   var cta = q('.fg-cta'), bubble = q('.fg-bubble'), bubbleIn = q('.fg-bubble__in'), badge = q('.fg-bubble__badge');
   var tip = q('.fg-bubble__tip'), toast = q('.fg-toast');
   var peekStack = q('.fg-peek__stack'), peekBadge = q('.fg-peek__badge');
+  var mail = q('.fg-mail'), mailForm = q('.fg-mail__box'), mailInput = q('#fg-mail-input'), mailConsent = q('#fg-mail-consent'), mailErr = q('.fg-mail__err'), mailPicks = q('.fg-mail__picks');
   var isPhone = function () { return window.matchMedia('(max-width: 760px)').matches; };
 
   var toastTimer;
@@ -198,6 +215,8 @@
   var added = function () { return cart.count > 0; };
   var inCart = function (id) { return cart.gifts.some(function (i) { return i.variant_id === id; }); };
   var pending = function () { return picks.filter(function (id) { return !inCart(id); }); };
+  // Nombre de regali à choisir : 3 (ou moins si la collection en a moins)
+  var need = function () { return products ? Math.min(cfg.max, products.length) : cfg.max; };
 
   /* Regalo retiré dans la popup (× du plateau ou carte décochée) alors qu'il est déjà dans le panier : retiré du panier
      aussi, la place se libère et le client peut en choisir un autre. */
@@ -278,10 +297,12 @@
 
   var renderCta = function () {
     cta.className = 'fg-cta';
-    var todo = pending().length;
+    // Activé seulement quand les 3 regali sont choisis ET que le panier atteint 50 €
+    var todo = pending().length, missing = need() - picks.length;
     if (!unlocked()) { cta.disabled = true; cta.innerHTML = I_LOCK + esc(T.locked); }
-    else if (todo) { cta.disabled = false; cta.classList.add('is-ready'); cta.innerHTML = esc(T.add) + ' (' + todo + ')'; }
-    else if (added()) { cta.disabled = true; cta.classList.add('is-done'); cta.innerHTML = esc(T.done); }
+    else if (todo && missing <= 0) { cta.disabled = false; cta.classList.add('is-ready'); cta.innerHTML = esc(T.add) + ' (' + todo + ')'; }
+    else if (!todo && added() && missing <= 0) { cta.disabled = true; cta.classList.add('is-done'); cta.innerHTML = esc(T.done); }
+    else if (missing > 0 && picks.length) { cta.disabled = true; cta.innerHTML = esc(missing === 1 ? T.need1 : T.need.replace('%n', missing)); }
     else { cta.disabled = true; cta.innerHTML = esc(T.choose); }
   };
 
@@ -393,13 +414,61 @@
       renderSlots(); renderList(); renderCta(); renderBubble();
       return;
     }
-    if (e.target.closest('.fg-cta') && !cta.disabled) addGifts();
+    if (e.target.closest('.fg-cta') && !cta.disabled) openMail();
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') dock(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (!mail.hidden) { closeMail(); return; }
+    dock();
+  });
+
+  /* ---------- Fenêtre e-mail ---------- */
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  var openMail = function () {
+    mailPicks.innerHTML = picks.map(byId).filter(Boolean).map(function (p) { return p.img ? '<img src="' + esc(p.img) + '" alt="" width="54" height="54">' : ''; }).join('');
+    mailInput.value = mailInput.value || store.get().email || cfg.email || '';
+    mailErr.hidden = true;
+    mailInput.removeAttribute('aria-invalid');
+    mail.hidden = false;
+    requestAnimationFrame(function () { mail.classList.add('is-open'); });
+    setTimeout(function () { try { mailInput.focus({ preventScroll: true }); } catch (e) {} }, 120);
+  };
+  var closeMail = function () {
+    mail.classList.remove('is-open');
+    setTimeout(function () { mail.hidden = true; }, 250);
+  };
+  mail.addEventListener('click', function (e) { if (e.target.closest('[data-fg-mail-close]')) closeMail(); });
+  mailInput.addEventListener('input', function () { if (!mailErr.hidden && EMAIL_RE.test(mailInput.value.trim())) { mailErr.hidden = true; mailInput.removeAttribute('aria-invalid'); } });
+  mailForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = mailInput.value.trim();
+    if (!EMAIL_RE.test(email)) { mailErr.hidden = false; mailInput.setAttribute('aria-invalid', 'true'); mailInput.focus(); return; }
+    store.set({ email: email });
+    saveEmail(email, mailConsent.checked);
+    closeMail();
+    addGifts();
+  });
+  /* L'e-mail suit la commande (attribut du panier « Email regali ») ; avec la case cochée, le client est inscrit aux
+     offres par le formulaire client standard de Shopify (étiquettes newsletter, regali-gratis). */
+  var saveEmail = function (email, consent) {
+    fetch(cfg.root + 'cart/update.js', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ attributes: { 'Email regali': email } })
+    }).catch(function () {});
+    if (!consent) return;
+    var body = new URLSearchParams();
+    body.set('form_type', 'customer');
+    body.set('utf8', '\u2713');
+    body.set('contact[email]', email);
+    body.set('contact[tags]', 'newsletter,regali-gratis');
+    body.set('contact[accepts_marketing]', 'true');
+    fetch(cfg.root + 'contact', { method: 'POST', credentials: 'same-origin', body: body }).catch(function () {});
+  };
 
   var addGifts = function () {
     var todo = pending();
-    if (busy || !unlocked() || !todo.length) return;
+    if (busy || !unlocked() || !todo.length || picks.length < need()) return;
     busy = true;
     cta.disabled = true;
     cta.style.opacity = '.6';
