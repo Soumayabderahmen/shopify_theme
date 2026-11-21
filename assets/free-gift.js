@@ -44,7 +44,7 @@
   var I_LOCK = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2h.5a1.5 1.5 0 0 1 1.5 1.5v5A1.5 1.5 0 0 1 12 15H4a1.5 1.5 0 0 1-1.5-1.5v-5A1.5 1.5 0 0 1 4 7h.5zm1.6 0h3.8V5a1.9 1.9 0 0 0-3.8 0v2z"/></svg>';
   var I_PLUS = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>';
   var I_GIFT = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 7h12v7H2zM1 4.5h14V7H1zM7 4.5h2V14H7zM8 4.5C6.5 1.5 3.5 1.5 3.8 3.2 4 4.4 6.4 4.5 8 4.5zm0 0c1.5-3 4.5-3 4.2-1.3C12 4.4 9.6 4.5 8 4.5z"/></svg>';
-  var BOX = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="30" width="44" height="28" rx="4" fill="#ff3d7f"/><rect x="29" y="30" width="6" height="28" fill="#ffd25e"/><g class="fg-lid"><rect x="6" y="20" width="52" height="12" rx="4" fill="#ff3d7f"/><rect x="29" y="20" width="6" height="12" fill="#ffd25e"/><path d="M32 20c-4-9-15-11-15-4 0 4 9 4 15 4zm0 0c4-9 15-11 15-4 0 4-9 4-15 4z" fill="none" stroke="#ffd25e" stroke-width="3.5" stroke-linejoin="round"/></g></svg>';
+  var BOX = '<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="30" width="44" height="28" rx="4" fill="#3a34d2"/><rect x="29" y="30" width="6" height="28" fill="#e4323c"/><g class="fg-lid"><rect x="6" y="20" width="52" height="12" rx="4" fill="#16123f"/><rect x="29" y="20" width="6" height="12" fill="#e4323c"/><path d="M32 20c-4-9-15-11-15-4 0 4 9 4 15 4zm0 0c4-9 15-11 15-4 0 4-9 4-15 4z" fill="none" stroke="#e4323c" stroke-width="3.5" stroke-linejoin="round"/></g></svg>';
 
   /* ---------- Construction ---------- */
   var root = document.createElement('div');
@@ -122,6 +122,12 @@
         var gifts = (c.items || []).filter(function (i) { return i.properties && i.properties._gift; });
         var giftTotal = gifts.reduce(function (s, i) { return s + i.final_line_price; }, 0);
         cart = { subtotal: (c.items_subtotal_price || c.total_price || 0) - giftTotal, gifts: gifts, count: gifts.reduce(function (s, i) { return s + i.quantity; }, 0) };
+        // Regali déjà dans le panier (autre onglet, autre appareil) : ce sont eux qui remplissent les 3 places
+        if (gifts.length) {
+          var giftIds = gifts.map(function (i) { return i.variant_id; }).filter(function (id, at, all) { return all.indexOf(id) === at; });
+          picks = giftIds.concat(picks.filter(function (id) { return giftIds.indexOf(id) === -1; })).slice(0, cfg.max);
+          store.set({ picks: picks });
+        }
         return cart;
       });
   };
@@ -180,6 +186,30 @@
   /* ---------- Rendu ---------- */
   var unlocked = function () { return cart.subtotal >= cfg.threshold; };
   var added = function () { return cart.count > 0; };
+  var inCart = function (id) { return cart.gifts.some(function (i) { return i.variant_id === id; }); };
+  var pending = function () { return picks.filter(function (id) { return !inCart(id); }); };
+
+  /* Regalo retiré dans la popup (× du plateau ou carte décochée) alors qu'il est déjà dans le panier : retiré du panier
+     aussi, la place se libère et le client peut en choisir un autre. */
+  var removeGift = function (id) {
+    var line = cart.gifts.filter(function (i) { return i.variant_id === id; })[0];
+    picks = picks.filter(function (x) { return x !== id; });
+    store.set({ picks: picks });
+    if (!line || busy) { render(); return; }
+    busy = true;
+    render();
+    fetch(cfg.root + 'cart/change.js', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ id: line.key, quantity: 0, sections: sideCartId() ? [sideCartId()] : undefined, sections_url: window.location.pathname })
+    }).then(function (r) { if (!r.ok) throw new Error('change'); return r.json(); })
+      .then(function (response) {
+        busy = false;
+        refreshTheme(response, false);
+        return readCart().then(render);
+      })
+      .catch(function () { busy = false; say(T.error); readCart().then(render); });
+  };
 
   var renderSub = function () {
     var text = esc(T.sub);
@@ -223,10 +253,10 @@
 
   var renderList = function () {
     if (!products) { list.innerHTML = new Array(9).join('<div class="fg-sk"></div>'); return; }
-    var full = picks.length >= cfg.max, done = added();
+    var full = picks.length >= cfg.max;
     var shown = products.filter(function (p) { return !filter || p.type === filter; });
-    list.innerHTML = (full && !done ? '<p class="fg-note">' + esc(T.full) + '</p>' : '') + shown.map(function (p) {
-      var on = picks.indexOf(p.id) !== -1, off = (full && !on) || done;
+    list.innerHTML = (full && pending().length ? '<p class="fg-note">' + esc(T.full) + '</p>' : '') + shown.map(function (p) {
+      var on = picks.indexOf(p.id) !== -1, off = full && !on;
       return '<button type="button" class="fg-card" data-id="' + p.id + '" aria-pressed="' + on + '" aria-disabled="' + off + '">' +
         '<span class="fg-card__img">' + (p.img ? '<img src="' + esc(p.img) + '" alt="" loading="lazy" width="180" height="180">' : '') +
           '<span class="fg-card__free">' + esc(T.free) + '</span><span class="fg-card__pick" aria-hidden="true">' + I_OK + '</span></span>' +
@@ -238,10 +268,11 @@
 
   var renderCta = function () {
     cta.className = 'fg-cta';
-    if (added()) { cta.disabled = true; cta.classList.add('is-done'); cta.innerHTML = I_OK + esc(T.done); }
-    else if (!unlocked()) { cta.disabled = true; cta.innerHTML = I_LOCK + esc(T.locked.replace('%s', money(cfg.threshold - cart.subtotal))); }
-    else if (!picks.length) { cta.disabled = true; cta.innerHTML = esc(T.choose); }
-    else { cta.disabled = false; cta.classList.add('is-ready'); cta.innerHTML = esc(picks.length === 1 ? T.addOne : T.addMany.replace('%n', picks.length)); }
+    var todo = pending().length;
+    if (!unlocked()) { cta.disabled = true; cta.innerHTML = I_LOCK + esc(T.locked); }
+    else if (todo) { cta.disabled = false; cta.classList.add('is-ready'); cta.innerHTML = esc(T.add) + ' (' + todo + ')'; }
+    else if (added()) { cta.disabled = true; cta.classList.add('is-done'); cta.innerHTML = esc(T.done); }
+    else { cta.disabled = true; cta.innerHTML = esc(T.choose); }
   };
 
   var bubbleTimer;
@@ -332,6 +363,7 @@
     var un = e.target.closest('[data-fg-un]');
     if (un) {
       var uid = Number(un.getAttribute('data-fg-un'));
+      if (inCart(uid)) { removeGift(uid); return; }
       picks = picks.filter(function (id) { return id !== uid; });
       store.set({ picks: picks });
       render();
@@ -341,8 +373,8 @@
     if (chip) { filter = chip.getAttribute('data-fg-type'); renderChips(); renderList(); list.scrollTop = 0; return; }
     var card = e.target.closest('.fg-card');
     if (card) {
-      if (added()) { say(T.already); return; }
       var id = Number(card.getAttribute('data-id')), at = picks.indexOf(id);
+      if (at !== -1 && inCart(id)) { removeGift(id); return; }
       if (at !== -1) picks.splice(at, 1);
       else if (picks.length < cfg.max) picks.push(id);
       else { card.classList.remove('is-shake'); void card.offsetWidth; card.classList.add('is-shake'); return; }
@@ -355,16 +387,17 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') dock(); });
 
   var addGifts = function () {
-    if (busy || !unlocked() || !picks.length) return;
+    var todo = pending();
+    if (busy || !unlocked() || !todo.length) return;
     busy = true;
     cta.disabled = true;
     cta.style.opacity = '.6';
-    var n = picks.length;
+    var n = todo.length;
     fetch(cfg.root + 'cart/add.js', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({
-        items: picks.map(function (id) { return { id: id, quantity: 1, properties: { _gift: '1' } }; }),
+        items: todo.map(function (id) { return { id: id, quantity: 1, properties: { _gift: '1' } }; }),
         sections: sideCartId() ? [sideCartId()] : undefined,
         sections_url: window.location.pathname
       })
