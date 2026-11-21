@@ -1,5 +1,5 @@
 /* Popup « 3 regali gratis » — réglages et textes dans snippets/free-gift-popup.liquid, styles dans assets/free-gift.css.
-   - Ouverture automatique en entier 10 s après l'arrivée sur chaque page. Une fois fermée, elle vole jusqu'à une bulle
+   - Ouverture automatique en entier 7 s après l'arrivée sur chaque page. Une fois fermée, elle vole jusqu'à une bulle
      story sur le côté pour le reste de la page. La bulle se déplace au doigt le long
      du bord et se colle au côté le plus proche (position retenue).
    - Plateau de 3 places en haut (un clic retire le produit), barre vers 50 €, filtres par type de produit.
@@ -484,7 +484,7 @@
   }
 
   /* ---------- Démarrage ---------- */
-  // Sur chaque page ouverte ou rechargée, la popup s'ouvre toute seule en entier après 10 s ; fermée, elle se range
+  // Sur chaque page ouverte ou rechargée, la popup s'ouvre toute seule en entier après 7 s ; fermée, elle se range
   // dans la bulle pour le reste de la page. Déjà rangée une fois : la bulle est là dès l'arrivée en attendant.
   if (state.docked) {
     showBubble();

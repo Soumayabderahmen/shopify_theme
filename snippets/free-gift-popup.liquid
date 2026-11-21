@@ -1,6 +1,6 @@
 {%- comment -%}
   Popup « 3 regali gratis » (prototype) — assets/free-gift.js + assets/free-gift.css.
-  - S'ouvre toute seule 10 s après l'arrivée sur chaque page ; fermée, elle se range dans la bulle.
+  - S'ouvre toute seule 7 s après l'arrivée sur chaque page ; fermée, elle se range dans la bulle.
   - Liste les produits de la collection choisie dans Personnalizza tema > Impostazioni tema > « Regali gratis (popup) »
     (pour l'instant : n'importe quelle collection ; à remplacer par la collection des produits à 0 €).
   - Le client choisit au plus 3 produits (les autres se grisent) ; l'ajout au panier n'est permis qu'à partir de 50 €
@@ -13,7 +13,7 @@
     assign fg_handle = settings.free_gift_collection.handle
   endif
   assign fg_threshold = settings.free_gift_threshold | default: 50
-  assign fg_delay = settings.free_gift_delay | default: 10
+  assign fg_delay = settings.free_gift_delay | default: 7
   assign fg_max = settings.free_gift_max | default: 3
   assign fg_lang = request.locale.iso_code | slice: 0, 2
 -%}
