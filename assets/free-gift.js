@@ -491,10 +491,12 @@
   try { dockedThisVisit = sessionStorage.getItem('fg_docked') === '1'; } catch (e) {}
   if (dockedThisVisit) {
     // Déjà vue et fermée pendant cette visite : directement la bulle ; données chargées sans bloquer la page.
-    var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 1200); };
-    idle(function () {
-      Promise.all([loadProducts(), readCart()]).then(enforce).then(showBubble).catch(showBubble);
-    });
+    // La bulle s'affiche tout de suite (avant : elle attendait un moment calme du navigateur, qui n'arrive jamais sur
+    // l'accueil, et restait invisible) ; photos et panier la complètent ensuite.
+    showBubble();
+    setTimeout(function () {
+      Promise.all([loadProducts(), readCart()]).then(enforce).then(showBubble).catch(function () {});
+    }, 800);
     return;
   }
   var t0;
