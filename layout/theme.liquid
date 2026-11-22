@@ -146,7 +146,8 @@
       # Autres pages mobiles avec la bannière de l'accueil et des collections (snippets/mhh-page-hero.liquid) et l'en-tête
       # transparent dessus : pages, politiques, toutes les collections, blog, articles, 404, panier
       assign mhh_page_kind = ''
-      assign mhh_page_templates = 'page,list-collections,blog,article,404,cart' | split: ','
+      # 404 : sa propre page complète sur toutes les tailles (sections/main-404.liquid), sans cette bannière
+      assign mhh_page_templates = 'page,list-collections,blog,article,cart' | split: ','
       if mhh_page_templates contains template.name
         assign mhh_page_kind = template.name
       elsif request.page_type == 'policy'

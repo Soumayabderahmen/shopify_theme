@@ -111,6 +111,22 @@
   @keyframes sp-draw { to { stroke-dashoffset: 0; } }
   @media (max-width: 1200px) { .sp__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   @media (max-width: 900px) { .sp__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  /* Tablette : bandeau un peu resserré, avantages en 3 cases, 3 à 4 cartes par ligne */
+  @media (min-width: 601px) and (max-width: 1024px) {
+    .sp__wrap { padding: 0 20px; }
+    .sp__hero { padding: 44px 0 84px; }
+    .sp__ico { width: 72px; height: 72px; margin-bottom: 14px; }
+    .sp__ico svg { width: 34px; height: 34px; }
+    .sp__title { font-size: 38px; }
+    .sp__text { font-size: 15px; }
+    .sp__actions { margin-top: 22px; }
+    .sp .sp__btn { min-width: 210px; min-height: 50px; }
+    .sp__perks { margin-top: -48px; gap: 12px; }
+    .sp__perks li { gap: 12px; padding: 14px 16px; font-size: 13px; }
+    .sp__perks i { width: 40px; height: 40px; }
+    .sp__shop { margin-top: 36px; }
+    .sp__grid { gap: 20px 12px; }
+  }
   /* Téléphone : bandeau compact, avantages en une ligne qui défile au doigt, cartes produits plus vite à l'écran */
   @media (max-width: 600px) {
     .sp { padding-bottom: 40px; }

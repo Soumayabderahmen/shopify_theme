@@ -1,43 +1,203 @@
-<article class="palette-{{ section.settings.color_palette }} m6er module-color-palette">
-	<h1><span class="strong">{{ '404.404' | t }}</span> {{ '404.title' | t }}</h1>
-	<p>{{ '404.subtitle_html' | t }}</p>
-    {%- if section.settings.show_link and section.settings.link_text != empty and section.settings.link_url != blank -%}
-      {%- liquid
-        assign button_color = section.settings.button_style | split: ' ' | first
-        assign button_style = section.settings.button_style | split: ' ' | last
-        assign is_link = false
-        if button_style == 'link'
-          assign is_link = true
-        endif
-      -%}
-      <p class="link-btn">
-        <a href="{{ section.settings.link_url }}" class="overlay-{{ button_color }} {% if is_link %}strong inline{% elsif button_style == 'inv' %}inv{% endif %}">
-        {% if is_link %}<span>{% endif %}{{ section.settings.link_text }}{% if is_link %}</span>&nbsp;<i aria-hidden="true" class="icon-chevron-right"></i>{% endif %}
-        </a>
-      </p>
-    {%- endif %}
-</article>
-<figure id="background" class="palette-{{ section.settings.color_palette }} module-color-palette static">
-  <span class="img-overlay" style="opacity:{{ section.settings.overlay_opacity | divided_by: 100.0 }}"></span>
-	{%- if section.settings.video -%}
-      {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
-	{%- endif -%}
-	{%- if section.settings.image -%}
-		{%- assign default_alt = 'header.extra_img_default_alt' | t %}
-		<picture {% if section.settings.video %}class="mobile-only"{% endif %}>
-	      <img
-			src="{{ section.settings.image | image_url: width: 1400 }}"
-	        srcset="{% render 'image-srcset', image: section.settings.image %}"
-	        sizes="100vw"
-	        width="1400"
-	        height="846"
-			alt="{{ section.settings.image.alt | default: default_alt | escape }}"
-            style="object-position: {{ section.settings.image.presentation.focal_point }}"
-            loading="lazy"
-	      >
-		</picture>
-	{% endif %}
-</figure>
+{%- comment -%}
+  Page 404 aux couleurs du site (ordinateur, tablette, mobile) : grand « 404 » avec un sac de shopping qui flotte,
+  recherche, boutons, raccourcis vers les catégories du menu principal, puis cartes produits « Più venduti »
+  (snippets/mshein-card.liquid, les mêmes que partout). Les boutons sont des liens <a> : les <button> du thème reçoivent
+  un ::before indigo qui couvre le texte. Réglages de la section : texte et lien du bouton principal.
+{%- endcomment -%}
+{%- liquid
+  assign e4_lang = request.locale.iso_code | slice: 0, 2
+  case e4_lang
+    when 'fr'
+      assign e4_eyebrow = 'Erreur 404'
+      assign e4_title = 'Oups, page introuvable'
+      assign e4_text = "La page que tu cherches n'existe pas ou a été déplacée. Cherche un produit ou repars d'ici :"
+      assign e4_ph = 'Que cherches-tu ?'
+      assign e4_search = 'Rechercher'
+      assign e4_home = "Retour à l'accueil"
+      assign e4_all = 'Tous les produits'
+      assign e4_cats = 'Catégories populaires'
+      assign e4_best = 'Ça pourrait te plaire'
+      assign e4_more = 'Tout voir'
+    when 'en'
+      assign e4_eyebrow = 'Error 404'
+      assign e4_title = 'Oops, page not found'
+      assign e4_text = "The page you are looking for doesn't exist or has moved. Search for a product or start from here:"
+      assign e4_ph = 'What are you looking for?'
+      assign e4_search = 'Search'
+      assign e4_home = 'Back to home'
+      assign e4_all = 'All products'
+      assign e4_cats = 'Popular categories'
+      assign e4_best = 'You might like'
+      assign e4_more = 'See all'
+    else
+      assign e4_eyebrow = 'Errore 404'
+      assign e4_title = 'Ops, pagina non trovata'
+      assign e4_text = 'La pagina che cerchi non esiste o è stata spostata. Cerca un prodotto o riparti da qui:'
+      assign e4_ph = 'Cosa stai cercando?'
+      assign e4_search = 'Cerca'
+      assign e4_home = 'Torna alla home'
+      assign e4_all = 'Tutti i prodotti'
+      assign e4_cats = 'Categorie più amate'
+      assign e4_best = 'Potrebbero piacerti'
+      assign e4_more = 'Vedi tutti'
+  endcase
+  assign e4_home_url = section.settings.link_url | default: routes.root_url
+  assign best = collections['bestsellers']
+  assign best_ids = best.products | map: 'id' | join: ','
+  assign e4_list = best
+  if e4_list.products_count == 0
+    assign e4_list = collections['all']
+  endif
+  assign e4_menu = linklists['main-menu']
+-%}
+{%- capture flag -%}{%- render 'country-flag-emoji' -%}{%- endcapture -%}
+{{ 'mshein-card.css' | asset_url | stylesheet_tag }}
+<style>
+  .e4 { --e4-ink: #16123f; --e4-mute: #7a7f95; --e4-line: #e6e8f2; --e4-accent: #3a34d2; --e4-soft: #eceafd; --e4-red: #e4323c; --e4-bg: #f4f5f9; background: var(--e4-bg); font-family: 'Figtree', system-ui, sans-serif; color: var(--e4-ink); padding-bottom: 56px; text-align: left; }
+  .e4 [hidden] { display: none !important; }
+  .e4__wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+  .e4__hero { position: relative; overflow: hidden; padding: 56px 0 64px; background: radial-gradient(80% 120% at 85% 10%, #eceafd 0%, #f4f5f9 55%); }
+  .e4__hero::before { content: ''; position: absolute; width: 520px; height: 520px; right: -160px; top: -200px; border-radius: 50%; background: radial-gradient(circle, rgb(58 52 210 / 12%), transparent 70%); pointer-events: none; }
+  .e4__grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 40px; align-items: center; }
+  .e4__eyebrow { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 14px; padding: 6px 12px; border-radius: 999px; background: #fff; box-shadow: 0 4px 14px rgb(22 18 63 / 8%); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--e4-red); }
+  .e4__eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--e4-red); box-shadow: 0 0 0 4px rgb(228 50 60 / 15%); }
+  .e4__title { margin: 0; font-family: 'Sora', 'Figtree', system-ui, sans-serif; font-size: clamp(30px, 4.4vw, 52px); font-weight: 700; line-height: 1.05; letter-spacing: -.02em; color: var(--e4-ink); }
+  .e4__text { max-width: 46ch; margin: 14px 0 0; font-size: 16px; line-height: 1.5; color: #4a4f6b; }
+  .e4__search { display: flex; gap: 8px; max-width: 520px; margin-top: 24px; padding: 6px; border-radius: 16px; background: #fff; box-shadow: 0 10px 30px rgb(22 18 63 / 10%); border: 1px solid var(--e4-line); }
+  .e4__search input { flex: 1; min-width: 0; height: 48px; padding: 0 14px; border: 0; background: none; font: inherit; font-size: 16px; color: var(--e4-ink); outline: none; box-shadow: none; }
+  .e4 .e4__search .e4__go { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 20px; border-radius: 12px; border: 0; background: linear-gradient(90deg, #3a34d2 0%, #16123f 100%); color: #fff; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .e4 .e4__search .e4__go::before, .e4 .e4__search .e4__go::after { content: none; display: none; }
+  /* Le thème remplace le fond des boutons : forcé ici */
+  .e4 .e4__search button.e4__go { background: linear-gradient(90deg, #3a34d2 0%, #16123f 100%) !important; color: #fff !important; border: 0 !important; box-shadow: none !important; min-width: 0 !important; }
+  .e4__go svg { width: 18px; height: 18px; }
+  .e4__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .e4 .e4__btn { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 12px; font-size: 14px; font-weight: 700; text-decoration: none; transition: transform .15s ease, background .2s ease; }
+  .e4 .e4__btn::before, .e4 .e4__btn::after { content: none; display: none; }
+  .e4 .e4__btn:active { transform: scale(.98); }
+  .e4 .e4__btn svg { width: 17px; height: 17px; }
+  .e4 .e4__btn--main { background: var(--e4-ink); color: #fff; }
+  .e4 .e4__btn--main:hover { background: #241e5c; }
+  .e4 .e4__btn--soft { background: var(--e4-soft); color: var(--e4-accent); }
+  .e4 .e4__btn--soft:hover { background: #e0ddfb; }
+  /* Illustration : grand 404 dégradé + sac qui flotte (transform seulement) */
+  .e4__art { position: relative; display: grid; place-items: center; min-height: 340px; }
+  .e4__num { font-family: 'Sora', 'Figtree', system-ui, sans-serif; font-size: clamp(120px, 17vw, 230px); font-weight: 800; line-height: .9; letter-spacing: -.06em; background: linear-gradient(135deg, #3a34d2 0%, #7b6cff 45%, #16123f 100%); -webkit-background-clip: text; background-clip: text; color: transparent; user-select: none; }
+  .e4__bag { position: absolute; left: 50%; top: 50%; width: clamp(96px, 11vw, 140px); margin-left: calc(clamp(96px, 11vw, 140px) / -2); margin-top: -70px; filter: drop-shadow(0 18px 24px rgb(22 18 63 / 25%)); animation: e4-float 4s ease-in-out infinite; }
+  .e4__shadow { position: absolute; left: 50%; bottom: 18px; width: 140px; height: 16px; margin-left: -70px; border-radius: 50%; background: rgb(22 18 63 / 12%); filter: blur(4px); animation: e4-shadow 4s ease-in-out infinite; }
+  @keyframes e4-float { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-16px) rotate(4deg); } }
+  @keyframes e4-shadow { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.8); opacity: .6; } }
+  /* Raccourcis catégories */
+  .e4__cats { margin-top: 36px; }
+  .e4__h2 { margin: 0 0 14px; font-family: 'Sora', 'Figtree', system-ui, sans-serif; font-size: clamp(20px, 2.4vw, 26px); font-weight: 700; color: var(--e4-ink); }
+  .e4__chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .e4__chips a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 999px; background: #fff; border: 1px solid var(--e4-line); font-size: 14px; font-weight: 600; color: var(--e4-ink); text-decoration: none; transition: border-color .2s, color .2s, transform .2s; }
+  .e4__chips a:hover { border-color: var(--e4-accent); color: var(--e4-accent); transform: translateY(-1px); }
+  .e4__chips svg { width: 14px; height: 14px; }
+  /* Cartes produits */
+  .e4__shop { margin-top: 40px; }
+  .e4__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .e4__head .e4__h2 { margin: 0; }
+  .e4__more { font-size: 14px; font-weight: 700; color: var(--e4-accent); text-decoration: none; }
+  .e4__more:hover { text-decoration: underline; }
+  .e4__cards { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px 16px; margin: 0; padding: 0; list-style: none; }
+  @media (max-width: 1200px) { .e4__cards { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  /* Tablette */
+  @media (min-width: 601px) and (max-width: 1024px) {
+    .e4__wrap { padding: 0 20px; }
+    .e4__hero { padding: 44px 0 48px; }
+    .e4__grid { gap: 24px; }
+    .e4__art { min-height: 260px; }
+    .e4__cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 12px; }
+  }
+  @media (max-width: 760px) {
+    .e4__grid { grid-template-columns: 1fr; text-align: center; }
+    .e4__art { order: -1; min-height: 200px; }
+    .e4__text, .e4__search { margin-left: auto; margin-right: auto; }
+    .e4__actions { justify-content: center; }
+    .e4__eyebrow { margin-left: auto; margin-right: auto; }
+  }
+  /* Téléphone */
+  @media (max-width: 600px) {
+    .e4 { padding-bottom: 40px; }
+    .e4__wrap { padding: 0 12px; }
+    .e4__hero { padding: 20px 0 32px; }
+    .e4__art { min-height: 170px; }
+    .e4__num { font-size: 112px; }
+    .e4__bag { width: 78px; margin-left: -39px; margin-top: -52px; }
+    .e4__shadow { bottom: 8px; width: 100px; margin-left: -50px; }
+    .e4__eyebrow { font-size: 11px; margin-bottom: 10px; }
+    .e4__title { font-size: 26px; }
+    .e4__text { font-size: 14px; margin-top: 10px; }
+    .e4__search { margin-top: 18px; padding: 5px; border-radius: 14px; }
+    .e4__search input { height: 44px; font-size: 16px; }
+    .e4 .e4__search .e4__go { height: 44px; padding: 0 14px; }
+    .e4__go span { display: none; }
+    .e4__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .e4 .e4__btn { justify-content: center; padding: 0 10px; font-size: 13px; min-height: 44px; }
+    .e4__cats { margin-top: 24px; }
+    .e4__chips { flex-wrap: nowrap; overflow-x: auto; margin: 0 -12px; padding: 0 12px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .e4__chips::-webkit-scrollbar { display: none; }
+    .e4__chips li { flex: none; }
+    .e4__chips a { padding: 9px 14px; font-size: 13px; white-space: nowrap; }
+    .e4__shop { margin-top: 26px; }
+    .e4__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .e4__bag, .e4__shadow { animation: none; } }
+</style>
+<section class="e4">
+  <div class="e4__hero">
+    <div class="e4__wrap">
+      <div class="e4__grid">
+        <div>
+          <p class="e4__eyebrow"><i aria-hidden="true"></i>{{ e4_eyebrow }}</p>
+          <h1 class="e4__title">{{ e4_title }}</h1>
+          <p class="e4__text">{{ e4_text }}</p>
+          <form class="e4__search" action="{{ routes.search_url }}" method="get" role="search">
+            <input type="search" name="q" id="e4-search" placeholder="{{ e4_ph }}" aria-label="{{ e4_ph }}" autocomplete="off">
+            <input type="hidden" name="type" value="product">
+            <button type="submit" class="e4__go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>{{ e4_search }}</span></button>
+          </form>
+          <div class="e4__actions">
+            <a class="e4__btn e4__btn--main" href="{{ e4_home_url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>{{ e4_home }}</a>
+            <a class="e4__btn e4__btn--soft" href="{{ routes.all_products_collection_url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>{{ e4_all }}</a>
+          </div>
+        </div>
+        <div class="e4__art" aria-hidden="true">
+          <span class="e4__num">404</span>
+          <svg class="e4__bag" viewBox="0 0 120 130"><path d="M22 38h76l-6 82a6 6 0 0 1-6 6H34a6 6 0 0 1-6-6z" fill="#fff"/><path d="M22 38h76l-6 82a6 6 0 0 1-6 6H34a6 6 0 0 1-6-6z" fill="none" stroke="#16123f" stroke-width="4" stroke-linejoin="round"/><path d="M42 50V30a18 18 0 0 1 36 0v20" fill="none" stroke="#16123f" stroke-width="4" stroke-linecap="round"/><path d="M50 78c0-7 5-11 10-11s10 4 10 10c0 7-10 8-10 15" fill="none" stroke="#3a34d2" stroke-width="5" stroke-linecap="round"/><circle cx="60" cy="103" r="3.6" fill="#3a34d2"/></svg>
+          <span class="e4__shadow"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="e4__wrap">
+    {%- if e4_menu.links.size > 0 -%}
+      <div class="e4__cats">
+        <h2 class="e4__h2">{{ e4_cats }}</h2>
+        <ul class="e4__chips">
+          {%- for link in e4_menu.links limit: 10 -%}
+            <li><a href="{{ link.url }}">{{ link.title | escape }}<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"/></svg></a></li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    {%- if e4_list.products_count > 0 -%}
+      <div class="e4__shop">
+        <div class="e4__head">
+          <h2 class="e4__h2">{{ e4_best }}</h2>
+          <a class="e4__more" href="{{ e4_list.url }}">{{ e4_more }} ›</a>
+        </div>
+        <ul class="e4__cards">
+          {%- for product in e4_list.products limit: 12 -%}
+            {%- render 'mshein-card', product: product, best: best, best_ids: best_ids, flag: flag, uniform: true -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
 
 {% schema %}
 {
