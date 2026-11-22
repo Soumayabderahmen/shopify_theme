@@ -110,13 +110,31 @@
   @keyframes sp-pop { from { transform: scale(.4); opacity: 0; } }
   @keyframes sp-draw { to { stroke-dashoffset: 0; } }
   @media (max-width: 1200px) { .sp__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  @media (max-width: 900px) { .sp__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .sp__perks { grid-template-columns: 1fr; max-width: 520px; } }
+  @media (max-width: 900px) { .sp__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  /* Téléphone : bandeau compact, avantages en une ligne qui défile au doigt, cartes produits plus vite à l'écran */
   @media (max-width: 600px) {
+    .sp { padding-bottom: 40px; }
     .sp__wrap { padding: 0 12px; }
-    .sp__hero { padding: 40px 0 84px; }
-    .sp .sp__btn { min-width: 0; width: 100%; }
-    .sp__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 10px; }
-    .sp__perks li { padding: 14px 16px; }
+    .sp__hero { padding: 28px 0 64px; }
+    .sp__hero::before { width: 260px; height: 260px; left: -110px; top: -130px; }
+    .sp__hero::after { width: 200px; height: 200px; right: -80px; bottom: -110px; }
+    .sp__ico { width: 62px; height: 62px; margin-bottom: 12px; }
+    .sp__ico svg { width: 30px; height: 30px; }
+    .sp__eyebrow { font-size: 10px; margin-bottom: 6px; }
+    .sp__title { font-size: 26px; }
+    .sp__text { font-size: 14px; margin-top: 8px; }
+    .sp__actions { gap: 8px; margin-top: 18px; }
+    .sp .sp__btn { min-width: 0; width: 100%; min-height: 46px; font-size: 14px; border-radius: 12px; }
+    .sp__perks { display: flex; max-width: none; margin: -40px -12px 0; padding: 0 12px 8px; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .sp__perks::-webkit-scrollbar { display: none; }
+    .sp__perks li { flex: 0 0 auto; scroll-snap-align: start; gap: 10px; padding: 10px 14px 10px 10px; border-radius: 14px; font-size: 13px; white-space: nowrap; box-shadow: 0 8px 20px rgb(22 18 63 / 10%); }
+    .sp__perks i { width: 34px; height: 34px; border-radius: 10px; }
+    .sp__perks svg { width: 18px; height: 18px; }
+    .sp__shop { margin-top: 26px; }
+    .sp__head { margin-bottom: 12px; }
+    .sp__h2 { font-size: 20px; }
+    .sp__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 8px; }
+    .sp__shopify { margin-top: 28px; font-size: 12px; }
   }
   @media (prefers-reduced-motion: reduce) { .sp__ico, .sp__ico .sp__check { animation: none; stroke-dashoffset: 0; } }
 </style>
