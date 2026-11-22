@@ -434,6 +434,13 @@
     mailInput.removeAttribute('aria-invalid');
     mail.hidden = false;
     requestAnimationFrame(function () { mail.classList.add('is-open'); });
+    // La protection anti-robot de Shopify (hCaptcha) ne s'attache au formulaire client qu'au premier « focus » dans ce
+    // formulaire ; sans elle, l'envoi est bloqué sans jamais repartir. On la prévient dès l'ouverture de la fenêtre.
+    var cf = document.getElementById('fg-customer-form');
+    if (cf && !cf.dataset.hcaptchaBound) {
+      var ce = cf.querySelector('[name="contact[email]"]');
+      if (ce) ce.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    }
     setTimeout(function () { try { mailInput.focus({ preventScroll: true }); } catch (e) {} }, 120);
   };
   var closeMail = function () {

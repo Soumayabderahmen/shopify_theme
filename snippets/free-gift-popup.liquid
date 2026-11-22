@@ -44,8 +44,10 @@
     Vrai formulaire client de Shopify (comme la newsletter du pied de page), invisible : la popup le remplit et l'envoie
     dans un cadre caché. Un envoi par script est refusé par la protection anti-robot de Shopify (403) ; un vrai
     formulaire passe et crée le client dans Clienti, inscrit aux offres (étiquettes newsletter, regali-gratis).
+    Hors de l'écran mais pas masqué (hidden) : la protection hCaptcha de Shopify doit pouvoir s'y attacher, sinon
+    elle bloque l'envoi sans jamais le relancer.
   {%- endcomment -%}
-  <div class="fg-customer" hidden aria-hidden="true">
+  <div class="fg-customer" aria-hidden="true" style="position:fixed;left:-10000px;top:0;width:320px;height:1px;overflow:hidden;">
     {%- form 'customer', id: 'fg-customer-form' -%}
       <input type="hidden" name="contact[email]" value="">
       <input type="hidden" name="contact[tags]" value="newsletter,regali-gratis">
