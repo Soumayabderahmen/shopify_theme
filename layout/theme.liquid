@@ -642,6 +642,9 @@
         {%- comment -%} Politiques : bouton retour, mise en page et politique d'expédition traduite (snippets/policy-page.liquid). {%- endcomment -%}
         {%- if request.page_type == 'policy' -%}
           {%- render 'policy-page', content: content_for_layout -%}
+        {%- elsif template.name != '404' and request.path contains '/account/' and request.path contains 'subscribe' -%}
+          {%- comment -%} Confirmation / annulation d'inscription aux e-mails, aux couleurs du site (snippets/subscribe-page.liquid). {%- endcomment -%}
+          {%- render 'subscribe-page', content: content_for_layout -%}
         {%- else -%}
           {{ content_for_layout }}
         {%- endif -%}

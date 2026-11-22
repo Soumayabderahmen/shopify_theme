@@ -1,0 +1,139 @@
+{%- comment -%}
+  Pages d'inscription aux e-mails de Shopify (lien de confirmation « /account/subscribe?token=… » et désinscription
+  « /account/unsubscribe… ») aux couleurs du site. Shopify fournit le contenu (content) sans modèle de thème : on le
+  garde tel quel (le lien « Annulla l'iscrizione » porte le jeton du client) et on l'habille autour.
+  Rendu depuis layout/theme.liquid à la place de content_for_layout sur ces adresses.
+{%- endcomment -%}
+{%- liquid
+  assign sp_unsub = false
+  if request.path contains 'unsubscribe'
+    assign sp_unsub = true
+  endif
+  assign sp_lang = request.locale.iso_code | slice: 0, 2
+  case sp_lang
+    when 'fr'
+      assign sp_eyebrow = 'Newsletter platinumshop'
+      assign sp_title = 'Inscription confirmée !'
+      assign sp_title_un = 'Désinscription effectuée'
+      assign sp_text = 'Merci, ton adresse est bien enregistrée. Tu recevras en premier nos offres, nouveautés et codes réservés aux abonnés.'
+      assign sp_text_un = 'Tu ne recevras plus nos e-mails. Tu peux te réinscrire quand tu veux.'
+      assign sp_b1 = 'Offres réservées aux abonnés'
+      assign sp_b2 = 'Nouveautés en avant-première'
+      assign sp_b3 = 'Livraison gratuite dès 50 €'
+      assign sp_cta = 'Continuer mes achats'
+      assign sp_gifts = 'Choisir mes 3 cadeaux'
+    when 'en'
+      assign sp_eyebrow = 'platinumshop newsletter'
+      assign sp_title = 'You are subscribed!'
+      assign sp_title_un = 'You have unsubscribed'
+      assign sp_text = 'Thanks, your email is saved. You will be the first to get our offers, new arrivals and subscriber-only codes.'
+      assign sp_text_un = 'You will no longer receive our emails. You can sign up again anytime.'
+      assign sp_b1 = 'Subscriber-only offers'
+      assign sp_b2 = 'Early access to new arrivals'
+      assign sp_b3 = 'Free shipping over €50'
+      assign sp_cta = 'Continue shopping'
+      assign sp_gifts = 'Pick my 3 gifts'
+    else
+      assign sp_eyebrow = 'Newsletter platinumshop'
+      assign sp_title = 'Iscrizione confermata!'
+      assign sp_title_un = 'Iscrizione annullata'
+      assign sp_text = 'Grazie, la tua email è registrata. Riceverai per primo le nostre offerte, le novità e i codici riservati agli iscritti.'
+      assign sp_text_un = 'Non riceverai più le nostre email. Puoi iscriverti di nuovo quando vuoi.'
+      assign sp_b1 = 'Offerte riservate agli iscritti'
+      assign sp_b2 = 'Novità in anteprima'
+      assign sp_b3 = 'Spedizione gratuita da 50 €'
+      assign sp_cta = 'Continua lo shopping'
+      assign sp_gifts = 'Scegli i tuoi 3 regali'
+  endcase
+-%}
+<style>
+  .sp { --sp-ink: #16123f; --sp-mute: #7a7f95; --sp-line: #e6e8f2; --sp-accent: #3a34d2; --sp-soft: #eceafd; --sp-bg: #f4f5f9; padding: 40px 16px 64px; background: var(--sp-bg); font-family: 'Figtree', system-ui, sans-serif; color: var(--sp-ink); }
+  .sp__card { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 24px 60px rgb(22 18 63 / 10%); }
+  .sp__hero { position: relative; padding: 40px 28px 34px; text-align: center; color: #fff; background: radial-gradient(120% 140% at 50% 0%, #4b44e0 0%, #2a2391 45%, #16123f 100%); overflow: hidden; }
+  .sp__hero::before, .sp__hero::after { content: ''; position: absolute; border-radius: 50%; background: rgb(255 255 255 / 7%); }
+  .sp__hero::before { width: 220px; height: 220px; left: -60px; top: -80px; }
+  .sp__hero::after { width: 160px; height: 160px; right: -40px; bottom: -70px; }
+  .sp__ico { position: relative; z-index: 1; width: 76px; height: 76px; margin: 0 auto 16px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: var(--sp-accent); box-shadow: 0 10px 30px rgb(0 0 0 / 25%); animation: sp-pop .6s cubic-bezier(.2, .9, .3, 1.4) both; }
+  .sp__ico svg { width: 36px; height: 36px; }
+  .sp__ico .sp__check { stroke-dasharray: 24; stroke-dashoffset: 24; animation: sp-draw .5s ease .45s forwards; }
+  .sp--un .sp__hero { background: radial-gradient(120% 140% at 50% 0%, #5b5f78 0%, #34374f 50%, #16123f 100%); }
+  .sp__eyebrow { position: relative; z-index: 1; margin: 0 0 8px; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgb(255 255 255 / 70%); }
+  .sp__title { position: relative; z-index: 1; margin: 0; font-family: 'Sora', 'Figtree', system-ui, sans-serif; font-size: clamp(26px, 5vw, 34px); font-weight: 700; line-height: 1.1; letter-spacing: -.01em; color: #fff; }
+  .sp__text { position: relative; z-index: 1; max-width: 46ch; margin: 12px auto 0; font-size: 15px; line-height: 1.5; color: rgb(255 255 255 / 82%); }
+  .sp__body { padding: 26px 28px 28px; display: grid; gap: 20px; }
+  .sp__perks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .sp__perks li { display: grid; justify-items: center; gap: 8px; padding: 14px 10px; border-radius: 14px; background: var(--sp-bg); text-align: center; font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .sp__perks svg { width: 22px; height: 22px; color: var(--sp-accent); }
+  .sp__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .sp__btn { flex: 1 1 200px; min-height: 50px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 14px; font-size: 15px; font-weight: 700; text-decoration: none; transition: transform .15s ease, box-shadow .2s ease; }
+  .sp__btn:active { transform: scale(.98); }
+  .sp__btn--main { background: linear-gradient(90deg, #3a34d2 0%, #16123f 100%); color: #fff; box-shadow: 0 8px 20px rgb(22 18 63 / 22%); }
+  .sp__btn--ghost { background: var(--sp-soft); color: var(--sp-accent); border: 0; cursor: pointer; font-family: inherit; }
+  .sp__btn svg { width: 18px; height: 18px; }
+  /* Contenu de Shopify (message et lien de désinscription) gardé tel quel, en petit en bas */
+  .sp__shopify { padding-top: 16px; border-top: 1px solid var(--sp-line); font-size: 13px; color: var(--sp-mute); text-align: center; }
+  .sp__shopify h1, .sp__shopify h2 { display: none; }
+  .sp__shopify p { margin: 4px 0; }
+  .sp__shopify a { color: var(--sp-mute); text-decoration: underline; text-underline-offset: 3px; }
+  .sp__shopify a:hover { color: var(--sp-ink); }
+  .sp__shopify > *, .sp__shopify .page-width, .sp__shopify [class*="container"] { max-width: none; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
+  @keyframes sp-pop { from { transform: scale(.4); opacity: 0; } }
+  @keyframes sp-draw { to { stroke-dashoffset: 0; } }
+  @media (max-width: 560px) {
+    .sp { padding: 20px 12px 48px; }
+    .sp__hero { padding: 32px 20px 28px; }
+    .sp__body { padding: 20px; }
+    .sp__perks { grid-template-columns: 1fr; }
+    .sp__perks li { grid-template-columns: 24px 1fr; justify-items: start; text-align: left; align-items: center; padding: 12px 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .sp__ico, .sp__ico .sp__check { animation: none; stroke-dashoffset: 0; } }
+</style>
+<section class="sp{% if sp_unsub %} sp--un{% endif %}">
+  <div class="sp__card">
+    <div class="sp__hero">
+      <div class="sp__ico" aria-hidden="true">
+        {%- if sp_unsub -%}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>
+        {%- else -%}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6" opacity=".35"/><path class="sp__check" d="m8.5 12.5 2.5 2.5 4.5-5" stroke-width="2.2"/></svg>
+        {%- endif -%}
+      </div>
+      <p class="sp__eyebrow">{{ sp_eyebrow }}</p>
+      <h1 class="sp__title">{% if sp_unsub %}{{ sp_title_un }}{% else %}{{ sp_title }}{% endif %}</h1>
+      <p class="sp__text">{% if sp_unsub %}{{ sp_text_un }}{% else %}{{ sp_text }}{% endif %}</p>
+    </div>
+    <div class="sp__body">
+      {%- unless sp_unsub -%}
+        <ul class="sp__perks">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v8H4v-8M2 7h20v5H2zM12 22V7M12 7c-2-4-7-4-7-1s5 1 7 1zm0 0c2-4 7-4 7-1s-5 1-7 1z"/></svg>{{ sp_b1 }}</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>{{ sp_b2 }}</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg>{{ sp_b3 }}</li>
+        </ul>
+      {%- endunless -%}
+      <div class="sp__actions">
+        <a class="sp__btn sp__btn--main" href="{{ routes.all_products_collection_url }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>{{ sp_cta }}</a>
+        {%- unless sp_unsub -%}
+          {%- comment -%} Rouvre la popup « 3 regali gratis » (assets/free-gift.js) si elle est sur la page {%- endcomment -%}
+          <button type="button" class="sp__btn sp__btn--ghost" data-sp-gifts hidden>{{ sp_gifts }}</button>
+        {%- endunless -%}
+      </div>
+      <div class="sp__shopify">{{ content }}</div>
+    </div>
+  </div>
+</section>
+<script>
+  (function () {
+    var btn = document.querySelector('[data-sp-gifts]');
+    if (!btn) return;
+    var tries = 0;
+    var wait = setInterval(function () {
+      var bubble = document.querySelector('.fg-root .fg-bubble');
+      if (bubble || ++tries > 40) {
+        clearInterval(wait);
+        if (!bubble) return;
+        btn.hidden = false;
+        btn.addEventListener('click', function () { bubble.click(); });
+      }
+    }, 250);
+  })();
+</script>
