@@ -98,6 +98,8 @@
    (sinon le curseur de texte faisait croire qu'on pouvait écrire dedans), pas d'effet au clic */
 .fg-root .fg-cta:disabled, .fg-root .fg-cta:disabled * { cursor: not-allowed !important; -webkit-user-select: none; user-select: none; }
 .fg-root .fg-cta:disabled:active { transform: none; }
+/* Téléphone : pas de flash gris ni de loupe de sélection quand on touche un bouton désactivé */
+.fg-root .fg-cta:disabled { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; touch-action: manipulation; }
 .fg-root .fg-cta.is-done { opacity: .78 !important; box-shadow: none; }
 .fg-root .fg-cta svg { width: 16px; height: 16px; flex: none; }
 
