@@ -96,7 +96,7 @@
         '<div class="fg-mail__picks"></div>' +
         '<label class="fg-mail__field"><span>' + esc(T.emailLabel) + '</span><input type="email" name="email" id="fg-mail-input" autocomplete="email" inputmode="email" placeholder="' + esc(T.emailPh) + '" required></label>' +
         '<p class="fg-mail__err" role="alert" hidden>' + esc(T.emailErr) + '</p>' +
-        '<label class="fg-mail__consent"><input type="checkbox" name="consent" id="fg-mail-consent"><span>' + esc(T.consent) + '</span></label>' +
+        '<p class="fg-mail__optin">' + esc(T.consent) + '</p>' +
         '<button type="submit" class="fg-cta is-ready fg-mail__cta">' + esc(T.emailCta) + '</button>' +
         '<p class="fg-mail__note">' + esc(T.emailNote) + (cfg.privacyUrl ? ' <a href="' + esc(cfg.privacyUrl) + '" target="_blank" rel="noopener">' + esc(T.privacy) + '</a>' : '') + '</p>' +
       '</form>' +
@@ -110,7 +110,7 @@
   var cta = q('.fg-cta'), bubble = q('.fg-bubble'), bubbleIn = q('.fg-bubble__in'), badge = q('.fg-bubble__badge');
   var tip = q('.fg-bubble__tip'), toast = q('.fg-toast');
   var peekStack = q('.fg-peek__stack'), peekBadge = q('.fg-peek__badge');
-  var mail = q('.fg-mail'), mailForm = q('.fg-mail__box'), mailInput = q('#fg-mail-input'), mailConsent = q('#fg-mail-consent'), mailErr = q('.fg-mail__err'), mailPicks = q('.fg-mail__picks');
+  var mail = q('.fg-mail'), mailForm = q('.fg-mail__box'), mailInput = q('#fg-mail-input'), mailErr = q('.fg-mail__err'), mailPicks = q('.fg-mail__picks');
   // Téléphone et tablette (jusqu'à 1024 px) : pile façon Instants d'Instagram au lieu de la bulle (même règle que free-gift.css)
   var isPhone = function () { return window.matchMedia('(max-width: 1024px)').matches; };
 
@@ -447,26 +447,25 @@
     var email = mailInput.value.trim();
     if (!EMAIL_RE.test(email)) { mailErr.hidden = false; mailInput.setAttribute('aria-invalid', 'true'); mailInput.focus(); return; }
     store.set({ email: email });
-    saveEmail(email, mailConsent.checked);
+    saveEmail(email);
     closeMail();
     addGifts();
   });
-  /* L'e-mail suit la commande (attribut du panier « Email regali ») ; avec la case cochée, le client est inscrit aux
-     offres par le formulaire client standard de Shopify (étiquettes newsletter, regali-gratis). */
-  var saveEmail = function (email, consent) {
+  /* L'e-mail suit la commande (attribut du panier « Email regali ») et le client est enregistré dans Clienti, inscrit
+     aux offres, par le formulaire client standard de Shopify (étiquettes newsletter, regali-gratis). */
+  var saveEmail = function (email) {
     fetch(cfg.root + 'cart/update.js', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ attributes: { 'Email regali': email } })
     }).catch(function () {});
-    if (!consent) return;
-    var body = new URLSearchParams();
-    body.set('form_type', 'customer');
-    body.set('utf8', '\u2713');
-    body.set('contact[email]', email);
-    body.set('contact[tags]', 'newsletter,regali-gratis');
-    body.set('contact[accepts_marketing]', 'true');
-    fetch(cfg.root + 'contact', { method: 'POST', credentials: 'same-origin', body: body }).catch(function () {});
+    // Vrai formulaire client de Shopify (snippets/free-gift-popup.liquid), envoyé dans un cadre caché : à chaque
+    // confirmation, le client est créé dans Clienti et inscrit aux offres (il en est informé sous le champ).
+    var form = document.getElementById('fg-customer-form');
+    if (!form) return;
+    form.querySelector('[name="contact[email]"]').value = email;
+    form.target = 'fg-customer-frame';
+    try { if (form.requestSubmit) form.requestSubmit(); else form.submit(); } catch (e) { form.submit(); }
   };
 
   var addGifts = function () {

@@ -165,6 +165,7 @@ html.m6pn-open .fg-root .fg-bubble.is-shown, html.mobile-wishlist-open .fg-root 
 .fg-root .fg-mail__consent input { flex: none; width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--fg-accent); }
 .fg-root .fg-mail__consent span { margin: 0; padding: 0; line-height: 1.35; }
 .fg-root .fg-mail__consent input { position: static; opacity: 1; appearance: auto; -webkit-appearance: checkbox; }
+.fg-root .fg-mail__optin { font-size: 12px; color: var(--fg-mute); line-height: 1.4; text-align: left; }
 .fg-root .fg-mail__cta { width: 100%; margin-top: 4px; }
 .fg-root .fg-mail__note { font-size: 11px; color: var(--fg-mute); line-height: 1.4; }
 .fg-root .fg-mail__note a { color: var(--fg-accent); }
