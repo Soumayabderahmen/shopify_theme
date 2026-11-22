@@ -94,7 +94,11 @@
 .fg-root .fg-cta:disabled { background: var(--fg-skel); color: var(--fg-mute); cursor: not-allowed; opacity: 1; }
 /* Même dégradé que le bouton « Aggiungi al carrello » des fiches produit */
 .fg-root .fg-cta.is-ready, .fg-root .fg-cta.is-done { background: linear-gradient(90deg, #3a34d2 0%, #16123f 100%); color: #fff; box-shadow: 0 8px 20px rgb(22 18 63 / 22%); }
-.fg-root .fg-cta.is-done { opacity: 1; cursor: default; }
+/* Bouton désactivé (cadenas, « Scegli ancora… », « Regali aggiunti ✓ ») : curseur « interdit », texte non sélectionnable
+   (sinon le curseur de texte faisait croire qu'on pouvait écrire dedans), pas d'effet au clic */
+.fg-root .fg-cta:disabled, .fg-root .fg-cta:disabled * { cursor: not-allowed !important; -webkit-user-select: none; user-select: none; }
+.fg-root .fg-cta:disabled:active { transform: none; }
+.fg-root .fg-cta.is-done { opacity: .78 !important; box-shadow: none; }
 .fg-root .fg-cta svg { width: 16px; height: 16px; flex: none; }
 
 /* ---------- Bulle (story), déplaçable le long du bord ---------- */
