@@ -463,13 +463,16 @@
     left: -40%;
     width: 30%;
     background: linear-gradient(90deg, transparent, rgb(255 255 255 / 45%), transparent);
-    transform: skewX(-20deg);
+    transform: translateX(0) skewX(-20deg);
     animation: mshein-shine 2.8s ease-in-out infinite;
   }
 
+  /* Le reflet glisse par transform (joué par la carte graphique) : animer « left » recalculait la page à chaque image
+     (accueil ordinateur figé au défilement sur les rangées de cartes). 567 % = de -40 % à 130 % de l'étiquette pour un
+     reflet de 30 %. */
   @keyframes mshein-shine {
-    0%, 60% { left: -40%; }
-    100% { left: 130%; }
+    0%, 60% { transform: translateX(0) skewX(-20deg); }
+    100% { transform: translateX(567%) skewX(-20deg); }
   }
 
   .mshein-rot {

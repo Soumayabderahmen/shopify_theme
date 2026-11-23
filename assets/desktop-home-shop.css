@@ -116,12 +116,14 @@
 @property --dhp-pb-a { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
 .dhp-pay { position: relative; display: flex; align-items: center; gap: 22px; margin-top: 16px; padding: 10px 10px 10px 14px; overflow: hidden; background: linear-gradient(#fff, #fff) padding-box, conic-gradient(from var(--dhp-pb-a), #6b5cff, #c9c4ff, #ffd166, #3a34d2, #c9c4ff, #6b5cff) border-box; border: 1.5px solid transparent; border-radius: 20px; box-shadow: 0 14px 30px -22px rgb(58 52 210 / 60%); animation: dhp-pb-turn 8s linear infinite; }
 @keyframes dhp-pb-turn { to { --dhp-pb-a: 360deg; } }
-.dhp-pay::after { content: ''; position: absolute; top: 0; bottom: 0; left: -30%; width: 22%; background: linear-gradient(100deg, transparent, rgb(107 92 255 / 10%), transparent); transform: skewX(-20deg); pointer-events: none; animation: dhp-pb-shine 6s ease-in-out infinite; }
-@keyframes dhp-pb-shine { 0%, 55% { left: -30%; } 100% { left: 120%; } }
+.dhp-pay::after { content: ''; position: absolute; top: 0; bottom: 0; left: -30%; width: 22%; background: linear-gradient(100deg, transparent, rgb(107 92 255 / 10%), transparent); transform: translateX(0) skewX(-20deg); pointer-events: none; animation: dhp-pb-shine 6s ease-in-out infinite; }
+/* Reflet par transform (carte graphique) : 682 % = de -30 % à 120 % de la bande pour un reflet de 22 % */
+@keyframes dhp-pb-shine { 0%, 55% { transform: translateX(0) skewX(-20deg); } 100% { transform: translateX(682%) skewX(-20deg); } }
 .dhp-pay__t { position: relative; z-index: 1; flex: none; display: flex; align-items: center; gap: 12px; color: var(--dhp-ink); }
 .dhp-pay__lock { position: relative; flex: none; display: grid; place-items: center; width: 40px; height: 40px; color: #fff; background: linear-gradient(180deg, #6b5cff, #3a34d2); border-radius: 12px; box-shadow: 0 8px 16px -8px rgb(58 52 210 / 90%); }
-.dhp-pay__lock::before { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 0 rgb(107 92 255 / 45%); animation: dhp-pb-pulse 2.4s ease-out infinite; }
-@keyframes dhp-pb-pulse { 70%, 100% { box-shadow: 0 0 0 10px rgb(107 92 255 / 0%); } }
+/* Pulsation : un halo qui grandit et s'efface (scale + opacity, carte graphique) au lieu d'une ombre animée */
+.dhp-pay__lock::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: rgb(107 92 255 / 45%); z-index: -1; animation: dhp-pb-pulse 2.4s ease-out infinite; }
+@keyframes dhp-pb-pulse { 0% { transform: scale(1); opacity: 1; } 70%, 100% { transform: scale(1.5); opacity: 0; } }
 .dhp-pay__lock svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .dhp-pay__shackle { animation: dhp-pb-lock 4.8s ease-in-out infinite; }
 @keyframes dhp-pb-lock { 0%, 70%, 100% { transform: none; } 78%, 88% { transform: translateY(-2.5px); } }
@@ -434,6 +436,9 @@ html.dhp-modal-open { overflow: hidden; }
 .dhp-new__card.is-loading { background: linear-gradient(100deg, #eceef1 30%, #f6f7f9 50%, #eceef1 70%) 0 0 / 200% 100%; animation: dhp-new-shine 1.2s linear infinite; }
 .dhp-new__card.is-loading::after, .dhp-new__card.is-loading .dhp-new__txt { visibility: hidden; }
 @keyframes dhp-new-shine { to { background-position: -200% 0; } }
+/* Hors de l'écran (assets/desktop-home-shop.js, classe dhp-off) : les animations sans fin des cartes, de la bande des
+   paiements et des blocs animés sont en pause ; elles reprennent un peu avant d'arriver à l'écran. */
+.dhp-off *, .dhp-off *::before, .dhp-off *::after, .dhp-off.dhp-pay, .dhp-off.dhp-pay::before, .dhp-off.dhp-pay::after, .dhp-off.dhp-new__card { animation-play-state: paused !important; }
 .dhp-new__txt { position: absolute; left: 22px; right: 128px; bottom: 22px; display: flex; flex-direction: column; gap: 4px; }
 .dhp-new__txt b { font-size: 24px; font-weight: 600; line-height: 1.15; }
 .dhp-new__txt small { color: rgb(255 255 255 / 75%); font-size: 14px; line-height: 1.3; }

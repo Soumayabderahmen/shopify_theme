@@ -254,10 +254,29 @@
       button.setAttribute('aria-pressed', String(Boolean(window.mobileWishlist.has(button.getAttribute('data-product-id')))));
     });
   };
+  // Animations sans fin (reflets, étiquettes qui tournent, barre de marque, cartes en chargement, bande des paiements,
+  // blocs flottants) en pause hors de l'écran : sur cet accueil chaque image animée coûte cher (page entière), et la
+  // page se figeait au défilement (classe dhp-off, assets/desktop-home-shop.css).
+  var liveIo = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) { entry.target.classList.toggle('dhp-off', !entry.isIntersecting); });
+  }, { rootMargin: '250px 0px' }) : null;
+  var LIVE = '.mshein-card, .dhp-new__card, .dhp-pay, .dhp-hero, .dhp-bf, .dhp-flash, .dhp-marq';
+  var watchLive = function (scope) {
+    if (!liveIo) return;
+    if (scope.matches && scope.matches(LIVE) && !scope.hasAttribute('data-dhp-live')) { scope.setAttribute('data-dhp-live', ''); liveIo.observe(scope); }
+    scope.querySelectorAll(LIVE).forEach(function (el) {
+      if (el.hasAttribute('data-dhp-live')) return;
+      el.setAttribute('data-dhp-live', '');
+      liveIo.observe(el);
+    });
+  };
   var decorate = function (scope) {
+    watchLive(scope);
     syncHearts(scope);
     if (window.msheinCards && typeof window.msheinCards.decorate === 'function') window.msheinCards.decorate(scope);
   };
+  // Haut de la page (bannière, bande des paiements, Black Friday) : surveillé dès le départ ; la suite à son arrivée (decorate)
+  watchLive(root);
   var toastBox = null;
   var toastTimer = null;
   var toast = function (text) {

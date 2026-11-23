@@ -417,7 +417,13 @@
       renderSlots(); renderList(); renderCta(); renderBubble();
       return;
     }
-    if (e.target.closest('.fg-cta') && !cta.disabled) openMail();
+    if (e.target.closest('.fg-cta') && !cta.disabled) {
+      // E-mail déjà donné (dans ce navigateur) : pas de 2e fenêtre, on ajoute directement (ex. un regalo remplacé)
+      // (l'e-mail est quand même recopié sur ce panier : attribut « Email regali » de la commande, sans recréer le client)
+      var known = store.get().email;
+      if (known) { saveCartEmail(known); addGifts(); return; }
+      openMail();
+    }
   });
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
@@ -460,12 +466,15 @@
   });
   /* L'e-mail suit la commande (attribut du panier « Email regali ») et le client est enregistré dans Clienti, inscrit
      aux offres, par le formulaire client standard de Shopify (étiquettes newsletter, regali-gratis). */
-  var saveEmail = function (email) {
+  var saveCartEmail = function (email) {
     fetch(cfg.root + 'cart/update.js', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ attributes: { 'Email regali': email } })
     }).catch(function () {});
+  };
+  var saveEmail = function (email) {
+    saveCartEmail(email);
     // Vrai formulaire client de Shopify (snippets/free-gift-popup.liquid), envoyé dans un cadre caché : à chaque
     // confirmation, le client est créé dans Clienti et inscrit aux offres (il en est informé sous le champ).
     var form = document.getElementById('fg-customer-form');
