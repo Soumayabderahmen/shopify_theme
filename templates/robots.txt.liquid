@@ -4,17 +4,27 @@
     {{- rule -}}
   {% endfor %}
   {%- comment -%}
-    Morceaux de page demandés par le site mobile (rayons, recherche, pages suivantes : ?view=mshein-dept,
-    mshein-dept-page, mshein-search…) : pas des pages, Google ne les explore pas. Les vraies pages ne changent pas.
+    Morceaux de page demandés par le site (pas des pages, sans titre ni adresse officielle) : Google ne les explore pas.
+    - mobile : rayons, recherche, pages suivantes (?view=mshein-dept, mshein-dept-page, mshein-search…) ;
+    - ordinateur : grille des collections et de la recherche (desktop-coll), nouveautés de l'accueil (dhp-new), suites de
+      l'accueil (dhp-more-a/b/c), compteurs (count, brand-count), ajout rapide (quick-add), cartes de la liste d'envies.
+    Les vraies pages restent ouvertes : ?view=novita, top, prezzi, offerte, brand…
   {%- endcomment -%}
   {%- if group.user_agent.value == '*' %}
 {{ 'Disallow: /*view=mshein*' }}
+{{ 'Disallow: /*view=desktop-coll*' }}
+{{ 'Disallow: /*view=dhp-*' }}
+{{ 'Disallow: /*view=count' }}
+{{ 'Disallow: /*view=brand-count' }}
+{{ 'Disallow: /*view=quick-add' }}
+{{ 'Disallow: /*view=wishlist-card' }}
   {%- endif -%}
   {%- if group.sitemap != blank -%}
     {{ group.sitemap }}
   {%- endif -%}
 {% endfor %}
-
-# DeepLumen Agentic Discovery v4
-Sitemap: https://{{ request.host }}/a/shop/sitemap.xml
-Sitemap: https://{{ request.host }}/a/shop/llms.txt
+{%- comment -%}
+  Plus de lignes « Sitemap » de DeepLumen (/a/shop/sitemap.xml et /a/shop/llms.txt) : leurs pages redirigent Google vers
+  le domaine myshopify.com, et llms.txt n'est pas un sitemap (erreurs dans Search Console). DeepLumen continue de servir
+  ses pages aux robots d'IA, et llms.txt reste à son adresse.
+{%- endcomment %}

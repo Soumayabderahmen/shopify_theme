@@ -1753,5 +1753,8 @@
       "quick_filters": "Filtres rapides",
       "one_size": "Taille unique"
     }
+  },
+  "seo_fallback": {
+    "collection_description": "{{ title }} sur {{ shop }} : découvrez {{ count }} produits et trouvez votre style."
   }
 }

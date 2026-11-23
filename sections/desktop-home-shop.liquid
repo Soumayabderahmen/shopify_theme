@@ -292,7 +292,8 @@
       {%- if bf_render -%}
         <div class="dhp-hero__txt dhp-hero__txt--bf" hidden data-bf-only>
           <span class="dhp-bf-chip"><i></i>{{ 'desktop_home_shop.bf_name' | t }} · {{ bf_dates }}</span>
-          <h1>{{ 'desktop_home_shop.bf_title_html' | t: percent: bf_max_text }}</h1>
+          {%- comment -%} Titre H2 : la page n'a qu'un titre principal (H1), celui de la bannière standard ci-dessous. {%- endcomment -%}
+          <h2 class="dhp-hero__h">{{ 'desktop_home_shop.bf_title_html' | t: percent: bf_max_text }}</h2>
           <p>{{ 'desktop_home_shop.bf_text' | t }}</p>
           <div class="dhp-cd" data-bf-cd="boxes"></div>
           <div class="dhp-hero__cta">

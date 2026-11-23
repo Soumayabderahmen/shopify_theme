@@ -1770,5 +1770,8 @@
       "item_5": "Solo usamos cookies esenciales para el funcionamiento del sitio",
       "policy_link": "Más información"
     }
+  },
+  "seo_fallback": {
+    "collection_description": "{{ title }} en {{ shop }}: descubre {{ count }} productos y encuentra tu estilo."
   }
 }

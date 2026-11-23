@@ -40,9 +40,14 @@
         assign theme_page_title = 'mobile.explore.on_sale' | t
       endif
     -%}
+    {%- liquid
+      # Nom de la boutique ajouté seulement s'il n'y est pas déjà, sans tenir compte des majuscules (« Contatti | Platinumshop »)
+      assign theme_title_lc = theme_page_title | downcase
+      assign theme_shop_lc = shop.name | downcase
+    -%}
     <title>
       {{ theme_page_title }}
-      {% unless theme_page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}
+      {% unless theme_title_lc contains theme_shop_lc %} &ndash; {{ shop.name }}{% endunless %}
     </title>
     {%- liquid
       # Fiche produit sans description SEO dont le texte est une fiche technique brute (« SPECIFICATIONS… Brand Name: »,
@@ -61,6 +66,15 @@
             endif
           endfor
           assign theme_meta_desc = theme_meta_desc | append: ' | ' | append: shop.name | truncate: 160, '…'
+        endif
+      endif
+      # Collection ou page sans description (Google inventerait le texte) : phrase courte et vraie, dans la langue du
+      # visiteur (collection : nom + nombre de produits ; page : son titre + la description de la boutique).
+      if theme_meta_desc == blank
+        if request.page_type == 'collection' and collection.title != blank
+          assign theme_meta_desc = 'seo_fallback.collection_description' | t: title: collection.title, count: collection.products_count, shop: shop.name
+        elsif request.page_type == 'page' and page.title != blank
+          assign theme_meta_desc = page.title | append: ' – ' | append: shop.description | default: shop.name | truncate: 160, '…'
         endif
       endif
     -%}

@@ -4450,5 +4450,8 @@
       "quick_filters": "Quick filters",
       "one_size": "One size"
     }
+  },
+  "seo_fallback": {
+    "collection_description": "{{ title }} at {{ shop }}: discover {{ count }} products and find your style."
   }
 }

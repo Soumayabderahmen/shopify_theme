@@ -1761,5 +1761,8 @@
       "quick_filters": "Filtre rapide",
       "one_size": "Mărime unică"
     }
+  },
+  "seo_fallback": {
+    "collection_description": "{{ title }} pe {{ shop }}: descoperă {{ count }} produse și găsește-ți stilul."
   }
 }

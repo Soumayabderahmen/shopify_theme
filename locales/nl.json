@@ -1755,5 +1755,8 @@
       "item_5": "We gebruiken alleen essentiële cookies voor de werking van de site",
       "policy_link": "Meer informatie"
     }
+  },
+  "seo_fallback": {
+    "collection_description": "{{ title }} bij {{ shop }}: ontdek {{ count }} producten en vind jouw stijl."
   }
 }
