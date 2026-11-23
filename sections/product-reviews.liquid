@@ -182,26 +182,7 @@
   document.querySelector('#root').appendChild(document.getElementById('review-popup-{{ section.id }}'));
 </script>
 
-{% if count > 0 %}
-  <script type="application/ld+json">
-    {
-      "@context": "http://schema.org/",
-      "@type": "AggregateRating",
-      "reviewCount": "{{ count }}",
-      "ratingValue": "{{ value }}",
-      "itemReviewed": {
-        "@type" : "Product",
-        "name" : "{{ product.title | escape }}",
-        "offers": {
-          "@type": "AggregateOffer",
-          "lowPrice": "{{ product.price_min | divided_by: 100.00 }}",
-          "highPrice": "{{ product.price_max | divided_by: 100.00 }}",
-          "priceCurrency": "{{ cart.currency.iso_code }}"
-        }
-      }
-    }
-  </script>
-{% endif %}
+{%- comment -%} Note pour Google : dans la fiche produit unique, snippets/product-jsonld.liquid (plus de 2e bloc ici). {%- endcomment -%}
 
 <style>
   @media only screen and (min-width: 47.5em) {

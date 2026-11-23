@@ -1,0 +1,136 @@
+{%- comment -%}
+  Données structurées de la fiche produit pour Google (JSON-LD, schema.org), rendues dans le <head> (layout/theme.liquid).
+  Un seul bloc produit sur la page : remplace ceux du thème (snippets/social-meta-tags.liquid, sections/header.liquid
+  via alireviews_aggregateRating, sections/product-reviews.liquid).
+  - Calculé par Shopify à chaque affichage : prix, variantes, images, stock sont toujours ceux de l'admin.
+  - Marché du visiteur : URL dans sa langue (/fr/…), textes traduits, prix et devise de son marché (cart.currency).
+  - Produit à variantes : ProductGroup + une fiche par variante (hasVariant) avec couleur, taille, image, prix, stock.
+  - Marque et vendeur : toujours le nom de la boutique (platinumshop), quel que soit le « vendor » du produit.
+  - Note : seulement si une app d'avis en fournit une vraie (Ali Reviews, champ standard Shopify, Judge.me, vstar).
+  La note reste dans le bloc : snippets/pdp-mobile-top.liquid la lit ici pour l'afficher tout de suite.
+{%- endcomment -%}
+{%- liquid
+  assign jl_origin = shop.url
+  assign jl_url = jl_origin | append: product.url
+  assign jl_currency = cart.currency.iso_code
+  assign jl_brand = shop.name
+
+  assign jl_desc = product.description | strip_html | strip_newlines | replace: '&nbsp;', ' ' | split: ' ' | join: ' ' | strip | truncate: 4900, '…'
+  if jl_desc == blank
+    assign jl_desc = product.title
+  endif
+
+  comment
+    Options couleur / taille, reconnues par leur nom dans les langues du site (les noms suivent la traduction).
+  endcomment
+  assign jl_color_names = 'color,colour,colore,colori,couleur,farbe,color de,colores,kleur,culoare,cor,renk,farge,färg,farve,цвет,اللون'
+  assign jl_size_names = 'size,sizes,taglia,taglie,misura,taille,größe,grösse,talla,maat,mărime,tamanho,beden,størrelse,storlek,размер,المقاس,الحجم'
+  assign jl_color_idx = -1
+  assign jl_size_idx = -1
+  for option in product.options_with_values
+    assign jl_on = option.name | downcase | strip
+    assign jl_on_list = jl_color_names | split: ','
+    if jl_on_list contains jl_on and jl_color_idx == -1
+      assign jl_color_idx = forloop.index0
+    endif
+    assign jl_on_list = jl_size_names | split: ','
+    if jl_on_list contains jl_on and jl_size_idx == -1
+      assign jl_size_idx = forloop.index0
+    endif
+  endfor
+
+  comment
+    Note réelle des avis : Ali Reviews (app choisie), puis champ standard Shopify, Judge.me, vstar. Rien sans avis.
+  endcomment
+  assign jl_rating = 0
+  assign jl_count = 0
+  assign jl_ali = product.metafields.alireviews.seo_rating_review_key_script | append: ''
+  if jl_ali contains 'ratingValue'
+    assign jl_rating = jl_ali | split: '"ratingValue"' | last | split: '"' | slice: 1, 1 | first | plus: 0
+    assign jl_count = jl_ali | split: '"reviewCount"' | last | split: '"' | slice: 1, 1 | first | plus: 0
+  endif
+  if jl_count == 0 and product.metafields.reviews.rating.value != blank
+    assign jl_rating = product.metafields.reviews.rating.value.rating | plus: 0
+    assign jl_count = product.metafields.reviews.rating_count.value | plus: 0
+  endif
+  if jl_count == 0 and product.metafields.judgeme.badge != blank
+    assign jl_jm = product.metafields.judgeme.badge | append: ''
+    assign jl_count = jl_jm | split: "data-number-of-reviews='" | last | split: "'" | first | plus: 0
+    assign jl_rating = jl_jm | split: "data-average-rating='" | last | split: "'" | first | plus: 0
+  endif
+  if jl_count == 0 and product.metafields.vstar.product_rating.value != blank
+    assign jl_rating = product.metafields.vstar.product_rating.value.rating | plus: 0
+    assign jl_count = product.metafields.vstar.product_rating.value.total_reviews | plus: 0
+  endif
+  if jl_rating <= 0 or jl_rating > 5
+    assign jl_count = 0
+  endif
+
+  assign jl_images = product.images | slice: 0, 10
+  assign jl_single = product.has_only_default_variant
+-%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": {% if jl_single %}"Product"{% else %}"ProductGroup"{% endif %},
+  "@id": {{ jl_url | append: '#product' | json }},
+  "url": {{ jl_url | json }},
+  "name": {{ product.title | json }},
+  "description": {{ jl_desc | json }},
+  "brand": { "@type": "Brand", "name": {{ jl_brand | json }} },
+  {%- if product.type != blank %}
+  "category": {{ product.type | json }},
+  {%- endif %}
+  {%- if jl_images.size > 0 %}
+  "image": [
+    {%- for image in jl_images -%}
+      {{ image | image_url: width: 1200 | prepend: 'https:' | json }}{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ],
+  {%- endif %}
+  {%- if jl_count > 0 %}
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": {{ jl_rating | json }},
+    "reviewCount": {{ jl_count | json }},
+    "bestRating": 5,
+    "worstRating": 1
+  },
+  {%- endif %}
+  {%- if jl_single -%}
+    {%- assign variant = product.selected_or_first_available_variant %}
+  "sku": {{ variant.sku | default: product.id | json }},
+  {%- render 'product-jsonld-gtin', variant: variant %}
+  "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_brand %}
+  {%- else %}
+  "productGroupID": {{ product.id | append: '' | json }},
+  "variesBy": [
+    {%- if jl_color_idx >= 0 %}"https://schema.org/color"{% endif -%}
+    {%- if jl_color_idx >= 0 and jl_size_idx >= 0 %}, {% endif -%}
+    {%- if jl_size_idx >= 0 %}"https://schema.org/size"{% endif -%}
+  ],
+  "hasVariant": [
+    {%- for variant in product.variants -%}
+    {%- assign jl_vimg = variant.featured_image | default: product.featured_image %}
+    {
+      "@type": "Product",
+      "@id": {{ jl_origin | append: variant.url | append: '#variant' | json }},
+      "name": {{ product.title | append: ' – ' | append: variant.title | json }},
+      "sku": {{ variant.sku | default: variant.id | json }},
+      {%- render 'product-jsonld-gtin', variant: variant %}
+      {%- if jl_color_idx >= 0 %}
+      "color": {{ variant.options[jl_color_idx] | json }},
+      {%- endif %}
+      {%- if jl_size_idx >= 0 %}
+      "size": {{ variant.options[jl_size_idx] | json }},
+      {%- endif %}
+      {%- if jl_vimg %}
+      "image": {{ jl_vimg | image_url: width: 1200 | prepend: 'https:' | json }},
+      {%- endif %}
+      "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_brand %}
+    }{% unless forloop.last %},{% endunless %}
+    {%- endfor %}
+  ]
+  {%- endif %}
+}
+</script>

@@ -44,7 +44,27 @@
       {{ theme_page_title }}
       {% unless theme_page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}
     </title>
-    {%- if page_description -%}<meta name="description" content="{{ page_description | escape }}">{%- endif -%}
+    {%- liquid
+      # Fiche produit sans description SEO dont le texte est une fiche technique brute (« SPECIFICATIONS… Brand Name: »,
+      # que Google afficherait tel quel) : description courte et vraie, titre + options du produit (couleurs, tailles…).
+      assign theme_meta_desc = page_description
+      if request.page_type == 'product' and product.metafields.global.description_tag == blank
+        assign theme_desc_txt = product.description | strip_html | strip_newlines | strip
+        assign theme_desc_head = theme_desc_txt | slice: 0, 20 | upcase
+        if theme_desc_txt == blank or theme_desc_head contains 'SPECIFICATION' or theme_desc_txt contains 'Brand Name:'
+          assign theme_meta_desc = product.title
+          for option in product.options_with_values
+            assign theme_opt_name = option.name | downcase
+            if option.values.size > 1 and theme_opt_name != 'ships from'
+              assign theme_opt_values = option.values | slice: 0, 6 | join: ', '
+              assign theme_meta_desc = theme_meta_desc | append: ' · ' | append: option.name | append: ': ' | append: theme_opt_values
+            endif
+          endfor
+          assign theme_meta_desc = theme_meta_desc | append: ' | ' | append: shop.name | truncate: 160, '…'
+        endif
+      endif
+    -%}
+    {%- if theme_meta_desc -%}<meta name="description" content="{{ theme_meta_desc | escape }}">{%- endif -%}
     <meta name="theme-color" content="{{ settings.default_color_scheme.settings.accent }}">
     <meta name="MobileOptimized" content="320">
     <meta name="HandheldFriendly" content="true">
@@ -54,15 +74,13 @@
     >
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-config" content="{{ 'browserconfig.xml' | asset_url }}">
-    {%- if template contains 'product' and product.metafields.deeplumen.ap_deployed.value == true -%}
-  <link rel="canonical" href="https://{{ request.host }}/a/shop/products/{{ product.handle }}">
-{%- elsif template contains 'collection' and collection.metafields.deeplumen.ap_deployed.value == true -%}
-  <link rel="canonical" href="https://{{ request.host }}/a/shop/collections/{{ collection.handle }}">
-{%- elsif template contains 'article' and article.metafields.deeplumen.ap_deployed.value == true -%}
-  <link rel="canonical" href="https://{{ request.host }}/a/shop/blogs/{{ article.handle }}">
-{%- else -%}
-  <link rel="canonical" href="{{ canonical_url }}">
-{%- endif -%}
+    {%- comment -%}
+      Adresse officielle de la page pour Google : toujours la page elle-même (canonical_url de Shopify, dans la langue
+      du visiteur). Avant : l'app Deeplumen y mettait /a/shop/…, qui redirige Google vers le domaine myshopify.com.
+      Deeplumen continue de servir ses pages aux robots d'IA (ChatGPT, Perplexity…), et ces pages déclarent déjà la
+      page normale comme officielle.
+    {%- endcomment -%}
+    <link rel="canonical" href="{{ canonical_url }}">
     {% unless settings.heading_font.system? -%}
       {%- assign heading_font_url = settings.heading_font | font_url -%}
       {{ heading_font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}
@@ -298,6 +316,7 @@
       } catch (e) {}
     </script>
     {% render 'social-meta-tags' %}
+    {%- if request.page_type == 'product' -%}{% render 'product-jsonld', product: product %}{%- endif -%}
     {% render 'standard-storefront-actions' %}
     {% render 'standard-storefront-events' %}
     {{ content_for_header }}

@@ -3994,4 +3994,7 @@
 }
 {% endschema %}
 
-{% include 'alireviews_aggregateRating' %}
+{%- comment -%}
+  Ancien bloc JSON-LD d'Ali Reviews (include du snippet alireviews_aggregateRating) retiré : il ajoutait une 2e fiche produit,
+  et une fiche vide sur toutes les autres pages. La note Ali Reviews est reprise dans snippets/product-jsonld.liquid.
+{%- endcomment -%}

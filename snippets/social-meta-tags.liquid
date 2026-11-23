@@ -62,72 +62,26 @@
   <meta name="twitter:card" content="{{ settings.logo | image_url }}">
 {% endif %}
 {% if twitter_image_tag %}{{ twitter_image_tag }}{% endif %}
+{%- comment -%}
+  Données structurées communes (Organization, WebSite ; Article sur les articles). La fiche produit est dans
+  snippets/product-jsonld.liquid (un seul bloc produit par page).
+{%- endcomment -%}
 <script type="application/ld+json">
   [
-    {%- if request.page_type == 'product' -%}
-      {%- liquid
-        if product.metafields.syncer.reviews
-          assign locale_ratings = product.metafields.syncer.reviews.value.reviews[localization.language.iso_code]
-          if locale_ratings
-            assign ratings_value = locale_ratings.rating
-            assign ratings_count = locale_ratings.count
-          else
-            assign ratings_value = product.metafields.syncer.reviews.value.cumulative_rating
-            assign ratings_count = product.metafields.syncer.reviews.value.total_reviews
-          endif
-        elsif product.metafields.reviews.rating
-          assign ratings_value = product.metafields.reviews.rating.value
-          assign ratings_count = product.metafields.reviews.rating_count
-        else
-          assign ratings_value = 0
-          assign ratings_count = 0
-        endif
-      %}
+    {%- if request.page_type == 'article' -%}
       {
-        "@context": "http://schema.org",
-        "@type": "Product",
-        "name": "{{ product.title | escape }}",
-        "url": "{{ shop.url }}{{ product.url }}",
-        {%- if product.vendor != "" and product.vendor != "vendor-unknown" -%}"brand": { "@type": "Brand", "name": "{{ product.vendor }}" },{%- endif -%}
-        {%- if product.description != blank -%}"description": {{ product.description | strip_html | json }},{%- endif -%}
-        {%- if product.featured_image -%}"image": "{{ product.featured_image | image_url: width: 600, height: 500 }}",{%- endif -%}
-        {%- if current_variant.barcode != "" -%}"gtin8": "{{ current_variant.barcode }}",{%- endif -%}
-        {%- if current_variant.sku != "" -%}"sku": "{{ current_variant.sku }}",{%- endif -%}
-        "offers": {
-          "@type": "Offer",
-          "price": "{{ current_variant.price | divided_by: 100.00 }}",
-          "url": "{{ shop.url }}{{ product.url }}",
-          {%- assign date = 'now' | date: "%s" | plus : 31556926 %}
-          "priceValidUntil": "{{ date | date: '%Y-%m-%d' }}",
-          "priceCurrency": "{{ cart.currency.iso_code }}"{%- if current_variant.inventory_quantity > 0 and current_variant.available -%},
-            "availability": "https://schema.org/InStock",
-            "inventoryLevel": "{{ current_variant.inventory_quantity }}"
-          {%- endif -%}
-        }
-        {% if ratings_count > 0 %},
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "bestRating": "5",
-            "worstRating": "1",
-            "reviewCount": "{{ ratings_count }}",
-            "ratingValue": "{{ ratings_value }}"
-          } 
-        {% endif %}
-      },
-    {%- elsif request.page_type == 'article' -%}
-      {
-          "@context": "http://schema.org",
+          "@context": "https://schema.org",
           "@type": "Article",
           "articleBody": {{ article.content | strip_html | json }},
           "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": {{ request.origin | append: page.url | json }}
+            "@id": {{ canonical_url | json }}
           },
           "headline": {{ article.title | json }},
           {% if article.excerpt != blank %}
             "description": {{ article.excerpt | strip_html | json }},
           {% endif %}
-      {% if article.image %}
+          {% if article.image %}
             "image": [
                {{ article | image_url: width: 1920 | prepend: "https:" | json }}
             ],
@@ -143,52 +97,40 @@
             "name": {{ shop.name | json }}
           }
         },
-    {% endif %}
+    {%- endif -%}
     {
-      "@context": "http://schema.org/",
+      "@context": "https://schema.org",
       "@type": "Organization",
-      "url": "{{ og_url }}",
-      "name": "{{ shop.name }}",
-      "legalName": "{{ shop.name }}",
-      "description": "{{ og_description }}",
+      "@id": {{ shop.url | append: '/#organization' | json }},
+      "url": {{ shop.url | append: routes.root_url | json }},
+      "name": {{ shop.name | json }},
+      "legalName": {{ shop.name | json }},
+      "description": {{ shop.description | default: shop.name | strip_html | json }},
       {%- if settings.logo -%}
-        "logo": "{{ settings.logo | image_url }}",
-        "image": "{{ settings.logo | image_url }}",
+        "logo": {{ settings.logo | image_url: width: 600 | prepend: 'https:' | json }},
+        "image": {{ settings.logo | image_url: width: 600 | prepend: 'https:' | json }},
       {%- endif -%}
       "contactPoint": {
         "@type": "ContactPoint",
-        "contactType": "Customer service",
-        "telephone": "{{ shop.phone }}"
+        "contactType": "customer service",
+        "telephone": {{ shop.phone | json }}
       },
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "{{ shop.address.street }}",
-        "addressLocality": "{{ shop.address.city }}",
-        "postalCode": "{{ shop.address.zip }}",
-        "addressCountry": "{{ shop.address.country_code }}"
+        "streetAddress": {{ shop.address.street | json }},
+        "addressLocality": {{ shop.address.city | json }},
+        "postalCode": {{ shop.address.zip | json }},
+        "addressCountry": {{ shop.address.country_code | json }}
       }
     },
     {
-      "@context": "http://schema.org",
+      "@context": "https://schema.org",
       "@type": "WebSite",
-      "url": "{{ og_url }}",
-      "name": "{{ shop.name }}",
-      "description": "{{ og_description }}",
-      "author": [
-        {
-          "@type": "Organization",
-          "url": "https://www.someoneyouknow.online",
-          "name": "Someoneyouknow",
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "Wilhelminaplein 25",
-            "addressLocality": "Eindhoven",
-            "addressRegion": "NB",
-            "postalCode": "5611 HG",
-            "addressCountry": "NL"
-          }
-        }
-      ]
+      "@id": {{ shop.url | append: '/#website' | json }},
+      "url": {{ shop.url | append: routes.root_url | json }},
+      "name": {{ shop.name | json }},
+      "inLanguage": {{ request.locale.iso_code | json }},
+      "publisher": { "@id": {{ shop.url | append: '/#organization' | json }} }
     }
   ]
 </script>

@@ -1,0 +1,13 @@
+{%- comment -%}
+  Offre d'une variante pour snippets/product-jsonld.liquid : URL de la variante (langue du visiteur), prix et devise du
+  marché, stock réel. Paramètres : variant, origin, currency, seller.
+{%- endcomment -%}
+{
+        "@type": "Offer",
+        "url": {{ origin | append: variant.url | json }},
+        "price": {{ variant.price | divided_by: 100.0 | json }},
+        "priceCurrency": {{ currency | json }},
+        "availability": "https://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+        "itemCondition": "https://schema.org/NewCondition",
+        "seller": { "@type": "Organization", "name": {{ seller | json }} }
+      }

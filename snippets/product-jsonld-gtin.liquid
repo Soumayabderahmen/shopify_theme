@@ -1,0 +1,14 @@
+{%- comment -%}
+  Code-barres d'une variante pour snippets/product-jsonld.liquid : seulement un vrai GTIN (8, 12, 13 ou 14 chiffres).
+  Rend la ligne « "gtin": "…", » ou rien. Paramètre : variant.
+{%- endcomment -%}
+{%- liquid
+  assign jl_bc = variant.barcode | strip
+  assign jl_bc_digits = jl_bc | remove: '0' | remove: '1' | remove: '2' | remove: '3' | remove: '4' | remove: '5' | remove: '6' | remove: '7' | remove: '8' | remove: '9'
+  assign jl_bc_len = jl_bc | size
+-%}
+{%- if jl_bc != blank and jl_bc_digits == '' -%}
+  {%- if jl_bc_len == 8 or jl_bc_len == 12 or jl_bc_len == 13 or jl_bc_len == 14 %}
+      "gtin": {{ jl_bc | json }},
+  {%- endif -%}
+{%- endif -%}
