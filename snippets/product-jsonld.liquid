@@ -21,21 +21,30 @@
   endif
 
   comment
-    Options couleur / taille, reconnues par leur nom dans les langues du site (les noms suivent la traduction).
+    Options couleur / taille, reconnues par un mot de leur nom dans les langues du site (« Color », « Colore »,
+    « Kid size », « Shoe size », « Taglia EU »… ; les noms suivent la traduction).
   endcomment
-  assign jl_color_names = 'color,colour,colore,colori,couleur,farbe,color de,colores,kleur,culoare,cor,renk,farge,färg,farve,цвет,اللون'
-  assign jl_size_names = 'size,sizes,taglia,taglie,misura,taille,größe,grösse,talla,maat,mărime,tamanho,beden,størrelse,storlek,размер,المقاس,الحجم'
+  assign jl_color_words = 'color,colour,colore,colori,couleur,farbe,kleur,culoare,renk,farge,färg,farve,цвет,اللون' | split: ','
+  assign jl_size_words = 'size,taglia,taglie,misura,taille,größe,grösse,talla,maat,mărime,tamanho,beden,størrelse,storlek,размер,المقاس,الحجم' | split: ','
   assign jl_color_idx = -1
   assign jl_size_idx = -1
   for option in product.options_with_values
     assign jl_on = option.name | downcase | strip
-    assign jl_on_list = jl_color_names | split: ','
-    if jl_on_list contains jl_on and jl_color_idx == -1
-      assign jl_color_idx = forloop.index0
+    if jl_color_idx == -1
+      for word in jl_color_words
+        if jl_on contains word
+          assign jl_color_idx = forloop.parentloop.index0
+          break
+        endif
+      endfor
     endif
-    assign jl_on_list = jl_size_names | split: ','
-    if jl_on_list contains jl_on and jl_size_idx == -1
-      assign jl_size_idx = forloop.index0
+    if jl_size_idx == -1 and jl_color_idx != forloop.index0
+      for word in jl_size_words
+        if jl_on contains word
+          assign jl_size_idx = forloop.parentloop.index0
+          break
+        endif
+      endfor
     endif
   endfor
 
@@ -104,11 +113,13 @@
   "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_brand %}
   {%- else %}
   "productGroupID": {{ product.id | append: '' | json }},
+  {%- if jl_color_idx >= 0 or jl_size_idx >= 0 %}
   "variesBy": [
     {%- if jl_color_idx >= 0 %}"https://schema.org/color"{% endif -%}
     {%- if jl_color_idx >= 0 and jl_size_idx >= 0 %}, {% endif -%}
     {%- if jl_size_idx >= 0 %}"https://schema.org/size"{% endif -%}
   ],
+  {%- endif %}
   "hasVariant": [
     {%- for variant in product.variants -%}
     {%- assign jl_vimg = variant.featured_image | default: product.featured_image %}
