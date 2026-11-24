@@ -97,6 +97,16 @@
             "height": 20
           }
         },
+        "klarna_on_site_messaging_app_block_VeB3tE": {
+          "type": "shopify://apps/klarna-on-site-messaging/blocks/app-block/b95936a9-74b6-4a95-8103-6a1b6459c25e",
+          "settings": {
+            "data_key": "credit-promotion-badge",
+            "theme": "dark",
+            "topPadding": "0",
+            "bottomPadding": "0",
+            "messagePrefix": ""
+          }
+        },
         "shipping_timer": {
           "type": "shipping_timer",
           "settings": {}
@@ -138,6 +148,7 @@
         "variant_selection",
         "buy_button",
         "beafbaf1-a0af-4326-b4de-6e78c472249c",
+        "klarna_on_site_messaging_app_block_VeB3tE",
         "shipping_timer",
         "f2290434-741b-4731-a534-ad679331e164"
       ],

@@ -663,13 +663,12 @@
     </button>
   </section>
 
-  {%- comment -%} 10. Klarna : 3 rate calculées sur le prix réel de la variante. {%- endcomment -%}
-  <div class="pdp-m__kl">
-    <i>Klarna</i>
-    <p>{%- assign pm_klarna_amount = pm_price | divided_by: 3 | money | append: mm_cur -%}
-    <b data-pdp-klarna>{{ 'mobile.pdp.klarna_installments_html' | t: amount: pm_klarna_amount }}</b><br>{{ 'mobile.pdp.klarna_interest' | t }}</p>
-    <a href="https://www.klarna.com/it/" target="_blank" rel="noopener">{{ 'mobile.pdp.learn_more' | t }}</a>
-  </div>
+  {%- comment -%}
+    10. Klarna : seulement le bandeau officiel de l'app Klarna On-site Messaging (bloc « Klarna Placement » de la fiche),
+    placé ici par assets/pdp-mobile.js à la place de ce repère vide. Notre ligne calculée « 3 rate da … » (prix ÷ 3) faisait
+    doublon : retirée. Sans le bloc de l'app, ou hors des marchés où Klarna est proposé, rien n'est affiché.
+  {%- endcomment -%}
+  <div class="pdp-m__kl" style="display: none" aria-hidden="true"></div>
   </div>
 
   {%- comment -%}
