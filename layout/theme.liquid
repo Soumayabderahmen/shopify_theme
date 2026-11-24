@@ -22,8 +22,11 @@
       <link rel="stylesheet" href="{{ 'producttext-style.css' | asset_url }}" media="print" onload="this.media='all'">
       <noscript>{{ 'producttext-style.css' | asset_url | stylesheet_tag }}</noscript>
     {%- endif -%}
+    {%- comment -%} Ali Reviews : avis affichés seulement sur la fiche produit, connexion préparée seulement là. {%- endcomment -%}
+    {%- if request.page_type == 'product' -%}
     <link rel="preconnect" href="https://cdn.alireviews.io" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.alireviews.io">
+    {%- endif -%}
 
     <meta charset="utf-8">
     {%- comment -%}
@@ -720,7 +723,11 @@
       <div class="panel-2"></div>
     </div>
     {% render 'global-variables' %}
-    {%- render 'free-gift-popup' -%}
+    {%- comment -%}
+      Popup « 3 regali gratis » (fenêtre de choix, bulle flottante « 2/3 », ajout des cadeaux au panier) : désactivée pour
+      le moment sur mobile, tablette et ordinateur. Pour la remettre : réactiver la ligne render 'free-gift-popup' ci-dessous.
+      render 'free-gift-popup'
+    {%- endcomment -%}
     {%- if rtl_languages contains localization.language.iso_code -%}
       {{ 'rtl.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
     {%- endif -%}

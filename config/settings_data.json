@@ -216,7 +216,7 @@
       },
       "8924079168617604943": {
         "type": "shopify://apps/ali-reviews/blocks/widget-popup/bf2eea72-0400-4db1-8908-44b7418f9a88",
-        "disabled": false,
+        "disabled": true,
         "settings": {}
       },
       "15885977890469162556": {
@@ -261,7 +261,7 @@
       },
       "15599951759576395258": {
         "type": "shopify://apps/mida-replay-heatmaps/blocks/mida_recorder/e4c350c5-eabf-426d-8014-47ef50412bd0",
-        "disabled": false,
+        "disabled": true,
         "settings": {}
       },
       "13951170544780599758": {

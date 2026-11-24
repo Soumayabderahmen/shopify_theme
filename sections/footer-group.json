@@ -42,15 +42,6 @@
             "border_color": "#00b67a"
           }
         },
-        "ali_reviews_review_badge_MgkFct": {
-          "type": "shopify://apps/ali-reviews/blocks/review-badge/bf2eea72-0400-4db1-8908-44b7418f9a88",
-          "settings": {
-            "template_id": "highlight",
-            "verified_text": "Verified reviews",
-            "scale": 100,
-            "product_ids": []
-          }
-        },
         "4300adc0-a530-4961-bb5a-0ef06c6e64fb": {
           "type": "socials_newsletter",
           "settings": {
@@ -74,7 +65,6 @@
       "block_order": [
         "customer_support_VqA3XV",
         "trustpilot_trustpilot_review_collector_widget_bwDyjX",
-        "ali_reviews_review_badge_MgkFct",
         "4300adc0-a530-4961-bb5a-0ef06c6e64fb",
         "c9a8027f-3a8d-4084-adbf-29db94608977"
       ],
