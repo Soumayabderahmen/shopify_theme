@@ -1,67 +1,77 @@
+{%- comment -%}
+  Balises de partage (Facebook, WhatsApp, X…). Les images sont en adresse absolue https (exigé par les réseaux) :
+  image_url peut renvoyer « //domaine/… » ou « /cdn/… » selon l'environnement.
+{%- endcomment -%}
 {%- liquid
   assign og_title = page_title
   assign og_url = canonical_url
   assign og_type = 'website'
-  assign og_description = page_description | default: shop.description | default: shop.name | escape
-  assign og_image_tag = ''
+  assign og_description = page_description | default: shop.description | default: shop.name
+  assign og_img = blank
 
   if request.page_type == 'product'
-    assign og_title = product.title | strip_html | escape
+    assign og_title = product.title | strip_html
     assign og_type = 'product'
-    assign image = product.featured_image | image_url: width: 600, height: 500, crop: 'center'
-    assign og_image_tag = '<meta property="og:image" content="' | append: image | append: '">'
-    assign twitter_image_tag = '<meta property="twitter:image" content="' | append: image | append: '">'
+    assign og_img = product.featured_image
   elsif request.page_type == 'article'
-    assign og_title = article.title | strip_html | escape
+    assign og_title = article.title | strip_html
     assign og_type = 'article'
-    assign og_description = article.excerpt_or_content | strip_html | escape
-    if article.image
-      assign image = article.image | image_url: width: 600, height: 500, crop: 'center'
-      assign og_image_tag = '<meta property="og:image" content="http:' | append: image | append: '">'
-      assign og_image_secure_url_tag = '<meta property="og:image:secure_url" content="https:' | append: image | append: '">'
-      assign twitter_image_tag = '<meta property="twitter:image" content="http:' | append: image | append: '">'
-    endif
+    assign og_description = article.excerpt_or_content | strip_html | truncate: 300
+    assign og_img = article.image
   elsif request.page_type == 'collection'
-    assign og_title = collection.title | strip_html | escape
+    assign og_title = collection.title | strip_html
     assign og_type = 'product.group'
-    if collection.image
-      assign image = collection.image | image_url: width: 600, height: 500, crop: 'center'
-      assign og_image_tag = '<meta property="og:image" content="http:' | append: image | append: '">'
-      assign og_image_secure_url_tag = '<meta property="og:image:secure_url" content="https:' | append: image | append: '">'
-      assign twitter_image_tag = '<meta property="twitter:image" content="http:' | append: image | append: '">'
-    endif
+    assign og_img = collection.image | default: collection.featured_image
   elsif request.page_type == 'password'
     assign og_title = shop.name
     assign og_url = shop.url
-    assign og_description = shop.description | default: shop.name | escape
+    assign og_description = shop.description | default: shop.name
   endif
-  if og_image_tag == '' and page_image
-    assign image = page_image | image_url: width: 600, height: 500, crop: 'center'
-    assign og_image_tag = '<meta property="og:image" content="' | append: image | append: '">'
+  if og_img == blank and page_image
+    assign og_img = page_image
+  endif
+
+  assign og_image = blank
+  if og_img != blank
+    assign og_image = og_img | image_url: width: 1200
+    assign og_head = og_image | slice: 0, 2
+    if og_head == '//'
+      assign og_image = og_image | prepend: 'https:'
+    elsif og_head contains '/'
+      assign og_image = og_image | prepend: shop.url
+    endif
+    assign og_w = 1200
+    assign og_h = og_img.height | times: 1200 | divided_by: og_img.width
   endif
 -%}
 <meta name="msapplication-config" content="{{ 'browserconfig.xml' | asset_url }}">
 <meta property="og:title" content="{{ og_title | escape }}">
 <meta property="og:type" content="{{ og_type }}">
-<meta property="og:description" content="{{ og_description }}">
-<meta property="og:site_name" content="{{ shop.name }}">
+<meta property="og:description" content="{{ og_description | escape }}">
+<meta property="og:site_name" content="{{ shop.name | escape }}">
 <meta property="og:url" content="{{ og_url }}">
-{% if request.page_type == 'product' %}
-  {% assign current_variant = product.selected_or_first_available_variant %}
-  <meta property="product:price:amount" content="{{ current_variant.price | money | strip_html }}">
-  <meta property="og:price:amount" content="{{ current_variant.price | money | strip_html }}">
-  <meta property="og:price:currency" content="{{ cart.currency.iso_code }}">
-  <meta property="og:availability" content="{% if product.available %}instock{% else %}out of stock{% endif %}" />
-{% endif %}
-{% if og_image_tag %}{{ og_image_tag }}{% endif %}
-{% if og_image_secure_url_tag %}{{ og_image_secure_url_tag }}{% endif %}
-<meta name="twitter:title" content="{{ og_title }}">
-<meta name="twitter:description" content="{{ og_description }}">
-<meta name="twitter:site" content="{{ shop.name }}">
-{% if settings.logo %}
-  <meta name="twitter:card" content="{{ settings.logo | image_url }}">
-{% endif %}
-{% if twitter_image_tag %}{{ twitter_image_tag }}{% endif %}
+<meta property="og:locale" content="{{ request.locale.iso_code | replace: '-', '_' }}">
+{%- if request.page_type == 'product' %}
+  {%- assign current_variant = product.selected_or_first_available_variant %}
+<meta property="product:price:amount" content="{{ current_variant.price | divided_by: 100.0 }}">
+<meta property="product:price:currency" content="{{ cart.currency.iso_code }}">
+<meta property="og:price:amount" content="{{ current_variant.price | divided_by: 100.0 }}">
+<meta property="og:price:currency" content="{{ cart.currency.iso_code }}">
+<meta property="product:availability" content="{% if product.available %}in stock{% else %}out of stock{% endif %}">
+{%- endif %}
+{%- if og_image != blank %}
+<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:secure_url" content="{{ og_image }}">
+<meta property="og:image:width" content="{{ og_w }}">
+<meta property="og:image:height" content="{{ og_h }}">
+<meta property="og:image:alt" content="{{ og_img.alt | default: og_title | escape }}">
+{%- endif %}
+<meta name="twitter:card" content="{% if og_image != blank %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ og_title | escape }}">
+<meta name="twitter:description" content="{{ og_description | escape }}">
+{%- if og_image != blank %}
+<meta name="twitter:image" content="{{ og_image }}">
+{%- endif %}
 {%- comment -%}
   Données structurées communes (Organization, WebSite ; Article sur les articles). La fiche produit est dans
   snippets/product-jsonld.liquid (un seul bloc produit par page).

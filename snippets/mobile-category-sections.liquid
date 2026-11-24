@@ -91,7 +91,7 @@
           <a href="{{ tile.url }}" class="mobile-category-card">
             <span class="mobile-category-card__image">
               {%- if tile_image != blank -%}
-                <img data-src="{{ tile_image | image_url: width: 184, height: 184, crop: 'center' }}" alt="" width="120" height="120">
+                <img data-src="{{ tile_image | image_url: width: 184, height: 184, crop: 'center' }}" alt="{{ tile_title | escape }}" width="120" height="120">
               {%- else -%}
                 <span aria-hidden="true">{{ tile_title | slice: 0, 1 | upcase }}</span>
               {%- endif -%}

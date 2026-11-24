@@ -61,7 +61,7 @@
   <div class="mhh__art" aria-hidden="true">
     {%- for slot in (1..3) -%}
       {%- assign hero_i = slot | minus: 1 -%}
-      <a class="mhh-fl mhh-fl--{{ slot }}" href="{{ hero_first_urls[hero_i] | default: '#' }}" tabindex="-1"><span class="mhh-fl__in"><img alt="" width="200" height="260"{% if hero_first_imgs[hero_i] != blank %} data-src="{{ hero_first_imgs[hero_i] }}"{% if slot == 1 %} fetchpriority="high"{% endif %}{% endif %}></span></a>
+      <a class="mhh-fl mhh-fl--{{ slot }}" href="{{ hero_first_urls[hero_i] | default: '#' }}" tabindex="-1"><span class="mhh-fl__in"><img alt="{{ shop.name | escape }}" width="200" height="260"{% if hero_first_imgs[hero_i] != blank %} data-src="{{ hero_first_imgs[hero_i] }}"{% if slot == 1 %} fetchpriority="high"{% endif %}{% endif %}></span></a>
     {%- endfor -%}
   </div>
   <div class="mhh__usp">

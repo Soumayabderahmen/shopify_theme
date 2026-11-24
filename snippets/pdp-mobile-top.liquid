@@ -186,7 +186,7 @@
           {%- for media in product.media -%}
             {%- if media.preview_image -%}
               <button class="pdp-m__th" type="button" data-index="{{ pm_thumb_index }}"{% if pm_thumb_index == 0 %} aria-current="true"{% endif %} aria-label="{{ pm_thumb_index | plus: 1 }} / {{ pm_media_count }}">
-                <img src="{{ media.preview_image | image_url: width: 160, height: 160, crop: 'center' }}" width="80" height="80" alt="" loading="lazy">
+                <img src="{{ media.preview_image | image_url: width: 160, height: 160, crop: 'center' }}" width="80" height="80" alt="{{ media.alt | default: product.title | escape }}" loading="lazy">
               </button>
               {%- assign pm_thumb_index = pm_thumb_index | plus: 1 -%}
             {%- endif -%}
@@ -519,7 +519,7 @@
                 <button type="button" class="pdp-m__swb" role="radio" aria-checked="{% if value == option.selected_value %}true{% else %}false{% endif %}" data-value="{{ value | escape }}">
                   <span class="pdp-m__im">
                     {%- if swatch_image != blank -%}
-                      <img src="{{ swatch_image | image_url: width: 152, height: 152, crop: 'center' }}" width="76" height="76" alt="" loading="lazy">
+                      <img src="{{ swatch_image | image_url: width: 152, height: 152, crop: 'center' }}" width="76" height="76" alt="{{ product.title | append: ' – ' | append: value | escape }}" loading="lazy">
                     {%- endif -%}
                   </span>
                   <span class="pdp-m__n">{{ value | escape }}</span>

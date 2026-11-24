@@ -28,7 +28,7 @@
       linear-gradient(200deg, #ffc35a 0%, #ff7a3d 38%, #d2486a 62%, #0a6f9e 100%);
   }
 
-  #root .mhh[data-season] h2 span, html[data-mhh-season] #root .mhh[data-mhh] h2 span { color: var(--mhh-accent); }
+  #root .mhh[data-season] :is(h2, .h2) span, html[data-mhh-season] #root .mhh[data-mhh] :is(h2, .h2) span { color: var(--mhh-accent); }
   .mhh[data-season] .mhh__eb i, html[data-mhh-season] .mhh[data-mhh] .mhh__eb i { background: var(--mhh-dot); box-shadow: 0 0 0 3px color-mix(in srgb, var(--mhh-dot) 25%, transparent); }
   #root .mhh[data-season] .mhh__btn, html[data-mhh-season] #root .mhh[data-mhh] .mhh__btn { color: var(--mhh-c3) !important; }
 }

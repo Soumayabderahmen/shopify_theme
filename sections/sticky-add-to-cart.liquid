@@ -60,13 +60,13 @@
                     </picture>
                 </figure>
                 <header>
-                    <h2>
+                    <p class="h2">
                         {%- if settings.show_vendor and product.vendor != "vendor-unknown" and product.vendor != shop.name -%}{%- assign show_vendor = true -%}<span class="small">{{ product.vendor }}</span>{%- endif -%}
                         {{ product.title }}
                         {% if section.settings.show_variant_picker == false and product.has_only_default_variant == false %}
                             {% if show_vendor %} - {% else %}<span class="small">{% endif %}{{ current_variant.title }}{% unless show_vendor %}</span>{% endunless %}
                         {% endif %}
-                    </h2>
+                    </p>
                 </header>
                 {%- if section.settings.show_variant_picker and product.has_only_default_variant == false and product.variants.size > 1 -%}
                     <p>

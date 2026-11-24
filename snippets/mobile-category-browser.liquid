@@ -100,7 +100,7 @@
 
     <div class="mobile-category-browser__main">
       <div class="mobile-category-browser__heading">
-        <h2>{{ shop_label }}</h2>
+        <p class="h2">{{ shop_label }}</p>
         {%- comment -%} Plus de « Novità › » ici : les nouveautés ont leur lien à gauche, sous « In evidenza ». {%- endcomment -%}
       </div>
       {%- capture view_all_icon -%}<span class="mobile-category-card__image"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><rect class="q q1" x="3.4" y="3.4" width="7.4" height="7.4" rx="2.5" fill="url(#mobile-category-view-all-gradient)"></rect><rect class="q q2" x="13.2" y="3.4" width="7.4" height="7.4" rx="2.5" fill="#3a34d2" fill-opacity=".26"></rect><rect class="q q3" x="3.4" y="13.2" width="7.4" height="7.4" rx="2.5" fill="#3a34d2" fill-opacity=".26"></rect><rect class="q q4" x="13.2" y="13.2" width="7.4" height="7.4" rx="3.7" fill="url(#mobile-category-view-all-gradient)"></rect></svg></span>{%- endcapture -%}
@@ -201,7 +201,7 @@
 
       <section class="mobile-explore-section mobile-explore-section--recent" data-mobile-explore-recent hidden>
         <div class="mobile-explore-section__title">
-          <h2>👀 {{ 'mobile.explore.recently_viewed' | t }}</h2>
+          <p class="h2">👀 {{ 'mobile.explore.recently_viewed' | t }}</p>
           <button type="button" data-mobile-explore-recent-clear>{{ 'mobile.explore.clear' | t }}</button>
         </div>
         <div class="mobile-explore-rail mobile-explore-rail--products" data-mobile-explore-recent-products></div>
@@ -241,7 +241,7 @@
       {%- if seasonal_collection_count > 0 -%}
         <section class="mobile-explore-section">
           <div class="mobile-explore-section__title">
-            <h2>{{ 'mobile.explore.collections' | t }} <span class="mobile-explore-tag mobile-explore-tag--season mobile-explore-tag--season-{{ season_class }}">{{ current_season | escape }}</span></h2>
+            <p class="h2">{{ 'mobile.explore.collections' | t }} <span class="mobile-explore-tag mobile-explore-tag--season mobile-explore-tag--season-{{ season_class }}">{{ current_season | escape }}</span></p>
             <button type="button" class="mobile-explore-section__more" aria-haspopup="dialog" data-mobile-season-open>{{ 'mobile.explore.see_all_f' | t }}</button>
           </div>
           <div class="mobile-explore-rail mobile-explore-rail--collections">
@@ -289,7 +289,7 @@
       {%- endif -%}
       <section class="mobile-explore-section">
         <div class="mobile-explore-section__title">
-          <h2>🔥 {{ 'mobile.explore.on_sale' | t }}</h2>
+          <p class="h2">🔥 {{ 'mobile.explore.on_sale' | t }}</p>
           <a href="{% if sale_collection.handle == 'in-offerta' %}{{ sale_collection.url }}{% else %}{{ routes.all_products_collection_url }}?view=offerte&sort_by=best-selling{% endif %}">{{ 'mobile.explore.see_all_f' | t }}</a>
         </div>
         {%- if sale_product_count > 0 -%}
@@ -373,7 +373,7 @@
       {%- endfor -%}
       <section class="mobile-explore-section">
         <div class="mobile-explore-section__title">
-          <h2>{{ 'mobile.explore.brands' | t }}</h2>
+          <p class="h2">{{ 'mobile.explore.brands' | t }}</p>
           <button type="button" class="mobile-explore-section__more" aria-haspopup="dialog" data-mobile-brands-open>{{ 'mobile.explore.see_more_brands' | t }}</button>
         </div>
         <div class="mobile-explore-brands" aria-label="{{ 'mobile.explore.scroll_brands' | t }}">
@@ -428,13 +428,13 @@
               {%- if brand_image != blank -%}
                 <img
                   src="{{ brand_image | image_url: width: 240, height: 148, crop: 'center' }}"
-                  alt=""
+                  alt="{{ brand_label | escape }}"
                   width="120"
                   height="74"
                   loading="lazy"
                 >
               {%- elsif brand_image_url != blank -%}
-                <img src="{{ brand_image_url }}" alt="" width="120" height="74" loading="lazy" onerror="this.remove()">
+                <img src="{{ brand_image_url }}" alt="{{ brand_label | escape }}" width="120" height="74" loading="lazy" onerror="this.remove()">
               {%- endif -%}
               <strong>{{ brand_label | escape }}</strong>
             </a>
@@ -459,7 +459,7 @@
       {%- assign current_month = 'now' | date: '%m' | plus: 0 -%}
       {%- if current_month == 10 or occasion_collection_count > 0 -%}
         <section class="mobile-explore-section">
-          <div class="mobile-explore-section__title"><h2>{{ 'mobile.explore.occasions' | t }}</h2></div>
+          <div class="mobile-explore-section__title"><p class="h2">{{ 'mobile.explore.occasions' | t }}</p></div>
           {%- if current_month == 10 and halloween_collection != blank and halloween_collection.products_count > 0 -%}
             <a class="mobile-explore-halloween" href="{{ halloween_collection.url }}">
               <span><small>🎃 {{ 'mobile.explore.halloween_date' | t }}</small><strong>Anime &amp; Cosplay</strong><em>{{ 'mobile.explore.halloween_text' | t }}</em></span>
@@ -523,7 +523,7 @@
       {%- if gift_month >= 11 and gift_month <= 12 -%}
         <section class="mobile-explore-section">
           <div class="mobile-explore-section__title">
-            <h2>🎁 {{ 'mobile.explore.gift_ideas' | t }} <span class="mobile-explore-tag mobile-explore-tag--gift">{{ 'mobile.explore.christmas' | t }}</span></h2>
+            <p class="h2">🎁 {{ 'mobile.explore.gift_ideas' | t }} <span class="mobile-explore-tag mobile-explore-tag--gift">{{ 'mobile.explore.christmas' | t }}</span></p>
           </div>
           <div class="mobile-explore-gifts">
             {%- comment -%} Le filtre de prix compte dans la devise du client (20 CHF, 20 CA$…) : même montant, au format de sa devise. {%- endcomment -%}
@@ -544,7 +544,7 @@
       {%- if new_collection != blank and new_collection.products_count > 0 -%}
         <section class="mobile-explore-section">
           <div class="mobile-explore-section__title">
-            <h2>{{ 'mobile.explore.new_arrivals' | t }} <span class="mobile-explore-tag">NEW</span></h2>
+            <p class="h2">{{ 'mobile.explore.new_arrivals' | t }} <span class="mobile-explore-tag">NEW</span></p>
             <a href="{{ new_collection.url }}?sort_by=created-descending">{{ 'mobile.explore.see_all' | t }}</a>
           </div>
           <div class="mobile-explore-rail mobile-explore-rail--products" data-mobile-explore-warm>
@@ -580,7 +580,7 @@
       {%- if hot_collection != blank and hot_collection.products_count > 0 -%}
         <section class="mobile-explore-section mobile-explore-section--top">
           <div class="mobile-explore-section__title">
-            <h2>🏆 {{ 'mobile.explore.best_sellers' | t }}</h2>
+            <p class="h2">🏆 {{ 'mobile.explore.best_sellers' | t }}</p>
             <a href="{{ hot_collection.url }}?sort_by=best-selling">{{ 'mobile.explore.see_all' | t }}</a>
           </div>
           <ol class="mobile-explore-top-products">
@@ -624,7 +624,7 @@
     >
       {%- render 'brand-vendors-json' -%}
       <div class="mobile-brands-sheet__head">
-        <h2 id="mobile-brands-sheet-title">{{ 'mobile.explore.all_brands' | t }} <span data-mobile-brands-count></span></h2>
+        <p class="h2" id="mobile-brands-sheet-title">{{ 'mobile.explore.all_brands' | t }} <span data-mobile-brands-count></span></p>
         <button type="button" class="mobile-brands-sheet__close" aria-label="{{ 'mobile.common.close' | t }}" data-mobile-brands-close>
           <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m6 6 12 12M18 6 6 18"></path></svg>
         </button>
@@ -651,7 +651,7 @@
         data-mobile-season-sheet
       >
         <div class="mobile-brands-sheet__head">
-          <h2 id="mobile-season-sheet-title">{{ 'mobile.explore.collections' | t }} <span class="mobile-explore-tag mobile-explore-tag--season mobile-explore-tag--season-{{ season_class }}">{{ current_season | escape }}</span></h2>
+          <p class="h2" id="mobile-season-sheet-title">{{ 'mobile.explore.collections' | t }} <span class="mobile-explore-tag mobile-explore-tag--season mobile-explore-tag--season-{{ season_class }}">{{ current_season | escape }}</span></p>
           <button type="button" class="mobile-brands-sheet__close" aria-label="{{ 'mobile.common.close' | t }}" data-mobile-brands-close>
             <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="m6 6 12 12M18 6 6 18"></path></svg>
           </button>

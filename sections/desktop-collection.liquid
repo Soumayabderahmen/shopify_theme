@@ -300,7 +300,7 @@
         {%- assign tile_image = link.object.featured_image -%}
         {%- if tile_image == blank and link.object.products -%}{%- assign tile_image = link.object.products.first.featured_image -%}{%- endif -%}
         <a class="cpt__tile{% if l_handle == handle %} is-on{% endif %}" href="{{ link.url }}"{% if l_handle == handle %} aria-current="page"{% endif %}>
-          <span class="cpt__img">{%- if tile_image -%}<img src="{{ tile_image | image_url: width: 200, height: 200, crop: 'center' }}" alt="" width="100" height="100" loading="lazy">{%- endif -%}</span>
+          <span class="cpt__img">{%- if tile_image -%}<img src="{{ tile_image | image_url: width: 200, height: 200, crop: 'center' }}" alt="{{ link.title | escape }}" width="100" height="100" loading="lazy">{%- endif -%}</span>
           <span class="cpt__name">{{ link.title | escape }}</span>
         </a>
         {%- assign tile_count = tile_count | plus: 1 -%}

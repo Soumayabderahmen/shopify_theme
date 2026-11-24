@@ -244,7 +244,7 @@
                 {%- unless link.url contains '/collections/' -%}{%- continue -%}{%- endunless -%}
                 {%- if link.links.size > 0 -%}
                   <div class="mm__subs" data-subs="{{ top_index }}" hidden>
-                    <a class="mm__head" href="{{ link.url }}"><img alt="" width="32" height="32" data-dh-head hidden><b>{{ link.title | escape }}</b></a>
+                    <a class="mm__head" href="{{ link.url }}"><img alt="{{ link.title | escape }}" width="32" height="32" data-dh-head hidden><b>{{ link.title | escape }}</b></a>
                     {%- for kid in link.links -%}
                       <a class="mm__sub" href="{{ kid.url }}" data-k="{{ forloop.index0 }}" data-handle="{{ kid.url | split: '/collections/' | last | split: '?' | first | split: '/' | first }}"><span>{{ kid.title | escape }}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
                       {%- comment -%} Sous-liens du menu (3e niveau) : contenu du sous-lien quand le panneau Categoria mobile n'en a pas {%- endcomment -%}
@@ -252,7 +252,7 @@
                         <template data-dh-kids>
                           {%- for grand in kid.links -%}
                             {%- assign grand_image = grand.object.featured_image | default: grand.object.image -%}
-                            <a class="mobile-category-card" href="{{ grand.url }}">{%- if grand_image -%}<img src="{{ grand_image | image_url: width: 180 }}" alt="">{%- endif -%}<span class="mobile-category-card__title">{{ grand.title | escape }}</span></a>
+                            <a class="mobile-category-card" href="{{ grand.url }}">{%- if grand_image -%}<img src="{{ grand_image | image_url: width: 180 }}" alt="{{ grand.title | escape }}" width="90" height="{{ 90 | times: grand_image.height | divided_by: grand_image.width | default: 90 }}" loading="lazy">{%- endif -%}<span class="mobile-category-card__title">{{ grand.title | escape }}</span></a>
                           {%- endfor -%}
                         </template>
                       {%- endif -%}

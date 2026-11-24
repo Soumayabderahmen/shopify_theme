@@ -31,10 +31,10 @@
   data-total="{{ cart.total_price }}"
 >
   <div class="cd-h">
-    <h2>
+    <p class="h2">
       {{- 'mobile.cart.title' | t -}}
       {%- if cart.item_count > 0 %} <span class="cd-n">{{ cart.item_count }}</span>{% endif -%}
-    </h2>
+    </p>
     <a href="./" class="m6pn-close cd-x" role="button" aria-label="{{ 'mobile.drawer.close' | t }}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
     </a>

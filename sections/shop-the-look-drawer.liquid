@@ -12,7 +12,7 @@
 <aside class="m6pn wide" id="add-products-to-banner" aria-hidden="true" data-products="[]">
   <div>
     <header>
-      {%- unless section.settings.shop_the_look_title == empty -%}{{ section.settings.shop_the_look_title }}{%- endunless -%}
+      {%- unless section.settings.shop_the_look_title == empty -%}{{ section.settings.shop_the_look_title | replace: '<h2>', '<p class="h2">' | replace: '</h2>', '</p>' }}{%- endunless -%}
       {%- unless section.settings.shop_the_look_subtitle == empty -%}
         <p>{{ section.settings.shop_the_look_subtitle }}</p>
       {%- endunless -%}

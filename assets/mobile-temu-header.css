@@ -1062,7 +1062,7 @@
     padding: 0 14px 10px;
   }
 
-  .mobile-explore-section__title h2 {
+  .mobile-explore-section__title :is(h2, .h2) {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -1471,7 +1471,7 @@
     padding: 16px 14px 10px;
   }
 
-  .mobile-brands-sheet__head h2 {
+  .mobile-brands-sheet__head :is(h2, .h2) {
     display: flex;
     align-items: center;
     gap: 7px;
@@ -1872,7 +1872,7 @@
     }
   }
 
-  .mobile-category-browser h2 {
+  .mobile-category-browser :is(h2, .h2) {
     flex: 0 0 auto;
     margin: 0;
     color: #111;
@@ -1961,7 +1961,7 @@
     gap: 8px;
   }
 
-  #root .mobile-category-browser .mobile-category-browser__heading h2 {
+  #root .mobile-category-browser .mobile-category-browser__heading :is(h2, .h2) {
     margin: 0;
     padding: 0;
     color: #16123f;
@@ -1990,7 +1990,7 @@
     text-underline-offset: 3px;
   }
 
-  .mobile-category-browser__main > h2 {
+  .mobile-category-browser__main > :is(h2, .h2) {
     margin-bottom: 18px;
     padding: 0 3px;
     font-size: 17px;
@@ -5107,7 +5107,7 @@
   }
 
   body > dialog.mobile-explore-drawer,
-  body > dialog.mobile-explore-drawer :is(h2, strong, b, .mobile-explore-tag) {
+  body > dialog.mobile-explore-drawer :is(h2, .h2, strong, b, .mobile-explore-tag) {
     font-family: 'Figtree', system-ui, sans-serif !important;
   }
 
@@ -5165,7 +5165,7 @@
     padding: 0 12px 10px;
   }
 
-  body > dialog.mobile-explore-drawer .mobile-explore-section__title h2 {
+  body > dialog.mobile-explore-drawer .mobile-explore-section__title :is(h2, .h2) {
     color: #111;
     font-size: 15px;
     font-weight: 800;

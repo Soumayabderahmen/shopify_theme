@@ -119,7 +119,7 @@ body #root .mhh.mhh[data-mhh] {
   box-shadow: 0 0 0 3px rgb(61 220 151 / 25%);
 }
 
-#root .mhh h2 {
+#root .mhh :is(h2, .h2) {
   margin: 10px 0 0;
   color: #fff;
   font-family: 'Sora', sans-serif;
@@ -130,7 +130,7 @@ body #root .mhh.mhh[data-mhh] {
   text-transform: none;
 }
 
-#root .mhh h2 span {
+#root .mhh :is(h2, .h2) span {
   color: #c9c4ff;
 }
 

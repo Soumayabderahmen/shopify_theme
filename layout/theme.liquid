@@ -45,10 +45,19 @@
       assign theme_title_lc = theme_page_title | downcase
       assign theme_shop_lc = shop.name | downcase
     -%}
-    <title>
-      {{ theme_page_title }}
-      {% unless theme_title_lc contains theme_shop_lc %} &ndash; {{ shop.name }}{% endunless %}
-    </title>
+    {%- liquid
+      # Pages 2, 3… d'une collection ou d'un blog : « – Pagina 2 » dans le titre et la description (sinon doublons pour Google).
+      # Marque : pas ajoutée si le titre contient déjà « platinum » (titres SEO des collections « … | PlatiNum »).
+      assign theme_page_n = ''
+      if current_page > 1
+        assign theme_page_n = 'desktop_brand.page_n' | t: n: current_page | prepend: ' – '
+      endif
+      assign theme_title_full = theme_page_title | strip_newlines | strip | append: theme_page_n
+      unless theme_title_lc contains theme_shop_lc or theme_title_lc contains 'platinum'
+        assign theme_title_full = theme_title_full | append: ' – ' | append: shop.name
+      endunless
+    -%}
+    <title>{{ theme_title_full }}</title>
     {%- liquid
       # Fiche produit sans description SEO dont le texte est une fiche technique brute (« SPECIFICATIONS… Brand Name: »,
       # que Google afficherait tel quel) : description courte et vraie, titre + options du produit (couleurs, tailles…).
@@ -78,7 +87,9 @@
         endif
       endif
     -%}
-    {%- if theme_meta_desc -%}<meta name="description" content="{{ theme_meta_desc | escape }}">{%- endif -%}
+    {%- if theme_meta_desc -%}<meta name="description" content="{{ theme_meta_desc | append: theme_page_n | escape }}">{%- endif -%}
+    {%- comment -%} Pages utiles aux clients mais sans intérêt dans Google (liste de souhaits, panier) : pas indexées. {%- endcomment -%}
+    {%- if template.name == 'cart' or request.page_type == 'page' and page.handle == 'wishlist' -%}<meta name="robots" content="noindex, follow">{%- endif -%}
     <meta name="theme-color" content="{{ settings.default_color_scheme.settings.accent }}">
     <meta name="MobileOptimized" content="320">
     <meta name="HandheldFriendly" content="true">
@@ -94,7 +105,15 @@
       Deeplumen continue de servir ses pages aux robots d'IA (ChatGPT, Perplexity…), et ces pages déclarent déjà la
       page normale comme officielle.
     {%- endcomment -%}
-    <link rel="canonical" href="{{ canonical_url }}">
+    {%- unless request.page_type == '404' %}<link rel="canonical" href="{{ canonical_url }}">{% endunless -%}
+    {%- comment -%}
+      Fiche produit : la 1re photo de la galerie (élément le plus grand de l'écran, LCP) est demandée dès le début de la
+      page, avec les mêmes tailles que snippets/pdp-mobile-top.liquid (sinon le navigateur la découvre après les styles).
+    {%- endcomment -%}
+    {%- if request.page_type == 'product' and product.featured_media.preview_image -%}
+      {%- assign lcp_img = product.featured_media.preview_image -%}
+      <link rel="preload" as="image" fetchpriority="high" href="{{ lcp_img | image_url: width: 750 }}" imagesrcset="{{ lcp_img | image_url: width: 375 }} 375w, {{ lcp_img | image_url: width: 600 }} 600w, {{ lcp_img | image_url: width: 750 }} 750w, {{ lcp_img | image_url: width: 900 }} 900w" imagesizes="100vw">
+    {%- endif -%}
     {% unless settings.heading_font.system? -%}
       {%- assign heading_font_url = settings.heading_font | font_url -%}
       {{ heading_font_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}

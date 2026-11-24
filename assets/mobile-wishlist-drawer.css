@@ -62,7 +62,7 @@ html.mobile-wishlist-open {
   display: none !important;
 }
 
-.mobile-wishlist-drawer h2,
+.mobile-wishlist-drawer :is(h2, .h2),
 .mobile-wishlist-drawer h3,
 .mobile-wishlist-drawer h4,
 .mobile-wishlist-drawer p,
@@ -135,7 +135,7 @@ html.mobile-wishlist-open {
   background: #fff;
 }
 
-.mobile-wishlist-drawer__head h2 {
+.mobile-wishlist-drawer__head :is(h2, .h2) {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -146,7 +146,7 @@ html.mobile-wishlist-open {
   letter-spacing: -0.4px;
 }
 
-.mobile-wishlist-drawer__head h2 span {
+.mobile-wishlist-drawer__head :is(h2, .h2) span {
   display: grid;
   min-width: 22px;
   height: 22px;

@@ -163,7 +163,7 @@
         {%- if group_image == blank -%}{%- continue -%}{%- endif -%}
         {%- assign group_count = group_count | plus: 1 -%}
         <a class="mshein-dgroup reveal" href="{{ group.url }}">
-          {{ group_image | image_url: width: 240, height: 300, crop: 'center' | image_tag: loading: 'lazy', alt: '' }}
+          {{ group_image | image_url: width: 240, height: 300, crop: 'center' | image_tag: loading: 'lazy', alt: group.title }}
           <span>{{ group.title | escape }}</span>
         </a>
       {%- endfor -%}
@@ -181,7 +181,7 @@
             {%- if sub_image == blank -%}{%- continue -%}{%- endif -%}
             {%- assign icon_count = icon_count | plus: 1 -%}
             <a class="mshein-dicon reveal" href="{{ sub.url }}">
-              <span class="mshein-dicon__img">{{ sub_image | image_url: width: 160, height: 160, crop: 'center' | image_tag: loading: 'lazy', alt: '' }}</span>
+              <span class="mshein-dicon__img">{{ sub_image | image_url: width: 160, height: 160, crop: 'center' | image_tag: loading: 'lazy', alt: sub.title }}</span>
               <span>{{ sub.title | escape }}</span>
             </a>
           {%- endfor -%}
