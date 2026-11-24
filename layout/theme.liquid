@@ -139,7 +139,41 @@
     <link rel="stylesheet" href="{{ 'screen-rest.css' | asset_url }}" media="print" onload="this.media='screen'">
     <noscript>{{ 'screen-rest.css' | asset_url | stylesheet_tag: media: 'screen' }}</noscript>
     {{ 'theme-xtra.css' | asset_url | stylesheet_tag: media: 'screen' }}
-    {{ 'mobile-temu-header.css' | asset_url | stylesheet_tag: preload: true, media: 'screen' }}
+    {%- comment -%}
+      En-tête et panneaux mobiles (assets/mobile-temu-header.css) : toutes ses règles sont pour les écrans de 760 px et moins,
+      donc la feuille ne bloque plus l'affichage sur ordinateur (media). Ses seules règles valables partout (en-tête mobile
+      caché par défaut, pastille du compteur wishlist) sont ici.
+    {%- endcomment -%}
+    <style>
+      .mobile-temu-header,
+      .mobile-category-browser,
+      .mobile-bottom-navigation,
+      .mobile-explore-scrim,
+      .mobile-explore-drawer {
+        display: none;
+      }
+
+      .mobile-wishlist__count[hidden],
+      .mobile-wishlist__share[hidden] {
+        display: none !important;
+      }
+
+      .mobile-wishlist__count {
+        position: absolute;
+        top: -4px;
+        right: -5px;
+        display: grid;
+        place-items: center;
+        min-width: 17px;
+        height: 17px;
+        padding: 0 4px;
+        border-radius: 9px;
+        background: #e4323c;
+        color: #fff;
+        font: 700 10px/1 'Figtree', system-ui, sans-serif;
+      }
+    </style>
+    {{ 'mobile-temu-header.css' | asset_url | stylesheet_tag: preload: true, media: 'only screen and (max-width: 760px)' }}
     {%- comment -%}
       Carte produit au style SHEIN (snippets/mshein-card.liquid) sur toutes les pages en mobile : styles en tête de page
       (cartes affichées finies), script commun (cœur, nom de la marque, toucher sur toute la carte).
@@ -266,6 +300,10 @@
           border-radius: 18px !important;
           overflow: hidden !important;
         }
+      }
+      /* Ordinateur : points du diaporama mobile cachés (avant dans assets/mobile-temu-header.css, désormais chargé sur mobile seulement). */
+      @media only screen and (min-width: 761px) {
+        #root [id$="section_slideshow_XNiKWa"] .mobile-hero-dots { display: none; }
       }
     </style>
     {{ 'async-print.css' | asset_url | stylesheet_tag: media: 'print' }}

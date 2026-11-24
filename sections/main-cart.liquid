@@ -38,7 +38,7 @@
     data-standard-view-event-scope="page"
     data-standard-view-event-payload='{{ cart | standard_event_data: "view", context: "page" | escape }}'
   >
-    <{{ section.settings.title_size }}>{{ 'cart.empty_title' | t }}</{{ section.settings.title_size }}>
+    {%- comment -%} Ancien panier (caché, remplacé par snippets/cart-mobile.liquid qui porte le seul H1) : titre en texte, pas en titre H1 en double. {%- endcomment -%}<p class="{{ section.settings.title_size }}">{{ 'cart.empty_title' | t }}</p>
     <p class="m50">{{ 'cart.empty_subtitle' | t }}</p>
     <figure class="m35">
       {% assign accent_color = settings.color_schemes[settings.default_color_scheme.id].settings.accent %}
@@ -55,7 +55,7 @@
     </p>
   </article>
 {%- else -%}
-  <{{ section.settings.title_size }}>{{ 'cart.title' | t }}</{{ section.settings.title_size }}>
+  <p class="{{ section.settings.title_size }}">{{ 'cart.title' | t }}</p>
   <article
     class="form-cart section-width-{{ section.settings.width }}"
     data-totalqty="{{ cart.item_count }}"
