@@ -1,6 +1,8 @@
 {%- comment -%}
   Offre d'une variante pour snippets/product-jsonld.liquid : URL de la variante (langue du visiteur), prix et devise du
-  marché, stock réel. Paramètres : variant, origin, currency, seller.
+  marché, stock réel. Paramètres : variant, origin, currency, seller ; ship (frais de livraison pour le pays
+  du visiteur, vide si inconnu) et country (code pays), calculés dans snippets/product-jsonld.liquid.
+  La politique de retour est au niveau de l'organisation (snippets/social-meta-tags.liquid).
 {%- endcomment -%}
 {
         "@type": "Offer",
@@ -9,5 +11,9 @@
         "priceCurrency": {{ currency | json }},
         "availability": "https://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
         "itemCondition": "https://schema.org/NewCondition",
+        {%- if ship != blank %}
+          {%- if variant.price >= 10000 %}{% assign ship_value = 0 %}{% else %}{% assign ship_value = ship | plus: 0 %}{% endif %}
+        "shippingDetails": {"@type": "OfferShippingDetails", "shippingRate": {"@type": "MonetaryAmount", "value": {{ ship_value }}, "currency": {{ currency | json }}}, "shippingDestination": {"@type": "DefinedRegion", "addressCountry": {{ country | json }}}},
+        {%- endif %}
         "seller": { "@type": "Organization", "name": {{ seller | json }} }
       }

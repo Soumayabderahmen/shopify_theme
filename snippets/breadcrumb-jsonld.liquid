@@ -1,0 +1,30 @@
+{%- comment -%}
+  Fil d'Ariane pour Google (BreadcrumbList), rendu dans le <head> (layout/theme.liquid) sur les fiches produit et
+  les collections. Remplace celui de l'app Tapita (désactivée dans le thème). Adresses dans la langue du visiteur.
+  - Collection : Accueil > Collection
+  - Produit : Accueil > Collection d'où vient le visiteur (si l'adresse passe par /collections/…) > Produit,
+    sinon Accueil > Produit.
+{%- endcomment -%}
+{%- liquid
+  assign bc_origin = shop.url
+  assign bc_home = bc_origin | append: routes.root_url
+-%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ shop.name | json }}, "item": {{ bc_home | json }} }
+    {%- if request.page_type == 'collection' and collection %},
+    { "@type": "ListItem", "position": 2, "name": {{ collection.title | json }}, "item": {{ bc_origin | append: collection.url | json }} }
+    {%- elsif request.page_type == 'product' and product -%}
+      {%- assign bc_pos = 2 -%}
+      {%- if collection and collection.url != blank %},
+    { "@type": "ListItem", "position": 2, "name": {{ collection.title | json }}, "item": {{ bc_origin | append: collection.url | json }} }
+        {%- assign bc_pos = 3 -%}
+      {%- endif %},
+    { "@type": "ListItem", "position": {{ bc_pos }}, "name": {{ product.title | json }}, "item": {{ bc_origin | append: product.url | json }} }
+    {%- endif %}
+  ]
+}
+</script>

@@ -391,6 +391,7 @@
     </script>
     {% render 'social-meta-tags' %}
     {%- if request.page_type == 'product' -%}{% render 'product-jsonld', product: product %}{%- endif -%}
+    {%- if request.page_type == 'product' or request.page_type == 'collection' -%}{% render 'breadcrumb-jsonld', product: product, collection: collection %}{%- endif -%}
     {% render 'standard-storefront-actions' %}
     {% render 'standard-storefront-events' %}
     {{ content_for_header }}

@@ -131,7 +131,32 @@
         "addressLocality": {{ shop.address.city | json }},
         "postalCode": {{ shop.address.zip | json }},
         "addressCountry": {{ shop.address.country_code | json }}
-      }
+      },
+      {%- comment -%}
+        Politique de retour, recopiée de la politique de rimborso de la boutique (Impostazioni > Politiche) :
+        Europe 14 jours, Amérique du Nord et centrale 30 jours, retour gratuit avec étiquette ; ailleurs 30 jours, à la
+        charge du client (pays non listés : Google n'accepte pas « tous les autres »). À mettre à jour si elle change.
+      {%- endcomment %}
+      "hasMerchantReturnPolicy": [
+        {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": ["AD","AT","BE","BY","BA","CZ","VA","HR","EE","FI","FR","DE","GI","GR","GG","IE","IS","IM","FO","AX","IT","JE","XK","LV","LI","LT","LU","MK","MT","MD","MC","ME","NO","NL","PL","PT","GB","RO","RU","SM","RS","SK","SI","ES","SJ","SE","CH","UA","HU"],
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": 14,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn",
+          "merchantReturnLink": {{ shop.url | append: '/policies/refund-policy' | json }}
+        },
+        {
+          "@type": "MerchantReturnPolicy",
+          "applicableCountry": ["BZ","CA","CR","SV","JM","GT","HT","HN","MX","NI","PA","DO","US"],
+          "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+          "merchantReturnDays": 30,
+          "returnMethod": "https://schema.org/ReturnByMail",
+          "returnFees": "https://schema.org/FreeReturn",
+          "merchantReturnLink": {{ shop.url | append: '/policies/refund-policy' | json }}
+        }
+      ]
     },
     {
       "@context": "https://schema.org",

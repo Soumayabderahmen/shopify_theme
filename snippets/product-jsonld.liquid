@@ -77,6 +77,65 @@
 
   assign jl_images = product.images | slice: 0, 10
   assign jl_single = product.has_only_default_variant
+
+  comment
+    Catégorie : catégorie standard Shopify (taxonomie Google), chemin complet ; sinon le « type » du produit.
+  endcomment
+  assign jl_category = ''
+  if product.category != blank
+    assign jl_category = product.category.ancestors | map: 'name' | reverse | join: ' > '
+    if jl_category != blank
+      assign jl_category = jl_category | append: ' > '
+    endif
+    assign jl_category = jl_category | append: product.category.name
+  endif
+  if jl_category == blank
+    assign jl_category = product.type
+  endif
+
+  comment
+    Public : homme ou femme, d'après les collections du produit (« … Uomo … », « … Donna … »). Rien si les deux
+    ou aucune (produits unisexes ou non classés).
+  endcomment
+  assign jl_men = false
+  assign jl_women = false
+  for c in product.collections
+    assign jl_ct = c.title | downcase
+    if jl_ct contains 'uomo'
+      assign jl_men = true
+    endif
+    if jl_ct contains 'donna'
+      assign jl_women = true
+    endif
+  endfor
+  assign jl_gender = ''
+  if jl_men and jl_women == false
+    assign jl_gender = 'male'
+  elsif jl_women and jl_men == false
+    assign jl_gender = 'female'
+  endif
+
+  assign jl_cc = localization.country.iso_code
+
+  comment
+    Livraison pour le pays du visiteur, d'après le « Profilo generale » de Shopify (Spedizione e consegna) :
+    10 (Germania 12 €) dans la devise de la zone, gratuite dès 100. Seulement si la devise affichée est celle de
+    la zone. Pas pour les produits Shopify Collective (tarif calculé par le fournisseur) : rien plutôt qu'un faux prix.
+    À mettre à jour si les tarifs changent dans l'admin.
+  endcomment
+  assign jl_ship = ''
+  unless product.tags contains 'Shopify Collective'
+    assign jl_eu_zone = 'IT,BY,AT,BE,BG,HR,CY,CZ,DK,EE,FI,FR,GR,HU,IE,LV,LT,LU,MT,NL,PL,PT,RO,SK,SI,ES,SE,NO,CH,GB,AD,AL,BA,IS,LI,MC,MD,ME,MK,RS,SM,UA,VA,XK,TR,AX,FO,GI,GG,IM,JE,SJ' | split: ','
+    if jl_cc == 'DE' and jl_currency == 'EUR'
+      assign jl_ship = '12'
+    elsif jl_eu_zone contains jl_cc and jl_currency == 'EUR'
+      assign jl_ship = '10'
+    elsif jl_cc == 'US' and jl_currency == 'USD'
+      assign jl_ship = '10'
+    elsif jl_cc == 'CA' and jl_currency == 'CAD'
+      assign jl_ship = '10'
+    endif
+  endunless
 -%}
 <script type="application/ld+json">
 {
@@ -87,8 +146,11 @@
   "name": {{ product.title | json }},
   "description": {{ jl_desc | json }},
   "brand": { "@type": "Brand", "name": {{ jl_brand | json }} },
-  {%- if product.type != blank %}
-  "category": {{ product.type | json }},
+  {%- if jl_category != blank %}
+  "category": {{ jl_category | json }},
+  {%- endif %}
+  {%- if jl_gender != blank %}
+  "audience": { "@type": "PeopleAudience", "suggestedGender": {{ jl_gender | json }} },
   {%- endif %}
   {%- if jl_images.size > 0 %}
   "image": [
@@ -110,7 +172,7 @@
     {%- assign variant = product.selected_or_first_available_variant %}
   "sku": {{ variant.sku | default: product.id | json }},
   {%- render 'product-jsonld-gtin', variant: variant %}
-  "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_brand %}
+  "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_brand, ship: jl_ship, country: jl_cc %}
   {%- else %}
   "productGroupID": {{ product.id | append: '' | json }},
   {%- if jl_color_idx >= 0 or jl_size_idx >= 0 %}
@@ -138,7 +200,7 @@
       {%- if jl_vimg %}
       "image": {{ jl_vimg | image_url: width: 1200 | prepend: 'https:' | json }},
       {%- endif %}
-      "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_brand %}
+      "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_brand, ship: jl_ship, country: jl_cc %}
     }{% unless forloop.last %},{% endunless %}
     {%- endfor %}
   ]
