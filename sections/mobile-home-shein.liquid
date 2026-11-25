@@ -275,6 +275,13 @@
         <div class="mshein-coll" data-mshein-coll{% if coll_sale %} data-view="mshein-dept-sale"{% endif %}>
           {%- render 'mshein-dept', collection: collection, best: best, flag: flag, menu: section.settings.menu, cards: coll_cards, next_url: coll_next, as_page: true, after_hero: coll_perks, sale: coll_sale -%}
         </div>
+        {%- comment -%}
+          Texte de présentation de la collection (Admin > Collezioni > Descrizione), sous les produits, 1re page seulement :
+          lu par Google pour comprendre la page. Même bloc sur ordinateur (sections/desktop-collection.liquid).
+        {%- endcomment -%}
+        {%- if collection.description != blank and coll_sale != true and current_page == 1 -%}
+          <section class="coll-about" style="padding:28px 16px 8px;color:#666;font-size:13px;line-height:1.6">{{ collection.description }}</section>
+        {%- endif -%}
 
       {%- when 'modules' -%}
         {%- liquid

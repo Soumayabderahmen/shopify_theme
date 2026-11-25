@@ -357,3 +357,8 @@ html.cpd-lock #content { z-index: 70; }
 @media (prefers-reduced-motion: reduce) {
   .dcl .cph-fl, .dcl .cph-fl__in, .dcl .cpr__sk { transition: none; animation: none; }
 }
+
+/* Texte de présentation de la collection, sous la grille (sections/desktop-collection.liquid) */
+.dcl .cl__about { max-width: 880px; margin: 48px auto 8px; color: var(--muted); font-size: 14px; line-height: 1.65; }
+.dcl .cl__about p { margin: 0 0 10px; }
+.dcl .cl__about strong { color: var(--ink); }

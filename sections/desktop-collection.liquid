@@ -645,6 +645,14 @@
         {%- endif -%}
         <div class="dcl-sale-more" data-dcl-sale-more hidden><button type="button">{{ 'desktop_home.show_more' | t }}</button></div>
         {{ grid_pager }}
+        {%- comment -%}
+          Texte de présentation de la collection (Admin > Collezioni > Descrizione), sous les produits, 1re page seulement
+          (pas sur la recherche) : lu par Google pour comprendre la page. Même bloc sur mobile (sections/mobile-home-shein.liquid).
+        {%- endcomment -%}
+        {%- assign about_page = current_page | append: '' -%}
+        {%- if is_search == false and collection.description != blank and about_page == '1' -%}
+          <section class="cl__about">{{ collection.description }}</section>
+        {%- endif -%}
       </div>
     </div>
   </main>
