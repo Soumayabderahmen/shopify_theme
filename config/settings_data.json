@@ -246,7 +246,7 @@
       },
       "16156609502398088594": {
         "type": "shopify://apps/omega-facebook-pixel/blocks/app-embed-block/ecdcc423-3dbd-480c-85e8-fdb9789cf058",
-        "disabled": false,
+        "disabled": true,
         "settings": {}
       },
       "4918592460924562117": {
