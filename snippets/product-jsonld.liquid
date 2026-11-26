@@ -170,7 +170,10 @@
   {%- endif %}
   {%- if jl_single -%}
     {%- assign variant = product.selected_or_first_available_variant %}
-  "sku": {{ variant.sku | default: product.id | json }},
+  {%- comment -%} sku : Google refuse les espaces et les valeurs trop longues (« Valeur non valide dans le champ sku »). {%- endcomment -%}
+  {%- assign jl_sku = variant.sku | default: variant.id | append: '' | strip | replace: ' ', '-' | replace: '/', '-' | replace: '--', '-' -%}
+  {%- if jl_sku.size > 50 %}{% assign jl_sku = variant.id | append: '' %}{% endif %}
+  "sku": {{ jl_sku | json }},
   {%- render 'product-jsonld-gtin', variant: variant %}
   "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_brand, ship: jl_ship, country: jl_cc %}
   {%- else %}
@@ -189,7 +192,9 @@
       "@type": "Product",
       "@id": {{ jl_origin | append: variant.url | append: '#variant' | json }},
       "name": {{ product.title | append: ' – ' | append: variant.title | json }},
-      "sku": {{ variant.sku | default: variant.id | json }},
+      {%- assign jl_sku = variant.sku | default: variant.id | append: '' | strip | replace: ' ', '-' | replace: '/', '-' | replace: '--', '-' -%}
+      {%- if jl_sku.size > 50 %}{% assign jl_sku = variant.id | append: '' %}{% endif %}
+      "sku": {{ jl_sku | json }},
       {%- render 'product-jsonld-gtin', variant: variant %}
       {%- if jl_color_idx >= 0 %}
       "color": {{ variant.options[jl_color_idx] | json }},
