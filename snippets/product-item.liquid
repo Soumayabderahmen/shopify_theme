@@ -900,9 +900,13 @@
   assign month_2_sales = product.metafields.custom.bestseller_month_2.value | default: 0 | plus: 0
   assign month_3_sales = product.metafields.custom.bestseller_month_3.value | default: 0 | plus: 0
 
-  assign free_shipping_threshold = 5000
+  # Seuil de livraison gratuite du thème (Impostazioni tema : free_shipping_amount, 100 €) ; avant : 50 € écrit en dur
+  assign free_shipping_threshold = 10000
+  if settings.free_shipping_amount != blank
+    assign free_shipping_threshold = settings.free_shipping_amount | replace: ',', '.' | times: 100 | round
+  endif
   assign qualifies_for_free_shipping = false
-  if current_variant.price > free_shipping_threshold
+  if settings.enable_free_shipping != false and current_variant.price >= free_shipping_threshold
     assign qualifies_for_free_shipping = true
   endif
 

@@ -9,7 +9,7 @@
     reviews.rating ; seulement
     pour une note d'au moins 4 sur 5 avec au moins 3 avis ; remplies selon la note exacte, note et nombre d'avis réels ;
   - « N venduti di recente » : métachamp custom.bestseller_current_month (sinon bestseller_count) ;
-  - « Sped. gratuita » au-dessus de 50 (même seuil que product-item), « Reso facile », « Risparmia » ;
+  - « Sped. gratuita » à partir du seuil de livraison gratuite du thème (100 €, même règle que product-item), « Reso facile », « Risparmia » ;
   - le nom de la marque (« 🏬 Marque › ») est ajouté par assets/mshein-card.js (liste assets/mobile-brands.json).
   Le cœur et le panier utilisent les scripts existants (classe .alibaba-card__wishlist, attribut data-quick-add).
   Params : product, best (collection « Più venduti »), best_ids (facultatif : identifiants des 50 premiers « Più venduti »
@@ -254,7 +254,19 @@
     </p>
     <div class="mshein-chips">
       {%- capture card_return -%}<span class="mshein-chip mshein-chip--ret">↩ {{ 't.Reso_facile' | t }}</span>{%- endcapture -%}
-      {%- if card_variant.price > 5000 -%}
+      {%- liquid
+        # « Sped. gratuita » à partir du seuil de livraison gratuite du thème (Impostazioni tema : free_shipping_amount,
+        # 100 €), comme le panier (snippets/cart-drawer-mobile.liquid) ; avant : 50 € écrit en dur.
+        assign card_ship_min = 10000
+        if settings.free_shipping_amount != blank
+          assign card_ship_min = settings.free_shipping_amount | replace: ',', '.' | times: 100 | round
+        endif
+        assign card_ship_ok = false
+        if settings.enable_free_shipping != false and card_variant.price >= card_ship_min
+          assign card_ship_ok = true
+        endif
+      -%}
+      {%- if card_ship_ok -%}
         {%- capture card_ship -%}<span class="mshein-chip mshein-chip--ship">{{ flag }} {{ 't.shipping_free' | t }}</span>{%- endcapture -%}
         <span class="mshein-rot mshein-rot--2"><span class="mshein-rot__track">{{ card_ship }}{{ card_return }}<span aria-hidden="true">{{ card_ship }}</span></span></span>
       {%- else -%}
