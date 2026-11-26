@@ -390,7 +390,8 @@
       } catch (e) {}
     </script>
     {% render 'social-meta-tags' %}
-    {%- if request.page_type == 'product' -%}{% render 'product-jsonld', product: product %}{%- endif -%}
+    {%- comment -%} Pas de fiche produit pour Google sans photo : Google la refuse (« Champ image manquant » dans Search Console). {%- endcomment -%}
+    {%- if request.page_type == 'product' and product.featured_image != blank -%}{% render 'product-jsonld', product: product %}{%- endif -%}
     {%- if request.page_type == 'product' or request.page_type == 'collection' -%}{% render 'breadcrumb-jsonld', product: product, collection: collection %}{%- endif -%}
     {% render 'standard-storefront-actions' %}
     {% render 'standard-storefront-events' %}
