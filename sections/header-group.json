@@ -201,7 +201,7 @@
         "f8ee5b63-cdad-4140-9183-2aea32d44591": {
           "type": "usp",
           "settings": {
-            "usp": "<p><a href=\"/policies/refund-policy\" title=\"Refund Policy\"><strong>Free exchange</strong></a> of products within 30 days</p>",
+            "usp": "<p><a href=\"/policies/refund-policy\" title=\"Refund Policy\"><strong>Free exchange</strong></a> of products within 14 days</p>",
             "icon": "mobile_payment",
             "image_width": 55
           }

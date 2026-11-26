@@ -31,7 +31,7 @@
     assign root_path = routes.root_url | append: '/' | replace: '//', '/'
     assign policies_href = 'href="' | append: root_path | append: 'policies/'
     assign title_attr = 'title="' | append: tr_title | append: '"'
-    assign out = out | replace: 'Free exchange', tr | replace: ' of products within 30 days', tr_rest | replace: 'title="Refund Policy"', title_attr | replace: 'href="/policies/', policies_href
+    assign out = out | replace: 'Free exchange', tr | replace: ' of products within 14 days', tr_rest | replace: ' of products within 30 days', tr_rest | replace: 'title="Refund Policy"', title_attr | replace: 'href="/policies/', policies_href
   endif
   if out == 'Customer service'
     assign out = 'editor_text.customer_service' | t

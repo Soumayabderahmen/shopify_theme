@@ -101,13 +101,13 @@
         "usp_1": {
           "type": "usp",
           "settings": {
-            "usp": "<p><strong>Free shipping </strong>on all orders above 50,00</p>"
+            "usp": "<p><strong>Free shipping </strong>on all orders above 100,00</p>"
           }
         },
         "usp_2": {
           "type": "usp",
           "settings": {
-            "usp": "<p>No <strong>hassle returns, </strong>30 days return</p>"
+            "usp": "<p>No <strong>hassle returns, </strong>14 days return</p>"
           }
         },
         "usp_3": {
@@ -124,7 +124,7 @@
             "title": "Buy now, pay later",
             "icon": "none",
             "header_image_width": 25,
-            "text": "<p>Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition. We ship worldwide. Your order will be packaged really carefully and delivered wherever you want. Delivery takes between 2-4 business days. </p>",
+            "text": "<p>Orders can be returned or exchanged within 14 days of receiving the parcel, providing they are in original resalable condition. We ship worldwide. Your order will be packaged really carefully and delivered wherever you want. Delivery takes between 2-4 business days. </p>",
             "page": "",
             "image_width": 465,
             "liquid": "",
@@ -215,7 +215,7 @@
             "faq_question": "Can I return my product?",
             "icon": "none",
             "header_image_width": 25,
-            "faq_answer": "<p>Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "faq_answer": "<p>Orders can be returned or exchanged within 14 days of receiving the parcel, providing they are in original resalable condition.</p>",
             "page": "",
             "image_width": 465,
             "liquid": "",
@@ -229,7 +229,7 @@
             "faq_question": "What can I do if my item (or part of it) is damaged?",
             "icon": "none",
             "header_image_width": 25,
-            "faq_answer": "<p>We work hard to deliver your items without damage. Orders can be returned or exchanged within 30 days of receiving the parcel, providing they are in original resalable condition.</p>",
+            "faq_answer": "<p>We work hard to deliver your items without damage. Orders can be returned or exchanged within 14 days of receiving the parcel, providing they are in original resalable condition.</p>",
             "page": "",
             "image_width": 465,
             "liquid": "",
