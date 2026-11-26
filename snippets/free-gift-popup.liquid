@@ -3,8 +3,8 @@
   - S'ouvre toute seule 7 s après l'arrivée sur chaque page ; fermée, elle se range dans la bulle.
   - Liste les produits de la collection choisie dans Personnalizza tema > Impostazioni tema > « Regali gratis (popup) »
     (pour l'instant : n'importe quelle collection ; à remplacer par la collection des produits à 0 €).
-  - Le client choisit au plus 3 produits (les autres se grisent) ; l'ajout au panier n'est permis qu'à partir de 50 €
-    d'achats. Les regali portent la propriété cachée _gift ; si le panier redescend sous 50 €, ils sont retirés.
+  - Le client choisit au plus 3 produits (les autres se grisent) ; l'ajout au panier n'est permis qu'à partir de 100 €
+    d'achats. Les regali portent la propriété cachée _gift ; si le panier redescend sous 100 €, ils sont retirés.
   - Fermée : elle se range en bulle ronde sur le côté de la page (comme une story Instagram) qui la rouvre.
 {%- endcomment -%}
 {%- liquid
@@ -12,7 +12,7 @@
   if settings.free_gift_collection != blank
     assign fg_handle = settings.free_gift_collection.handle
   endif
-  assign fg_threshold = settings.free_gift_threshold | default: 50
+  assign fg_threshold = settings.free_gift_threshold | default: 100
   assign fg_delay = settings.free_gift_delay | default: 7
   assign fg_max = settings.free_gift_max | default: 3
   assign fg_lang = request.locale.iso_code | slice: 0, 2

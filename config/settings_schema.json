@@ -2254,7 +2254,7 @@
   "settings": [
     { "type": "checkbox", "id": "free_gift_enabled", "label": "Mostra il popup dei regali", "default": true },
     { "type": "collection", "id": "free_gift_collection", "label": "Collezione dei prodotti regalo (0 €)", "info": "Se vuota, il prototipo mostra i prodotti di tutto il negozio." },
-    { "type": "range", "id": "free_gift_threshold", "label": "Spesa minima per sbloccare i regali", "min": 10, "max": 200, "step": 5, "unit": "€", "default": 50 },
+    { "type": "range", "id": "free_gift_threshold", "label": "Spesa minima per sbloccare i regali", "min": 10, "max": 200, "step": 5, "unit": "€", "default": 100 },
     { "type": "range", "id": "free_gift_max", "label": "Numero massimo di regali", "min": 1, "max": 6, "step": 1, "default": 3 },
     { "type": "range", "id": "free_gift_delay", "label": "Apertura dopo", "min": 3, "max": 60, "step": 1, "unit": "s", "default": 7 }
   ]
