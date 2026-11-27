@@ -248,6 +248,26 @@
       Fiche produit : la 1re photo de la galerie (élément le plus grand de l'écran, LCP) est demandée dès le début de la
       page, avec les mêmes tailles que snippets/pdp-mobile-top.liquid (sinon le navigateur la découvre après les styles).
     {%- endcomment -%}
+    {%- comment -%}
+      Accueil mobile : 1re photo de la bannière (sections/mobile-home-hero.liquid, même produit et même taille) demandée dès
+      le début de la page ; avant, l'annonce était dans la section, après ~300 Ko de page (en-tête, accueil ordinateur).
+    {%- endcomment -%}
+    {%- if template.name == 'index' -%}
+      {%- liquid
+        assign lcp_hero_coll = collections['bestsellers']
+        if lcp_hero_coll == blank or lcp_hero_coll.products_count == 0
+          assign lcp_hero_coll = collections['all']
+        endif
+        assign lcp_hero_img = blank
+        for lcp_hero_product in lcp_hero_coll.products limit: 18
+          if lcp_hero_product.featured_image != blank
+            assign lcp_hero_img = lcp_hero_product.featured_image
+            break
+          endif
+        endfor
+      -%}
+      {%- if lcp_hero_img != blank -%}<link rel="preload" as="image" href="{{ lcp_hero_img | image_url: width: 320 }}" media="(max-width: 760px)" fetchpriority="high">{%- endif -%}
+    {%- endif -%}
     {%- if request.page_type == 'product' and product.featured_media.preview_image -%}
       {%- assign lcp_img = product.featured_media.preview_image -%}
       <link rel="preload" as="image" fetchpriority="high" href="{{ lcp_img | image_url: width: 750 }}" imagesrcset="{{ lcp_img | image_url: width: 375 }} 375w, {{ lcp_img | image_url: width: 600 }} 600w, {{ lcp_img | image_url: width: 750 }} 750w, {{ lcp_img | image_url: width: 900 }} 900w" imagesizes="100vw">

@@ -46,10 +46,7 @@
   assign hero_first_urls = hero_first_urls | split: '|'
 -%}
 
-{%- if hero_first_imgs[0] != blank -%}
-  {%- comment -%} Grande photo de la bannière (LCP du mobile) demandée dès la lecture de la page, mobile seulement {%- endcomment -%}
-  <link rel="preload" as="image" href="{{ hero_first_imgs[0] }}" media="(max-width: 760px)" fetchpriority="high">
-{%- endif -%}
+{%- comment -%} Grande photo de la bannière (LCP du mobile) : annoncée dans l'en-tête de la page (layout/theme.liquid). {%- endcomment -%}
 <div class="mhh" data-mshein-hero data-mhh>
   <div class="mhh__dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   <div class="mhh__txt" data-mhh-txt>
@@ -64,6 +61,21 @@
       <a class="mhh-fl mhh-fl--{{ slot }}" href="{{ hero_first_urls[hero_i] | default: '#' }}" tabindex="-1"><span class="mhh-fl__in"><img alt="{{ shop.name | escape }}" width="200" height="260"{% if hero_first_imgs[hero_i] != blank %} data-src="{{ hero_first_imgs[hero_i] }}"{% if slot == 1 %} fetchpriority="high"{% endif %}{% endif %}></span></a>
     {%- endfor -%}
   </div>
+  {%- comment -%}
+    Photos affichées dès que la bannière est lue (mobile) : avant, seulement quand assets/mobile-home-hero.js tournait,
+    après la lecture de toute la page (~1 Mo, 3 à 4 s sur téléphone). Le script reprend ensuite (mêmes photos, puis le
+    changement toutes les 5 s). Pas pour la bannière de la liste de souhaits (ses photos viennent du navigateur).
+  {%- endcomment -%}
+  <script>
+    (function (hero) {
+      if (!hero || hero.hasAttribute('data-mhh-source') || !window.matchMedia('(max-width: 760px)').matches) return;
+      hero.querySelectorAll('.mhh-fl').forEach(function (node) {
+        var image = node.querySelector('img[data-src]');
+        if (image && !image.getAttribute('src')) image.src = image.getAttribute('data-src');
+        node.classList.add('on');
+      });
+    })(document.currentScript.closest('[data-mhh]'));
+  </script>
   <div class="mhh__usp">
     {%- if shipping_amount != '' -%}<span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 5h13v11H1zM14 9h4l3 3v4h-7"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>{{ 'desktop_home_shop.usp_shipping_html' | t: amount: shipping_amount }}</span>{%- endif -%}
     <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>{{ 'desktop_home_shop.usp_return_html' | t }}</span>
