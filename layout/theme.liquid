@@ -52,8 +52,15 @@
       # Pages 2, 3… d'une collection ou d'un blog : « – Pagina 2 » dans le titre et la description (sinon doublons pour Google).
       # Marque : pas ajoutée si le titre contient déjà « platinum » (titres SEO des collections « … | PlatiNum »).
       assign theme_page_n = ''
-      if current_page > 1
-        assign theme_page_n = 'desktop_brand.page_n' | t: n: current_page | prepend: ' – '
+      # Numéro de page lu dans l'adresse officielle (…?page=2) : current_page vaut toujours 1 ici, hors des blocs de
+      # pagination des sections, et « – Pagina 2 » n'était jamais ajouté.
+      assign theme_page_num = 1
+      if canonical_url contains 'page='
+        assign theme_page_str = canonical_url | split: 'page=' | last | split: '&' | first
+        assign theme_page_num = theme_page_str | plus: 0
+      endif
+      if theme_page_num > 1
+        assign theme_page_n = 'desktop_brand.page_n' | t: n: theme_page_num | prepend: ' – '
       endif
       assign theme_title_full = theme_page_title | strip_newlines | strip | append: theme_page_n
       unless theme_title_lc contains theme_shop_lc or theme_title_lc contains 'platinum'
@@ -91,8 +98,22 @@
       endif
     -%}
     {%- if theme_meta_desc -%}<meta name="description" content="{{ theme_meta_desc | append: theme_page_n | escape }}">{%- endif -%}
-    {%- comment -%} Pages utiles aux clients mais sans intérêt dans Google (liste de souhaits, panier) : pas indexées. {%- endcomment -%}
-    {%- if template.name == 'cart' or request.page_type == 'page' and page.handle == 'wishlist' -%}<meta name="robots" content="noindex, follow">{%- endif -%}
+    {%- comment -%}
+      Pages utiles aux clients mais sans intérêt dans Google : pas indexées (liens toujours suivis). Liste de souhaits, panier,
+      et résultats de recherche (une adresse par mot cherché : des milliers de pages pauvres en double), sauf les pages de
+      marque qui passent par la recherche (?view=brand, templates/search.brand.json).
+    {%- endcomment -%}
+    {%- liquid
+      assign theme_noindex = false
+      if template.name == 'cart'
+        assign theme_noindex = true
+      elsif request.page_type == 'page' and page.handle == 'wishlist'
+        assign theme_noindex = true
+      elsif template.name == 'search' and template.suffix != 'brand'
+        assign theme_noindex = true
+      endif
+    -%}
+    {%- if theme_noindex -%}<meta name="robots" content="noindex, follow">{%- endif -%}
     <meta name="theme-color" content="{{ settings.default_color_scheme.settings.accent }}">
     <meta name="MobileOptimized" content="320">
     <meta name="HandheldFriendly" content="true">
