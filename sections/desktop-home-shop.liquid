@@ -42,6 +42,10 @@
   assign shipping_amount = ''
   if settings.enable_free_shipping and settings.free_shipping_amount > 0
     assign shipping_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
+    # Visiteur dans une autre devise (lei, CHF, $…) : le seuil reste écrit en euros, sinon « 100 lei »
+    if cart.currency.iso_code != shop.currency
+      assign shipping_amount = settings.free_shipping_amount | append: ' €'
+    endif
   endif
 
   # Rayons : liens collection du menu (sans « Tutti i prodotti »), dans l'ordre de l'en-tête, avec le nom de l'onglet

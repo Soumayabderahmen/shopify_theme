@@ -262,7 +262,7 @@
           assign card_ship_min = settings.free_shipping_amount | replace: ',', '.' | times: 100 | round
         endif
         assign card_ship_ok = false
-        if settings.enable_free_shipping != false and card_variant.price >= card_ship_min
+        if settings.enable_free_shipping != false and card_variant.price >= card_ship_min and cart.currency.iso_code == shop.currency
           assign card_ship_ok = true
         endif
       -%}

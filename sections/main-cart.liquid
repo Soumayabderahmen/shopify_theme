@@ -18,7 +18,7 @@
 
   assign free_shipping_amount = settings.free_shipping_amount | replace: ',', '.' | times: 1
   assign has_free_shipping_amount = false
-  if settings.enable_free_shipping
+  if settings.enable_free_shipping and cart.currency.iso_code == shop.currency
     assign has_free_shipping_amount = true
     assign free_shipping_amount = settings.free_shipping_amount | replace: ',', '.' | times: 1 | times: 100
   endif

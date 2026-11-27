@@ -88,6 +88,10 @@
   assign br_upper = br_name | upcase
   # Promesse « Livraison gratuite dès … » : même montant que la barre du haut (snippets/desktop-header.liquid)
   assign br_ship_amount = settings.free_shipping_amount | times: 100 | money_without_trailing_zeros | strip_html
+  # Visiteur dans une autre devise (lei, CHF, $…) : le seuil reste écrit en euros, sinon « 100 lei »
+  if cart.currency.iso_code != shop.currency
+    assign br_ship_amount = settings.free_shipping_amount | append: ' €'
+  endif
   # Grande carte « Best Sellers » : la marque triée par meilleures ventes (si la page a ce tri)
   assign br_best_url = ''
   for option in br_sorts
