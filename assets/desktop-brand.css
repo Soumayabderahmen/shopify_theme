@@ -78,6 +78,8 @@ body:not(.template-product):has(.br) .dft { margin-top: 0 !important; }
 
 /* ---------- Logo rempli par la photo ---------- */
 .br-hero { display: grid; justify-items: center; padding: 60px 0 40px; text-align: center; }
+/* Titre H1 de la page (nom de la marque) : lu par Google et les lecteurs d'écran, le logo dessiné le montre déjà */
+.br .br-h1 { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .br-lock { display: grid; justify-items: center; filter: drop-shadow(0 0 1px rgb(255 255 255 / 70%)) drop-shadow(0 14px 30px rgb(0 0 0 / 55%)); }
 .br-lock__name, .br-lock__mark { background: var(--photo, #fff) 0 40% / 900px auto, #fff; filter: brightness(1.45) contrast(1.1); animation: br-lock 18s ease-in-out infinite alternate; }
 .br-lock__name { position: relative; z-index: 1; max-width: 1100px; color: transparent; font-size: 150px; font-weight: 900; line-height: 0.85; letter-spacing: -2px; transform: skewX(-12deg); -webkit-background-clip: text; background-clip: text; }

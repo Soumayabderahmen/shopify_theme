@@ -147,6 +147,9 @@
 
   {%- comment -%} Logo de la marque rempli par la photo {%- endcomment -%}
   <div class="br-hero">
+    {%- comment -%} Titre principal de la page pour Google et les lecteurs d'écran : le nom de la marque (le logo dessiné
+      au-dessous est une image). {%- endcomment -%}
+    <h1 class="br-h1">{{ br_name | escape }}</h1>
     <div class="br-lock{% if br_logo == '' %} br-lock--text{% endif %}" role="img" aria-label="{{ br_name | escape }}">
       <span class="br-lock__name">{{ br_upper | escape }}</span>
       {%- if br_logo != '' -%}<i class="br-lock__mark" style="--logo: url('https://cdn.jsdelivr.net/npm/simple-icons@11.14.0/icons/{{ br_logo }}.svg');"></i>{%- endif -%}

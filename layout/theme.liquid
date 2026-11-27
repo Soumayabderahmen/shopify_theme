@@ -42,6 +42,30 @@
       if template.name == 'collection' and template.suffix == 'offerte'
         assign theme_page_title = 'mobile.explore.on_sale' | t
       endif
+      # Pages de marque (sections/desktop-brand.liquid) : « Nike – 723 prodotti » au lieu du titre brut de la recherche
+      # (« … risultati trovati per "title:"Nike"" ») ; aussi pour les pages fournisseur (/collections/vendors?q=…&view=brand).
+      # Les marques avec leur propre collection gardent le titre SEO choisi dans l'admin.
+      assign theme_brand_name = ''
+      assign theme_brand_count = 0
+      if template.suffix == 'brand'
+        if template.name == 'search'
+          assign theme_brand_terms = search.terms | replace: '&quot;', '"' | replace: '&#34;', '"' | strip
+          if theme_brand_terms contains 'title:"'
+            assign theme_brand_name = theme_brand_terms | split: '"' | slice: 1, 1 | first
+          else
+            assign theme_brand_name = theme_brand_terms | remove: 'title:'
+          endif
+          assign theme_brand_name = theme_brand_name | strip
+          assign theme_brand_count = search.results_count
+        elsif template.name == 'collection' and collection.handle == 'vendors'
+          assign theme_brand_name = collection.title
+          assign theme_brand_count = collection.products_count
+        endif
+        if theme_brand_name != blank
+          assign theme_brand_n = 'desktop_collection.count' | t: count: theme_brand_count
+          assign theme_page_title = theme_brand_name | append: ' – ' | append: theme_brand_n
+        endif
+      endif
     -%}
     {%- liquid
       # Nom de la boutique ajouté seulement s'il n'y est pas déjà, sans tenir compte des majuscules (« Contatti | Platinumshop »)
@@ -89,6 +113,9 @@
       endif
       # Collection ou page sans description (Google inventerait le texte) : phrase courte et vraie, dans la langue du
       # visiteur (collection : nom + nombre de produits ; page : son titre + la description de la boutique).
+      if theme_brand_name != blank
+        assign theme_meta_desc = 'seo_fallback.collection_description' | t: title: theme_brand_name, count: theme_brand_count, shop: shop.name
+      endif
       if theme_meta_desc == blank
         if request.page_type == 'collection' and collection.title != blank
           assign theme_meta_desc = 'seo_fallback.collection_description' | t: title: collection.title, count: collection.products_count, shop: shop.name
