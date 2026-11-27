@@ -471,8 +471,8 @@
         {%- endif -%}
 
         {%- comment -%}
-          Shop per brand : comme l'accueil ordinateur (même liste snippets/brand-list.liquid, mêmes tuiles de couleur à photo
-          penchée), 2 rangées qui défilent ; chaque marque ouvre sa page brand (sections/desktop-brand.liquid : sa
+          Shop per brand : comme l'accueil ordinateur (même liste snippets/brand-list.liquid), 2 rangées de grandes cartes
+          photo qui défilent sans fin en sens inverse ; chaque marque ouvre sa page brand (sections/desktop-brand.liquid : sa
           collection, sinon la recherche dans les titres) ; « Vedi altri » ouvre la fenêtre de toutes les marques du
           panneau Categoria (snippets/mobile-category-browser.liquid). Styles : assets/mobile-home-hero.css (.mhb).
         {%- endcomment -%}
@@ -481,72 +481,187 @@
         {%- assign mhb_colors = '#e8547a,#c8102e,#2f2a6b,#0e7c66,#f08c2e,#e2506b,#b23a48,#7a4e2d,#3a74c4,#5b5799' | split: ',' -%}
         <section class="mhb">
           <div class="mho__hd"><h3>{{ 'desktop_home_shop.shop_by_brand' | t }}</h3><button type="button" aria-haspopup="dialog" data-mobile-brands-open>{{ 'mobile.explore.see_more_brands' | t }}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button></div>
-          <div class="mhb__rail">
-            {%- for mhb_entry in mhb_entries -%}
-              {%- liquid
-                assign mhb_parts = mhb_entry | strip | split: '|'
-                if mhb_parts[0] == blank
-                  continue
-                endif
-                assign mhb_collection = blank
-                assign mhb_handles = mhb_parts[2] | split: ','
-                for mhb_handle in mhb_handles
-                  if mhb_collection == blank and collections[mhb_handle].products_count > 0
-                    assign mhb_collection = collections[mhb_handle]
-                  endif
-                endfor
-                assign mhb_query = 'title:"' | append: mhb_parts[1] | append: '"' | url_encode
-                assign mhb_url = routes.search_url | append: '?q=' | append: mhb_query | append: '&type=product&view=brand'
-                assign mhb_image = blank
-                # Marque ajoutée toute seule depuis le fournisseur des produits (snippets/brand-list.liquid) : sa page
-                # fournisseur ; photo de son premier produit posée par le script plus bas.
-                assign mhb_vendor = false
-                if mhb_parts[4] == 'vendor'
-                  assign mhb_vendor = true
-                  assign mhb_url = mhb_parts[0] | url_for_vendor | append: '&view=brand'
-                endif
-                if mhb_collection != blank
-                  assign mhb_url = mhb_collection.url | append: '?view=brand'
-                  assign mhb_image = mhb_collection.featured_image | default: mhb_collection.image
-                endif
-                assign mhb_color = forloop.index0 | modulo: mhb_colors.size
-              -%}
-              <a class="mhb__tile" href="{{ mhb_url }}" style="background: {{ mhb_colors[mhb_color] }}"{% if mhb_vendor and mhb_image == blank %} data-brand-photo="{{ mhb_parts[0] | url_for_vendor | append: '&view=brand-count' }}"{% endif %}>
-                {%- if mhb_image != blank -%}
-                  <img src="{{ mhb_image | image_url: width: 240 }}" alt="" loading="lazy" decoding="async" width="120" height="120">
-                {%- elsif mhb_parts[3] != blank -%}
-                  <img src="{{ mhb_parts[3] | strip }}&width=240" alt="" loading="lazy" decoding="async" width="120" height="120" onerror="this.remove()">
-                {%- endif -%}
-                <strong>{{ mhb_parts[0] | escape }}</strong>
-              </a>
-            {%- endfor -%}
-            <button class="mhb__tile mhb__tile--more" type="button" aria-haspopup="dialog" data-mobile-brands-open><strong>{{ 'mobile.explore.see_more_brands' | t }}</strong></button>
-          </div>
           {%- comment -%}
-            Photos des marques : en « lazy », seules les 4 premières étaient chargées, les autres attendaient d'entrer
-            dans l'écran en glissant (cases vides qui se remplissaient pendant le geste). Toutes demandées dès que la
-            bande approche (à ~1 écran), avant que le doigt y arrive.
+            2 rangées de grandes cartes photo qui défilent sans fin en sens inverse (comme l'accueil ordinateur,
+            sections/desktop-home-shop.liquid) : photo de la marque en fond, nom et nombre de produits (collection de la
+            marque ; sinon relevé assets/mobile-brands.json posé par le script plus bas). Chaque rangée est écrite deux
+            fois (copie cachée aux lecteurs d'écran) pour une boucle sans saut ; en pause tant que le doigt touche la bande
+            et hors de l'écran. Styles : assets/mobile-home-hero.css (.mhb__mq).
           {%- endcomment -%}
+          {%- capture mhb_row_a -%}{%- endcapture -%}
+          {%- capture mhb_row_b -%}{%- endcapture -%}
+          {%- assign mhb_n = 0 -%}
+          {%- for mhb_entry in mhb_entries -%}
+            {%- liquid
+              assign mhb_parts = mhb_entry | strip | split: '|'
+              if mhb_parts[0] == blank
+                continue
+              endif
+              assign mhb_collection = blank
+              assign mhb_handles = mhb_parts[2] | split: ','
+              for mhb_handle in mhb_handles
+                if mhb_collection == blank and collections[mhb_handle].products_count > 0
+                  assign mhb_collection = collections[mhb_handle]
+                endif
+              endfor
+              assign mhb_query = 'title:"' | append: mhb_parts[1] | append: '"' | url_encode
+              assign mhb_url = routes.search_url | append: '?q=' | append: mhb_query | append: '&type=product&view=brand'
+              assign mhb_image = blank
+              assign mhb_count = ''
+              # Marque ajoutée toute seule depuis le fournisseur des produits (snippets/brand-list.liquid) : sa page
+              # fournisseur ; photo et nombre de produits posés par le script plus bas.
+              assign mhb_vendor = false
+              if mhb_parts[4] == 'vendor'
+                assign mhb_vendor = true
+                assign mhb_url = mhb_parts[0] | url_for_vendor | append: '&view=brand'
+              endif
+              if mhb_collection != blank
+                assign mhb_url = mhb_collection.url | append: '?view=brand'
+                assign mhb_image = mhb_collection.featured_image | default: mhb_collection.image
+                assign mhb_count = mhb_collection.products_count
+              endif
+              assign mhb_color = forloop.index0 | modulo: mhb_colors.size
+              assign mhb_key = mhb_parts[0] | strip | downcase | escape
+            -%}
+            {%- capture mhb_tile -%}
+              <a class="mhb__tile" href="{{ mhb_url }}" style="background: {{ mhb_colors[mhb_color] }}" data-brand-name="{{ mhb_key }}" data-brand-q="{{ mhb_parts[1] | strip | escape }}"{% if mhb_vendor and mhb_image == blank %} data-brand-photo="{{ mhb_parts[0] | url_for_vendor | append: '&view=brand-count' }}"{% endif %}>
+                {%- if mhb_image != blank -%}
+                  <img src="{{ mhb_image | image_url: width: 440 }}" alt="" loading="lazy" decoding="async" width="210" height="136">
+                {%- elsif mhb_parts[3] != blank -%}
+                  <img src="{{ mhb_parts[3] | strip }}&width=440" alt="" loading="lazy" decoding="async" width="210" height="136">
+                {%- endif -%}
+                <span class="mhb__txt"><strong>{{ mhb_parts[0] | escape }}</strong><small data-mhb-count>{% if mhb_count != '' %}{{ 'desktop_collection.count' | t: count: mhb_count }}{% endif %}</small></span>
+              </a>
+            {%- endcapture -%}
+            {%- assign mhb_odd = mhb_n | modulo: 2 -%}
+            {%- if mhb_odd == 0 -%}
+              {%- capture mhb_row_a -%}{{ mhb_row_a }}{{ mhb_tile }}{%- endcapture -%}
+            {%- else -%}
+              {%- capture mhb_row_b -%}{{ mhb_row_b }}{{ mhb_tile }}{%- endcapture -%}
+            {%- endif -%}
+            {%- assign mhb_n = mhb_n | plus: 1 -%}
+          {%- endfor -%}
+          {%- assign mhb_copy_a = mhb_row_a | replace: '<a class="mhb__tile"', '<a tabindex="-1" aria-hidden="true" class="mhb__tile"' -%}
+          {%- assign mhb_copy_b = mhb_row_b | replace: '<a class="mhb__tile"', '<a tabindex="-1" aria-hidden="true" class="mhb__tile"' -%}
+          <div class="mhb__mq" data-mhb-mq data-search-url="{{ routes.search_url }}" data-brands-url="{{ 'mobile-brands.json' | asset_url }}" data-count-tpl="{{ 'desktop_collection.count.other' | t: count: '__N__' | escape }}" data-count-one="{{ 'desktop_collection.count.one' | t: count: 1 | escape }}">
+            <div class="mhb__row"><div class="mhb__track">{{ mhb_row_a }}{{ mhb_copy_a }}</div></div>
+            <div class="mhb__row mhb__row--rev"><div class="mhb__track">{{ mhb_row_b }}{{ mhb_copy_b }}</div></div>
+          </div>
           <script>
             (function () {
-              var rail = document.currentScript.previousElementSibling;
+              var box = document.currentScript.previousElementSibling;
+              var tracks = box.querySelectorAll('.mhb__track');
+              var tpl = box.getAttribute('data-count-tpl') || '__N__';
+              var one = box.getAttribute('data-count-one');
+              var countText = function (n) { return Number(n) === 1 && one ? one : tpl.replace('__N__', n); };
+              // Vitesse constante (~30 px/s) quelle que soit la longueur de la rangée
+              var setSpeed = function () {
+                tracks.forEach(function (track) {
+                  var half = track.scrollWidth / 2;
+                  if (half > 0) track.style.setProperty('--mhb-dur', Math.max(20, Math.round(half / 30)) + 's');
+                });
+              };
+              setSpeed();
+              window.addEventListener('load', setSpeed, { once: true });
+              // Doigt sur la bande : pause, la rangée touchée suit le doigt (sa position dans la boucle est convertie en
+              // temps de l'animation, sans saut), reprise du défilement au relâchement. Les rayons ne glissent pas ici
+              // (assets/mobile-home-tabs.js ignore .mhb__mq).
+              var resume, held = null;
+              var posOf = function (track) { var m = getComputedStyle(track).transform.match(/matrix\(([^)]+)\)/); return m ? parseFloat(m[1].split(',')[4]) || 0 : 0; };
+              box.addEventListener('touchstart', function (event) {
+                clearTimeout(resume);
+                box.classList.add('is-held');
+                var track = event.target.closest('.mhb__track');
+                if (!track || event.touches.length !== 1) { held = null; return; }
+                var anim = track.getAnimations ? track.getAnimations()[0] : null;
+                held = { track: track, anim: anim, rev: !!track.closest('.mhb__row--rev'), x0: event.touches[0].clientX, y0: event.touches[0].clientY, pos: posOf(track), dist: track.scrollWidth / 2 + 5, axis: '' };
+              }, { passive: true });
+              box.addEventListener('touchmove', function (event) {
+                if (!held || !held.anim || event.touches.length !== 1) return;
+                var dx = event.touches[0].clientX - held.x0, dy = event.touches[0].clientY - held.y0;
+                if (!held.axis) { if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return; held.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'; }
+                if (held.axis !== 'x') return;
+                // Position voulue, ramenée dans la boucle (-dist, 0], puis convertie en temps de l'animation
+                var dist = held.dist, x = held.pos + dx;
+                x = ((x % dist) + dist) % dist - dist;
+                var p = held.rev ? (x + dist) / dist : -x / dist;
+                var total = Number(held.anim.effect.getComputedTiming().duration) || 0;
+                if (total) held.anim.currentTime = p * total;
+              }, { passive: true });
+              ['touchend', 'touchcancel'].forEach(function (type) {
+                box.addEventListener(type, function () { held = null; clearTimeout(resume); resume = setTimeout(function () { box.classList.remove('is-held'); }, 900); }, { passive: true });
+              });
+              var searchUrl = box.getAttribute('data-search-url') || '/search';
+              // Photo qui ne charge pas : celle du premier produit de la marque (titre, sinon recherche complète) ;
+              // aucune trouvaille : marque vide, carte retirée
+              var fromSearch = function (tile) {
+                if (tile.hasAttribute('data-mhb-searched')) return;
+                tile.setAttribute('data-mhb-searched', '');
+                var q = tile.getAttribute('data-brand-q');
+                if (!q) return;
+                var ask = function (query) {
+                  return fetch(searchUrl + '?q=' + encodeURIComponent(query) + '&type=product&view=brand-count', { credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); });
+                };
+                ask('title:"' + q + '"')
+                  .then(function (d) { return d && d.img ? d : ask(q); })
+                  .then(function (d) {
+                    if (!d || !d.count) { tile.remove(); setSpeed(); return; }
+                    var c = tile.querySelector('[data-mhb-count]');
+                    if (c) c.textContent = countText(d.count);
+                    if (!d.img) return;
+                    var im = tile.querySelector('img') || tile.insertBefore(document.createElement('img'), tile.firstChild);
+                    im.alt = ''; im.width = 210; im.height = 136; im.decoding = 'async';
+                    im.onerror = function () { im.remove(); };
+                    im.src = d.img.replace(/width=\d+/, 'width=440');
+                  })
+                  .catch(function () {});
+              };
+              var watchImg = function (tile, im) {
+                var bad = function () { im.remove(); fromSearch(tile); };
+                if (im.complete && im.naturalWidth === 0 && im.getAttribute('src')) bad();
+                else im.addEventListener('error', bad, { once: true });
+              };
               var load = function () {
-                rail.querySelectorAll('img[loading="lazy"]').forEach(function (img) { img.loading = 'eager'; });
-                // Marques ajoutées depuis le fournisseur : photo de leur premier produit (JSON de collection.brand-count).
-                rail.querySelectorAll('[data-brand-photo]').forEach(function (tile) {
+                box.querySelectorAll('img[loading="lazy"]').forEach(function (img) { img.loading = 'eager'; });
+                // Marques ajoutées depuis le fournisseur : photo et nombre de produits (JSON de collection.brand-count)
+                box.querySelectorAll('[data-brand-photo]').forEach(function (tile) {
                   fetch(tile.getAttribute('data-brand-photo')).then(function (r) { return r.json(); }).then(function (data) {
-                    // Fournisseur sans produit visible (brouillons, épuisés masqués) : pas de tuile vide.
-                    if (!data.count) { tile.remove(); return; }
+                    if (!data.count) { tile.remove(); setSpeed(); return; }
+                    var c = tile.querySelector('[data-mhb-count]');
+                    if (c && !c.textContent) c.textContent = countText(data.count);
                     if (!data.img) return;
                     var img = document.createElement('img');
-                    img.src = data.img.replace(/width=\d+/, 'width=240');
+                    img.src = data.img.replace(/width=\d+/, 'width=440');
                     img.alt = '';
-                    img.width = 120;
-                    img.height = 120;
+                    img.width = 210;
+                    img.height = 136;
                     img.decoding = 'async';
                     tile.insertBefore(img, tile.firstChild);
                   }).catch(function () {});
                 });
+                // Relevé des marques : nombre et photo manquants ; marque absente du relevé et sans nombre : retirée
+                fetch(box.getAttribute('data-brands-url')).then(function (r) { return r.json(); }).then(function (data) {
+                  var info = {};
+                  var cdn = data.cdn || '';
+                  (data.brands || []).forEach(function (b) { if (b && b[0]) info[String(b[0]).trim().toLowerCase()] = { n: b[2], img: b[3] ? cdn + b[3] : '' }; });
+                  var removed = false;
+                  box.querySelectorAll('.mhb__tile[data-brand-name]').forEach(function (tile) {
+                    var el = tile.querySelector('[data-mhb-count]');
+                    var entry = info[tile.getAttribute('data-brand-name')];
+                    if (el && !el.textContent && entry && entry.n) el.textContent = countText(entry.n);
+                    if (!tile.querySelector('img') && entry && entry.img) {
+                      var img = document.createElement('img');
+                      img.src = entry.img + (entry.img.indexOf('?') === -1 ? '?' : '&') + 'width=440';
+                      img.alt = ''; img.width = 210; img.height = 136; img.decoding = 'async';
+                      tile.insertBefore(img, tile.firstChild);
+                    }
+                    var tileImg = tile.querySelector('img');
+                    if (tileImg) watchImg(tile, tileImg); else if (entry) fromSearch(tile);
+                    if (!entry && !tile.hasAttribute('data-brand-photo') && el && !el.textContent) { tile.remove(); removed = true; }
+                  });
+                  if (removed) setSpeed();
+                }).catch(function () {});
               };
               if (!('IntersectionObserver' in window)) { load(); return; }
               var io = new IntersectionObserver(function (entries) {
@@ -554,7 +669,12 @@
                 io.disconnect();
                 load();
               }, { rootMargin: '900px 0px' });
-              io.observe(rail);
+              io.observe(box);
+              // Hors de l'écran : défilement en pause (rien à animer pour personne)
+              var vis = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) { box.classList.toggle('is-off', !entry.isIntersecting); });
+              }, { rootMargin: '200px 0px' });
+              vis.observe(box);
             })();
           </script>
         </section>

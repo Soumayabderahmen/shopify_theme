@@ -1368,7 +1368,7 @@
   // Pas de changement d'onglet depuis une bande qui défile déjà de côté (bannière, puces, vignettes…) ni un champ.
   var scrollsSideways = function (element) {
     for (var node = element; node && node !== page; node = node.parentElement) {
-      if (node.matches('.swiper, input, select, textarea, [data-dept-sheet]')) return true;
+      if (node.matches('.swiper, input, select, textarea, [data-dept-sheet], .mhb__mq')) return true;
       if (node.scrollWidth > node.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(node).overflowX)) return true;
     }
     return false;

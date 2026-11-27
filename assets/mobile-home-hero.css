@@ -892,8 +892,8 @@ body.template-index #root .mshein-feed__tabs button.is-on {
   }
 }
 
-/* Shop per brand (accueil mobile, sections/mobile-home-shein.liquid) : comme l'accueil ordinateur — tuiles de couleur,
-   photo penchée à droite, nom en bas à gauche, 2 rangées qui défilent ; « Vedi altri » : fenêtre de toutes les marques */
+/* Shop per brand (accueil mobile, sections/mobile-home-shein.liquid) : comme l'accueil ordinateur — 2 rangées de
+   grandes cartes photo qui défilent sans fin en sens inverse ; « Vedi altri » : fenêtre de toutes les marques */
 .mhb {
   margin-top: 22px;
   font-family: 'Figtree', system-ui, sans-serif;
@@ -936,25 +936,74 @@ body.template-index #root .mshein-feed__tabs button.is-on {
   stroke-linejoin: round;
 }
 
-.mhb__rail {
+/* 2 rangées de grandes cartes photo qui défilent sans fin, en sens inverse (comme l'accueil ordinateur) ; durée
+   calculée par le script de la section pour ~30 px/s ; pause au toucher (is-held) et hors de l'écran (is-off). */
+.mhb__mq {
+  position: relative;
+  touch-action: pan-y;
   display: grid;
-  grid-template-rows: repeat(2, 96px);
-  grid-auto-flow: column;
-  grid-auto-columns: 142px;
   gap: 10px;
-  padding: 0 14px 4px;
-  overflow-x: auto;
-  /* Pas de calage sur une marque : la bande glisse librement avec l'élan du doigt. */
-  scrollbar-width: none;
+  padding: 2px 0 4px;
+  overflow: hidden;
 }
 
-.mhb__rail::-webkit-scrollbar {
-  display: none;
+.mhb__mq::before,
+.mhb__mq::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  width: 18px;
+  pointer-events: none;
+}
+
+.mhb__mq::before {
+  left: 0;
+  background: linear-gradient(90deg, #fff, rgb(255 255 255 / 0%));
+}
+
+.mhb__mq::after {
+  right: 0;
+  background: linear-gradient(270deg, #fff, rgb(255 255 255 / 0%));
+}
+
+.mhb__row {
+  overflow: hidden;
+}
+
+.mhb__track {
+  display: flex;
+  gap: 10px;
+  width: max-content;
+  animation: mhb-left var(--mhb-dur, 60s) linear infinite;
+}
+
+.mhb__row--rev .mhb__track {
+  animation-name: mhb-right;
+}
+
+.mhb__mq.is-held .mhb__track,
+.mhb__mq.is-off .mhb__track {
+  animation-play-state: paused;
+}
+
+@keyframes mhb-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 5px)); }
+}
+
+@keyframes mhb-right {
+  from { transform: translateX(calc(-50% - 5px)); }
+  to { transform: translateX(0); }
 }
 
 #root .mhb__tile {
   position: relative;
+  flex: none;
   display: block;
+  width: 210px;
+  height: 136px;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -963,52 +1012,58 @@ body.template-index #root .mshein-feed__tabs button.is-on {
   text-decoration: none;
   border: 0;
   border-radius: 18px;
+  box-shadow: 0 8px 18px -14px rgb(22 18 63 / 55%);
 }
 
 .mhb__tile img {
   position: absolute;
-  top: 12%;
-  right: -8%;
-  width: 60%;
+  inset: 0;
+  width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: -8px 12px 22px -12px rgb(0 0 0 / 45%);
-  transform: rotate(-6deg);
+  background: #f2f1ee;
 }
 
-.mhb__tile strong {
+.mhb__tile::after {
+  content: '';
   position: absolute;
-  bottom: 10px;
-  left: 12px;
-  max-width: 48%;
+  inset: 0;
+  background: linear-gradient(0deg, rgb(22 18 63 / 80%) 0%, rgb(22 18 63 / 35%) 40%, rgb(22 18 63 / 0%) 66%);
+  pointer-events: none;
+}
+
+.mhb__txt {
+  position: absolute;
+  z-index: 1;
+  left: 14px;
+  right: 12px;
+  bottom: 11px;
+  display: grid;
+  gap: 1px;
+}
+
+.mhb__txt strong {
+  overflow: hidden;
   color: #fff;
   font-family: 'Sora', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 800;
   line-height: 1.15;
-  text-shadow: 0 1px 6px rgb(0 0 0 / 20%);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 8px rgb(0 0 0 / 30%);
 }
 
-#root .mhb__tile--more {
-  display: grid;
-  place-items: center;
-  color: #3a34d2;
-  font: inherit;
-  background: #f1f0ff;
-  border: 1.5px dashed #b9b6f3;
+.mhb__txt small {
+  min-height: 1.2em;
+  color: rgb(255 255 255 / 86%);
+  font-size: 12px;
+  font-weight: 500;
 }
 
-#root .mhb__tile--more::before,
-#root .mhb__tile--more::after {
-  content: none;
-}
-
-.mhb__tile--more strong {
-  position: static;
-  max-width: none;
-  color: #3a34d2;
-  font-family: 'Figtree', sans-serif;
-  text-shadow: none;
+@media (prefers-reduced-motion: reduce) {
+  .mhb__mq::before,
+  .mhb__mq::after { display: none; }
+  .mhb__row { overflow-x: auto; scrollbar-width: none; }
+  .mhb__track { animation: none; padding: 0 14px; }
 }
