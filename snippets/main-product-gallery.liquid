@@ -202,7 +202,7 @@
           <{{ heading_tag }} class="mobile-hide">{{ 'product.description' | t }}</{{ heading_tag }}>
           {%- if section.settings.product_description_enable_read_more -%}
             <div class="m6lm">
-              {{ product.description }}
+              {% render 'product-description-clean', product: product %}
             </div>
             <p class="has-link-more">
               <a href="./" class="strong link-more">
@@ -213,7 +213,7 @@
               </a>
             </p>
           {%- else -%}
-            {{ product.description }}
+            {% render 'product-description-clean', product: product %}
           {%- endif -%}
         </div>
       </div>

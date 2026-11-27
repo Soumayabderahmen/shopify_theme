@@ -2,12 +2,15 @@
   Description du produit prête à afficher (fiche ordinateur et mobile) :
   - ses titres H1 deviennent des H2 (un seul H1 par page : le nom du produit) ;
   - les photos sans texte alternatif (souvent celles des descriptions importées d'AliExpress) reçoivent le nom du
-    produit, pour Google Images et les lecteurs d'écran. Un texte alternatif déjà rempli est gardé tel quel.
+    produit, pour Google Images et les lecteurs d'écran. Un texte alternatif déjà rempli est gardé tel quel ;
+  - les balises de données structurées collées dans certaines descriptions (itemscope / itemtype Product, avec
+    image AliExpress, vieux prix et vieille adresse) sont neutralisées : Google y voyait un 2e produit sans image
+    (« Champ image manquant »). Le seul produit pour Google reste le JSON-LD du thème (product-jsonld).
   Usage : {% render 'product-description-clean', product: product %}
 {%- endcomment -%}
 {%- liquid
   assign pdc_alt = product.title | escape
-  assign pdc_desc = product.description | replace: '<h1', '<h2' | replace: '</h1>', '</h2>' | replace: '<H1', '<h2' | replace: '</H1>', '</h2>' | replace: '<IMG', '<img' | replace: ' alt=""', '' | replace: " alt=''", ''
+  assign pdc_desc = product.description | replace: '<h1', '<h2' | replace: '</h1>', '</h2>' | replace: '<H1', '<h2' | replace: '</H1>', '</h2>' | replace: '<IMG', '<img' | replace: ' alt=""', '' | replace: " alt=''", '' | replace: ' itemscope', ' data-itemscope' | replace: ' itemtype=', ' data-itemtype=' | replace: ' itemprop=', ' data-itemprop='
   if pdc_desc contains '<img'
     assign pdc_parts = pdc_desc | split: '<img'
     assign pdc_out = pdc_parts | first | default: ''
