@@ -393,6 +393,14 @@
     if (window.msheinCards && typeof window.msheinCards.decorate === 'function') window.msheinCards.decorate(root.querySelector('[data-dcl-grid]'));
   };
   var afterContent = function () {
+    // Liens reçus du template sans en-tête (pages, filtres…) : « view=desktop-coll » retiré, sinon un clic molette ou
+    // « ouvrir dans un nouvel onglet » ouvrait la page sans en-tête ni pied de page
+    root.querySelectorAll('a[href*="view=desktop-coll"]').forEach(function (link) {
+      var target = new URL(link.getAttribute('href'), location.href);
+      if (target.searchParams.get('view') !== VIEW) return;
+      target.searchParams.delete('view');
+      link.setAttribute('href', target.pathname + target.search + target.hash);
+    });
     prepareFilters();
     decorate();
     var found = root.querySelector('[data-dcl-found]');
@@ -663,6 +671,13 @@
   });
   history.replaceState({ dcl: true }, '', location.href);
 
-  var start = function () { var node = document.querySelector('[data-dcl]'); if (node) init(node); };
+  // Page normale : bloc ordinateur inséré après coup par la section (cadre vide data-dcl-shell, événement « dcl:inserted »)
+  var start = function () {
+    var node = document.querySelector('[data-dcl]');
+    if (!node || node.hasAttribute('data-dcl-started')) return;
+    node.setAttribute('data-dcl-started', '');
+    init(node);
+  };
+  document.addEventListener('dcl:inserted', start);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
