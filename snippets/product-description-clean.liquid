@@ -1,0 +1,29 @@
+{%- comment -%}
+  Description du produit prête à afficher (fiche ordinateur et mobile) :
+  - ses titres H1 deviennent des H2 (un seul H1 par page : le nom du produit) ;
+  - les photos sans texte alternatif (souvent celles des descriptions importées d'AliExpress) reçoivent le nom du
+    produit, pour Google Images et les lecteurs d'écran. Un texte alternatif déjà rempli est gardé tel quel.
+  Usage : {% render 'product-description-clean', product: product %}
+{%- endcomment -%}
+{%- liquid
+  assign pdc_alt = product.title | escape
+  assign pdc_desc = product.description | replace: '<h1', '<h2' | replace: '</h1>', '</h2>' | replace: '<H1', '<h2' | replace: '</H1>', '</h2>' | replace: '<IMG', '<img' | replace: ' alt=""', '' | replace: " alt=''", ''
+  if pdc_desc contains '<img'
+    assign pdc_parts = pdc_desc | split: '<img'
+    assign pdc_out = pdc_parts | first | default: ''
+    for pdc_part in pdc_parts offset: 1
+      assign pdc_tag = pdc_part | split: '>' | first | downcase
+      if pdc_tag contains ' alt='
+        assign pdc_out = pdc_out | append: '<img' | append: pdc_part
+      else
+        assign pdc_out = pdc_out | append: '<img alt="' | append: pdc_alt | append: '"' | append: pdc_part
+      endif
+    endfor
+    if pdc_desc contains '<img' and pdc_parts.size == 1
+      assign pdc_out = pdc_desc
+    endif
+    echo pdc_out
+  else
+    echo pdc_desc
+  endif
+-%}

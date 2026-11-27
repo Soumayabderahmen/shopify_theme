@@ -688,7 +688,7 @@
   -%}
   {%- if product.description != blank and pm_desc_ok -%}
     {%- comment -%} Titres H1 des descriptions importées (« SPECIFICATIONS ») en H2 : un seul H1 par fiche, le nom du produit. {%- endcomment -%}
-    <template data-pdp-desc-src>{{ product.description | replace: '<h1', '<h2' | replace: '</h1>', '</h2>' | replace: '<H1', '<h2' | replace: '</H1>', '</h2>' }}</template>
+    <template data-pdp-desc-src>{% render 'product-description-clean', product: product %}</template>
     <div class="pdp-m__desc" data-pdp-desc></div>
   {%- endif -%}
 

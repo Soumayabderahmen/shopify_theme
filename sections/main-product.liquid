@@ -262,7 +262,7 @@
             </{{ description_heading_tag }}>
             {%- if section.settings.product_description_enable_read_more -%}
               <div class="m6lm">
-                {{ product.description | replace: '<h1', '<h2' | replace: '</h1>', '</h2>' | replace: '<H1', '<h2' | replace: '</H1>', '</h2>' }}
+                {% render 'product-description-clean', product: product %}
               </div>
               <p class="has-link-more">
                 <a href="./" class="strong link-more">
@@ -273,7 +273,7 @@
                 ></a>
               </p>
             {%- else -%}
-              {{ product.description | replace: '<h1', '<h2' | replace: '</h1>', '</h2>' | replace: '<H1', '<h2' | replace: '</H1>', '</h2>' }}
+              {% render 'product-description-clean', product: product %}
             {%- endif -%}
           </div>
         </div>
@@ -306,7 +306,7 @@
               </{{ description_heading_tag }}>
               {%- if section.settings.product_description_enable_read_more -%}
                 <div class="m6lm">
-                  {{ product.description | replace: '<h1', '<h2' | replace: '</h1>', '</h2>' | replace: '<H1', '<h2' | replace: '</H1>', '</h2>' }}
+                  {% render 'product-description-clean', product: product %}
                 </div>
                 <p class="has-link-more">
                   <a href="./" class="strong link-more">
@@ -317,7 +317,7 @@
                   ></a>
                 </p>
               {%- else -%}
-                {{ product.description | replace: '<h1', '<h2' | replace: '</h1>', '</h2>' | replace: '<H1', '<h2' | replace: '</H1>', '</h2>' }}
+                {% render 'product-description-clean', product: product %}
               {%- endif -%}
             </div>
           {%- endif %}
