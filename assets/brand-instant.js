@@ -82,9 +82,15 @@
   var brandLink = function (target) {
     var link = target && target.closest && target.closest('a[href]');
     if (!link || link.target === '_blank' || link.hasAttribute('download') || link.closest('[data-br]')) return null;
+    // Lien interne à la page (#…, ex. onglets du panneau Categoria « #mobile-category-panel-6 ») : sur une page marque,
+    // le navigateur le complète avec l'adresse de la page (?view=brand) ; il était pris pour un lien de marque, le panneau
+    // se fermait et la page marque se rechargeait au lieu d'afficher la catégorie.
+    var raw = (link.getAttribute('href') || '').trim();
+    if (!raw || raw.charAt(0) === '#') return null;
     var url;
     try { url = new URL(link.href, location.href); } catch (error) { return null; }
     if (url.origin !== location.origin || url.searchParams.get('view') !== 'brand') return null;
+    if (url.hash && url.pathname === location.pathname && url.search === location.search) return null;
     return link;
   };
 
