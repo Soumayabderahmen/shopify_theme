@@ -102,7 +102,9 @@
   else
     assign hero_title_html = '<span>' | append: title_words.first | append: '</span>'
   endif
-  assign hero_text = collection.description | strip_html | strip | truncatewords: 10, '…'
+  # Paragraphes séparés par une espace (« Bagno Scopri », pas « BagnoScopri ») ; caractères spéciaux décodés (« & », pas
+  # « &amp; » : le texte est encodé une seule fois à l'affichage)
+  assign hero_text = collection.description | replace: '</', ' </' | replace: '<br>', ' ' | replace: '<br/>', ' ' | replace: '<br />', ' ' | strip_html | replace: '&amp;', '&' | replace: '&quot;', '"' | replace: '&#39;', "'" | replace: '&#34;', '"' | replace: '&lt;', '<' | replace: '&gt;', '>' | replace: '&nbsp;', ' ' | strip | truncatewords: 10, '…'
   if hero_text == '' or is_all
     assign hero_text = 'mobile_home_hero.text1' | t
   endif

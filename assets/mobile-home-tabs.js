@@ -1087,7 +1087,51 @@
     }
   };
   // Bannière immédiate d'une autre collection : photo et nom du lien touché (la vraie bannière la remplace à l'arrivée).
+  // Collection hors menu (panneau Categoria, tuiles…) : en attendant sa page, la bannière orange du site (copie de
+  // celle d'un rayon, snippets/mshein-dept-hero.liquid) avec le titre et la photo de la collection touchée. Avant :
+  // une bannière photo + titre blanc de l'ancien design, remplacée une seconde plus tard par la vraie.
+  var themedHero = function (tab) {
+    var model = document.querySelector('template[data-mshein-hero-for]');
+    if (!model) return null;
+    var copy = model.content.cloneNode(true);
+    var hero = copy.querySelector('[data-mhh]');
+    if (!hero) return null;
+    var payItems = document.querySelector('template[data-mhh-pay-items]');
+    if (payItems) copy.querySelectorAll('[data-mhh-pay-fill]').forEach(function (list) { list.replaceChildren(payItems.content.cloneNode(true)); });
+    var data = hero.querySelector('[data-mhh-data]');
+    if (data) data.remove();
+    var words = String(tab.title || '').trim().split(/\s+/);
+    var last = words.pop() || '';
+    var title = hero.querySelector('[data-mhh-title]');
+    if (title) {
+      title.textContent = words.length ? words.join(' ') + ' ' : '';
+      var mark = document.createElement('span');
+      mark.textContent = last;
+      title.appendChild(mark);
+    }
+    var eyebrow = hero.querySelector('[data-mhh-eb]');
+    if (eyebrow) eyebrow.textContent = '';
+    var text = hero.querySelector('[data-mhh-text]');
+    if (text) text.textContent = '';
+    var button = hero.querySelector('[data-mhh-btn]');
+    if (button && (tab.href || tab.path)) button.setAttribute('href', tab.href || tab.path);
+    hero.querySelectorAll('.mhh-fl').forEach(function (photo, index) {
+      var inner = photo.querySelector('.mhh-fl__in');
+      if (inner) inner.replaceChildren();
+      if (index === 0 && tab.image && inner) {
+        var image = tab.image.cloneNode(false);
+        image.removeAttribute('loading');
+        image.removeAttribute('sizes');
+        image.alt = '';
+        inner.appendChild(image);
+      }
+      photo.setAttribute('href', tab.href || tab.path || photo.getAttribute('href'));
+    });
+    return copy;
+  };
   var provisionalHero = function (tab) {
+    var themed = themedHero(tab);
+    if (themed) return themed;
     var section = document.createElement('section');
     section.className = 'mshein-dhero';
     var media = document.createElement('span');

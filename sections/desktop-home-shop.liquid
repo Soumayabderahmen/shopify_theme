@@ -939,24 +939,65 @@
       ---------- Collezioni da scoprire : sous-liens collection du menu (un par rayon, puis le suivant…), photo de la
       collection, ses produits 3 par 3 (flèches, défilement automatique) ----------
     {%- endcomment -%}
+    {%- comment -%}
+      Choix du jour : toutes les collections du menu (sous-liens et sous-sous-liens, un par rayon puis le suivant…),
+      lues seulement dans les adresses des liens (aucune collection chargée pour faire la liste) ; puis, à partir d'un
+      point qui avance chaque jour (jour de l'année), les 12 premières qui ont au moins 3 produits et ne sont pas cachées
+      de Google : 12 collections différentes chaque jour, même choix pour tous les visiteurs du jour. Avant : toujours
+      les 12 mêmes.
+    {%- endcomment -%}
+    {%- liquid
+      assign coll_pool = ''
+      assign coll_seen = ','
+      for round in (0..11)
+        for link in menu.links
+          if link.type != 'collection_link' or link.url contains '/collections/all'
+            continue
+          endif
+          assign sub_link = link.links[round]
+          if sub_link != blank and sub_link.type == 'collection_link'
+            assign sub_handle = sub_link.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+            assign sub_key = ',' | append: sub_handle | append: ','
+            unless coll_seen contains sub_key
+              assign coll_seen = coll_seen | append: sub_handle | append: ','
+              assign coll_pool = coll_pool | append: sub_handle | append: '~' | append: sub_link.title | append: '~' | append: link.title | append: '^'
+            endunless
+          endif
+          for kid_link in link.links
+            assign grand_link = kid_link.links[round]
+            if grand_link == blank or grand_link.type != 'collection_link'
+              continue
+            endif
+            assign sub_handle = grand_link.url | split: '/collections/' | last | split: '?' | first | split: '/' | first
+            assign sub_key = ',' | append: sub_handle | append: ','
+            unless coll_seen contains sub_key
+              assign coll_seen = coll_seen | append: sub_handle | append: ','
+              assign coll_pool = coll_pool | append: sub_handle | append: '~' | append: grand_link.title | append: '~' | append: link.title | append: '^'
+            endunless
+          endfor
+        endfor
+      endfor
+      assign coll_list = coll_pool | split: '^'
+      assign coll_size = coll_list.size
+      assign coll_day = 'now' | date: '%j' | plus: 0
+      assign coll_start = 0
+      if coll_size > 0
+        assign coll_start = coll_day | times: 12 | modulo: coll_size
+      endif
+    -%}
     {%- capture coll_cards -%}
       {%- assign coll_shown = 0 -%}
-      {%- assign coll_seen = ',' -%}
-      {%- for round in (0..3) -%}
-        {%- for link in menu.links -%}
-          {%- if link.type != 'collection_link' or link.object.handle == 'all' -%}{%- continue -%}{%- endif -%}
-          {%- assign sub_link = link.links[round] -%}
-          {%- if sub_link == blank or sub_link.type != 'collection_link' -%}{%- continue -%}{%- endif -%}
-          {%- assign sub = sub_link.object -%}
-          {%- assign sub_key = ',' | append: sub.handle | append: ',' -%}
-          {%- if coll_seen contains sub_key or sub.products_count < 3 -%}{%- continue -%}{%- endif -%}
-          {%- assign coll_seen = coll_seen | append: sub.handle | append: ',' -%}
+      {%- for step in (1..coll_size) -%}
+          {%- assign coll_index = coll_start | plus: step | minus: 1 | modulo: coll_size -%}
+          {%- assign coll_parts = coll_list[coll_index] | split: '~' -%}
+          {%- assign sub = collections[coll_parts[0]] -%}
+          {%- if sub == blank or sub.products_count < 3 or sub.metafields.seo.hidden == 1 -%}{%- continue -%}{%- endif -%}
           {%- assign sub_image = sub.image | default: sub.products.first.featured_image -%}
           <a class="dhp-coll" href="{{ sub.url }}">
             {%- if sub_image != blank -%}<img class="dhp-coll__bg" src="{{ sub_image | image_url: width: 800 }}" alt="" loading="lazy" width="400" height="500">{%- endif -%}
             <span>
-              <span class="dhp-coll__name">{{ sub_link.title | escape }}</span>
-              <span class="dhp-coll__sub">{{ link.title | escape }}</span>
+              <span class="dhp-coll__name">{{ coll_parts[1] | escape }}</span>
+              <span class="dhp-coll__sub">{{ coll_parts[2] | escape }}</span>
             </span>
             <span class="dhp-coll__items">
               <span class="dhp-coll__rail">
@@ -972,8 +1013,6 @@
           </a>
           {%- assign coll_shown = coll_shown | plus: 1 -%}
           {%- if coll_shown >= 12 -%}{%- break -%}{%- endif -%}
-        {%- endfor -%}
-        {%- if coll_shown >= 12 -%}{%- break -%}{%- endif -%}
       {%- endfor -%}
     {%- endcapture -%}
     {%- if coll_cards != blank -%}

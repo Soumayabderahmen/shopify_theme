@@ -129,7 +129,8 @@
   # Titre de l'onglet quand la page est ouverte sans recharger (assets/brand-instant.js, desktop-brand.js) : le même que
   # celui de layout/theme.liquid (« Nike – 723 prodotti – platinumshop » ; collection de la marque : son titre SEO).
   if template.name == 'collection' and collection.handle != 'vendors'
-    assign br_title = page_title
+    # page_title est déjà encodé par Shopify (« &amp; ») : décodé, encodé une seule fois dans l'attribut
+    assign br_title = page_title | replace: '&amp;', '&' | replace: '&quot;', '"' | replace: '&#39;', "'" | replace: '&#34;', '"' | replace: '&lt;', '<' | replace: '&gt;', '>' | replace: '&nbsp;', ' '
   else
     assign br_title_count = br_count | append: ''
     if template.name == 'search' and br_count >= 1000

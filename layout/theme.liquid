@@ -52,6 +52,8 @@
         document.addEventListener('error', function (event) {
           var img = event.target;
           if (!img || img.tagName !== 'IMG' || img.classList.contains('img-broken')) return;
+          // Seulement les photos de la boutique (pas les pixels de suivi des applis, bloqués par exemple par un bloqueur)
+          if (!/\/cdn\/shop\/|cdn\.shopify\.com\//.test(img.currentSrc || img.src)) return;
           var failed = file(img.currentSrc || img.src);
           // 1er échec : la même photo est redemandée une fois (le serveur d'images de Shopify répond parfois 502 au hasard ;
           // « r=1 » évite la réponse en erreur gardée en cache), puis une autre photo, puis le fond neutre
@@ -70,7 +72,8 @@
           tried.push(failed);
           img.setAttribute('data-img-tried', tried.join('|'));
           var link = img.closest('a[href]');
-          var path = link ? new URL(link.href, location.href).pathname : location.pathname;
+          // Photo dans un lien (carte, tuile) : le produit ou la collection du lien ; sans lien : seulement sur une fiche produit
+          var path = link ? new URL(link.href, location.href).pathname : (/\/products\//.test(location.pathname) ? location.pathname : '');
           var product = path.match(/\/products\/([^/?#]+)/);
           var collection = path.match(/\/collections\/([^/?#]+)\/?$/);
           var request = product ? getJson('/products/' + product[1] + '.js').then(function (data) { return data && data.images; })

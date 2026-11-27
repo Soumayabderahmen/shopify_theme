@@ -140,7 +140,8 @@
 {%- liquid
   # Titre de l'onglet du navigateur quand ce rayon s'ouvre sans recharger (assets/mobile-home-tabs.js) : le même que
   # layout/theme.liquid (titre SEO de la collection + nom de la boutique s'il n'y est pas déjà)
-  assign dept_page_title = page_title | strip
+  # page_title est déjà encodé par Shopify (« &amp; ») : décodé ici, encodé une seule fois dans l'attribut
+  assign dept_page_title = page_title | replace: '&amp;', '&' | replace: '&quot;', '"' | replace: '&#39;', "'" | replace: '&#34;', '"' | replace: '&lt;', '<' | replace: '&gt;', '>' | replace: '&nbsp;', ' ' | strip
   assign dept_page_title_lc = dept_page_title | downcase
   unless dept_page_title_lc contains 'platinum'
     assign dept_page_title = dept_page_title | append: ' – ' | append: shop.name
