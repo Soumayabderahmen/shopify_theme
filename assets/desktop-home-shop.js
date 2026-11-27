@@ -260,7 +260,7 @@
   var liveIo = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) { entry.target.classList.toggle('dhp-off', !entry.isIntersecting); });
   }, { rootMargin: '250px 0px' }) : null;
-  var LIVE = '.mshein-card, .dhp-new__card, .dhp-pay, .dhp-hero, .dhp-bf, .dhp-flash, .dhp-marq';
+  var LIVE = '.mshein-card, .dhp-new__card, .dhp-pay, .dhp-hero, .dhp-bf, .dhp-flash, .dhp-marq, .dhp-bmq';
   var watchLive = function (scope) {
     if (!liveIo) return;
     if (scope.matches && scope.matches(LIVE) && !scope.hasAttribute('data-dhp-live')) { scope.setAttribute('data-dhp-live', ''); liveIo.observe(scope); }
@@ -1235,9 +1235,12 @@
           .then(function (response) { return response.json(); })
           .then(function (data) {
             if (!data.count) { tile.remove(); return; }
+            var countEl = tile.querySelector('[data-bmq-count]');
+            var tplBox = tile.closest('[data-count-tpl]');
+            if (countEl && tplBox && !countEl.textContent) countEl.textContent = Number(data.count) === 1 && tplBox.getAttribute('data-count-one') ? tplBox.getAttribute('data-count-one') : tplBox.getAttribute('data-count-tpl').replace('__N__', data.count);
             if (!data.img) return;
             var img = document.createElement('img');
-            img.src = data.img.replace(/width=\d+/, 'width=300');
+            img.src = data.img.replace(/width=\d+/, tile.classList.contains('dhp-bmq__tile') ? 'width=600' : 'width=300');
             img.alt = '';
             img.width = 150;
             img.height = 150;
@@ -1256,6 +1259,95 @@
     io.observe(rail);
   };
   brandPhotos(root);
+  /* « Shop per brand » en 2 rangées qui défilent : vitesse constante (~40 px/s) quelle que soit la longueur de la rangée,
+     et nombre de produits des marques sans collection (relevé assets/mobile-brands.json, par nom). */
+  var brandMarquee = function (scope) {
+    var box = scope.querySelector('[data-dhp-bmq]:not([data-bmq-ready])');
+    if (!box) return;
+    box.setAttribute('data-bmq-ready', '');
+    var setSpeed = function () {
+      box.querySelectorAll('.dhp-bmq__track').forEach(function (track) {
+        var half = track.scrollWidth / 2;
+        if (half > 0) track.style.setProperty('--bmq-dur', Math.max(20, Math.round(half / 40)) + 's');
+      });
+    };
+    setSpeed();
+    window.addEventListener('load', setSpeed, { once: true });
+    var tpl = box.getAttribute('data-count-tpl') || '__N__';
+    var url = box.getAttribute('data-brands-url');
+    if (!url) return;
+    // Relevé des marques (nom → nombre de produits, photo) : nombre manquant, photo manquante (ou qui n'a pas chargé),
+    // et carte retirée pour une marque absente du relevé (aucun produit) ; les marques du fournisseur sont gérées par
+    // brandPhotos (leur propre JSON).
+    var fill = function () {
+      fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+        var info = {};
+        var cdn = data.cdn || '';
+        (data.brands || []).forEach(function (b) { if (b && b[0]) info[String(b[0]).trim().toLowerCase()] = { n: b[2], img: b[3] ? cdn + b[3] : '' }; });
+        var removed = false;
+        // Photo qui ne charge pas : celle du premier produit de la marque (JSON de templates/search.brand-count.liquid)
+        var searchUrl = box.getAttribute('data-search-url') || '/search';
+        var fromSearch = function (tile) {
+          if (tile.hasAttribute('data-bmq-searched')) return;
+          tile.setAttribute('data-bmq-searched', '');
+          var q = tile.getAttribute('data-brand-q');
+          if (!q) return;
+          var ask = function (query) {
+            return fetch(searchUrl + '?q=' + encodeURIComponent(query) + '&type=product&view=brand-count', { credentials: 'same-origin' })
+              .then(function (r) { return r.json(); });
+          };
+          // Titre d'abord (comme la page de la marque), sinon recherche complète ; aucune trouvaille : marque vide, carte retirée
+          ask('title:"' + q + '"')
+            .then(function (d) { return d && d.img ? d : ask(q); })
+            .then(function (d) {
+              if (!d || !d.count) { tile.remove(); setSpeed(); return; }
+              var cEl = tile.querySelector('[data-bmq-count]');
+              if (cEl) cEl.textContent = Number(d.count) === 1 ? (box.getAttribute('data-count-one') || tpl.replace('__N__', d.count)) : tpl.replace('__N__', d.count);
+              if (!d.img) return;
+              var im = tile.querySelector('img') || tile.insertBefore(document.createElement('img'), tile.firstChild);
+              im.alt = ''; im.width = 300; im.height = 190; im.decoding = 'async';
+              im.onerror = function () { im.remove(); };
+              im.src = d.img.replace(/width=\d+/, 'width=600');
+            })
+            .catch(function () {});
+        };
+        var watchImg = function (tile, im) {
+          var bad = function () { im.remove(); fromSearch(tile); };
+          if (im.complete && im.naturalWidth === 0 && im.getAttribute('src')) bad();
+          else im.addEventListener('error', bad, { once: true });
+        };
+        box.querySelectorAll('.dhp-bmq__tile[data-brand-name]').forEach(function (tile) {
+          var el = tile.querySelector('[data-bmq-count]');
+          var entry = info[tile.getAttribute('data-brand-name')];
+          if (el && !el.textContent && entry && entry.n) {
+            el.textContent = Number(entry.n) === 1 ? (box.getAttribute('data-count-one') || tpl.replace('__N__', entry.n)) : tpl.replace('__N__', entry.n);
+          }
+          if (!tile.querySelector('img') && entry && entry.img) {
+            var img = document.createElement('img');
+            img.src = entry.img + (entry.img.indexOf('?') === -1 ? '?' : '&') + 'width=600';
+            img.alt = '';
+            img.width = 300;
+            img.height = 190;
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            tile.insertBefore(img, tile.firstChild);
+          }
+          var tileImg = tile.querySelector('img');
+          if (tileImg) watchImg(tile, tileImg); else if (entry) fromSearch(tile);
+          if (!entry && !tile.hasAttribute('data-brand-photo') && el && !el.textContent) { tile.remove(); removed = true; }
+        });
+        if (removed) setSpeed();
+      }).catch(function () {});
+    };
+    if (!('IntersectionObserver' in window)) { fill(); return; }
+    var io = new IntersectionObserver(function (entries) {
+      if (!entries.some(function (e) { return e.isIntersecting; })) return;
+      io.disconnect();
+      fill();
+    }, { rootMargin: '900px 0px' });
+    io.observe(box);
+  };
+  brandMarquee(root);
   root.querySelectorAll('[data-dhp-more-part]').forEach(function (box) {
     var key = box.getAttribute('data-dhp-more-part');
     var request = window.dhpMore && window.dhpMore[key];
@@ -1274,6 +1366,7 @@
         initArrows();
         initMore();
         brandPhotos(box);
+        brandMarquee(box);
       })
       .catch(function (error) {
         box.removeAttribute('aria-busy');
