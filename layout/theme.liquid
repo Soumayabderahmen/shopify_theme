@@ -30,6 +30,64 @@
 
     <meta charset="utf-8">
     {%- comment -%}
+      Photos cassées chez Shopify (fichier qui répond 502 à chaque fois, ex. images importées abîmées) : au lieu du texte de
+      l'image et d'un trou, une autre photo du même produit (/products/…js) ou d'un produit de la collection
+      (/collections/…/products.json) ; sinon un fond neutre. Partout sur le site (cartes, tuiles, panneaux, fiches).
+    {%- endcomment -%}
+    <style>img.img-broken{color:transparent;font-size:0;background:#f1f0f7;}img.img-broken::before{content:none;}</style>
+    <script>
+      (function () {
+        var cache = {};
+        var getJson = function (url) {
+          if (!cache[url]) cache[url] = fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+          return cache[url];
+        };
+        var file = function (src) { return String(src || '').split('?')[0].split('/').pop().replace(/_\d+x\d*(?=\.)/, ''); };
+        var sized = function (src, width) { src = String(src); if (src.indexOf('//') === 0) src = 'https:' + src; return src + (src.indexOf('?') > -1 ? '&' : '?') + 'width=' + width; };
+        var noSets = function (img) {
+          img.removeAttribute('srcset');
+          if (img.parentNode && img.parentNode.tagName === 'PICTURE') [].slice.call(img.parentNode.querySelectorAll('source')).forEach(function (s) { s.remove(); });
+        };
+        var broken = function (img) { img.classList.add('img-broken'); noSets(img); };
+        document.addEventListener('error', function (event) {
+          var img = event.target;
+          if (!img || img.tagName !== 'IMG' || img.classList.contains('img-broken')) return;
+          var failed = file(img.currentSrc || img.src);
+          // 1er échec : la même photo est redemandée une fois (le serveur d'images de Shopify répond parfois 502 au hasard ;
+          // « r=1 » évite la réponse en erreur gardée en cache), puis une autre photo, puis le fond neutre
+          if (failed && !img.hasAttribute('data-img-again')) {
+            img.setAttribute('data-img-again', '');
+            var again = img.currentSrc || img.src;
+            setTimeout(function () {
+              noSets(img);
+              img.src = again + (again.indexOf('?') > -1 ? '&' : '?') + 'r=1';
+            }, 700);
+            return;
+          }
+          // Puis au plus 3 photos différentes (celle d'origine, puis deux autres) : jamais de boucle
+          var tried = (img.getAttribute('data-img-tried') || '').split('|').filter(Boolean);
+          if (!failed || tried.length >= 3) { broken(img); return; }
+          tried.push(failed);
+          img.setAttribute('data-img-tried', tried.join('|'));
+          var link = img.closest('a[href]');
+          var path = link ? new URL(link.href, location.href).pathname : location.pathname;
+          var product = path.match(/\/products\/([^/?#]+)/);
+          var collection = path.match(/\/collections\/([^/?#]+)\/?$/);
+          var request = product ? getJson('/products/' + product[1] + '.js').then(function (data) { return data && data.images; })
+            : collection ? getJson('/collections/' + collection[1] + '/products.json?limit=3').then(function (data) {
+                return data && data.products && data.products.map(function (p) { return p.images && p.images[0] && p.images[0].src; });
+              })
+            : Promise.resolve(null);
+          request.then(function (list) {
+            var next = (list || []).filter(function (src) { return src && tried.indexOf(file(src)) < 0; })[0];
+            if (!next) { broken(img); return; }
+            noSets(img);
+            img.src = sized(next, img.width > 400 ? 800 : 540);
+          });
+        }, true);
+      })();
+    </script>
+    {%- comment -%}
       Choix automatique langue / pays : au tout début de la page, pour envoyer tout de suite le visiteur vers la bonne
       langue et la bonne devise (avant : en fin de page, après la lecture de toute la page, puis 2e chargement).
     {%- endcomment -%}
