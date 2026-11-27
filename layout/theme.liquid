@@ -350,8 +350,12 @@
     {%- comment -%} Saison posée tout de suite sur <html> : la bannière s'affiche directement à ses couleurs (sans passer
       par le bleu en attendant mhh-seasons.js, chargé en différé). Même calcul que dans mhh-seasons.js. {%- endcomment -%}
     <script>(function(){var N={printemps:'spring',ete:'summer',automne:'autumn',noel:'xmas',hiver:'winter'},f=null;try{var q=new URLSearchParams(location.search).get('saison');if(q&&N[q])f=q;else if(q!=='auto')f=sessionStorage.getItem('mhhSeason');}catch(e){}var d=new Date(),m=d.getMonth()+1,s=f&&N[f]?N[f]:(m===12||(m===1&&d.getDate()<=6))?'xmas':m<=2?'winter':m<=5?'spring':m<=8?'summer':'autumn';document.documentElement.setAttribute('data-mhh-season',s);})();</script>
+    {%- comment -%} Pas sur les fiches produit (aucune bannière de saison) : mhh-seasons.js y surveillait chaque changement
+      de la page pour rien (~1,2 s de calcul sur un téléphone moyen, mesure PageSpeed du 27/11/2026). {%- endcomment -%}
+    {%- unless template.name == 'product' -%}
     <link rel="stylesheet" href="{{ 'mhh-seasons.css' | asset_url }}">
     <script src="{{ 'mhh-seasons.js' | asset_url }}" defer></script>
+    {%- endunless -%}
     {%- liquid
       # Pages collection (template collection.json) et page « In offerta » (collection.offerte.json) : en mobile, même
       # design que les onglets de rayon de l'accueil.
