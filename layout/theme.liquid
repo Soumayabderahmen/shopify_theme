@@ -148,6 +148,16 @@
       elsif template.suffix == 'brand' and theme_brand_name != blank and theme_brand_count == 0
         # Page de marque sans aucun produit (« X – 0 prodotti ») : page vide, pas dans Google.
         assign theme_noindex = true
+      elsif template.name == 'search' and template.suffix == 'brand'
+        # Page de marque par la recherche : seulement pour une vraie marque (snippets/brand-seo-terms.liquid), sinon
+        # n'importe quel mot (/search?q=n'importe-quoi&view=brand) donnerait une page indexable.
+        capture theme_brand_known
+          render 'brand-seo-terms'
+        endcapture
+        assign theme_brand_key = theme_brand_name | replace: '&amp;', '&' | downcase | strip | prepend: '|' | append: '|'
+        unless theme_brand_known contains theme_brand_key
+          assign theme_noindex = true
+        endunless
       endif
     -%}
     {%- if theme_noindex -%}<meta name="robots" content="noindex, follow">{%- endif -%}
