@@ -329,7 +329,15 @@
 .dhp-bmq__row { overflow: hidden; }
 .dhp-bmq__track { display: flex; gap: 16px; width: max-content; animation: dhp-bmq-left var(--bmq-dur, 60s) linear infinite; }
 .dhp-bmq__row--rev .dhp-bmq__track { animation-name: dhp-bmq-right; }
-.dhp-bmq:hover .dhp-bmq__track { animation-play-state: paused; }
+.dhp-bmq:hover .dhp-bmq__track, .dhp-bmq.is-held .dhp-bmq__track { animation-play-state: paused; }
+.dhp-bmq { touch-action: pan-y; }
+/* Tablette : cartes un peu plus petites (plus de marques à l'écran) */
+@media (max-width: 1024px) {
+  .dhp .dhp-bmq .dhp-bmq__tile.dhp-brand { width: 250px; height: 160px; border-radius: 20px; }
+  .dhp .dhp-bmq .dhp-bmq__txt strong { font-size: 20px; }
+  .dhp .dhp-bmq__txt small { font-size: 13px; }
+  .dhp .dhp-bmq__txt { left: 16px; bottom: 13px; }
+}
 @keyframes dhp-bmq-left { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 8px)); } }
 @keyframes dhp-bmq-right { from { transform: translateX(calc(-50% - 8px)); } to { transform: translateX(0); } }
 .dhp .dhp-bmq .dhp-bmq__tile { position: relative; flex: none; display: block; width: 300px; height: 190px; overflow: hidden; border-radius: 22px; color: #fff; box-shadow: 0 10px 24px -18px rgb(22 18 63 / 55%); transition: transform .3s cubic-bezier(.2, .8, .2, 1), box-shadow .3s; }

@@ -1273,6 +1273,31 @@
     };
     setSpeed();
     window.addEventListener('load', setSpeed, { once: true });
+    // Tablette (toucher) : pause quand le doigt touche la bande, la rangée touchée suit le doigt (position convertie en
+    // temps de l'animation), reprise au relâchement ; même règle que l'accueil mobile (sections/mobile-home-shein.liquid).
+    var resume, held = null;
+    var posOf = function (track) { var m = getComputedStyle(track).transform.match(/matrix\(([^)]+)\)/); return m ? parseFloat(m[1].split(',')[4]) || 0 : 0; };
+    box.addEventListener('touchstart', function (event) {
+      clearTimeout(resume);
+      box.classList.add('is-held');
+      var track = event.target.closest('.dhp-bmq__track');
+      if (!track || event.touches.length !== 1) { held = null; return; }
+      held = { track: track, anim: track.getAnimations ? track.getAnimations()[0] : null, rev: !!track.closest('.dhp-bmq__row--rev'), x0: event.touches[0].clientX, y0: event.touches[0].clientY, pos: posOf(track), dist: track.scrollWidth / 2 + 8, axis: '' };
+    }, { passive: true });
+    box.addEventListener('touchmove', function (event) {
+      if (!held || !held.anim || event.touches.length !== 1) return;
+      var dx = event.touches[0].clientX - held.x0, dy = event.touches[0].clientY - held.y0;
+      if (!held.axis) { if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return; held.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'; }
+      if (held.axis !== 'x') return;
+      var dist = held.dist, x = held.pos + dx;
+      x = ((x % dist) + dist) % dist - dist;
+      var p = held.rev ? (x + dist) / dist : -x / dist;
+      var total = Number(held.anim.effect.getComputedTiming().duration) || 0;
+      if (total) held.anim.currentTime = p * total;
+    }, { passive: true });
+    ['touchend', 'touchcancel'].forEach(function (type) {
+      box.addEventListener(type, function () { held = null; clearTimeout(resume); resume = setTimeout(function () { box.classList.remove('is-held'); }, 900); }, { passive: true });
+    });
     var tpl = box.getAttribute('data-count-tpl') || '__N__';
     var url = box.getAttribute('data-brands-url');
     if (!url) return;
