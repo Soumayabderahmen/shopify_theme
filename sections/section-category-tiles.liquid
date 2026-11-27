@@ -56,6 +56,10 @@
           if excluded contains handle_key
             continue
           endif
+          # Collections cachées de Google (métachamp seo.hidden = 1 : techniques, vides, « Aug 31, 2026 »…) : pas de tuile
+          if tile_collection.metafields.seo.hidden == 1
+            continue
+          endif
           # featured_image = photo de la collection, sinon celle du 1er produit (même résultat qu'avant) sans charger les
           # produits de chaque collection : avant, jusqu'à 250 listes de produits lues, ~10 s au premier affichage
           # (cache de Shopify vide) et page d'erreur de Shopify sur l'accueil.

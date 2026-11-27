@@ -8,7 +8,8 @@
   assign tile_key = label | handleize | replace: '-', '_'
   assign tile_key = 'editor_text.tiles.' | append: tile_key
   assign tile_text = tile_key | t
-  if tile_text contains 'translation missing' or tile_text == tile_key
+  # Shopify écrit « Translation missing: … » (majuscule) : les deux formes, sinon la tuile affichait ce message
+  if tile_text contains 'ranslation missing' or tile_text == tile_key
     assign tile_text = label
   endif
 -%}
