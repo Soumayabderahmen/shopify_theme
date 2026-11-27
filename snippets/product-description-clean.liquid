@@ -5,7 +5,9 @@
     produit, pour Google Images et les lecteurs d'écran. Un texte alternatif déjà rempli est gardé tel quel ;
   - les balises de données structurées collées dans certaines descriptions (itemscope / itemtype Product, avec
     image AliExpress, vieux prix et vieille adresse) sont neutralisées : Google y voyait un 2e produit sans image
-    (« Champ image manquant »). Le seul produit pour Google reste le JSON-LD du thème (product-jsonld).
+    (« Champ image manquant »). Le seul produit pour Google reste le JSON-LD du thème (product-jsonld) ;
+  - les photos sont chargées en différé (loading="lazy", decoding="async") quand la description ne le dit pas : 279 000
+    des 280 000 photos des descriptions (presque toutes hébergées chez AliExpress, ~136 Ko chacune) ne l'avaient pas.
   Usage : {% render 'product-description-clean', product: product %}
 {%- endcomment -%}
 {%- liquid
@@ -16,11 +18,17 @@
     assign pdc_out = pdc_parts | first | default: ''
     for pdc_part in pdc_parts offset: 1
       assign pdc_tag = pdc_part | split: '>' | first | downcase
-      if pdc_tag contains ' alt='
-        assign pdc_out = pdc_out | append: '<img' | append: pdc_part
-      else
-        assign pdc_out = pdc_out | append: '<img alt="' | append: pdc_alt | append: '"' | append: pdc_part
-      endif
+      assign pdc_out = pdc_out | append: '<img'
+      unless pdc_tag contains ' alt='
+        assign pdc_out = pdc_out | append: ' alt="' | append: pdc_alt | append: '"'
+      endunless
+      unless pdc_tag contains ' loading='
+        assign pdc_out = pdc_out | append: ' loading="lazy"'
+      endunless
+      unless pdc_tag contains ' decoding='
+        assign pdc_out = pdc_out | append: ' decoding="async"'
+      endunless
+      assign pdc_out = pdc_out | append: pdc_part
     endfor
     if pdc_desc contains '<img' and pdc_parts.size == 1
       assign pdc_out = pdc_desc
