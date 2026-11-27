@@ -2313,7 +2313,8 @@
     var scan = function () { document.querySelectorAll('klarna-placement').forEach(fix); };
     scan();
     // L'app crée et remplace son bloc après coup (et la fiche ouverte sur place le recrée) : surveillé 90 s.
-    var klarnaTimer = every(scan, 200);
+    // Toutes les 500 ms (avant 200 ms : 450 recherches dans la page pendant le chargement, mesure Lighthouse du 27/11).
+    var klarnaTimer = every(scan, 500);
     window.setTimeout(function () { window.clearInterval(klarnaTimer); }, 90000);
   })();
 
@@ -2363,7 +2364,9 @@
         tries += 1;
         if (document.querySelector('script[src*="alireviews-box"]') || reviewsBlock.querySelector('.alireviews-review-box') && reviewsBlock.innerText.trim().length > 50) return;
         window.dispatchEvent(new Event('scroll'));
-        if (tries < 30) window.setTimeout(kick, 500);
+        // Toutes les secondes pendant 15 s (avant : toutes les 500 ms) : chaque faux défilement fait aussi travailler les
+        // autres scripts de la page qui écoutent le défilement.
+        if (tries < 15) window.setTimeout(kick, 1000);
       };
       kick();
     };
@@ -2762,10 +2765,16 @@
   (function () {
     if (!window.matchMedia('(max-width: 760px)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var limit = window.innerHeight;
-    var waiting = [].slice.call(root.querySelectorAll(':scope > .pdp-m__top > section.pdp-m__card, :scope > .pdp-m__top > .pdp-m__klo, :scope > .pdp-m__desc, :scope > .pdp-m__sec, :scope > .pdp-m__rel'))
-      .filter(function (block) { return block.getBoundingClientRect().top > limit; });
-    if (!waiting.length) return;
-    waiting.forEach(function (block) { block.classList.add('pdp-rv-wait'); });
+    var blocks = [].slice.call(root.querySelectorAll(':scope > .pdp-m__top > section.pdp-m__card, :scope > .pdp-m__top > .pdp-m__klo, :scope > .pdp-m__desc, :scope > .pdp-m__sec, :scope > .pdp-m__rel'));
+    if (!blocks.length) return;
+    var waiting = [];
+    // Positions lues avec les autres mesures du démarrage (measure) : les lire ici forçait un calcul de toute la fiche.
+    measure(function () {
+      return blocks.map(function (block) { return block.getBoundingClientRect().top; });
+    }, function (tops) {
+      waiting = blocks.filter(function (block, i) { return tops[i] > limit; });
+      waiting.forEach(function (block) { block.classList.add('pdp-rv-wait'); });
+    });
     var ticking = false;
     var check = function () {
       ticking = false;

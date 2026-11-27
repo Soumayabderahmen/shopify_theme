@@ -23,6 +23,7 @@
   {%- endunless -%}
 {%- endcapture -%}
 <div class="mhh-pay" role="region" aria-label="{{ 'desktop_home_shop.pay_aria' | t }}">
+  <i class="mhh-pay__line" aria-hidden="true"></i>
   <span class="mhh-pay__lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v2"/></svg></span>
   <span class="mhh-pay__t"><b>{{ 'desktop_home_shop.pay_title' | t }}</b><small><i></i>{{ 'desktop_home_shop.pay_count' | t: count: shop.enabled_payment_types.size }}</small></span>
   <div class="mhh-pay__view">
