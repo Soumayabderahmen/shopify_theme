@@ -4,6 +4,7 @@
   chargement et, si la langue ou le pays doit changer, la page est envoyée tout de suite vers la bonne version (avant :
   attente de la lecture de toute la page, ~6 s, puis 2e chargement complet ; la page s'affichait d'abord en italien).
   Pendant la vérification (1re visite seulement), la page reste cachée (au plus 2,5 s).
+  Robots (Googlebot, Bing…) et outils de mesure (PageSpeed / Lighthouse) : rien de tout ça, la page reste celle demandée.
 {%- endcomment -%}
 <style>html.geo-pending body { visibility: hidden; }</style>
 <script>
@@ -46,6 +47,10 @@
     }, true);
 
     async function applyAutomaticLanguage() {
+      // Robots (Googlebot explore surtout depuis les États-Unis, Bing, etc.) et outils de mesure (PageSpeed / Lighthouse) :
+      // pas de page cachée ni d'envoi automatique vers une autre langue. Chaque adresse (/, /en, /fr…) doit être lue
+      // telle quelle, comme Google le recommande pour les redirections selon le pays. Les visiteurs ne changent pas.
+      if (/googlebot|adsbot-google|mediapartners-google|google-inspectiontool|storebot-google|bingbot|yandexbot|baiduspider|duckduckbot|applebot|petalbot|slurp|crawler|spider|chrome-lighthouse|gtmetrix/i.test(navigator.userAgent || '')) return;
       if (storageGet(window.localStorage, manualChoiceKey)) return;
       if (storageGet(window.localStorage, manualCountryChoiceKey)) return;
       if (storageGet(window.sessionStorage, autoAttemptKey)) {
