@@ -61,8 +61,15 @@
           assign theme_brand_name = collection.title
           assign theme_brand_count = collection.products_count
         endif
+        # La recherche de Shopify s'arrête à 1000 résultats : « 1000+ prodotti » plutôt qu'un chiffre faux.
+        assign theme_brand_count_txt = theme_brand_count | append: ''
+        if template.name == 'search' and theme_brand_count >= 1000
+          assign theme_brand_count_txt = theme_brand_count | append: '+'
+        endif
         if theme_brand_name != blank
           assign theme_brand_n = 'desktop_collection.count' | t: count: theme_brand_count
+          assign theme_brand_count_str = theme_brand_count | append: ''
+          assign theme_brand_n = theme_brand_n | replace_first: theme_brand_count_str, theme_brand_count_txt
           assign theme_page_title = theme_brand_name | append: ' – ' | append: theme_brand_n
         endif
       endif
@@ -114,7 +121,7 @@
       # Collection ou page sans description (Google inventerait le texte) : phrase courte et vraie, dans la langue du
       # visiteur (collection : nom + nombre de produits ; page : son titre + la description de la boutique).
       if theme_brand_name != blank
-        assign theme_meta_desc = 'seo_fallback.collection_description' | t: title: theme_brand_name, count: theme_brand_count, shop: shop.name
+        assign theme_meta_desc = 'seo_fallback.collection_description' | t: title: theme_brand_name, count: theme_brand_count_txt, shop: shop.name
       endif
       if theme_meta_desc == blank
         if request.page_type == 'collection' and collection.title != blank
@@ -137,6 +144,9 @@
       elsif request.page_type == 'page' and page.handle == 'wishlist'
         assign theme_noindex = true
       elsif template.name == 'search' and template.suffix != 'brand'
+        assign theme_noindex = true
+      elsif template.suffix == 'brand' and theme_brand_name != blank and theme_brand_count == 0
+        # Page de marque sans aucun produit (« X – 0 prodotti ») : page vide, pas dans Google.
         assign theme_noindex = true
       endif
     -%}
