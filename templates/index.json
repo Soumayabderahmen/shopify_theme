@@ -39,10 +39,10 @@
       "settings": {
         "source": "auto",
         "tiles_count": 20,
-        "exclude_menu": "main-menu",
+        "exclude_menu": "",
         "exclude_handles": "all\nbestsellers\nnew-arrivals\nproducts_recenti_reviews\nseo-pro-5-off\nglobofilter-best-selling-products-index",
         "min_products": 6,
-        "labels": "abbigliamento-cinese: Stile Cinese\nbambini-ragazza: Bambina\ngiacche-ragazza-luxury: Giacche Lux\ngioielli-hip-hop: Hip Hop\nfelpe-novita: Hoodie\nnews-arrival: Sotto 100\nscarpe_all_collection: Scarpe\nscarpe_uomo: Scarpe Uomo\nsept-discount: Offerte\ntecnologie: Tecnologia",
+        "labels": "maden-mens-clothing: MADEN Uomo\nabbigliamento-cinese: Stile Cinese\nbambini-ragazza: Bambina\ngiacche-ragazza-luxury: Giacche Lux\ngioielli-hip-hop: Hip Hop\nfelpe-novita: Hoodie\nnews-arrival: Sotto 100\nscarpe_all_collection: Scarpe\nscarpe_uomo: Scarpe Uomo\nsept-discount: Offerte\ntecnologie: Tecnologia\nicebear: ICEbear Giacche\npuffer-jackets-coats: Piumini\nwomens-cashmere-clothing: Cashmere Donna\nrebok: Reebok\nthe-north-face-giacche-piumini: The North Face\nassiesdive-watches: Orologi Assiesdive\nborse-baguette: Borse Baguette\nt-shirt-carino: T-shirt\nzodf-urban-streetwear: ZODF Streetwear\nadidas-abbigliamento-sportivo: Adidas\nscarpe-new-balance: New Balance\nmens-heritage-clothing-accessories: Heritage Uomo\nsaucezhan: SauceZhan\ntoyou: TOYOU\namii-clothing: AMII\nchic-ven: Chic Ven\nmishow-womens-clothing: MISHOW\nfsle-women: FSLE\ndave-bella-kids-clothing: Dave Bella\nkelme-abbigliamento-sportivo: KELME\nmoda-donna-abbigliamento-scarpe-accessori: Moda Donna\nwomens-lingerie-sets-bras-panties: Lingerie\nabbigliamento-sportivo-streetwear: Sportswear\nabbigliamento-uomo-tutti: Uomo\nscarpe-uomo: Scarpe Uomo\nanimal-print-accessories: Animalier\nanimal-onesie-pajamas: Kigurumi\nslippers-cuddles: Pantofole",
         "label": "Categorie",
         "mobile_only": true,
         "layout": "scroll"
