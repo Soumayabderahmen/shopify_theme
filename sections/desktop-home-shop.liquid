@@ -303,7 +303,7 @@
         </div>
       {%- endif -%}
       <div class="dhp-hero__txt dhp-hero__txt--std">
-        <h1>{{ 'desktop_home_shop.hero_title_html' | t: shop: shop_name }}</h1>
+        <h1>{{ 'desktop_home_shop.hero_title_html' | t: shop: shop_name | replace: '<br>', ' <br>' }}</h1>
         <p>{{ 'desktop_home_shop.hero_text' | t }}</p>
         <div class="dhp-hero__cta">
           <a class="dhp-btn dhp-btn--brand" href="#dhp-reparti">{{ 'desktop_home_shop.hero_cta_shop' | t }} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>

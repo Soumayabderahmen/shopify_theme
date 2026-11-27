@@ -195,7 +195,9 @@
 {%- if pp_page == false or pp_desk_doc -%}
   <link rel="stylesheet" href="{{ 'desktop-contact.css' | asset_url }}" media="(min-width: 761px)">
   <link rel="stylesheet" href="{{ 'desktop-policy.css' | asset_url }}" media="(min-width: 761px)">
-  {%- render 'desktop-page-hero', title: pp_hero_title, copy: pp_date, crumb: pp_hero_title -%}
+  {%- comment -%} Un seul titre principal (H1) par page : celui de la fiche mobile ci-dessus ; bandeau ordinateur et titre
+    ajouté par Shopify dans le texte de la politique (caché) en titres simples. Avant : 3 H1 identiques. {%- endcomment -%}
+  {%- render 'desktop-page-hero', title: pp_hero_title, copy: pp_date, crumb: pp_hero_title, heading: 'p' -%}
 {%- endif -%}
 {%- if pp_page -%}
   {%- if pp_doc -%}
@@ -276,9 +278,9 @@
       </section>
     </article>
   {%- elsif pp_doc -%}
-    <div class="pp__card pp__card--shopify pp__desk">{{ content }}</div>
+    <div class="pp__card pp__card--shopify pp__desk">{{ content | replace: '<h1', '<h2' | replace: '</h1>', '</h2>' }}</div>
   {%- else -%}
-    <div class="pp__card pp__card--shopify">{{ content }}</div>
+    <div class="pp__card pp__card--shopify">{{ content | replace: '<h1', '<h2' | replace: '</h1>', '</h2>' }}</div>
   {%- endif -%}
 </div>
 {%- endif -%}

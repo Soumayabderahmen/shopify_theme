@@ -5,6 +5,7 @@
   snippets/mobile-footer.liquid, mêmes liens et textes ; le lien vers la page ouverte est omis).
   Styles : assets/desktop-contact.css (à charger par la page). Caché sur mobile (≤ 760px).
   - title : titre ; copy : texte sous le titre (facultatif) ; crumb : dernier élément du fil d'Ariane (par défaut page.title)
+  - heading : balise du titre (par défaut h1 ; « p » quand la page a déjà son titre principal, ex. pages de politique)
 {%- endcomment -%}
 <style>@media (max-width: 760px) { .dct { display: none; } }</style>
 <section class="dct" aria-labelledby="dct-title">
@@ -13,7 +14,8 @@
       <nav class="dct-hero__bc" aria-label="{{ 'mobile.cart.breadcrumb' | t }}">
         <a href="{{ routes.root_url }}">{{ 'mobile.nav.home' | t }}</a><i aria-hidden="true">›</i><b>{{ crumb | default: page.title | escape }}</b>
       </nav>
-      <h1 class="dct-hero__title" id="dct-title">{{ title }}</h1>
+      {%- assign dph_tag = heading | default: 'h1' -%}
+      <{{ dph_tag }} class="dct-hero__title" id="dct-title">{{ title }}</{{ dph_tag }}>
       {%- if copy != blank -%}<p class="dct-hero__copy">{{ copy }}</p>{%- endif -%}
       <div class="dct-hero__usp">
         <span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{{ 'desktop_contact.fast_reply' | t }}</span>
