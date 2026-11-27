@@ -852,6 +852,7 @@
   // Adresse de la page chargée (l'adresse affichée change ensuite avec l'onglet ouvert).
   var basePathname = window.location.pathname;
   var baseUrl = basePathname + window.location.search;
+  var baseTitle = document.title;
   var minIndex = baseIndex >= 0 ? 0 : -1;
   var isBase = function (index) { return index === baseIndex; };
   // Bannières des rayons préparées dans la page (snippets/mshein-tab-heroes.liquid), par adresse de collection.
@@ -1055,6 +1056,8 @@
   var renderDept = function (tab, html) {
     var dept = new DOMParser().parseFromString(html, 'text/html').querySelector('[data-mshein-dept]');
     if (!dept) throw new Error('Department markup missing');
+    // Titre de l'onglet du navigateur : celui du rayon ouvert (avant : celui de la page de départ restait affiché)
+    if (dept.getAttribute('data-page-title')) document.title = dept.getAttribute('data-page-title');
     var part = function (name) {
       var element = dept.querySelector('[data-dept-part="' + name + '"]');
       return element ? element.innerHTML : '';
@@ -1155,6 +1158,7 @@
       pushState({ mshTab: index, mshY: 0 }, '', isBase(index) ? baseUrl : target.address || target.path + (target.query ? '?' + target.query : ''));
     }
     if (isBase(index)) {
+      document.title = baseTitle;
       clearSlots();
       setHomeVisible(true);
       restoreScroll(y, baseProducts);
@@ -1192,10 +1196,18 @@
     else showTab(index);
   };
   // Clic sur un onglet, le logo ou « Home » : changement sans rechargement (souris, clavier ; au doigt : touchend plus bas).
+  // Page de marque ouverte sur place par-dessus cette page (assets/brand-instant.js) : cette page est d'abord remise,
+  // sinon les onglets, le logo et les collections agissaient sur une page retirée (rien ne changeait à l'écran).
+  // false : page absente et impossible à remettre (le lien fait alors une navigation normale).
+  var homeReady = function () {
+    if (document.contains(slots.hero)) return true;
+    return Boolean(window.brandInstant && window.brandInstant.restoreOrigin()) && document.contains(slots.hero);
+  };
   var handleClick = function (event) {
     if (!mobile.matches || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     var link = event.target.closest && event.target.closest('a[data-mshein-tab]');
     if (link && nav.contains(link)) {
+      if (!homeReady()) return;
       event.preventDefault();
       openTab(Number(link.getAttribute('data-mshein-tab')));
       return;
@@ -1207,6 +1219,19 @@
       var trim = function (path) { return String(path).replace(/\/+$/, ''); };
       // Adresse de l'accueil (avec la langue : « / », « /de »…).
       if (target.origin === window.location.origin && trim(target.pathname) === trim(basePathname) && !target.hash) {
+        // Depuis une page de marque ouverte sur place : la page de départ revient, en haut, avec son adresse
+        if (!document.contains(slots.hero)) {
+          if (!homeReady()) return;
+          event.preventDefault();
+          if (isBase(current)) {
+            pushState({ mshTab: current, mshY: 0 }, '', baseUrl);
+            document.title = baseTitle;
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          } else {
+            showTab(baseIndex);
+          }
+          return;
+        }
         event.preventDefault();
         if (!isBase(current)) showTab(baseIndex);
         else window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1234,7 +1259,7 @@
   nav.addEventListener('touchend', function (event) {
     var touched = tap;
     tap = null;
-    if (!touched || !mobile.matches || !event.cancelable) return;
+    if (!touched || !mobile.matches || !event.cancelable || !homeReady()) return;
     event.preventDefault();
     // Toucher traité : il ne remonte pas jusqu'aux scripts de statistiques (qui l'analysent aussi, ~0,1 s).
     event.stopImmediatePropagation();
@@ -1334,7 +1359,7 @@
   window.addEventListener('click', function (event) {
     if (!mobile.matches || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     var found = collectionLink(event.target);
-    if (!found) return;
+    if (!found || !homeReady()) return;
     event.preventDefault();
     openCollection(found);
   }, true);
@@ -1352,7 +1377,7 @@
   document.addEventListener('touchend', function (event) {
     var touched = linkTap;
     linkTap = null;
-    if (!touched || !mobile.matches || !event.cancelable) return;
+    if (!touched || !mobile.matches || !event.cancelable || !homeReady()) return;
     event.preventDefault();
     event.stopImmediatePropagation();
     openCollection(touched.found);

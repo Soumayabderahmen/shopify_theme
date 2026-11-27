@@ -158,6 +158,12 @@
         unless theme_brand_known contains theme_brand_key
           assign theme_noindex = true
         endunless
+        # Recherche dans la marque (catégorie ou mot : title:"Amii" (title:felpa OR …)) : doublon de la page de la marque,
+        # pas dans Google ; seule la page de la marque elle-même (title:"Amii") reste indexée.
+        assign theme_brand_only = 'title:"' | append: theme_brand_name | append: '"'
+        if theme_brand_terms != theme_brand_only and theme_brand_terms != theme_brand_name
+          assign theme_noindex = true
+        endif
       endif
     -%}
     {%- if theme_noindex -%}<meta name="robots" content="noindex, follow">{%- endif -%}

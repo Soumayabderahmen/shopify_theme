@@ -125,7 +125,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
 
-<div class="br" style="--brand: {{ br_theme[0] }}; --brand-2: {{ br_theme[1] }}; --accent: {{ br_theme[2] }}; --photo: url('{{ br_cover }}');" data-br data-br-name="{{ br_name | escape }}" data-br-term="{{ br_term | escape }}"  data-br-base="{{ br_base }}" data-br-search="{{ routes.search_url }}" data-br-root="{{ routes.root_url }}" data-br-currency="{{ cart.currency.symbol }}" data-br-brands="{{ 'mobile-brands.json' | asset_url }}" data-br-best="{{ br_best_url }}" data-added="{{ 'mobile.js.added_to_wishlist' | t }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t }}">
+{%- liquid
+  # Titre de l'onglet quand la page est ouverte sans recharger (assets/brand-instant.js, desktop-brand.js) : le même que
+  # celui de layout/theme.liquid (« Nike – 723 prodotti – platinumshop » ; collection de la marque : son titre SEO).
+  if template.name == 'collection' and collection.handle != 'vendors'
+    assign br_title = page_title
+  else
+    assign br_title_count = br_count | append: ''
+    if template.name == 'search' and br_count >= 1000
+      assign br_title_count = br_count | append: '+'
+    endif
+    assign br_title_n = 'desktop_collection.count' | t: count: br_count
+    assign br_title_str = br_count | append: ''
+    assign br_title = br_name | append: ' – ' | append: br_title_n | replace_first: br_title_str, br_title_count
+  endif
+  assign br_title_lc = br_title | downcase
+  unless br_title_lc contains 'platinum'
+    assign br_title = br_title | append: ' – ' | append: shop.name
+  endunless
+-%}
+<div class="br" data-br-title="{{ br_title | strip | escape }}" style="--brand: {{ br_theme[0] }}; --brand-2: {{ br_theme[1] }}; --accent: {{ br_theme[2] }}; --photo: url('{{ br_cover }}');" data-br data-br-name="{{ br_name | escape }}" data-br-term="{{ br_term | escape }}"  data-br-base="{{ br_base }}" data-br-search="{{ routes.search_url }}" data-br-root="{{ routes.root_url }}" data-br-currency="{{ cart.currency.symbol }}" data-br-brands="{{ 'mobile-brands.json' | asset_url }}" data-br-best="{{ br_best_url }}" data-added="{{ 'mobile.js.added_to_wishlist' | t }}" data-removed="{{ 'mobile.js.removed_from_wishlist' | t }}">
   <div class="br-bg" aria-hidden="true"></div>
 
   {%- comment -%} Haut : logo ☰ (panneau) et recherche dans la marque {%- endcomment -%}
@@ -154,7 +173,11 @@
       <span class="br-lock__name">{{ br_upper | escape }}</span>
       {%- if br_logo != '' -%}<i class="br-lock__mark" style="--logo: url('https://cdn.jsdelivr.net/npm/simple-icons@11.14.0/icons/{{ br_logo }}.svg');"></i>{%- endif -%}
     </div>
-    <p class="br-hero__meta">{{ 'desktop_brand.original' | t }} · {{ 'desktop_brand.products_html' | t: count: br_count }}<span data-br-from></span>{% if settings.enable_free_shipping %} · {{ 'desktop_brand.free_shipping' | t }}{% endif %}</p>
+    {%- comment -%} « 1 prodotto » / « 604 prodotti » (forme au singulier de desktop_collection.count ; avant : « 1 prodotti ») {%- endcomment -%}
+    {%- assign br_count_n = 'desktop_collection.count' | t: count: br_count -%}
+    {%- assign br_count_s = br_count | append: '' -%}
+    {%- assign br_count_b = '<b>' | append: br_count_s | append: '</b>' -%}
+    <p class="br-hero__meta">{{ 'desktop_brand.original' | t }} · {{ br_count_n | escape | replace_first: br_count_s, br_count_b }}<span data-br-from></span>{% if settings.enable_free_shipping %} · {{ 'desktop_brand.free_shipping' | t }}{% endif %}</p>
   </div>
   <div class="br-pills" data-br-pills></div>
 
@@ -162,7 +185,7 @@
     {%- comment -%} « Sélections » : mosaïque de 4 grandes photos (une catégorie, « Promos », « Meilleures ventes », une autre
       catégorie), remplie par assets/desktop-brand.js {%- endcomment -%}
     <section class="br-sel">
-      <div class="br-sec br-sec--x"><div><small>{{ 'desktop_brand.sel_eyebrow' | t }}</small><h2>{{ 'desktop_brand.essentials' | t: brand: br_name }}</h2></div><span>{{ 'desktop_brand.brand_products' | t: count: br_count }}</span></div>
+      <div class="br-sec br-sec--x"><div><small>{{ 'desktop_brand.sel_eyebrow' | t }}</small><h2>{{ 'desktop_brand.essentials' | t: brand: br_name }}</h2></div><span>{% if br_count == 1 %}{{ br_count_n }}{% else %}{{ 'desktop_brand.brand_products' | t: count: br_count }}{% endif %}</span></div>
       {%- comment -%} Mosaïque grise animée en attendant le script (remplacée dès qu'il tourne) {%- endcomment -%}
       <div class="br-feat br-feat--bento" data-br-feat aria-busy="true"><span class="br-tile br-tile--big br-tile--sk"></span><span class="br-tile br-tile--sk"></span><span class="br-tile br-tile--sk"></span><span class="br-tile br-tile--wide br-tile--sk"></span></div>
     </section>
@@ -329,7 +352,7 @@
   <aside class="br-menu-panel" data-br-panel aria-hidden="true">
     <div class="br-mp__bar"><button type="button" data-br-close aria-label="{{ 'desktop_brand.close' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button><button type="button" data-br-share aria-label="{{ 'desktop_brand.share' | t }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button></div>
     <div class="br-mp__scroll">
-      <div class="br-mp__id"><span class="br-blogo">{%- if br_logo != '' -%}<i class="br-mask" style="--logo: url('https://cdn.jsdelivr.net/npm/simple-icons@11.14.0/icons/{{ br_logo }}.svg');"></i>{%- else -%}<b>{{ br_upper | escape }}</b>{%- endif -%}</span><div><b>{{ br_name | escape }}</b><small>{{ 'desktop_brand.panel_count' | t: count: br_count }}</small></div></div>
+      <div class="br-mp__id"><span class="br-blogo">{%- if br_logo != '' -%}<i class="br-mask" style="--logo: url('https://cdn.jsdelivr.net/npm/simple-icons@11.14.0/icons/{{ br_logo }}.svg');"></i>{%- else -%}<b>{{ br_upper | escape }}</b>{%- endif -%}</span><div><b>{{ br_name | escape }}</b><small>{% if br_count == 1 %}{{ br_count_n }} · {{ 'desktop_brand.original' | t | remove: '✓' | strip }}{% else %}{{ 'desktop_brand.panel_count' | t: count: br_count }}{% endif %}</small></div></div>
       <div class="br-mp__card"><div class="br-mp__cats" data-br-panel-cats></div></div>
       <a class="br-mp__card" href="https://www.trustpilot.com/review/platinumshop.it" target="_blank" rel="noopener">
         <div class="br-mp__h"><h3>{{ 'desktop_brand.reviews' | t }}</h3><span class="br-mp__go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></div>

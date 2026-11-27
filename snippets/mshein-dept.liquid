@@ -137,7 +137,16 @@
 
 {%- capture chev -%}<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>{%- endcapture -%}
 
-<div class="mshein-dept" data-mshein-dept data-title="{{ dept_title | escape }}" data-handle="{{ collection.handle }}"{% if dept_top and sale != true %} data-top="{{ dept_top.url }}"{% endif %}{% if is_all %} data-all{% endif %}{% if sale %} data-sale{% endif %}>
+{%- liquid
+  # Titre de l'onglet du navigateur quand ce rayon s'ouvre sans recharger (assets/mobile-home-tabs.js) : le même que
+  # layout/theme.liquid (titre SEO de la collection + nom de la boutique s'il n'y est pas déjà)
+  assign dept_page_title = page_title | strip
+  assign dept_page_title_lc = dept_page_title | downcase
+  unless dept_page_title_lc contains 'platinum'
+    assign dept_page_title = dept_page_title | append: ' – ' | append: shop.name
+  endunless
+-%}
+<div class="mshein-dept" data-mshein-dept data-title="{{ dept_title | escape }}" data-page-title="{{ dept_page_title | escape }}" data-handle="{{ collection.handle }}"{% if dept_top and sale != true %} data-top="{{ dept_top.url }}"{% endif %}{% if is_all %} data-all{% endif %}{% if sale %} data-sale{% endif %}>
 
   {%- comment -%} Bannière {%- endcomment -%}
   <div data-dept-part="hero"{% if as_page %} data-mshein-hero-active{% endif %}>

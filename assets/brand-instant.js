@@ -297,7 +297,9 @@
         var root = section.querySelector('[data-br]');
         var name = root.getAttribute('data-br-name') || '';
         var parts = saved.title.split(' – ');
-        if (name) document.title = name + ' – ' + parts[parts.length - 1];
+        // Vrai titre de la page de marque (sections/desktop-brand.liquid, data-br-title), sinon nom + nom de la boutique
+        if (root.getAttribute('data-br-title')) document.title = root.getAttribute('data-br-title');
+        else if (name) document.title = name + ' – ' + parts[parts.length - 1];
         jump(0);
         clearHeader(section);
         startBrand(root, scriptSrc);
@@ -307,6 +309,24 @@
         console.error('Brand page: in-place open failed.', error);
         window.location.href = href;
       });
+  };
+  // Page d'origine remise sur place sans toucher à l'adresse, pour assets/mobile-home-tabs.js : depuis la page de la
+  // marque, logo / « Home », onglet de rayon ou collection du panneau Categoria (avant : rien ne se passait, le script
+  // des rayons travaillait sur l'accueil mis de côté). La page de la marque est gardée pour « Avancer ».
+  window.brandInstant = {
+    restoreOrigin: function () {
+      if (!saved || brandNodes) return false;
+      var content = document.getElementById('content');
+      if (!content) return false;
+      token += 1;
+      if (ghost) { ghost.remove(); ghost = null; }
+      document.documentElement.classList.remove('bri-on');
+      brandNodes = [].slice.call(content.childNodes);
+      brandNodes.forEach(function (node) { content.removeChild(node); });
+      saved.nodes.forEach(function (node) { content.appendChild(node); });
+      document.title = saved.title;
+      return true;
+    }
   };
   // Retour vers la page d'origine : remise telle quelle (même position) ; Avancer : la page marque revient
   window.addEventListener('popstate', function () {
@@ -329,10 +349,23 @@
       brandNodes.forEach(function (node) { content.appendChild(node); });
       brandNodes = null;
       jump(0);
+      // Titre de la marque, posé après les autres scripts du retour arrière (mobile-home-tabs.js remet celui de l'accueil)
+      var back = content.querySelector('[data-br]');
+      var backTitle = back && back.getAttribute('data-br-title');
+      if (backTitle) setTimeout(function () { document.title = backTitle; }, 0);
     }
   });
 
+  // Lien touché dans une fenêtre ouverte (« Tutti i brand », tiroir ☰) : la fenêtre se ferme par son propre bouton
+  // (même nettoyage que d'habitude) ; avant, la page de la marque s'ouvrait derrière la liste restée ouverte
+  var closePanels = function (link) {
+    if (!link.closest('dialog[open]')) return;
+    [].forEach.call(document.querySelectorAll('dialog[open] [data-mobile-brands-close], dialog[open] [data-mobile-explore-close]'), function (button) {
+      if (button.closest('dialog[open]')) button.click();
+    });
+  };
   var go = function (link, kind) {
+    closePanels(link);
     if (kind !== 'product' && document.getElementById('content')) { openBrand(link); return; }
     show(link, kind);
     // Laisse le navigateur afficher la page en attente avant de partir

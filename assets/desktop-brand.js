@@ -39,7 +39,13 @@
     // Recherche dans la marque limitée aux titres : title:"Marque" title:mot … (sinon la recherche ramène d'autres produits)
     var brandTerm = root.getAttribute('data-br-term') || brand;
     var brandSearch = function (term) {
-      var words = String(term || '').trim().split(/\s+/).filter(Boolean).map(function (w) { return 'title:' + w; });
+      // Mot d'une catégorie connue (liste CATALOG / GENDER plus bas) : la même recherche que sa pastille, avec ses
+      // synonymes (« felpa » = felpa OR hoodie OR sweatshirt) ; avant, « felpa » seul ne trouvait pas les titres anglais
+      var words = String(term || '').trim().split(/\s+/).filter(Boolean).map(function (w) {
+        var low = w.toLowerCase();
+        var known = CATALOG.concat(GENDER).filter(function (entry) { return entry[1].test(low); })[0];
+        return known ? known[2] : 'title:' + w;
+      });
       return searchUrl + '?q=' + encodeURIComponent(['title:"' + brandTerm + '"'].concat(words).join(' ')) + '&type=product&view=brand';
     };
     var cards = function () {
@@ -179,10 +185,29 @@
         .then(function (response) { return response.ok ? response.json() : null; })
         .catch(function () { return null; });
     };
-    var money = function (cents) { return currency + (cents / 100).toFixed(2); };
+    // Format de prix de la boutique (« €42,58 » en italien, comme les cartes) ; avant : « €42.58 » avec un point
+    var money = function (cents) {
+      if (window.Shopify && typeof window.Shopify.formatMoney === 'function') return String(window.Shopify.formatMoney(cents)).replace(/<[^>]*>/g, '');
+      var amount = (cents / 100).toFixed(2);
+      return currency + (/^en/.test(document.documentElement.lang) ? amount : amount.replace('.', ','));
+    };
+    // Page ouverte sur une recherche dans la marque (title:"Marque" + mots, ex. « felpa ») : le haut de page (nombre de
+    // produits, prix de départ, « N prodotti del brand ») garde les chiffres de toute la marque, pas ceux de la recherche
+    var baseHref = root.getAttribute('data-br-base') || '';
+    var subSearch = false;
+    try { subSearch = Boolean(baseHref) && new URL(baseHref, location.origin).searchParams.get('q') !== new URL(location.href).searchParams.get('q'); } catch (error) {}
+    if (subSearch) {
+      getCount(baseHref).then(function (data) {
+        if (!data || !(data.count > 0)) return;
+        var heroCount = root.querySelector('.br-hero__meta b');
+        if (heroCount) heroCount.textContent = data.count;
+        var essentials = root.querySelector('.br-sec--x > span');
+        if (essentials) essentials.textContent = essentials.textContent.replace(/\d[\d.,]*/, data.count);
+      });
+    }
     var fromBox = root.querySelector('[data-br-from]');
     if (fromBox) {
-      getCount(location.href, true).then(function (data) { if (data && data.from > 0) fromBox.innerHTML = t('from_html', ' · da <b>__PRICE__</b>').replace('__PRICE__', esc(money(data.from))); });
+      getCount(subSearch ? baseHref : location.href, true).then(function (data) { if (data && data.from > 0) fromBox.innerHTML = t('from_html', ' · da <b>__PRICE__</b>').replace('__PRICE__', esc(money(data.from))); });
     }
 
     // ---------- Grandes cartes comme le prototype : « Offerte » puis 3 catégories ----------
@@ -564,7 +589,8 @@
       window.scrollTo(0, 0);
       var name = fresh.getAttribute('data-br-name') || '';
       var parts = document.title.split(' – ');
-      if (name) document.title = name + (parts.length > 1 ? ' – ' + parts[parts.length - 1] : '');
+      if (fresh.getAttribute('data-br-title')) document.title = fresh.getAttribute('data-br-title');
+      else if (name) document.title = name + (parts.length > 1 ? ' – ' + parts[parts.length - 1] : '');
       init(fresh);
       setTimeout(function () { fresh.removeAttribute('data-br-enter'); }, 450);
     };
@@ -1044,11 +1070,14 @@
       // Produits de la marque : recherche prédictive Shopify
       var id = request += 1;
       var root_ = root.getAttribute('data-br-root') || '/';
-      fetch(root_ + 'search/suggest.json?q=' + encodeURIComponent(brand + ' ' + q) + '&resources[type]=product&resources[limit]=4', { credentials: 'same-origin' })
+      fetch(root_ + 'search/suggest.json?q=' + encodeURIComponent(brand + ' ' + q) + '&resources[type]=product&resources[limit]=10', { credentials: 'same-origin' })
         .then(function (response) { return response.ok ? response.json() : null; })
         .then(function (data) {
           if (id !== request || !data) return;
-          var products = (((data.resources || {}).results || {}).products || []).slice(0, 3);
+          // Seulement les produits de la marque (la recherche prédictive ramenait aussi « Adidas Felpa… » dans Amii)
+          var products = (((data.resources || {}).results || {}).products || []).filter(function (p) {
+            return String(p.title || '').toLowerCase().indexOf(brandTerm.toLowerCase()) > -1 || String(p.vendor || '').toLowerCase() === brandTerm.toLowerCase();
+          }).slice(0, 3);
           var box = sugg.querySelector('[data-br-sugg-products]');
           if (!box) return;
           box.innerHTML = products.map(function (p) {
