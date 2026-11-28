@@ -5,7 +5,9 @@
   - Calculé par Shopify à chaque affichage : prix, variantes, images, stock sont toujours ceux de l'admin.
   - Marché du visiteur : URL dans sa langue (/fr/…), textes traduits, prix et devise de son marché (cart.currency).
   - Produit à variantes : ProductGroup + une fiche par variante (hasVariant) avec couleur, taille, image, prix, stock.
-  - Marque et vendeur : toujours le nom de la boutique (platinumshop), quel que soit le « vendor » du produit.
+  - Marque : le « vendor » du produit quand c'est une vraie marque (ex. Nike, Amii, Calvin Klein), sinon le nom de la boutique
+    (aussi pour les grossistes Sportiamo et Trendsi, qui vendent plusieurs marques).
+    Vendeur (offers.seller) : toujours la boutique.
   - Note : seulement si une app d'avis en fournit une vraie (Ali Reviews, champ standard Shopify, Judge.me, vstar).
   La note reste dans le bloc : snippets/pdp-mobile-top.liquid la lit ici pour l'afficher tout de suite.
 {%- endcomment -%}
@@ -13,7 +15,15 @@
   assign jl_origin = shop.url
   assign jl_url = jl_origin | append: product.url
   assign jl_currency = cart.currency.iso_code
+  assign jl_seller = shop.name
   assign jl_brand = shop.name
+  assign jl_vendor = product.vendor | strip
+  assign jl_vendor_key = jl_vendor | downcase | remove: ' '
+  assign jl_vendor_start = jl_vendor_key | slice: 0, 8
+  assign jl_shop_key = shop.name | downcase | remove: ' '
+  if jl_vendor != blank and jl_vendor_key != jl_shop_key and jl_vendor_start != 'platinum' and jl_vendor_key != 'vendor-unknown' and jl_vendor_key != 'sportiamo' and jl_vendor_key != 'trendsi'
+    assign jl_brand = jl_vendor
+  endif
 
   assign jl_desc = product.description | strip_html | strip_newlines | replace: '&nbsp;', ' ' | split: ' ' | join: ' ' | strip | truncate: 4900, '…'
   if jl_desc == blank
@@ -175,7 +185,7 @@
   {%- if jl_sku.size > 50 %}{% assign jl_sku = variant.id | append: '' %}{% endif %}
   "sku": {{ jl_sku | json }},
   {%- render 'product-jsonld-gtin', variant: variant %}
-  "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_brand, ship: jl_ship, country: jl_cc %}
+  "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_seller, ship: jl_ship, country: jl_cc %}
   {%- else %}
   "productGroupID": {{ product.id | append: '' | json }},
   {%- if jl_color_idx >= 0 or jl_size_idx >= 0 %}
@@ -205,7 +215,7 @@
       {%- if jl_vimg %}
       "image": {{ jl_vimg | image_url: width: 1200 | prepend: 'https:' | json }},
       {%- endif %}
-      "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_brand, ship: jl_ship, country: jl_cc %}
+      "offers": {%- render 'product-jsonld-offer', variant: variant, origin: jl_origin, currency: jl_currency, seller: jl_seller, ship: jl_ship, country: jl_cc %}
     }{% unless forloop.last %},{% endunless %}
     {%- endfor %}
   ]

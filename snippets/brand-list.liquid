@@ -4,7 +4,8 @@
   Categoria mobile (snippets/mobile-category-browser.liquid).
   Avant cette liste (en premier) : chaque fournisseur (« Vendor » des produits, ex. une marque arrivée par Shopify Collective) qui n'y
   est pas encore est ajouté tout seul, 5e partie « vendor » : page /collections/vendors?q=…&view=brand, photo de son
-  premier produit (templates/collection.brand-count.liquid). « platinumshop », « PlatiNum »… (la boutique) sont ignorés ; un
+  premier produit (templates/collection.brand-count.liquid). « platinumshop », « PlatiNum »… (la boutique) et les marques de
+  snippets/brand-vendors-filled.liquid (marque recopiée du titre dans « Vendor ») sont ignorés ; un
   fournisseur sans produit visible est retiré par le script de la bande.
 {%- endcomment -%}
 {%- capture bl_static -%}
@@ -45,6 +46,11 @@ Lige|Lige||https://cdn.shopify.com/s/files/1/0942/1570/0821/files/S8738fe98c5014
     assign bl_name = bl_entry | strip | split: '|' | first | strip | downcase
     assign bl_known = bl_known | append: bl_name | append: '|'
   endfor
+  # Marques recopiées du titre dans « Vendor » (snippets/brand-vendors-filled.liquid) : pas ajoutées d'office.
+  capture bl_filled
+    render 'brand-vendors-filled'
+  endcapture
+  assign bl_known = bl_known | append: bl_filled | strip
   assign bl_auto = ''
   for bl_vendor in shop.vendors
     assign bl_key = bl_vendor | strip | downcase
