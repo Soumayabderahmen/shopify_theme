@@ -64,8 +64,40 @@
       endif
     endif
   else
+    # Nom de la marque : les mots du titre de la collection qui forment son adresse (michael-kors → « Michael Kors » dans
+    # « Orologi Michael Kors », icebear → « ICEbear » dans « ICEbear: Giacche e Parka Donna »). Les titres des collections
+    # ont été enrichis pour Google (27/11/2026) ; avec le titre entier, les pastilles cherchaient title:"Orologi Michael
+    # Kors" (0 produit) et l'en-tête affichait « Orologi Michael Kors ». Titre entier seulement si rien ne correspond.
+    # 1) Collection d'une marque de « Shop per brand » (snippets/brand-list.liquid, 3e partie : amii-clothing, toyou,
+    #    scarpe-new-balance…) : son nom et son mot de recherche. 2) Sinon les mots du titre qui forment l'adresse.
     assign br_name = collection.title
-    assign br_term = collection.title
+    assign br_term = ''
+    capture br_bl
+      render 'brand-list'
+    endcapture
+    assign br_bl = br_bl | strip_newlines | split: ';'
+    for br_entry in br_bl
+      assign br_parts = br_entry | strip | split: '|'
+      assign br_cols = br_parts[2] | default: '' | split: ','
+      if br_cols contains collection.handle
+        assign br_name = br_parts[0] | strip
+        assign br_term = br_parts[1] | strip
+        break
+      endif
+    endfor
+    if br_term == ''
+      assign br_hn = collection.handle | split: '-' | size
+      assign br_tw = collection.title | replace: ':', ' ' | replace: ',', ' ' | split: ' '
+      for br_i in (0..br_tw.size)
+        assign br_win = br_tw | slice: br_i, br_hn | join: ' '
+        assign br_win_h = br_win | handleize
+        if br_win_h == collection.handle
+          assign br_name = br_win
+          break
+        endif
+      endfor
+      assign br_term = br_name
+    endif
     assign br_count = collection.products_count
     assign br_filters = collection.filters
     assign br_sorts = collection.sort_options

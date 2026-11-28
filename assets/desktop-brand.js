@@ -41,7 +41,8 @@
     var brandSearch = function (term) {
       // Mot d'une catégorie connue (liste CATALOG / GENDER plus bas) : la même recherche que sa pastille, avec ses
       // synonymes (« felpa » = felpa OR hoodie OR sweatshirt) ; avant, « felpa » seul ne trouvait pas les titres anglais
-      var words = String(term || '').trim().split(/\s+/).filter(Boolean).map(function (w) {
+      // Mots de 1-2 lettres (« in », « da ») retirés : la recherche Shopify ne trouve rien avec title:in (« in tela » → 0)
+      var words = String(term || '').trim().split(/\s+/).filter(function (w) { return w.length > 2; }).map(function (w) {
         var low = w.toLowerCase();
         var known = CATALOG.concat(GENDER).filter(function (entry) { return entry[1].test(low); })[0];
         return known ? known[2] : 'title:' + w;
@@ -111,16 +112,18 @@
       ['Basket', /basket/, '(title:basketball OR title:basket)'],
       ['Air Force 1', /air force|\baf1\b/, 'title:"air force"'],
       ['Jordan', /jordan/, 'title:jordan'],
-      ['Sandali', /sandal/, '(title:sandali OR title:sandals)'],
-      ['Ciabatte', /ciabatt|slide|slipper/, '(title:ciabatte OR title:slides OR title:slippers)'],
-      ['Stivali', /stival|\bboots?\b/, '(title:stivali OR title:boots)'],
-      ['Felpe', /felp|hoodie|sweatshirt/, '(title:felpa OR title:hoodie OR title:sweatshirt)'],
-      ['T-shirt', /t-shirt|tshirt/, '(title:t-shirt OR title:tshirt)'],
-      ['Giacche', /giacc|jacket/, '(title:giacca OR title:jacket)'],
-      ['Pantaloni', /pantalon|\bpants\b/, '(title:pantaloni OR title:pants)'],
+      // Formes italiennes au singulier et au pluriel : depuis la traduction des titres (point 8, 11/2026), « Maglietta »,
+      // « Sandalo »… ; avant, les pastilles T-shirt / Sandali de certaines marques ne trouvaient plus rien.
+      ['Sandali', /sandal/, '(title:sandali OR title:sandalo OR title:sandals OR title:sandal)'],
+      ['Ciabatte', /ciabatt|slide|slipper/, '(title:ciabatte OR title:ciabatta OR title:slides OR title:slippers)'],
+      ['Stivali', /stival|\bboots?\b/, '(title:stivali OR title:stivale OR title:stivaletti OR title:boots)'],
+      ['Felpe', /felp|hoodie|sweatshirt/, '(title:felpa OR title:felpe OR title:hoodie OR title:sweatshirt)'],
+      ['T-shirt', /t-shirt|tshirt|magliett/, '(title:t-shirt OR title:tshirt OR title:maglietta OR title:magliette)'],
+      ['Giacche', /giacc|jacket/, '(title:giacca OR title:giacche OR title:jacket)'],
+      ['Pantaloni', /pantalon|\bpants\b/, '(title:pantaloni OR title:pantalone OR title:pants)'],
       ['Tute', /\btuta\b|tracksuit/, '(title:tuta OR title:tracksuit)'],
-      ['Borse', /\bbors|\bbags?\b/, '(title:borsa OR title:bag)'],
-      ['Automatici', /automatic/, '(title:automatico OR title:automatic)'],
+      ['Borse', /\bbors|\bbags?\b/, '(title:borsa OR title:borse OR title:bag)'],
+      ['Automatici', /automatic/, '(title:automatico OR title:automatici OR title:automatic)'],
       ['Al quarzo', /quarz/, '(title:quarzo OR title:quartz)'],
       ['Cronografi', /cronograf|chronograph/, '(title:cronografo OR title:chronograph)'],
       ['Subacquei', /subacque|\bdiver/, '(title:subacqueo OR title:diver)']
@@ -171,6 +174,18 @@
         return '<a href="' + esc(item.url) + '">' + (item.img ? '<img src="' + esc(item.img) + '" alt="" loading="lazy">' : '') + esc(item.label) + '</a>';
       }).join('');
     }
+    // Pastille qui ne trouverait aucun produit (marque absente des titres, ex. Trendsi, fournisseur ; ou catégorie vue
+    // seulement dans les titres de la page et pas dans la recherche) : retirée, au lieu d'ouvrir une page vide.
+    cats.forEach(function (item) {
+      var u = new URL(item.url, location.origin);
+      u.searchParams.set('view', 'brand-count');
+      fetch(u.toString(), { credentials: 'same-origin' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (data) {
+        if (!data || Number(data.count) > 0) return;
+        root.querySelectorAll('[data-br-pills] a, [data-br-panel-cats] a').forEach(function (a) {
+          if (a.getAttribute('href') === item.url) a.remove();
+        });
+      }).catch(function () {});
+    });
 
     // ---------- Nombre de produits et prix le plus bas (templates *.brand-count) ----------
     var countUrl = function (url, cheapest) {
