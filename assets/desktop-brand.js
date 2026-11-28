@@ -851,7 +851,14 @@
         if (ok) shown += 1;
       });
       var active = local.sale || local.min > 0 || local.max !== null;
-      if (countBox) countBox.textContent = active ? countText(shown) : totalText;
+      // Compteur : le prix est un vrai filtre Shopify (adresse filter.v.price…) → le total calculé par la page (ex. 700) est
+      // le bon ; « In offerta » ne trie que les cartes déjà chargées → « 40+ » tant que « Mostra altri prodotti » reste.
+      // Avant : « 40 prodotti » (seulement les cartes affichées) dès qu'un filtre était actif.
+      if (countBox) {
+        if (!active || (!local.sale && /filter\.v\.price/.test(location.search))) countBox.textContent = totalText;
+        else if (document.querySelector('[data-br-next]')) countBox.textContent = countText(shown).replace(String(shown), shown + '+');
+        else countBox.textContent = countText(shown);
+      }
       if (noneBox) noneBox.hidden = !(active && shown === 0);
       root.querySelectorAll('[data-br-sale]').forEach(function (b) { b.classList.toggle('on', local.sale); });
       if (priceChip) {
